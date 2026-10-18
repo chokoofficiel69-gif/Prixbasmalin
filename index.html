@@ -88,6 +88,78 @@ footer a{color:#475569;text-decoration:underline;text-underline-offset:3px}
  .affiliate-note{text-align:left;margin-top:24px;padding:0 2px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+
+/* Futuriste Léger — surcouche visuelle, sans dépendance externe */
+:root{
+ --bg:#0B1220;--ink:#E5F3FA;--muted:#A8B8CA;--line:rgba(103,232,249,.18);
+ --surface:rgba(17,29,48,.78);--primary:#22D3EE;--primary-dark:#06B6D4;
+ --positive:#34D399;--soft-teal:rgba(8,145,178,.12);--shadow:0 18px 48px rgba(0,0,0,.24);
+}
+html{background:var(--bg)}
+body{
+ background:radial-gradient(ellipse at 50% -12%,rgba(6,182,212,.19),transparent 48%),
+ radial-gradient(ellipse at 92% 34%,rgba(34,211,238,.07),transparent 34%),
+ linear-gradient(145deg,#0B1220 0%,#111827 72%,#0B1220 100%);
+ color:var(--ink);position:relative;isolation:isolate;overflow-x:hidden
+}
+header,footer{background:rgba(11,18,32,.84);border-color:var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+header{position:relative;z-index:2}
+.brand{color:#F1FAFF}
+.brand span{color:var(--primary)}
+.header-note{color:#C6F7FF;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.2)}
+main{position:relative;z-index:1}
+.hero{position:relative}
+h1{color:#F8FAFC}
+h1 em{color:var(--primary);text-shadow:0 0 28px rgba(34,211,238,.17)}
+.eyebrow{color:#67E8F9}
+.eyebrow:before{box-shadow:0 0 14px rgba(34,211,238,.75)}
+.sub{color:#B7C7D9}
+.search{background:rgba(15,27,45,.88);border-color:rgba(103,232,249,.32);box-shadow:0 0 0 1px rgba(34,211,238,.035),0 18px 52px rgba(0,0,0,.28),0 0 34px rgba(6,182,212,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.search:focus-within{border-color:var(--primary);box-shadow:0 0 0 4px rgba(34,211,238,.13),0 0 34px rgba(6,182,212,.14)}
+.search input{color:#F8FAFC}
+.search input::placeholder{color:#8296AB}
+.primary-btn,.offer-btn{background:linear-gradient(135deg,#22D3EE,#06B6D4);color:#06202A;box-shadow:0 6px 18px rgba(6,182,212,.16)}
+.primary-btn:hover,.offer:hover .offer-btn{background:linear-gradient(135deg,#67E8F9,#22D3EE)}
+.group-label{color:#C7D8E8}
+.chip{background:rgba(17,29,48,.74);border-color:rgba(148,197,215,.19);color:#D6E7F3}
+.chip:hover{border-color:rgba(34,211,238,.65);color:#67E8F9;background:rgba(8,145,178,.16)}
+.category{background:rgba(15,35,53,.84)}
+.notice,.results-intro{color:#A8B8CA}
+.trust-banner{border-color:rgba(52,211,153,.27);background:rgba(6,95,70,.16);color:#D1FAE5;box-shadow:0 12px 36px rgba(0,0,0,.12)}
+.trust-icon,.num{background:rgba(34,211,238,.12);color:#67E8F9}
+.result-disclaimer{background:rgba(30,41,59,.8);color:#C4D4E3;border:1px solid rgba(148,197,215,.12)}
+.offer,.step{background:linear-gradient(145deg,rgba(20,35,56,.88),rgba(13,24,41,.82));border-color:rgba(103,232,249,.16);box-shadow:0 8px 26px rgba(0,0,0,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.offer:hover{border-color:rgba(34,211,238,.62);box-shadow:0 12px 30px rgba(0,0,0,.22),0 0 24px rgba(6,182,212,.09)}
+.merchant{color:#F1FAFF}
+.offer-desc,.step p{color:#A8B8CA}
+.how-section .section-heading h2{color:#F1FAFF}
+.section-heading p{color:#A8B8CA}
+.step h3{color:#E5F3FA}
+.affiliate-note{color:#B9CAD9}
+.affiliate-note strong{color:#F1FAFF}
+footer{color:#9FB2C5}
+.footer-brand{color:#F1FAFF}
+footer a{color:#67E8F9}
+.footer-small{color:#A8B8CA}
+.affiliate-note{border:1px solid rgba(103,232,249,.12);background:rgba(17,29,48,.48);border-radius:14px;padding:15px 18px}
+.visual-orbit{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:-1;opacity:.7}
+.float-item{position:absolute;width:clamp(42px,7vw,78px);height:clamp(42px,7vw,78px);color:#67E8F9;filter:drop-shadow(0 0 14px rgba(34,211,238,.15));animation:float 13s ease-in-out infinite}
+.float-item svg{width:100%;height:100%;overflow:visible}
+.float-phone{top:13%;left:2%;animation-delay:-3s}
+.float-bike{top:24%;right:1%;animation-delay:-7s}
+.float-tool{top:68%;left:4%;animation-delay:-5s}
+.float-shoe{top:72%;right:3%;animation-delay:-9s}
+@keyframes float{0%,100%{transform:translate3d(0,0,0) rotate(-3deg)}50%{transform:translate3d(0,-11px,0) rotate(3deg)}}
+@media(max-width:640px){
+ .visual-orbit{opacity:.27}
+ .float-item{width:39px;height:39px}
+ .float-phone{top:5%;left:0}.float-bike{top:29%;right:0}
+ .float-tool{top:66%;left:0}.float-shoe{top:76%;right:0}
+ .search{background:rgba(15,27,45,.96)}
+ .trust-banner,.offer,.step{backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+@media(prefers-reduced-motion:reduce){.float-item{animation:none}}
+
 </style>
 </head>
 <body>
@@ -96,6 +168,12 @@ footer a{color:#475569;text-decoration:underline;text-underline-offset:3px}
   <div class="header-note">Comparaison gratuite</div>
 </header>
 <main>
+<div class="visual-orbit" aria-hidden="true">
+ <span class="float-item float-phone"><svg viewBox="0 0 64 64" fill="none"><rect x="18" y="5" width="28" height="54" rx="6" stroke="currentColor" stroke-width="2"/><path d="M25 12h14M28 51h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="22" y="17" width="20" height="28" rx="2" stroke="currentColor" stroke-opacity=".6"/></svg></span>
+ <span class="float-item float-bike"><svg viewBox="0 0 80 64" fill="none"><circle cx="17" cy="44" r="13" stroke="currentColor" stroke-width="2"/><circle cx="63" cy="44" r="13" stroke="currentColor" stroke-width="2"/><path d="M17 44l14-23 14 23H17l13-23h17l16 23M42 16h9M27 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+ <span class="float-item float-tool"><svg viewBox="0 0 64 64" fill="none"><path d="M37 10a16 16 0 0 0-19 20L7 41a6 6 0 0 0 8 8l12-12a16 16 0 0 0 20-19l-9 9-10-2-2-10 11-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m11 44 8 8" stroke="currentColor" stroke-width="2"/></svg></span>
+ <span class="float-item float-shoe"><svg viewBox="0 0 72 64" fill="none"><path d="M8 40c9 0 16-5 20-17l9 8c5 5 12 8 20 9l7 2v9H8c-5 0-6-8 0-11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m31 29 7 4m-11 0 7 4M8 47h56" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+ </div>
   <section class="hero" aria-labelledby="page-title">
     <div class="eyebrow">Comparez plus simplement</div>
     <h1 id="page-title">Le bon prix,<br><em>sans y passer des heures.</em></h1>
