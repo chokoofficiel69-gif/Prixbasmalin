@@ -159,23 +159,7 @@ footer a{color:#67E8F9}
  .trust-banner,.offer,.step{backdrop-filter:none;-webkit-backdrop-filter:none}
 }
 @media(prefers-reduced-motion:reduce){.float-item{animation:none}}
-.negotiation-card{max-width:850px;margin:18px auto 0;padding:20px;border:1px solid rgba(34,211,238,.28);border-radius:18px;background:linear-gradient(145deg,rgba(8,145,178,.13),rgba(17,29,48,.85));box-shadow:0 12px 34px rgba(0,0,0,.15)}
-.negotiation-card h3{margin:0 0 6px;font-size:1.18rem;color:#F1FAFF}
-.negotiation-card>p{margin:0 0 15px;color:#B7C7D9;font-size:.9rem;line-height:1.6}
-.negotiation-fields{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.negotiation-fields label{display:flex;flex-direction:column;gap:6px;font-size:.82rem;font-weight:700;color:#D6E7F3}
-.negotiation-fields input,.negotiation-fields select,.negotiation-fields textarea{width:100%;min-width:0;border:1px solid rgba(103,232,249,.2);border-radius:10px;background:rgba(11,18,32,.85);color:#F1FAFF;padding:11px;outline:none}
-.negotiation-fields textarea{min-height:78px;resize:vertical}
-.negotiation-fields .full{grid-column:1/-1}
-.negotiation-consent{display:flex;align-items:flex-start;gap:9px;margin:13px 0;color:#B7C7D9;font-size:.8rem;line-height:1.5}
-.negotiation-consent input{margin-top:4px;accent-color:#22D3EE}
-.negotiation-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
-.negotiation-status{margin-top:13px;padding:12px;border-radius:11px;background:rgba(6,95,70,.18);border:1px solid rgba(52,211,153,.25);color:#D1FAE5;font-size:.85rem;line-height:1.55}
-.negotiation-status[hidden]{display:none}
-.negotiation-fineprint{margin:12px 0 0!important;font-size:.78rem!important;color:#9FB2C5!important}
-@media(max-width:640px){.negotiation-card{padding:16px}.negotiation-fields{grid-template-columns:1fr}.negotiation-fields .full{grid-column:auto}.negotiation-actions .primary-btn{width:100%}}
 
-.details-form{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;max-width:740px;margin:12px auto 0;text-align:left}
 .details-form label{display:flex;flex-direction:column;gap:6px;color:#B7C7D9;font-size:.78rem;font-weight:700}
 .details-form input,.details-form select{width:100%;min-width:0;min-height:44px;border:1px solid rgba(103,232,249,.2);border-radius:11px;background:rgba(15,27,45,.88);color:#E5F3FA;padding:10px 11px;outline:none}
 .details-form input::placeholder{color:#8296AB}
@@ -202,7 +186,7 @@ footer a{color:#67E8F9}
   <section class="hero" aria-labelledby="page-title">
     <div class="eyebrow">Comparez plus simplement</div>
     <h1 id="page-title">Le bon prix,<br><em>sans y passer des heures.</em></h1>
-    <p class="sub">Recherchez un produit et explorez les offres de plusieurs marchands et comparateurs. Vous choisissez où acheter, directement chez le vendeur.</p>
+    <p class="sub">Recherchez un produit et retrouvez rapidement les sites marchands où consulter leurs offres. À terme, nous afficherons les produits et les prix directement ici grâce aux catalogues partenaires.</p>
     <form class="search" id="searchForm">
       <input id="product" type="search" placeholder="Bonjour ! Que cherchez-vous ? Ex. : Yamaha BW’s 50" aria-label="Produit à rechercher" required maxlength="160" autocomplete="off">
       <button class="primary-btn" type="submit">Trouver mon offre <span aria-hidden="true">→</span></button>
@@ -213,7 +197,7 @@ footer a{color:#67E8F9}
       <label>État recherché<select id="condition"><option value="tous">Neuf ou occasion</option><option value="occasion">Occasion</option><option value="neuf">Neuf</option></select></label>
     </div>
     <p class="assistant-hint"><strong>On affine ensemble :</strong> donnez-nous le modèle, l’année et votre budget. Nous préparons votre recherche sur plusieurs sites pour vous aider à repérer les offres intéressantes.</p>
-    <p class="group-label">Recherches populaires</p>
+    <p class="group-label">Exemples de recherche</p>
     <div class="examples" aria-label="Suggestions de recherche">
       <button class="chip" type="button" data-q="Tracker pour clés">Tracker pour clés</button>
       <button class="chip" type="button" data-q="Casque bluetooth">Casque bluetooth</button>
@@ -232,14 +216,14 @@ footer a{color:#67E8F9}
       <button class="chip category" type="button" data-q="Beauté">Beauté</button>
       <button class="chip category" type="button" data-q="Animaux">Animaux</button>
     </div>
-    <p class="notice">Prixbasmalin ne vend pas directement de produits : les recherches ouvrent des sites marchands ou comparateurs. Les prix, frais de livraison et disponibilités peuvent varier ; vérifiez toujours le prix final chez le vendeur.</p>
+    <p class="notice">Pour le moment, la recherche ouvre les sites marchands. L’affichage direct des produits et des prix nécessite encore l’accès aux catalogues partenaires. Vérifiez toujours le prix final et les frais de livraison chez le vendeur.</p>
   </section>
 
   <aside class="trust-banner" aria-label="Information importante">
     <div class="trust-icon" aria-hidden="true">✓</div>
     <div>
       <strong>Vous choisissez, le marchand vend.</strong>
-      <p>Nous facilitons vos recherches, mais ne vendons aucun produit. Les informations et les prix proviennent des marchands ou comparateurs consultés. Vérifiez toujours le prix final, la livraison et les conditions directement sur leur site.</p>
+      <p>Pour cette première étape, Prixbasmalin vous aide à lancer votre recherche chez plusieurs marchands. Nous préparons les connexions nécessaires pour afficher les produits directement sur notre site, sans inventer de prix.</p>
     </div>
   </aside>
 
@@ -252,25 +236,6 @@ footer a{color:#67E8F9}
     </div>
     <p class="result-disclaimer">Les prix et disponibilités sont ceux des marchands. Vérifiez toujours le prix final chez le vendeur.</p>
     <div class="resultgrid" id="resultGrid"></div>
-  </section>
-
-  <section class="negotiation-card" id="negotiation" aria-labelledby="negotiation-title">
-    <h3 id="negotiation-title">Vous voulez tenter d’obtenir un meilleur prix ?</h3>
-    <p>Choisissez une offre ci-dessus puis préparez une demande de négociation. Dans cette première version, le formulaire sert à tester le parcours : il ne contacte pas encore le vendeur et aucune négociation n’est envoyée.</p>
-    <form id="negotiationForm">
-      <div class="negotiation-fields">
-        <label>Produit recherché<input id="negProduct" name="product" required maxlength="160" placeholder="Ex. : trottinette Xiaomi"></label>
-        <label>Prix affiché (€)<input id="negPrice" name="listedPrice" type="number" min="0" max="10000000" step="0.01" placeholder="Ex. : 200"></label>
-        <label>Prix que vous aimeriez payer (€)<input id="negTarget" name="targetPrice" type="number" min="0" max="10000000" step="0.01" placeholder="Ex. : 180"></label>
-        <label>Délai souhaité<select id="negDelay" name="delay"><option value="24">Jusqu’à 24 heures</option><option value="48" selected>Jusqu’à 48 heures</option></select></label>
-        <label class="full">Lien de l’annonce (facultatif)<input id="negUrl" name="listingUrl" type="url" maxlength="1000" placeholder="https://…"></label>
-        <label class="full">Précisions (facultatif)<textarea id="negNotes" name="notes" maxlength="1000" placeholder="Année, modèle, état, livraison souhaitée…"></textarea></label>
-      </div>
-      <label class="negotiation-consent"><input id="negConsent" type="checkbox" required><span>Je comprends qu’il s’agit d’une demande de test : aucun vendeur ne sera contacté, aucune économie n’est garantie et aucun paiement n’est demandé.</span></label>
-      <div class="negotiation-actions"><button class="primary-btn" type="submit">Préparer ma demande</button><span class="offer-desc">Aucun frais ni paiement dans ce prototype.</span></div>
-      <div class="negotiation-status" id="negStatus" role="status" aria-live="polite" hidden></div>
-    </form>
-    <p class="negotiation-fineprint">Avant le lancement réel, il faudra ajouter un serveur sécurisé pour recevoir les demandes, un moyen de contacter le client, le suivi des vendeurs et des règles transparentes de rémunération en cas de négociation réussie.</p>
   </section>
 
   <section class="how-section" aria-labelledby="how-title">
@@ -294,7 +259,7 @@ footer a{color:#67E8F9}
     <a href="#confidentialite" data-placeholder="Confidentialité">Confidentialité</a>
     <a href="mailto:contact@prixbasmalin.fr">Contact</a>
   </nav>
-  <p class="footer-small">Prixbasmalin est un service de recherche qui renvoie vers des sites tiers. Nous ne vendons pas directement de produits et ne garantissons ni l’exhaustivité des offres ni le prix le plus bas du marché. Les informations légales et de confidentialité doivent être complétées et vérifiées avant le lancement commercial.</p>
+  <p class="footer-small">Prixbasmalin est un service de recherche qui renvoie vers des sites tiers. Nous ne vendons pas directement de produits et ne garantissons ni l’exhaustivité des offres ni le prix le plus bas du marché. L’affichage automatique des catalogues nécessite des accès partenaires autorisés. Les informations légales et de confidentialité doivent être complétées avant le lancement commercial.</p>
 </footer>
 <script>
 const providers=[
@@ -346,42 +311,10 @@ function compare(query){
   sourcing.style.marginTop="12px";
   sourcing.textContent="Prochaine étape : nous connecterons des catalogues partenaires pour afficher les produits et leurs prix directement ici. Pour le moment, ces boutons ouvrent les recherches des sites ; Prixbasmalin ne récupère pas encore automatiquement leurs annonces et ne négocie pas encore les prix à votre place.";
   grid.after(sourcing);
-  prepareNegotiation();
   const results=document.getElementById("results");
   results.style.display="block";
   results.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
 }
-const negProduct=document.getElementById("negProduct");
-const negPrice=document.getElementById("negPrice");
-const negTarget=document.getElementById("negTarget");
-const negStatus=document.getElementById("negStatus");
-function prepareNegotiation(){
-  negProduct.value=document.getElementById("product").value.trim();
-  negPrice.value="";
-  negTarget.value="";
-  negStatus.hidden=true;
-}
-document.getElementById("negotiationForm").addEventListener("submit",event=>{
-  event.preventDefault();
-  const product=negProduct.value.trim();
-  const listed=negPrice.value===""?null:Number(negPrice.value);
-  const target=negTarget.value===""?null:Number(negTarget.value);
-  if(!product){negStatus.hidden=false;negStatus.textContent="Indiquez le produit à rechercher.";return;}
-  if(listed!==null&&target!==null&&target>listed){negStatus.hidden=false;negStatus.textContent="Le prix souhaité doit être inférieur ou égal au prix affiché.";return;}
-  const request={
-    product,
-    listedPrice:listed,
-    targetPrice:target,
-    delayHours:Number(document.getElementById("negDelay").value),
-    listingUrl:document.getElementById("negUrl").value.trim(),
-    notes:document.getElementById("negNotes").value.trim(),
-    createdAt:new Date().toISOString(),
-    status:"prototype_non_envoye"
-  };
-  try{localStorage.setItem("prixbasmalin_demo_negotiation",JSON.stringify(request));}catch(e){}
-  negStatus.hidden=false;
-  negStatus.textContent="Demande de test préparée sur cet appareil. Elle n’a pas été envoyée à Prixbasmalin ni au vendeur. Le site n’effectue pas encore de négociation réelle.";
-});
 document.getElementById("searchForm").addEventListener("submit",event=>{
   event.preventDefault();
   compare(document.getElementById("product").value);
