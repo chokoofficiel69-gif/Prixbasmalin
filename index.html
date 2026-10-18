@@ -159,6 +159,15 @@ footer a{color:#67E8F9}
  .trust-banner,.offer,.step{backdrop-filter:none;-webkit-backdrop-filter:none}
 }
 @media(prefers-reduced-motion:reduce){.float-item{animation:none}}
+.details-form{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;max-width:740px;margin:12px auto 0;text-align:left}
+.details-form label{display:flex;flex-direction:column;gap:6px;color:#B7C7D9;font-size:.78rem;font-weight:700}
+.details-form input,.details-form select{width:100%;min-width:0;min-height:44px;border:1px solid rgba(103,232,249,.2);border-radius:11px;background:rgba(15,27,45,.88);color:#E5F3FA;padding:10px 11px;outline:none}
+.details-form input::placeholder{color:#8296AB}
+.details-form input:focus,.details-form select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+.assistant-hint{max-width:740px;margin:12px auto 0;color:#A8B8CA;font-size:.85rem;line-height:1.6}
+.assistant-hint strong{color:#D6F8FF}
+@media(max-width:640px){.details-form{grid-template-columns:1fr;gap:9px}.details-form label{font-size:.82rem}.details-form input,.details-form select{min-height:46px}}
+
 
 </style>
 </head>
@@ -179,9 +188,15 @@ footer a{color:#67E8F9}
     <h1 id="page-title">Le bon prix,<br><em>sans y passer des heures.</em></h1>
     <p class="sub">Recherchez un produit et explorez les offres de plusieurs marchands et comparateurs. Vous choisissez où acheter, directement chez le vendeur.</p>
     <form class="search" id="searchForm">
-      <input id="product" type="search" placeholder="Ex. : vélo électrique, micro, perceuse…" aria-label="Produit à rechercher" required maxlength="160" autocomplete="off">
-      <button class="primary-btn" type="submit">Comparer les offres <span aria-hidden="true">→</span></button>
+      <input id="product" type="search" placeholder="Bonjour ! Que cherchez-vous ? Ex. : Yamaha BW’s 50" aria-label="Produit à rechercher" required maxlength="160" autocomplete="off">
+      <button class="primary-btn" type="submit">Trouver mon offre <span aria-hidden="true">→</span></button>
     </form>
+    <div class="details-form" aria-label="Précisez votre recherche">
+      <label>Année / modèle (facultatif)<input id="yearModel" type="text" placeholder="Ex. : 2010, version 50 cm³" maxlength="100"></label>
+      <label>Budget maximum (€)<input id="budget" type="number" min="0" max="10000000" step="1" placeholder="Ex. : 950"></label>
+      <label>État recherché<select id="condition"><option value="tous">Neuf ou occasion</option><option value="occasion">Occasion</option><option value="neuf">Neuf</option></select></label>
+    </div>
+    <p class="assistant-hint"><strong>On affine ensemble :</strong> donnez-nous le modèle, l’année et votre budget. Nous préparons votre recherche sur plusieurs sites pour vous aider à repérer les offres intéressantes.</p>
     <p class="group-label">Recherches populaires</p>
     <div class="examples" aria-label="Suggestions de recherche">
       <button class="chip" type="button" data-q="Tracker pour clés">Tracker pour clés</button>
@@ -216,7 +231,7 @@ footer a{color:#67E8F9}
     <div class="results-head">
       <div>
         <h2 id="resultTitle">Offres à explorer</h2>
-        <p class="results-intro">Ouvrez les services ci-dessous pour consulter les résultats de votre recherche.</p>
+        <p class="results-intro">Votre recherche est préparée pour chaque site. Les résultats et les prix sont affichés par les vendeurs eux-mêmes.</p>
       </div>
     </div>
     <p class="result-disclaimer">Les prix et disponibilités sont ceux des marchands. Vérifiez toujours le prix final chez le vendeur.</p>
@@ -248,19 +263,26 @@ footer a{color:#67E8F9}
 </footer>
 <script>
 const providers=[
-  {name:"Google Shopping",desc:"Explorer des offres et comparer les produits",url:q=>"https://www.google.com/search?tbm=shop&q="+encodeURIComponent(q)},
+  {name:"Google Shopping",desc:"Explorer les offres de nombreux vendeurs",url:q=>"https://www.google.com/search?tbm=shop&q="+encodeURIComponent(q)},
+  {name:"Leboncoin",desc:"Chercher les annonces de particuliers et professionnels",url:q=>"https://www.leboncoin.fr/recherche?text="+encodeURIComponent(q)},
+  {name:"La Centrale",desc:"Comparer les annonces de scooters et véhicules",url:q=>"https://www.lacentrale.fr/listing?search="+encodeURIComponent(q)},
   {name:"idealo",desc:"Consulter les résultats du comparateur",url:q=>"https://www.idealo.fr/prechcat.html?q="+encodeURIComponent(q)},
   {name:"Amazon",desc:"Rechercher ce produit sur Amazon France",url:q=>"https://www.amazon.fr/s?k="+encodeURIComponent(q)},
   {name:"Cdiscount",desc:"Explorer les offres sur Cdiscount",url:q=>"https://www.cdiscount.com/search/10/"+encodeURIComponent(q)+".html"},
   {name:"Fnac",desc:"Rechercher les produits et offres Fnac",url:q=>"https://www.fnac.com/SearchResult/ResultList.aspx?Search="+encodeURIComponent(q)},
-  {name:"Boulanger",desc:"Consulter les résultats chez Boulanger",url:q=>"https://www.boulanger.com/resultats?tr="+encodeURIComponent(q)},
+  {name:"Boulanger",desc:"Consulter les offres chez Boulanger",url:q=>"https://www.boulanger.com/resultats?tr="+encodeURIComponent(q)},
   {name:"Darty",desc:"Explorer les offres disponibles chez Darty",url:q=>"https://www.darty.com/nav/recherche?text="+encodeURIComponent(q)}
 ];
 function compare(query){
-  const q=query.trim();
-  if(!q)return;
-  document.getElementById("product").value=q;
-  document.getElementById("resultTitle").textContent="Offres à explorer pour « "+q+" »";
+  const base=query.trim();
+  if(!base)return;
+  const yearModel=document.getElementById("yearModel").value.trim();
+  const budget=document.getElementById("budget").value.trim();
+  const condition=document.getElementById("condition").value;
+  const parts=[base,yearModel,condition!=="tous"?condition:"",budget?"budget maximum "+budget+" euros":""].filter(Boolean);
+  const q=parts.join(" ");
+  document.getElementById("product").value=base;
+  document.getElementById("resultTitle").textContent="Sites à consulter pour « "+q+" »";
   const grid=document.getElementById("resultGrid");
   grid.replaceChildren();
   providers.forEach(provider=>{
@@ -284,6 +306,11 @@ function compare(query){
     a.append(copy,button);
     grid.append(a);
   });
+  const sourcing=document.createElement("div");
+  sourcing.className="result-disclaimer";
+  sourcing.style.marginTop="12px";
+  sourcing.textContent="Prochaine étape : nous connecterons des catalogues partenaires pour afficher les produits et leurs prix directement ici. Pour le moment, ces boutons ouvrent les recherches des sites ; Prixbasmalin ne récupère pas encore automatiquement leurs annonces et ne négocie pas encore les prix à votre place.";
+  grid.after(sourcing);
   const results=document.getElementById("results");
   results.style.display="block";
   results.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
