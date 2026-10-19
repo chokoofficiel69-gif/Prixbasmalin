@@ -27,8 +27,8 @@ h1 span{color:var(--accent)}
 .search-bar input{flex:1;min-width:0;border:0;outline:0;padding:12px;font-size:1rem;background:transparent}
 .search-bar button{background:var(--accent);color:#fff;font-weight:700;border-radius:11px;padding:0 22px;min-height:46px;font-family:Outfit,sans-serif;border:0;cursor:pointer}
 .cats{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:18px 0}
-.cats button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;font-size:.85rem;cursor:pointer}
-.cats button.active,.cats button:hover{background:var(--soft);border-color:var(--accent)}
+.cats a{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;font-size:.85rem}
+.cats a:hover{background:var(--soft);border-color:var(--accent)}
 main{max-width:1100px;margin:28px auto;padding:0 18px}
 .section-title{font-family:Outfit,sans-serif;font-size:1.4rem;margin:0 0 16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
@@ -57,16 +57,15 @@ footer{text-align:center;padding:24px 16px;color:var(--muted);font-size:.75rem;b
     <input id="q" type="search" placeholder="Robe, baskets, casque, survêtement…" required>
     <button type="submit">Comparer</button>
   </form>
-  <div class="cats" id="cats">
-    <button class="active" data-cat="">Tous</button>
-    <button data-cat="mode">Mode</button>
-    <button data-cat="high-tech">High-tech</button>
-    <button data-cat="maison">Maison</button>
-    <button data-cat="cuisine">Cuisine</button>
-    <button data-cat="sport">Sport</button>
-    <button data-cat="beauté">Beauté</button>
-    <button data-cat="jeux">Jeux</button>
-    <button data-cat="auto">Auto</button>
+  <div class="cats">
+    <a href="mode.html">Mode</a>
+    <a href="high-tech.html">High-tech</a>
+    <a href="#" data-cat="maison">Maison</a>
+    <a href="#" data-cat="cuisine">Cuisine</a>
+    <a href="#" data-cat="sport">Sport</a>
+    <a href="#" data-cat="beauté">Beauté</a>
+    <a href="#" data-cat="jeux">Jeux</a>
+    <a href="#" data-cat="auto">Auto</a>
   </div>
 </section>
 <main>
@@ -86,17 +85,15 @@ const merchants = [
   {name:"eBay",mark:"e",url:q=>"https://www.ebay.fr/sch/i.html?_nkw="+encodeURIComponent(q)}
 ];
 const ideas = ["survêtement","casque bluetooth","robe d'été","baskets","cafetiere","aspirateur","montre connectée","enceinte bluetooth","pantalon","sac à dos","lampe LED","tapis de yoga","parfum","smartphone","tablette","clavier mécanique","chaise de bureau","plante artificielle","draps","oreiller"];
-let currentCat = "";
 function showResults(query) {
   const results = document.getElementById("results");
   const welcome = document.getElementById("welcome");
   welcome.style.display = "none";
   results.innerHTML = "";
-  const q = currentCat ? currentCat + " " + query : query;
   merchants.forEach(m => {
     const card = document.createElement("article");
     card.className = "card";
-    card.innerHTML = `<div class="merchant-icon">${m.mark}</div><h3>${m.name}</h3><p>Voir les offres pour « ${q} »</p><a class="btn-link" href="${m.url(q)}" target="_blank">Voir les offres</a>`;
+    card.innerHTML = `<div class="merchant-icon">${m.mark}</div><h3>${m.name}</h3><p>Voir les offres pour « ${query} »</p><a class="btn-link" href="${m.url(query)}" target="_blank">Voir les offres</a>`;
     results.appendChild(card);
   });
 }
@@ -104,14 +101,6 @@ document.getElementById("searchForm").onsubmit = e => {
   e.preventDefault();
   const q = document.getElementById("q").value.trim();
   if (q) showResults(q);
-};
-document.getElementById("cats").onclick = e => {
-  if (e.target.tagName !== "BUTTON") return;
-  document.querySelectorAll("#cats button").forEach(b => b.classList.remove("active"));
-  e.target.classList.add("active");
-  currentCat = e.target.dataset.cat || "";
-  const q = document.getElementById("q").value.trim() || currentCat || "produits";
-  showResults(q);
 };
 const ideasEl = document.getElementById("ideas");
 ideas.forEach(idea => {
