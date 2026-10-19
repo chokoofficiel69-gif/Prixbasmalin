@@ -47,17 +47,17 @@ main{max-width:860px;margin:0 auto}
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
 .section-head h2{font-family:Outfit,Inter,sans-serif;font-size:23px;letter-spacing:-.5px;margin:0;font-weight:800}
 .text-link{border:0;background:transparent;color:var(--orange);font-size:15px;font-weight:600;white-space:nowrap}
-.products{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:auto;padding-bottom:3px}
-.product{min-width:0;border:1.5px solid #ededed;border-radius:19px;padding:12px 10px 13px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center}
-.product-image{width:100%;height:105px;display:grid;place-items:center;margin-bottom:7px;background:#f8f8f8;border-radius:8px;overflow:hidden}
+.products{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.product{min-width:160px;max-width:180px;flex-shrink:0;border:1.5px solid #ededed;border-radius:16px;padding:12px 10px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;scroll-snap-align:start}
+.product-image{width:100%;height:90px;display:grid;place-items:center;margin-bottom:6px;background:#f8f8f8;border-radius:8px;overflow:hidden}
 .product-image img{width:100%;height:100%;object-fit:contain}
-.product h3{font-size:15px;line-height:1.25;font-weight:600;margin:0 0 4px}
-.desc{font-size:11px;color:#888;margin-bottom:6px;line-height:1.3}
-.price{font-size:19px;font-weight:800;color:var(--orange);line-height:1.2}
-.old-price{font-size:13px;color:#aaa;text-decoration:line-through;margin-top:4px}
-.saving{font-size:13px;color:var(--green);font-weight:700;margin-top:5px}
-.merchant{font-size:13px;color:#999;margin-top:8px}
-.product-action{border:0;background:transparent;color:var(--orange);font-size:17px;font-weight:700;padding:0}
+.product h3{font-size:13px;line-height:1.2;font-weight:600;margin:0 0 3px;word-break:break-word}
+.desc{font-size:10px;color:#888;margin-bottom:4px;line-height:1.25;word-break:break-word}
+.price{font-size:16px;font-weight:800;color:var(--orange);line-height:1.2}
+.old-price{font-size:11px;color:#aaa;text-decoration:line-through;margin-top:2px}
+.saving{font-size:11px;color:var(--green);font-weight:700;margin-top:3px}
+.merchant{font-size:11px;color:#999;margin-top:4px}
+.product-action{border:0;background:transparent;color:var(--orange);font-size:13px;font-weight:700;padding:0;margin-top:4px}
 .trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 18px 28px}
 .trust-card{border:1.5px solid #ededed;border-radius:17px;text-align:center;padding:14px 7px 13px;min-width:0}
 .trust-icon{font-size:26px;margin-bottom:5px}
@@ -79,7 +79,7 @@ main{max-width:860px;margin:0 auto}
 .modal-actions button{border:0;border-radius:12px;padding:12px 16px;font-weight:700}
 .modal-primary{background:var(--orange);color:#fff}.modal-secondary{background:#f1f1f1;color:#222}
 .notice{font-size:12px;color:#888;line-height:1.45;margin-top:12px}
-.empty{grid-column:1/-1;padding:26px 12px;text-align:center;color:#777;border:1px dashed #ddd;border-radius:16px}
+.empty{padding:26px 12px;text-align:center;color:#777;border:1px dashed #ddd;border-radius:16px;min-width:100%}
 </style>
 </head>
 <body>
@@ -135,11 +135,11 @@ main{max-width:860px;margin:0 auto}
 <script>
 const AFFILIATE_TAG="prixbasmalin2-21";
 const productData=[
- {id:"watch",name:"Montre connectée",desc:"Suivi fitness, notifications, autonomie 7 jours",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",merchant:"Amazon",price:"49,99 €",old:"89,99 €",save:"Économisez 40 €"},
- {id:"earbuds",name:"Écouteurs sans fil",desc:"Bluetooth, réduction de bruit, étui chargeur",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop",merchant:"Amazon",price:"29,99 €",old:"59,99 €",save:"Économisez 30 €"},
- {id:"backpack",name:"Sac à dos",desc:"Poche ordinateur, imperméable, 20L",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99 €",old:"39,99 €",save:"Économisez 15 €"},
- {id:"sofa",name:"Canapé",desc:"2 places, tissu gris, pieds bois",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop",merchant:"Amazon",price:"199,99 €",old:"349,99 €",save:"Économisez 150 €"},
- {id:"baby",name:"Accessoires bébé",desc:"Set biberons + anneau de dentition",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99 €",old:"34,99 €",save:"Économisez 15 €"}
+ {id:"watch",name:"Montre connectée",desc:"Suivi fitness, notif, 7 jours",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",merchant:"Amazon",price:"49,99 €",old:"89,99 €",save:"-40 €"},
+ {id:"earbuds",name:"Écouteurs",desc:"Bluetooth, anti-bruit",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop",merchant:"Amazon",price:"29,99 €",old:"59,99 €",save:"-30 €"},
+ {id:"backpack",name:"Sac à dos",desc:"Poche PC, 20L",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99 €",old:"39,99 €",save:"-15 €"},
+ {id:"sofa",name:"Canapé",desc:"2 places, tissu gris",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop",merchant:"Amazon",price:"199,99 €",old:"349,99 €",save:"-150 €"},
+ {id:"baby",name:"Bébé",desc:"Set biberons",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99 €",old:"34,99 €",save:"-15 €"}
 ];
 let activeCategory="all",showingFavorites=false;
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
@@ -149,15 +149,15 @@ function productCard(p){
  const isFav=favorites.includes(p.id);
  const card=document.createElement("article");card.className="product";
  const imgWrap=document.createElement("div");imgWrap.className="product-image";
- const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:42px'>🛍️</span>"};imgWrap.append(img);
+ const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:36px'>🛍️</span>"};imgWrap.append(img);
  const title=document.createElement("h3");title.textContent=p.name;
  const desc=document.createElement("div");desc.className="desc";desc.textContent=p.desc;
  const price=document.createElement("div");price.className="price";price.textContent=p.price;
  const old=document.createElement("div");old.className="old-price";old.textContent=p.old;
  const saving=document.createElement("div");saving.className="saving";saving.textContent=p.save;
  const merchant=document.createElement("div");merchant.className="merchant";merchant.textContent=p.merchant;
- const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px";
- const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Comparer ↗";
+ const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px";
+ const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Voir ↗";
  const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=()=>{favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
  actions.append(buy,fav);card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
 }
