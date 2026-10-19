@@ -3,51 +3,50 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#fffaf4">
 <title>Prix Malin — Comparez les prix</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fafafa;--card:#fff;--ink:#111;--muted:#666;--line:#eee;--accent:#ff5a1f;--soft:#fff5f0;--radius:16px}
+:root{--accent:#ff5a1f;--bg:#f8f8f8;--ink:#111}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
 a{color:inherit;text-decoration:none}
-header{padding:14px 5%;display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
-.brand{font-family:Outfit;font-size:1.4rem;font-weight:800;display:flex;align-items:center;gap:8px}
+header{padding:16px 5%;background:#fff;display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;position:sticky;top:0}
+.logo{width:36px;height:36px;background:var(--accent);border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;font-family:Outfit}
+.brand{font-family:Outfit;font-size:1.3rem;font-weight:800}
 .brand span{color:var(--accent)}
-.logo{width:34px;height:34px;background:var(--accent);border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800}
-.hero{padding:40px 5% 20px;text-align:center;max-width:800px;margin:0 auto}
-.hero h1{font-family:Outfit;font-size:clamp(2.2rem,6vw,3.2rem);line-height:1.1;margin:0 0 12px}
+.hero{text-align:center;padding:36px 5% 20px}
+.hero h1{font-family:Outfit;font-size:2.2rem;line-height:1.15;margin:0 0 10px}
 .hero h1 span{color:var(--accent)}
-.hero p{color:var(--muted);margin:0 0 22px}
-.search{display:flex;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:4px;box-shadow:0 4px 20px #00000008}
-.search input{flex:1;border:0;outline:0;padding:14px 16px;font-size:1rem;background:transparent}
-.search button{background:var(--accent);color:#fff;border:0;border-radius:11px;padding:0 22px;font-weight:700;cursor:pointer}
-.cats{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;padding:28px 5%}
-.cat{display:flex;flex-direction:column;align-items:center;gap:6px;width:80px}
-.cat-icon{width:52px;height:52px;border-radius:14px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:1.3rem}
-.cat span{font-size:.75rem;font-weight:600}
-.section{padding:10px 5% 30px;max-width:1100px;margin:0 auto}
-.section h2{font-family:Outfit;font-size:1.3rem;margin:0 0 16px}
-.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.prod{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
-.prod-icon{font-size:2rem;margin-bottom:8px}
-.prod h3{font-size:.9rem;margin:0 0 4px;font-weight:600}
-.prod p{font-size:.75rem;color:var(--muted);margin:0 0 10px}
-.prod a{display:block;background:var(--ink);color:#fff;padding:8px;border-radius:8px;font-size:.78rem;font-weight:600}
-footer{text-align:center;padding:20px;color:var(--muted);font-size:.75rem;border-top:1px solid var(--line)}
+.hero p{color:#666;margin:0 0 20px}
+.search{display:flex;max-width:520px;margin:0 auto;background:#fff;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden}
+.search input{flex:1;border:0;padding:14px 16px;font-size:1rem;outline:0}
+.search button{background:var(--accent);color:#fff;border:0;padding:0 20px;font-weight:700;cursor:pointer}
+.cats{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;padding:24px 5%}
+.cat{text-align:center;width:70px}
+.cat-icon{width:50px;height:50px;background:#fff;border-radius:14px;display:grid;place-items:center;font-size:1.4rem;margin:0 auto 6px;border:1px solid #eee}
+.cat span{font-size:.72rem;font-weight:600}
+.section{padding:8px 5% 24px;max-width:1000px;margin:0 auto}
+.section h2{font-family:Outfit;font-size:1.25rem;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.card{background:#fff;border-radius:14px;padding:14px;text-align:center;border:1px solid #eee}
+.card .icon{font-size:1.8rem;margin-bottom:6px}
+.card h3{font-size:.85rem;margin:0 0 4px}
+.card p{font-size:.72rem;color:#888;margin:0 0 10px}
+.card a{display:block;background:#111;color:#fff;padding:7px;border-radius:8px;font-size:.75rem;font-weight:600}
+footer{text-align:center;padding:16px;font-size:.72rem;color:#888;border-top:1px solid #eee}
 </style>
 </head>
 <body>
 <header>
-  <a class="brand" href="#"><span class="logo">PM</span>Prix <span>Malin</span></a>
-  <span style="font-size:.8rem;color:var(--muted)">Gratuit</span>
+  <div class="logo">PM</div>
+  <div class="brand">Prix <span>Malin</span></div>
 </header>
 <section class="hero">
-  <h1>Trouvez le meilleur prix.<br><span>Comparez en un clic.</span></h1>
-  <p>Prix Malin est gratuit. Comparez les offres sur Amazon et d'autres sites.</p>
-  <form class="search" id="searchForm">
-    <input id="q" type="search" placeholder="Que cherchez-vous ?" required>
-    <button type="submit">Comparer</button>
+  <h1>Trouvez le meilleur prix.<br><span>Gratuit.</span></h1>
+  <p>Comparez en un clic sur Amazon et d'autres sites.</p>
+  <form class="search" id="sf">
+    <input id="q" placeholder="Que cherchez-vous ?" required>
+    <button>Comparer</button>
   </form>
 </section>
 <div class="cats">
@@ -57,56 +56,22 @@ footer{text-align:center;padding:20px;color:var(--muted);font-size:.75rem;border
   <a class="cat" href="#"><div class="cat-icon">🍳</div><span>Cuisine</span></a>
   <a class="cat" href="#"><div class="cat-icon">⚽</div><span>Sport</span></a>
   <a class="cat" href="#"><div class="cat-icon">💄</div><span>Beauté</span></a>
-  <a class="cat" href="#"><div class="cat-icon">🎮</div><span>Jeux</span></a>
-  <a class="cat" href="#"><div class="cat-icon">🚗</div><span>Auto</span></a>
 </div>
 <section class="section">
   <h2>Idées populaires</h2>
-  <div class="products" id="products"></div>
+  <div class="grid" id="ideas"></div>
 </section>
 <section class="section">
-  <h2>Comparer</h2>
-  <div class="products" id="results"></div>
+  <h2>Résultats</h2>
+  <div class="grid" id="results"></div>
 </section>
 <footer>Prix Malin · Gratuit · © 2026</footer>
 <script>
-const TAG = "prixbasmalin2-21";
-const ideas = [
-  {name:"Survêtement",icon:"👕",q:"survêtement"},
-  {name:"Casque BT",icon:"🎧",q:"casque bluetooth"},
-  {name:"Robe été",icon:"👗",q:"robe été"},
-  {name:"Baskets",icon:"👟",q:"baskets"},
-  {name:"Cafetière",icon:"☕",q:"cafetière"},
-  {name:"Aspirateur",icon:"🧹",q:"aspirateur"},
-  {name:"Montre",icon:"⌚",q:"montre connectée"},
-  {name:"Enceinte",icon:"🔊",q:"enceinte bluetooth"}
-];
-const productsEl = document.getElementById("products");
-ideas.forEach(i => {
-  const d = document.createElement("div");
-  d.className = "prod";
-  d.innerHTML = `<div class="prod-icon">${i.icon}</div><h3>${i.name}</h3><p>Comparer les prix</p><a href="https://www.amazon.fr/s?k=${encodeURIComponent(i.q)}&tag=${TAG}" target="_blank">Voir sur Amazon</a>`;
-  productsEl.appendChild(d);
-});
-document.getElementById("searchForm").onsubmit = e => {
-  e.preventDefault();
-  const q = document.getElementById("q").value.trim();
-  if (!q) return;
-  const results = document.getElementById("results");
-  results.innerHTML = "";
-  const merchants = [
-    {name:"Amazon",url:`https://www.amazon.fr/s?k=${encodeURIComponent(q)}&tag=${TAG}`},
-    {name:"Google Shopping",url:`https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}`},
-    {name:"Cdiscount",url:`https://www.cdiscount.com/search/10/${encodeURIComponent(q)}.html`},
-    {name:"eBay",url:`https://www.ebay.fr/sch/i.html?_nkw=${encodeURIComponent(q)}`}
-  ];
-  merchants.forEach(m => {
-    const d = document.createElement("div");
-    d.className = "prod";
-    d.innerHTML = `<div class="prod-icon">🛒</div><h3>${m.name}</h3><p>« ${q} »</p><a href="${m.url}" target="_blank">Voir les offres</a>`;
-    results.appendChild(d);
-  });
-};
+const TAG="prixbasmalin2-21";
+const ideas=[{n:"Survêtement",i:"👕",q:"survêtement"},{n:"Casque",i:"🎧",q:"casque bluetooth"},{n:"Robe",i:"👗",q:"robe"},{n:"Baskets",i:"👟",q:"baskets"},{n:"Cafetière",i:"☕",q:"cafetière"},{n:"Aspirateur",i:"🧹",q:"aspirateur"},{n:"Montre",i:"⌚",q:"montre connectée"},{n:"Enceinte",i:"🔊",q:"enceinte bluetooth"}];
+const el=document.getElementById("ideas");
+ideas.forEach(x=>{const d=document.createElement("div");d.className="card";d.innerHTML=`<div class="icon">${x.i}</div><h3>${x.n}</h3><p>Comparer</p><a href="https://www.amazon.fr/s?k=${encodeURIComponent(x.q)}&tag=${TAG}" target="_blank">Amazon</a>`;el.appendChild(d)});
+document.getElementById("sf").onsubmit=e=>{e.preventDefault();const q=document.getElementById("q").value.trim();if(!q)return;const r=document.getElementById("results");r.innerHTML="";[{n:"Amazon",u:`https://www.amazon.fr/s?k=${encodeURIComponent(q)}&tag=${TAG}`},{n:"Google",u:`https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}`},{n:"Cdiscount",u:`https://www.cdiscount.com/search/10/${encodeURIComponent(q)}.html`},{n:"eBay",u:`https://www.ebay.fr/sch/i.html?_nkw=${encodeURIComponent(q)}`}].forEach(m=>{const d=document.createElement("div");d.className="card";d.innerHTML=`<div class="icon">🛒</div><h3>${m.n}</h3><p>${q}</p><a href="${m.u}" target="_blank">Voir</a>`;r.appendChild(d)})};
 </script>
 </body>
 </html>
