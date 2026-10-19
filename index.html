@@ -51,7 +51,8 @@ main{max-width:860px;margin:0 auto}
 .product{min-width:0;border:1.5px solid #ededed;border-radius:19px;padding:12px 10px 13px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center}
 .product-image{width:100%;height:105px;display:grid;place-items:center;margin-bottom:7px;background:#f8f8f8;border-radius:8px;overflow:hidden}
 .product-image img{width:100%;height:100%;object-fit:contain}
-.product h3{font-size:15px;line-height:1.25;font-weight:600;margin:0 0 7px}
+.product h3{font-size:15px;line-height:1.25;font-weight:600;margin:0 0 4px}
+.desc{font-size:11px;color:#888;margin-bottom:6px;line-height:1.3}
 .price{font-size:19px;font-weight:800;color:var(--orange);line-height:1.2}
 .old-price{font-size:13px;color:#aaa;text-decoration:line-through;margin-top:4px}
 .saving{font-size:13px;color:var(--green);font-weight:700;margin-top:5px}
@@ -134,11 +135,11 @@ main{max-width:860px;margin:0 auto}
 <script>
 const AFFILIATE_TAG="prixbasmalin2-21";
 const productData=[
- {id:"watch",name:"Montre connectée",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",merchant:"Amazon",price:"49,99 €",old:"89,99 €",save:"Économisez 40 €"},
- {id:"earbuds",name:"Écouteurs sans fil",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop",merchant:"Amazon",price:"29,99 €",old:"59,99 €",save:"Économisez 30 €"},
- {id:"backpack",name:"Sac à dos",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99 €",old:"39,99 €",save:"Économisez 15 €"},
- {id:"sofa",name:"Canapé",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop",merchant:"Amazon",price:"199,99 €",old:"349,99 €",save:"Économisez 150 €"},
- {id:"baby",name:"Accessoires bébé",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99 €",old:"34,99 €",save:"Économisez 15 €"}
+ {id:"watch",name:"Montre connectée",desc:"Suivi fitness, notifications, autonomie 7 jours",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",merchant:"Amazon",price:"49,99 €",old:"89,99 €",save:"Économisez 40 €"},
+ {id:"earbuds",name:"Écouteurs sans fil",desc:"Bluetooth, réduction de bruit, étui chargeur",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop",merchant:"Amazon",price:"29,99 €",old:"59,99 €",save:"Économisez 30 €"},
+ {id:"backpack",name:"Sac à dos",desc:"Poche ordinateur, imperméable, 20L",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99 €",old:"39,99 €",save:"Économisez 15 €"},
+ {id:"sofa",name:"Canapé",desc:"2 places, tissu gris, pieds bois",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop",merchant:"Amazon",price:"199,99 €",old:"349,99 €",save:"Économisez 150 €"},
+ {id:"baby",name:"Accessoires bébé",desc:"Set biberons + anneau de dentition",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99 €",old:"34,99 €",save:"Économisez 15 €"}
 ];
 let activeCategory="all",showingFavorites=false;
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
@@ -150,6 +151,7 @@ function productCard(p){
  const imgWrap=document.createElement("div");imgWrap.className="product-image";
  const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:42px'>🛍️</span>"};imgWrap.append(img);
  const title=document.createElement("h3");title.textContent=p.name;
+ const desc=document.createElement("div");desc.className="desc";desc.textContent=p.desc;
  const price=document.createElement("div");price.className="price";price.textContent=p.price;
  const old=document.createElement("div");old.className="old-price";old.textContent=p.old;
  const saving=document.createElement("div");saving.className="saving";saving.textContent=p.save;
@@ -157,13 +159,13 @@ function productCard(p){
  const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px";
  const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Comparer ↗";
  const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=()=>{favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
- actions.append(buy,fav);card.append(imgWrap,title,price,old,saving,merchant,actions);return card;
+ actions.append(buy,fav);card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
 }
 function renderProducts(){
  const el=document.getElementById("products");el.innerHTML="";
  let list=productData.filter(p=>activeCategory==="all"||p.category===activeCategory);
  const q=document.getElementById("query").value.trim().toLowerCase();
- if(q)list=list.filter(p=>(p.name+" "+p.query).toLowerCase().includes(q));
+ if(q)list=list.filter(p=>(p.name+" "+p.query+" "+p.desc).toLowerCase().includes(q));
  if(showingFavorites)list=list.filter(p=>favorites.includes(p.id));
  if(!list.length){el.innerHTML='<div class="empty">Aucun produit</div>';return}
  list.forEach(p=>el.append(productCard(p)));
