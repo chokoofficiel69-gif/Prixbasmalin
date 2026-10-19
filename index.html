@@ -37,7 +37,8 @@ header{padding:10px 14px;display:flex;align-items:center;justify-content:space-b
 .sh a{font-size:.62rem;color:#ff5a1f;font-weight:600;cursor:pointer}
 .prods{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
 .prod{min-width:108px;background:#fff;border:1px solid #eee;border-radius:11px;padding:8px;text-align:center;cursor:pointer}
-.prod .img{width:48px;height:48px;background:#f8f8f8;border-radius:8px;display:grid;place-items:center;margin:0 auto 4px;font-size:1.4rem}
+.prod .img{width:56px;height:56px;background:#f8f8f8;border-radius:8px;overflow:hidden;margin:0 auto 4px}
+.prod .img img{width:100%;height:100%;object-fit:cover}
 .prod h3{font-size:.64rem;font-weight:600;margin-bottom:2px;line-height:1.15}
 .prod .price{font-size:.72rem;font-weight:700;color:#ff5a1f}
 .prod .m{font-size:.5rem;color:#999;margin-top:2px}
@@ -120,14 +121,13 @@ nav .i{font-size:.95rem;display:block}
 <script>
 const T="prixbasmalin2-21";
 const products=[
-  {n:"Montre connectée",i:"⌚",c:"tech",q:"montre connectée"},
-  {n:"Écouteurs",i:"🎧",c:"tech",q:"écouteurs bluetooth"},
-  {n:"Sac à dos",i:"🎒",c:"mode",q:"sac à dos"},
-  {n:"Cafetière",i:"☕",c:"home",q:"cafetière"},
-  {n:"Biberon",i:"🧸",c:"baby",q:"biberon"}
+  {n:"Montre connectée",img:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop",c:"tech",q:"montre connectée"},
+  {n:"Écouteurs",img:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=200&h=200&fit=crop",c:"tech",q:"écouteurs bluetooth"},
+  {n:"Sac à dos",img:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200&h=200&fit=crop",c:"mode",q:"sac à dos"},
+  {n:"Cafetière",img:"https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=200&h=200&fit=crop",c:"home",q:"cafetière"},
+  {n:"Accessoires bébé",img:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=200&h=200&fit=crop",c:"baby",q:"accessoires bébé"}
 ];
-let favs=JSON.parse(localStorage.getItem("pmFavs")||"[]");
-function render(list){const el=document.getElementById("prods");el.innerHTML="";list.forEach(p=>{const d=document.createElement("a");d.className="prod";d.href=`https://www.amazon.fr/s?k=${encodeURIComponent(p.q)}&tag=${T}`;d.target="_blank";d.innerHTML=`<div class="img">${p.i}</div><h3>${p.n}</h3><div class="price">Voir le prix</div><div class="m">Amazon</div>`;el.appendChild(d)})}
+function render(list){const el=document.getElementById("prods");el.innerHTML="";list.forEach(p=>{const d=document.createElement("a");d.className="prod";d.href=`https://www.amazon.fr/s?k=${encodeURIComponent(p.q)}&tag=${T}`;d.target="_blank";d.innerHTML=`<div class="img"><img src="${p.img}" alt="${p.n}"></div><h3>${p.n}</h3><div class="price">Voir le prix</div><div class="m">Amazon</div>`;el.appendChild(d)})}
 render(products);
 document.getElementById("sf").onsubmit=e=>{e.preventDefault();const q=document.getElementById("q").value.trim();if(q)window.open(`https://www.amazon.fr/s?k=${encodeURIComponent(q)}&tag=${T}`,"_blank")};
 document.getElementById("cats").onclick=e=>{const c=e.target.closest(".cat");if(!c)return;document.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));c.classList.add("on");const cat=c.dataset.cat;render(cat==="all"?products:products.filter(p=>p.c===cat))};
@@ -141,7 +141,7 @@ document.getElementById("smart").onclick=()=>showModal("Gratuit","Prix Malin est
 document.getElementById("navHome").onclick=()=>location.reload();
 document.getElementById("navCats").onclick=()=>document.getElementById("cats").scrollIntoView();
 document.getElementById("navDeals").onclick=()=>showModal("Bons plans","Les bons plans sont les produits populaires ci-dessus.");
-document.getElementById("navFav").onclick=()=>showModal("Favoris",favs.length?favs.join(", "):"Aucun favori. Clique sur un produit pour l'ajouter.");
+document.getElementById("navFav").onclick=()=>showModal("Favoris","Fonctionnalité à venir.");
 document.getElementById("navAcc").onclick=()=>showModal("Compte","Fonctionnalité à venir. Pas de compte requis pour comparer.");
 const box=document.getElementById("box"),abt=document.getElementById("abt"),bf=document.getElementById("bf"),bm=document.getElementById("bm");
 abt.onclick=()=>box.classList.toggle("on");
