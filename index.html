@@ -41,6 +41,18 @@ main{max-width:1100px;margin:28px auto;padding:0 18px}
 .ideas{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 24px}
 .ideas a{background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:.82rem;color:var(--ink)}
 .ideas a:hover{border-color:var(--accent);background:var(--soft)}
+.agent{position:fixed;bottom:18px;right:18px;z-index:20}
+.agent-btn{width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:0;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 16px #f0643240}
+.agent-panel{position:absolute;bottom:70px;right:0;width:320px;max-height:420px;background:#fff;border:1px solid var(--line);border-radius:16px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px #00000018}
+.agent-panel.open{display:flex}
+.agent-header{padding:12px 14px;background:var(--soft);font-weight:700;font-family:Outfit}
+.agent-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:85%;padding:8px 12px;border-radius:12px;font-size:.85rem}
+.msg.user{align-self:flex-end;background:var(--accent);color:#fff}
+.msg.bot{align-self:flex-start;background:#f5f5f5}
+.agent-input{display:flex;border-top:1px solid var(--line)}
+.agent-input input{flex:1;border:0;padding:10px 12px;outline:0}
+.agent-input button{border:0;background:var(--accent);color:#fff;padding:0 14px;font-weight:700;cursor:pointer}
 footer{text-align:center;padding:24px 16px;color:var(--muted);font-size:.75rem;border-top:1px solid var(--line);margin-top:42px}
 </style>
 </head>
@@ -75,6 +87,17 @@ footer{text-align:center;padding:24px 16px;color:var(--muted);font-size:.75rem;b
   <div id="welcome" class="welcome">Tape un produit ou choisis une catégorie.</div>
 </main>
 <footer>Prix Malin · © 2026</footer>
+<div class="agent">
+  <div class="agent-panel" id="agentPanel">
+    <div class="agent-header">Léa — Assistante</div>
+    <div class="agent-messages" id="agentMsgs"><div class="msg bot">Salut ! Tu cherches quoi ? Je peux t'aider à trouver des produits.</div></div>
+    <form class="agent-input" id="agentForm">
+      <input type="text" placeholder="Ex: casquette Lacoste pas chère" required>
+      <button type="submit">→</button>
+    </form>
+  </div>
+  <button class="agent-btn" id="agentBtn">💬</button>
+</div>
 <script>
 const AMAZON_TAG = "prixbasmalin2-21";
 const merchants = [
@@ -110,6 +133,28 @@ ideas.forEach(idea => {
   a.onclick = e => { e.preventDefault(); document.getElementById("q").value = idea; showResults(idea); };
   ideasEl.appendChild(a);
 });
+const agentBtn = document.getElementById("agentBtn");
+const agentPanel = document.getElementById("agentPanel");
+const agentForm = document.getElementById("agentForm");
+const agentMsgs = document.getElementById("agentMsgs");
+agentBtn.onclick = () => agentPanel.classList.toggle("open");
+agentForm.onsubmit = e => {
+  e.preventDefault();
+  const input = agentForm.querySelector("input");
+  const text = input.value.trim();
+  if (!text) return;
+  const userMsg = document.createElement("div");
+  userMsg.className = "msg user";
+  userMsg.textContent = text;
+  agentMsgs.appendChild(userMsg);
+  const botMsg = document.createElement("div");
+  botMsg.className = "msg bot";
+  botMsg.innerHTML = `Je te propose de chercher « ${text} » sur Amazon : <a href="https://www.amazon.fr/s?k=${encodeURIComponent(text)}&tag=${AMAZON_TAG}" target="_blank" style="color:#f06432;font-weight:700">Voir les offres</a>`;
+  agentMsgs.appendChild(botMsg);
+  agentMsgs.scrollTop = agentMsgs.scrollHeight;
+  input.value = "";
+  showResults(text);
+};
 </script>
 </body>
 </html>
