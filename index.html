@@ -11,78 +11,84 @@
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.5}
 a{color:inherit;text-decoration:none}
 header{padding:14px 4%;display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
-.brand{font-family:Outfit,sans-serif;font-size:1.3rem;font-weight:700}
+.brand{font-family:Outfit,sans-serif;font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px}
 .brand span{color:var(--accent)}
-main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
-.search-bar{display:flex;max-width:640px;margin:0 auto 20px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
-.search-bar input{flex:1;border:0;outline:0;padding:12px 14px;font-size:1rem;background:transparent}
-.search-bar button{background:var(--accent);color:#fff;font-weight:600;border-radius:10px;padding:0 18px;min-height:42px;font-family:Outfit,sans-serif;border:0;cursor:pointer}
-.agent-mini{display:flex;align-items:center;gap:8px;max-width:640px;margin:0 auto 20px;font-size:.88rem;color:var(--muted)}
-.agent-mini .avatar{width:28px;height:28px;border-radius:50%;background:#FFD4C2;display:flex;align-items:center;justify-content:center;font-size:.8rem}
-.filters{display:flex;gap:8px;flex-wrap:wrap;max-width:640px;margin:0 auto 18px;font-size:.85rem}
-.filters select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-.card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.05);display:flex;flex-direction:column}
-.card .img{width:100%;height:140px;background:#F7F7F8;display:flex;align-items:center;justify-content:center;color:#999;font-weight:500;font-size:.85rem}
+.logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem}
+.layout{display:flex;max-width:1200px;margin:0 auto;padding:16px;gap:20px}
+.sidebar{width:180px;flex-shrink:0}
+.sidebar h3{font-family:Outfit,sans-serif;font-size:.8rem;font-weight:600;margin:0 0 10px;color:var(--muted);text-transform:uppercase}
+.cats{display:flex;flex-direction:column;gap:3px}
+.cats a{padding:7px 10px;border-radius:8px;font-size:.88rem;cursor:pointer}
+.cats a:hover,.cats a.active{background:#FFF0E6}
+.main{flex:1}
+.search-bar{display:flex;max-width:560px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:14px}
+.search-bar input{flex:1;border:0;outline:0;padding:11px 12px;font-size:.98rem;background:transparent}
+.search-bar button{background:var(--accent);color:#fff;font-weight:600;border-radius:9px;padding:0 16px;min-height:40px;font-family:Outfit,sans-serif;border:0;cursor:pointer}
+.agent-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:.9rem}
+.agent-avatar{width:36px;height:36px;border-radius:50%;background:#FFD4C2;display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05);display:flex;flex-direction:column}
+.card .img{width:100%;height:130px;background:#F7F7F8;display:flex;align-items:center;justify-content:center;color:#999;font-weight:500;font-size:.82rem}
 .info{padding:12px;text-align:center}
-.info h3{margin:0 0 8px;font-size:.9rem;font-weight:600;font-family:Outfit,sans-serif}
-.btn-link{display:block;background:var(--accent);color:#fff;padding:8px;border-radius:8px;font-weight:600;font-size:.82rem}
-.btn-link:hover{opacity:.9}
-.welcome{text-align:center;color:var(--muted);padding:40px 20px}
-footer{text-align:center;padding:18px;color:var(--muted);font-size:.72rem;border-top:1px solid var(--line);margin-top:40px}
+.info h3{margin:0 0 8px;font-size:.88rem;font-weight:600;font-family:Outfit,sans-serif}
+.btn-link{display:block;background:var(--accent);color:#fff;padding:7px;border-radius:7px;font-weight:600;font-size:.8rem}
+.welcome{text-align:center;color:var(--muted);padding:30px 10px}
+footer{text-align:center;padding:16px;color:var(--muted);font-size:.7rem;border-top:1px solid var(--line);margin-top:30px}
+@media(max-width:700px){.layout{flex-direction:column}.sidebar{width:100%}.cats{flex-direction:row;flex-wrap:wrap}}
 </style>
 </head>
 <body>
 <header>
-  <a class="brand" href="#">Prix <span>Malin</span></a>
-  <span style="font-size:.75rem;color:var(--accent);font-weight:600">Comparateur</span>
+  <a class="brand" href="#">
+    <div class="logo">PM</div>
+    Prix <span>Malin</span>
+  </a>
+  <span style="font-size:.72rem;color:var(--accent);font-weight:600">Comparateur</span>
 </header>
-<main>
-  <form class="search-bar" id="searchForm">
-    <input id="q" type="search" placeholder="Robe, baskets, casque, air fryer…" required>
-    <button type="submit">Chercher</button>
-  </form>
-  <div class="agent-mini">
-    <div class="avatar">L</div>
-    <span>Léa peut aussi t’aider. Tape ce que tu cherches.</span>
-  </div>
-  <div class="filters" id="filters" style="display:none">
-    <select id="size"><option>Taille</option><option>S</option><option>M</option><option>L</option><option>XL</option></select>
-    <select id="sort"><option>Trier</option><option>Prix croissant</option><option>Prix décroissant</option></select>
-  </div>
-  <div id="results" class="grid"></div>
-  <div id="welcome" class="welcome">
-    <p>Tape un produit pour voir les offres.</p>
-  </div>
-</main>
+<div class="layout">
+  <aside class="sidebar">
+    <h3>Catégories</h3>
+    <div class="cats">
+      <a class="active">Tous</a>
+      <a>Mode</a>
+      <a>High-tech</a>
+      <a>Maison</a>
+      <a>Cuisine</a>
+      <a>Sport</a>
+      <a>Beauté</a>
+    </div>
+  </aside>
+  <main class="main">
+    <form class="search-bar" id="searchForm">
+      <input id="q" type="search" placeholder="Robe, baskets, casque…" required>
+      <button type="submit">Chercher</button>
+    </form>
+    <div class="agent-box">
+      <div class="agent-avatar">L</div>
+      <span>Léa · Dis-moi ce que tu cherches</span>
+    </div>
+    <div id="results" class="grid"></div>
+    <div id="welcome" class="welcome">Tape un produit pour voir les offres.</div>
+  </main>
+</div>
 <footer>Prix Malin · © 2026</footer>
 <script>
 const TAG = "prixbasmalin2-21";
-
 function showResults(query) {
   const results = document.getElementById("results");
   const welcome = document.getElementById("welcome");
-  const filters = document.getElementById("filters");
   welcome.style.display = "none";
-  filters.style.display = "flex";
   results.innerHTML = "";
-
   const variations = ["", " pas chère", " femme", " homme", " noir", " blanc"];
   variations.forEach(v => {
     const title = query + (v ? v : "");
     const url = "https://www.amazon.fr/s?k=" + encodeURIComponent(title) + "&tag=" + TAG;
     const card = document.createElement("article");
     card.className = "card";
-    card.innerHTML = `
-      <div class="img">${title}</div>
-      <div class="info">
-        <h3>${title}</h3>
-        <a class="btn-link" href="${url}" target="_blank">Voir les offres</a>
-      </div>`;
+    card.innerHTML = `<div class="img">${title}</div><div class="info"><h3>${title}</h3><a class="btn-link" href="${url}" target="_blank">Voir les offres</a></div>`;
     results.appendChild(card);
   });
 }
-
 document.getElementById("searchForm").onsubmit = e => {
   e.preventDefault();
   const q = document.getElementById("q").value.trim();
