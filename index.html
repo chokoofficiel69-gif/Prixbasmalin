@@ -14,78 +14,76 @@
 html{scroll-behavior:smooth}
 body{margin:0;background:#fff;color:var(--ink);font-family:Inter,system-ui,sans-serif;padding-bottom:92px}
 button,input{font:inherit}button,a{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:none}button{cursor:pointer}
-header{height:78px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#fff}
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
-.logo{width:44px;height:44px;border-radius:13px;background:var(--orange);display:grid;place-items:center;color:#fff;flex:none}
-.logo svg{width:29px;height:29px}
-.brand-name{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:24px;letter-spacing:-.7px;line-height:1.1;white-space:nowrap}
+header{height:64px;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#fff}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--orange);display:grid;place-items:center;color:#fff;flex:none;font-weight:800;font-size:14px}
+.brand-name{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:18px;letter-spacing:-.5px;line-height:1.1;white-space:nowrap}
 .brand-name span{color:var(--orange)}
-.tagline{font-size:13px;color:#999;margin-top:4px}
-.icon-button{border:0;background:transparent;width:42px;height:42px;border-radius:50%;font-size:23px;display:grid;place-items:center}
+.tagline{font-size:10px;color:#999;margin-top:1px}
+.icon-button{border:0;background:transparent;width:36px;height:36px;border-radius:50%;font-size:18px;display:grid;place-items:center}
 main{max-width:860px;margin:0 auto}
-.search-row{padding:12px 18px 8px;display:flex;gap:10px}
-.search{height:54px;display:flex;flex:1;min-width:0;background:#f5f5f5;border-radius:16px;overflow:hidden}
-.search input{min-width:0;flex:1;border:0;outline:0;background:transparent;padding:0 18px;font-size:16px;color:var(--ink)}
+.search-row{padding:8px 14px 6px;display:flex;gap:8px}
+.search{height:42px;display:flex;flex:1;min-width:0;background:#f5f5f5;border-radius:12px;overflow:hidden}
+.search input{min-width:0;flex:1;border:0;outline:0;background:transparent;padding:0 12px;font-size:14px;color:var(--ink)}
 .search input::placeholder{color:#aaa}
-.search button{width:64px;border:0;background:var(--orange);color:#fff;font-size:25px}
-.filter-button{width:54px;border:0;border-radius:16px;background:#f5f5f5;font-size:23px;color:#222}
-.categories{display:flex;gap:14px;overflow-x:auto;padding:12px 18px 20px;scrollbar-width:none}
+.search button{width:46px;border:0;background:var(--orange);color:#fff;font-size:18px}
+.filter-button{width:42px;border:0;border-radius:12px;background:#f5f5f5;font-size:16px;color:#222}
+.categories{display:flex;gap:10px;overflow-x:auto;padding:8px 14px 14px;scrollbar-width:none}
 .categories::-webkit-scrollbar,.products::-webkit-scrollbar{display:none}
-.category{border:0;background:transparent;min-width:72px;flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;color:#666;font-size:13px;font-weight:600}
-.category-icon{height:58px;width:58px;border:2px solid #eee;border-radius:50%;display:grid;place-items:center;font-size:27px;background:#fff}
+.category{border:0;background:transparent;min-width:58px;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#666;font-size:11px;font-weight:600}
+.category-icon{height:44px;width:44px;border:1.5px solid #eee;border-radius:50%;display:grid;place-items:center;font-size:18px;background:#fff}
 .category.active .category-icon{background:var(--orange);border-color:var(--orange);color:#fff}
-.banner{margin:4px 18px 22px;background:var(--orange);border-radius:24px;padding:24px 24px;display:flex;align-items:center;gap:18px;color:#fff;min-height:174px}
+.banner{margin:2px 14px 16px;background:var(--orange);border-radius:16px;padding:16px;display:flex;align-items:center;gap:10px;color:#fff}
 .banner-copy{min-width:0;flex:1}
-.banner h1{font-family:Outfit,Inter,sans-serif;font-size:clamp(23px,4.3vw,32px);line-height:1.12;letter-spacing:-.6px;margin:0 0 10px;font-weight:800}
-.banner p{font-size:15px;line-height:1.45;margin:0 0 16px}
-.primary-link{display:inline-flex;align-items:center;gap:10px;background:#fff;color:var(--orange);font-weight:700;border-radius:13px;padding:12px 18px;font-size:15px;white-space:nowrap}
-.discount-art{width:104px;flex:none;display:grid;place-items:center}
-.discount-tag{width:76px;height:91px;position:relative;transform:rotate(13deg);background:#fff;color:var(--orange);border-radius:12px 12px 17px 17px;display:grid;place-items:center;box-shadow:0 5px 12px #b6370e33}
-.discount-tag:before{content:"";position:absolute;width:14px;height:14px;border:3px solid var(--orange);border-radius:50%;top:8px;left:31px;background:#fff}
-.discount-tag span{font-size:43px;font-weight:800;margin-top:13px}
-.section{padding:0 18px 22px}
-.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-.section-head h2{font-family:Outfit,Inter,sans-serif;font-size:23px;letter-spacing:-.5px;margin:0;font-weight:800}
-.text-link{border:0;background:transparent;color:var(--orange);font-size:15px;font-weight:600;white-space:nowrap}
-.products{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
-.product{min-width:160px;max-width:180px;flex-shrink:0;border:1.5px solid #ededed;border-radius:16px;padding:12px 10px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;scroll-snap-align:start}
-.product-image{width:100%;height:90px;display:grid;place-items:center;margin-bottom:6px;background:#f8f8f8;border-radius:8px;overflow:hidden}
+.banner h1{font-family:Outfit,Inter,sans-serif;font-size:18px;line-height:1.15;letter-spacing:-.4px;margin:0 0 6px;font-weight:800}
+.banner p{font-size:12px;line-height:1.4;margin:0 0 10px}
+.primary-link{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--orange);font-weight:700;border-radius:8px;padding:8px 12px;font-size:12px;white-space:nowrap}
+.discount-art{width:60px;flex:none;display:grid;place-items:center}
+.discount-tag{width:48px;height:56px;position:relative;transform:rotate(10deg);background:#fff;color:var(--orange);border-radius:8px;display:grid;place-items:center;box-shadow:0 3px 8px #b6370e33}
+.discount-tag span{font-size:22px;font-weight:800}
+.section{padding:0 14px 16px}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.section-head h2{font-family:Outfit,Inter,sans-serif;font-size:16px;letter-spacing:-.3px;margin:0;font-weight:800}
+.text-link{border:0;background:transparent;color:var(--orange);font-size:12px;font-weight:600;white-space:nowrap}
+.products{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scroll-snap-type:x mandatory}
+.product{min-width:140px;max-width:150px;flex-shrink:0;border:1px solid #eee;border-radius:14px;padding:10px 8px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;scroll-snap-align:start}
+.product-image{width:100%;height:70px;display:grid;place-items:center;margin-bottom:4px;background:#f8f8f8;border-radius:6px;overflow:hidden}
 .product-image img{width:100%;height:100%;object-fit:contain}
-.product h3{font-size:13px;line-height:1.2;font-weight:600;margin:0 0 3px;word-break:break-word}
-.desc{font-size:10px;color:#888;margin-bottom:4px;line-height:1.25;word-break:break-word}
-.price{font-size:16px;font-weight:800;color:var(--orange);line-height:1.2}
-.old-price{font-size:11px;color:#aaa;text-decoration:line-through;margin-top:2px}
-.saving{font-size:11px;color:var(--green);font-weight:700;margin-top:3px}
-.merchant{font-size:11px;color:#999;margin-top:4px}
-.product-action{border:0;background:transparent;color:var(--orange);font-size:13px;font-weight:700;padding:0;margin-top:4px}
-.trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 18px 28px}
-.trust-card{border:1.5px solid #ededed;border-radius:17px;text-align:center;padding:14px 7px 13px;min-width:0}
-.trust-icon{font-size:26px;margin-bottom:5px}
-.trust-card h3{font-size:14px;margin:0 0 4px;font-weight:700}
-.trust-card p{font-size:12px;color:#999;margin:0;line-height:1.3}
-.bottom-nav{position:fixed;z-index:20;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eaeaea;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px max(10px,env(safe-area-inset-bottom));}
-.bottom-nav button{border:0;background:transparent;color:#999;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:600;min-width:0}
+.product h3{font-size:12px;line-height:1.2;font-weight:600;margin:0 0 2px}
+.desc{font-size:9px;color:#999;margin-bottom:3px;line-height:1.2}
+.price{font-size:14px;font-weight:800;color:var(--orange);line-height:1.1}
+.old-price{font-size:10px;color:#bbb;text-decoration:line-through;margin-top:1px}
+.saving{font-size:10px;color:var(--green);font-weight:700;margin-top:2px}
+.merchant{font-size:10px;color:#aaa;margin-top:3px}
+.product-action{border:0;background:transparent;color:var(--orange);font-size:11px;font-weight:700;padding:0;margin-top:3px}
+.trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 14px 20px}
+.trust-card{border:1px solid #eee;border-radius:12px;text-align:center;padding:10px 4px;min-width:0}
+.trust-icon{font-size:20px;margin-bottom:2px}
+.trust-card h3{font-size:11px;margin:0 0 2px;font-weight:700}
+.trust-card p{font-size:9px;color:#999;margin:0;line-height:1.2}
+.bottom-nav{position:fixed;z-index:20;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eaeaea;display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px max(8px,env(safe-area-inset-bottom));}
+.bottom-nav button{border:0;background:transparent;color:#999;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;min-width:0}
 .bottom-nav button.active{color:var(--orange)}
-.nav-icon{font-size:26px;line-height:1.1}
-.agent{position:fixed;right:14px;bottom:100px;z-index:30}
-.agent-button{height:60px;width:60px;border-radius:50%;padding:0;overflow:hidden;border:0;box-shadow:0 4px 18px #0002;background:#eee}
+.nav-icon{font-size:20px;line-height:1}
+.agent{position:fixed;right:12px;bottom:80px;z-index:30}
+.agent-button{height:48px;width:48px;border-radius:50%;padding:0;overflow:hidden;border:0;box-shadow:0 3px 12px #0002;background:#eee}
 .agent-button img{width:100%;height:100%;object-fit:cover}
 .modal{position:fixed;inset:0;z-index:50;background:#0006;display:none;align-items:flex-end}
 .modal.open{display:flex}
-.modal-panel{background:#fff;width:100%;max-height:78vh;overflow:auto;border-radius:22px 22px 0 0;padding:24px 20px max(22px,env(safe-area-inset-bottom))}
-.modal-panel h2{font-family:Outfit,sans-serif;margin:0 0 14px;font-size:23px}
-.modal-panel p{line-height:1.5;color:#555}
-.modal-actions{display:flex;gap:10px;margin-top:18px}
-.modal-actions button{border:0;border-radius:12px;padding:12px 16px;font-weight:700}
+.modal-panel{background:#fff;width:100%;max-height:70vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px 14px max(16px,env(safe-area-inset-bottom))}
+.modal-panel h2{font-family:Outfit,sans-serif;margin:0 0 10px;font-size:18px}
+.modal-panel p{line-height:1.4;color:#555;font-size:13px}
+.modal-actions{display:flex;gap:8px;margin-top:12px}
+.modal-actions button{border:0;border-radius:8px;padding:8px 12px;font-weight:700;font-size:13px}
 .modal-primary{background:var(--orange);color:#fff}.modal-secondary{background:#f1f1f1;color:#222}
-.notice{font-size:12px;color:#888;line-height:1.45;margin-top:12px}
-.empty{padding:26px 12px;text-align:center;color:#777;border:1px dashed #ddd;border-radius:16px;min-width:100%}
+.notice{font-size:10px;color:#999;line-height:1.3;margin-top:8px}
+.empty{padding:20px 8px;text-align:center;color:#777;border:1px dashed #ddd;border-radius:12px;min-width:100%;font-size:12px}
 </style>
 </head>
 <body>
 <header>
   <a class="brand" href="#" id="brandHome" aria-label="Prix Malin, accueil">
-    <span class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><path d="M7 14h26v19H7z" fill="white"/><path d="M13 15V11a7 7 0 0 1 14 0v4" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="m20 18 2.2 4.3 4.8.7-3.5 3.4.8 4.8-4.3-2.3-4.3 2.3.8-4.8-3.5-3.4 4.8-.7z" fill="#ff5a1f"/></svg></span>
+    <span class="logo">%</span>
     <span><span class="brand-name">Prix <span>Malin</span></span><span class="tagline" style="display:block">Comparez. Économisez. Malin.</span></span>
   </a>
   <button class="icon-button" id="bell" aria-label="Notifications">🔔</button>
@@ -106,40 +104,40 @@ main{max-width:860px;margin:0 auto}
     <div class="banner-copy">
       <h1>Trouvez le meilleur prix à chaque fois.</h1>
       <p>Comparez les prix et économisez sur vos achats.</p>
-      <a class="primary-link" href="#popular" id="compareButton">Comparer maintenant →</a>
+      <a class="primary-link" href="#popular" id="compareButton">Comparer →</a>
     </div>
     <div class="discount-art" aria-hidden="true"><div class="discount-tag"><span>%</span></div></div>
   </section>
   <section class="section" id="popular">
     <div class="section-head"><h2>Produits populaires</h2><button class="text-link" id="seeAll">Voir tout ›</button></div>
     <div class="products" id="products" aria-live="polite"></div>
-    <p class="notice">Prix indicatifs. À confirmer sur le site marchand. Prix Malin peut percevoir une commission sur certains liens affiliés.</p>
+    <p class="notice">Prix indicatifs. À confirmer sur le site marchand.</p>
   </section>
   <section class="trust" aria-label="Nos engagements">
-    <button class="trust-card" data-info="merchants"><div class="trust-icon">🛡️</div><h3>Marchands de confiance</h3><p>Liens vers les boutiques</p></button>
-    <button class="trust-card" data-info="prices"><div class="trust-icon">🏷️</div><h3>Meilleurs prix</h3><p>Comparez les offres</p></button>
-    <button class="trust-card" data-info="smart"><div class="trust-icon">⭐</div><h3>Achats malins</h3><p>Comparez avant d'acheter</p></button>
+    <button class="trust-card" data-info="merchants"><div class="trust-icon">🛡️</div><h3>Marchands</h3><p>Liens affiliés</p></button>
+    <button class="trust-card" data-info="prices"><div class="trust-icon">🏷️</div><h3>Meilleurs prix</h3><p>Comparez</p></button>
+    <button class="trust-card" data-info="smart"><div class="trust-icon">⭐</div><h3>Achats malins</h3><p>Gratuit</p></button>
   </section>
 </main>
 <nav class="bottom-nav" aria-label="Navigation principale">
   <button class="active" data-nav="home"><span class="nav-icon">🏠</span><span>Accueil</span></button>
   <button data-nav="categories"><span class="nav-icon">▦</span><span>Catégories</span></button>
-  <button data-nav="deals"><span class="nav-icon">🏷️</span><span>Bons plans</span></button>
+  <button data-nav="deals"><span class="nav-icon">🏷️</span><span>Plans</span></button>
   <button data-nav="favorites"><span class="nav-icon">❤️</span><span>Favoris</span></button>
   <button data-nav="account"><span class="nav-icon">👤</span><span>Compte</span></button>
 </nav>
-<div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l'assistant Prix Malin"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=faces" alt=""></button></div>
+<div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l'assistant Prix Malin"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces" alt=""></button></div>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-panel"><h2 id="modalTitle">Prix Malin</h2><div id="modalContent"></div><div class="modal-actions"><button class="modal-secondary" id="modalClose">Fermer</button></div></div>
 </div>
 <script>
 const AFFILIATE_TAG="prixbasmalin2-21";
 const productData=[
- {id:"watch",name:"Montre connectée",desc:"Suivi fitness, notif, 7 jours",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",merchant:"Amazon",price:"49,99 €",old:"89,99 €",save:"-40 €"},
- {id:"earbuds",name:"Écouteurs",desc:"Bluetooth, anti-bruit",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop",merchant:"Amazon",price:"29,99 €",old:"59,99 €",save:"-30 €"},
- {id:"backpack",name:"Sac à dos",desc:"Poche PC, 20L",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99 €",old:"39,99 €",save:"-15 €"},
- {id:"sofa",name:"Canapé",desc:"2 places, tissu gris",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop",merchant:"Amazon",price:"199,99 €",old:"349,99 €",save:"-150 €"},
- {id:"baby",name:"Bébé",desc:"Set biberons",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99 €",old:"34,99 €",save:"-15 €"}
+ {id:"watch",name:"Montre",desc:"Fitness, 7j",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop",merchant:"Amazon",price:"49,99€",old:"89,99€",save:"-40€"},
+ {id:"earbuds",name:"Écouteurs",desc:"Bluetooth",category:"tech",query:"écouteurs",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=200&h=200&fit=crop",merchant:"Amazon",price:"29,99€",old:"59,99€",save:"-30€"},
+ {id:"backpack",name:"Sac",desc:"20L, PC",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200&h=200&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
+ {id:"sofa",name:"Canapé",desc:"2 places",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&h=200&fit=crop",merchant:"Amazon",price:"199€",old:"349€",save:"-150€"},
+ {id:"baby",name:"Bébé",desc:"Set",category:"baby",query:"bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=200&h=200&fit=crop",merchant:"Amazon",price:"19,99€",old:"34,99€",save:"-15€"}
 ];
 let activeCategory="all",showingFavorites=false;
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
@@ -149,15 +147,15 @@ function productCard(p){
  const isFav=favorites.includes(p.id);
  const card=document.createElement("article");card.className="product";
  const imgWrap=document.createElement("div");imgWrap.className="product-image";
- const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:36px'>🛍️</span>"};imgWrap.append(img);
+ const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:28px'>🛍️</span>"};imgWrap.append(img);
  const title=document.createElement("h3");title.textContent=p.name;
  const desc=document.createElement("div");desc.className="desc";desc.textContent=p.desc;
  const price=document.createElement("div");price.className="price";price.textContent=p.price;
  const old=document.createElement("div");old.className="old-price";old.textContent=p.old;
  const saving=document.createElement("div");saving.className="saving";saving.textContent=p.save;
  const merchant=document.createElement("div");merchant.className="merchant";merchant.textContent=p.merchant;
- const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px";
- const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Voir ↗";
+ const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:4px";
+ const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Voir";
  const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=()=>{favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
  actions.append(buy,fav);card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
 }
@@ -175,14 +173,14 @@ function closeModal(){document.getElementById("modal").classList.remove("open")}
 document.getElementById("searchForm").onsubmit=e=>{e.preventDefault();showingFavorites=false;renderProducts()};
 document.getElementById("query").oninput=()=>{showingFavorites=false;renderProducts()};
 document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[data-category]");if(!btn)return;activeCategory=btn.dataset.category;showingFavorites=false;document.querySelectorAll(".category").forEach(c=>c.classList.toggle("active",c===btn));renderProducts()};
-document.getElementById("filterButton").onclick=()=>openModal("Filtres","Filtres à venir. Utilise les catégories.");
+document.getElementById("filterButton").onclick=()=>openModal("Filtres","Filtres à venir.");
 document.getElementById("compareButton").onclick=()=>document.getElementById("query").focus();
 document.getElementById("seeAll").onclick=()=>{activeCategory="all";showingFavorites=false;document.getElementById("query").value="";document.querySelectorAll(".category").forEach((c,i)=>c.classList.toggle("active",i===0));renderProducts()};
 document.getElementById("bell").onclick=()=>openModal("Notifications","Aucune notification.");
-document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Les prix sont à confirmer sur le site marchand."));
-document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){openModal("Bons plans","Les réductions vérifiées ne sont pas encore disponibles.")}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts()}else if(action==="account"){openModal("Compte","Pas de compte requis pour comparer.")}};
+document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Prix à confirmer sur le site marchand."));
+document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){openModal("Bons plans","Réductions à venir.")}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts()}else if(action==="account"){openModal("Compte","Pas de compte requis.")}};
 document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})};
-document.getElementById("agentButton").onclick=()=>openModal("Assistant","Utilise la barre de recherche pour trouver un produit.");
+document.getElementById("agentButton").onclick=()=>openModal("Assistant","Utilise la recherche.");
 document.getElementById("modalClose").onclick=closeModal;
 document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
 renderProducts();
