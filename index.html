@@ -9,9 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fffaf4;--card:#fff;--ink:#202124;--muted:#676b73;--line:#eee5dc;--accent:#f06432;--accent-dark:#d94e20;--soft:#fff0e7;--green:#16794b;--radius:18px}
+:root{--bg:#fffaf4;--card:#fff;--ink:#202124;--muted:#676b73;--line:#eee5dc;--accent:#f06432;--accent-dark:#d94e20;--soft:#fff0e7;--radius:18px}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.5}
 a{color:inherit;text-decoration:none}
 header{padding:14px max(4%,calc((100% - 1180px)/2));display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
@@ -27,93 +26,84 @@ h1 span{color:var(--accent)}
 .search-bar{display:flex;max-width:700px;margin:0 auto 14px;background:#fff;border:1px solid #e6dcd2;border-radius:15px;padding:5px;box-shadow:0 8px 30px #4b2a1010}
 .search-bar input{flex:1;min-width:0;border:0;outline:0;padding:12px;font-size:1rem;background:transparent}
 .search-bar button{background:var(--accent);color:#fff;font-weight:700;border-radius:11px;padding:0 22px;min-height:46px;font-family:Outfit,sans-serif;border:0;cursor:pointer}
-.search-bar button:hover{background:var(--accent-dark)}
-.quick-title{font-size:.78rem;color:var(--muted);margin:12px 0 8px}
-.quick-searches{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
-.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 12px;font-size:.82rem;cursor:pointer}
-.chip:hover{border-color:var(--accent);background:var(--soft)}
+.cats{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:18px 0}
+.cats button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;font-size:.85rem;cursor:pointer}
+.cats button.active,.cats button:hover{background:var(--soft);border-color:var(--accent)}
 main{max-width:1100px;margin:28px auto;padding:0 18px}
-.result-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:14px}
-.result-heading h2{font:700 1.35rem Outfit,sans-serif;margin:0}
-#resultSubtitle{font-size:.83rem;color:var(--muted);margin:4px 0 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;min-height:220px;box-shadow:0 4px 18px #3b26100a}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;min-height:200px}
 .merchant-icon{width:46px;height:46px;border-radius:13px;background:var(--soft);color:var(--accent-dark);display:grid;place-items:center;font:800 1rem Outfit,sans-serif;margin-bottom:14px}
 .card h3{font:700 1.05rem Outfit,sans-serif;margin:0 0 6px}
 .card p{font-size:.85rem;color:var(--muted);margin:0 0 18px;flex:1}
 .btn-link{display:flex;align-items:center;justify-content:center;background:var(--ink);color:#fff;padding:11px 12px;border-radius:10px;font-weight:700;font-size:.86rem}
-.btn-link:hover{background:#41434a}
-.disclosure{margin:18px 0 0;padding:13px 15px;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:.78rem}
 .welcome{text-align:center;color:var(--muted);padding:28px 10px;background:#fff;border:1px dashed #e4d7cb;border-radius:16px}
 footer{text-align:center;padding:24px 16px;color:var(--muted);font-size:.75rem;border-top:1px solid var(--line);margin-top:42px}
-@media(max-width:560px){header{padding:12px 16px}.header-note{display:none}.hero{margin-top:24px}.search-bar{gap:4px}.search-bar input{padding:10px 8px;font-size:.9rem}.search-bar button{padding:0 13px}.result-heading{align-items:start;flex-direction:column}}
 </style>
 </head>
 <body>
 <header>
-  <a class="brand" href="#" aria-label="Prix Malin, accueil"><span class="logo">PM</span><span class="brand-name">Prix <span>Malin</span></span></a>
-  <span class="header-note">Comparez les boutiques en quelques secondes</span>
+  <a class="brand" href="#"><span class="logo">PM</span><span class="brand-name">Prix <span>Malin</span></span></a>
+  <span class="header-note">Comparez les boutiques</span>
 </header>
 <section class="hero">
   <span class="eyebrow">LE BON RÉFLEXE AVANT D’ACHETER</span>
   <h1>Trouvez le bon produit.<br><span>Comparez les offres.</span></h1>
-  <p>Entrez le nom d’un produit pour lancer la recherche chez plusieurs marchands et comparer leurs offres sur leurs propres sites.</p>
+  <p>Recherchez un produit et comparez les offres chez plusieurs marchands.</p>
   <form class="search-bar" id="searchForm">
-    <input id="q" type="search" placeholder="Ex. : casque Bluetooth Sony" aria-label="Produit à rechercher" required>
-    <button type="submit">Comparer ↗</button>
+    <input id="q" type="search" placeholder="Robe, baskets, casque…" required>
+    <button type="submit">Comparer</button>
   </form>
-  <div class="quick-title">Besoin d’une idée ? Essayez :</div>
-  <div class="quick-searches">
-    <button class="chip" type="button" data-query="tracker Bluetooth pour clés">Tracker pour clés</button>
-    <button class="chip" type="button" data-query="casque Bluetooth">Casque Bluetooth</button>
-    <button class="chip" type="button" data-query="écouteurs sans fil">Écouteurs sans fil</button>
-    <button class="chip" type="button" data-query="montre connectée">Montre connectée</button>
-    <button class="chip" type="button" data-query="batterie externe">Batterie externe</button>
+  <div class="cats" id="cats">
+    <button class="active" data-cat="">Tous</button>
+    <button data-cat="mode">Mode</button>
+    <button data-cat="high-tech">High-tech</button>
+    <button data-cat="maison">Maison</button>
+    <button data-cat="cuisine">Cuisine</button>
+    <button data-cat="sport">Sport</button>
+    <button data-cat="beauté">Beauté</button>
   </div>
 </section>
 <main>
-  <div class="result-heading">
-    <div><h2 id="resultTitle">Prêt à comparer ?</h2><p id="resultSubtitle">Lancez une recherche pour ouvrir les offres de plusieurs marchands.</p></div>
-  </div>
   <div id="results" class="grid"></div>
-  <div id="welcome" class="welcome">🔎 Vos recherches apparaîtront ici. Aucun faux prix ni faux classement : chaque bouton ouvre les résultats du marchand choisi.</div>
-  <p class="disclosure">À savoir : cette version ouvre les pages de recherche des marchands. Elle ne récupère pas encore leurs prix en direct et ne peut donc pas garantir automatiquement le prix le plus bas. Vérifiez le prix final, les frais de livraison et la disponibilité sur le site marchand.</p>
+  <div id="welcome" class="welcome">Tape un produit ou choisis une catégorie.</div>
 </main>
-<footer>Prix Malin · © 2026 · Les prix et disponibilités sont déterminés par les marchands. Certains liens, notamment Amazon, peuvent être affiliés : nous pouvons recevoir une commission si vous achetez, sans surcoût annoncé pour vous.</footer>
+<footer>Prix Malin · © 2026</footer>
 <script>
 const AMAZON_TAG = "prixbasmalin2-21";
 const merchants = [
-  {name:"Amazon",mark:"a",description:"Chercher ce produit sur Amazon.",url:q=>"https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag="+AMAZON_TAG},
-  {name:"Google Shopping",mark:"G",description:"Explorer les offres de plusieurs boutiques.",url:q=>"https://www.google.com/search?tbm=shop&q="+encodeURIComponent(q)},
-  {name:"Cdiscount",mark:"C",description:"Consulter les produits et offres Cdiscount.",url:q=>"https://www.cdiscount.com/search/10/"+encodeURIComponent(q)+".html"},
-  {name:"Fnac",mark:"F",description:"Rechercher le produit sur la Fnac.",url:q=>"https://www.fnac.com/SearchResult/ResultList.aspx?Search="+encodeURIComponent(q)},
-  {name:"eBay",mark:"e",description:"Voir les annonces neuves et d’occasion.",url:q=>"https://www.ebay.fr/sch/i.html?_nkw="+encodeURIComponent(q)},
-  {name:"Rakuten",mark:"R",description:"Consulter les offres des vendeurs Rakuten.",url:q=>"https://fr.shopping.rakuten.com/s/"+encodeURIComponent(q)}
+  {name:"Amazon",mark:"a",url:q=>"https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag="+AMAZON_TAG},
+  {name:"Google Shopping",mark:"G",url:q=>"https://www.google.com/search?tbm=shop&q="+encodeURIComponent(q)},
+  {name:"Cdiscount",mark:"C",url:q=>"https://www.cdiscount.com/search/10/"+encodeURIComponent(q)+".html"},
+  {name:"Fnac",mark:"F",url:q=>"https://www.fnac.com/SearchResult/ResultList.aspx?Search="+encodeURIComponent(q)},
+  {name:"eBay",mark:"e",url:q=>"https://www.ebay.fr/sch/i.html?_nkw="+encodeURIComponent(q)}
 ];
-function showResults(query){
-  const results=document.getElementById("results");
-  const welcome=document.getElementById("welcome");
-  results.replaceChildren();
-  welcome.style.display="none";
-  document.getElementById("resultTitle").textContent="Offres pour « "+query+" »";
-  document.getElementById("resultSubtitle").textContent="Comparez les résultats chez ces "+merchants.length+" marchands.";
-  merchants.forEach(m=>{
-    const card=document.createElement("article"); card.className="card";
-    const icon=document.createElement("div"); icon.className="merchant-icon"; icon.textContent=m.mark;
-    const title=document.createElement("h3"); title.textContent=m.name;
-    const desc=document.createElement("p"); desc.textContent=m.description;
-    const link=document.createElement("a"); link.className="btn-link"; link.textContent="Voir les offres ↗";
-    link.href=m.url(query); link.target="_blank"; link.rel="noopener noreferrer";
-    link.setAttribute("aria-label","Voir "+query+" sur "+m.name);
-    card.append(icon,title,desc,link); results.appendChild(card);
+let currentCat = "";
+function showResults(query) {
+  const results = document.getElementById("results");
+  const welcome = document.getElementById("welcome");
+  welcome.style.display = "none";
+  results.innerHTML = "";
+  const q = currentCat ? currentCat + " " + query : query;
+  merchants.forEach(m => {
+    const card = document.createElement("article");
+    card.className = "card";
+    card.innerHTML = `<div class="merchant-icon">${m.mark}</div><h3>${m.name}</h3><p>Voir les offres pour « ${q} »</p><a class="btn-link" href="${m.url(q)}" target="_blank">Voir les offres</a>`;
+    results.appendChild(card);
   });
 }
-document.getElementById("searchForm").addEventListener("submit",e=>{
-  e.preventDefault(); const q=document.getElementById("q").value.trim(); if(q) showResults(q);
-});
-document.querySelectorAll("[data-query]").forEach(button=>button.addEventListener("click",()=>{
-  const q=button.dataset.query; document.getElementById("q").value=q; showResults(q);
-}));
+document.getElementById("searchForm").onsubmit = e => {
+  e.preventDefault();
+  const q = document.getElementById("q").value.trim();
+  if (q) showResults(q);
+};
+document.getElementById("cats").onclick = e => {
+  if (e.target.tagName !== "BUTTON") return;
+  document.querySelectorAll("#cats button").forEach(b => b.classList.remove("active"));
+  e.target.classList.add("active");
+  currentCat = e.target.dataset.cat || "";
+  const q = document.getElementById("q").value.trim() || currentCat || "produits";
+  showResults(q);
+};
 </script>
 </body>
 </html>
