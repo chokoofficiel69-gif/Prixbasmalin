@@ -4,130 +4,89 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prix Malin — Comparateur de prix</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F8FAFC;--ink:#0F172A;--muted:#64748B;--line:#E2E8F0;--primary:#0EA5E9;--primary-dark:#0284C7;--shadow:0 10px 30px rgba(15,23,42,.07);--radius:18px}
+:root{--bg:#FFFBF5;--card:#FFFFFF;--ink:#1A1A1A;--muted:#6B6B6B;--line:#F0E6DC;--accent:#FF6B35;--radius:16px}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.5}
 a{color:inherit;text-decoration:none}
-header{padding:16px 6%;display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
-.brand{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.45rem;font-weight:800}
-.brand span{color:var(--primary)}
-main{max-width:1100px;margin:0 auto;padding:48px 20px 90px}
-.hero{text-align:center;margin-bottom:48px}
-h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(2.2rem,6vw,3.6rem);font-weight:800;letter-spacing:-.04em;line-height:1.08;margin:0 0 14px}
-h1 em{font-style:normal;color:var(--primary)}
-.sub{color:var(--muted);max-width:600px;margin:0 auto 22px;font-size:1.08rem}
-.highlight{background:#F0F9FF;border:1px solid #BAE6FD;color:#0369A1;padding:12px 20px;border-radius:12px;display:inline-block;font-weight:600;margin:12px 0}
-.search{display:flex;max-width:680px;margin:20px auto 0;background:#fff;border:1px solid #CBD5E1;border-radius:16px;padding:5px;box-shadow:var(--shadow)}
-.search input{flex:1;border:0;outline:0;padding:14px 18px;font-size:1rem}
-.btn{background:var(--primary);color:#fff;font-weight:700;border-radius:12px;padding:0 24px;min-height:48px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:40px}
-.comp-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);display:flex;flex-direction:column}
-.comp-card .img-placeholder{height:180px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-weight:600;font-size:.95rem}
-.comp-info{padding:18px}
-.comp-info h3{margin:0 0 12px;font-size:1.05rem;font-weight:700}
-.sources{display:flex;gap:10px;margin-bottom:10px}
-.source{flex:1;text-align:center;padding:10px;border-radius:10px;font-weight:700;font-size:.9rem}
-.source.amazon{background:#FF9900;color:#fff}
-.source.other{background:var(--primary);color:#fff}
-.source:hover{opacity:.9}
-.hint{font-size:.8rem;color:var(--muted);margin:0;text-align:center}
-.section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.5rem;text-align:center;margin:48px 0 8px}
-footer{text-align:center;padding:28px;border-top:1px solid var(--line);background:#fff;color:var(--muted);font-size:.8rem}
+header{padding:14px 4%;display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+.brand{font-family:Outfit,sans-serif;font-size:1.3rem;font-weight:700}
+.brand span{color:var(--accent)}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+.search-bar{display:flex;max-width:640px;margin:0 auto 20px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.search-bar input{flex:1;border:0;outline:0;padding:12px 14px;font-size:1rem;background:transparent}
+.search-bar button{background:var(--accent);color:#fff;font-weight:600;border-radius:10px;padding:0 18px;min-height:42px;font-family:Outfit,sans-serif;border:0;cursor:pointer}
+.agent-mini{display:flex;align-items:center;gap:8px;max-width:640px;margin:0 auto 20px;font-size:.88rem;color:var(--muted)}
+.agent-mini .avatar{width:28px;height:28px;border-radius:50%;background:#FFD4C2;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.filters{display:flex;gap:8px;flex-wrap:wrap;max-width:640px;margin:0 auto 18px;font-size:.85rem}
+.filters select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.05);display:flex;flex-direction:column}
+.card .img{width:100%;height:140px;background:#F7F7F8;display:flex;align-items:center;justify-content:center;color:#999;font-weight:500;font-size:.85rem}
+.info{padding:12px;text-align:center}
+.info h3{margin:0 0 8px;font-size:.9rem;font-weight:600;font-family:Outfit,sans-serif}
+.btn-link{display:block;background:var(--accent);color:#fff;padding:8px;border-radius:8px;font-weight:600;font-size:.82rem}
+.btn-link:hover{opacity:.9}
+.welcome{text-align:center;color:var(--muted);padding:40px 20px}
+footer{text-align:center;padding:18px;color:var(--muted);font-size:.72rem;border-top:1px solid var(--line);margin-top:40px}
 </style>
 </head>
 <body>
 <header>
   <a class="brand" href="#">Prix <span>Malin</span></a>
-  <span style="font-size:.8rem;color:var(--primary-dark);font-weight:600">Comparateur</span>
+  <span style="font-size:.75rem;color:var(--accent);font-weight:600">Comparateur</span>
 </header>
 <main>
-  <section class="hero">
-    <h1>Comparez les prix<br><em>en un seul endroit.</em></h1>
-    <p class="sub">Deux sources en même temps. Vous voyez directement les meilleures offres sans ouvrir plusieurs sites.</p>
-    <div class="highlight">Toujours les meilleurs prix grâce à notre comparateur</div>
-    <form class="search" id="f">
-      <input id="q" type="search" placeholder="Rechercher un produit…" required>
-      <button class="btn" type="submit">Comparer</button>
-    </form>
-  </section>
-
-  <h2 class="section-title">Exemples de comparaisons</h2>
-  <div class="grid">
-    <article class="comp-card">
-      <div class="img-placeholder">Casque audio</div>
-      <div class="comp-info">
-        <h3>Casque audio</h3>
-        <div class="sources">
-          <a class="source amazon" href="https://www.amazon.fr/s?k=casque+audio&tag=prixbasmalin2-21" target="_blank" rel="noopener">Amazon</a>
-          <a class="source other" href="https://www.amazon.fr/s?k=casque+audio+pas+cher&tag=prixbasmalin2-21" target="_blank" rel="noopener">Meilleur prix</a>
-        </div>
-        <p class="hint">Comparez les offres en un clic</p>
-      </div>
-    </article>
-    <article class="comp-card">
-      <div class="img-placeholder">Sneakers</div>
-      <div class="comp-info">
-        <h3>Sneakers</h3>
-        <div class="sources">
-          <a class="source amazon" href="https://www.amazon.fr/s?k=sneakers&tag=prixbasmalin2-21" target="_blank" rel="noopener">Amazon</a>
-          <a class="source other" href="https://www.amazon.fr/s?k=sneakers+pas+cher&tag=prixbasmalin2-21" target="_blank" rel="noopener">Meilleur prix</a>
-        </div>
-        <p class="hint">Comparez les offres en un clic</p>
-      </div>
-    </article>
-    <article class="comp-card">
-      <div class="img-placeholder">Air fryer</div>
-      <div class="comp-info">
-        <h3>Air fryer</h3>
-        <div class="sources">
-          <a class="source amazon" href="https://www.amazon.fr/s?k=air+fryer&tag=prixbasmalin2-21" target="_blank" rel="noopener">Amazon</a>
-          <a class="source other" href="https://www.amazon.fr/s?k=air+fryer+pas+cher&tag=prixbasmalin2-21" target="_blank" rel="noopener">Meilleur prix</a>
-        </div>
-        <p class="hint">Comparez les offres en un clic</p>
-      </div>
-    </article>
-    <article class="comp-card">
-      <div class="img-placeholder">Soin visage</div>
-      <div class="comp-info">
-        <h3>Soin visage</h3>
-        <div class="sources">
-          <a class="source amazon" href="https://www.amazon.fr/s?k=cr%C3%A8me+visage&tag=prixbasmalin2-21" target="_blank" rel="noopener">Amazon</a>
-          <a class="source other" href="https://www.amazon.fr/s?k=cr%C3%A8me+visage+pas+cher&tag=prixbasmalin2-21" target="_blank" rel="noopener">Meilleur prix</a>
-        </div>
-        <p class="hint">Comparez les offres en un clic</p>
-      </div>
-    </article>
+  <form class="search-bar" id="searchForm">
+    <input id="q" type="search" placeholder="Robe, baskets, casque, air fryer…" required>
+    <button type="submit">Chercher</button>
+  </form>
+  <div class="agent-mini">
+    <div class="avatar">L</div>
+    <span>Léa peut aussi t’aider. Tape ce que tu cherches.</span>
   </div>
-
-  <div id="results" class="grid" style="display:none;margin-top:32px"></div>
+  <div class="filters" id="filters" style="display:none">
+    <select id="size"><option>Taille</option><option>S</option><option>M</option><option>L</option><option>XL</option></select>
+    <select id="sort"><option>Trier</option><option>Prix croissant</option><option>Prix décroissant</option></select>
+  </div>
+  <div id="results" class="grid"></div>
+  <div id="welcome" class="welcome">
+    <p>Tape un produit pour voir les offres.</p>
+  </div>
 </main>
-<footer>
-  Prix Malin · Comparateur de prix · © 2026
-</footer>
+<footer>Prix Malin · © 2026</footer>
 <script>
-const TAG="prixbasmalin2-21";
-document.getElementById("f").onsubmit=e=>{
+const TAG = "prixbasmalin2-21";
+
+function showResults(query) {
+  const results = document.getElementById("results");
+  const welcome = document.getElementById("welcome");
+  const filters = document.getElementById("filters");
+  welcome.style.display = "none";
+  filters.style.display = "flex";
+  results.innerHTML = "";
+
+  const variations = ["", " pas chère", " femme", " homme", " noir", " blanc"];
+  variations.forEach(v => {
+    const title = query + (v ? v : "");
+    const url = "https://www.amazon.fr/s?k=" + encodeURIComponent(title) + "&tag=" + TAG;
+    const card = document.createElement("article");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="img">${title}</div>
+      <div class="info">
+        <h3>${title}</h3>
+        <a class="btn-link" href="${url}" target="_blank">Voir les offres</a>
+      </div>`;
+    results.appendChild(card);
+  });
+}
+
+document.getElementById("searchForm").onsubmit = e => {
   e.preventDefault();
-  const q=document.getElementById("q").value;
-  const url1="https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag="+TAG;
-  const url2="https://www.amazon.fr/s?k="+encodeURIComponent(q+" pas cher")+"&tag="+TAG;
-  const res=document.getElementById("results");
-  res.style.display="grid";
-  res.innerHTML=`
-    <article class="comp-card">
-      <div class="img-placeholder">« ${q} »</div>
-      <div class="comp-info">
-        <h3>${q}</h3>
-        <div class="sources">
-          <a class="source amazon" href="${url1}" target="_blank">Amazon</a>
-          <a class="source other" href="${url2}" target="_blank">Pas cher</a>
-        </div>
-        <p class="hint">Comparez les deux résultats</p>
-      </div>
-    </article>`;
-  res.scrollIntoView({behavior:"smooth"});
+  const q = document.getElementById("q").value.trim();
+  if (q) showResults(q);
 };
 </script>
 </body>
