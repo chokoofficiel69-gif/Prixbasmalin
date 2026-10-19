@@ -7,54 +7,61 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,system-ui,sans-serif;background:#fff;color:#1a1a1a;padding-bottom:70px}
+body{font-family:Inter,system-ui,sans-serif;background:#fff;color:#1a1a1a;padding-bottom:68px}
 a{text-decoration:none;color:inherit}
-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f0f0;position:sticky;top:0;background:#fff;z-index:10}
+header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f0f0;position:sticky;top:0;background:#fff;z-index:10}
 .left{display:flex;align-items:center;gap:8px}
-.logo{width:34px;height:34px;background:#ff5a1f;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-family:Outfit}
-.brand{font-family:Outfit;font-weight:800;font-size:1.15rem}
+.logo{width:32px;height:32px;background:#ff5a1f;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:800;font-family:Outfit;font-size:.85rem}
+.brand{font-family:Outfit;font-weight:800;font-size:1.1rem}
 .brand span{color:#ff5a1f}
-.sub{font-size:.62rem;color:#999}
-.hero{padding:18px 16px 8px}
-.hero h1{font-family:Outfit;font-size:1.5rem;font-weight:800;line-height:1.1;margin-bottom:6px}
-.hero p{font-size:.82rem;color:#666;margin-bottom:14px;line-height:1.35}
-.search{display:flex;background:#f5f5f5;border-radius:12px;overflow:hidden;margin-bottom:14px}
-.search input{flex:1;border:0;background:transparent;padding:12px 14px;font-size:.92rem;outline:0}
-.search button{background:#ff5a1f;color:#fff;border:0;padding:0 16px;font-weight:700}
-.mini{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px}
-.mc{text-align:center;min-width:54px}
-.mc-i{width:42px;height:42px;background:#fff5f0;border-radius:12px;display:grid;place-items:center;margin:0 auto 3px;font-size:1rem}
-.mc span{font-size:.6rem;font-weight:600;color:#666}
-.sec{padding:8px 16px 14px}
+.sub{font-size:.58rem;color:#999}
+.search-row{padding:10px 16px;display:flex;gap:8px}
+.search{flex:1;display:flex;background:#f5f5f5;border-radius:10px;overflow:hidden}
+.search input{flex:1;border:0;background:transparent;padding:10px 12px;font-size:.88rem;outline:0}
+.search button{background:#ff5a1f;color:#fff;border:0;padding:0 12px;font-weight:700}
+.filter{width:36px;height:36px;background:#f5f5f5;border-radius:10px;display:grid;place-items:center;font-size:.9rem}
+.cats{display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto}
+.cat{text-align:center;min-width:50px}
+.cat-i{width:40px;height:40px;background:#fff;border:1px solid #eee;border-radius:50%;display:grid;place-items:center;margin:0 auto 3px;font-size:1rem}
+.cat.on .cat-i{background:#ff5a1f;color:#fff;border-color:#ff5a1f}
+.cat span{font-size:.58rem;font-weight:600;color:#666}
+.banner{margin:8px 16px 14px;background:#ff5a1f;border-radius:16px;padding:18px 16px;color:#fff;position:relative;overflow:hidden}
+.banner h1{font-family:Outfit;font-size:1.25rem;font-weight:800;line-height:1.15;margin-bottom:4px}
+.banner p{font-size:.78rem;opacity:.95;margin-bottom:12px}
+.banner .btn{display:inline-block;background:#fff;color:#ff5a1f;padding:8px 14px;border-radius:8px;font-size:.75rem;font-weight:700}
+.banner .tag{position:absolute;right:12px;top:12px;background:#fff;color:#ff5a1f;font-weight:800;font-size:1.1rem;padding:6px 10px;border-radius:8px}
+.sec{padding:4px 16px 12px}
 .sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.sh h2{font-family:Outfit;font-size:1rem;font-weight:700}
-.sh a{font-size:.72rem;color:#ff5a1f;font-weight:600}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.card{background:#fff;border:1px solid #f0f0f0;border-radius:12px;padding:12px 8px;text-align:center}
-.card.g{background:#f3faf3;border-color:#e5f0e5}
-.card .i{font-size:1.4rem;margin-bottom:4px}
-.card h3{font-size:.72rem;font-weight:700;margin-bottom:1px}
-.card p{font-size:.6rem;color:#888}
-.news{margin:12px 16px;background:#ff5a1f;border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;color:#fff}
-.news .l{display:flex;align-items:center;gap:8px}
-.news .s{width:32px;height:32px;background:#fff;border-radius:50%;display:grid;place-items:center;color:#ff5a1f;font-weight:800}
-.news p{font-size:.7rem;font-weight:600;line-height:1.25}
-.news button{background:#fff;color:#ff5a1f;border:0;padding:7px 10px;border-radius:18px;font-size:.65rem;font-weight:700}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:6px 0 10px}
-nav a{text-align:center;font-size:.6rem;color:#999;font-weight:600}
+.sh h2{font-family:Outfit;font-size:.95rem;font-weight:700}
+.sh a{font-size:.7rem;color:#ff5a1f;font-weight:600}
+.prods{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.prod{min-width:110px;background:#fff;border:1px solid #f0f0f0;border-radius:12px;padding:8px;text-align:center}
+.prod .img{font-size:1.6rem;margin-bottom:4px}
+.prod h3{font-size:.68rem;font-weight:600;margin-bottom:2px;line-height:1.2}
+.prod .price{font-size:.78rem;font-weight:700;color:#ff5a1f}
+.prod .old{font-size:.6rem;color:#aaa;text-decoration:line-through}
+.prod .save{font-size:.58rem;color:#2a9d4e;font-weight:600}
+.prod .merchant{font-size:.55rem;color:#888;margin-top:2px}
+.trust{display:flex;gap:8px;padding:8px 16px 14px;overflow-x:auto}
+.t{flex:1;min-width:90px;background:#fff;border:1px solid #f0f0f0;border-radius:10px;padding:8px;text-align:center}
+.t .i{font-size:.9rem;margin-bottom:2px}
+.t h4{font-size:.62rem;font-weight:700;margin-bottom:1px}
+.t p{font-size:.52rem;color:#888}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:6px 0 8px}
+nav a{text-align:center;font-size:.55rem;color:#999;font-weight:600}
 nav a.on{color:#ff5a1f}
-nav .i{font-size:1.1rem;display:block}
-.agent{position:fixed;bottom:76px;right:14px;z-index:30}
-.ab{width:54px;height:54px;border-radius:50%;border:0;padding:0;overflow:hidden;box-shadow:0 2px 12px #00000025;cursor:pointer}
+nav .i{font-size:1rem;display:block;margin-bottom:1px}
+.agent{position:fixed;bottom:72px;right:12px;z-index:30}
+.ab{width:48px;height:48px;border-radius:50%;border:0;padding:0;overflow:hidden;box-shadow:0 2px 10px #00000020;cursor:pointer}
 .ab img{width:100%;height:100%;object-fit:cover}
-.box{position:absolute;bottom:62px;right:0;width:270px;background:#fff;border-radius:14px;box-shadow:0 4px 24px #0000001a;display:none;flex-direction:column;overflow:hidden}
+.box{position:absolute;bottom:56px;right:0;width:250px;background:#fff;border-radius:12px;box-shadow:0 4px 20px #00000018;display:none;flex-direction:column;overflow:hidden}
 .box.on{display:flex}
-.bh{padding:10px 12px;background:#fff5f0;display:flex;align-items:center;gap:8px;font-weight:700;font-size:.82rem}
-.bh img{width:26px;height:26px;border-radius:50%;object-fit:cover}
-.bm{padding:10px;max-height:180px;overflow-y:auto;font-size:.78rem}
+.bh{padding:8px 10px;background:#fff5f0;display:flex;align-items:center;gap:6px;font-weight:700;font-size:.75rem}
+.bh img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.bm{padding:8px;max-height:140px;overflow-y:auto;font-size:.72rem}
 .bi{display:flex;border-top:1px solid #eee}
-.bi input{flex:1;border:0;padding:8px 10px;outline:0;font-size:.78rem}
-.bi button{border:0;background:#ff5a1f;color:#fff;padding:0 12px;font-weight:700}
+.bi input{flex:1;border:0;padding:6px 8px;outline:0;font-size:.72rem}
+.bi button{border:0;background:#ff5a1f;color:#fff;padding:0 10px;font-weight:700}
 </style>
 </head>
 <body>
@@ -62,51 +69,57 @@ nav .i{font-size:1.1rem;display:block}
   <div class="left"><div class="logo">%</div><div><div class="brand">Prix <span>Malin</span></div><div class="sub">Comparez. Économisez. Malin.</div></div></div>
   <div>🔔</div>
 </header>
-<section class="hero">
-  <h1>Trouvez le meilleur prix,<br>à chaque fois.</h1>
-  <p>Comparez les prix de milliers de produits parmi les meilleures enseignes.</p>
+<div class="search-row">
   <form class="search" id="sf"><input id="q" placeholder="Rechercher un produit..." required><button>🔍</button></form>
-  <div class="mini">
-    <div class="mc"><div class="mc-i">📱</div><span>Électronique</span></div>
-    <div class="mc"><div class="mc-i">🛋️</div><span>Maison</span></div>
-    <div class="mc"><div class="mc-i">🧋</div><span>Électroménager</span></div>
-    <div class="mc"><div class="mc-i">💊</div><span>Beauté</span></div>
-    <div class="mc"><div class="mc-i">👟</div><span>Sport</span></div>
-    <div class="mc"><div class="mc-i">🧸</div><span>Bébé</span></div>
-  </div>
-</section>
+  <div class="filter">☰</div>
+</div>
+<div class="cats">
+  <div class="cat on"><div class="cat-i">▦</div><span>Toutes</span></div>
+  <div class="cat"><div class="cat-i">📱</div><span>Électronique</span></div>
+  <div class="cat"><div class="cat-i">👕</div><span>Mode</span></div>
+  <div class="cat"><div class="cat-i">🛋️</div><span>Maison</span></div>
+  <div class="cat"><div class="cat-i">👶</div><span>Bébé</span></div>
+</div>
+<div class="banner">
+  <div class="tag">%</div>
+  <h1>Trouvez le meilleur prix à chaque fois.</h1>
+  <p>Comparez les prix et économisez sur vos achats.</p>
+  <a class="btn" href="#">Comparer maintenant →</a>
+</div>
 <section class="sec">
-  <div class="sh"><h2>Catégories populaires</h2><a href="#">Voir tout ›</a></div>
-  <div class="grid">
-    <a class="card" href="#"><div class="i">🎧</div><h3>Électronique</h3><p>1 254 offres ›</p></a>
-    <a class="card" href="#"><div class="i">🛋️</div><h3>Maison</h3><p>2 341 offres ›</p></a>
-    <a class="card g" href="#"><div class="i">🍽️</div><h3>Électroménager</h3><p>1 087 offres ›</p></a>
+  <div class="sh"><h2>Produits populaires</h2><a href="#">Voir tout</a></div>
+  <div class="prods">
+    <a class="prod" href="https://www.amazon.fr/s?k=montre+connect%C3%A9e&tag=prixbasmalin2-21" target="_blank"><div class="img">⌚</div><h3>Montre connectée</h3><div class="price">49,99 €</div><div class="old">89,99 €</div><div class="save">Économisez 40 €</div><div class="merchant">Amazon</div></a>
+    <a class="prod" href="https://www.amazon.fr/s?k=écouteurs+bluetooth&tag=prixbasmalin2-21" target="_blank"><div class="img">🎧</div><h3>Écouteurs</h3><div class="price">29,99 €</div><div class="old">59,99 €</div><div class="save">Économisez 30 €</div><div class="merchant">Amazon</div></a>
+    <a class="prod" href="https://www.amazon.fr/s?k=sac+à+dos&tag=prixbasmalin2-21" target="_blank"><div class="img">🎒</div><h3>Sac à dos</h3><div class="price">24,99 €</div><div class="old">39,99 €</div><div class="save">Économisez 15 €</div><div class="merchant">Amazon</div></a>
   </div>
 </section>
-<div class="news">
-  <div class="l"><div class="s">★</div><p>Recevez les meilleurs bons plans chaque semaine</p></div>
-  <button>Je m'inscris ›</button>
+<div class="trust">
+  <div class="t"><div class="i">🛡️</div><h4>Marchands</h4><p>Liens affiliés</p></div>
+  <div class="t"><div class="i">🔍</div><h4>Meilleurs prix</h4><p>Comparez</p></div>
+  <div class="t"><div class="i">⭐</div><h4>Achats malins</h4><p>Gratuit</p></div>
 </div>
 <nav>
   <a class="on" href="#"><span class="i">🏠</span>Accueil</a>
-  <a href="#"><span class="i">📊</span>Comparateur</a>
+  <a href="#"><span class="i">▦</span>Catégories</a>
+  <a href="#"><span class="i">🏷️</span>Bons plans</a>
   <a href="#"><span class="i">❤️</span>Favoris</a>
-  <a href="#"><span class="i">👤</span>Profil</a>
+  <a href="#"><span class="i">👤</span>Compte</a>
 </nav>
 <div class="agent">
   <div class="box" id="box">
-    <div class="bh"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces" alt="">Léa</div>
+    <div class="bh"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&h=60&fit=crop&crop=faces" alt="">Léa</div>
     <div class="bm" id="bm">Salut ! Que cherches-tu ?</div>
-    <form class="bi" id="bf"><input placeholder="Ex: casquette pas chère" required><button>→</button></form>
+    <form class="bi" id="bf"><input placeholder="Ex: casquette" required><button>→</button></form>
   </div>
-  <button class="ab" id="abt"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces" alt=""></button>
+  <button class="ab" id="abt"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&h=60&fit=crop&crop=faces" alt=""></button>
 </div>
 <script>
 const T="prixbasmalin2-21";
 document.getElementById("sf").onsubmit=e=>{e.preventDefault();const q=document.getElementById("q").value.trim();if(q)window.open("https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag="+T,"_blank")};
 const box=document.getElementById("box"),abt=document.getElementById("abt"),bf=document.getElementById("bf"),bm=document.getElementById("bm");
 abt.onclick=()=>box.classList.toggle("on");
-bf.onsubmit=e=>{e.preventDefault();const t=bf.querySelector("input").value.trim();if(!t)return;bm.innerHTML+=`<div style="text-align:right;margin:5px 0"><span style="background:#ff5a1f;color:#fff;padding:3px 7px;border-radius:7px;font-size:.72rem">${t}</span></div>`;bm.innerHTML+=`<div style="margin:5px 0"><a href="https://www.amazon.fr/s?k=${encodeURIComponent(t)}&tag=${T}" target="_blank" style="color:#ff5a1f;font-weight:700">Voir sur Amazon</a></div>`;bf.querySelector("input").value="";bm.scrollTop=bm.scrollHeight};
+bf.onsubmit=e=>{e.preventDefault();const t=bf.querySelector("input").value.trim();if(!t)return;bm.innerHTML+=`<div style="text-align:right;margin:4px 0"><span style="background:#ff5a1f;color:#fff;padding:2px 6px;border-radius:6px;font-size:.68rem">${t}</span></div>`;bm.innerHTML+=`<div style="margin:4px 0"><a href="https://www.amazon.fr/s?k=${encodeURIComponent(t)}&tag=${T}" target="_blank" style="color:#ff5a1f;font-weight:700">Voir sur Amazon</a></div>`;bf.querySelector("input").value="";bm.scrollTop=bm.scrollHeight};
 </script>
 </body>
 </html>
