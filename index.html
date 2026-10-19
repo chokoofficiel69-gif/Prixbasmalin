@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#fffaf4">
-<meta name="description" content="Prix Malin vous aide à comparer rapidement les offres de plusieurs boutiques en ligne.">
+<meta name="description" content="Prix Malin - Comparez les offres de plusieurs boutiques en ligne.">
 <title>Prix Malin — Comparez les offres</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -30,6 +30,7 @@ h1 span{color:var(--accent)}
 .cats button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;font-size:.85rem;cursor:pointer}
 .cats button.active,.cats button:hover{background:var(--soft);border-color:var(--accent)}
 main{max-width:1100px;margin:28px auto;padding:0 18px}
+.section-title{font-family:Outfit,sans-serif;font-size:1.4rem;margin:0 0 16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;min-height:200px}
 .merchant-icon{width:46px;height:46px;border-radius:13px;background:var(--soft);color:var(--accent-dark);display:grid;place-items:center;font:800 1rem Outfit,sans-serif;margin-bottom:14px}
@@ -37,6 +38,9 @@ main{max-width:1100px;margin:28px auto;padding:0 18px}
 .card p{font-size:.85rem;color:var(--muted);margin:0 0 18px;flex:1}
 .btn-link{display:flex;align-items:center;justify-content:center;background:var(--ink);color:#fff;padding:11px 12px;border-radius:10px;font-weight:700;font-size:.86rem}
 .welcome{text-align:center;color:var(--muted);padding:28px 10px;background:#fff;border:1px dashed #e4d7cb;border-radius:16px}
+.ideas{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 24px}
+.ideas a{background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:.82rem;color:var(--ink)}
+.ideas a:hover{border-color:var(--accent);background:var(--soft)}
 footer{text-align:center;padding:24px 16px;color:var(--muted);font-size:.75rem;border-top:1px solid var(--line);margin-top:42px}
 </style>
 </head>
@@ -50,7 +54,7 @@ footer{text-align:center;padding:24px 16px;color:var(--muted);font-size:.75rem;b
   <h1>Trouvez le bon produit.<br><span>Comparez les offres.</span></h1>
   <p>Recherchez un produit et comparez les offres chez plusieurs marchands.</p>
   <form class="search-bar" id="searchForm">
-    <input id="q" type="search" placeholder="Robe, baskets, casque…" required>
+    <input id="q" type="search" placeholder="Robe, baskets, casque, survêtement…" required>
     <button type="submit">Comparer</button>
   </form>
   <div class="cats" id="cats">
@@ -61,9 +65,13 @@ footer{text-align:center;padding:24px 16px;color:var(--muted);font-size:.75rem;b
     <button data-cat="cuisine">Cuisine</button>
     <button data-cat="sport">Sport</button>
     <button data-cat="beauté">Beauté</button>
+    <button data-cat="jeux">Jeux</button>
+    <button data-cat="auto">Auto</button>
   </div>
 </section>
 <main>
+  <h2 class="section-title">Idées de recherches</h2>
+  <div class="ideas" id="ideas"></div>
   <div id="results" class="grid"></div>
   <div id="welcome" class="welcome">Tape un produit ou choisis une catégorie.</div>
 </main>
@@ -77,6 +85,7 @@ const merchants = [
   {name:"Fnac",mark:"F",url:q=>"https://www.fnac.com/SearchResult/ResultList.aspx?Search="+encodeURIComponent(q)},
   {name:"eBay",mark:"e",url:q=>"https://www.ebay.fr/sch/i.html?_nkw="+encodeURIComponent(q)}
 ];
+const ideas = ["survêtement","casque bluetooth","robe d'été","baskets","cafetiere","aspirateur","montre connectée","enceinte bluetooth","pantalon","sac à dos","lampe LED","tapis de yoga","parfum","smartphone","tablette","clavier mécanique","chaise de bureau","plante artificielle","draps","oreiller"];
 let currentCat = "";
 function showResults(query) {
   const results = document.getElementById("results");
@@ -104,6 +113,14 @@ document.getElementById("cats").onclick = e => {
   const q = document.getElementById("q").value.trim() || currentCat || "produits";
   showResults(q);
 };
+const ideasEl = document.getElementById("ideas");
+ideas.forEach(idea => {
+  const a = document.createElement("a");
+  a.href = "#";
+  a.textContent = idea;
+  a.onclick = e => { e.preventDefault(); document.getElementById("q").value = idea; showResults(idea); };
+  ideasEl.appendChild(a);
+});
 </script>
 </body>
 </html>
