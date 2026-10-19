@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,system-ui,sans-serif;background:#fff;color:#1a1a1a;padding-bottom:64px}
+body{font-family:Inter,system-ui,sans-serif;background:#fff;color:#1a1a1a;padding-bottom:80px}
 a{text-decoration:none;color:inherit}
 header{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f2f2f2;position:sticky;top:0;background:#fff;z-index:10}
 .left{display:flex;align-items:center;gap:7px}
@@ -25,33 +25,33 @@ header{padding:10px 14px;display:flex;align-items:center;justify-content:space-b
 .cat-i{width:38px;height:38px;background:#fff;border:1px solid #eee;border-radius:50%;display:grid;place-items:center;margin:0 auto 2px;font-size:.95rem}
 .cat.on .cat-i{background:#ff5a1f;color:#fff;border-color:#ff5a1f}
 .cat span{font-size:.55rem;font-weight:600;color:#777}
-.banner{margin:6px 14px 12px;background:#ff5a1f;border-radius:14px;padding:16px 14px;color:#fff;position:relative}
-.banner h1{font-family:Outfit;font-size:1.15rem;font-weight:800;line-height:1.12;margin-bottom:3px}
-.banner p{font-size:.75rem;opacity:.95;margin-bottom:10px}
-.banner .btn{display:inline-block;background:#fff;color:#ff5a1f;padding:7px 12px;border-radius:7px;font-size:.7rem;font-weight:700}
-.banner .tag{position:absolute;right:10px;top:10px;background:#fff;color:#ff5a1f;font-weight:800;font-size:1rem;padding:5px 8px;border-radius:7px}
+.banner{margin:6px 14px 12px;background:#ff5a1f;border-radius:14px;padding:16px 14px;color:#fff;display:flex;align-items:center;gap:12px}
+.banner-text{flex:1}
+.banner h1{font-family:Outfit;font-size:1.05rem;font-weight:800;line-height:1.15;margin-bottom:4px}
+.banner p{font-size:.72rem;opacity:.95;margin-bottom:10px}
+.banner .btn{display:inline-block;background:#fff;color:#ff5a1f;padding:7px 12px;border-radius:7px;font-size:.68rem;font-weight:700}
+.banner .tag{background:#fff;color:#ff5a1f;font-weight:800;font-size:1.1rem;padding:8px 12px;border-radius:8px;flex-shrink:0}
 .sec{padding:2px 14px 10px}
-.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .sh h2{font-family:Outfit;font-size:.9rem;font-weight:700}
 .sh a{font-size:.65rem;color:#ff5a1f;font-weight:600}
-.prods{display:flex;gap:6px;overflow-x:auto}
-.prod{min-width:100px;background:#fff;border:1px solid #f0f0f0;border-radius:10px;padding:7px;text-align:center}
-.prod .img{font-size:1.4rem;margin-bottom:3px}
-.prod h3{font-size:.62rem;font-weight:600;margin-bottom:1px;line-height:1.15}
-.prod .price{font-size:.72rem;font-weight:700;color:#ff5a1f}
-.prod .old{font-size:.55rem;color:#bbb;text-decoration:line-through}
-.prod .save{font-size:.52rem;color:#2a9d4e;font-weight:600}
-.prod .m{font-size:.5rem;color:#999;margin-top:1px}
-.trust{display:flex;gap:6px;padding:6px 14px 12px}
-.t{flex:1;background:#fff;border:1px solid #f0f0f0;border-radius:8px;padding:6px;text-align:center}
-.t .i{font-size:.8rem;margin-bottom:1px}
-.t h4{font-size:.58rem;font-weight:700}
-.t p{font-size:.48rem;color:#999}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:5px 0 6px}
-nav a{text-align:center;font-size:.5rem;color:#aaa;font-weight:600}
+.prods{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.prod{min-width:110px;background:#fff;border:1px solid #f0f0f0;border-radius:12px;padding:10px 8px;text-align:center}
+.prod .img{font-size:1.6rem;margin-bottom:4px}
+.prod h3{font-size:.68rem;font-weight:600;margin-bottom:2px;line-height:1.2}
+.prod .price{font-size:.78rem;font-weight:700;color:#ff5a1f}
+.prod .note{font-size:.52rem;color:#999;margin-top:2px}
+.prod .m{font-size:.55rem;color:#888;margin-top:2px}
+.trust{display:flex;gap:6px;padding:8px 14px 20px}
+.t{flex:1;background:#fff;border:1px solid #f0f0f0;border-radius:8px;padding:8px 6px;text-align:center}
+.t .i{font-size:.85rem;margin-bottom:2px}
+.t h4{font-size:.6rem;font-weight:700}
+.t p{font-size:.5rem;color:#999}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:6px 0 8px;z-index:20}
+nav a{text-align:center;font-size:.52rem;color:#aaa;font-weight:600}
 nav a.on{color:#ff5a1f}
-nav .i{font-size:.95rem;display:block}
-.agent{position:fixed;bottom:68px;right:10px;z-index:30}
+nav .i{font-size:1rem;display:block}
+.agent{position:fixed;bottom:74px;right:10px;z-index:30}
 .ab{width:44px;height:44px;border-radius:50%;border:0;padding:0;overflow:hidden;box-shadow:0 2px 8px #00000018;cursor:pointer}
 .ab img{width:100%;height:100%;object-fit:cover}
 .box{position:absolute;bottom:50px;right:0;width:230px;background:#fff;border-radius:10px;box-shadow:0 3px 16px #00000015;display:none;flex-direction:column;overflow:hidden}
@@ -81,23 +81,25 @@ nav .i{font-size:.95rem;display:block}
   <div class="cat"><div class="cat-i">👶</div><span>Bébé</span></div>
 </div>
 <div class="banner">
+  <div class="banner-text">
+    <h1>Trouvez le meilleur prix à chaque fois.</h1>
+    <p>Comparez les prix et économisez sur vos achats.</p>
+    <a class="btn" href="#">Comparer maintenant →</a>
+  </div>
   <div class="tag">%</div>
-  <h1>Trouvez le meilleur prix à chaque fois.</h1>
-  <p>Comparez les prix et économisez sur vos achats.</p>
-  <a class="btn" href="#">Comparer maintenant →</a>
 </div>
 <section class="sec">
   <div class="sh"><h2>Produits populaires</h2><a href="#">Voir tout</a></div>
   <div class="prods">
-    <a class="prod" href="https://www.amazon.fr/s?k=montre+connect%C3%A9e&tag=prixbasmalin2-21" target="_blank"><div class="img">⌚</div><h3>Montre</h3><div class="price">49,99€</div><div class="old">89,99€</div><div class="save">-40€</div><div class="m">Amazon</div></a>
-    <a class="prod" href="https://www.amazon.fr/s?k=écouteurs&tag=prixbasmalin2-21" target="_blank"><div class="img">🎧</div><h3>Écouteurs</h3><div class="price">29,99€</div><div class="old">59,99€</div><div class="save">-30€</div><div class="m">Amazon</div></a>
-    <a class="prod" href="https://www.amazon.fr/s?k=sac+à+dos&tag=prixbasmalin2-21" target="_blank"><div class="img">🎒</div><h3>Sac</h3><div class="price">24,99€</div><div class="old">39,99€</div><div class="save">-15€</div><div class="m">Amazon</div></a>
+    <a class="prod" href="https://www.amazon.fr/s?k=montre+connect%C3%A9e&tag=prixbasmalin2-21" target="_blank"><div class="img">⌚</div><h3>Montre connectée</h3><div class="price">Voir le prix</div><div class="note">Prix variable</div><div class="m">Amazon</div></a>
+    <a class="prod" href="https://www.amazon.fr/s?k=écouteurs+bluetooth&tag=prixbasmalin2-21" target="_blank"><div class="img">🎧</div><h3>Écouteurs</h3><div class="price">Voir le prix</div><div class="note">Prix variable</div><div class="m">Amazon</div></a>
+    <a class="prod" href="https://www.amazon.fr/s?k=sac+à+dos&tag=prixbasmalin2-21" target="_blank"><div class="img">🎒</div><h3>Sac à dos</h3><div class="price">Voir le prix</div><div class="note">Prix variable</div><div class="m">Amazon</div></a>
   </div>
 </section>
 <div class="trust">
-  <div class="t"><div class="i">🛡️</div><h4>Marchands</h4><p>Affiliés</p></div>
-  <div class="t"><div class="i">🔍</div><h4>Prix</h4><p>Comparez</p></div>
-  <div class="t"><div class="i">⭐</div><h4>Malin</h4><p>Gratuit</p></div>
+  <div class="t"><div class="i">🛡️</div><h4>Marchands</h4><p>Liens affiliés</p></div>
+  <div class="t"><div class="i">🔍</div><h4>Meilleurs prix</h4><p>Comparez</p></div>
+  <div class="t"><div class="i">⭐</div><h4>Achats malins</h4><p>Gratuit</p></div>
 </div>
 <nav>
   <a class="on" href="#"><span class="i">🏠</span>Accueil</a>
