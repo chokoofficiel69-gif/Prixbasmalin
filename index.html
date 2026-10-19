@@ -7,87 +7,106 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,system-ui,sans-serif;background:#fff;color:#1a1a1a;padding-bottom:72px}
+body{font-family:Inter,system-ui,sans-serif;background:#fafafa;color:#1a1a1a;padding-bottom:70px}
 a{text-decoration:none;color:inherit}
-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f2f2f2;position:sticky;top:0;background:#fff;z-index:10}
+header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10}
 .left{display:flex;align-items:center;gap:8px}
-.logo{width:34px;height:34px;background:#ff5a1f;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-family:Outfit}
-.brand{font-family:Outfit;font-weight:800;font-size:1.15rem}
+.logo{width:32px;height:32px;background:#ff5a1f;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:800;font-family:Outfit;font-size:.9rem}
+.brand{font-family:Outfit;font-weight:800;font-size:1.1rem}
 .brand span{color:#ff5a1f}
-.tagline{font-size:.62rem;color:#999;margin-top:-1px}
-.bell{font-size:1.1rem}
-.hero{padding:18px 16px 6px}
-.hero h1{font-family:Outfit;font-size:1.5rem;font-weight:800;line-height:1.15;margin-bottom:6px}
-.hero p{font-size:.82rem;color:#666;margin-bottom:14px;line-height:1.4}
-.search{display:flex;background:#f6f6f6;border-radius:12px;overflow:hidden;margin-bottom:16px}
-.search input{flex:1;border:0;background:transparent;padding:12px 14px;font-size:.92rem;outline:0}
-.search button{background:#ff5a1f;color:#fff;border:0;padding:0 16px;font-weight:700;font-size:1rem}
-.mini-cats{display:flex;gap:12px;overflow-x:auto;padding-bottom:14px}
-.mc{text-align:center;min-width:54px}
-.mc-icon{width:42px;height:42px;background:#fff5f0;border-radius:12px;display:grid;place-items:center;margin:0 auto 4px;font-size:1.05rem}
-.mc span{font-size:.62rem;font-weight:600;color:#666}
-.sec{padding:4px 16px 14px}
-.sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.sec-h h2{font-family:Outfit;font-size:1.02rem;font-weight:700}
-.sec-h a{font-size:.75rem;color:#ff5a1f;font-weight:600}
-.cat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.cat-card{background:#fff;border:1px solid #f0f0f0;border-radius:12px;padding:12px 8px;text-align:center}
-.cat-card.green{background:#f3faf3;border-color:#e5f0e5}
-.cat-card .ic{font-size:1.5rem;margin-bottom:4px}
-.cat-card h3{font-size:.75rem;font-weight:700;margin-bottom:1px}
-.cat-card p{font-size:.62rem;color:#888}
-.newsletter{margin:14px 16px;background:#ff5a1f;border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;color:#fff}
-.newsletter .left{display:flex;align-items:center;gap:8px}
-.newsletter .star{width:32px;height:32px;background:#fff;border-radius:50%;display:grid;place-items:center;color:#ff5a1f;font-weight:800;font-size:.9rem}
-.newsletter p{font-size:.72rem;font-weight:600;line-height:1.25}
-.newsletter button{background:#fff;color:#ff5a1f;border:0;padding:7px 10px;border-radius:18px;font-size:.68rem;font-weight:700;white-space:nowrap}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:6px 0 10px}
-nav a{text-align:center;font-size:.62rem;color:#999;font-weight:600}
-nav a.active{color:#ff5a1f}
-nav .ic{font-size:1.15rem;display:block;margin-bottom:1px}
+.sub{font-size:.6rem;color:#999}
+.hero{padding:16px;background:#fff}
+.hero h1{font-family:Outfit;font-size:1.45rem;font-weight:800;line-height:1.1;margin-bottom:6px}
+.hero p{font-size:.8rem;color:#666;margin-bottom:14px}
+.search{display:flex;background:#f5f5f5;border-radius:10px;overflow:hidden}
+.search input{flex:1;border:0;background:transparent;padding:11px 12px;font-size:.9rem;outline:0}
+.search button{background:#ff5a1f;color:#fff;border:0;padding:0 14px;font-weight:700}
+.cats{display:flex;gap:10px;padding:12px 16px;overflow-x:auto;background:#fff}
+.cat{text-align:center;min-width:52px}
+.cat-icon{width:40px;height:40px;background:#fff5f0;border-radius:10px;display:grid;place-items:center;margin:0 auto 3px;font-size:1rem}
+.cat span{font-size:.6rem;font-weight:600;color:#666}
+.sec{padding:12px 16px}
+.sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sec-h h2{font-family:Outfit;font-size:1rem;font-weight:700}
+.sec-h a{font-size:.72rem;color:#ff5a1f;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.card{background:#fff;border-radius:12px;padding:10px 8px;text-align:center;border:1px solid #f0f0f0}
+.card.green{background:#f0faf0}
+.card .ic{font-size:1.4rem;margin-bottom:4px}
+.card h3{font-size:.72rem;font-weight:700;margin-bottom:1px}
+.card p{font-size:.6rem;color:#888}
+.news{margin:12px 16px;background:#ff5a1f;border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.news .l{display:flex;align-items:center;gap:8px}
+.news .star{width:30px;height:30px;background:#fff;border-radius:50%;display:grid;place-items:center;color:#ff5a1f;font-weight:800}
+.news p{font-size:.7rem;font-weight:600;line-height:1.2}
+.news button{background:#fff;color:#ff5a1f;border:0;padding:6px 10px;border-radius:16px;font-size:.65rem;font-weight:700}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:6px 0 8px}
+nav a{text-align:center;font-size:.6rem;color:#999;font-weight:600}
+nav a.on{color:#ff5a1f}
+nav .ic{font-size:1.1rem;display:block}
+.agent{position:fixed;bottom:70px;right:14px;z-index:20}
+.agent-btn{width:52px;height:52px;border-radius:50%;border:0;padding:0;overflow:hidden;box-shadow:0 2px 10px #00000020;cursor:pointer}
+.agent-btn img{width:100%;height:100%;object-fit:cover}
+.agent-box{position:absolute;bottom:60px;right:0;width:280px;background:#fff;border-radius:14px;box-shadow:0 4px 20px #00000018;display:none;flex-direction:column;overflow:hidden}
+.agent-box.open{display:flex}
+.agent-h{padding:10px 12px;background:#fff5f0;display:flex;align-items:center;gap:8px;font-weight:700;font-size:.85rem}
+.agent-h img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.agent-m{padding:10px;max-height:200px;overflow-y:auto;font-size:.8rem}
+.agent-i{display:flex;border-top:1px solid #eee}
+.agent-i input{flex:1;border:0;padding:8px 10px;outline:0;font-size:.8rem}
+.agent-i button{border:0;background:#ff5a1f;color:#fff;padding:0 12px;font-weight:700}
 </style>
 </head>
 <body>
 <header>
-  <div class="left"><div class="logo">%</div><div><div class="brand">Prix <span>Malin</span></div><div class="tagline">Comparez. Économisez. Malin.</div></div></div>
-  <div class="bell">🔔</div>
+  <div class="left"><div class="logo">%</div><div><div class="brand">Prix <span>Malin</span></div><div class="sub">Comparez. Économisez. Malin.</div></div></div>
+  <div>🔔</div>
 </header>
 <section class="hero">
   <h1>Trouvez le meilleur prix,<br>à chaque fois.</h1>
   <p>Comparez les prix de milliers de produits parmi les meilleures enseignes.</p>
-  <form class="search" id="sf">
-    <input id="q" placeholder="Rechercher un produit..." required>
-    <button>🔍</button>
-  </form>
-  <div class="mini-cats">
-    <div class="mc"><div class="mc-icon">📱</div><span>Électronique</span></div>
-    <div class="mc"><div class="mc-icon">🛋️</div><span>Maison</span></div>
-    <div class="mc"><div class="mc-icon">🧋</div><span>Électroménager</span></div>
-    <div class="mc"><div class="mc-icon">💊</div><span>Beauté</span></div>
-    <div class="mc"><div class="mc-icon">👟</div><span>Sport</span></div>
-    <div class="mc"><div class="mc-icon">🧸</div><span>Bébé</span></div>
-  </div>
+  <form class="search" id="sf"><input id="q" placeholder="Rechercher un produit..." required><button>🔍</button></form>
 </section>
+<div class="cats">
+  <div class="cat"><div class="cat-icon">📱</div><span>Électronique</span></div>
+  <div class="cat"><div class="cat-icon">🛋️</div><span>Maison</span></div>
+  <div class="cat"><div class="cat-icon">🧋</div><span>Électroménager</span></div>
+  <div class="cat"><div class="cat-icon">💊</div><span>Beauté</span></div>
+  <div class="cat"><div class="cat-icon">👟</div><span>Sport</span></div>
+  <div class="cat"><div class="cat-icon">🧸</div><span>Bébé</span></div>
+</div>
 <section class="sec">
   <div class="sec-h"><h2>Catégories populaires</h2><a href="#">Voir tout ›</a></div>
-  <div class="cat-grid">
-    <a class="cat-card" href="#"><div class="ic">🎧</div><h3>Électronique</h3><p>1 254 offres ›</p></a>
-    <a class="cat-card" href="#"><div class="ic">🛋️</div><h3>Maison</h3><p>2 341 offres ›</p></a>
-    <a class="cat-card green" href="#"><div class="ic">🍽️</div><h3>Électroménager</h3><p>1 087 offres ›</p></a>
+  <div class="grid">
+    <a class="card" href="#"><div class="ic">🎧</div><h3>Électronique</h3><p>1 254 offres ›</p></a>
+    <a class="card" href="#"><div class="ic">🛋️</div><h3>Maison</h3><p>2 341 offres ›</p></a>
+    <a class="card green" href="#"><div class="ic">🍽️</div><h3>Électroménager</h3><p>1 087 offres ›</p></a>
   </div>
 </section>
-<div class="newsletter">
-  <div class="left"><div class="star">★</div><p>Recevez les meilleurs bons plans chaque semaine</p></div>
+<div class="news">
+  <div class="l"><div class="star">★</div><p>Recevez les meilleurs bons plans chaque semaine</p></div>
   <button>Je m'inscris ›</button>
 </div>
 <nav>
-  <a class="active" href="#"><span class="ic">🏠</span>Accueil</a>
+  <a class="on" href="#"><span class="ic">🏠</span>Accueil</a>
   <a href="#"><span class="ic">📊</span>Comparateur</a>
   <a href="#"><span class="ic">❤️</span>Favoris</a>
   <a href="#"><span class="ic">👤</span>Profil</a>
 </nav>
+<div class="agent">
+  <div class="agent-box" id="ab">
+    <div class="agent-h"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=faces" alt="">Léa</div>
+    <div class="agent-m" id="am">Salut ! Que cherches-tu ?</div>
+    <form class="agent-i" id="af"><input placeholder="Ex: casquette pas chère" required><button>→</button></form>
+  </div>
+  <button class="agent-btn" id="abt"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=faces" alt=""></button>
+</div>
 <script>
-document.getElementById("sf").onsubmit=e=>{e.preventDefault();const q=document.getElementById("q").value.trim();if(q)window.open("https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag=prixbasmalin2-21","_blank")};
+const T="prixbasmalin2-21";
+document.getElementById("sf").onsubmit=e=>{e.preventDefault();const q=document.getElementById("q").value.trim();if(q)window.open("https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag="+T,"_blank")};
+const ab=document.getElementById("ab"),abt=document.getElementById("abt"),af=document.getElementById("af"),am=document.getElementById("am");
+abt.onclick=()=>ab.classList.toggle("open");
+af.onsubmit=e=>{e.preventDefault();const t=af.querySelector("input").value.trim();if(!t)return;am.innerHTML+=`<div style="text-align:right;margin:6px 0"><span style="background:#ff5a1f;color:#fff;padding:4px 8px;border-radius:8px;font-size:.75rem">${t}</span></div>`;am.innerHTML+=`<div style="margin:6px 0"><a href="https://www.amazon.fr/s?k=${encodeURIComponent(t)}&tag=${T}" target="_blank" style="color:#ff5a1f;font-weight:700">Voir « ${t} » sur Amazon</a></div>`;af.querySelector("input").value="";am.scrollTop=am.scrollHeight};
 </script>
 </body>
 </html>
