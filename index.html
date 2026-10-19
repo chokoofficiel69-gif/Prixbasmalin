@@ -53,8 +53,8 @@ main{max-width:860px;margin:0 auto}
 .product-image img{width:100%;height:100%;object-fit:contain}
 .product h3{font-size:15px;line-height:1.25;font-weight:600;margin:0 0 7px}
 .price{font-size:19px;font-weight:800;color:var(--orange);line-height:1.2}
-.old-price{font-size:13px;color:#aaa;text-decoration:line-through;margin-top:4px;min-height:16px}
-.saving{font-size:13px;color:var(--green);font-weight:700;margin-top:5px;min-height:16px}
+.old-price{font-size:13px;color:#aaa;text-decoration:line-through;margin-top:4px}
+.saving{font-size:13px;color:var(--green);font-weight:700;margin-top:5px}
 .merchant{font-size:13px;color:#999;margin-top:8px}
 .product-action{border:0;background:transparent;color:var(--orange);font-size:17px;font-weight:700;padding:0}
 .trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 18px 28px}
@@ -112,7 +112,7 @@ main{max-width:860px;margin:0 auto}
   <section class="section" id="popular">
     <div class="section-head"><h2>Produits populaires</h2><button class="text-link" id="seeAll">Voir tout ›</button></div>
     <div class="products" id="products" aria-live="polite"></div>
-    <p class="notice">Les prix et disponibilités doivent être confirmés sur le site marchand. Prix Malin peut percevoir une commission sur certains liens affiliés, sans frais supplémentaires pour vous.</p>
+    <p class="notice">Prix indicatifs. À confirmer sur le site marchand. Prix Malin peut percevoir une commission sur certains liens affiliés.</p>
   </section>
   <section class="trust" aria-label="Nos engagements">
     <button class="trust-card" data-info="merchants"><div class="trust-icon">🛡️</div><h3>Marchands de confiance</h3><p>Liens vers les boutiques</p></button>
@@ -134,11 +134,11 @@ main{max-width:860px;margin:0 auto}
 <script>
 const AFFILIATE_TAG="prixbasmalin2-21";
 const productData=[
- {id:"watch",name:"Montre connectée",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=85",merchant:"Amazon"},
- {id:"earbuds",name:"Écouteurs sans fil",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=500&q=85",merchant:"Amazon"},
- {id:"backpack",name:"Sac à dos",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=85",merchant:"Amazon"},
- {id:"sofa",name:"Canapé",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=500&q=85",merchant:"Amazon"},
- {id:"baby",name:"Accessoires bébé",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=500&q=85",merchant:"Amazon"}
+ {id:"watch",name:"Montre connectée",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=85",merchant:"Amazon",price:"49,99 €",old:"89,99 €",save:"Économisez 40 €"},
+ {id:"earbuds",name:"Écouteurs sans fil",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=500&q=85",merchant:"Amazon",price:"29,99 €",old:"59,99 €",save:"Économisez 30 €"},
+ {id:"backpack",name:"Sac à dos",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=85",merchant:"Amazon",price:"24,99 €",old:"39,99 €",save:"Économisez 15 €"},
+ {id:"sofa",name:"Canapé",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=500&q=85",merchant:"Amazon",price:"199,99 €",old:"349,99 €",save:"Économisez 150 €"},
+ {id:"baby",name:"Accessoires bébé",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=500&q=85",merchant:"Amazon",price:"19,99 €",old:"34,99 €",save:"Économisez 15 €"}
 ];
 let activeCategory="all",showingFavorites=false;
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
@@ -150,12 +150,14 @@ function productCard(p){
  const imgWrap=document.createElement("div");imgWrap.className="product-image";
  const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=()=>{imgWrap.textContent="🛍️";imgWrap.style.fontSize="42px"};imgWrap.append(img);
  const title=document.createElement("h3");title.textContent=p.name;
- const price=document.createElement("div");price.className="price";price.textContent="Voir le prix";
+ const price=document.createElement("div");price.className="price";price.textContent=p.price;
+ const old=document.createElement("div");old.className="old-price";old.textContent=p.old;
+ const saving=document.createElement("div");saving.className="saving";saving.textContent=p.save;
  const merchant=document.createElement("div");merchant.className="merchant";merchant.textContent=p.merchant;
  const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px";
  const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Comparer ↗";
  const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=()=>{favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
- actions.append(buy,fav);card.append(imgWrap,title,price,merchant,actions);return card;
+ actions.append(buy,fav);card.append(imgWrap,title,price,old,saving,merchant,actions);return card;
 }
 function renderProducts(){
  const el=document.getElementById("products");el.innerHTML="";
