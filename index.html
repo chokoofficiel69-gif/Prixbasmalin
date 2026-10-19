@@ -59,6 +59,9 @@ h1 em{font-style:normal;color:var(--primary)}
 .merchant{display:block;font-weight:800;font-size:1rem;letter-spacing:-.02em}
 .offer-desc{display:block;color:var(--muted);font-size:.82rem;line-height:1.45;margin-top:4px}
 .offer-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 13px;border-radius:11px;background:var(--primary);color:#fff;font-size:.84rem;font-weight:750}
+.offer-status{display:block;margin-top:7px;font-size:.72rem;font-weight:700;color:#A8B8CA}
+.offer-status.active{color:#6EE7B7}
+.offer-status.pending{color:#FCD34D}
 .offer:hover .offer-btn{background:var(--primary-dark)}
 .how-section{margin:58px auto 0}
 .section-heading{text-align:center;margin-bottom:20px}
@@ -299,18 +302,25 @@ function compare(query){
     const desc=document.createElement("span");
     desc.className="offer-desc";
     desc.textContent=provider.desc;
-    copy.append(name,desc);
+    const status=document.createElement("span");
+    status.className="offer-status "+(provider.affiliate?"active":"pending");
+    status.textContent=provider.affiliate?"Lien affilié configuré":"Lien classique · affiliation non configurée";
+    copy.append(name,desc,status);
     const button=document.createElement("span");
     button.className="offer-btn";
     button.textContent="Voir l’offre ↗";
     a.append(copy,button);
     grid.append(a);
   });
-  const sourcing=document.createElement("div");
-  sourcing.className="result-disclaimer";
-  sourcing.style.marginTop="12px";
-  sourcing.textContent="Prochaine étape : nous connecterons des catalogues partenaires pour afficher les produits et leurs prix directement ici. Pour le moment, ces boutons ouvrent les recherches des sites ; Prixbasmalin ne récupère pas encore automatiquement leurs annonces et ne négocie pas encore les prix à votre place.";
-  grid.after(sourcing);
+  let sourcing=document.getElementById("sourcingNote");
+  if(!sourcing){
+    sourcing=document.createElement("p");
+    sourcing.id="sourcingNote";
+    sourcing.className="result-disclaimer";
+    sourcing.style.marginTop="12px";
+    sourcing.textContent="Pour le moment, ces boutons ouvrent les recherches des sites : Prixbasmalin ne récupère pas automatiquement les annonces et les prix. Le lien Amazon contient l’identifiant affilié du site ; les autres liens ne sont pas encore monétisés. L’accès aux catalogues nécessite des partenariats et autorisations distincts.";
+    grid.after(sourcing);
+  }
   const results=document.getElementById("results");
   results.style.display="block";
   results.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
