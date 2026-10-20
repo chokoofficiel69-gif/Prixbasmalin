@@ -217,7 +217,7 @@ const productData=[
  {id:"stroller",name:"Accessoires poussette",desc:"Promenade • praticité",category:"baby",query:"accessoires poussette",image:"https://images.unsplash.com/photo-1591348278863-a8fb3887e2aa?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les prix",old:"",save:""}
 
 ];
-let activeCategory="all",showingFavorites=false;
+let activeCategory="all",showingFavorites=false,currentSort="default";
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
 let cart=JSON.parse(localStorage.getItem("prixMalinCart")||"[]");
 function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringify(favorites))}
@@ -305,6 +305,8 @@ function renderProducts(){
  const ql=q.toLowerCase();
  if(q)list=list.filter(p=>matchesSearch(p,ql));
  if(showingFavorites)list=list.filter(p=>favorites.includes(p.id));
+ if(currentSort==="az")list.sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+ if(currentSort==="za")list.sort((a,b)=>b.name.localeCompare(a.name,"fr"));
  if(q && list.length<3){
   banner.innerHTML=`<div class="amazon-banner"><strong>Tous les produits « ${q} »</strong><br><a class="amazon-big" href="${amazonSearchUrl(q)}" target="_blank" rel="sponsored noopener">Voir tout sur Amazon</a></div>`;
  }
@@ -356,7 +358,24 @@ function closeModal(){document.getElementById("modal").classList.remove("open")}
 document.getElementById("searchForm").onsubmit=e=>{e.preventDefault();showingFavorites=false;renderProducts()};
 document.getElementById("query").oninput=()=>{showingFavorites=false;renderProducts()};
 document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[data-category]");if(!btn)return;activeCategory=btn.dataset.category;showingFavorites=false;document.querySelectorAll(".category").forEach(c=>c.classList.toggle("active",c===btn));renderProducts()};
-document.getElementById("filterButton").onclick=()=>openModal("Filtres","Utilise les catégories ou la recherche.");
+document.getElementById("filterButton").onclick=()=>{
+ const content=document.getElementById("modalContent");
+ document.getElementById("modalTitle").textContent="Affiner la recherche";
+ content.innerHTML="";
+ const wrap=document.createElement("div");wrap.style.cssText="display:grid;gap:14px";
+ const catLabel=document.createElement("label");catLabel.textContent="Catégorie";catLabel.style.cssText="font-weight:700;font-size:13px;display:grid;gap:6px";
+ const cat=document.createElement("select");cat.style.cssText="padding:12px;border:1px solid #ddd;border-radius:10px;background:white";
+ [["all","Toutes les catégories"],["tech","Électronique"],["fashion","Mode"],["home","Maison"],["garden","Jardin"],["sport","Sport"],["beauty","Beauté"],["baby","Bébé"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;o.selected=activeCategory===v;cat.append(o)});
+ catLabel.append(cat);
+ const sortLabel=document.createElement("label");sortLabel.textContent="Ordre d’affichage";sortLabel.style.cssText=catLabel.style.cssText;
+ const sort=document.createElement("select");sort.id="sortProducts";sort.style.cssText=cat.style.cssText;
+ [["default","Sélection Prix Malin"],["az","Nom : A à Z"],["za","Nom : Z à A"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;sort.append(o)});
+ sortLabel.append(sort);
+ const note=document.createElement("p");note.textContent="Les prix en direct et le tri par prix seront activés lorsque les flux de données des marchands seront connectés. Pour l’instant, les fiches renvoient vers les offres du vendeur.";note.style.cssText="font-size:12px;color:#666;line-height:1.5;margin:0";
+ const apply=document.createElement("button");apply.className="modal-primary";apply.textContent="Appliquer les filtres";apply.style.cssText="padding:12px;border-radius:10px;border:0;font-weight:700";
+ apply.onclick=()=>{activeCategory=cat.value;currentSort=sort.value;document.querySelectorAll("#categories [data-category]").forEach(c=>c.classList.toggle("active",c.dataset.category===activeCategory));renderProducts();closeModal()};
+ wrap.append(catLabel,sortLabel,note,apply);content.append(wrap);document.getElementById("modal").classList.add("open");
+};
 document.getElementById("compareButton").onclick=()=>document.getElementById("query").focus();
 document.getElementById("seeAll").onclick=showAllProducts;
 document.getElementById("cartBtn").onclick=showCart;
