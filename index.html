@@ -448,7 +448,7 @@ function showCart(){
    item.append(remove);content.append(item);
   });
   const checkout=document.createElement("button");checkout.className="modal-primary";checkout.style.marginTop="12px";checkout.style.width="100%";checkout.textContent="Valider sur Amazon";
-  checkout.onclick=()=>{const queries=items.map(p=>p.query).join(" OR ");window.open(amazonSearchUrl(queries),"_blank")};
+  checkout.onclick=()=>{const queries=items.map(p=>p.query).join(" OR ");window.open(amazonSearchUrl(queries),"_blank","noopener,noreferrer")};
   content.append(checkout);
  }
  document.getElementById("modalTitle").textContent="Panier";
