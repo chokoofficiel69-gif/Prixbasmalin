@@ -47,7 +47,7 @@ main{max-width:860px;margin:0 auto}
 .section-head h2{font-family:Outfit,Inter,sans-serif;font-size:16px;letter-spacing:-.3px;margin:0;font-weight:800}
 .text-link{border:0;background:transparent;color:var(--orange);font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer}
 .products{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
-.product{min-width:160px;max-width:170px;flex-shrink:0;border:1px solid #eee;border-radius:14px;padding:12px 10px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;scroll-snap-align:start}
+.product{min-width:160px;max-width:170px;flex-shrink:0;border:1px solid #eee;border-radius:14px;padding:12px 10px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;scroll-snap-align:start;cursor:pointer}
 .product-image{width:100%;height:90px;display:grid;place-items:center;margin-bottom:6px;background:#f8f8f8;border-radius:8px;overflow:hidden}
 .product-image img{width:100%;height:100%;object-fit:contain}
 .product h3{font-size:13px;line-height:1.2;font-weight:600;margin:0 0 3px}
@@ -85,6 +85,7 @@ main{max-width:860px;margin:0 auto}
 .cart-item-info{flex:1}
 .cart-item-name{font-size:13px;font-weight:600}
 .cart-item-price{font-size:13px;color:var(--orange);font-weight:700}
+.detail-img{width:100%;max-height:220px;object-fit:contain;border-radius:10px;background:#f8f8f8;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -152,20 +153,25 @@ const synonyms={
  "baskets":["chaussure","chaussures","sneakers","basket"]
 };
 const productData=[
- {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim, coupe slim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
- {id:"jeans2",name:"Pantalon jeans",desc:"Vêtement casual, confort",category:"fashion",query:"pantalon jeans",image:"https://images.unsplash.com/photo-1582418702059-97ebafb35d09?w=300&h=300&fit=crop",merchant:"Amazon",price:"29,99€",old:"49,99€",save:"-20€"},
- {id:"sneakers1",name:"Baskets blanches",desc:"Meilleur prix du moment",category:"fashion",query:"baskets chaussures blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop",merchant:"Amazon",price:"39,99€",old:"69,99€",save:"-30€"},
- {id:"sneakers2",name:"Chaussures sport",desc:"Moins cher que chez les concurrents",category:"sport",query:"chaussures baskets sport",image:"https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop",merchant:"Amazon",price:"34,99€",old:"59,99€",save:"-25€"},
- {id:"sneakers3",name:"Baskets Nike",desc:"Vertes à petit prix",category:"fashion",query:"baskets nike",image:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=300&h=300&fit=crop",merchant:"Amazon",price:"27,99€",old:"49,99€",save:"-22€"},
- {id:"watch",name:"Montre connectée",desc:"Fitness, 7 jours",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",merchant:"Amazon",price:"39,99€",old:"79,99€",save:"-40€"},
- {id:"earbuds",name:"Écouteurs",desc:"Bluetooth anti-bruit",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99€",old:"49,99€",save:"-25€"},
- {id:"backpack",name:"Sac à dos",desc:"20L, poche PC",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99€",old:"34,99€",save:"-15€"},
- {id:"sofa",name:"Canapé",desc:"2 places, tissu",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop",merchant:"Amazon",price:"179€",old:"299€",save:"-120€"},
- {id:"gardenchair",name:"Fauteuil jardin",desc:"Résine, résistant",category:"garden",query:"fauteuil jardin",image:"https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=300&h=300&fit=crop",merchant:"Amazon",price:"69,99€",old:"119,99€",save:"-50€"},
- {id:"plants",name:"Plantes d'intérieur",desc:"Set 3 plantes",category:"garden",query:"plantes intérieur",image:"https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
- {id:"baby",name:"Accessoires bébé",desc:"Set biberons",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop",merchant:"Amazon",price:"14,99€",old:"29,99€",save:"-15€"},
- {id:"serum",name:"Sérum visage",desc:"Hydratant, anti-âge",category:"beauty",query:"sérum visage",image:"https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop",merchant:"Amazon",price:"17,99€",old:"34,99€",save:"-17€"},
- {id:"yoga",name:"Tapis yoga",desc:"Antidérapant, 6mm",category:"sport",query:"tapis yoga",image:"https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99€",old:"34,99€",save:"-15€"}
+ {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim, coupe slim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
+ {id:"jeans2",name:"Pantalon jeans",desc:"Vêtement casual, confort",category:"fashion",query:"pantalon jeans",image:"https://images.unsplash.com/photo-1582418702059-97ebafb35d09?w=400&h=400&fit=crop",merchant:"Amazon",price:"29,99€",old:"49,99€",save:"-20€"},
+ {id:"jeans3",name:"Jeans femme",desc:"Coupe droite, denim",category:"fashion",query:"jeans femme pantalon",image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop",merchant:"Amazon",price:"27,99€",old:"44,99€",save:"-17€"},
+ {id:"tshirt1",name:"T-shirt basique",desc:"Coton, plusieurs couleurs",category:"fashion",query:"t-shirt homme",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"9,99€",old:"19,99€",save:"-10€"},
+ {id:"sneakers1",name:"Baskets blanches",desc:"Meilleur prix du moment",category:"fashion",query:"baskets chaussures blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",merchant:"Amazon",price:"39,99€",old:"69,99€",save:"-30€"},
+ {id:"sneakers2",name:"Chaussures sport",desc:"Moins cher que chez les concurrents",category:"sport",query:"chaussures baskets sport",image:"https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop",merchant:"Amazon",price:"34,99€",old:"59,99€",save:"-25€"},
+ {id:"sneakers3",name:"Baskets Nike",desc:"Vertes à petit prix",category:"fashion",query:"baskets nike",image:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop",merchant:"Amazon",price:"27,99€",old:"49,99€",save:"-22€"},
+ {id:"sneakers4",name:"Baskets running",desc:"Légères et confort",category:"sport",query:"baskets running",image:"https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop",merchant:"Amazon",price:"32,99€",old:"54,99€",save:"-22€"},
+ {id:"watch",name:"Montre connectée",desc:"Fitness, 7 jours",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",merchant:"Amazon",price:"39,99€",old:"79,99€",save:"-40€"},
+ {id:"earbuds",name:"Écouteurs",desc:"Bluetooth anti-bruit",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=400&h=400&fit=crop",merchant:"Amazon",price:"24,99€",old:"49,99€",save:"-25€"},
+ {id:"backpack",name:"Sac à dos",desc:"20L, poche PC",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",merchant:"Amazon",price:"19,99€",old:"34,99€",save:"-15€"},
+ {id:"sofa",name:"Canapé",desc:"2 places, tissu",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop",merchant:"Amazon",price:"179€",old:"299€",save:"-120€"},
+ {id:"gardenchair",name:"Fauteuil jardin",desc:"Résine, résistant",category:"garden",query:"fauteuil jardin",image:"https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400&h=400&fit=crop",merchant:"Amazon",price:"69,99€",old:"119,99€",save:"-50€"},
+ {id:"plants",name:"Plantes d'intérieur",desc:"Set 3 plantes",category:"garden",query:"plantes intérieur",image:"https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
+ {id:"baby",name:"Accessoires bébé",desc:"Set biberons",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=400&h=400&fit=crop",merchant:"Amazon",price:"14,99€",old:"29,99€",save:"-15€"},
+ {id:"serum",name:"Sérum visage",desc:"Hydratant, anti-âge",category:"beauty",query:"sérum visage",image:"https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop",merchant:"Amazon",price:"17,99€",old:"34,99€",save:"-17€"},
+ {id:"yoga",name:"Tapis yoga",desc:"Antidérapant, 6mm",category:"sport",query:"tapis yoga",image:"https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=400&fit=crop",merchant:"Amazon",price:"19,99€",old:"34,99€",save:"-15€"},
+ {id:"hoodie",name:"Sweat à capuche",desc:"Confort, plusieurs tailles",category:"fashion",query:"sweat capuche",image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop",merchant:"Amazon",price:"22,99€",old:"39,99€",save:"-17€"},
+ {id:"lamp",name:"Lampe de chevet",desc:"LED, design moderne",category:"home",query:"lampe chevet",image:"https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&h=400&fit=crop",merchant:"Amazon",price:"18,99€",old:"34,99€",save:"-16€"}
 ];
 let activeCategory="all",showingFavorites=false;
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
@@ -174,21 +180,32 @@ function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringif
 function saveCart(){localStorage.setItem("prixMalinCart",JSON.stringify(cart));updateCartCount()}
 function updateCartCount(){document.getElementById("cartCount").textContent=cart.length}
 function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag="+AFFILIATE_TAG}
+function showProductDetail(p){
+ const content=`<img class="detail-img" src="${p.image}" alt="${p.name}"><h3 style="margin:0 0 6px">${p.name}</h3><p style="margin:0 0 8px;color:#666">${p.desc}</p><div class="price" style="font-size:18px">${p.price}</div><div class="old-price">${p.old}</div><div class="saving">${p.save}</div><p style="margin-top:10px;font-size:13px">Meilleur prix du moment sur Amazon.</p>`;
+ document.getElementById("modalTitle").textContent=p.name;
+ document.getElementById("modalContent").innerHTML=content;
+ const actions=document.createElement("div");actions.className="modal-actions";
+ const add=document.createElement("button");add.className="modal-primary";add.textContent="Ajouter au panier";add.onclick=()=>{if(!cart.includes(p.id)){cart.push(p.id);saveCart();closeModal();renderProducts()}};
+ const amazon=document.createElement("a");amazon.href=merchantUrl(p);amazon.target="_blank";amazon.rel="sponsored noopener";amazon.className="modal-secondary";amazon.style.textDecoration="none";amazon.style.display="inline-flex";amazon.style.alignItems="center";amazon.textContent="Voir sur Amazon";
+ actions.append(add,amazon);document.getElementById("modalContent").append(actions);
+ document.getElementById("modal").classList.add("open");
+}
 function productCard(p){
  const isFav=favorites.includes(p.id);
  const inCart=cart.includes(p.id);
  const card=document.createElement("article");card.className="product";
  const imgWrap=document.createElement("div");imgWrap.className="product-image";
  const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:32px'>🛍️</span>"};imgWrap.append(img);
- const title=document.createElement("h3");title.textContent=p.name;
+ imgWrap.onclick=()=>showProductDetail(p);
+ const title=document.createElement("h3");title.textContent=p.name;title.onclick=()=>showProductDetail(p);
  const desc=document.createElement("div");desc.className="desc";desc.textContent=p.desc;
  const price=document.createElement("div");price.className="price";price.textContent=p.price;
  const old=document.createElement("div");old.className="old-price";old.textContent=p.old;
  const saving=document.createElement("div");saving.className="saving";saving.textContent=p.save;
  const merchant=document.createElement("div");merchant.className="merchant";merchant.textContent=p.merchant;
  const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px";
- const addCart=document.createElement("button");addCart.className="product-action";addCart.textContent=inCart?"Ajouté":"Ajouter";addCart.onclick=()=>{if(!cart.includes(p.id)){cart.push(p.id);saveCart();renderProducts()}};
- const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=()=>{favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
+ const addCart=document.createElement("button");addCart.className="product-action";addCart.textContent=inCart?"Ajouté":"Ajouter";addCart.onclick=e=>{e.stopPropagation();if(!cart.includes(p.id)){cart.push(p.id);saveCart();renderProducts()}};
+ const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=e=>{e.stopPropagation();favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
  actions.append(addCart,fav);card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
 }
 function matchesSearch(p,q){
@@ -212,7 +229,7 @@ function renderProducts(){
  if(q)list=list.filter(p=>matchesSearch(p,q));
  if(showingFavorites)list=list.filter(p=>favorites.includes(p.id));
  if(!list.length){el.innerHTML='<div class="empty">Aucun produit trouvé. Essaie pantalon, jeans, baskets, jardin...</div>';return}
- list.slice(0,8).forEach(p=>el.append(productCard(p)));
+ list.slice(0,12).forEach(p=>el.append(productCard(p)));
 }
 function showCart(){
  const items=cart.map(id=>productData.find(p=>p.id===id)).filter(Boolean);
