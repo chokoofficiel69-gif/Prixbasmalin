@@ -1,0 +1,53 @@
+name: Validate offer feed
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - strategie/partenaires-api-gratuits
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate normalized offer feed
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          path = Path("data/offres-exemple.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          assert isinstance(data, dict), "feed must be a JSON object"
+          assert data.get("schema_version") == 1, "schema_version must equal 1"
+          assert isinstance(data.get("offers"), list), "offers must be an array"
+          if data.get("generated_at") is not None:
+              dt = datetime.fromisoformat(data["generated_at"].replace("Z", "+00:00"))
+              assert dt.tzinfo is not None, "generated_at must include timezone"
+              assert dt <= datetime.now(timezone.utc), "generated_at cannot be in future"
+          for index, offer in enumerate(data["offers"]):
+              prefix = f"offer #{index + 1}"
+              for key in ("offer_id", "product_name", "merchant_name", "product_url", "source", "price", "currency", "condition", "last_updated"):
+                  assert key in offer, f"{prefix}: missing {key}"
+              assert isinstance(offer["price"], (int, float)) and not isinstance(offer["price"], bool) and offer["price"] >= 0, f"{prefix}: invalid price"
+              assert offer["currency"] == "EUR", f"{prefix}: currency must be EUR"
+              assert urlparse(offer["product_url"]).scheme == "https" and urlparse(offer["product_url"]).netloc, f"{prefix}: product_url must be HTTPS"
+              if offer.get("tracking_url") is not None:
+                  u = urlparse(offer["tracking_url"])
+                  assert u.scheme == "https" and u.netloc, f"{prefix}: tracking_url must be HTTPS"
+              if offer.get("shipping_price") is not None:
+                  assert isinstance(offer["shipping_price"], (int, float)) and not isinstance(offer["shipping_price"], bool) and offer["shipping_price"] >= 0, f"{prefix}: invalid shipping_price"
+              if offer.get("total_price") is not None:
+                  assert isinstance(offer["total_price"], (int, float)) and not isinstance(offer["total_price"], bool) and offer["total_price"] >= 0, f"{prefix}: invalid total_price"
+              assert offer["condition"] in ("new", "used", "refurbished", "unknown"), f"{prefix}: invalid condition"
+              datetime.fromisoformat(offer["last_updated"].replace("Z", "+00:00"))
+          print(f"Feed valide : {len(data['offers'])} offre(s). Aucun prix de démonstration n'est injecté.")
+          PY
