@@ -28,6 +28,14 @@ footer{max-width:1160px;margin:0 auto;padding:0 16px 32px;font-size:11px;color:v
 @media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){main{padding:14px 12px 36px}.grid{grid-template-columns:1fr}.hero{border-radius:17px;padding:20px}.search button{padding:0 13px;font-size:13px}.section-head{display:block}.section-head p{margin-top:4px}.category{padding:15px}.back{font-size:12px}}
 </style>
+<style>
+.offer-group{margin:12px 0;padding:12px;border:1px solid #eee;border-radius:12px}
+.offer-group h3{margin:0 0 8px;font-size:15px}
+.offer-list{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.offer-list li{display:grid;grid-template-columns:1fr auto;gap:5px 12px;padding:10px 0;border-top:1px solid #f0f0f0;font-size:13px}
+.offer-list li small{grid-column:1/-1;color:#777;font-size:11px}
+.offer-list li a{grid-column:1/-1;color:#e7470d;font-weight:700}
+</style>
 </head>
 <body>
 <header><a class="logo" href="index.html" aria-label="Accueil Prix Malin">PM</a><a class="brand" href="index.html">Prix <span>Malin</span></a><a class="back" href="index.html">← Accueil</a></header>
@@ -113,11 +121,18 @@ footer{max-width:1160px;margin:0 auto;padding:0 16px 32px;font-size:11px;color:v
 </section>
 
 <section class="compare"><h2>Astuce : compare aussi les alternatives</h2><p>Pour éviter de choisir uniquement une marque connue, ouvre plusieurs recherches : une marque premium, une marque concurrente et une requête budget. Vérifie ensuite les caractéristiques équivalentes, les avis récents, les frais de livraison et les conditions de retour.</p><div class="compare-links"><a href="https://www.amazon.fr/s?k=produit+alternative+moins+cher&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">🔎 Alternatives moins chères</a><a href="https://www.amazon.fr/s?k=produit+meilleur+rapport+qualit%C3%A9+prix&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">⚖️ Rapport qualité-prix</a><a href="https://www.amazon.fr/s?k=produit+reconditionn%C3%A9&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">♻️ Reconditionné</a></div></section>
+
+<section class="section" id="live-price-comparison" style="margin:18px 14px;padding:16px;border:1px solid #eee;border-radius:14px;background:#fff">
+  <div class="section-head"><h2>Comparaison des offres vérifiées</h2></div>
+  <p class="notice" style="font-size:12px">Cette zone affichera des offres réelles datées lorsque Prix Malin disposera d’un flux autorisé. Aucun prix fictif n’est affiché.</p>
+  <div data-price-offers aria-live="polite">Comparaison automatique en préparation : aucun flux de prix vérifié n’est connecté.</div>
+</section>
 </main>
 <footer>Prix Malin participe au programme Partenaires Amazon EU. En tant que Partenaire Amazon, le site peut percevoir une rémunération sur les achats éligibles. Les liens ouvrent des recherches Amazon ; le site ne prétend pas afficher des prix en direct ni comparer automatiquement tous les vendeurs. Vérifie toujours le produit exact, le vendeur, le prix final, les frais de livraison et les conditions de retour avant l’achat.</footer>
 <script>
 const form=document.getElementById("searchForm"),input=document.getElementById("query");
 form.addEventListener("submit",function(event){event.preventDefault();const q=input.value.trim();if(!q)return;const url="https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag=prixbasmalin2-21";window.open(url,"_blank","noopener");});
 </script>
+<script src="js/offres.js" defer></script>
 </body>
 </html>
