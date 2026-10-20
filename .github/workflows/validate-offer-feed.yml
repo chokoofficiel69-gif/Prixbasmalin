@@ -20,6 +20,7 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import math
           from datetime import datetime, timezone
           from pathlib import Path
           from urllib.parse import urlparse
@@ -29,25 +30,47 @@ jobs:
           assert isinstance(data, dict), "feed must be a JSON object"
           assert data.get("schema_version") == 1, "schema_version must equal 1"
           assert isinstance(data.get("offers"), list), "offers must be an array"
+
+          def parse_date(value, label):
+              assert isinstance(value, str) and value, f"{label} must be a non-empty date string"
+              parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+              assert parsed.tzinfo is not None, f"{label} must include timezone"
+              return parsed
+
           if data.get("generated_at") is not None:
-              dt = datetime.fromisoformat(data["generated_at"].replace("Z", "+00:00"))
-              assert dt.tzinfo is not None, "generated_at must include timezone"
-              assert dt <= datetime.now(timezone.utc), "generated_at cannot be in future"
+              generated_at = parse_date(data["generated_at"], "generated_at")
+              assert generated_at <= datetime.now(timezone.utc), "generated_at cannot be in future"
+
+          offer_ids = set()
           for index, offer in enumerate(data["offers"]):
               prefix = f"offer #{index + 1}"
+              assert isinstance(offer, dict), f"{prefix} must be an object"
               for key in ("offer_id", "product_name", "merchant_name", "product_url", "source", "price", "currency", "condition", "last_updated"):
                   assert key in offer, f"{prefix}: missing {key}"
-              assert isinstance(offer["price"], (int, float)) and not isinstance(offer["price"], bool) and offer["price"] >= 0, f"{prefix}: invalid price"
+              assert isinstance(offer["offer_id"], str) and offer["offer_id"].strip(), f"{prefix}: invalid offer_id"
+              assert offer["offer_id"] not in offer_ids, f"{prefix}: duplicate offer_id"
+              offer_ids.add(offer["offer_id"])
+              for key in ("product_name", "merchant_name", "source"):
+                  assert isinstance(offer[key], str) and offer[key].strip(), f"{prefix}: invalid {key}"
+              for key in ("price", "shipping_price", "total_price"):
+                  value = offer.get(key)
+                  if value is not None:
+                      assert isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and value >= 0, f"{prefix}: invalid {key}"
               assert offer["currency"] == "EUR", f"{prefix}: currency must be EUR"
-              assert urlparse(offer["product_url"]).scheme == "https" and urlparse(offer["product_url"]).netloc, f"{prefix}: product_url must be HTTPS"
+              product_url = urlparse(offer["product_url"])
+              assert product_url.scheme == "https" and product_url.netloc, f"{prefix}: product_url must be HTTPS"
               if offer.get("tracking_url") is not None:
-                  u = urlparse(offer["tracking_url"])
-                  assert u.scheme == "https" and u.netloc, f"{prefix}: tracking_url must be HTTPS"
-              if offer.get("shipping_price") is not None:
-                  assert isinstance(offer["shipping_price"], (int, float)) and not isinstance(offer["shipping_price"], bool) and offer["shipping_price"] >= 0, f"{prefix}: invalid shipping_price"
-              if offer.get("total_price") is not None:
-                  assert isinstance(offer["total_price"], (int, float)) and not isinstance(offer["total_price"], bool) and offer["total_price"] >= 0, f"{prefix}: invalid total_price"
+                  tracking_url = urlparse(offer["tracking_url"])
+                  assert tracking_url.scheme == "https" and tracking_url.netloc, f"{prefix}: tracking_url must be HTTPS"
+              if offer.get("shipping_price") is None:
+                  assert offer.get("total_price") is None, f"{prefix}: total_price must be null when shipping is unknown"
+              elif offer.get("total_price") is not None:
+                  assert math.isclose(offer["total_price"], offer["price"] + offer["shipping_price"], abs_tol=0.02), f"{prefix}: total_price does not match price + shipping_price"
               assert offer["condition"] in ("new", "used", "refurbished", "unknown"), f"{prefix}: invalid condition"
-              datetime.fromisoformat(offer["last_updated"].replace("Z", "+00:00"))
+              if "availability" in offer:
+                  assert offer["availability"] in ("in_stock", "out_of_stock", "unknown"), f"{prefix}: invalid availability"
+              last_updated = parse_date(offer["last_updated"], f"{prefix}.last_updated")
+              if data.get("generated_at") is not None:
+                  assert last_updated <= generated_at, f"{prefix}: last_updated is after generated_at"
           print(f"Feed valide : {len(data['offers'])} offre(s). Aucun prix de démonstration n'est injecté.")
           PY
