@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "generated_at": null,
+  "offers": [],
+  "notes": [
+    "Ce fichier est un modèle vide, pas un flux de prix réel.",
+    "Ajouter uniquement des offres récupérées auprès d'une source autorisée.",
+    "Ne jamais publier de clé API, mot de passe ou URL de flux privée.",
+    "price et shipping_price sont des nombres en euros; shipping_price peut être null si inconnu.",
+    "product_group_id doit identifier un modèle précis; ne pas mélanger les variantes."
+  ]
+}
