@@ -20,7 +20,8 @@ header{height:64px;padding:8px 14px;display:flex;align-items:center;justify-cont
 .brand-name{font-family:Outfit,Inter,sans-serif;font-weight:800;font-size:18px;letter-spacing:-.5px;line-height:1.1;white-space:nowrap}
 .brand-name span{color:var(--orange)}
 .tagline{font-size:10px;color:#999;margin-top:1px}
-.icon-button{border:0;background:transparent;width:36px;height:36px;border-radius:50%;font-size:18px;display:grid;place-items:center}
+.icon-button{border:0;background:transparent;width:36px;height:36px;border-radius:50%;font-size:18px;display:grid;place-items:center;position:relative}
+.cart-count{position:absolute;top:2px;right:2px;background:var(--orange);color:#fff;font-size:10px;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-weight:700}
 main{max-width:860px;margin:0 auto}
 .search-row{padding:8px 14px 6px;display:flex;gap:8px}
 .search{height:42px;display:flex;flex:1;min-width:0;background:#f5f5f5;border-radius:12px;overflow:hidden}
@@ -79,6 +80,11 @@ main{max-width:860px;margin:0 auto}
 .notice{font-size:10px;color:#999;line-height:1.3;margin-top:8px}
 .empty{padding:30px 10px;text-align:center;color:#777;border:1px dashed #ddd;border-radius:12px;min-width:100%;font-size:13px}
 .all-products{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:10px}
+.cart-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee}
+.cart-item img{width:50px;height:50px;object-fit:contain;border-radius:6px;background:#f8f8f8}
+.cart-item-info{flex:1}
+.cart-item-name{font-size:13px;font-weight:600}
+.cart-item-price{font-size:13px;color:var(--orange);font-weight:700}
 </style>
 </head>
 <body>
@@ -87,7 +93,7 @@ main{max-width:860px;margin:0 auto}
     <span class="logo">%</span>
     <span><span class="brand-name">Prix <span>Malin</span></span><span class="tagline" style="display:block">Comparez. Économisez. Malin.</span></span>
   </a>
-  <button class="icon-button" id="bell" aria-label="Notifications">🔔</button>
+  <button class="icon-button" id="cartBtn" aria-label="Panier">🛒<span class="cart-count" id="cartCount">0</span></button>
 </header>
 <main>
   <div class="search-row">
@@ -163,10 +169,14 @@ const productData=[
 ];
 let activeCategory="all",showingFavorites=false;
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
+let cart=JSON.parse(localStorage.getItem("prixMalinCart")||"[]");
 function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringify(favorites))}
+function saveCart(){localStorage.setItem("prixMalinCart",JSON.stringify(cart));updateCartCount()}
+function updateCartCount(){document.getElementById("cartCount").textContent=cart.length}
 function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag="+AFFILIATE_TAG}
 function productCard(p){
  const isFav=favorites.includes(p.id);
+ const inCart=cart.includes(p.id);
  const card=document.createElement("article");card.className="product";
  const imgWrap=document.createElement("div");imgWrap.className="product-image";
  const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:32px'>🛍️</span>"};imgWrap.append(img);
@@ -177,9 +187,9 @@ function productCard(p){
  const saving=document.createElement("div");saving.className="saving";saving.textContent=p.save;
  const merchant=document.createElement("div");merchant.className="merchant";merchant.textContent=p.merchant;
  const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px";
- const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Voir sur Amazon";
+ const addCart=document.createElement("button");addCart.className="product-action";addCart.textContent=inCart?"Ajouté":"Ajouter";addCart.onclick=()=>{if(!cart.includes(p.id)){cart.push(p.id);saveCart();renderProducts()}};
  const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=()=>{favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
- actions.append(buy,fav);card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
+ actions.append(addCart,fav);card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
 }
 function matchesSearch(p,q){
  const text=(p.name+" "+p.query+" "+p.desc+" "+p.category).toLowerCase();
@@ -204,6 +214,26 @@ function renderProducts(){
  if(!list.length){el.innerHTML='<div class="empty">Aucun produit trouvé. Essaie pantalon, jeans, baskets, jardin...</div>';return}
  list.slice(0,8).forEach(p=>el.append(productCard(p)));
 }
+function showCart(){
+ const items=cart.map(id=>productData.find(p=>p.id===id)).filter(Boolean);
+ const content=document.createElement("div");
+ if(!items.length){content.innerHTML='<p>Votre panier est vide.</p>';}
+ else{
+  items.forEach(p=>{
+   const item=document.createElement("div");item.className="cart-item";
+   item.innerHTML=`<img src="${p.image}" alt=""><div class="cart-item-info"><div class="cart-item-name">${p.name}</div><div class="cart-item-price">${p.price}</div></div>`;
+   const remove=document.createElement("button");remove.className="product-action";remove.textContent="Retirer";remove.onclick=()=>{cart=cart.filter(id=>id!==p.id);saveCart();showCart()};
+   item.append(remove);content.append(item);
+  });
+  const checkout=document.createElement("button");checkout.className="modal-primary";checkout.style.marginTop="12px";checkout.style.width="100%";checkout.textContent="Valider sur Amazon";
+  checkout.onclick=()=>{const queries=items.map(p=>p.query).join(" OR ");window.open("https://www.amazon.fr/s?k="+encodeURIComponent(queries)+"&tag="+AFFILIATE_TAG,"_blank")};
+  content.append(checkout);
+ }
+ document.getElementById("modalTitle").textContent="Panier";
+ document.getElementById("modalContent").innerHTML="";
+ document.getElementById("modalContent").append(content);
+ document.getElementById("modal").classList.add("open");
+}
 function showAllProducts(){
  const content=document.createElement("div");
  content.className="all-products";
@@ -221,13 +251,14 @@ document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[d
 document.getElementById("filterButton").onclick=()=>openModal("Filtres","Utilise les catégories ou la recherche.");
 document.getElementById("compareButton").onclick=()=>document.getElementById("query").focus();
 document.getElementById("seeAll").onclick=showAllProducts;
-document.getElementById("bell").onclick=()=>openModal("Notifications","Aucune notification.");
+document.getElementById("cartBtn").onclick=showCart;
 document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Nous cherchons toujours les meilleurs prix pour toi."));
 document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){openModal("Bons plans","Les meilleurs prix du moment sont déjà affichés.")}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts()}else if(action==="account"){openModal("Compte","Pas de compte nécessaire.")}};
 document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})};
 document.getElementById("agentButton").onclick=()=>openModal("Assistant","Dis-moi ce que tu cherches (pantalon, jeans, baskets, jardin...) pour voir les meilleurs prix.");
 document.getElementById("modalClose").onclick=closeModal;
 document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
+updateCartCount();
 renderProducts();
 </script>
 </body>
