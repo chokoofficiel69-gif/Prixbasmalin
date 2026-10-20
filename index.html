@@ -335,6 +335,7 @@ function showCart(){
  document.getElementById("modal").classList.add("open");
 }
 function showAllProducts(page=1){
+ if(typeof page!=="number" || !Number.isFinite(page)) page=1;
  const pageSize=12;
  const content=document.createElement("div");
  content.className="all-products";
