@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prixbasmalin.fr/schemas/offer.schema.json",
+  "title": "Prix Malin — Merchant Offer",
+  "description": "Normalized offer record for a product listing obtained from an authorized source. This schema does not itself provide or verify live prices.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "offer_id",
+    "product_name",
+    "merchant_name",
+    "product_url",
+    "source",
+    "price",
+    "currency",
+    "condition",
+    "last_updated"
+  ],
+  "properties": {
+    "offer_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable identifier from the authorized source, or a locally generated stable ID."
+    },
+    "product_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "brand": {
+      "type": ["string", "null"]
+    },
+    "model": {
+      "type": ["string", "null"]
+    },
+    "gtin": {
+      "type": ["string", "null"],
+      "description": "EAN/GTIN when supplied by the source; preserve as text."
+    },
+    "merchant_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "product_url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "tracking_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "Authorized affiliate URL, only when the relevant program has approved the publisher."
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the authorized API, feed, or merchant agreement."
+    },
+    "price": {
+      "type": "number",
+      "minimum": 0
+    },
+    "shipping_price": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Null when shipping cost is unknown."
+    },
+    "total_price": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Only set when product price and all mandatory shipping costs are known."
+    },
+    "currency": {
+      "type": "string",
+      "const": "EUR"
+    },
+    "condition": {
+      "type": "string",
+      "enum": ["new", "used", "refurbished", "unknown"]
+    },
+    "availability": {
+      "type": "string",
+      "enum": ["in_stock", "out_of_stock", "unknown"],
+      "default": "unknown"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when this offer was last checked or the source says it was updated."
+    },
+    "expires_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  }
+}
