@@ -116,10 +116,15 @@ main{max-width:860px;margin:0 auto}
     <button class="category" data-category="beauty"><span class="category-icon">💄</span><span>Beauté</span></button>
     <button class="category" data-category="baby"><span class="category-icon">👶</span><span>Bébé</span></button>
   </div>
+  <a href="catalogue.html" aria-label="Explorer le grand catalogue de produits" style="display:flex;align-items:center;gap:12px;margin:0 14px 14px;padding:13px 14px;border:1px solid #ffd5c2;border-radius:13px;background:#fff8f4;color:#191919">
+    <span style="font-size:25px">🧭</span>
+    <span style="flex:1;min-width:0"><strong style="display:block;font-size:13px">Explorer tout le catalogue</strong><span style="display:block;font-size:11px;color:#777;line-height:1.4;margin-top:3px">Mode, marques concurrentes, high-tech, maison, sport et bien plus</span></span>
+    <span style="color:#ff5a1f;font-weight:800">→</span>
+  </a>
   <section class="banner" aria-label="Comparer les prix">
     <div class="banner-copy">
-      <h1>Trouvez le meilleur prix à chaque fois.</h1>
-      <p>Comparez les prix et économisez sur vos achats.</p>
+      <h1>Explorez, comparez et choisissez malin.</h1>
+      <p>Découvrez des produits et comparez les options disponibles chez le vendeur.</p>
       <a class="primary-link" href="#popular" id="compareButton">Comparer →</a>
     </div>
     <div class="discount-art" aria-hidden="true"><div class="discount-tag"><span>%</span></div></div>
@@ -127,11 +132,11 @@ main{max-width:860px;margin:0 auto}
   <section class="section" id="popular">
     <div class="section-head"><h2>Produits populaires</h2><button class="text-link" id="seeAll">Voir tout ›</button></div>
     <div class="products" id="products" aria-live="polite"></div>
-    <p class="notice">Meilleurs prix du moment. À confirmer sur Amazon. Prix Malin peut percevoir une commission.</p>
+    <p class="notice">Prix affichés à titre indicatif et non vérifiés en direct : confirmez le prix actuel sur Amazon. Prix Malin peut percevoir une commission.</p>
   </section>
   <section class="trust" aria-label="Nos engagements">
     <button class="trust-card" data-info="merchants"><div class="trust-icon">🛡️</div><h3>Marchands</h3><p>Liens affiliés</p></button>
-    <button class="trust-card" data-info="prices"><div class="trust-icon">🏷️</div><h3>Meilleurs prix</h3><p>Toujours moins cher</p></button>
+    <button class="trust-card" data-info="prices"><div class="trust-icon">🏷️</div><h3>Comparer</h3><p>Vérifier le prix final</p></button>
     <button class="trust-card" data-info="smart"><div class="trust-icon">⭐</div><h3>Achats malins</h3><p>Gratuit</p></button>
   </section>
 </main>
@@ -158,14 +163,14 @@ const synonyms={
  "vetement":["pantalon","jeans","mode","vêtement","robe","tshirt","t-shirt","survêtement"]
 };
 const productData=[
- {id:"t1",name:"T-shirt blanc",desc:"Coton basique",category:"fashion",query:"t-shirt blanc",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"8,99€",old:"16,99€",save:"-8€"},
- {id:"t2",name:"T-shirt noir",desc:"Coupe classique",category:"fashion",query:"t-shirt noir",image:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=400&fit=crop",merchant:"Amazon",price:"9,99€",old:"18,99€",save:"-9€"},
- {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
- {id:"jeans2",name:"Jeans femme",desc:"Coupe droite",category:"fashion",query:"jeans femme",image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop",merchant:"Amazon",price:"27,99€",old:"44,99€",save:"-17€"},
- {id:"sweat1",name:"Survêtement",desc:"Ensemble jogging",category:"fashion",query:"survêtement jogging",image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop",merchant:"Amazon",price:"34,99€",old:"59,99€",save:"-25€"},
- {id:"polo1",name:"Polo Lacoste style",desc:"Polo classique",category:"fashion",query:"polo lacoste",image:"https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=400&h=400&fit=crop",merchant:"Amazon",price:"29,99€",old:"49,99€",save:"-20€"},
- {id:"sneakers1",name:"Baskets blanches",desc:"Running",category:"fashion",query:"baskets blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",merchant:"Amazon",price:"39,99€",old:"69,99€",save:"-30€"},
- {id:"watch",name:"Montre connectée",desc:"Fitness",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",merchant:"Amazon",price:"39,99€",old:"79,99€",save:"-40€"}
+ {id:"t1",name:"T-shirt blanc",desc:"Coton basique",category:"fashion",query:"t-shirt blanc",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"t2",name:"T-shirt noir",desc:"Coupe classique",category:"fashion",query:"t-shirt noir",image:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"jeans2",name:"Jeans femme",desc:"Coupe droite",category:"fashion",query:"jeans femme",image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"sweat1",name:"Survêtement",desc:"Ensemble jogging",category:"fashion",query:"survêtement jogging",image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"polo1",name:"Polo Lacoste style",desc:"Polo classique",category:"fashion",query:"polo lacoste",image:"https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"sneakers1",name:"Baskets blanches",desc:"Running",category:"fashion",query:"baskets blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"watch",name:"Montre connectée",desc:"Fitness",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""}
 ];
 let activeCategory="all",showingFavorites=false;
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
@@ -201,7 +206,7 @@ function showProductDetail(p){
  if(related.length){
   relatedHtml='<div style="margin-top:16px;font-weight:700">Autres '+p.name.split(" ")[0].toLowerCase()+'s</div><div class="related" id="related"></div>';
  }
- const content=`<img class="detail-img" src="${p.image}" alt="${p.name}"><h3 style="margin:0 0 6px">${p.name}</h3><p style="margin:0 0 8px;color:#666">${p.desc}</p><div class="price" style="font-size:18px">${p.price}</div><div class="old-price">${p.old}</div><div class="saving">${p.save}</div><p style="margin-top:10px;font-size:13px">Meilleur prix du moment.</p>${relatedHtml}`;
+ const content=`<img class="detail-img" src="${p.image}" alt="${p.name}"><h3 style="margin:0 0 6px">${p.name}</h3><p style="margin:0 0 8px;color:#666">${p.desc}</p><div class="price" style="font-size:18px">${p.price}</div><div class="old-price">${p.old}</div><div class="saving">${p.save}</div><p style="margin-top:10px;font-size:13px">Prix et disponibilité à confirmer sur Amazon.</p>${relatedHtml}`;
  document.getElementById("modalTitle").textContent=p.name;
  document.getElementById("modalContent").innerHTML=content;
  const actions=document.createElement("div");actions.className="modal-actions";
@@ -302,7 +307,7 @@ document.getElementById("filterButton").onclick=()=>openModal("Filtres","Utilise
 document.getElementById("compareButton").onclick=()=>document.getElementById("query").focus();
 document.getElementById("seeAll").onclick=showAllProducts;
 document.getElementById("cartBtn").onclick=showCart;
-document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Nous cherchons toujours les meilleurs prix."));
+document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Les prix, vendeurs et disponibilités doivent être vérifiés sur la page du vendeur."));
 document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){openModal("Bons plans","Les meilleurs prix sont affichés.")}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts()}else if(action==="account"){openModal("Compte","Pas de compte nécessaire.")}};
 document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})};
 document.getElementById("agentButton").onclick=()=>openModal("Assistant","Dis-moi ce que tu cherches.");
