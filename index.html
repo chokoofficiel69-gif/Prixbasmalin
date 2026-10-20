@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--orange:#ff5a1f;--ink:#191919;--muted:#777;--line:#ededed;--soft:#f6f6f6;--green:#239b50}
+:root{--orange:#ff5a1f;--orange-dark:#e7470d;--ink:#191919;--muted:#666;--line:#e9e9e9;--soft:#f7f7f8;--green:#167a3b;--surface:#fff;--shadow:0 8px 28px rgba(25,25,25,.06)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:#fff;color:var(--ink);font-family:Inter,system-ui,sans-serif;padding-bottom:92px}
@@ -101,6 +101,86 @@ body.high-contrast .product,body.high-contrast .trust-card,body.high-contrast .s
 body.large-text{font-size:120%}body.large-text .product h3,body.large-text .banner p,body.large-text .desc,body.large-text .notice{font-size:inherit}
 .access-panel{display:grid;gap:10px}.access-panel button{border:1px solid #ccc;background:#fff;border-radius:10px;padding:12px;text-align:left;font-weight:700;color:#111}
 .assistant-form{display:grid;gap:10px}.assistant-form input{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;font:inherit}.assistant-form button{padding:12px;border:0;border-radius:10px;background:var(--orange);color:#fff;font-weight:800}
+
+/* Finition responsive et confort d’utilisation */
+body{background:linear-gradient(180deg,#fff 0%,#fff 60%,#fafafa 100%);color:var(--ink);line-height:1.45}
+header{position:sticky;top:0;z-index:25;backdrop-filter:saturate(160%) blur(14px);background:rgba(255,255,255,.94);padding-left:max(14px,calc((100vw - 1120px)/2));padding-right:max(14px,calc((100vw - 1120px)/2))}
+main{max-width:1120px}
+.search-row{padding-top:14px}
+.search{border:1px solid #eee;transition:border-color .18s,box-shadow .18s}
+.search:focus-within{border-color:#ffb08f;box-shadow:0 0 0 4px #ff5a1f16}
+.search button{transition:background .18s}
+.search button:hover,.assistant-form button:hover{background:var(--orange-dark)}
+.filter-button{border:1px solid #eee;transition:background .18s,border-color .18s}
+.filter-button:hover{background:#fff0e9;border-color:#ffc7b2}
+.categories{gap:12px}
+.category{border-radius:14px;padding:4px 2px;transition:color .18s,transform .18s}
+.category:hover{color:var(--orange);transform:translateY(-1px)}
+.category-icon{box-shadow:0 2px 8px #00000006;transition:all .18s}
+.banner{box-shadow:0 10px 26px #ff5a1f20;padding:clamp(18px,3vw,28px);min-height:145px}
+.banner h1{font-size:clamp(20px,3vw,30px);max-width:640px}
+.banner p{font-size:clamp(12px,1.5vw,15px);max-width:610px}
+.discount-art{width:clamp(64px,12vw,100px)}
+.discount-tag{width:clamp(50px,7vw,68px);height:clamp(58px,8vw,78px)}
+.discount-tag span{font-size:clamp(24px,3vw,34px)}
+.section{padding-top:4px}
+.section-head{margin-bottom:12px}
+.section-head h2{font-size:clamp(17px,2vw,21px)}
+.product{box-shadow:0 2px 10px #00000004;transition:transform .18s,box-shadow .18s,border-color .18s}
+.product:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#ffd1c1}
+.product-image{background:linear-gradient(145deg,#fafafa,#f2f2f2)}
+.product-action{padding:7px 10px;border-radius:8px;background:#fff2ec}
+.product-action:hover{background:#ffe2d5}
+.trust-card{background:#fff;transition:transform .18s,box-shadow .18s}
+.trust-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.bottom-nav{box-shadow:0 -5px 24px #00000008;backdrop-filter:blur(14px);background:rgba(255,255,255,.97)}
+.agent-button,.accessibility-button{transition:transform .18s,box-shadow .18s}
+.agent-button:hover,.accessibility-button:hover{transform:translateY(-2px);box-shadow:0 6px 18px #00000020}
+.modal{padding:16px;align-items:center;justify-content:center}
+.modal-panel{max-width:560px;border-radius:20px;padding:22px;box-shadow:0 18px 60px #0003}
+.modal-panel h2{font-size:22px}
+.modal-panel p{font-size:14px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155eef!important;outline-offset:3px}
+@media(min-width:700px){
+ body{padding-bottom:32px}
+ header{height:76px}
+ .brand-name{font-size:22px}
+ .tagline{font-size:11px}
+ .search-row{padding:22px 24px 8px}
+ .categories{padding:12px 24px 20px;gap:16px}
+ .category{font-size:12px}
+ .category-icon{width:54px;height:54px;font-size:21px}
+ .banner{margin:4px 24px 24px;border-radius:22px}
+ .section{padding:0 24px 26px}
+ .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));overflow:visible;gap:14px}
+ .product{min-width:0;max-width:none;padding:14px}
+ .product-image{height:130px}
+ .product h3{font-size:14px}
+ .desc,.merchant{font-size:11px}
+ .price{font-size:17px}
+ .trust{padding:0 24px 28px;gap:14px}
+ .trust-card{padding:18px 10px}
+ .trust-card h3{font-size:13px}
+ .trust-card p{font-size:11px}
+ .bottom-nav{position:static;max-width:720px;margin:0 auto 24px;border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:none}
+ .bottom-nav button{font-size:12px}
+ .agent{right:24px;bottom:24px}
+ .accessibility-button{right:24px;bottom:84px}
+ .modal{align-items:center}
+}
+@media(max-width:360px){
+ .brand-name{font-size:16px}
+ .tagline{font-size:9px}
+ .banner{margin-left:10px;margin-right:10px;padding:13px}
+ .section{padding-left:10px;padding-right:10px}
+ .products{gap:8px}
+ .product{min-width:145px}
+ .accessibility-button{right:10px;bottom:132px}
+ .agent{right:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
 </style>
 </head>
 <body><a class="skip-link" href="#popular">Aller directement aux produits</a>
@@ -312,6 +392,9 @@ function matchesSearch(p,q){
  }
  return false;
 }
+function escapeHtml(value){
+ return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+}
 function renderProducts(){
  const el=document.getElementById("products");
  const banner=document.getElementById("amazonBanner");
@@ -326,7 +409,7 @@ function renderProducts(){
  if(currentSort==="az")list.sort((a,b)=>a.name.localeCompare(b.name,"fr"));
  if(currentSort==="za")list.sort((a,b)=>b.name.localeCompare(a.name,"fr"));
  if(q && list.length<3){
-  banner.innerHTML=`<div class="amazon-banner"><strong>Tous les produits « ${q} »</strong><br><a class="amazon-big" href="${amazonSearchUrl(q)}" target="_blank" rel="sponsored noopener">Voir tout sur Amazon</a></div>`;
+  banner.innerHTML=`<div class="amazon-banner"><strong>Tous les produits « ${escapeHtml(q)} »</strong><br><a class="amazon-big" href="${amazonSearchUrl(q)}" target="_blank" rel="sponsored noopener">Voir tout sur Amazon</a></div>`;
  }
  if(!list.length){
   el.innerHTML=`<div class="empty">Aucun résultat local.</div>`;
