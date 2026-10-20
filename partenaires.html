@@ -59,7 +59,13 @@ footer{border-top:1px solid var(--line);padding:22px 16px;text-align:center;colo
 <label>Contexte ou proposition personnalisée<textarea id="context" placeholder="Ex. : je connais plusieurs entreprises de la région qui pourraient utiliser ce service."></textarea></label>
 <div class="form-actions"><button class="btn dark" type="submit">Générer l'e-mail</button><button class="btn outline" type="button" id="clear">Effacer</button></div>
 </form><section id="resultSection" hidden><h3>E-mail prêt à relire</h3><label>Objet<input id="mailSubject" readonly></label><div class="output" id="mailBody" tabindex="0"></div><div class="form-actions" style="margin-top:12px"><button class="btn dark" id="copyMail" type="button">Copier l'e-mail</button><a class="btn outline" id="openMail" href="#">Ouvrir l'application e-mail</a></div><p id="copyStatus" class="small" aria-live="polite"></p></section></div></section>
-<section><div class="note"><strong>Important :</strong> cette page prépare les e-mails, mais ne les envoie pas et ne stocke pas encore de carnet de contacts. Les partenaires cités sont des pistes à contacter, pas des accords déjà obtenus. Certaines plateformes demandent un volume de trafic ou une validation préalable.</div></section>
+<section id="prospects"><div class="section-head"><h2>📇 Carnet de prospection</h2><p>Ajoute les entreprises à contacter et suis l'avancement. Pour l'instant, les données restent dans le navigateur de cet appareil, pas dans un compte en ligne.</p></div>
+<div class="form-card"><form id="prospectForm">
+<div class="row"><label>Entreprise<input id="prospectCompany" required placeholder="Nom de l'entreprise"></label><label>Contact / service<input id="prospectPerson" placeholder="Service partenariats, achats…"></label></div>
+<div class="row"><label>E-mail<input id="prospectEmail" type="email" placeholder="contact@entreprise.fr"></label><label>Domaine<select id="prospectDomain"><option>Produits / boutique</option><option>Affiliation</option><option>Transport / voyage</option><option>Grossiste / achats en volume</option><option>Entreprise locale</option><option>Publicité</option><option>Autre</option></select></label></div>
+<label>Prochaine étape<select id="prospectStatus"><option>À contacter</option><option>E-mail préparé</option><option>E-mail envoyé</option><option>Relance à faire</option><option>Réponse reçue</option><option>Partenariat obtenu</option><option>Refus / clôturé</option></select></label>
+<div class="form-actions"><button class="btn dark" type="submit">Ajouter au carnet</button><button class="btn outline" type="button" id="exportProspects">Exporter le carnet (CSV)</button><button class="btn outline" type="button" id="clearProspects">Effacer le carnet</button></div></form>
+<div id="prospectStatusMessage" class="small" aria-live="polite" style="margin-top:10px"></div><div id="prospectList" style="display:grid;gap:10px;margin-top:14px"></div></div></section><section><div class="note"><strong>Important :</strong> cette page prépare les e-mails, mais ne les envoie pas et ne stocke pas encore de carnet de contacts. Les partenaires cités sont des pistes à contacter, pas des accords déjà obtenus. Certaines plateformes demandent un volume de trafic ou une validation préalable.</div></section>
 </main><footer>Prix Malin — Comparer plus simplement, pour tous. Les partenariats et offres sponsorisées seront signalés clairement.</footer>
 <script>
 const byId=id=>document.getElementById(id);
@@ -88,4 +94,40 @@ byId("copyMail").addEventListener("click",async()=>{
  catch(e){const range=document.createRange();range.selectNodeContents(byId("mailBody"));const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);byId("copyStatus").textContent="Sélection effectuée. Maintiens le doigt sur le texte puis choisis Copier."}
 });
 byId("clear").addEventListener("click",()=>{byId("mailForm").reset();byId("resultSection").hidden=true;byId("copyStatus").textContent=""});
+const prospectKey="prixMalinProspectsV1";
+function loadProspects(){try{return JSON.parse(localStorage.getItem(prospectKey)||"[]")}catch(e){return []}}
+function saveProspects(list){localStorage.setItem(prospectKey,JSON.stringify(list))}
+function renderProspects(){
+ const list=loadProspects(),box=byId("prospectList");box.innerHTML="";
+ byId("prospectStatusMessage").textContent=list.length+" contact(s) enregistré(s) sur cet appareil.";
+ if(!list.length){box.innerHTML='<div class="note">Ton carnet est vide. Ajoute la première entreprise ci-dessus.</div>';return}
+ list.slice().reverse().forEach(item=>{
+  const card=document.createElement("article");card.className="card";
+  const title=document.createElement("h3");title.textContent=item.company;
+  const meta=document.createElement("p");meta.textContent=[item.person,item.email,item.domain].filter(Boolean).join(" · ");
+  const row=document.createElement("div");row.className="row";
+  const statusLabel=document.createElement("label");statusLabel.textContent="Suivi";
+  const select=document.createElement("select");
+  ["À contacter","E-mail préparé","E-mail envoyé","Relance à faire","Réponse reçue","Partenariat obtenu","Refus / clôturé"].forEach(value=>{const o=document.createElement("option");o.value=value;o.textContent=value;o.selected=value===item.status;select.append(o)});
+  select.addEventListener("change",()=>{const current=loadProspects();const target=current.find(x=>x.id===item.id);if(target){target.status=select.value;saveProspects(current);renderProspects()}});
+  statusLabel.append(select);
+  const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:end;gap:8px;flex-wrap:wrap";
+  if(item.email){const draft=document.createElement("button");draft.className="btn outline";draft.type="button";draft.textContent="Préparer un e-mail";draft.onclick=()=>{byId("company").value=item.company;byId("person").value=item.person||"";byId("email").value=item.email;byId("kind").value=item.domain.includes("Transport")?"travel":item.domain.includes("Grossiste")?"supplier":item.domain.includes("Affiliation")?"affiliate":item.domain.includes("Publicité")?"ads":"merchant";byId("courrier").scrollIntoView({behavior:"smooth"});byId("goal").focus()};actions.append(draft)}
+  const remove=document.createElement("button");remove.className="btn outline";remove.type="button";remove.textContent="Supprimer";remove.onclick=()=>{if(confirm("Supprimer "+item.company+" du carnet ?")){saveProspects(loadProspects().filter(x=>x.id!==item.id));renderProspects()}};actions.append(remove);
+  row.append(statusLabel,actions);card.append(title,meta,row);box.append(card)
+ });
+}
+byId("prospectForm").addEventListener("submit",e=>{
+ e.preventDefault();const company=byId("prospectCompany").value.trim();if(!company)return;
+ const list=loadProspects();list.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),company,person:byId("prospectPerson").value.trim(),email:byId("prospectEmail").value.trim(),domain:byId("prospectDomain").value,status:byId("prospectStatus").value,createdAt:new Date().toISOString()});
+ saveProspects(list);byId("prospectForm").reset();renderProspects();byId("prospectStatusMessage").textContent="Contact ajouté. Pense à exporter régulièrement une copie de sauvegarde."
+});
+byId("exportProspects").addEventListener("click",()=>{
+ const rows=[["Entreprise","Contact","E-mail","Domaine","Statut","Ajouté le"],...loadProspects().map(x=>[x.company,x.person,x.email,x.domain,x.status,x.createdAt])];
+ const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
+ const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="prix-malin-prospects.csv";a.click();URL.revokeObjectURL(url);byId("prospectStatusMessage").textContent="Export demandé : conserve le fichier CSV en lieu sûr."
+});
+byId("clearProspects").addEventListener("click",()=>{if(confirm("Effacer tous les contacts enregistrés sur cet appareil ? Exporte une sauvegarde avant si nécessaire.")){localStorage.removeItem(prospectKey);renderProspects()}});
+renderProspects();
+
 </script></body></html>
