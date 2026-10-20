@@ -78,7 +78,8 @@ main{max-width:860px;margin:0 auto}
 .modal-actions button{border:0;border-radius:8px;padding:8px 12px;font-weight:700;font-size:13px}
 .modal-primary{background:var(--orange);color:#fff}.modal-secondary{background:#f1f1f1;color:#222}
 .notice{font-size:10px;color:#999;line-height:1.3;margin-top:8px}
-.empty{padding:30px 10px;text-align:center;color:#777;border:1px dashed #ddd;border-radius:12px;min-width:100%;font-size:13px}
+.empty{padding:20px 10px;text-align:center;color:#777;border:1px dashed #ddd;border-radius:12px;min-width:100%;font-size:13px}
+.empty a{display:inline-block;margin-top:10px;background:var(--orange);color:#fff;padding:8px 14px;border-radius:8px;font-weight:700;font-size:13px}
 .all-products{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:10px}
 .cart-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee}
 .cart-item img{width:50px;height:50px;object-fit:contain;border-radius:6px;background:#f8f8f8}
@@ -150,17 +151,16 @@ const synonyms={
  "jeans":["pantalon","jean","vetement","vêtement"],
  "tshirt":["t-shirt","tee-shirt","t shirt","vetement"],
  "t-shirt":["tshirt","tee-shirt","t shirt"],
- "vetement":["pantalon","jeans","mode","vêtement","robe","tshirt","t-shirt"]
+ "survêtement":["sweat","jogging","ensemble","sport"],
+ "lacoste":["polo","marque","mode"],
+ "vetement":["pantalon","jeans","mode","vêtement","robe","tshirt","t-shirt","survêtement"]
 };
 const productData=[
  {id:"t1",name:"T-shirt blanc",desc:"Coton basique",category:"fashion",query:"t-shirt blanc",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"8,99€",old:"16,99€",save:"-8€"},
  {id:"t2",name:"T-shirt noir",desc:"Coupe classique",category:"fashion",query:"t-shirt noir",image:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=400&fit=crop",merchant:"Amazon",price:"9,99€",old:"18,99€",save:"-9€"},
  {id:"t3",name:"T-shirt gris",desc:"Coton doux",category:"fashion",query:"t-shirt gris",image:"https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop",merchant:"Amazon",price:"10,99€",old:"19,99€",save:"-9€"},
- {id:"t4",name:"T-shirt bleu",desc:"Style casual",category:"fashion",query:"t-shirt bleu",image:"https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400&h=400&fit=crop",merchant:"Amazon",price:"11,99€",old:"21,99€",save:"-10€"},
- {id:"t5",name:"T-shirt rouge",desc:"Coton bio",category:"fashion",query:"t-shirt rouge",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"12,99€",old:"22,99€",save:"-10€"},
- {id:"t6",name:"T-shirt oversize",desc:"Coupe large",category:"fashion",query:"t-shirt oversize",image:"https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop",merchant:"Amazon",price:"14,99€",old:"24,99€",save:"-10€"},
- {id:"t7",name:"T-shirt femme",desc:"Coupe ajustée",category:"fashion",query:"t-shirt femme",image:"https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&h=400&fit=crop",merchant:"Amazon",price:"9,99€",old:"17,99€",save:"-8€"},
- {id:"t8",name:"T-shirt graphique",desc:"Imprimé",category:"fashion",query:"t-shirt graphique",image:"https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&h=400&fit=crop",merchant:"Amazon",price:"13,99€",old:"23,99€",save:"-10€"},
+ {id:"sweat1",name:"Survêtement",desc:"Ensemble jogging",category:"fashion",query:"survêtement jogging",image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop",merchant:"Amazon",price:"34,99€",old:"59,99€",save:"-25€"},
+ {id:"polo1",name:"Polo Lacoste style",desc:"Polo classique",category:"fashion",query:"polo lacoste",image:"https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=400&h=400&fit=crop",merchant:"Amazon",price:"29,99€",old:"49,99€",save:"-20€"},
  {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
  {id:"sneakers1",name:"Baskets blanches",desc:"Running",category:"fashion",query:"baskets blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",merchant:"Amazon",price:"39,99€",old:"69,99€",save:"-30€"},
  {id:"watch",name:"Montre connectée",desc:"Fitness",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",merchant:"Amazon",price:"39,99€",old:"79,99€",save:"-40€"}
@@ -172,14 +172,15 @@ function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringif
 function saveCart(){localStorage.setItem("prixMalinCart",JSON.stringify(cart));updateCartCount()}
 function updateCartCount(){document.getElementById("cartCount").textContent=cart.length}
 function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag="+AFFILIATE_TAG}
+function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag="+AFFILIATE_TAG}
 function getRelated(p){
- return productData.filter(x=>x.id!==p.id && (x.category===p.category || x.name.toLowerCase().includes("t-shirt") && p.name.toLowerCase().includes("t-shirt"))).slice(0,12);
+ return productData.filter(x=>x.id!==p.id && (x.category===p.category || x.name.toLowerCase().includes("t-shirt") && p.name.toLowerCase().includes("t-shirt"))).slice(0,8);
 }
 function showProductDetail(p){
  const related=getRelated(p);
  let relatedHtml='';
  if(related.length){
-  relatedHtml='<div style="margin-top:16px;font-weight:600">Autres '+ (p.name.toLowerCase().includes('t-shirt')?'t-shirts':'produits similaires') +'</div><div class="related" id="related"></div>';
+  relatedHtml='<div style="margin-top:16px;font-weight:600">Autres produits similaires</div><div class="related" id="related"></div>';
  }
  const content=`<img class="detail-img" src="${p.image}" alt="${p.name}"><h3 style="margin:0 0 6px">${p.name}</h3><p style="margin:0 0 8px;color:#666">${p.desc}</p><div class="price" style="font-size:18px">${p.price}</div><div class="old-price">${p.old}</div><div class="saving">${p.save}</div><p style="margin-top:10px;font-size:13px">Meilleur prix du moment.</p>${relatedHtml}`;
  document.getElementById("modalTitle").textContent=p.name;
@@ -232,7 +233,11 @@ function renderProducts(){
  const q=document.getElementById("query").value.trim().toLowerCase();
  if(q)list=list.filter(p=>matchesSearch(p,q));
  if(showingFavorites)list=list.filter(p=>favorites.includes(p.id));
- if(!list.length){el.innerHTML='<div class="empty">Aucun produit trouvé.</div>';return}
+ if(!list.length){
+  const searchLink=q?`<a href="${amazonSearchUrl(q)}" target="_blank" rel="sponsored noopener">Chercher « ${document.getElementById("query").value} » sur Amazon</a>`:'';
+  el.innerHTML=`<div class="empty">Aucun produit trouvé localement.<br>${searchLink}</div>`;
+  return;
+ }
  list.slice(0,12).forEach(p=>el.append(productCard(p)));
 }
 function showCart(){
@@ -247,7 +252,7 @@ function showCart(){
    item.append(remove);content.append(item);
   });
   const checkout=document.createElement("button");checkout.className="modal-primary";checkout.style.marginTop="12px";checkout.style.width="100%";checkout.textContent="Valider sur Amazon";
-  checkout.onclick=()=>{const queries=items.map(p=>p.query).join(" OR ");window.open("https://www.amazon.fr/s?k="+encodeURIComponent(queries)+"&tag="+AFFILIATE_TAG,"_blank")};
+  checkout.onclick=()=>{const queries=items.map(p=>p.query).join(" OR ");window.open(amazonSearchUrl(queries),"_blank")};
   content.append(checkout);
  }
  document.getElementById("modalTitle").textContent="Panier";
