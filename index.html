@@ -250,7 +250,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155e
   <div class="modal-panel"><h2 id="modalTitle">Prix Malin</h2><div id="modalContent"></div><div class="modal-actions"><button class="modal-secondary" id="modalClose">Fermer</button></div></div>
 </div>
 <script>
-const AFFILIATE_TAG="prixbasmalin2-21";
 const synonyms={
  "pantalon":["jeans","jean","vetement","vêtement","mode","pantalons"],
  "jeans":["pantalon","jean","vetement","vêtement"],
@@ -321,7 +320,7 @@ let cart=JSON.parse(localStorage.getItem("prixMalinCart")||"[]");
 function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringify(favorites))}
 function saveCart(){localStorage.setItem("prixMalinCart",JSON.stringify(cart));updateCartCount()}
 function updateCartCount(){document.getElementById("cartCount").textContent=cart.length}
-function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag="+AFFILIATE_TAG}
+function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)}
 function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)}
 function getRelated(p){
  const name=p.name.toLowerCase();
