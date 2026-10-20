@@ -98,7 +98,7 @@ main{max-width:860px;margin:0 auto}
 .skip-link:focus{top:8px}
 body.high-contrast{--ink:#000;--muted:#222;--line:#555;--soft:#fff;background:#fff;color:#000}
 body.high-contrast .product,body.high-contrast .trust-card,body.high-contrast .search,body.high-contrast .category-icon{border:2px solid #111;background:#fff;color:#000}
-body.large-text{font-size:120%}body.large-text .product h3,body.large-text .banner p,body.large-text .desc,body.large-text .notice{font-size:inherit}
+body.large-text{font-size:125%}body.large-text .product h3,body.large-text .banner p,body.large-text .desc,body.large-text .notice,body.large-text .category,body.large-text .trust-card p{font-size:inherit} .access-panel button[aria-pressed="true"]{border-color:#167a3b;background:#edf9f0;box-shadow:inset 0 0 0 1px #167a3b}
 .access-panel{display:grid;gap:10px}.access-panel button{border:1px solid #ccc;background:#fff;border-radius:10px;padding:12px;text-align:left;font-weight:700;color:#111}
 .assistant-form{display:grid;gap:10px}.assistant-form input{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;font:inherit}.assistant-form button{padding:12px;border:0;border-radius:10px;background:var(--orange);color:#fff;font-weight:800}
 
@@ -322,7 +322,7 @@ function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringif
 function saveCart(){localStorage.setItem("prixMalinCart",JSON.stringify(cart));updateCartCount()}
 function updateCartCount(){document.getElementById("cartCount").textContent=cart.length}
 function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag="+AFFILIATE_TAG}
-function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag="+AFFILIATE_TAG}
+function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)}
 function getRelated(p){
  const name=p.name.toLowerCase();
  let type="";
@@ -496,16 +496,56 @@ document.getElementById("agentButton").onclick=()=>{
  form.onsubmit=e=>{e.preventDefault();const q=input.value.trim();if(!q){input.focus();return}document.getElementById("query").value=q;activeCategory="all";showingFavorites=false;renderProducts();closeModal();document.getElementById("popular").scrollIntoView({behavior:"smooth"});document.getElementById("query").focus()};
  content.append(form);document.getElementById("modal").classList.add("open");input.focus();
 };
+let touchAnnounceEnabled=localStorage.getItem("pmTouchAnnounce")==="1";
+let lastAnnouncement="";
+function speakShort(text){
+ if(!("speechSynthesis" in window)||!text)return;
+ const clean=String(text).replace(/\\s+/g," ").trim().slice(0,180);
+ if(!clean||clean===lastAnnouncement)return;
+ lastAnnouncement=clean;
+ window.speechSynthesis.cancel();
+ const utterance=new SpeechSynthesisUtterance(clean);utterance.lang="fr-FR";utterance.rate=0.95;
+ window.speechSynthesis.speak(utterance);
+}
+function accessibleLabel(el){
+ if(!el)return "";
+ const aria=el.getAttribute("aria-label");
+ if(aria)return aria;
+ const labelled=el.getAttribute("aria-labelledby");
+ if(labelled){const node=document.getElementById(labelled);if(node?.innerText)return node.innerText;}
+ if(el.matches("input,select,textarea"))return el.getAttribute("aria-label")||el.labels?.[0]?.innerText||el.getAttribute("placeholder")||el.name||"Champ de saisie";
+ const title=el.getAttribute("title");if(title)return title;
+ const img=el.querySelector("img[alt]");if(img?.alt)return img.alt;
+ return (el.innerText||el.textContent||"").replace(/\\s+/g," ").trim().slice(0,140);
+}
+document.addEventListener("pointerup",e=>{
+ if(!touchAnnounceEnabled)return;
+ const el=e.target.closest("button,a,input,select,textarea,[role='button'],.product");
+ if(!el)return;
+ const label=accessibleLabel(el);
+ if(label)setTimeout(()=>speakShort(label),80);
+});
+document.addEventListener("focusin",e=>{
+ if(!touchAnnounceEnabled)return;
+ const el=e.target.closest("button,a,input,select,textarea,[role='button'],.product");
+ if(el){const label=accessibleLabel(el);if(label)speakShort(label);}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&"speechSynthesis"in window)window.speechSynthesis.cancel()});
 document.getElementById("accessibilityButton").onclick=()=>{
  const content=document.getElementById("modalContent");document.getElementById("modalTitle").textContent="Options d’accessibilité";content.innerHTML="";
  const panel=document.createElement("div");panel.className="access-panel";
- const note=document.createElement("p");note.textContent="Choisis les réglages qui rendent le site plus confortable. La lecture à voix haute utilise la synthèse vocale disponible sur ton appareil.";
+ const note=document.createElement("p");note.textContent="Active le guidage vocal pour entendre uniquement le nom du bouton ou de l’élément touché. Tu peux aussi agrandir le texte ou renforcer le contraste.";
+ const announce=document.createElement("button");
+ const refreshAnnounceLabel=()=>{announce.textContent="Guidage vocal au toucher : "+(touchAnnounceEnabled?"activé":"désactivé")};
+ refreshAnnounceLabel();
+ announce.setAttribute("aria-pressed",String(touchAnnounceEnabled));
+ announce.onclick=()=>{touchAnnounceEnabled=!touchAnnounceEnabled;localStorage.setItem("pmTouchAnnounce",touchAnnounceEnabled?"1":"0");announce.setAttribute("aria-pressed",String(touchAnnounceEnabled));refreshAnnounceLabel();lastAnnouncement="";if(!touchAnnounceEnabled&&"speechSynthesis"in window)window.speechSynthesis.cancel();else speakShort("Guidage vocal activé")};
  const contrast=document.createElement("button");contrast.textContent="Contraste renforcé : activer / désactiver";contrast.onclick=()=>{document.body.classList.toggle("high-contrast");localStorage.setItem("pmContrast",document.body.classList.contains("high-contrast")?"1":"0")};
  const size=document.createElement("button");size.textContent="Texte agrandi : activer / désactiver";size.onclick=()=>{document.body.classList.toggle("large-text");localStorage.setItem("pmLargeText",document.body.classList.contains("large-text")?"1":"0")};
- const read=document.createElement("button");read.textContent="Lire la page à voix haute";read.onclick=()=>{if(!("speechSynthesis" in window)){alert("La lecture vocale n’est pas disponible dans ce navigateur. Essaie le lecteur d’écran de ton téléphone.");return}window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(document.querySelector("main")?.innerText||document.body.innerText);utterance.lang="fr-FR";window.speechSynthesis.speak(utterance)};
- const stop=document.createElement("button");stop.textContent="Arrêter la lecture";stop.onclick=()=>{if("speechSynthesis" in window)window.speechSynthesis.cancel()};
- const tips=document.createElement("p");tips.textContent="Pour les personnes aveugles, utilise aussi TalkBack sur Android ou VoiceOver sur iPhone. Les informations essentielles restent écrites pour les personnes sourdes. Les couleurs ne doivent jamais être le seul indicateur.";
- panel.append(note,contrast,size,read,stop,tips);content.append(panel);document.getElementById("modal").classList.add("open");
+ const read=document.createElement("button");read.textContent="Lire seulement le titre et l’aide";read.onclick=()=>{const title=document.getElementById("modalTitle")?.innerText||"Options d’accessibilité";const help=note.innerText;speakShort(title+". "+help)};
+ const stop=document.createElement("button");stop.textContent="Arrêter la voix";stop.onclick=()=>{if("speechSynthesis"in window)window.speechSynthesis.cancel();lastAnnouncement=""};
+ const tips=document.createElement("p");tips.textContent="Sur Android, TalkBack reste recommandé pour une lecture complète de l’interface. Ce guidage est facultatif et peut être coupé à tout moment. Les prix restent écrits à l’écran.";
+ panel.append(note,announce,contrast,size,read,stop,tips);content.append(panel);document.getElementById("modal").classList.add("open");
 };
 if(localStorage.getItem("pmContrast")==="1")document.body.classList.add("high-contrast");
 if(localStorage.getItem("pmLargeText")==="1")document.body.classList.add("large-text");
