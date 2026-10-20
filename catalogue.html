@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Explorez les catégories Prix Malin et recherchez des produits sur Amazon France. Vérifiez le prix, la taille, la couleur et la disponibilité sur Amazon.">
+<meta name="theme-color" content="#ffffff">
+<title>Explorer le catalogue Amazon — Prix Malin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--orange:#ff5a1f;--ink:#191919;--muted:#737373;--line:#ededed;--soft:#f7f7f7}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:Inter,system-ui,sans-serif;background:#fff}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid var(--line);padding:12px max(16px,calc((100% - 1120px)/2));display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;display:grid;place-items:center;background:var(--orange);color:#fff;border-radius:11px;font-weight:800;font-family:Outfit}
+.brand{font-weight:800;font-family:Outfit;font-size:19px}.brand span{color:var(--orange)}
+.back{margin-left:auto;font-size:13px;font-weight:700;color:var(--orange)}
+main{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+.hero{background:var(--orange);color:#fff;border-radius:20px;padding:24px;display:grid;grid-template-columns:1fr;gap:16px}
+h1{font-family:Outfit,sans-serif;font-size:clamp(28px,5vw,42px);line-height:1.05;letter-spacing:-1px;margin:0 0 10px}
+.hero p{line-height:1.5;margin:0;max-width:700px}
+.search{display:flex;gap:8px;max-width:720px}
+.search input{min-width:0;flex:1;border:0;border-radius:11px;padding:14px;font:inherit}
+.search button{border:0;border-radius:11px;padding:0 18px;background:#191919;color:#fff;font-weight:700}
+.notice{font-size:12px;line-height:1.5;color:var(--muted);margin:14px 2px 24px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:28px 0 12px}
+h2{font-family:Outfit,sans-serif;font-size:23px;margin:0}
+.section-head p{font-size:12px;color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.category{border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}
+.category h3{font-family:Outfit,sans-serif;margin:0 0 5px;font-size:18px}
+.category p{color:var(--muted);font-size:12px;line-height:1.45;margin:0 0 12px}
+.links{display:flex;flex-wrap:wrap;gap:7px}
+.links a{font-size:12px;font-weight:600;border:1px solid #eee;border-radius:999px;padding:8px 10px;background:var(--soft)}
+.links a:hover,.links a:focus{border-color:var(--orange);color:var(--orange)}
+footer{max-width:1120px;margin:0 auto;padding:0 16px 32px;font-size:11px;color:var(--muted);line-height:1.6}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding:20px}.search button{padding:0 12px}}
+@media(max-width:440px){.grid{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:5px}.search input{padding:12px}.search button{font-size:13px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html" aria-label="Accueil Prix Malin">PM</a>
+  <a class="brand" href="index.html">Prix <span>Malin</span></a>
+  <a class="back" href="index.html">← Accueil</a>
+</header>
+<main>
+  <section class="hero">
+    <div>
+      <h1>Explore le catalogue</h1>
+      <p>Choisis une catégorie ou lance une recherche sur Amazon France. Compare les modèles, les tailles, les couleurs, les vendeurs et les frais de livraison sur la page Amazon du produit.</p>
+    </div>
+    <form class="search" id="searchForm">
+      <input id="query" type="search" placeholder="Ex. : survêtement Lacoste" aria-label="Produit à rechercher" required>
+      <button type="submit">Rechercher</button>
+    </form>
+  </section>
+  <p class="notice">Les liens ci-dessous ouvrent des recherches Amazon, pas une liste de prix vérifiés par Prix Malin. Les prix, vendeurs, variantes et stocks peuvent changer : confirme-les sur Amazon avant l’achat.</p>
+  <div class="section-head"><h2>Mode et chaussures</h2><p>Marques, styles et tailles</p></div>
+  <section class="grid">
+    <article class="category"><h3>Survêtements</h3><p>Ensembles, vestes et pantalons de jogging</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=surv%C3%AAtement+homme&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Homme</a>
+      <a href="https://www.amazon.fr/s?k=surv%C3%AAtement+femme&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Femme</a>
+      <a href="https://www.amazon.fr/s?k=surv%C3%AAtement+enfant&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Enfant</a>
+      <a href="https://www.amazon.fr/s?k=surv%C3%AAtement+Lacoste&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Lacoste</a>
+      <a href="https://www.amazon.fr/s?k=surv%C3%AAtement+Nike&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Nike</a>
+      <a href="https://www.amazon.fr/s?k=surv%C3%AAtement+Adidas&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Adidas</a>
+    </div></article>
+    <article class="category"><h3>Baskets</h3><p>Ville, sport et marche</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=baskets+homme&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Homme</a>
+      <a href="https://www.amazon.fr/s?k=baskets+femme&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Femme</a>
+      <a href="https://www.amazon.fr/s?k=baskets+enfant&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Enfant</a>
+      <a href="https://www.amazon.fr/s?k=baskets+Nike&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Nike</a>
+      <a href="https://www.amazon.fr/s?k=baskets+Adidas&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Adidas</a>
+    </div></article>
+    <article class="category"><h3>Vêtements</h3><p>Essentiels et tenues du quotidien</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=jean+homme&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Jeans</a>
+      <a href="https://www.amazon.fr/s?k=polo+Lacoste&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Polos Lacoste</a>
+      <a href="https://www.amazon.fr/s?k=t-shirt+homme&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">T-shirts</a>
+      <a href="https://www.amazon.fr/s?k=manteau+homme&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Manteaux</a>
+      <a href="https://www.amazon.fr/s?k=sac+%C3%A0+main&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Sacs</a>
+    </div></article>
+  </section>
+  <div class="section-head"><h2>High-tech et gaming</h2><p>Électronique et accessoires</p></div>
+  <section class="grid">
+    <article class="category"><h3>Audio</h3><p>Écoute et son nomade</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=casque+bluetooth&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Casques Bluetooth</a>
+      <a href="https://www.amazon.fr/s?k=%C3%A9couteurs+sans+fil&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Écouteurs sans fil</a>
+      <a href="https://www.amazon.fr/s?k=enceinte+bluetooth&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Enceintes</a>
+    </div></article>
+    <article class="category"><h3>Informatique</h3><p>Ordinateurs et périphériques</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=clavier+m%C3%A9canique&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Claviers</a>
+      <a href="https://www.amazon.fr/s?k=souris+gaming&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Souris gaming</a>
+      <a href="https://www.amazon.fr/s?k=%C3%A9cran+PC&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Écrans PC</a>
+      <a href="https://www.amazon.fr/s?k=ordinateur+portable&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">PC portables</a>
+    </div></article>
+    <article class="category"><h3>Objets connectés</h3><p>Accessoires connectés au quotidien</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=montre+connect%C3%A9e&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Montres connectées</a>
+      <a href="https://www.amazon.fr/s?k=tracker+objets+connect%C3%A9&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Trackers</a>
+      <a href="https://www.amazon.fr/s?k=batterie+externe&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Batteries externes</a>
+    </div></article>
+  </section>
+  <div class="section-head"><h2>Maison, sport et quotidien</h2><p>Des niches à développer</p></div>
+  <section class="grid">
+    <article class="category"><h3>Maison et cuisine</h3><p>Rangement, équipement et petit électroménager</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=rangement+maison&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Rangement</a>
+      <a href="https://www.amazon.fr/s?k=aspirateur+sans+fil&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Aspirateurs</a>
+      <a href="https://www.amazon.fr/s?k=machine+%C3%A0+caf%C3%A9&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Café</a>
+    </div></article>
+    <article class="category"><h3>Sport et plein air</h3><p>Entraînement et sorties</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=halt%C3%A8res&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Haltères</a>
+      <a href="https://www.amazon.fr/s?k=tapis+de+course&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Course</a>
+      <a href="https://www.amazon.fr/s?k=sac+de+randonn%C3%A9e&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Randonnée</a>
+    </div></article>
+    <article class="category"><h3>Auto et bricolage</h3><p>Accessoires et équipement pratique</p><div class="links">
+      <a href="https://www.amazon.fr/s?k=accessoires+voiture&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Auto</a>
+      <a href="https://www.amazon.fr/s?k=outillage+bricolage&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Outillage</a>
+      <a href="https://www.amazon.fr/s?k=lampe+torche+rechargeable&tag=prixbasmalin2-21" target="_blank" rel="sponsored noopener">Lampes</a>
+    </div></article>
+  </section>
+</main>
+<footer>
+  Prix Malin peut percevoir une commission sur les achats éligibles effectués via certains liens affiliés. Les recherches Amazon affichées ne constituent pas une comparaison de prix indépendante : consulte la page Amazon pour le prix actuel, le vendeur, les variantes, les frais de livraison et la disponibilité.
+</footer>
+<script>
+const form=document.getElementById("searchForm");
+const input=document.getElementById("query");
+form.addEventListener("submit",function(event){
+  event.preventDefault();
+  const q=input.value.trim();
+  if(!q)return;
+  const url="https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag=prixbasmalin2-21";
+  window.open(url,"_blank","noopener");
+});
+</script>
+</body>
+</html>
