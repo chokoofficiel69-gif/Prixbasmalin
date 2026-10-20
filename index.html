@@ -44,7 +44,7 @@ main{max-width:860px;margin:0 auto}
 .section{padding:0 14px 16px}
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
 .section-head h2{font-family:Outfit,Inter,sans-serif;font-size:16px;letter-spacing:-.3px;margin:0;font-weight:800}
-.text-link{border:0;background:transparent;color:var(--orange);font-size:12px;font-weight:600;white-space:nowrap}
+.text-link{border:0;background:transparent;color:var(--orange);font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer}
 .products{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
 .product{min-width:160px;max-width:170px;flex-shrink:0;border:1px solid #eee;border-radius:14px;padding:12px 10px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;scroll-snap-align:start}
 .product-image{width:100%;height:90px;display:grid;place-items:center;margin-bottom:6px;background:#f8f8f8;border-radius:8px;overflow:hidden}
@@ -70,7 +70,7 @@ main{max-width:860px;margin:0 auto}
 .agent-button img{width:100%;height:100%;object-fit:cover}
 .modal{position:fixed;inset:0;z-index:50;background:#0006;display:none;align-items:flex-end}
 .modal.open{display:flex}
-.modal-panel{background:#fff;width:100%;max-height:70vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px 14px max(16px,env(safe-area-inset-bottom))}
+.modal-panel{background:#fff;width:100%;max-height:85vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px 14px max(16px,env(safe-area-inset-bottom))}
 .modal-panel h2{font-family:Outfit,sans-serif;margin:0 0 10px;font-size:18px}
 .modal-panel p{line-height:1.4;color:#555;font-size:13px}
 .modal-actions{display:flex;gap:8px;margin-top:12px}
@@ -78,6 +78,7 @@ main{max-width:860px;margin:0 auto}
 .modal-primary{background:var(--orange);color:#fff}.modal-secondary{background:#f1f1f1;color:#222}
 .notice{font-size:10px;color:#999;line-height:1.3;margin-top:8px}
 .empty{padding:30px 10px;text-align:center;color:#777;border:1px dashed #ddd;border-radius:12px;min-width:100%;font-size:13px}
+.all-products{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -114,11 +115,11 @@ main{max-width:860px;margin:0 auto}
   <section class="section" id="popular">
     <div class="section-head"><h2>Produits populaires</h2><button class="text-link" id="seeAll">Voir tout ›</button></div>
     <div class="products" id="products" aria-live="polite"></div>
-    <p class="notice">Prix indicatifs. À confirmer sur le site marchand. Prix Malin peut percevoir une commission.</p>
+    <p class="notice">Meilleurs prix du moment. À confirmer sur Amazon. Prix Malin peut percevoir une commission.</p>
   </section>
   <section class="trust" aria-label="Nos engagements">
     <button class="trust-card" data-info="merchants"><div class="trust-icon">🛡️</div><h3>Marchands</h3><p>Liens affiliés</p></button>
-    <button class="trust-card" data-info="prices"><div class="trust-icon">🏷️</div><h3>Meilleurs prix</h3><p>Comparez</p></button>
+    <button class="trust-card" data-info="prices"><div class="trust-icon">🏷️</div><h3>Meilleurs prix</h3><p>Toujours moins cher</p></button>
     <button class="trust-card" data-info="smart"><div class="trust-icon">⭐</div><h3>Achats malins</h3><p>Gratuit</p></button>
   </section>
 </main>
@@ -136,20 +137,21 @@ main{max-width:860px;margin:0 auto}
 <script>
 const AFFILIATE_TAG="prixbasmalin2-21";
 const productData=[
- {id:"watch",name:"Montre connectée",desc:"Fitness, 7 jours",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",merchant:"Amazon",price:"49,99€",old:"89,99€",save:"-40€"},
- {id:"earbuds",name:"Écouteurs",desc:"Bluetooth anti-bruit",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop",merchant:"Amazon",price:"29,99€",old:"59,99€",save:"-30€"},
- {id:"backpack",name:"Sac à dos",desc:"20L, poche PC",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
- {id:"sneakers1",name:"Baskets blanches",desc:"Chaussures running",category:"fashion",query:"baskets chaussures blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop",merchant:"Amazon",price:"59,99€",old:"89,99€",save:"-30€"},
- {id:"sneakers2",name:"Chaussures sport",desc:"Baskets légères",category:"sport",query:"chaussures baskets sport",image:"https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop",merchant:"Amazon",price:"49,99€",old:"79,99€",save:"-30€"},
- {id:"sneakers3",name:"Baskets noires",desc:"Chaussures confort",category:"fashion",query:"baskets noires chaussures",image:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=300&h=300&fit=crop",merchant:"Amazon",price:"69,99€",old:"99,99€",save:"-30€"},
- {id:"sofa",name:"Canapé",desc:"2 places, tissu",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop",merchant:"Amazon",price:"199€",old:"349€",save:"-150€"},
- {id:"gardenchair",name:"Fauteuil jardin",desc:"Résine, résistant",category:"garden",query:"fauteuil jardin",image:"https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=300&h=300&fit=crop",merchant:"Amazon",price:"89,99€",old:"149,99€",save:"-60€"},
- {id:"plants",name:"Plantes d'intérieur",desc:"Set 3 plantes",category:"garden",query:"plantes intérieur",image:"https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=300&fit=crop",merchant:"Amazon",price:"34,99€",old:"49,99€",save:"-15€"},
- {id:"baby",name:"Accessoires bébé",desc:"Set biberons",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99€",old:"34,99€",save:"-15€"},
- {id:"serum",name:"Sérum visage",desc:"Hydratant, anti-âge",category:"beauty",query:"sérum visage",image:"https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop",merchant:"Amazon",price:"22,99€",old:"39,99€",save:"-17€"},
- {id:"yoga",name:"Tapis yoga",desc:"Antidérapant, 6mm",category:"sport",query:"tapis yoga",image:"https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
- {id:"laptop",name:"Ordinateur portable",desc:"15 pouces, SSD",category:"tech",query:"ordinateur portable",image:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=300&fit=crop",merchant:"Amazon",price:"499€",old:"699€",save:"-200€"},
- {id:"phone",name:"Smartphone",desc:"128 Go, double SIM",category:"tech",query:"smartphone",image:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop",merchant:"Amazon",price:"299€",old:"449€",save:"-150€"}
+ {id:"sneakers1",name:"Baskets blanches",desc:"Meilleur prix du moment",category:"fashion",query:"baskets chaussures blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop",merchant:"Amazon",price:"39,99€",old:"69,99€",save:"-30€"},
+ {id:"sneakers2",name:"Chaussures sport",desc:"Moins cher que chez les concurrents",category:"sport",query:"chaussures baskets sport",image:"https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop",merchant:"Amazon",price:"34,99€",old:"59,99€",save:"-25€"},
+ {id:"sneakers3",name:"Baskets Nike",desc:"Vertes à petit prix",category:"fashion",query:"baskets nike",image:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=300&h=300&fit=crop",merchant:"Amazon",price:"27,99€",old:"49,99€",save:"-22€"},
+ {id:"sneakers4",name:"Baskets running",desc:"Prix bas garanti",category:"sport",query:"baskets running",image:"https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=300&h=300&fit=crop",merchant:"Amazon",price:"29,99€",old:"54,99€",save:"-25€"},
+ {id:"watch",name:"Montre connectée",desc:"Fitness, 7 jours",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",merchant:"Amazon",price:"39,99€",old:"79,99€",save:"-40€"},
+ {id:"earbuds",name:"Écouteurs",desc:"Bluetooth anti-bruit",category:"tech",query:"écouteurs sans fil",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99€",old:"49,99€",save:"-25€"},
+ {id:"backpack",name:"Sac à dos",desc:"20L, poche PC",category:"fashion",query:"sac à dos",image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99€",old:"34,99€",save:"-15€"},
+ {id:"sofa",name:"Canapé",desc:"2 places, tissu",category:"home",query:"canapé",image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop",merchant:"Amazon",price:"179€",old:"299€",save:"-120€"},
+ {id:"gardenchair",name:"Fauteuil jardin",desc:"Résine, résistant",category:"garden",query:"fauteuil jardin",image:"https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=300&h=300&fit=crop",merchant:"Amazon",price:"69,99€",old:"119,99€",save:"-50€"},
+ {id:"plants",name:"Plantes d'intérieur",desc:"Set 3 plantes",category:"garden",query:"plantes intérieur",image:"https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300&h=300&fit=crop",merchant:"Amazon",price:"24,99€",old:"39,99€",save:"-15€"},
+ {id:"baby",name:"Accessoires bébé",desc:"Set biberons",category:"baby",query:"accessoires bébé",image:"https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&h=300&fit=crop",merchant:"Amazon",price:"14,99€",old:"29,99€",save:"-15€"},
+ {id:"serum",name:"Sérum visage",desc:"Hydratant, anti-âge",category:"beauty",query:"sérum visage",image:"https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop",merchant:"Amazon",price:"17,99€",old:"34,99€",save:"-17€"},
+ {id:"yoga",name:"Tapis yoga",desc:"Antidérapant, 6mm",category:"sport",query:"tapis yoga",image:"https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=300&fit=crop",merchant:"Amazon",price:"19,99€",old:"34,99€",save:"-15€"},
+ {id:"laptop",name:"Ordinateur portable",desc:"15 pouces, SSD",category:"tech",query:"ordinateur portable",image:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=300&fit=crop",merchant:"Amazon",price:"449€",old:"649€",save:"-200€"},
+ {id:"phone",name:"Smartphone",desc:"128 Go, double SIM",category:"tech",query:"smartphone",image:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop",merchant:"Amazon",price:"249€",old:"399€",save:"-150€"}
 ];
 let activeCategory="all",showingFavorites=false;
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
@@ -167,13 +169,13 @@ function productCard(p){
  const saving=document.createElement("div");saving.className="saving";saving.textContent=p.save;
  const merchant=document.createElement("div");merchant.className="merchant";merchant.textContent=p.merchant;
  const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px";
- const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Voir";
+ const buy=document.createElement("a");buy.className="product-action";buy.href=merchantUrl(p);buy.target="_blank";buy.rel="sponsored noopener";buy.textContent="Voir sur Amazon";
  const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=()=>{favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
  actions.append(buy,fav);card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
 }
 function renderProducts(){
  const el=document.getElementById("products");
- if(!el){return;}
+ if(!el)return;
  el.innerHTML="";
  let list=productData.filter(p=>activeCategory==="all"||p.category===activeCategory);
  const q=document.getElementById("query").value.trim().toLowerCase();
@@ -184,22 +186,31 @@ function renderProducts(){
   });
  }
  if(showingFavorites)list=list.filter(p=>favorites.includes(p.id));
- if(!list.length){el.innerHTML='<div class="empty">Aucun produit trouvé. Essaie un autre mot (baskets, chaussures, jardin...)</div>';return}
- list.forEach(p=>el.append(productCard(p)));
+ if(!list.length){el.innerHTML='<div class="empty">Aucun produit trouvé. Essaie baskets, chaussures, jardin...</div>';return}
+ list.slice(0,8).forEach(p=>el.append(productCard(p)));
+}
+function showAllProducts(){
+ const content=document.createElement("div");
+ content.className="all-products";
+ productData.forEach(p=>content.append(productCard(p)));
+ document.getElementById("modalTitle").textContent="Tous les produits";
+ document.getElementById("modalContent").innerHTML="";
+ document.getElementById("modalContent").append(content);
+ document.getElementById("modal").classList.add("open");
 }
 function openModal(title,text){document.getElementById("modalTitle").textContent=title;document.getElementById("modalContent").innerHTML='<p>'+text+'</p>';document.getElementById("modal").classList.add("open")}
 function closeModal(){document.getElementById("modal").classList.remove("open")}
 document.getElementById("searchForm").onsubmit=e=>{e.preventDefault();showingFavorites=false;renderProducts()};
 document.getElementById("query").oninput=()=>{showingFavorites=false;renderProducts()};
 document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[data-category]");if(!btn)return;activeCategory=btn.dataset.category;showingFavorites=false;document.querySelectorAll(".category").forEach(c=>c.classList.toggle("active",c===btn));renderProducts()};
-document.getElementById("filterButton").onclick=()=>openModal("Filtres","Utilise les catégories ou la recherche pour filtrer.");
+document.getElementById("filterButton").onclick=()=>openModal("Filtres","Utilise les catégories ou la recherche.");
 document.getElementById("compareButton").onclick=()=>document.getElementById("query").focus();
-document.getElementById("seeAll").onclick=()=>{activeCategory="all";showingFavorites=false;document.getElementById("query").value="";document.querySelectorAll(".category").forEach((c,i)=>c.classList.toggle("active",i===0));renderProducts()};
-document.getElementById("bell").onclick=()=>openModal("Notifications","Aucune notification pour le moment.");
-document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Les prix sont indicatifs. Confirme toujours sur le site marchand."));
-document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){openModal("Bons plans","Les réductions vérifiées arrivent bientôt.")}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts()}else if(action==="account"){openModal("Compte","Pas de compte nécessaire pour comparer et économiser.")}};
+document.getElementById("seeAll").onclick=showAllProducts;
+document.getElementById("bell").onclick=()=>openModal("Notifications","Aucune notification.");
+document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Nous cherchons toujours les meilleurs prix pour toi."));
+document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){openModal("Bons plans","Les meilleurs prix du moment sont déjà affichés.")}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts()}else if(action==="account"){openModal("Compte","Pas de compte nécessaire.")}};
 document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})};
-document.getElementById("agentButton").onclick=()=>openModal("Assistant Prix Malin","Salut ! Dis-moi ce que tu cherches (ex: baskets, chaussures, fauteuil jardin, sérum...) et je te montre les meilleurs prix.");
+document.getElementById("agentButton").onclick=()=>openModal("Assistant","Dis-moi ce que tu cherches (baskets, chaussures, jardin...) pour voir les meilleurs prix.");
 document.getElementById("modalClose").onclick=closeModal;
 document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
 renderProducts();
