@@ -90,9 +90,20 @@ main{max-width:860px;margin:0 auto}
 .detail-img{width:100%;max-height:180px;object-fit:contain;border-radius:10px;background:#f8f8f8;margin-bottom:10px}
 .related{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:8px}
 .related .product{min-width:130px;max-width:140px}
+
+.agent-button{font-size:24px;color:#fff;background:var(--orange);display:grid;place-items:center}
+.accessibility-button{position:fixed;right:12px;bottom:138px;z-index:30;width:46px;height:46px;border:2px solid #222;border-radius:50%;background:#fff;color:#111;font-size:22px;box-shadow:0 3px 12px #0002}
+:focus-visible{outline:3px solid #155eef!important;outline-offset:3px}
+.skip-link{position:absolute;left:8px;top:-60px;background:#111;color:#fff;padding:12px;z-index:100;border-radius:8px}
+.skip-link:focus{top:8px}
+body.high-contrast{--ink:#000;--muted:#222;--line:#555;--soft:#fff;background:#fff;color:#000}
+body.high-contrast .product,body.high-contrast .trust-card,body.high-contrast .search,body.high-contrast .category-icon{border:2px solid #111;background:#fff;color:#000}
+body.large-text{font-size:120%}body.large-text .product h3,body.large-text .banner p,body.large-text .desc,body.large-text .notice{font-size:inherit}
+.access-panel{display:grid;gap:10px}.access-panel button{border:1px solid #ccc;background:#fff;border-radius:10px;padding:12px;text-align:left;font-weight:700;color:#111}
+.assistant-form{display:grid;gap:10px}.assistant-form input{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;font:inherit}.assistant-form button{padding:12px;border:0;border-radius:10px;background:var(--orange);color:#fff;font-weight:800}
 </style>
 </head>
-<body>
+<body><a class="skip-link" href="#popular">Aller directement aux produits</a>
 <header>
   <a class="brand" href="#" id="brandHome" aria-label="Prix Malin, accueil">
     <span class="logo">%</span>
@@ -154,7 +165,7 @@ main{max-width:860px;margin:0 auto}
   <button data-nav="favorites"><span class="nav-icon">❤️</span><span>Favoris</span></button>
   <button data-nav="account"><span class="nav-icon">👤</span><span>Compte</span></button>
 </nav>
-<div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l'assistant Prix Malin"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&h=120&fit=crop&crop=faces" alt="Assistant"></button></div>
+<div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l’assistant Prix Malin" title="Besoin d’aide ?"><span aria-hidden="true">💬</span></button></div><button id="accessibilityButton" class="accessibility-button" aria-label="Ouvrir les options d’accessibilité" title="Accessibilité">♿</button>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-panel"><h2 id="modalTitle">Prix Malin</h2><div id="modalContent"></div><div class="modal-actions"><button class="modal-secondary" id="modalClose">Fermer</button></div></div>
 </div>
@@ -389,7 +400,33 @@ document.getElementById("cartBtn").onclick=showCart;
 document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Les prix, vendeurs et disponibilités doivent être vérifiés sur la page du vendeur."));
 document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){openModal("Bons plans","Les meilleurs prix sont affichés.")}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts()}else if(action==="account"){openModal("Compte","Pas de compte nécessaire.")}};
 document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})};
-document.getElementById("agentButton").onclick=()=>openModal("Assistant","Dis-moi ce que tu cherches.");
+
+document.getElementById("agentButton").onclick=()=>{
+ const content=document.getElementById("modalContent");
+ document.getElementById("modalTitle").textContent="Bonjour ! Comment puis-je t’aider ?";
+ content.innerHTML="";
+ const form=document.createElement("form");form.className="assistant-form";
+ const intro=document.createElement("p");intro.textContent="Décris ce que tu recherches, ton budget et, si besoin, la quantité. Je peux t’aider à préciser la recherche. Les prix en direct ne sont pas encore connectés.";
+ const input=document.createElement("input");input.name="assistantQuery";input.placeholder="Ex. : un casque Bluetooth à moins de 40 €";input.setAttribute("aria-label","Que recherches-tu ?");
+ const submit=document.createElement("button");submit.type="submit";submit.textContent="Rechercher sur Prix Malin";
+ form.append(intro,input,submit);
+ form.onsubmit=e=>{e.preventDefault();const q=input.value.trim();if(!q){input.focus();return}document.getElementById("query").value=q;activeCategory="all";showingFavorites=false;renderProducts();closeModal();document.getElementById("popular").scrollIntoView({behavior:"smooth"});document.getElementById("query").focus()};
+ content.append(form);document.getElementById("modal").classList.add("open");input.focus();
+};
+document.getElementById("accessibilityButton").onclick=()=>{
+ const content=document.getElementById("modalContent");document.getElementById("modalTitle").textContent="Options d’accessibilité";content.innerHTML="";
+ const panel=document.createElement("div");panel.className="access-panel";
+ const note=document.createElement("p");note.textContent="Choisis les réglages qui rendent le site plus confortable. La lecture à voix haute utilise la synthèse vocale disponible sur ton appareil.";
+ const contrast=document.createElement("button");contrast.textContent="Contraste renforcé : activer / désactiver";contrast.onclick=()=>{document.body.classList.toggle("high-contrast");localStorage.setItem("pmContrast",document.body.classList.contains("high-contrast")?"1":"0")};
+ const size=document.createElement("button");size.textContent="Texte agrandi : activer / désactiver";size.onclick=()=>{document.body.classList.toggle("large-text");localStorage.setItem("pmLargeText",document.body.classList.contains("large-text")?"1":"0")};
+ const read=document.createElement("button");read.textContent="Lire la page à voix haute";read.onclick=()=>{if(!("speechSynthesis" in window)){alert("La lecture vocale n’est pas disponible dans ce navigateur. Essaie le lecteur d’écran de ton téléphone.");return}window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(document.querySelector("main")?.innerText||document.body.innerText);utterance.lang="fr-FR";window.speechSynthesis.speak(utterance)};
+ const stop=document.createElement("button");stop.textContent="Arrêter la lecture";stop.onclick=()=>{if("speechSynthesis" in window)window.speechSynthesis.cancel()};
+ const tips=document.createElement("p");tips.textContent="Pour les personnes aveugles, utilise aussi TalkBack sur Android ou VoiceOver sur iPhone. Les informations essentielles restent écrites pour les personnes sourdes. Les couleurs ne doivent jamais être le seul indicateur.";
+ panel.append(note,contrast,size,read,stop,tips);content.append(panel);document.getElementById("modal").classList.add("open");
+};
+if(localStorage.getItem("pmContrast")==="1")document.body.classList.add("high-contrast");
+if(localStorage.getItem("pmLargeText")==="1")document.body.classList.add("large-text");
+
 document.getElementById("modalClose").onclick=closeModal;
 document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
 updateCartCount();
