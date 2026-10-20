@@ -30,7 +30,9 @@
       throw new Error("Cdiscount n'est pas encore configuré : valider le programme et ses URL officielles.");
     }
     // La forme exacte dépend des gabarits fournis par le réseau / marchand.
-    return CONFIG.urls.searchTemplate.replace("{query}", encodeURIComponent(cleaned));
+    const encoded = encodeURIComponent(cleaned);
+    if (!CONFIG.urls.searchTemplate.includes("{query}")) throw new Error("Le gabarit officiel doit contenir {query}.");
+    return CONFIG.urls.searchTemplate.replace("{query}", encoded);
   }
 
   function buildProductTrackingUrl(productUrl) {
@@ -40,6 +42,7 @@
     let url;
     try { url = new URL(productUrl); } catch (_) { throw new TypeError("URL de produit invalide."); }
     if (url.protocol !== "https:") throw new TypeError("Seules les URL HTTPS sont autorisées.");
+    if (!CONFIG.urls.productTrackingTemplate.includes("{url}")) throw new Error("Le gabarit officiel doit contenir {url}.");
     return CONFIG.urls.productTrackingTemplate.replace("{url}", encodeURIComponent(url.href));
   }
 
