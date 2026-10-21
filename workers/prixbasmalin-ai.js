@@ -1,62 +1,152 @@
 /**
- * Prix Malin — secure AI gateway for Cloudflare Workers.
- * Required Worker secrets: AGNES_API_KEY and GROK_API_KEY.
- * Never put provider keys in browser code or this repository.
+ * Prix Malin — AI gateway for Cloudflare Workers.
+ * Required secrets: AGNES_API_KEY and GROK_API_KEY.
+ * Optional vars: AGNES_MODEL, GROK_MODEL.
+ * Never expose provider keys to browser code.
  */
-const ALLOWED_ORIGINS = new Set(["https://prixbasmalin.fr", "https://www.prixbasmalin.fr"]);
+const ALLOWED_ORIGINS = new Set([
+  "https://prixbasmalin.fr",
+  "https://www.prixbasmalin.fr"
+]);
+const JSON_HEADERS = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" };
+
+function json(data, status, cors = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...JSON_HEADERS, ...cors }
+  });
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
+    const originAllowed = ALLOWED_ORIGINS.has(origin);
     const cors = {
-      "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://prixbasmalin.fr",
+      ...(originAllowed ? { "Access-Control-Allow-Origin": origin } : {}),
       "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
       "Vary": "Origin"
     };
+
+    if (request.method === "OPTIONS") {
+      if (!originAllowed) return new Response(null, { status: 403 });
+      return new Response(null, { status: 204, headers: cors });
+    }
+
     const url = new URL(request.url);
-    if (request.method === "OPTIONS") return new Response(null, { headers: cors });
     if (url.pathname === "/health" && request.method === "GET") {
-      return Response.json({ ok: true, service: "Prix Malin AI gateway", providers: {
-        agnes: Boolean(env.AGNES_API_KEY), grok: Boolean(env.GROK_API_KEY)
-      }}, { headers: cors });
+      return json({
+        ok: true,
+        service: "Prix Malin AI gateway",
+        providers: {
+          agnes: Boolean(env.AGNES_API_KEY),
+          grok: Boolean(env.GROK_API_KEY)
+        }
+      }, 200, cors);
     }
+
     if (url.pathname !== "/api/ai" || request.method !== "POST")
-      return Response.json({ error: "Not found" }, { status: 404, headers: cors });
-    if (!ALLOWED_ORIGINS.has(origin))
-      return Response.json({ error: "Origin not allowed" }, { status: 403, headers: cors });
+      return json({ error: "Not found" }, 404, cors);
+
+    if (!originAllowed)
+      return json({ error: "Origin not allowed" }, 403);
+
+    const contentType = request.headers.get("Content-Type") || "";
+    if (!contentType.toLowerCase().includes("application/json"))
+      return json({ error: "Content-Type must be application/json" }, 415, cors);
+
+    const declaredLength = Number(request.headers.get("Content-Length") || 0);
+    if (declaredLength > 12_000)
+      return json({ error: "Request too large" }, 413, cors);
+
     let body;
-    try { body = await request.json(); } catch {
-      return Response.json({ error: "Invalid JSON" }, { status: 400, headers: cors });
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: "Invalid JSON" }, 400, cors);
     }
-    const provider = body.provider;
-    if (!["agnes", "grok"].includes(provider))
-      return Response.json({ error: "provider must be agnes or grok" }, { status: 400, headers: cors });
-    const apiKey = provider === "agnes" ? env.AGNES_API_KEY : env.GROK_API_KEY;
-    if (!apiKey)
-      return Response.json({ error: "API key not configured", provider }, { status: 503, headers: cors });
+
+    const provider = body?.provider;
+    if (provider !== "agnes" && provider !== "grok")
+      return json({ error: "provider must be agnes or grok" }, 400, cors);
+
     const message = typeof body.message === "string" ? body.message.trim() : "";
     if (!message || message.length > 4000)
-      return Response.json({ error: "message required (max 4000 characters)" }, { status: 400, headers: cors });
-    const base = provider === "agnes" ? "https://apihub.agnes-ai.com/v1" : "https://api.x.ai/v1";
-    const model = typeof body.model === "string" && /^[a-zA-Z0-9._:-]{1,100}$/.test(body.model)
-      ? body.model : (provider === "agnes" ? "agnes-default" : "grok-3-mini");
+      return json({ error: "message required (max 4000 characters)" }, 400, cors);
+
+    // Models are controlled by server-side environment variables, not arbitrary client input.
+    const model = provider === "agnes"
+      ? (env.AGNES_MODEL || "agnes-default")
+      : (env.GROK_MODEL || "grok-3-mini");
+    if (!/^[a-zA-Z0-9._:-]{1,100}$/.test(model))
+      return json({ error: "Invalid server model configuration" }, 500, cors);
+
+    const apiKey = provider === "agnes" ? env.AGNES_API_KEY : env.GROK_API_KEY;
+    if (!apiKey)
+      return json({ error: "Provider not configured", provider }, 503, cors);
+
+    const base = provider === "agnes"
+      ? "https://apihub.agnes-ai.com/v1"
+      : "https://api.x.ai/v1";
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20_000);
+
     let upstream;
     try {
       upstream = await fetch(base + "/chat/completions", {
         method: "POST",
-        headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, messages: [{ role: "user", content: message }], max_tokens: 500, temperature: 0.2 })
+        signal: controller.signal,
+        headers: {
+          "Authorization": "Bearer " + apiKey,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: message }],
+          max_tokens: 500,
+          temperature: 0.2
+        })
       });
+    } catch (error) {
+      clearTimeout(timeout);
+      return json({
+        error: error?.name === "AbortError" ? "AI provider timed out" : "AI provider unreachable",
+        provider
+      }, 502, cors);
+    } finally {
+      // The timer is cleared after fetch resolves/rejects; the response body is read below.
+    }
+
+    let raw;
+    try {
+      raw = await upstream.text();
     } catch {
-      return Response.json({ error: "AI provider unreachable", provider }, { status: 502, headers: cors });
+      clearTimeout(timeout);
+      return json({ error: "Could not read AI provider response", provider }, 502, cors);
     }
-    const raw = await upstream.text();
-    if (!upstream.ok)
-      return Response.json({ error: "AI provider request failed", provider, status: upstream.status, details: raw.slice(0, 300) }, { status: 502, headers: cors });
+    clearTimeout(timeout);
+
+    if (!upstream.ok) {
+      // Do not return provider response bodies; they may contain internal details.
+      return json({
+        error: "AI provider request failed",
+        provider,
+        status: upstream.status
+      }, 502, cors);
+    }
+
     let data;
-    try { data = JSON.parse(raw); } catch {
-      return Response.json({ error: "Invalid response from AI provider" }, { status: 502, headers: cors });
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return json({ error: "Invalid response from AI provider", provider }, 502, cors);
     }
-    return Response.json({ ok: true, provider, model, answer: data.choices?.[0]?.message?.content ?? null }, { headers: cors });
+
+    const answer = data?.choices?.[0]?.message?.content;
+    if (typeof answer !== "string" || !answer.trim())
+      return json({ error: "AI provider returned no answer", provider }, 502, cors);
+
+    return json({ ok: true, provider, model, answer }, 200, cors);
   }
 };
