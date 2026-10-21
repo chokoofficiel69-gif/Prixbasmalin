@@ -425,6 +425,12 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 .ad-showcase .ad-featured .ad-kicker,.ad-showcase .ad-amazon .ad-kicker,.ad-showcase .ad-partner .ad-kicker{position:static;display:block;margin:0 0 8px}
 .ad-showcase .ad-card .ad-symbol{display:none}
 
+
+/* Flyer original La Maille : afficher l'image entière, sans recadrage ni réduction */
+.ad-showcase .ad-real-flyer{display:block!important;width:100%;min-width:0}
+.ad-showcase .ad-real-flyer .real-flyer-link{display:block;width:100%;margin:0 auto}
+.ad-showcase .ad-real-flyer .real-flyer-image{display:block;width:100%;height:auto;max-height:none;object-fit:contain;object-position:center top;border-radius:12px;background:#fff}
+
 /* Bandeau publicitaire animé : flyers défilants */
 .flyer-ticker{margin:10px 14px 20px;overflow:hidden;border:1px solid #eee;border-radius:14px;background:#111;color:#fff}
 .flyer-ticker-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 13px;background:#fff;color:#222;font-size:12px;font-weight:850}
@@ -577,15 +583,15 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
       <div class="ad-copy"><h2>Présentez votre activité</h2><p>Vous avez un commerce, une marque, un événement ou un projet artistique ? Préparez une demande de visibilité. Toute diffusion est confirmée après validation du contenu et des modalités.</p><a href="publicite.html" class="ad-cta">Préparer une demande ↗</a></div>
     </article>
     <article class="ad-card ad-snap-partner ad-real-flyer" aria-label="Flyer pare-brise La Maille">
-      <a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir Snapchat pour contacter La Maille">
-        <img src="assets/flyers/flyer-zero-franchise.webp" alt="Flyer La Maille : pare-brise, zéro franchise selon contrat et bonus annoncé de 200 euros" loading="lazy" style="display:block;width:100%;max-height:520px;object-fit:contain;object-position:top center;background:#fff;border-radius:12px">
+      <a class="real-flyer-link" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir Snapchat pour contacter La Maille">
+        <img class="real-flyer-image" src="assets/flyers/flyer-maille-snap.webp" alt="Flyer original La Maille avec avatar et contact Snapchat lozeill69" loading="eager">
       </a>
       <div class="ad-copy">
         <span class="snap-mini-label">🚘 ACTIVITÉ PARE-BRISE · LA MAILLE</span>
         <h2>Pare-brise endommagé ?</h2>
         <p>Retrouve mon flyer et contacte-moi directement sur Snapchat <strong>@lozeill69</strong>.</p>
         <a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" class="ad-cta snap-cta">👻 Ajouter lozeill69 sur Snap ↗</a>
-        <p class="notice">Franchise, prise en charge et bonus soumis aux conditions du contrat et à l’éligibilité de l’offre.</p>
+        <p class="notice">Le flyer original est affiché sans modifier son texte ni son avatar.</p>
       </div>
     </article>
   </section>
