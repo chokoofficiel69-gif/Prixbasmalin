@@ -372,6 +372,15 @@ button,.icon-button,.filter-button,.search button,.assistant-form button,.modal-
 .icon-button:hover{background:#fff3ed;border-color:#ffc8b2}
 button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
 
+
+/* Icônes vectorielles cohérentes : fini les émojis système dans la navigation */
+.category-icon{border-radius:15px;background:linear-gradient(145deg,#fff 0%,#fff8f3 100%);border-color:#eee0d7;box-shadow:0 3px 9px rgba(40,25,15,.07),inset 0 1px 0 #fff;color:#e9571c}
+.category-icon svg{width:23px;height:23px;display:block}
+.category.active .category-icon{color:#fff;box-shadow:0 5px 12px rgba(255,90,31,.23)}
+.nav-icon{width:24px;height:24px;display:grid;place-items:center}
+.nav-icon svg{width:22px;height:22px;display:block;stroke-width:1.9}
+.search button svg{width:23px;height:23px;display:block;margin:auto}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -395,19 +404,19 @@ button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
 </header>
 <main>
   <div class="search-row">
-    <form class="search" id="searchForm" autocomplete="off"><input id="query" type="search" placeholder="Rechercher un produit (ex. iPhone 15, Samsung Galaxy...)" aria-label="Rechercher un produit" aria-autocomplete="list" aria-controls="searchSuggestions"><button type="submit" aria-label="Lancer la recherche">🔍</button><div class="autocomplete" id="searchSuggestions" role="listbox" aria-label="Suggestions de recherche"></div></form>
+    <form class="search" id="searchForm" autocomplete="off"><input id="query" type="search" placeholder="Rechercher un produit (ex. iPhone 15, Samsung Galaxy...)" aria-label="Rechercher un produit" aria-autocomplete="list" aria-controls="searchSuggestions"><button type="submit" aria-label="Lancer la recherche"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><div class="autocomplete" id="searchSuggestions" role="listbox" aria-label="Suggestions de recherche"></div></form>
     <button class="filter-button" id="filterButton" aria-label="Filtres">☰</button>
   </div>
   <div id="amazonBanner"></div>
   <div class="categories" id="categories" aria-label="Catégories">
-    <button class="category active" data-category="all"><span class="category-icon">▦</span><span>Toutes</span></button>
-    <button class="category" data-category="tech"><span class="category-icon">📱</span><span>Électronique</span></button>
-    <button class="category" data-category="fashion"><span class="category-icon">👕</span><span>Mode</span></button>
-    <button class="category" data-category="home"><span class="category-icon">🛋️</span><span>Maison</span></button>
-    <button class="category" data-category="garden"><span class="category-icon">🌿</span><span>Jardin</span></button>
-    <button class="category" data-category="sport"><span class="category-icon">⚽</span><span>Sport</span></button>
-    <button class="category" data-category="beauty"><span class="category-icon">💄</span><span>Beauté</span></button>
-    <button class="category" data-category="baby"><span class="category-icon">👶</span><span>Bébé</span></button>
+    <button class="category active" data-category="all"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span><span>Toutes</span></button>
+    <button class="category" data-category="tech"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10 5h4M11 18.5h2"/></svg></span><span>Électronique</span></button>
+    <button class="category" data-category="fashion"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 4 4 2 4-2 5 3-2 5-3-1v9H8v-9l-3 1-2-5 5-3Z"/></svg></span><span>Mode</span></button>
+    <button class="category" data-category="home"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M4 11a2 2 0 0 0-2 2v4h20v-4a2 2 0 0 0-2-2"/><path d="M5 17v3m14-3v3M4 13h16"/></svg></span><span>Maison</span></button>
+    <button class="category" data-category="garden"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C10 4 5 7 5 13a5 5 0 0 0 5 5c6 0 9-6 10-14Z"/><path d="M3 21c3-6 7-9 13-13"/></svg></span><span>Jardin</span></button>
+    <button class="category" data-category="sport"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m12 7 4 3-1 5h-6l-1-5 4-3Zm0 0V3m4 7 5-2M15 15l3 5M9 15l-3 5m-1-10-2-2"/></svg></span><span>Sport</span></button>
+    <button class="category" data-category="beauty"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v4H9zM8 7h8l1 14H7L8 7Z"/><path d="M10 11h4"/></svg></span><span>Beauté</span></button>
+    <button class="category" data-category="baby"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><path d="M8 9h8l2 5-3 2v4H9v-4l-3-2 2-5Z"/><path d="M9 20v2m6-2v2"/></svg></span><span>Bébé</span></button>
   </div>
   <a href="catalogue.html" aria-label="Explorer le grand catalogue de produits" style="display:flex;align-items:center;gap:12px;margin:0 14px 14px;padding:13px 14px;border:1px solid #ffd5c2;border-radius:13px;background:#fff8f4;color:#191919">
     <span style="font-size:25px">🧭</span>
@@ -448,11 +457,11 @@ button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
   </section>
 </main>
 <nav class="bottom-nav" aria-label="Navigation principale">
-  <button class="active" data-nav="home"><span class="nav-icon">🏠</span><span>Accueil</span></button>
-  <button data-nav="categories"><span class="nav-icon">▦</span><span>Catégories</span></button>
-  <button data-nav="deals"><span class="nav-icon">🏷️</span><span>Plans</span></button>
-  <button data-nav="favorites"><span class="nav-icon">❤️</span><span>Favoris</span></button>
-  <button data-nav="account"><span class="nav-icon">👤</span><span>Compte</span></button>
+  <button class="active" data-nav="home"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span><span>Accueil</span></button>
+  <button data-nav="categories"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span><span>Catégories</span></button>
+  <button data-nav="deals"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13 13 20 3 10V4h6l11 9Z"/><circle cx="7" cy="8" r="1"/></svg></span><span>Plans</span></button>
+  <button data-nav="favorites"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.8 4.8 0 0 1 12 6.4a4.8 4.8 0 0 1 8.8 2.4Z"/></svg></span><span>Favoris</span></button>
+  <button data-nav="account"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Compte</span></button>
 </nav>
 <div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l’assistant Prix Malin" title="Besoin d’aide ?"><span aria-hidden="true">💬</span></button></div><button id="accessibilityButton" class="accessibility-button" aria-label="Ouvrir les options d’accessibilité" title="Accessibilité">♿</button>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
