@@ -412,6 +412,26 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 @media(min-width:700px){.floating-promo{bottom:22px;left:auto;right:22px;margin:0}.floating-promo-copy strong{font-size:13px}.floating-promo-copy span{font-size:11px}body.promo-visible .agent{bottom:105px}}
 @media(max-width:390px){.floating-promo{gap:8px;padding:11px 35px 11px 10px}.floating-promo-tag{font-size:8px;padding:5px}.floating-promo-copy strong{font-size:11px}.floating-promo-copy span{font-size:9px}.floating-promo-cta{padding:9px 8px;font-size:10px}}
 
+
+/* Bandeau de trois publicités — la marque Prixbasmalin est mise en avant */
+.ad-showcase{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 14px 18px}
+.ad-card{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:142px;padding:17px;border-radius:15px;overflow:hidden;border:1px solid #e7e7e7;background:#fff}
+.ad-featured{background:linear-gradient(115deg,#ff5a1f,#ff813e);border-color:#ff5a1f;color:#fff;box-shadow:0 8px 22px #ff5a1f24}
+.ad-amazon{background:linear-gradient(115deg,#fff8ed,#fff);border-color:#f2d8b2}
+.ad-partner{background:linear-gradient(115deg,#f4f6ff,#fff);border-color:#dce2ff}
+.ad-kicker{position:absolute;left:17px;top:12px;font-size:9px;font-weight:800;letter-spacing:.7px;opacity:.8}
+.ad-copy{padding-top:12px;max-width:620px;position:relative;z-index:1}
+.ad-copy h2{font-family:Outfit,Inter,sans-serif;font-size:clamp(17px,2.4vw,23px);line-height:1.15;margin:8px 0 5px;letter-spacing:-.3px}
+.ad-copy p{font-size:12px;line-height:1.45;margin:0 0 11px;max-width:520px;color:inherit;opacity:.82}
+.ad-cta{display:inline-flex;align-items:center;background:#fff;color:#e7470d;padding:8px 11px;border-radius:8px;font-size:11px;font-weight:800;text-decoration:none}
+.ad-amazon .ad-cta{background:#232f3e;color:#fff}
+.ad-partner .ad-cta{background:#222;color:#fff}
+.ad-symbol{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:30px;font-weight:800;background:#ffffff30;color:inherit}
+.ad-amazon .ad-symbol{background:#ffbd69;color:#232f3e;font-family:Georgia,serif}
+.ad-partner .ad-symbol{background:#dfe4ff;color:#3542a0}
+@media(min-width:760px){.ad-showcase{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 22px 22px;gap:12px}.ad-card{min-height:185px;padding:17px;align-items:flex-start}.ad-kicker{left:17px;top:12px}.ad-copy{padding-top:20px}.ad-symbol{position:absolute;right:15px;bottom:15px;opacity:.8}.ad-copy p{padding-right:0}.ad-copy h2{font-size:19px}.ad-cta{font-size:11px}}
+@media(max-width:390px){.ad-card{padding:15px 12px;gap:7px}.ad-kicker{left:12px}.ad-symbol{width:38px;height:38px;font-size:23px}.ad-copy h2{font-size:16px}.ad-copy p{font-size:11px}}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -454,6 +474,23 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
     <span style="flex:1;min-width:0"><strong style="display:block;font-size:13px">Explorer tout le catalogue</strong><span style="display:block;font-size:11px;color:#777;line-height:1.4;margin-top:3px">Mode, marques concurrentes, high-tech, maison, sport et bien plus</span></span>
     <span style="color:#ff5a1f;font-weight:800">→</span>
   </a>
+  <section class="ad-showcase" aria-label="Bannières publicitaires">
+    <article class="ad-card ad-featured">
+      <span class="ad-kicker">À LA UNE · PRIXBAS MALIN</span>
+      <div class="ad-copy"><h2>Comparez mieux. Achetez malin.</h2><p>Retrouvez notre sélection et explorez le catalogue pour préparer vos achats.</p><a href="catalogue.html" class="ad-cta">Découvrir le catalogue ↗</a></div>
+      <div class="ad-symbol" aria-hidden="true">%</div>
+    </article>
+    <article class="ad-card ad-amazon">
+      <span class="ad-kicker">PARTENAIRE · AMAZON</span>
+      <div class="ad-copy"><h2>À la recherche d’un bon produit ?</h2><p>Explorez les offres Amazon et vérifiez le prix directement chez le vendeur.</p><a href="https://www.amazon.fr/s?k=high-tech&amp;tag=prixbasmalin2021" target="_blank" rel="sponsored nofollow noopener" class="ad-cta">Voir les offres ↗</a></div>
+      <div class="ad-symbol" aria-hidden="true">a</div>
+    </article>
+    <article class="ad-card ad-partner">
+      <span class="ad-kicker">ESPACE PARTENAIRE</span>
+      <div class="ad-copy"><h2>Faites connaître votre projet</h2><p>Commerce, artiste, musique ou événement : votre publicité peut être mise en avant ici.</p><a href="publicite.html" class="ad-cta">Découvrir les offres ↗</a></div>
+      <div class="ad-symbol" aria-hidden="true">↗</div>
+    </article>
+  </section>
   <section class="banner" aria-label="Comparer les prix">
     <div class="banner-copy">
       <h1>Explorez, comparez et choisissez malin.</h1>
