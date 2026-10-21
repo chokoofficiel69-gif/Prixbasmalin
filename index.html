@@ -528,6 +528,16 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 /* Ralentissement demandé : défilement plus doux */
 .flyer-ticker-track{animation-duration:48s}
 @media(prefers-reduced-motion:reduce){.flyer-ticker-track{animation:none;flex-wrap:wrap;width:auto}}
+
+/* Correctifs finaux du bandeau flyers et de la taille du flyer La Maille */
+.flyer-ticker{margin:0 0 16px!important;border-radius:0 0 14px 14px!important;border-left:0!important;border-right:0!important}
+.flyer-ticker-window{padding:9px 0!important}
+.flyer-ticker-track{animation-duration:48s!important}
+.flyer-ticker-card{grid-template-columns:92px minmax(0,1fr)!important;width:290px!important;min-height:112px!important}
+.flyer-ticker-photo-wrap{display:block!important;width:92px!important;height:92px!important;overflow:hidden!important;border-radius:8px!important;background:#fff!important}
+.flyer-ticker-photo{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;background:#fff!important}
+.ad-showcase .ad-real-flyer .real-flyer-image{display:block!important;width:auto!important;max-width:100%!important;height:auto!important;max-height:300px!important;margin:0 auto!important;object-fit:contain!important;object-position:center top!important}
+@media(min-width:700px){.flyer-ticker{margin:0 0 18px!important}.flyer-ticker-card{width:320px!important;grid-template-columns:104px minmax(0,1fr)!important}.flyer-ticker-photo-wrap{width:104px!important;height:104px!important}.ad-showcase .ad-real-flyer .real-flyer-image{max-height:440px!important}}
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
