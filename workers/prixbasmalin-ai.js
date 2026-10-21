@@ -9,6 +9,20 @@ const ALLOWED_ORIGINS = new Set([
   "https://www.prixbasmalin.fr"
 ]);
 const JSON_HEADERS = { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" };
+// Best-effort per-isolate guard. Use Cloudflare Rate Limiting rules for a durable edge-wide limit.
+const rateBuckets = new Map();
+function isRateLimited(key, now = Date.now()) {
+  const windowMs = 60_000;
+  const limit = 20;
+  let bucket = rateBuckets.get(key);
+  if (!bucket || now - bucket.start >= windowMs) bucket = { start: now, count: 0 };
+  bucket.count++;
+  rateBuckets.set(key, bucket);
+  if (rateBuckets.size > 2000) {
+    for (const [k, v] of rateBuckets) if (now - v.start >= windowMs) rateBuckets.delete(k);
+  }
+  return bucket.count > limit;
+}
 
 function json(data, status, cors = {}) {
   return new Response(JSON.stringify(data), {
@@ -69,6 +83,10 @@ export default {
     const provider = body?.provider;
     if (provider !== "agnes" && provider !== "grok")
       return json({ error: "provider must be agnes or grok" }, 400, cors);
+
+    const clientIp = request.headers.get("CF-Connecting-IP") || "unknown";
+    if (isRateLimited(clientIp))
+      return json({ error: "Too many requests. Please try again in a minute." }, 429, cors);
 
     const message = typeof body.message === "string" ? body.message.trim() : "";
     if (!message || message.length > 4000)
