@@ -700,7 +700,7 @@ document.addEventListener("click",e=>{if(!e.target.closest("#searchForm"))sugges
 
 document.getElementById("searchForm").onsubmit=e=>{e.preventDefault();suggestionBox.classList.remove("open");showingFavorites=false;renderProducts()};
 document.getElementById("query").oninput=()=>{showingFavorites=false;renderProducts()};
-document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[data-category]");if(!btn)return;activeCategory=btn.dataset.category;showingFavorites=false;document.querySelectorAll(".category").forEach(c=>c.classList.toggle("active",c===btn));renderProducts()};
+document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[data-category]");if(!btn)return;if(btn.dataset.category==="all"){window.location.href="catalogue.html";return;}activeCategory=btn.dataset.category;showingFavorites=false;document.querySelectorAll(".category").forEach(c=>c.classList.toggle("active",c===btn));renderProducts()};
 document.getElementById("filterButton").onclick=()=>{
  const content=document.getElementById("modalContent");
  document.getElementById("modalTitle").textContent="Affiner la recherche";
