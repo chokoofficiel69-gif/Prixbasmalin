@@ -336,6 +336,42 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155e
 .modal.catalog-mode .all-products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media(min-width:760px){.modal.catalog-mode .all-products{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:480px){.modal.catalog-mode .all-products{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.modal.catalog-mode .modal-panel>h2{font-size:22px}}
+
+/* Système de boutons Prix Malin : net, cohérent et accessible */
+button,.icon-button,.filter-button,.search button,.assistant-form button,.modal-actions button,.access-panel button{
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+.search button,.assistant-form button{
+  border-radius:12px;
+  font-weight:800;
+  box-shadow:0 3px 8px rgba(224,91,35,.16);
+}
+.search button:hover,.assistant-form button:hover{
+  box-shadow:0 5px 13px rgba(224,91,35,.23);
+  transform:translateY(-1px);
+}
+.filter-button{
+  border-radius:12px;
+  background:#fff;
+  border:1px solid #e7e2de;
+}
+.filter-button:active,.search button:active,.assistant-form button:active{transform:scale(.98)}
+.category-icon{
+  border-radius:14px;
+  background:linear-gradient(145deg,#fff 0%,#fff8f3 100%);
+  border-color:#eee2d9;
+  box-shadow:0 3px 9px rgba(40,25,15,.07),inset 0 1px 0 #fff;
+}
+.category.active .category-icon{
+  box-shadow:0 4px 10px rgba(224,91,35,.2);
+}
+.icon-button{
+  border:1px solid #eee5df;
+  background:#fff;
+}
+.icon-button:hover{background:#fff3ed;border-color:#ffc8b2}
+button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
