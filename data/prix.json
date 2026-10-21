@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "max_age_days": 7,
+  "methodology": "Relevés saisis manuellement. Un prix n'est affiché que si verifie=true, prix positif, URL HTTPS et date valide de moins de 7 jours.",
+  "prices": []
+}
