@@ -503,14 +503,29 @@ document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrol
 
 document.getElementById("agentButton").onclick=()=>{
  const content=document.getElementById("modalContent");
- document.getElementById("modalTitle").textContent="Bonjour ! Comment puis-je t’aider ?";
+ document.getElementById("modalTitle").textContent="Assistant IA Prix Malin";
  content.innerHTML="";
  const form=document.createElement("form");form.className="assistant-form";
- const intro=document.createElement("p");intro.textContent="Décris ce que tu recherches, ton budget et, si besoin, la quantité. Je peux t’aider à préciser la recherche. Les prix en direct ne sont pas encore connectés.";
- const input=document.createElement("input");input.name="assistantQuery";input.placeholder="Ex. : un casque Bluetooth à moins de 40 €";input.setAttribute("aria-label","Que recherches-tu ?");
- const submit=document.createElement("button");submit.type="submit";submit.textContent="Rechercher sur Prix Malin";
- form.append(intro,input,submit);
- form.onsubmit=e=>{e.preventDefault();const q=input.value.trim();if(!q){input.focus();return}document.getElementById("query").value=q;activeCategory="all";showingFavorites=false;renderProducts();closeModal();document.getElementById("popular").scrollIntoView({behavior:"smooth"});document.getElementById("query").focus()};
+ const intro=document.createElement("p");intro.textContent="Pose ta question à l’assistant IA. Il peut t’aider à choisir un produit, comparer des critères et préparer une recherche. Les prix en direct ne sont pas encore connectés.";
+ const providerLabel=document.createElement("label");providerLabel.textContent="Assistant";
+ const provider=document.createElement("select");provider.name="provider";provider.setAttribute("aria-label","Choisir l’assistant IA");provider.style.cssText="width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;font:inherit";
+ [["agnes","Agnes AI — rapide"],["grok","Grok — analyse"]].forEach(([value,label])=>{const option=document.createElement("option");option.value=value;option.textContent=label;provider.append(option)});
+ const input=document.createElement("input");input.name="assistantQuery";input.placeholder="Ex. : compare les critères d’un casque Bluetooth à moins de 40 €";input.setAttribute("aria-label","Ta question");
+ const submit=document.createElement("button");submit.type="submit";submit.textContent="Demander à l’IA";
+ const result=document.createElement("div");result.setAttribute("role","status");result.setAttribute("aria-live","polite");result.style.cssText="white-space:pre-wrap;line-height:1.55;font-size:14px;color:#222";
+ form.append(intro,providerLabel,provider,input,submit,result);
+ form.onsubmit=async e=>{
+  e.preventDefault();const q=input.value.trim();if(!q){input.focus();return}
+  submit.disabled=true;submit.textContent="Réponse en cours…";result.textContent="Connexion à "+(provider.value==="agnes"?"Agnes AI":"Grok")+"…";
+  try{
+   const response=await fetch("https://prixbasmalin-ia.chokoofficiel69.workers.dev/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:provider.value,message:q})});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok||!data.ok)throw new Error(data.error||"Le service IA est temporairement indisponible.");
+   result.textContent=data.answer;
+  }catch(error){
+   result.textContent="Je n’ai pas pu joindre l’IA. Vérifie la connexion puis réessaie. ("+String(error.message||"erreur réseau")+")";
+  }finally{submit.disabled=false;submit.textContent="Demander à l’IA"}
+ };
  content.append(form);document.getElementById("modal").classList.add("open");input.focus();
 };
 let touchAnnounceEnabled=localStorage.getItem("pmTouchAnnounce")==="1";
