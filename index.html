@@ -495,6 +495,22 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 .flyer-ticker-card.deals-ad .flyer-ticker-icon{background:#ff5a1f;color:#fff}
 .flyer-ticker-card.deals-ad em{background:#ff5a1f;color:#fff}
 @media(min-width:700px){.flyer-ticker-card{flex-basis:340px;min-height:122px;padding:16px}.flyer-ticker-card strong{font-size:16px}}
+
+/* Flyers images réelles dans le bandeau tournant */
+.flyer-ticker-card{display:flex;align-items:center;gap:10px;width:290px;min-height:126px;flex:0 0 290px;padding:10px}
+.flyer-ticker-photo-wrap{height:104px;width:70px;flex:0 0 70px;display:flex;align-items:center;justify-content:center;background:#181818;border-radius:7px;overflow:hidden}
+.flyer-ticker-photo{display:block;max-height:104px;max-width:70px;width:100%;height:100%;object-fit:contain}
+.flyer-ticker-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;min-width:0}
+.flyer-ticker-copy strong{font-size:12px;line-height:1.15}
+.flyer-ticker-copy small{font-size:10px;line-height:1.25;color:#333}
+.flyer-ticker-copy em{font-size:9px;padding:6px 7px;margin-top:2px}
+.flyer-ticker-card.amazon-ad{background:linear-gradient(120deg,#eaf2ff,#d3e3ff);border-color:#bdd0f3}
+.flyer-ticker-card.amazon-ad .flyer-ticker-icon{background:#164d9b;color:white;flex:0 0 58px}
+.flyer-ticker-card.amazon-ad em{background:#164d9b;color:#fff}
+.flyer-ticker-card.deals-ad{background:linear-gradient(120deg,#fff0e6,#ffd9c4);border-color:#ffc6a9}
+.flyer-ticker-card.deals-ad .flyer-ticker-icon{background:#ff5a1f;color:white;flex:0 0 58px}
+.flyer-ticker-card.deals-ad em{background:#ff5a1f;color:#fff}
+@media(min-width:700px){.flyer-ticker-card{width:330px;flex-basis:330px;min-height:136px}.flyer-ticker-photo-wrap{height:114px;width:78px;flex-basis:78px}.flyer-ticker-photo{max-height:114px;max-width:78px}.flyer-ticker-copy strong{font-size:14px}.flyer-ticker-copy small{font-size:11px}}
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -572,17 +588,21 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
       </div>
     </article>
   </section>
-  <section class="flyer-ticker" aria-label="Publicités et flyers partenaires">
+    <section class="flyer-ticker" aria-label="Flyers et publicités partenaires">
     <div class="flyer-ticker-head"><span>📣 Flyers & partenaires</span><a href="publicite.html">Proposer un flyer ↗</a></div>
     <div class="flyer-ticker-window"><div class="flyer-ticker-track">
-      <a class="flyer-ticker-card la-maille-ad" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">👻</span><span><strong>LA MAILLE · SNAP</strong><small>Contact direct sur Snapchat</small><em>@lozeill69 · AJOUTE-MOI ↗</em></span></a>
-      <a class="flyer-ticker-card amazon-ad" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">🛍️</span><span><strong>OFFRES AMAZON</strong><small>Explore les offres du moment</small><em>VOIR LES OFFRES ↗</em></span></a>
-      <a class="flyer-ticker-card future-ad" href="publicite.html"><span class="flyer-ticker-icon">＋</span><span><strong>VOTRE MARQUE ICI</strong><small>Commerce, événement, service ou créateur</small><em>Réserver une bannière ↗</em></span></a>
-      <a class="flyer-ticker-card deals-ad" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">🏷️</span><span><strong>BONS PLANS SHOPPING</strong><small>Compare avant de payer</small><em>EXPLORER ↗</em></span></a>
-      <a class="flyer-ticker-card la-maille-ad" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">👻</span><span><strong>LA MAILLE · SNAP</strong><small>Contact direct sur Snapchat</small><em>@lozeill69 · AJOUTE-MOI ↗</em></span></a>
-      <a class="flyer-ticker-card amazon-ad" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">🛍️</span><span><strong>OFFRES AMAZON</strong><small>Explore les offres du moment</small><em>VOIR LES OFFRES ↗</em></span></a>
-      <a class="flyer-ticker-card future-ad" href="publicite.html"><span class="flyer-ticker-icon">＋</span><span><strong>VOTRE MARQUE ICI</strong><small>Commerce, événement, service ou créateur</small><em>Réserver une bannière ↗</em></span></a>
-      <a class="flyer-ticker-card deals-ad" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">🏷️</span><span><strong>BONS PLANS SHOPPING</strong><small>Compare avant de payer</small><em>EXPLORER ↗</em></span></a>
+      <a class="flyer-ticker-card flyer-maille-cadeaux" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-maille-cadeaux.webp" alt="LA MAILLE · SNAP" loading="lazy"></span><span class="flyer-ticker-copy"><strong>LA MAILLE · SNAP</strong><small>Flyer original • cadeaux et offres</small><em>CONTACT SUR SNAP ↗</em></span></a>
+      <a class="flyer-ticker-card flyer-maille-snap" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-maille-snap.webp" alt="LA MAILLE · SNAP" loading="lazy"></span><span class="flyer-ticker-copy"><strong>LA MAILLE · SNAP</strong><small>Flyer original • infos et contact</small><em>AJOUTE-MOI ↗</em></span></a>
+      <a class="flyer-ticker-card flyer-300-euros" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-300-euros.webp" alt="300 € EN CADEAU" loading="lazy"></span><span class="flyer-ticker-copy"><strong>300 € EN CADEAU</strong><small>Découvre les détails de l’offre sur Snap</small><em>EN SAVOIR PLUS ↗</em></span></a>
+      <a class="flyer-ticker-card flyer-zero-franchise" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-zero-franchise.webp" alt="PARE-BRISE · BONUS" loading="lazy"></span><span class="flyer-ticker-copy"><strong>PARE-BRISE · BONUS</strong><small>Le flyer de La Maille • contact direct</small><em>CONTACT SUR SNAP ↗</em></span></a>
+      <a class="flyer-ticker-card amazon-ad" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">🛍️</span><span class="flyer-ticker-copy"><strong>OFFRES AMAZON</strong><small>Explore les offres du moment</small><em>VOIR LES OFFRES ↗</em></span></a>
+      <a class="flyer-ticker-card deals-ad" href="catalogue.html"><span class="flyer-ticker-icon">％</span><span class="flyer-ticker-copy"><strong>PRIX MALIN</strong><small>Compare avant de payer</small><em>EXPLORER LE CATALOGUE ↗</em></span></a>
+      <a class="flyer-ticker-card flyer-maille-cadeaux" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-maille-cadeaux.webp" alt="LA MAILLE · SNAP" loading="lazy"></span><span class="flyer-ticker-copy"><strong>LA MAILLE · SNAP</strong><small>Flyer original • cadeaux et offres</small><em>CONTACT SUR SNAP ↗</em></span></a>
+      <a class="flyer-ticker-card flyer-maille-snap" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-maille-snap.webp" alt="LA MAILLE · SNAP" loading="lazy"></span><span class="flyer-ticker-copy"><strong>LA MAILLE · SNAP</strong><small>Flyer original • infos et contact</small><em>AJOUTE-MOI ↗</em></span></a>
+      <a class="flyer-ticker-card flyer-300-euros" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-300-euros.webp" alt="300 € EN CADEAU" loading="lazy"></span><span class="flyer-ticker-copy"><strong>300 € EN CADEAU</strong><small>Découvre les détails de l’offre sur Snap</small><em>EN SAVOIR PLUS ↗</em></span></a>
+      <a class="flyer-ticker-card flyer-zero-franchise" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-zero-franchise.webp" alt="PARE-BRISE · BONUS" loading="lazy"></span><span class="flyer-ticker-copy"><strong>PARE-BRISE · BONUS</strong><small>Le flyer de La Maille • contact direct</small><em>CONTACT SUR SNAP ↗</em></span></a>
+      <a class="flyer-ticker-card amazon-ad" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">🛍️</span><span class="flyer-ticker-copy"><strong>OFFRES AMAZON</strong><small>Explore les offres du moment</small><em>VOIR LES OFFRES ↗</em></span></a>
+      <a class="flyer-ticker-card deals-ad" href="catalogue.html"><span class="flyer-ticker-icon">％</span><span class="flyer-ticker-copy"><strong>PRIX MALIN</strong><small>Compare avant de payer</small><em>EXPLORER LE CATALOGUE ↗</em></span></a>
     </div></div>
   </section>
   <section class="banner" aria-label="Comparer les prix">
