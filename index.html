@@ -181,6 +181,26 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155e
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Carrousel publicitaire : formats de démonstration, fluide sur mobile */
+.ad-carousel{overflow:hidden;border-radius:16px;background:#171717;padding:10px 0;border:1px solid #e7e7e7;mask-image:linear-gradient(to right,transparent 0,#000 3%,#000 97%,transparent 100%)}
+.ad-track{display:flex;gap:12px;width:max-content;animation:adMarquee 34s linear infinite;padding:0 12px}
+.ad-carousel:hover .ad-track,.ad-carousel:focus-within .ad-track{animation-play-state:paused}
+.ad-card{display:block;flex:0 0 300px;width:300px;overflow:hidden;border:1px solid #343434;border-radius:14px;background:#fff;color:#171717;scroll-snap-align:start;box-shadow:0 3px 12px #0002}
+.ad-visual{height:155px;padding:14px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px}
+.ad-visual .ad-eyebrow{font-size:9px;letter-spacing:1.1px;font-weight:800;opacity:.8}
+.ad-visual strong{font-family:Outfit,Inter,sans-serif;font-size:27px;line-height:1;letter-spacing:-.8px}
+.ad-visual span:not(.ad-eyebrow){font-size:12px;line-height:1.35;max-width:245px}
+.ad-visual b{font-size:11px;padding:8px 10px;border-radius:8px;margin-top:3px}
+.ad-yellow{background:linear-gradient(135deg,#fff64d,#ffe500);color:#111}.ad-yellow b{background:#111;color:#ffed00}
+.ad-blue{background:linear-gradient(135deg,#e8f1ff,#b9d3ff);color:#122c60}.ad-blue b{background:#183f8c;color:#fff}
+.ad-light{background:linear-gradient(135deg,#fff,#f0f2f6);color:#222}.ad-light b{background:#171717;color:#ffed00}
+.ad-caption{padding:10px 12px;display:flex;flex-direction:column;gap:3px;min-height:58px;background:#fff}
+.ad-caption strong{font-size:12px}.ad-caption span{font-size:10px;color:#666;line-height:1.3}
+.ad-pricing-note{font-size:10px;color:#888;margin:7px 2px 0;line-height:1.4}
+@keyframes adMarquee{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 6px))}}
+@media(min-width:700px){.ad-card{flex-basis:360px;width:360px}.ad-visual{height:170px;padding:18px}.ad-visual strong{font-size:31px}}
+@media(prefers-reduced-motion:reduce){.ad-track{animation:none;overflow-x:auto}.ad-carousel{overflow-x:auto}}
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -241,12 +261,29 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155e
       <span style="font-size:12px;color:#666;line-height:1.5">Explore les plateformes, compare les devis et calcule le coût total par article.</span>
     </a>
   </section>
-  <section class="section" aria-label="Partenariats Prix Malin">
-    <div class="section-head"><h2>🤝 Partenaires & professionnels</h2><a class="text-link" href="partenaires.html">Découvrir ›</a></div>
-    <a href="partenaires.html" style="display:block;background:#f7f7ff;border:1px solid #dedcff;border-radius:14px;padding:16px;color:inherit;text-decoration:none">
-      <strong style="display:block;font-size:15px;margin-bottom:5px">Vous êtes une entreprise ou un fournisseur ?</strong>
-      <span style="display:block;font-size:12px;color:#666;line-height:1.5">Explorez les partenariats, les domaines à développer et préparez un e-mail professionnel en quelques étapes.</span>
-    </a>
+  <section class="section" aria-label="Bannières publicitaires et flyers">
+    <div class="section-head"><h2>📣 Flyers & publicités partenaires</h2><a class="text-link" href="partenaires.html">Proposer une publicité ↗</a></div>
+    <div class="ad-carousel" aria-label="Carrousel publicitaire défilant">
+      <div class="ad-track">
+        <a class="ad-card ad-snap" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" aria-label="Contacter La Maille sur Snapchat">
+          <div class="ad-visual ad-yellow"><span class="ad-eyebrow">PARTENAIRE LOCAL</span><strong>LA MAILLE</strong><span>On se retrouve sur Snap.</span><b>@lozeill69 · AJOUTE-MOI ↗</b></div>
+          <div class="ad-caption"><strong>La Maille · Snapchat 👻</strong><span>Contact direct • Lyon et alentours</span></div>
+        </a>
+        <a class="ad-card ad-amazon" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021" target="_blank" rel="noopener noreferrer" aria-label="Découvrir les offres Amazon">
+          <div class="ad-visual ad-blue"><span class="ad-eyebrow">SÉLECTION SHOPPING</span><strong>AMAZON</strong><span>Explorez les offres et comparez avant d’acheter.</span><b>VOIR LES OFFRES ↗</b></div>
+          <div class="ad-caption"><strong>Offres Amazon</strong><span>Vérifiez le prix et la disponibilité chez le vendeur.</span></div>
+        </a>
+        <a class="ad-card ad-partner" href="partenaires.html">
+          <div class="ad-visual ad-light"><span class="ad-eyebrow">EMPLACEMENT PARTENAIRE</span><strong>VOTRE MARQUE ICI</strong><span>Commerce, événement, service ou créateur.</span><b>PROPOSER UNE PUBLICITÉ ↗</b></div>
+          <div class="ad-caption"><strong>Votre entreprise</strong><span>Emplacement disponible pour un futur partenaire.</span></div>
+        </a>
+        <a class="ad-card ad-snap" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" aria-label="Contacter La Maille sur Snapchat">
+          <div class="ad-visual ad-yellow"><span class="ad-eyebrow">PARTENAIRE LOCAL</span><strong>LA MAILLE</strong><span>On se retrouve sur Snap.</span><b>@lozeill69 · AJOUTE-MOI ↗</b></div>
+          <div class="ad-caption"><strong>La Maille · Snapchat 👻</strong><span>Contact direct • Lyon et alentours</span></div>
+        </a>
+      </div>
+    </div>
+    <p class="ad-pricing-note">Exemple de régie publicitaire : formats et tarifs à définir. La visibilité peut évoluer selon la formule choisie.</p>
   </section>
   <section class="section" aria-label="Guides d’achat">
     <div class="section-head"><h2>📘 Guides d’achat</h2><a class="text-link" href="guide-achat-maison-jardin.html">Maison & jardin ›</a></div>
