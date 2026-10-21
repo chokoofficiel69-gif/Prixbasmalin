@@ -2,15 +2,134 @@
   "version": 1,
   "note": "Liens de recherche externes uniquement. Ils n'importent ni ne vérifient automatiquement les prix.",
   "comparateurs": [
-    {"id":"google-shopping","nom":"Google Shopping","categories":["tech","fashion","home","garden","sport","beauty","baby"],"url_modele":"https://www.google.com/search?tbm=shop&q={q}","a_verifier":false,"verification":"Recherche Shopping déjà utilisée dans le site."},
-    {"id":"idealo","nom":"Idealo","categories":["tech","home","sport"],"url_modele":"https://www.idealo.fr/prechcat.html?q={q}","a_verifier":false,"verification":"Modèle France trouvé dans la documentation consultée."},
-    {"id":"amazon","nom":"Amazon","categories":["tech","fashion","home","garden","sport","beauty","baby"],"url_modele":"https://www.amazon.fr/s?k={q}&tag=prixbasmalin2021","a_verifier":false,"verification":"Recherche Amazon déjà utilisée dans le site ; lien affilié existant."},
-    {"id":"fnac","nom":"Fnac","categories":["tech","home"],"url_modele":"https://www.fnac.com/SearchResult/ResultList.aspx?Search={q}","a_verifier":false,"verification":"Modèle déjà présent dans le code du site ; à revalider en test manuel."},
-    {"id":"cdiscount","nom":"Cdiscount","categories":["tech","home","garden","sport"],"url_modele":"https://www.cdiscount.com/search/10/{q}.html","a_verifier":false,"verification":"Modèle déjà présent dans le code du site ; à revalider en test manuel."},
-    {"id":"ledenicheur","nom":"leDénicheur","categories":["tech","home"],"url_modele":"https://ledenicheur.fr/search?search={q}","a_verifier":true,"verification":"À vérifier manuellement avant affichage public."},
-    {"id":"darty","nom":"Darty","categories":["tech","home"],"url_modele":"https://www.darty.com/nav/recherche?text={q}","a_verifier":true,"verification":"À vérifier manuellement avant affichage public."},
-    {"id":"boulanger","nom":"Boulanger","categories":["tech","home"],"url_modele":"https://www.boulanger.com/resultats?tr={q}","a_verifier":true,"verification":"À vérifier manuellement avant affichage public."},
-    {"id":"rakuten","nom":"Rakuten","categories":["tech","fashion","home"],"url_modele":"https://fr.shopping.rakuten.com/s/{q}","a_verifier":true,"verification":"À vérifier manuellement avant affichage public."},
-    {"id":"ebay","nom":"eBay","categories":["tech","fashion","home","garden","sport","beauty","baby"],"url_modele":"https://www.ebay.fr/sch/i.html?_nkw={q}","a_verifier":true,"verification":"À vérifier manuellement avant affichage public."}
+    {
+      "id": "google-shopping",
+      "nom": "Google Shopping",
+      "categories": [
+        "tech",
+        "fashion",
+        "home",
+        "garden",
+        "sport",
+        "beauty",
+        "baby"
+      ],
+      "url_modele": "https://www.google.com/search?tbm=shop&q={q}",
+      "a_verifier": false,
+      "verification": "Recherche Shopping déjà utilisée dans le site."
+    },
+    {
+      "id": "idealo",
+      "nom": "Idealo",
+      "categories": [
+        "tech",
+        "home",
+        "sport"
+      ],
+      "url_modele": "https://www.idealo.fr/prechcat.html?q={q}",
+      "a_verifier": false,
+      "verification": "Modèle France trouvé dans la documentation consultée."
+    },
+    {
+      "id": "amazon",
+      "nom": "Amazon",
+      "categories": [
+        "tech",
+        "fashion",
+        "home",
+        "garden",
+        "sport",
+        "beauty",
+        "baby"
+      ],
+      "url_modele": "https://www.amazon.fr/s?k={q}&tag=prixbasmalin2021",
+      "a_verifier": false,
+      "verification": "Recherche Amazon déjà utilisée dans le site ; lien affilié existant."
+    },
+    {
+      "id": "fnac",
+      "nom": "Fnac",
+      "categories": [
+        "tech",
+        "home"
+      ],
+      "url_modele": "https://www.fnac.com/SearchResult/ResultList.aspx?Search={q}",
+      "a_verifier": true,
+      "verification": "Le modèle est repris de l’ancien code, mais l’accès public n’a pas pu être testé par cet audit ; masqué jusqu’à validation manuelle."
+    },
+    {
+      "id": "cdiscount",
+      "nom": "Cdiscount",
+      "categories": [
+        "tech",
+        "home",
+        "garden",
+        "sport"
+      ],
+      "url_modele": "https://www.cdiscount.com/search/10/{q}.html",
+      "a_verifier": true,
+      "verification": "Le modèle est repris de l’ancien code, mais l’accès public n’a pas pu être testé par cet audit ; masqué jusqu’à validation manuelle."
+    },
+    {
+      "id": "ledenicheur",
+      "nom": "leDénicheur",
+      "categories": [
+        "tech",
+        "home"
+      ],
+      "url_modele": "https://ledenicheur.fr/search?search={q}",
+      "a_verifier": true,
+      "verification": "À vérifier manuellement avant affichage public."
+    },
+    {
+      "id": "darty",
+      "nom": "Darty",
+      "categories": [
+        "tech",
+        "home"
+      ],
+      "url_modele": "https://www.darty.com/nav/recherche?text={q}",
+      "a_verifier": true,
+      "verification": "À vérifier manuellement avant affichage public."
+    },
+    {
+      "id": "boulanger",
+      "nom": "Boulanger",
+      "categories": [
+        "tech",
+        "home"
+      ],
+      "url_modele": "https://www.boulanger.com/resultats?tr={q}",
+      "a_verifier": true,
+      "verification": "À vérifier manuellement avant affichage public."
+    },
+    {
+      "id": "rakuten",
+      "nom": "Rakuten",
+      "categories": [
+        "tech",
+        "fashion",
+        "home"
+      ],
+      "url_modele": "https://fr.shopping.rakuten.com/s/{q}",
+      "a_verifier": true,
+      "verification": "À vérifier manuellement avant affichage public."
+    },
+    {
+      "id": "ebay",
+      "nom": "eBay",
+      "categories": [
+        "tech",
+        "fashion",
+        "home",
+        "garden",
+        "sport",
+        "beauty",
+        "baby"
+      ],
+      "url_modele": "https://www.ebay.fr/sch/i.html?_nkw={q}",
+      "a_verifier": true,
+      "verification": "À vérifier manuellement avant affichage public."
+    }
   ]
 }
