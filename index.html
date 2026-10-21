@@ -511,6 +511,10 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 .flyer-ticker-card.deals-ad .flyer-ticker-icon{background:#ff5a1f;color:white;flex:0 0 58px}
 .flyer-ticker-card.deals-ad em{background:#ff5a1f;color:#fff}
 @media(min-width:700px){.flyer-ticker-card{width:330px;flex-basis:330px;min-height:136px}.flyer-ticker-photo-wrap{height:114px;width:78px;flex-basis:78px}.flyer-ticker-photo{max-height:114px;max-width:78px}.flyer-ticker-copy strong{font-size:14px}.flyer-ticker-copy small{font-size:11px}}
+
+/* Ralentissement demandé : défilement plus doux */
+.flyer-ticker-track{animation-duration:48s}
+@media(prefers-reduced-motion:reduce){.flyer-ticker-track{animation:none;flex-wrap:wrap;width:auto}}
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
