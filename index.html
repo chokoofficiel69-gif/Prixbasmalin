@@ -244,6 +244,82 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155e
  .logo{background:#fff;color:var(--orange);border:2px solid var(--orange)}
 }
 
+
+/* Refonte comparateur inspirée de la maquette fournie */
+@media(min-width:760px){
+ body{padding-bottom:28px;background:#fff;color:#20242b}
+ header{height:76px;padding:10px max(24px,calc((100vw - 1240px)/2));display:grid;grid-template-columns:180px minmax(300px,1fr) auto;gap:24px;border-bottom:1px solid #e5e7eb;position:relative}
+ .logo{width:40px;height:40px;background:#fff;color:var(--orange);border:2px solid var(--orange);border-radius:10px;font-size:22px}
+ .brand{gap:9px}
+ .brand-name{font-size:22px;color:#20242b}
+ .tagline{font-size:9px!important;color:#777}
+ #cartBtn{display:none}
+ header:after{content:"Mes favoris   ♡     Aide   ?";white-space:pre;font-size:12px;color:#444;grid-column:3;grid-row:1}
+ main{max-width:1240px;padding:0 24px}
+ .search-row{padding:14px 0 8px;gap:10px}
+ .search{height:44px;border:1px solid #d9dce1;border-radius:7px;background:#fff}
+ .search input{font-size:14px;padding:0 14px}
+ .search button{width:48px}
+ .filter-button{height:44px;width:auto;padding:0 15px;border-radius:7px;background:#fff;border:1px solid #ddd;font-size:13px}
+ .categories{padding:8px 0 15px;gap:0;border-bottom:1px solid #e7e7e7;overflow-x:auto}
+ .category{flex:0 0 auto;min-width:auto;padding:10px 16px;border-radius:0;border-bottom:2px solid transparent;font-size:12px;color:#333}
+ .category-icon{display:none}
+ .category.active{color:var(--orange);border-bottom-color:var(--orange)}
+ .banner{display:none}
+ main>a[aria-label="Explorer le grand catalogue de produits"]{display:none!important}
+ #popular{padding:15px 0 12px}
+ .section-head{margin-bottom:10px}
+ .section-head h2{font-size:21px}
+ .section-head:before{content:"Comparez les prix, faites le bon choix";font-family:Outfit,Inter,sans-serif;font-size:23px;font-weight:800;letter-spacing:-.5px;order:-2}
+ #popular .section-head h2{display:none}
+ #popular .section-head:after{content:"Des milliers d’offres actualisées chaque jour pour payer moins, malin.";display:block;font-size:12px;color:#777;order:-1}
+ #seeAll{display:none}
+ .products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;padding:0}
+ .product{position:relative;min-width:0;max-width:none;width:100%;min-height:190px;display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:auto auto auto 1fr;column-gap:14px;align-items:start;text-align:left;padding:14px;border:1px solid #e5e7eb;border-radius:9px;box-shadow:0 1px 4px #00000005}
+ .product-image{grid-column:1;grid-row:1/5;width:112px;height:132px;margin:0;background:#f7f7f7;border-radius:7px}
+ .product h3{grid-column:2;grid-row:1;font-size:14px;line-height:1.3;margin:1px 20px 3px 0;font-weight:700}
+ .product .desc{grid-column:2;grid-row:2;font-size:11px;color:#777;margin-bottom:4px}
+ .product .price{grid-column:2;grid-row:3;font-size:12px;color:#333;font-weight:500;margin-top:4px}
+ .product .old-price{display:none}
+ .product .saving{display:none}
+ .product .merchant{grid-column:2;grid-row:4;font-size:11px;color:#555;margin:3px 0 0}
+ .product>div:last-child{grid-column:2;grid-row:5;justify-content:flex-start!important;margin-top:7px!important}
+ .product-action{background:var(--orange);color:#fff;border-radius:5px;padding:7px 12px;font-size:11px}
+ .product-action:last-child{background:#fff1e9;color:var(--orange)}
+ .product:before{content:"♡";position:absolute;right:12px;top:8px;color:#777;font-size:19px}
+ .trust{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:12px 14px;background:#fffaf2;border:1px solid #ffe1c0;border-radius:8px;margin:4px 0 18px}
+ .trust-card{display:grid;grid-template-columns:28px 1fr;grid-template-rows:auto auto;gap:0 8px;text-align:left;border:0;border-radius:0;background:transparent;padding:8px 12px}
+ .trust-icon{grid-column:1;grid-row:1/3;color:var(--orange);font-size:22px}
+ .trust-card h3{font-size:12px;margin:0 0 2px}
+ .trust-card p{font-size:10px}
+ .bottom-nav{display:none}
+ .agent{right:24px;bottom:24px}
+ .accessibility-button{right:24px;bottom:84px}
+ .notice{font-size:11px}
+ #amazonBanner{margin:0}
+ .amazon-banner{margin:0 0 12px;padding:14px 18px;border-radius:8px}
+ .amazon-banner strong{font-size:18px}
+ .amazon-banner p{font-size:12px!important}
+ .all-products{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:759px){
+ .products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;overflow:visible}
+ .product{min-width:0;max-width:none;width:100%;padding:8px 7px;border-radius:10px}
+ .product-image{height:100px}
+ .product h3{font-size:12px}
+ .price{font-size:14px}
+ .merchant{font-size:10px}
+ .product-action{font-size:10px;padding:6px 7px}
+}
+.autocomplete{position:absolute;z-index:45;top:calc(100% + 5px);left:0;right:0;background:#fff;border:1px solid #e0e0e0;border-radius:10px;box-shadow:0 12px 28px #00000018;overflow:hidden;display:none}
+.autocomplete.open{display:block}
+.autocomplete button{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;text-align:left;border:0;border-bottom:1px solid #f0f0f0;background:#fff;color:#222;font-size:14px}
+.autocomplete button:last-child{border-bottom:0}
+.autocomplete button:hover,.autocomplete button:focus{background:#fff3ed}
+.autocomplete .suggest-icon{color:#888;font-size:16px}
+.search-row{position:relative}
+@media(min-width:760px){.search-row{position:relative}.search{flex:1}}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -267,7 +343,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155e
 </header>
 <main>
   <div class="search-row">
-    <form class="search" id="searchForm"><input id="query" type="search" placeholder="Rechercher un produit ou une marque..." aria-label="Rechercher un produit"><button type="submit" aria-label="Lancer la recherche">🔍</button></form>
+    <form class="search" id="searchForm" autocomplete="off"><input id="query" type="search" placeholder="Rechercher un produit (ex. iPhone 15, Samsung Galaxy...)" aria-label="Rechercher un produit" aria-autocomplete="list" aria-controls="searchSuggestions"><button type="submit" aria-label="Lancer la recherche">🔍</button><div class="autocomplete" id="searchSuggestions" role="listbox" aria-label="Suggestions de recherche"></div></form>
     <button class="filter-button" id="filterButton" aria-label="Filtres">☰</button>
   </div>
   <div id="amazonBanner"></div>
@@ -538,7 +614,47 @@ function showAllProducts(page=1){
 }
 function openModal(title,text){document.getElementById("modalTitle").textContent=title;document.getElementById("modalContent").innerHTML='<p>'+text+'</p>';document.getElementById("modal").classList.add("open")}
 function closeModal(){document.getElementById("modal").classList.remove("open")}
-document.getElementById("searchForm").onsubmit=e=>{e.preventDefault();showingFavorites=false;renderProducts()};
+
+/* Suggestions de recherche : aide à la saisie sans prétendre à une correction magique */
+const suggestionTerms = [
+ "Téléphone","Téléphone Samsung","iPhone","Smartphone pas cher","Casque Bluetooth",
+ "Écouteurs sans fil","Montre connectée","Ordinateur portable","Tablette",
+ "Télévision 4K","Console de jeux","Batterie externe","Chargeur USB-C",
+ "T-shirt","Baskets","Jean","Canapé","Aspirateur","Machine à laver",
+ "Robot aspirateur","Chaise de bureau","Tondeuse","Parfum","Poussette"
+];
+const queryInput=document.getElementById("query");
+const suggestionBox=document.getElementById("searchSuggestions");
+function getSuggestions(value){
+ const q=value.trim().toLocaleLowerCase("fr");
+ if(!q)return [];
+ const matches=suggestionTerms.filter(term=>term.toLocaleLowerCase("fr").includes(q)||term.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").includes(q.normalize("NFD").replace(/[\u0300-\u036f]/g,"")));
+ const products=productData.map(p=>p.name).filter(name=>name.toLocaleLowerCase("fr").includes(q));
+ return [...new Set([...matches,...products])].slice(0,6);
+}
+function paintSuggestions(){
+ const value=queryInput.value;
+ const choices=getSuggestions(value);
+ suggestionBox.innerHTML="";
+ if(!value.trim()||!choices.length){suggestionBox.classList.remove("open");return;}
+ choices.forEach(term=>{
+  const option=document.createElement("button");option.type="button";option.role="option";
+  option.innerHTML='<span class="suggest-icon">⌕</span><span></span>';
+  option.lastElementChild.textContent=term;
+  option.addEventListener("click",()=>{queryInput.value=term;suggestionBox.classList.remove("open");showingFavorites=false;renderProducts();queryInput.focus();});
+  suggestionBox.append(option);
+ });
+ suggestionBox.classList.add("open");
+}
+queryInput.addEventListener("input",paintSuggestions);
+queryInput.addEventListener("focus",paintSuggestions);
+queryInput.addEventListener("keydown",e=>{
+ if(e.key==="Escape")suggestionBox.classList.remove("open");
+ if(e.key==="ArrowDown"&&suggestionBox.classList.contains("open")){e.preventDefault();suggestionBox.querySelector("button")?.focus();}
+});
+document.addEventListener("click",e=>{if(!e.target.closest("#searchForm"))suggestionBox.classList.remove("open");});
+
+document.getElementById("searchForm").onsubmit=e=>{e.preventDefault();suggestionBox.classList.remove("open");showingFavorites=false;renderProducts()};
 document.getElementById("query").oninput=()=>{showingFavorites=false;renderProducts()};
 document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[data-category]");if(!btn)return;activeCategory=btn.dataset.category;showingFavorites=false;document.querySelectorAll(".category").forEach(c=>c.classList.toggle("active",c===btn));renderProducts()};
 document.getElementById("filterButton").onclick=()=>{
