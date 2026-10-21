@@ -1,5 +1,41 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff"><title>Tous les produits — Prix Malin</title><meta name="description" content="Explorez le catalogue Prix Malin avec de vraies fiches illustrées."><style>
 :root{--orange:#ff650b;--ink:#252a32;--muted:#777;--line:#eee}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#fff}header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:14px max(16px,calc((100vw - 1200px)/2));display:flex;align-items:center;gap:14px}a{color:inherit;text-decoration:none}.back{font-size:26px;color:var(--orange);padding:4px 8px}.brand{font-size:22px;font-weight:850;white-space:nowrap}.brand span{color:var(--orange)}main{max-width:1200px;margin:auto;padding:20px 16px 100px}.intro{background:#fff5ef;border:1px solid #ffd3bf;border-radius:18px;padding:20px;margin-bottom:20px}.intro h1{margin:0 0 7px;font-size:26px}.intro p{margin:0;color:#686868;line-height:1.5}.tools{display:grid;gap:12px;margin:18px 0}.search{width:100%;padding:14px 16px;border:1px solid #ddd;border-radius:12px;font:inherit;outline-color:var(--orange)}.filters{display:flex;gap:8px;overflow:auto;padding-bottom:4px}.filters button{border:1px solid #eee;background:#fff;border-radius:999px;padding:9px 13px;white-space:nowrap;font:inherit;font-size:13px;font-weight:650}.filters button.active{background:var(--orange);border-color:var(--orange);color:#fff}.count{color:var(--muted);font-size:13px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product{border:1px solid #ececec;border-radius:16px;padding:10px;min-width:0;box-shadow:0 2px 10px #00000005;display:flex;flex-direction:column}.photo{width:100%;aspect-ratio:1/1;background:#f7f7f7;border-radius:11px;overflow:hidden;display:grid;place-items:center}.photo img{width:100%;height:100%;object-fit:cover}.name{font-weight:750;margin:10px 0 4px;font-size:14px}.desc{color:var(--muted);font-size:12px;min-height:32px}.price{color:var(--orange);font-weight:800;margin:10px 0 4px;font-size:14px}.merchant{color:#888;font-size:11px;margin-bottom:10px}.offer{margin-top:auto;display:block;text-align:center;background:var(--orange);color:white;font-weight:750;padding:10px 8px;border-radius:10px;font-size:13px}.note{font-size:12px;color:#777;line-height:1.5;margin-top:22px}.empty{padding:30px;text-align:center;color:#777;grid-column:1/-1}@media(min-width:700px){main{padding-top:30px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.product{padding:14px}.name{font-size:16px}.intro h1{font-size:32px}}@media(min-width:1000px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Boutons catalogue : hiérarchie claire et tactile */
+.filters button{
+  border-radius:11px;
+  border-color:#e8e1dc;
+  background:#fff;
+  color:#39322e;
+  min-height:40px;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+.filters button:hover:not(.active){
+  background:#fff5ef;
+  border-color:#ffc7b2;
+}
+.filters button.active{
+  box-shadow:0 3px 9px rgba(224,91,35,.18);
+}
+.offer{
+  border-radius:11px;
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 3px 8px rgba(224,91,35,.14);
+  transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+.offer:hover{
+  box-shadow:0 5px 13px rgba(224,91,35,.22);
+  transform:translateY(-1px);
+}
+.offer:active{transform:scale(.99)}
+button:focus-visible,a:focus-visible,input:focus-visible{
+  outline:3px solid #2459d3;
+  outline-offset:3px;
+}
+
 </style></head><body><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a></header><main><section class="intro"><h1>Tous les produits</h1><p>Parcourez les fiches illustrées, filtrez par catégorie et recherchez un produit.</p></section><div class="tools"><input id="search" class="search" type="search" placeholder="Rechercher : téléphone, casque, baskets…" aria-label="Rechercher un produit"><div class="filters" id="filters"><button class="active" data-cat="all">Tout</button><button data-cat="tech">Électronique</button><button data-cat="fashion">Mode</button><button data-cat="home">Maison</button><button data-cat="garden">Jardin</button><button data-cat="sport">Sport</button><button data-cat="beauty">Beauté</button><button data-cat="baby">Bébé</button></div></div><div class="count" id="count"></div><section class="grid" id="products" aria-live="polite"></section><p class="note">Les fiches affichent des images illustratives. Les prix et disponibilités ne sont pas encore récupérés en temps réel : vérifiez les informations chez le vendeur avant l’achat.</p></main><script>
 const productData=[
  {id:"t1",name:"T-shirt blanc",desc:"Coton basique",category:"fashion",query:"t-shirt blanc",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
