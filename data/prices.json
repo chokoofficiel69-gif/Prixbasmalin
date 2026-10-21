@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "generated_at": null,
+  "schedule": "toutes les 10 heures",
+  "methodology": "Les prix ne seront affichés qu'après lecture d'une source marchande publique. Aucun prix inventé.",
+  "products": [],
+  "offers": [],
+  "errors": []
+}
