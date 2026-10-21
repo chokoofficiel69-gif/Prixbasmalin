@@ -506,10 +506,10 @@ document.getElementById("agentButton").onclick=()=>{
  document.getElementById("modalTitle").textContent="Assistant IA Prix Malin";
  content.innerHTML="";
  const form=document.createElement("form");form.className="assistant-form";
- const intro=document.createElement("p");intro.textContent="Pose ta question à l’assistant IA. Il peut t’aider à choisir un produit, comparer des critères et préparer une recherche. Les prix en direct ne sont pas encore connectés.";
+ const intro=document.createElement("p");intro.textContent="Pose ta question à Agnes AI. Il peut t’aider à choisir un produit, comparer des critères et préparer une recherche. Pour le moment, Agnes AI est le seul assistant activé. Les prix en direct ne sont pas encore connectés.";
  const providerLabel=document.createElement("label");providerLabel.textContent="Assistant";
  const provider=document.createElement("select");provider.name="provider";provider.setAttribute("aria-label","Choisir l’assistant IA");provider.style.cssText="width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;font:inherit";
- [["agnes","Agnes AI — rapide"],["grok","Grok — analyse"]].forEach(([value,label])=>{const option=document.createElement("option");option.value=value;option.textContent=label;provider.append(option)});
+ [["agnes","Agnes AI — rapide"]].forEach(([value,label])=>{const option=document.createElement("option");option.value=value;option.textContent=label;provider.append(option)});
  const input=document.createElement("input");input.name="assistantQuery";input.placeholder="Ex. : compare les critères d’un casque Bluetooth à moins de 40 €";input.setAttribute("aria-label","Ta question");
  const submit=document.createElement("button");submit.type="submit";submit.textContent="Demander à l’IA";
  const result=document.createElement("div");result.setAttribute("role","status");result.setAttribute("aria-live","polite");result.style.cssText="white-space:pre-wrap;line-height:1.55;font-size:14px;color:#222";
