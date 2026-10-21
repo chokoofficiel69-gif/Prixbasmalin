@@ -381,6 +381,22 @@ button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
 .nav-icon svg{width:22px;height:22px;display:block;stroke-width:1.9}
 .search button svg{width:23px;height:23px;display:block;margin:auto}
 
+
+/* Catégories illustrées : photos de produits dans des cadres crème */
+.category-icon{
+ width:66px;height:66px;border-radius:19px;padding:5px;overflow:hidden;
+ background:linear-gradient(145deg,#fffaf5,#f7e9dc);
+ border:1px solid #f0dfd2;
+ box-shadow:0 4px 12px rgba(54,35,20,.08),inset 0 1px 0 #fff;
+ color:var(--orange);
+}
+.category-icon img{width:100%;height:100%;object-fit:cover;display:block;border-radius:14px}
+.category-icon svg{width:25px;height:25px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.category.active .category-icon{background:var(--orange);border-color:var(--orange)}
+.category.active .category-icon img{outline:2px solid #fff;outline-offset:-2px}
+.category{gap:7px}
+@media(max-width:520px){.category-icon{width:60px;height:60px;border-radius:17px}.category-icon img{border-radius:12px}}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -409,14 +425,14 @@ button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
   </div>
   <div id="amazonBanner"></div>
   <div class="categories" id="categories" aria-label="Catégories">
-    <button class="category active" data-category="all"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span><span>Toutes</span></button>
-    <button class="category" data-category="tech"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M10 5h4M11 18.5h2"/></svg></span><span>Électronique</span></button>
-    <button class="category" data-category="fashion"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 4 4 2 4-2 5 3-2 5-3-1v9H8v-9l-3 1-2-5 5-3Z"/></svg></span><span>Mode</span></button>
-    <button class="category" data-category="home"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M4 11a2 2 0 0 0-2 2v4h20v-4a2 2 0 0 0-2-2"/><path d="M5 17v3m14-3v3M4 13h16"/></svg></span><span>Maison</span></button>
-    <button class="category" data-category="garden"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C10 4 5 7 5 13a5 5 0 0 0 5 5c6 0 9-6 10-14Z"/><path d="M3 21c3-6 7-9 13-13"/></svg></span><span>Jardin</span></button>
-    <button class="category" data-category="sport"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m12 7 4 3-1 5h-6l-1-5 4-3Zm0 0V3m4 7 5-2M15 15l3 5M9 15l-3 5m-1-10-2-2"/></svg></span><span>Sport</span></button>
-    <button class="category" data-category="beauty"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v4H9zM8 7h8l1 14H7L8 7Z"/><path d="M10 11h4"/></svg></span><span>Beauté</span></button>
-    <button class="category" data-category="baby"><span class="category-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.5"/><path d="M8 9h8l2 5-3 2v4H9v-4l-3-2 2-5Z"/><path d="M9 20v2m6-2v2"/></svg></span><span>Bébé</span></button>
+    <button class="category active" data-category="all"><span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span><span>Toutes</span></button>
+    <button class="category" data-category="tech"><span class="category-icon"><img src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Électronique</span></button>
+    <button class="category" data-category="fashion"><span class="category-icon"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Mode</span></button>
+    <button class="category" data-category="home"><span class="category-icon"><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Maison</span></button>
+    <button class="category" data-category="garden"><span class="category-icon"><img src="https://images.unsplash.com/photo-1497250681960-ef046c08a56e?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Jardin</span></button>
+    <button class="category" data-category="sport"><span class="category-icon"><img src="https://images.unsplash.com/photo-1614632537423-1e6c2e7e0e8e?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Sport</span></button>
+    <button class="category" data-category="beauty"><span class="category-icon"><img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Beauté</span></button>
+    <button class="category" data-category="baby"><span class="category-icon"><img src="https://images.unsplash.com/photo-1591348278863-a8fb3887e2aa?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Bébé</span></button>
   </div>
   <a href="catalogue.html" aria-label="Explorer le grand catalogue de produits" style="display:flex;align-items:center;gap:12px;margin:0 14px 14px;padding:13px 14px;border:1px solid #ffd5c2;border-radius:13px;background:#fff8f4;color:#191919">
     <span style="font-size:25px">🧭</span>
