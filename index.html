@@ -181,6 +181,69 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155e
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Interface desktop inspirée de la maquette fournie — Prix Malin */
+:root{--orange:#ff6508;--orange-dark:#e95a00;--ink:#252a31;--muted:#6b7280;--line:#e5e7eb;--soft:#f8fafc;--green:#167a3b;--surface:#fff;--shadow:0 2px 10px rgba(15,23,42,.05)}
+@media(min-width:700px){
+ body{background:#f7f8fa;padding-bottom:24px}
+ header{height:76px;max-width:none;padding:10px max(24px,calc((100vw - 1240px)/2));display:flex;gap:22px}
+ .brand{flex:0 0 190px}
+ .logo{background:#fff;color:var(--orange);border:2px solid var(--orange);border-radius:8px;font-size:22px}
+ .tagline{font-size:9px;color:#6b7280}
+ #cartBtn{order:3}
+ main{max-width:1240px;background:#fff;min-height:calc(100vh - 100px);border-left:1px solid #edf0f2;border-right:1px solid #edf0f2}
+ .search-row{padding:14px 22px 6px;max-width:100%;align-items:center}
+ .search{height:42px;background:#fff;border:1px solid #e5e7eb;border-radius:8px}
+ .search input{font-size:13px}
+ .search button{width:44px}
+ .filter-button{border-radius:8px;background:#fff}
+ .categories{padding:8px 22px 12px;display:flex;gap:0;border-bottom:1px solid #e5e7eb;overflow-x:auto}
+ .category{flex:0 0 auto;min-width:auto;display:block;padding:9px 14px;border-radius:0;border-bottom:2px solid transparent;color:#4b5563;font-size:12px;white-space:nowrap}
+ .category-icon{display:none}
+ .category.active{color:var(--orange);border-bottom-color:var(--orange);background:#fff}
+ .category:hover{transform:none;background:#fff8f3}
+ a[href="catalogue.html"][aria-label="Explorer le grand catalogue de produits"]{margin:14px 22px!important}
+ .banner{margin:12px 22px 20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:none;color:var(--ink);padding:20px 22px;min-height:unset}
+ .banner h1{font-size:24px;color:#242a32;max-width:none}
+ .banner p{font-size:13px;color:#6b7280;max-width:none}
+ .primary-link{background:var(--orange);color:#fff;border-radius:7px;padding:9px 14px}
+ .discount-art{width:72px}
+ .discount-tag{background:#fff5ee;border:1px solid #ffd9c4;box-shadow:none}
+ .section{padding:0 22px 22px}
+ .section-head{margin-bottom:12px}
+ .section-head h2{font-size:19px}
+ .products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;padding-bottom:0}
+ .product{max-width:none;min-width:0;display:grid;grid-template-columns:128px minmax(0,1fr);grid-template-rows:auto auto auto auto auto;gap:4px 14px;padding:14px;text-align:left;align-items:start;border:1px solid #e5e7eb;border-radius:10px;box-shadow:none}
+ .product:hover{transform:none;box-shadow:0 4px 14px rgba(15,23,42,.07);border-color:#ffd1b7}
+ .product-image{grid-column:1;grid-row:1/6;height:142px;margin:0;background:#fff;border-radius:8px}
+ .product h3{grid-column:2;grid-row:1;font-size:14px;line-height:1.35;margin:2px 0 0;color:#252a31}
+ .desc{grid-column:2;grid-row:2;font-size:11px;color:#6b7280;margin:0}
+ .price{grid-column:2;grid-row:3;font-size:18px;color:#252a31;margin-top:4px}
+ .old-price{grid-column:2;grid-row:4;font-size:11px;margin:0}
+ .saving{grid-column:2;grid-row:4;justify-self:end;font-size:11px}
+ .merchant{grid-column:2;grid-row:5;font-size:11px;color:#6b7280;margin:0;align-self:end}
+ .product>div:last-child{grid-column:2;grid-row:6;justify-content:flex-start!important}
+ .product-action{background:var(--orange);color:#fff;padding:8px 12px;border-radius:6px;font-size:11px}
+ .product-action:hover{background:var(--orange-dark);color:#fff}
+ .trust{padding:0 22px 24px;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+ .trust-card{border-radius:10px;padding:14px 8px;background:#fff}
+ .trust-card h3{font-size:12px}
+ .trust-card p{font-size:10px}
+ .bottom-nav{position:static;max-width:640px;margin:0 auto 20px;border:1px solid #e5e7eb;border-radius:12px;padding:10px;box-shadow:none}
+ .agent{right:24px;bottom:24px}
+ .accessibility-button{right:24px;bottom:82px}
+ .amazon-banner{margin:10px 22px}
+}
+@media(min-width:1100px){
+ .search-row{padding-left:22px;padding-right:22px}
+ .product{grid-template-columns:150px minmax(0,1fr);padding:16px}
+ .product-image{height:150px}
+ .banner{display:flex}
+}
+@media(max-width:699px){
+ .logo{background:#fff;color:var(--orange);border:2px solid var(--orange)}
+}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
