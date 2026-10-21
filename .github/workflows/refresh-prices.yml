@@ -1,0 +1,38 @@
+name: Actualiser les prix publics
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0,10,20 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: price-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Lire les prix publiquement disponibles
+        run: node price-engine/refresh.mjs
+      - name: Enregistrer le relevé
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/prices.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement dans le relevé."
+          else
+            git commit -m "Refresh verified product prices"
+            git push
+          fi
