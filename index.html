@@ -443,6 +443,8 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 @media(min-width:760px){.ad-showcase{grid-template-columns:repeat(3,minmax(0,1fr));margin:16px 22px 22px;gap:12px}.ad-card{min-height:185px;padding:17px;align-items:flex-start}.ad-kicker{left:17px;top:12px}.ad-copy{padding-top:20px}.ad-symbol{position:absolute;right:15px;bottom:15px;opacity:.8}.ad-copy p{padding-right:0}.ad-copy h2{font-size:19px}.ad-cta{font-size:11px}}
 @media(max-width:390px){.ad-card{padding:15px 12px;gap:7px}.ad-kicker{left:12px}.ad-symbol{width:38px;height:38px;font-size:23px}.ad-copy h2{font-size:16px}.ad-copy p{font-size:11px}}
 
+
+.deal-list{display:grid;gap:9px}.deal-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid #eee;border-radius:12px;background:#fff;text-decoration:none;color:var(--ink)}.deal-row strong,.deal-row small{display:block}.deal-row small{font-size:12px;color:#666;margin-top:3px;line-height:1.35}.deal-row b{color:var(--orange);white-space:nowrap;font-size:13px}.account-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.account-stats div{padding:14px;border:1px solid #eee;border-radius:12px}.account-stats strong,.account-stats span{display:block}.account-stats strong{font-size:24px;color:var(--orange)}.account-stats span{font-size:12px;color:#666}
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -516,7 +518,7 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
   <section class="section" id="popular">
     <div class="section-head"><h2>Produits populaires</h2><button class="text-link" id="seeAll">Voir tout ›</button></div>
     <div class="products" id="products" aria-live="polite"></div>
-    <p class="notice">Prix affichés à titre indicatif et non vérifiés en direct : confirmez le prix actuel sur Amazon. Prix Malin peut percevoir une commission.</p>
+    <p class="notice">Ouvre une fiche produit pour consulter les offres du vendeur. Les prix et stocks sont fournis par les marchands et peuvent évoluer.</p>
   </section>
   <section class="section" aria-label="Bons plans et achats en quantité">
     <div class="section-head"><h2>🏭 Bons plans & grossistes</h2><a class="text-link" href="grossistes.html">Explorer Temu, AliExpress et Alibaba ›</a></div>
@@ -577,7 +579,7 @@ const synonyms={
  "vetement":["pantalon","jeans","mode","vêtement","robe","tshirt","t-shirt","survêtement"]
 };
 const productData=[
- {id:"t1",name:"T-shirt blanc",desc:"Coton basique",category:"fashion",query:"t-shirt blanc",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"t1",name:"T-shirt blanc",desc:"Coton basique",category:"fashion",query:"t-shirt blanc",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""},
  {id:"t2",name:"T-shirt noir",desc:"Coupe classique",category:"fashion",query:"t-shirt noir",image:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
  {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
  {id:"jeans2",name:"Jeans femme",desc:"Coupe droite",category:"fashion",query:"jeans femme",image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
@@ -858,7 +860,7 @@ document.getElementById("filterButton").onclick=()=>{
  const sort=document.createElement("select");sort.id="sortProducts";sort.style.cssText=cat.style.cssText;
  [["default","Sélection Prix Malin"],["az","Nom : A à Z"],["za","Nom : Z à A"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;sort.append(o)});
  sortLabel.append(sort);
- const note=document.createElement("p");note.textContent="Les prix en direct et le tri par prix seront activés lorsque les flux de données des marchands seront connectés. Pour l’instant, les fiches renvoient vers les offres du vendeur.";note.style.cssText="font-size:12px;color:#666;line-height:1.5;margin:0";
+ const note=document.createElement("p");note.textContent="Choisis une catégorie puis ouvre une fiche pour consulter les offres disponibles chez les vendeurs. Le tri par prix utilise les recherches du vendeur lorsqu’elles sont ouvertes.";note.style.cssText="font-size:12px;color:#666;line-height:1.5;margin:0";
  const apply=document.createElement("button");apply.className="modal-primary";apply.textContent="Appliquer les filtres";apply.style.cssText="padding:12px;border-radius:10px;border:0;font-weight:700";
  apply.onclick=()=>{activeCategory=cat.value;currentSort=sort.value;document.querySelectorAll("#categories [data-category]").forEach(c=>c.classList.toggle("active",c.dataset.category===activeCategory));renderProducts();closeModal()};
  wrap.append(catLabel,sortLabel,note,apply);content.append(wrap);document.getElementById("modal").classList.add("open");
@@ -866,8 +868,38 @@ document.getElementById("filterButton").onclick=()=>{
 document.getElementById("compareButton").onclick=()=>document.getElementById("query").focus();
 document.getElementById("seeAll").onclick=showAllProducts;
 document.getElementById("cartBtn").onclick=showCart;
-document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>openModal(btn.querySelector("h3").textContent,"Les prix, vendeurs et disponibilités doivent être vérifiés sur la page du vendeur."));
-document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){openModal("Bons plans","Les meilleurs prix sont affichés.")}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts()}else if(action==="account"){openModal("Compte","Pas de compte nécessaire.")}};
+document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>{
+ const key=btn.dataset.info;
+ if(key==="merchants"){
+  document.getElementById("modalTitle").textContent="Marchands et offres";
+  document.getElementById("modalContent").innerHTML='<p>Choisis un vendeur pour ouvrir les offres disponibles sur son site.</p><div class="all-products"><a class="amazon-big" target="_blank" rel="sponsored noopener" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021">Offres Amazon du jour ↗</a><a class="amazon-big" target="_blank" rel="noopener" href="https://www.fnac.com/">Fnac ↗</a><a class="amazon-big" target="_blank" rel="noopener" href="https://www.cdiscount.com/">Cdiscount ↗</a></div><p class="notice">Les offres, prix et stocks sont affichés par chaque marchand et peuvent changer.</p>';
+  document.getElementById("modal").classList.add("open");
+ } else if(key==="prices"){
+  document.getElementById("modalTitle").textContent="Comparer les prix";
+  document.getElementById("modalContent").innerHTML='<p>Recherche le même produit chez plusieurs vendeurs, puis compare le prix total, la livraison, le vendeur et les conditions de retour.</p><form id="quickCompare" class="assistant-form"><input id="quickCompareQuery" required placeholder="Ex. : casque Bluetooth Sony" aria-label="Produit à comparer"><button type="submit">Comparer chez plusieurs vendeurs ↗</button></form><p class="notice">Les liens ouvrent les recherches des vendeurs ; les résultats peuvent varier selon le produit.</p>';
+  document.getElementById("modal").classList.add("open");
+  document.getElementById("quickCompare").onsubmit=e=>{e.preventDefault();const q=document.getElementById("quickCompareQuery").value.trim();if(!q)return;const enc=encodeURIComponent(q);[ "https://www.amazon.fr/s?k="+enc+"&tag=prixbasmalin2021","https://www.google.com/search?tbm=shop&q="+enc,"https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+enc].forEach(url=>window.open(url,"_blank","noopener"));};
+ } else {
+  document.getElementById("modalTitle").textContent="Achats malins";
+  document.getElementById("modalContent").innerHTML='<p>Prix Malin est gratuit à utiliser. Explore les produits, ajoute tes favoris et ouvre les offres chez les vendeurs.</p><p><strong>Favoris enregistrés sur cet appareil :</strong> '+favorites.length+'</p><p><strong>Produits dans ton panier :</strong> '+cart.length+'</p><p class="notice">Les favoris et le panier sont conservés dans ce navigateur ; aucun compte n’est requis.</p>';
+  document.getElementById("modal").classList.add("open");
+ }
+});
+function showDeals(){
+ const deals=[
+  ["Offres du jour Amazon","https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021","Promotions mises en avant par Amazon"],
+  ["High-tech au prix le plus bas","https://www.amazon.fr/s?k=high-tech&s=price-asc-rank&tag=prixbasmalin2021","Recherche Amazon triée par prix croissant"],
+  ["Écouteurs sans fil","https://www.amazon.fr/s?k=%C3%A9couteurs+sans+fil&s=price-asc-rank&tag=prixbasmalin2021","Comparer les modèles et les prix"],
+  ["Casques Bluetooth","https://www.amazon.fr/s?k=casque+bluetooth&s=price-asc-rank&tag=prixbasmalin2021","Trouver des options selon le budget"],
+  ["Montres connectées","https://www.amazon.fr/s?k=montre+connect%C3%A9e&s=price-asc-rank&tag=prixbasmalin2021","Voir les offres disponibles"],
+  ["Aspirateurs robots","https://www.amazon.fr/s?k=aspirateur+robot&s=price-asc-rank&tag=prixbasmalin2021","Comparer les prix affichés par Amazon"],
+  ["Maison et cuisine","https://www.amazon.fr/s?k=maison+cuisine&s=price-asc-rank&tag=prixbasmalin2021","Explorer les offres maison"]
+ ];
+ document.getElementById("modalTitle").textContent="Offres Amazon du moment";
+ document.getElementById("modalContent").innerHTML='<p>Accès rapide aux promotions Amazon et aux recherches triées du moins cher au plus cher.</p><div class="deal-list">'+deals.map(([title,url,desc])=>'<a class="deal-row" href="'+url+'" target="_blank" rel="sponsored noopener"><span><strong>'+title+'</strong><small>'+desc+'</small></span><b>Voir ↗</b></a>').join("")+'</div><p class="notice">Les promotions et les prix changent en permanence. Ces liens affichent les offres actuelles chez Amazon ; Prix Malin ne prétend pas les avoir vérifiées ni classées en temps réel.</p>';
+ document.getElementById("modal").classList.add("open");
+}
+document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){showDeals()}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts();document.getElementById("popular").scrollIntoView({behavior:"smooth"})}else if(action==="account"){document.getElementById("modalTitle").textContent="Mon espace Prix Malin";document.getElementById("modalContent").innerHTML='<p>Pas besoin de créer un compte pour utiliser Prix Malin.</p><div class="account-stats"><div><strong>'+favorites.length+'</strong><span>Favoris enregistrés</span></div><div><strong>'+cart.length+'</strong><span>Articles dans le panier</span></div></div><button class="modal-primary" id="accountFavorites" style="margin-top:12px">Voir mes favoris</button><button class="modal-secondary" id="accountCart" style="margin-top:12px">Ouvrir mon panier</button><p class="notice">Tes favoris et ton panier sont conservés sur cet appareil.</p>';document.getElementById("modal").classList.add("open");document.getElementById("accountFavorites").onclick=()=>{closeModal();showingFavorites=true;document.getElementById("query").value="";renderProducts();document.getElementById("popular").scrollIntoView({behavior:"smooth"})};document.getElementById("accountCart").onclick=showCart}};
 document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})};
 
 document.getElementById("agentButton").onclick=()=>{
