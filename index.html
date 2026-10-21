@@ -520,7 +520,7 @@ document.getElementById("agentButton").onclick=()=>{
   try{
    const response=await fetch("https://prixbasmalin-ia.chokoofficiel69.workers.dev/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:provider.value,message:q})});
    const data=await response.json().catch(()=>({}));
-   if(!response.ok||!data.ok)throw new Error(data.error||"Le service IA est temporairement indisponible.");
+   if(!response.ok||!data.ok){const detail=data.status?" (code fournisseur "+data.status+")":"";throw new Error((data.error||"Le service IA est temporairement indisponible.")+detail);}
    result.textContent=data.answer;
   }catch(error){
    result.textContent="Je n’ai pas pu joindre l’IA. Vérifie la connexion puis réessaie. ("+String(error.message||"erreur réseau")+")";
