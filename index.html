@@ -701,8 +701,8 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 </div>
 <script>
 /* Stockage facultatif : l’interface doit rester utilisable même si le navigateur bloque localStorage. */
-function safeStorageGet(key){try{return window.safeStorageGet(key)}catch(error){return null}}
-function safeStorageSet(key,value){try{window.safeStorageSet(key,value)}catch(error){}}
+function safeStorageGet(key){try{return window.localStorage.getItem(key)}catch(error){return null}}
+function safeStorageSet(key,value){try{window.localStorage.setItem(key,value)}catch(error){}}
 const synonyms={
  "pantalon":["jeans","jean","vetement","vêtement","mode","pantalons"],
  "jeans":["pantalon","jean","vetement","vêtement"],
