@@ -580,13 +580,13 @@ const synonyms={
 };
 const productData=[
  {id:"t1",name:"T-shirt blanc",desc:"Coton basique",category:"fashion",query:"t-shirt blanc",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""},
- {id:"t2",name:"T-shirt noir",desc:"Coupe classique",category:"fashion",query:"t-shirt noir",image:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
- {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
- {id:"jeans2",name:"Jeans femme",desc:"Coupe droite",category:"fashion",query:"jeans femme",image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
- {id:"sweat1",name:"Survêtement",desc:"Ensemble jogging",category:"fashion",query:"survêtement jogging",image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
- {id:"polo1",name:"Polo Lacoste style",desc:"Polo classique",category:"fashion",query:"polo lacoste",image:"https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
- {id:"sneakers1",name:"Baskets blanches",desc:"Running",category:"fashion",query:"baskets blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
- {id:"watch",name:"Montre connectée",desc:"Fitness",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""}
+ {id:"t2",name:"T-shirt noir",desc:"Coupe classique",category:"fashion",query:"t-shirt noir",image:"https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""},
+ {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""},
+ {id:"jeans2",name:"Jeans femme",desc:"Coupe droite",category:"fashion",query:"jeans femme",image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""},
+ {id:"sweat1",name:"Survêtement",desc:"Ensemble jogging",category:"fashion",query:"survêtement jogging",image:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""},
+ {id:"polo1",name:"Polo Lacoste style",desc:"Polo classique",category:"fashion",query:"polo lacoste",image:"https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""},
+ {id:"sneakers1",name:"Baskets blanches",desc:"Running",category:"fashion",query:"baskets blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""},
+ {id:"watch",name:"Montre connectée",desc:"Fitness",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""}
 ,
  {id:"earbuds",name:"Écouteurs sans fil",desc:"Bluetooth • plusieurs budgets",category:"tech",query:"écouteurs sans fil bluetooth",image:"https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les prix",old:"",save:""},
  {id:"headphones",name:"Casque Bluetooth",desc:"Audio sans fil",category:"tech",query:"casque bluetooth réduction bruit",image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les prix",old:"",save:""},
@@ -667,7 +667,7 @@ function showProductDetail(p){
  if(related.length){
   relatedHtml='<div style="margin-top:16px;font-weight:700">Autres '+p.name.split(" ")[0].toLowerCase()+'s</div><div class="related" id="related"></div>';
  }
- const content=`<img class="detail-img" src="${p.image}" alt="${p.name}"><h3 style="margin:0 0 6px">${p.name}</h3><p style="margin:0 0 8px;color:#666">${p.desc}</p><div class="price" style="font-size:18px">${p.price}</div><div class="old-price">${p.old}</div><div class="saving">${p.save}</div><p style="margin-top:10px;font-size:13px">Prix et disponibilité à confirmer sur Amazon.</p>${relatedHtml}`;
+ const content=`<img class="detail-img" src="${p.image}" alt="${p.name}"><h3 style="margin:0 0 6px">${p.name}</h3><p style="margin:0 0 8px;color:#666">${p.desc}</p><div class="price" style="font-size:18px">${p.price}</div><div class="old-price">${p.old}</div><div class="saving">${p.save}</div><p style="margin-top:10px;font-size:13px">Consulte les offres du vendeur pour voir le prix actuel, les frais de livraison et la disponibilité.</p>${relatedHtml}`;
  document.getElementById("modalTitle").textContent=p.name;
  document.getElementById("modalContent").innerHTML=content;
  const actions=document.createElement("div");actions.className="modal-actions";
