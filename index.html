@@ -580,8 +580,8 @@ let cart=JSON.parse(localStorage.getItem("prixMalinCart")||"[]");
 function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringify(favorites))}
 function saveCart(){localStorage.setItem("prixMalinCart",JSON.stringify(cart));updateCartCount()}
 function updateCartCount(){document.getElementById("cartCount").textContent=cart.length}
-function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)}
-function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)}
+function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag=prixbasmalin2021"}
+function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag=prixbasmalin2021"}
 function getRelated(p){
  const name=p.name.toLowerCase();
  let type="";
@@ -669,7 +669,7 @@ function renderProducts(){
  if(currentSort==="za")list.sort((a,b)=>b.name.localeCompare(a.name,"fr"));
  if(q){
   const term=encodeURIComponent(q);
-  const links=[["Amazon","https://www.amazon.fr/s?k="+term],["Google Shopping","https://www.google.com/search?tbm=shop&q="+term],["idealo","https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+term],["Le Dénicheur","https://ledenicheur.fr/search?search="+term],["Fnac","https://www.fnac.com/SearchResult/ResultList.aspx?Search="+term],["Cdiscount","https://www.cdiscount.com/search/10/"+term+".html"]];
+  const links=[["Amazon","https://www.amazon.fr/s?k="+term+"&tag=prixbasmalin2021"],["Google Shopping","https://www.google.com/search?tbm=shop&q="+term],["idealo","https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+term],["Le Dénicheur","https://ledenicheur.fr/search?search="+term],["Fnac","https://www.fnac.com/SearchResult/ResultList.aspx?Search="+term],["Cdiscount","https://www.cdiscount.com/search/10/"+term+".html"]];
   banner.innerHTML=`<div class="amazon-banner"><strong>Élargir la comparaison : « ${escapeHtml(q)} »</strong><p style="font-size:12px;line-height:1.45;color:#555;margin:7px 0 10px">En attendant l’activation de flux/API partenaires, ces liens ouvrent des recherches externes. Les prix et disponibilités sont à vérifier chez chaque vendeur ; Prix Malin ne les récupère pas encore automatiquement.</p><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">${links.map(([name,url])=>`<a href="${url}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:9px 11px;border:1px solid #f0d7ce;border-radius:9px;background:#fff;color:#222;font-size:12px;font-weight:700;text-decoration:none">${name} ↗</a>`).join("")}</div></div>`;
  }
  if(!list.length){
