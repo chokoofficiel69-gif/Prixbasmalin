@@ -700,6 +700,9 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
   <div class="modal-panel"><h2 id="modalTitle">Prix Malin</h2><div id="modalContent"></div><div class="modal-actions"><button class="modal-secondary" id="modalClose">Fermer</button></div></div>
 </div>
 <script>
+/* Stockage facultatif : l’interface doit rester utilisable même si le navigateur bloque localStorage. */
+function safeStorageGet(key){try{return window.safeStorageGet(key)}catch(error){return null}}
+function safeStorageSet(key,value){try{window.safeStorageSet(key,value)}catch(error){}}
 const synonyms={
  "pantalon":["jeans","jean","vetement","vêtement","mode","pantalons"],
  "jeans":["pantalon","jean","vetement","vêtement"],
@@ -767,10 +770,10 @@ const productData=[
 let activeCategory="all",showingFavorites=false,currentSort="default";
 let comparatorRegistry=[];
 fetch("data/comparateurs.json").then(r=>r.ok?r.json():null).then(data=>{comparatorRegistry=(data?.comparateurs||[]).filter(c=>!c.a_verifier&&typeof c.url_modele==="string"&&c.url_modele.includes("{q}"));if(document.getElementById("query")?.value.trim())renderProducts();}).catch(()=>{});
-let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
-let cart=JSON.parse(localStorage.getItem("prixMalinCart")||"[]");
-function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringify(favorites))}
-function saveCart(){localStorage.setItem("prixMalinCart",JSON.stringify(cart));updateCartCount()}
+let favorites=JSON.parse(safeStorageGet("prixMalinFavorites")||"[]");
+let cart=JSON.parse(safeStorageGet("prixMalinCart")||"[]");
+function saveFavorites(){safeStorageSet("prixMalinFavorites",JSON.stringify(favorites))}
+function saveCart(){safeStorageSet("prixMalinCart",JSON.stringify(cart));updateCartCount()}
 function updateCartCount(){document.getElementById("cartCount").textContent=cart.length}
 function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag=prixbasmalin2021"}
 function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag=prixbasmalin2021"}
@@ -859,7 +862,7 @@ function renderProducts(){
  if(showingFavorites)list=list.filter(p=>favorites.includes(p.id));
  if(currentSort==="az")list.sort((a,b)=>a.name.localeCompare(b.name,"fr"));
  if(currentSort==="za")list.sort((a,b)=>b.name.localeCompare(a.name,"fr"));
- if(q){
+ if(q && banner){
   const term=encodeURIComponent(q);
   const links=comparatorRegistry.length?comparatorRegistry.map(c=>[c.nom,c.url_modele.replaceAll("{q}",term)]):[["Amazon","https://www.amazon.fr/s?k="+term+"&tag=prixbasmalin2021"],["Google Shopping","https://www.google.com/search?tbm=shop&q="+term]];
   banner.innerHTML=`<div class="amazon-banner"><strong>Élargir la comparaison : « ${escapeHtml(q)} »</strong><p style="font-size:12px;line-height:1.45;color:#555;margin:7px 0 10px">Liens vers des sites tiers, prix à confirmer chez le vendeur. Prix Malin ne récupère pas automatiquement les prix de ces recherches.</p><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">${links.map(([name,url])=>`<a href="${url}" target="_blank" rel="noopener sponsored" style="display:inline-block;padding:9px 11px;border:1px solid #f0d7ce;border-radius:9px;background:#fff;color:#222;font-size:12px;font-weight:700;text-decoration:none">${name} ↗</a>`).join("")}</div></div>`;
@@ -1062,7 +1065,7 @@ document.getElementById("agentButton").onclick=()=>{
  };
  content.append(form);document.getElementById("modal").classList.add("open");input.focus();
 };
-let touchAnnounceEnabled=localStorage.getItem("pmTouchAnnounce")==="1";
+let touchAnnounceEnabled=safeStorageGet("pmTouchAnnounce")==="1";
 let lastAnnouncement="";
 function speakShort(text){
  if(!("speechSynthesis" in window)||!text)return;
@@ -1105,16 +1108,16 @@ document.getElementById("accessibilityButton").onclick=()=>{
  const refreshAnnounceLabel=()=>{announce.textContent="Guidage vocal au toucher : "+(touchAnnounceEnabled?"activé":"désactivé")};
  refreshAnnounceLabel();
  announce.setAttribute("aria-pressed",String(touchAnnounceEnabled));
- announce.onclick=()=>{touchAnnounceEnabled=!touchAnnounceEnabled;localStorage.setItem("pmTouchAnnounce",touchAnnounceEnabled?"1":"0");announce.setAttribute("aria-pressed",String(touchAnnounceEnabled));refreshAnnounceLabel();lastAnnouncement="";if(!touchAnnounceEnabled&&"speechSynthesis"in window)window.speechSynthesis.cancel();else speakShort("Guidage vocal activé")};
- const contrast=document.createElement("button");contrast.textContent="Contraste renforcé : activer / désactiver";contrast.onclick=()=>{document.body.classList.toggle("high-contrast");localStorage.setItem("pmContrast",document.body.classList.contains("high-contrast")?"1":"0")};
- const size=document.createElement("button");size.textContent="Texte agrandi : activer / désactiver";size.onclick=()=>{document.body.classList.toggle("large-text");localStorage.setItem("pmLargeText",document.body.classList.contains("large-text")?"1":"0")};
+ announce.onclick=()=>{touchAnnounceEnabled=!touchAnnounceEnabled;safeStorageSet("pmTouchAnnounce",touchAnnounceEnabled?"1":"0");announce.setAttribute("aria-pressed",String(touchAnnounceEnabled));refreshAnnounceLabel();lastAnnouncement="";if(!touchAnnounceEnabled&&"speechSynthesis"in window)window.speechSynthesis.cancel();else speakShort("Guidage vocal activé")};
+ const contrast=document.createElement("button");contrast.textContent="Contraste renforcé : activer / désactiver";contrast.onclick=()=>{document.body.classList.toggle("high-contrast");safeStorageSet("pmContrast",document.body.classList.contains("high-contrast")?"1":"0")};
+ const size=document.createElement("button");size.textContent="Texte agrandi : activer / désactiver";size.onclick=()=>{document.body.classList.toggle("large-text");safeStorageSet("pmLargeText",document.body.classList.contains("large-text")?"1":"0")};
  const read=document.createElement("button");read.textContent="Lire seulement le titre et l’aide";read.onclick=()=>{const title=document.getElementById("modalTitle")?.innerText||"Options d’accessibilité";const help=note.innerText;speakShort(title+". "+help)};
  const stop=document.createElement("button");stop.textContent="Arrêter la voix";stop.onclick=()=>{if("speechSynthesis"in window)window.speechSynthesis.cancel();lastAnnouncement=""};
  const tips=document.createElement("p");tips.textContent="Sur Android, TalkBack reste recommandé pour une lecture complète de l’interface. Ce guidage est facultatif et peut être coupé à tout moment. Les prix restent écrits à l’écran.";
  panel.append(note,announce,contrast,size,read,stop,tips);content.append(panel);document.getElementById("modal").classList.add("open");
 };
-if(localStorage.getItem("pmContrast")==="1")document.body.classList.add("high-contrast");
-if(localStorage.getItem("pmLargeText")==="1")document.body.classList.add("large-text");
+if(safeStorageGet("pmContrast")==="1")document.body.classList.add("high-contrast");
+if(safeStorageGet("pmLargeText")==="1")document.body.classList.add("large-text");
 
 document.getElementById("modalClose").onclick=closeModal;
 document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
