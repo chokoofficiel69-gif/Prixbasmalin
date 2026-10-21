@@ -146,11 +146,24 @@ export default {
     clearTimeout(timeout);
 
     if (!upstream.ok) {
-      // Do not return provider response bodies; they may contain internal details.
+      // Return only a short, sanitized provider error message; never return raw bodies or credentials.
+      let providerMessage = "";
+      try {
+        const errorData = JSON.parse(raw);
+        const candidate = errorData?.error?.message || errorData?.message || errorData?.error;
+        if (typeof candidate === "string") providerMessage = candidate;
+        else if (candidate && typeof candidate.message === "string") providerMessage = candidate.message;
+      } catch {}
+      providerMessage = String(providerMessage)
+        .replace(/Bearer\\s+\\S+/gi, "Bearer [redacted]")
+        .replace(/sk-[A-Za-z0-9_-]{8,}/g, "[redacted]")
+        .replace(/[\\r\\n\\t]+/g, " ")
+        .slice(0, 240);
       return json({
         error: "AI provider request failed",
         provider,
-        status: upstream.status
+        status: upstream.status,
+        ...(providerMessage ? { providerMessage } : {})
       }, 502, cors);
     }
 
