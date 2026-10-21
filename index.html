@@ -424,6 +424,19 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 .ad-showcase .ad-card .ad-copy{max-width:none}
 .ad-showcase .ad-featured .ad-kicker,.ad-showcase .ad-amazon .ad-kicker,.ad-showcase .ad-partner .ad-kicker{position:static;display:block;margin:0 0 8px}
 .ad-showcase .ad-card .ad-symbol{display:none}
+
+/* Visuel partenaire Snapchat — La Maille */
+.ad-snap-partner{background:linear-gradient(135deg,#fffce5,#fff 62%,#f6f2ff);border-color:#e8df9a}
+.snap-flyer-art{position:relative;overflow:hidden;min-height:208px;border-radius:13px;padding:18px 15px;background:linear-gradient(145deg,#ffed00 0%,#ffe500 58%,#f9d900 100%);color:#161616;box-shadow:inset 0 0 0 1px #16161612}
+.snap-flyer-eyebrow{font-size:9px;letter-spacing:1.2px;font-weight:900}
+.snap-flyer-title{font-size:clamp(33px,8vw,49px);font-weight:1000;line-height:.82;letter-spacing:-2px;margin:20px 0 12px}
+.snap-flyer-sub{font-size:12px;font-weight:750;max-width:120px;line-height:1.3}
+.snap-flyer-handle{display:inline-block;margin-top:12px;background:#171717;color:#ffed00;padding:7px 9px;border-radius:7px;font-size:12px;font-weight:900}
+.snap-flyer-bubble{position:absolute;right:-12px;bottom:-12px;width:102px;height:102px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:47px;transform:rotate(-12deg);box-shadow:0 6px 20px #00000012}
+.snap-mini-label{display:inline-block;font-size:9px;letter-spacing:.8px;font-weight:900;color:#665d00;margin-bottom:4px}
+.snap-cta{background:#171717!important;color:#ffed00!important}
+@media(min-width:700px){.ad-snap-partner{display:grid!important;grid-template-columns:minmax(220px,.8fr) 1.2fr;align-items:stretch;gap:16px}.snap-flyer-art{height:100%}}
+
 /* Bandeau de trois publicités — la marque Prixbasmalin est mise en avant */
 .ad-showcase{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 14px 18px}
 .ad-card{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:142px;padding:17px;border-radius:15px;overflow:hidden;border:1px solid #e7e7e7;background:#fff}
@@ -505,6 +518,21 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
     <article class="ad-card ad-partner">
       <span class="ad-kicker">POUR LES COMMERÇANTS ET CRÉATEURS</span>
       <div class="ad-copy"><h2>Présentez votre activité</h2><p>Vous avez un commerce, une marque, un événement ou un projet artistique ? Préparez une demande de visibilité. Toute diffusion est confirmée après validation du contenu et des modalités.</p><a href="publicite.html" class="ad-cta">Préparer une demande ↗</a></div>
+    </article>
+    <article class="ad-card ad-snap-partner" aria-label="La Maille sur Snapchat">
+      <div class="snap-flyer-art" role="img" aria-label="Visuel promotionnel La Maille sur Snapchat">
+        <span class="snap-flyer-eyebrow">CONTACT & VISIBILITÉ</span>
+        <div class="snap-flyer-title">LA<br>MAILLE</div>
+        <div class="snap-flyer-sub">On se retrouve sur Snap.</div>
+        <div class="snap-flyer-handle">@lozeill69</div>
+        <div class="snap-flyer-bubble" aria-hidden="true">👻</div>
+      </div>
+      <div class="ad-copy">
+        <span class="snap-mini-label">À DÉCOUVRIR · SNAPCHAT</span>
+        <h2>La Maille</h2>
+        <p>Pour me contacter directement, retrouve-moi sur Snapchat. Simple, rapide, en direct.</p>
+        <a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" class="ad-cta snap-cta">Contacte-moi sur Snap ↗</a>
+      </div>
     </article>
   </section>
   <section class="banner" aria-label="Comparer les prix">
