@@ -413,6 +413,17 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 @media(max-width:390px){.floating-promo{gap:8px;padding:11px 35px 11px 10px}.floating-promo-tag{font-size:8px;padding:5px}.floating-promo-copy strong{font-size:11px}.floating-promo-copy span{font-size:9px}.floating-promo-cta{padding:9px 8px;font-size:10px}}
 
 
+/* Publicités vidéo — Prixbasmalin */
+.ad-video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;background:#111}
+.ad-card-video{display:block;position:relative;overflow:hidden;border-radius:12px;width:100%;background:#111}
+.ad-card-video .ad-video{border-radius:12px;max-height:240px}
+.ad-video-wrap{width:100%;min-width:0}
+.ad-video-controls{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 2px 0;font-size:11px;color:var(--muted)}
+.ad-sound{border:1px solid #ddd;background:#fff;border-radius:7px;padding:6px 9px;font-weight:700;font-size:11px;cursor:pointer}
+.ad-showcase .ad-card{display:block;min-width:0}
+.ad-showcase .ad-card .ad-copy{max-width:none}
+.ad-showcase .ad-featured .ad-kicker,.ad-showcase .ad-amazon .ad-kicker,.ad-showcase .ad-partner .ad-kicker{position:static;display:block;margin:0 0 8px}
+.ad-showcase .ad-card .ad-symbol{display:none}
 /* Bandeau de trois publicités — la marque Prixbasmalin est mise en avant */
 .ad-showcase{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 14px 18px}
 .ad-card{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:142px;padding:17px;border-radius:15px;overflow:hidden;border:1px solid #e7e7e7;background:#fff}
@@ -474,21 +485,22 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
     <span style="flex:1;min-width:0"><strong style="display:block;font-size:13px">Explorer tout le catalogue</strong><span style="display:block;font-size:11px;color:#777;line-height:1.4;margin-top:3px">Mode, marques concurrentes, high-tech, maison, sport et bien plus</span></span>
     <span style="color:#ff5a1f;font-weight:800">→</span>
   </a>
-  <section class="ad-showcase" aria-label="Bannières publicitaires">
+  <section class="ad-showcase" aria-label="Publicités vidéo">
     <article class="ad-card ad-featured">
-      <span class="ad-kicker">À LA UNE · PRIXBAS MALIN</span>
-      <div class="ad-copy"><h2>Comparez mieux. Achetez malin.</h2><p>Retrouvez notre sélection et explorez le catalogue pour préparer vos achats.</p><a href="catalogue.html" class="ad-cta">Découvrir le catalogue ↗</a></div>
-      <div class="ad-symbol" aria-hidden="true">%</div>
+      <span class="ad-kicker">VIDÉO OFFICIELLE · PRIXBAS MALIN</span>
+      <a class="ad-card-video" href="catalogue.html" aria-label="Découvrir le catalogue Prixbasmalin">
+        <video class="ad-video" src="https://pub-ef2e8f407f5c49dabb568cf90eb45f0d.r2.dev/promo_prixbasmalin_vitesse_150.mp4" autoplay muted loop playsinline preload="metadata" poster="" aria-label="Publicité vidéo Prixbasmalin"></video>
+      </a>
+      <div class="ad-video-controls"><span>Comparez. Économisez. Malin.</span><button type="button" class="ad-sound" data-video-sound="prix">Activer le son</button></div>
+      <div class="ad-copy"><h2>Comparez mieux. Achetez malin.</h2><p>Découvrez notre comparateur et explorez le catalogue.</p><a href="catalogue.html" class="ad-cta">Découvrir le catalogue ↗</a></div>
     </article>
     <article class="ad-card ad-amazon">
       <span class="ad-kicker">PARTENAIRE · AMAZON</span>
-      <div class="ad-copy"><h2>À la recherche d’un bon produit ?</h2><p>Explorez les offres Amazon et vérifiez le prix directement chez le vendeur.</p><a href="https://www.amazon.fr/s?k=high-tech&amp;tag=prixbasmalin2021" target="_blank" rel="sponsored nofollow noopener" class="ad-cta">Voir les offres ↗</a></div>
-      <div class="ad-symbol" aria-hidden="true">a</div>
+      <div class="ad-copy"><h2>Publicité Amazon</h2><p>Emplacement affilié Amazon. La vidéo promotionnelle officielle sera ajoutée lorsqu’une ressource vidéo autorisée sera disponible.</p><a href="https://www.amazon.fr/s?k=high-tech&amp;tag=prixbasmalin2021" target="_blank" rel="sponsored nofollow noopener" class="ad-cta">Voir les offres ↗</a></div>
     </article>
     <article class="ad-card ad-partner">
       <span class="ad-kicker">ESPACE PARTENAIRE</span>
-      <div class="ad-copy"><h2>Faites connaître votre projet</h2><p>Commerce, artiste, musique ou événement : votre publicité peut être mise en avant ici.</p><a href="publicite.html" class="ad-cta">Découvrir les offres ↗</a></div>
-      <div class="ad-symbol" aria-hidden="true">↗</div>
+      <div class="ad-copy"><h2>Votre vidéo ici</h2><p>Emplacement prévu pour la vidéo d’un futur commerce, artiste ou annonceur partenaire.</p><a href="publicite.html" class="ad-cta">Proposer une publicité ↗</a></div>
     </article>
   </section>
   <section class="banner" aria-label="Comparer les prix">
@@ -952,6 +964,9 @@ if(floatingPromo){
 
 updateCartCount();
 renderProducts();
+</script>
+<script>
+document.querySelectorAll('[data-video-sound]').forEach(function(button){button.addEventListener('click',function(){const video=button.closest('.ad-card').querySelector('video');if(!video)return;video.muted=!video.muted;button.textContent=video.muted?'Activer le son':'Couper le son';if(!video.muted){const p=video.play();if(p&&p.catch)p.catch(()=>{});}})});
 </script>
 </body>
 </html>
