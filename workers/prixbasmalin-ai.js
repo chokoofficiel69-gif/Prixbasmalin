@@ -76,8 +76,8 @@ export default {
 
     // Models are controlled by server-side environment variables, not arbitrary client input.
     const model = provider === "agnes"
-      ? (env.AGNES_MODEL || "agnes-default")
-      : (env.GROK_MODEL || "grok-3-mini");
+      ? (env.AGNES_MODEL || "agnes-3.0-flash")
+      : (env.GROK_MODEL || "grok-4.7");
     if (!/^[a-zA-Z0-9._:-]{1,100}$/.test(model))
       return json({ error: "Invalid server model configuration" }, 500, cors);
 
