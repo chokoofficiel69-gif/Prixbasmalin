@@ -320,6 +320,22 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #155e
 .search-row{position:relative}
 @media(min-width:760px){.search-row{position:relative}.search{flex:1}}
 
+
+.suggestion-heading,.suggestion-foot{padding:10px 14px;background:#fafafa;color:#777;font-size:11px;font-weight:700}
+.suggestion-foot{font-weight:400;border-top:1px solid #eee}
+.autocomplete button{min-height:44px}
+.modal.catalog-mode{align-items:stretch;background:#fff}
+.modal.catalog-mode .modal-panel{width:100%;height:100%;max-height:100%;border-radius:0;padding:18px max(16px,calc((100vw - 1200px)/2)) 28px;overflow:auto}
+.modal.catalog-mode .modal-panel>h2{font-size:26px;padding:6px 0 14px;border-bottom:1px solid #eee}
+.modal.catalog-mode .modal-actions{position:sticky;bottom:0;background:#fff;padding-top:12px;border-top:1px solid #eee}
+.catalog-toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:8px 0 18px;flex-wrap:wrap}
+.catalog-toolbar input{flex:1;min-width:220px;border:1px solid #ddd;border-radius:9px;padding:12px;font:inherit}
+.catalog-count,.catalog-pager{font-size:12px;color:#666}
+.catalog-pager{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:22px 0}
+.catalog-pager button{padding:10px 14px;border-radius:8px;border:0;font-weight:700}
+.modal.catalog-mode .all-products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:760px){.modal.catalog-mode .all-products{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){.modal.catalog-mode .all-products{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.modal.catalog-mode .modal-panel>h2{font-size:22px}}
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -598,22 +614,37 @@ function showCart(){
 function showAllProducts(page=1){
  if(typeof page!=="number" || !Number.isFinite(page)) page=1;
  const pageSize=12;
+ const modal=document.getElementById("modal");
+ modal.classList.add("catalog-mode");
  const content=document.createElement("div");
  content.className="all-products";
  const start=(page-1)*pageSize;
  productData.slice(start,start+pageSize).forEach(p=>content.append(productCard(p)));
- const pager=document.createElement("div");pager.style.cssText="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:16px";
- const info=document.createElement("span");info.style.cssText="font-size:12px;color:#777";info.textContent="Page "+page+" sur "+Math.ceil(productData.length/pageSize)+" • "+productData.length+" idées produits";
+ const pager=document.createElement("div");pager.className="catalog-pager";
+ const info=document.createElement("span");info.textContent="Page "+page+" sur "+Math.ceil(productData.length/pageSize)+" • "+productData.length+" produits";
  const prev=document.createElement("button");prev.className="modal-secondary";prev.textContent="← Précédent";prev.disabled=page===1;prev.onclick=()=>showAllProducts(page-1);
  const next=document.createElement("button");next.className="modal-primary";next.textContent="Suivant →";next.disabled=start+pageSize>=productData.length;next.onclick=()=>showAllProducts(page+1);
  pager.append(prev,info,next);
+ const toolbar=document.createElement("div");toolbar.className="catalog-toolbar";
+ const search=document.createElement("input");search.type="search";search.placeholder="Rechercher parmi tous les produits…";search.setAttribute("aria-label","Rechercher dans tous les produits");
+ const count=document.createElement("span");count.className="catalog-count";count.textContent=productData.length+" produits à découvrir";
+ toolbar.append(search,count);
+ search.addEventListener("input",()=>{
+  const q=search.value.trim().toLocaleLowerCase("fr");
+  content.innerHTML="";
+  const found=productData.filter(p=>!q||(p.name+" "+p.desc+" "+p.query).toLocaleLowerCase("fr").includes(q));
+  found.forEach(p=>content.append(productCard(p)));
+  count.textContent=found.length+" produit(s)";
+  info.textContent=found.length+" résultat(s)";
+  prev.style.display=next.style.display=q?"none":"";
+ });
  document.getElementById("modalTitle").textContent="Tous les produits";
  document.getElementById("modalContent").innerHTML="";
- document.getElementById("modalContent").append(content,pager);
- document.getElementById("modal").classList.add("open");
+ document.getElementById("modalContent").append(toolbar,content,pager);
+ modal.classList.add("open");
 }
 function openModal(title,text){document.getElementById("modalTitle").textContent=title;document.getElementById("modalContent").innerHTML='<p>'+text+'</p>';document.getElementById("modal").classList.add("open")}
-function closeModal(){document.getElementById("modal").classList.remove("open")}
+function closeModal(){const modal=document.getElementById("modal");modal.classList.remove("open","catalog-mode")}
 
 /* Suggestions de recherche : aide à la saisie sans prétendre à une correction magique */
 const suggestionTerms = [
@@ -627,23 +658,36 @@ const queryInput=document.getElementById("query");
 const suggestionBox=document.getElementById("searchSuggestions");
 function getSuggestions(value){
  const q=value.trim().toLocaleLowerCase("fr");
- if(!q)return [];
- const matches=suggestionTerms.filter(term=>term.toLocaleLowerCase("fr").includes(q)||term.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").includes(q.normalize("NFD").replace(/[\u0300-\u036f]/g,"")));
- const products=productData.map(p=>p.name).filter(name=>name.toLocaleLowerCase("fr").includes(q));
- return [...new Set([...matches,...products])].slice(0,6);
+ const normalize=s=>s.toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+ if(!q)return ["Téléphone","Écouteurs sans fil","Casque Bluetooth","Montre connectée","Ordinateur portable","Télévision 4K"];
+ const nq=normalize(q);
+ const matches=suggestionTerms.filter(term=>normalize(term).includes(nq)||nq.includes(normalize(term)));
+ const products=productData.map(p=>p.name).filter(name=>normalize(name).includes(nq));
+ const synonyms=[["tel","Téléphone"],["sams","Téléphone Samsung"],["iph","iPhone"],["ordi","Ordinateur portable"],["pc","Ordinateur portable"],["casq","Casque Bluetooth"],["ecout","Écouteurs sans fil"],["écout","Écouteurs sans fil"],["mont","Montre connectée"],["tv","Télévision 4K"],["tele","Télévision 4K"],["télé","Télévision 4K"],["batt","Batterie externe"],["chaus","Baskets"],["bask","Baskets"]];
+ const extra=synonyms.filter(([key])=>nq.startsWith(normalize(key))).map(([,term])=>term);
+ const result=[...new Set([...matches,...products,...extra])].slice(0,6);
+ if(!result.length)return ["Rechercher « "+value.trim()+" »","Téléphone","Casque Bluetooth","Écouteurs sans fil"];
+ return result;
 }
 function paintSuggestions(){
  const value=queryInput.value;
  const choices=getSuggestions(value);
  suggestionBox.innerHTML="";
- if(!value.trim()||!choices.length){suggestionBox.classList.remove("open");return;}
+ const title=document.createElement("div");title.className="suggestion-heading";title.textContent=value.trim()?"Suggestions pour votre recherche":"Recherches populaires";suggestionBox.append(title);
  choices.forEach(term=>{
-  const option=document.createElement("button");option.type="button";option.role="option";
-  option.innerHTML='<span class="suggest-icon">⌕</span><span></span>';
+  const option=document.createElement("button");option.type="button";option.setAttribute("role","option");
+  const isSearch=term.startsWith("Rechercher ");
+  option.innerHTML='<span class="suggest-icon">'+(isSearch?"🔎":"⌕")+'</span><span></span>';
   option.lastElementChild.textContent=term;
-  option.addEventListener("click",()=>{queryInput.value=term;suggestionBox.classList.remove("open");showingFavorites=false;renderProducts();queryInput.focus();});
+  option.addEventListener("click",()=>{
+   queryInput.value=isSearch?value.trim():term;
+   suggestionBox.classList.remove("open");showingFavorites=false;renderProducts();
+   if(isSearch){document.getElementById("amazonBanner")?.scrollIntoView({behavior:"smooth",block:"nearest"});}
+   queryInput.focus();
+  });
   suggestionBox.append(option);
  });
+ const foot=document.createElement("div");foot.className="suggestion-foot";foot.textContent="Choisissez une suggestion pour lancer la recherche";suggestionBox.append(foot);
  suggestionBox.classList.add("open");
 }
 queryInput.addEventListener("input",paintSuggestions);
