@@ -39,13 +39,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 </style></head><body><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a></header><main><section class="intro"><h1>Tous les produits</h1><p>Parcourez les fiches illustrées, filtrez par catégorie et recherchez un produit.</p></section><div class="tools"><input id="search" class="search" type="search" placeholder="Rechercher : téléphone, casque, baskets…" aria-label="Rechercher un produit"><div class="filters" id="filters"><button class="active" data-cat="all">Tout</button><button data-cat="tech">Électronique</button><button data-cat="fashion">Mode</button><button data-cat="home">Maison</button><button data-cat="garden">Jardin</button><button data-cat="sport">Sport</button><button data-cat="beauty">Beauté</button><button data-cat="baby">Bébé</button></div></div><section id="comparateurs" class="intro" aria-labelledby="comparateurs-title"><h2 id="comparateurs-title" style="margin:0 0 8px;font-size:20px">Comparer partout</h2><p style="margin:0 0 12px">Ouvre la même recherche sur plusieurs sites, puis vérifie le prix, la livraison et le vendeur.</p><form id="compare-form" class="tools"><input id="compare-query" class="search" type="search" placeholder="Nom du produit ou référence" aria-label="Produit à rechercher chez les comparateurs" required><button type="submit" class="offer">Comparer partout ↗</button></form><p class="note" style="margin:8px 0">Liens vers des sites tiers, prix à confirmer chez le vendeur. Prix Malin ne récupère pas automatiquement les prix de ces recherches.</p><div id="compare-links" class="filters" aria-live="polite"></div></section><div class="count" id="count"></div><section class="grid" id="products" aria-live="polite"></section><p class="note">Les fiches affichent des images illustratives. Les prix et disponibilités ne sont pas encore récupérés en temps réel : vérifiez les informations chez le vendeur avant l’achat.</p></main><script>
 let verifiedPriceIndex = new Map();
 const MAX_PRICE_AGE_DAYS=7;
-function normalizePriceName(value){return String(value||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("fr").trim();}
+function normalizePriceName(value){return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("fr").trim();}
 fetch("data/prix.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(data=>{
  if(!data)return;
  const now=Date.now(),maxAge=(Number(data.max_age_days)||MAX_PRICE_AGE_DAYS)*86400000;
  (data.prices||[]).filter(p=>{
   const date=Date.parse(p.date_releve),price=Number(p.prix_eur);
-  return p.verifie===true&&Number.isFinite(price)&&price>0&&/^https:\\/\\//i.test(p.url||"")&&Number.isFinite(date)&&date<=now&&now-date<=maxAge;
+  return p.verifie===true&&Number.isFinite(price)&&price>0&&/^https:\/\//i.test(p.url||"")&&Number.isFinite(date)&&date<=now&&now-date<=maxAge;
  }).sort((a,b)=>Number(a.prix_eur)-Number(b.prix_eur)).forEach(p=>verifiedPriceIndex.set(normalizePriceName(p.produit),p));
  render();
 }).catch(()=>{});
