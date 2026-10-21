@@ -852,11 +852,12 @@ function escapeHtml(value){
 function renderProducts(){
  const el=document.getElementById("products");
  const banner=document.getElementById("amazonBanner");
+ const queryInput=document.getElementById("query");
  if(!el)return;
  el.innerHTML="";
- banner.innerHTML="";
+ if(banner)banner.innerHTML="";
  let list=productData.filter(p=>activeCategory==="all"||p.category===activeCategory);
- const q=document.getElementById("query").value.trim();
+ const q=queryInput?.value?.trim()||"";
  const ql=q.toLowerCase();
  if(q)list=list.filter(p=>matchesSearch(p,ql));
  if(showingFavorites)list=list.filter(p=>favorites.includes(p.id));
