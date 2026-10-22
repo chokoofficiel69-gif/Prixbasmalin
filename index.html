@@ -664,7 +664,7 @@ header{position:sticky;top:0;z-index:120;background:rgba(255,255,255,.97);backdr
     <button class="category" data-category="fashion"><span class="category-icon"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Mode</span></button>
     <button class="category" data-category="home"><span class="category-icon"><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Maison</span></button>
     <button class="category" data-category="garden"><span class="category-icon"><img src="https://images.unsplash.com/photo-1497250681960-ef046c08a56e?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Jardin</span></button>
-    <button class="category" data-category="sport"><span class="category-icon"><img src="https://images.unsplash.com/photo-1614632537423-1e6c2e7e0e8e?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Sport</span></button>
+    <button class="category" data-category="sport"><span class="category-icon" aria-hidden="true">🏃</span><span>Sport</span></button>
     <button class="category" data-category="beauty"><span class="category-icon"><img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Beauté</span></button>
     <button class="category" data-category="baby"><span class="category-icon"><img src="https://images.unsplash.com/photo-1591348278863-a8fb3887e2aa?w=160&h=160&fit=crop" alt="" loading="lazy" decoding="async"></span><span>Bébé</span></button>
   </div>
@@ -677,7 +677,7 @@ header{position:sticky;top:0;z-index:120;background:rgba(255,255,255,.97);backdr
     <article class="ad-card ad-featured">
       <span class="ad-kicker">VIDÉO OFFICIELLE · PRIXBAS MALIN</span>
       <div class="ad-card-video">
-        <video class="ad-video" src="https://pub-ef2e8f407f5c49dabb568cf90eb45f0d.r2.dev/promo_prixbasmalin_compatible_iphone%20%281%29.mp4" controls autoplay muted loop playsinline preload="auto" aria-label="Publicité vidéo Prixbasmalin">
+        <video class="ad-video" src="https://pub-ef2e8f407f5c49dabb568cf90eb45f0d.r2.dev/promo_prixbasmalin_compatible_iphone%20%281%29.mp4" controls muted loop playsinline preload="none" aria-label="Publicité vidéo Prixbasmalin">
           Votre navigateur ne peut pas lire cette vidéo. <a href="https://pub-ef2e8f407f5c49dabb568cf90eb45f0d.r2.dev/promo_prixbasmalin_compatible_iphone%20%281%29.mp4">Ouvrir la vidéo directement</a>.
         </video>
       </div>
@@ -887,7 +887,7 @@ function productCard(p){
  const inCart=cart.includes(p.id);
  const card=document.createElement("article");card.className="product";
  const imgWrap=document.createElement("div");imgWrap.className="product-image";
- const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:32px'>🛍️</span>"};imgWrap.append(img);
+ const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.width=160;img.height=90;if(p.id==="t1"){img.loading="eager";img.fetchPriority="high"}else{img.loading="lazy"}img.decoding="async";img.onerror=function(){this.style.display="none";imgWrap.innerHTML="<span style='font-size:32px'>🛍️</span>"};imgWrap.append(img);
  imgWrap.onclick=()=>showProductDetail(p);
  const title=document.createElement("h3");title.textContent=p.name;title.onclick=()=>showProductDetail(p);
  const desc=document.createElement("div");desc.className="desc";desc.textContent=p.desc;
