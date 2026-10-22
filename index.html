@@ -583,6 +583,17 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 .flyer-ticker-copy em{display:inline-block!important;align-self:flex-start!important;max-width:100%!important;font-size:10px!important;line-height:1.25!important;white-space:normal!important;overflow-wrap:anywhere!important}
 @media(min-width:700px){.flyer-ticker-card{width:320px!important;grid-template-columns:90px minmax(0,1fr)!important}.flyer-ticker-photo-wrap{width:90px!important;min-width:90px!important;height:100px!important}}
 
+
+/* Hiérarchie éditoriale : Prix Malin d'abord, promotions partenaires ensuite */
+header{position:sticky;top:0;z-index:120;background:rgba(255,255,255,.97);backdrop-filter:blur(12px)}
+.flyer-ticker{position:sticky!important;top:72px!important;z-index:110!important;margin:0 0 18px!important;border-radius:0 0 14px 14px!important;box-shadow:0 5px 16px #00000012}
+.flyer-ticker-head{padding:7px 12px!important}
+.flyer-ticker-window{padding:7px 0!important}
+.ad-showcase,.flyer-gallery{margin-top:28px!important}
+.ad-showcase{border-top:1px solid #eee;padding-top:22px}
+.flyer-gallery{border-top:1px solid #eee;padding-top:22px}
+@media(max-width:600px){header{top:0}.flyer-ticker{top:64px!important}.flyer-ticker-head{font-size:13px}}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -1179,5 +1190,18 @@ renderProducts();
 document.querySelectorAll('[data-video-sound]').forEach(function(button){button.addEventListener('click',function(){const video=button.closest('.ad-card').querySelector('video');if(!video)return;video.muted=!video.muted;button.textContent=video.muted?'Activer le son':'Couper le son';if(!video.muted){const p=video.play();if(p&&p.catch)p.catch(()=>{});}})});
 </script>
   <script src="js/track-outbound.js" defer></script>
+<script>
+/* Keep the main shopping experience first; place general ads and full flyers after the product catalogue. */
+document.addEventListener("DOMContentLoaded",()=>{
+  const catalogue=document.querySelector(".all-products")||document.querySelector("#popular");
+  const ads=document.querySelector(".ad-showcase");
+  const gallery=document.querySelector(".flyer-gallery");
+  if(catalogue&&catalogue.parentNode){
+    const parent=catalogue.parentNode;
+    if(ads&&ads.parentNode===parent) parent.appendChild(ads);
+    if(gallery&&gallery.parentNode===parent) parent.appendChild(gallery);
+  }
+});
+</script>
 </body>
 </html>
