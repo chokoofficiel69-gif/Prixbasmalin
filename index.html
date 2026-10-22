@@ -683,6 +683,14 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 @media(prefers-reduced-motion:reduce){.pm-reveal{opacity:1;transform:none;transition:none}.product,.trust-card,.category-icon,.primary-link,.product-action,.agent-button{transition:none}.pm-scroll-progress{display:none}}
 
 
+/* Fluid page changes where supported; instant navigation remains the fallback */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:pmPageOut .12s ease both}
+::view-transition-new(root){animation:pmPageIn .2s ease both}
+@keyframes pmPageOut{to{opacity:.92}}
+@keyframes pmPageIn{from{opacity:.96;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}
+
 /* Professional storytelling layer — clear hierarchy, reassuring microcopy, restrained orange light */
 .pm-eyebrow{margin:0 0 8px;color:#d94c18;font-size:10px;font-weight:850;letter-spacing:1.5px;text-transform:uppercase}
 .pm-section-intro{max-width:560px;margin:8px 0 0;color:#686868;font-size:13px;line-height:1.65}
