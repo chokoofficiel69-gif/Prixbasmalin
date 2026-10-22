@@ -615,6 +615,16 @@ header{position:sticky;top:0;z-index:120;background:rgba(255,255,255,.97);backdr
 
 /* Stabiliser la hauteur de la bannière mobile pour limiter les CLS */
 @media(max-width:699px){.banner{min-height:180px;align-items:center}.banner-copy{min-width:0}.banner h1,.banner p{overflow-wrap:anywhere}}
+
+/* Mascotte officielle Malin — identité stable orange et blanc */
+.logo.mascot-logo{width:42px;height:42px;border-radius:12px;background:#fff;overflow:hidden;display:grid;place-items:center}
+.logo.mascot-logo img{width:48px;height:48px;object-fit:contain;max-width:none}
+.mascot-banner-art{width:88px;min-height:96px;flex:none;display:grid;place-items:center;background:#fff;border-radius:18px 18px 18px 5px;padding:2px;box-shadow:0 4px 12px #b6370e2b}
+.mascot-banner-art img{width:86px;height:94px;object-fit:contain}
+.agent-button{background:#fff!important;border:2px solid var(--orange)!important}
+.agent-button img{width:100%;height:100%;object-fit:contain;transform:scale(1.18)}
+@media(min-width:600px){.mascot-banner-art{width:104px;min-height:112px}.mascot-banner-art img{width:102px;height:110px}}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -632,7 +642,7 @@ header{position:sticky;top:0;z-index:120;background:rgba(255,255,255,.97);backdr
 <body><a class="skip-link" href="#popular">Aller directement aux produits</a>
 <header>
   <a class="brand" href="#" id="brandHome" aria-label="Prix Malin, accueil">
-    <span class="logo">%</span>
+    <span class="logo mascot-logo"><img src="assets/mascotte-malin.svg" alt="" width="42" height="42"></span>
     <span><span class="brand-name">Prix <span>Malin</span></span><span class="tagline" style="display:block">Comparez. Économisez. Malin.</span></span>
   </a>
   <button class="icon-button" id="cartBtn" aria-label="Panier">🛒<span class="cart-count" id="cartCount">0</span></button>
@@ -712,7 +722,7 @@ header{position:sticky;top:0;z-index:120;background:rgba(255,255,255,.97);backdr
       <p>Découvrez des produits et comparez les options disponibles chez le vendeur.</p>
       <a class="primary-link" href="#popular" id="compareButton">Comparer →</a>
     </div>
-    <div class="discount-art" aria-hidden="true"><div class="discount-tag"><span>%</span></div></div>
+    <div class="discount-art mascot-banner-art" aria-hidden="true"><img src="assets/mascotte-malin.svg" alt="" width="92" height="100"></div>
   </section>
   <section class="section" id="popular">
     <div class="section-head"><h2>Produits populaires</h2><button class="text-link" id="seeAll">Voir tout ›</button></div>
@@ -763,7 +773,7 @@ header{position:sticky;top:0;z-index:120;background:rgba(255,255,255,.97);backdr
   <a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" class="floating-promo-cta">Ajouter ↗</a>
 </aside>
 
-<div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l’assistant Prix Malin" title="Besoin d’aide ?"><span aria-hidden="true">💬</span></button></div><button id="accessibilityButton" class="accessibility-button" aria-label="Ouvrir les options d’accessibilité" title="Accessibilité">♿</button>
+<div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l’assistant Prix Malin" title="Besoin d’aide ?"><img src="assets/mascotte-malin.svg" alt=""></button></div><button id="accessibilityButton" class="accessibility-button" aria-label="Ouvrir les options d’accessibilité" title="Accessibilité">♿</button>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-panel"><h2 id="modalTitle">Prix Malin</h2><div id="modalContent"></div><div class="modal-actions"><button class="modal-secondary" id="modalClose">Fermer</button></div></div>
 </div>
