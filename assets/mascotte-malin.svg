@@ -1,31 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 260" role="img" aria-labelledby="title desc">
-<title id="title">Malin, la mascotte de Prix Malin</title><desc id="desc">Sac de courses orange souriant avec de grands yeux, des gants blancs et des baskets orange et blanches.</desc>
-<defs><linearGradient id="bag" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a35"/><stop offset="1" stop-color="#f04a0b"/></linearGradient><linearGradient id="shoe" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#e8e8e8"/></linearGradient></defs>
-<ellipse cx="120" cy="245" rx="76" ry="9" fill="#191919" opacity=".12"/>
-<!-- handle -->
-<path d="M83 65V43c0-24 15-34 37-34s37 10 37 34v22" fill="none" stroke="#252525" stroke-width="13" stroke-linecap="round"/>
-<path d="M83 65V43c0-24 15-34 37-34s37 10 37 34v22" fill="none" stroke="#ff8a49" stroke-width="4" stroke-linecap="round"/>
+<title id="title">Malin, la mascotte de Prix Malin</title><desc id="desc">Mascotte de sac de courses orange, joyeuse et accueillante, avec de grands yeux brillants, des gants blancs et des baskets orange et blanches.</desc>
+<defs>
+ <linearGradient id="bag" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff9a51"/><stop offset=".42" stop-color="#ff681f"/><stop offset="1" stop-color="#ef4308"/></linearGradient>
+ <linearGradient id="shoe" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#e5e8ed"/></linearGradient>
+ <radialGradient id="eye"><stop stop-color="#75462d"/><stop offset=".75" stop-color="#3d2117"/><stop offset="1" stop-color="#1c1715"/></radialGradient>
+ <linearGradient id="glove" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#e8edf2"/></linearGradient>
+</defs>
+<ellipse cx="120" cy="246" rx="77" ry="8" fill="#20202a" opacity=".13"/>
+<!-- handle like the brand's shopping bag -->
+<path d="M80 67V42C80 19 96 8 120 8s40 11 40 34v25" fill="none" stroke="#24262a" stroke-width="14" stroke-linecap="round"/>
+<path d="M80 61V42C80 21 98 13 120 13s34 9 34 29v19" fill="none" stroke="#ffb27b" stroke-width="4" stroke-linecap="round"/>
+<!-- legs and bright sneakers -->
+<path d="M88 196l-2 31M151 196l5 31" stroke="#26272b" stroke-width="16" stroke-linecap="round"/>
+<path d="M47 225q15-11 34-3l18 10q9 7 1 15H39q-11-4-4-14z" fill="url(#shoe)" stroke="#dfe1e5" stroke-width="2"/>
+<path d="M137 228q14-10 32-3l20 10q9 7 0 12h-47q-12-3-5-13z" fill="url(#shoe)" stroke="#dfe1e5" stroke-width="2"/>
+<path d="M45 233h47M145 235h39" stroke="#ff5a1f" stroke-width="7" stroke-linecap="round"/>
+<path d="M60 226l8 5m4-7 8 5m67 5 7 4m4-7 8 4" stroke="#ff7b32" stroke-width="2.5" stroke-linecap="round"/>
 <!-- arms -->
-<path d="M48 131 20 112" fill="none" stroke="#292929" stroke-width="14" stroke-linecap="round"/><path d="M191 131 217 108" fill="none" stroke="#292929" stroke-width="14" stroke-linecap="round"/>
-<path d="M22 112c-11-3-15-15-8-23 7-8 17-5 23 1l13 14-9 15z" fill="#fff" stroke="#e5e5e5" stroke-width="2"/>
-<path d="M215 109c10-7 20-2 21 7 1 9-8 17-18 16l-12-3 1-13z" fill="#fff" stroke="#e5e5e5" stroke-width="2"/>
-<!-- legs -->
-<path d="M88 202v22M151 202v22" stroke="#292929" stroke-width="14" stroke-linecap="round"/>
-<path d="M56 225c9-8 26-8 39-1l9 11c2 5-3 10-9 10H43c-8 0-12-6-7-12z" fill="url(#shoe)" stroke="#ddd" stroke-width="2"/>
-<path d="M137 225c10-7 26-7 38 0l17 10c5 5 1 10-7 10h-44c-8 0-12-5-8-11z" fill="url(#shoe)" stroke="#ddd" stroke-width="2"/>
-<path d="M48 232h46M145 232h38" stroke="#ff5a1f" stroke-width="7" stroke-linecap="round"/>
-<!-- body bag -->
-<path d="M43 69Q43 58 55 58H185Q197 58 197 71L207 179Q208 196 190 201L51 201Q33 197 35 180z" fill="url(#bag)" stroke="#df4309" stroke-width="2"/>
-<path d="M50 70h140" stroke="#ffb181" stroke-width="3" opacity=".65"/>
-<!-- eyebrows -->
-<path d="M70 99q16-12 29 0M142 99q15-12 29 0" fill="none" stroke="#28201d" stroke-width="8" stroke-linecap="round"/>
-<!-- eyes -->
-<ellipse cx="85" cy="120" rx="17" ry="22" fill="#fff"/><ellipse cx="155" cy="120" rx="17" ry="22" fill="#fff"/>
-<ellipse cx="89" cy="122" rx="10" ry="15" fill="#4c2b1b"/><ellipse cx="151" cy="122" rx="10" ry="15" fill="#4c2b1b"/>
-<ellipse cx="91" cy="117" rx="4" ry="6" fill="#fff"/><ellipse cx="153" cy="117" rx="4" ry="6" fill="#fff"/>
-<!-- nose and smile -->
-<ellipse cx="120" cy="140" rx="8" ry="6" fill="#e94b11"/>
-<path d="M77 151q43 48 86 0" fill="#fff" stroke="#492117" stroke-width="5" stroke-linecap="round"/><path d="M94 165q26 14 52 0" fill="#ff9d9d" opacity=".9"/>
-<!-- bag logo badge -->
-<circle cx="120" cy="184" r="13" fill="#fff" opacity=".98"/><path d="M114 181v-4a6 6 0 0 1 12 0v4" fill="none" stroke="#ff5a1f" stroke-width="3" stroke-linecap="round"/><rect x="111" y="180" width="18" height="13" rx="3" fill="#ff5a1f"/><path d="m115 186 3 3 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M48 132 24 113M192 132l25-23" fill="none" stroke="#26272b" stroke-width="15" stroke-linecap="round"/>
+<!-- left glove thumbs-up -->
+<path d="M25 116c-11 0-17-8-14-17 2-6 8-9 14-7l-1-14c0-8 6-13 12-10 5 2 7 7 7 14l1 10 11 10c7 7 4 18-5 21l-18 2z" fill="url(#glove)" stroke="#e2e5e9" stroke-width="2"/>
+<!-- right glove -->
+<path d="M215 110c7-8 16-5 18 2 2 7-3 14-11 16l-10 3-9-7 2-8z" fill="url(#glove)" stroke="#e2e5e9" stroke-width="2"/>
+<!-- bag body, softened silhouette -->
+<path d="M39 72Q39 57 56 57H184Q201 57 201 74L207 177Q208 198 188 203H52Q32 199 34 179z" fill="url(#bag)" stroke="#ef4a0c" stroke-width="2"/>
+<path d="M49 72q0-6 8-6h126q8 0 8 7" fill="none" stroke="#ffc49a" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+<path d="M48 82q4-10 8-10" fill="none" stroke="#fff" stroke-width="3" opacity=".28" stroke-linecap="round"/>
+<!-- friendly expressive eyebrows -->
+<path d="M65 99q15-14 31-2M144 97q15-12 29 1" fill="none" stroke="#38241d" stroke-width="8" stroke-linecap="round"/>
+<!-- big warm eyes -->
+<ellipse cx="83" cy="122" rx="19" ry="24" fill="#fff" stroke="#f3eee9" stroke-width="2"/>
+<ellipse cx="157" cy="122" rx="19" ry="24" fill="#fff" stroke="#f3eee9" stroke-width="2"/>
+<ellipse cx="87" cy="124" rx="12" ry="17" fill="url(#eye)"/>
+<ellipse cx="153" cy="124" rx="12" ry="17" fill="url(#eye)"/>
+<ellipse cx="90" cy="117" rx="5" ry="7" fill="#fff"/><ellipse cx="156" cy="117" rx="5" ry="7" fill="#fff"/>
+<circle cx="82" cy="130" r="2.6" fill="#d69b63"/><circle cx="148" cy="130" r="2.6" fill="#d69b63"/>
+<!-- nose, cheeks and wide joyful smile -->
+<ellipse cx="120" cy="143" rx="9" ry="7" fill="#ed4b16"/>
+<ellipse cx="60" cy="145" rx="12" ry="6" fill="#ff9b82" opacity=".5"/><ellipse cx="180" cy="145" rx="12" ry="6" fill="#ff9b82" opacity=".5"/>
+<path d="M73 151q47 55 94 0q-2 33-47 35q-43-2-47-35z" fill="#40201c"/>
+<path d="M79 153q41 16 82 0q-6 17-41 18q-33-1-41-18z" fill="#fff"/>
+<path d="M99 174q21 14 42 0q-9 17-21 16q-13-1-21-16z" fill="#ff777d"/>
+<!-- signature smile on the bag -->
+<path d="M99 190q21 16 42 0" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+<!-- small brand tag -->
+<circle cx="120" cy="184" r="13" fill="#fff" opacity=".98"/>
+<path d="M114 181v-4a6 6 0 0 1 12 0v4" fill="none" stroke="#ff5a1f" stroke-width="3" stroke-linecap="round"/>
+<rect x="111" y="180" width="18" height="13" rx="3" fill="#ff5a1f"/>
+<path d="m115 186 3 3 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
