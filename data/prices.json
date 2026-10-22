@@ -1,9 +1,10 @@
 {
   "version": 1,
-  "generated_at": null,
+  "generated_at": "2026-10-22T03:10:36.389Z",
   "schedule": "toutes les 10 heures",
-  "methodology": "Les prix ne seront affichés qu'après lecture d'une source marchande publique. Aucun prix inventé.",
+  "methodology": "Prix lus dans les données structurées publiques Product/Offer des pages marchands. Aucune estimation ni prix inventé.",
   "products": [],
   "offers": [],
-  "errors": []
+  "errors": [],
+  "previous_generated_at": null
 }
