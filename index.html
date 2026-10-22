@@ -538,6 +538,22 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
 .flyer-ticker-photo{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;background:#fff!important}
 .ad-showcase .ad-real-flyer .real-flyer-image{display:block!important;width:auto!important;max-width:100%!important;height:auto!important;max-height:300px!important;margin:0 auto!important;object-fit:contain!important;object-position:center top!important}
 @media(min-width:700px){.flyer-ticker{margin:0 0 18px!important}.flyer-ticker-card{width:320px!important;grid-template-columns:104px minmax(0,1fr)!important}.flyer-ticker-photo-wrap{width:104px!important;height:104px!important}.ad-showcase .ad-real-flyer .real-flyer-image{max-height:440px!important}}
+
+/* Galerie compacte de flyers : glisser horizontalement pour voir chaque visuel */
+.flyer-gallery{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 14px 14px;margin:10px 0 18px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.flyer-gallery-card{flex:0 0 min(78vw,300px);max-width:300px;scroll-snap-align:start;border:1px solid #e9e9e9;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 4px 14px rgba(25,25,25,.05)}
+.flyer-gallery-image-link{display:flex;align-items:center;justify-content:center;height:170px;padding:8px;background:#f7f7f8}
+.flyer-gallery-image{display:block;width:100%;height:100%;object-fit:contain;border-radius:8px}
+.flyer-gallery-copy{display:grid;gap:7px;padding:12px}
+.flyer-gallery-copy strong{font-size:15px}
+.flyer-gallery-copy span{font-size:12px;line-height:1.4;color:#666}
+.flyer-gallery-copy a{justify-self:start;background:#171717;color:#ffed00;text-decoration:none;border-radius:8px;padding:9px 11px;font-size:12px;font-weight:800}
+.flyer-gallery::-webkit-scrollbar{height:4px}.flyer-gallery::-webkit-scrollbar-thumb{background:#ddd;border-radius:9px}
+/* Logo de marque plus net, sans changer le nom ni les couleurs */
+.logo{width:42px;height:42px;border-radius:12px;background:#fff;color:var(--orange);border:2px solid var(--orange);font-size:22px;font-weight:800;box-shadow:inset 0 0 0 3px #fff;}
+.brand{gap:10px}.brand-name{font-size:20px;letter-spacing:-.6px}
+@media(min-width:700px){.flyer-gallery-card{flex-basis:280px}.flyer-gallery-image-link{height:190px}}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -621,28 +637,20 @@ body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
       <span class="ad-kicker">POUR LES COMMERÇANTS ET CRÉATEURS</span>
       <div class="ad-copy"><h2>Présentez votre activité</h2><p>Vous avez un commerce, une marque, un événement ou un projet artistique ? Préparez une demande de visibilité. Toute diffusion est confirmée après validation du contenu et des modalités.</p><a href="publicite.html" class="ad-cta">Préparer une demande ↗</a></div>
     </article>
-    <article class="ad-card ad-snap-partner ad-real-flyer" aria-label="Flyer pare-brise La Maille">
-      <a class="real-flyer-link" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir Snapchat pour contacter La Maille">
-        <img class="real-flyer-image" src="assets/flyers/flyer-zero-franchise.webp" alt="Flyer original La Maille pare-brise noir et or avec avatar et contact Snapchat lozeill69" loading="eager">
-      </a>
-      <div class="ad-copy">
-        <span class="snap-mini-label">🚘 ACTIVITÉ PARE-BRISE · LA MAILLE</span>
-        <h2>Pare-brise endommagé ?</h2>
-        <p>Découvre les services pare-brise et l’offre cadeau présentés sur les flyers. Les conditions de prise en charge et de bonus dépendent du contrat et de l’offre applicable.</p>
-        <a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" class="ad-cta snap-cta">👻 Ajouter lozeill69 sur Snap ↗</a>
-      </div>
-    </article>
-    <article class="ad-card" aria-label="Flyer cadeau La Maille">
-      <a class="real-flyer-link" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir Snapchat pour contacter La Maille">
-        <img class="real-flyer-image" src="assets/flyers/flyer-maille-cadeaux.webp" alt="Flyer La Maille : cadeau annoncé jusqu’à 300 euros selon les conditions de l’offre" loading="lazy">
-      </a>
-      <div class="ad-copy">
-        <span class="snap-mini-label">🎁 OFFRE CADEAU · LA MAILLE</span>
-        <h2>Choisis ton cadeau</h2>
-        <p>Retrouve les détails de l’offre et les conditions auprès de La Maille.</p>
-        <a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" class="ad-cta snap-cta">👻 En savoir plus sur Snap ↗</a>
-      </div>
-    </article>
+    <div class="flyer-gallery" aria-label="Flyers La Maille, faites glisser horizontalement pour voir les autres flyers">
+      <article class="flyer-gallery-card">
+        <a class="flyer-gallery-image-link" href="assets/flyers/flyer-zero-franchise.webp" target="_blank" rel="noopener noreferrer" aria-label="Afficher le flyer pare-brise en grand">
+          <img class="flyer-gallery-image" src="assets/flyers/flyer-zero-franchise.webp" alt="Flyer La Maille : pare-brise endommagé, zéro franchise selon contrat et bonus annoncé" loading="lazy">
+        </a>
+        <div class="flyer-gallery-copy"><strong>Pare-brise endommagé ?</strong><span>Les conditions dépendent de ton contrat et de l’offre applicable.</span><a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer">Contacter La Maille sur Snap ↗</a></div>
+      </article>
+      <article class="flyer-gallery-card">
+        <a class="flyer-gallery-image-link" href="assets/flyers/flyer-maille-cadeaux.webp" target="_blank" rel="noopener noreferrer" aria-label="Afficher le flyer cadeau en grand">
+          <img class="flyer-gallery-image" src="assets/flyers/flyer-maille-cadeaux.webp" alt="Flyer La Maille : offre cadeau annoncée jusqu’à 300 euros, selon conditions" loading="lazy">
+        </a>
+        <div class="flyer-gallery-copy"><strong>Choisis ton cadeau</strong><span>Découvre les détails et les conditions auprès de La Maille.</span><a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer">En savoir plus sur Snap ↗</a></div>
+      </article>
+    </div>
   </section>
 
   <section class="banner" aria-label="Comparer les prix">
