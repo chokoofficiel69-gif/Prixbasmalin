@@ -925,9 +925,16 @@ function renderProducts(){
  const q=document.getElementById("query").value.trim();
  const ql=q.toLowerCase();
  if(q)list=list.filter(p=>matchesSearch(p,ql));
- if(showingFavorites)list=list.filter(p=>favorites.includes(p.id));
+ const words=p=>(p.name+" "+p.desc+" "+p.query+" "+(p.brand||"")).toLocaleLowerCase("fr");
+ if(productFilters.gender!=="all")list=list.filter(p=>{const t=words(p);return productFilters.gender==="homme"?/homme|masculin|garçon/.test(t):productFilters.gender==="femme"?/femme|féminin|fille/.test(t):/unisexe|mixte/.test(t)});
+ if(productFilters.color!=="all")list=list.filter(p=>words(p).includes(productFilters.color));
+ if(productFilters.size!=="all")list=list.filter(p=>words(p).includes(productFilters.size));
+ if(productFilters.brand!=="all")list=list.filter(p=>words(p).includes(productFilters.brand));
+ if(productFilters.onlyFavorites||showingFavorites)list=list.filter(p=>favorites.includes(p.id));
+ if(productFilters.minPrice||productFilters.maxPrice)list=list.filter(p=>{const m=String(p.price||"").match(/[0-9]+(?:[.,][0-9]+)?/);if(!m)return false;const n=Number(m[0].replace(",","."));return (!productFilters.minPrice||n>=Number(productFilters.minPrice))&&(!productFilters.maxPrice||n<=Number(productFilters.maxPrice))});
  if(currentSort==="az")list.sort((a,b)=>a.name.localeCompare(b.name,"fr"));
  if(currentSort==="za")list.sort((a,b)=>b.name.localeCompare(a.name,"fr"));
+ if(currentSort==="priceAsc"||currentSort==="priceDesc")list.sort((a,b)=>{const n=x=>Number(String(x.price||"").match(/[0-9]+(?:[.,][0-9]+)?/)?.[0]?.replace(",","."))||Infinity;return currentSort==="priceAsc"?n(a)-n(b):n(b)-n(a)});
  if(q){
   const term=encodeURIComponent(q);
   const links=[["Amazon","https://www.amazon.fr/s?k="+term+"&tag=prixbasmalin2021"],["Google Shopping","https://www.google.com/search?tbm=shop&q="+term],["idealo","https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+term],["Le Dénicheur","https://ledenicheur.fr/search?search="+term],["Fnac","https://www.fnac.com/SearchResult/ResultList.aspx?Search="+term],["Cdiscount","https://www.cdiscount.com/search/10/"+term+".html"]];
