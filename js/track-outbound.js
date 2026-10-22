@@ -31,6 +31,26 @@
     record(link.href, "outbound");
   }, true);
 
+
+  // Mesure anonyme des pages vues : identifiant de session temporaire, sans cookie.
+  try {
+    var sessionKey = "pm_analytics_session";
+    var sessionId = sessionStorage.getItem(sessionKey);
+    if (!sessionId) {
+      sessionId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() :
+        "pm-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      sessionStorage.setItem(sessionKey, sessionId);
+    }
+    fetch(endpoint.replace(/\/track$/, "/view"), {
+      method: "POST",
+      mode: "cors",
+      credentials: "omit",
+      keepalive: true,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page_path: location.pathname || "/", visitor_id: sessionId })
+    }).catch(function () {});
+  } catch (_) {}
+
   var originalOpen = window.open;
   window.open = function (url) {
     if (url) record(String(url), "search");
