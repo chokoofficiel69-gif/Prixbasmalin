@@ -1133,5 +1133,6 @@ renderProducts();
 <script>
 document.querySelectorAll('[data-video-sound]').forEach(function(button){button.addEventListener('click',function(){const video=button.closest('.ad-card').querySelector('video');if(!video)return;video.muted=!video.muted;button.textContent=video.muted?'Activer le son':'Couper le son';if(!video.muted){const p=video.play();if(p&&p.catch)p.catch(()=>{});}})});
 </script>
+  <script src="js/track-outbound.js" defer></script>
 </body>
 </html>
