@@ -613,6 +613,8 @@ header{position:sticky;top:0;z-index:120;background:rgba(255,255,255,.97);backdr
  .flyer-ticker-copy strong{font-size:12px!important}
 }
 
+/* Stabiliser la hauteur de la bannière mobile pour limiter les CLS */
+@media(max-width:699px){.banner{min-height:180px;align-items:center}.banner-copy{min-width:0}.banner h1,.banner p{overflow-wrap:anywhere}}
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
