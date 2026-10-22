@@ -1,12 +1,11 @@
----
-layout: null
----
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://prixbasmalin.fr/</loc>
-  </url>
-  <url>
-    <loc>https://prixbasmalin.fr/catalogue.html</loc>
-  </url>
+  <url><loc>https://prixbasmalin.fr/</loc></url>
+  <url><loc>https://prixbasmalin.fr/catalogue.html</loc></url>
+  <url><loc>https://prixbasmalin.fr/grossistes.html</loc></url>
+  <url><loc>https://prixbasmalin.fr/high-tech.html</loc></url>
+  <url><loc>https://prixbasmalin.fr/mode.html</loc></url>
+  <url><loc>https://prixbasmalin.fr/offres.html</loc></url>
+  <url><loc>https://prixbasmalin.fr/partenaires.html</loc></url>
+  <url><loc>https://prixbasmalin.fr/publicite.html</loc></url>
 </urlset>
