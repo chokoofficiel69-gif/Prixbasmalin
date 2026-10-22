@@ -835,6 +835,7 @@ const productData=[
 
 ];
 let activeCategory="all",showingFavorites=false,currentSort="default";
+let productFilters={gender:"all",color:"all",size:"all",brand:"all",minPrice:"",maxPrice:"",onlyFavorites:false};
 let favorites=JSON.parse(localStorage.getItem("prixMalinFavorites")||"[]");
 let cart=JSON.parse(localStorage.getItem("prixMalinCart")||"[]");
 function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringify(favorites))}
@@ -1047,24 +1048,30 @@ document.addEventListener("click",e=>{if(!e.target.closest("#searchForm"))sugges
 
 document.getElementById("searchForm").onsubmit=e=>{e.preventDefault();suggestionBox.classList.remove("open");showingFavorites=false;renderProducts()};
 document.getElementById("query").oninput=()=>{showingFavorites=false;renderProducts()};
-document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[data-category]");if(!btn)return;if(btn.dataset.category==="all"){window.location.href="catalogue.html";return;}activeCategory=btn.dataset.category;showingFavorites=false;document.querySelectorAll(".category").forEach(c=>c.classList.toggle("active",c===btn));renderProducts()};
-document.getElementById("filterButton").onclick=()=>{
+document.getElementById("categories").onclick=e=>{const btn=e.target.closest("[data-category]");if(!btn)return;if(btn.dataset.category==="all"){window.location.href="catalogue.html";return;}activeCategory=btn.dataset.category;showingFavoritesdocument.getElementById("filterButton").onclick=()=>{
  const content=document.getElementById("modalContent");
- document.getElementById("modalTitle").textContent="Affiner la recherche";
+ document.getElementById("modalTitle").textContent="Filtres de recherche";
  content.innerHTML="";
- const wrap=document.createElement("div");wrap.style.cssText="display:grid;gap:14px";
- const catLabel=document.createElement("label");catLabel.textContent="Catégorie";catLabel.style.cssText="font-weight:700;font-size:13px;display:grid;gap:6px";
- const cat=document.createElement("select");cat.style.cssText="padding:12px;border:1px solid #ddd;border-radius:10px;background:white";
- [["all","Toutes les catégories"],["tech","Électronique"],["fashion","Mode"],["home","Maison"],["garden","Jardin"],["sport","Sport"],["beauty","Beauté"],["baby","Bébé"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;o.selected=activeCategory===v;cat.append(o)});
- catLabel.append(cat);
- const sortLabel=document.createElement("label");sortLabel.textContent="Ordre d’affichage";sortLabel.style.cssText=catLabel.style.cssText;
- const sort=document.createElement("select");sort.id="sortProducts";sort.style.cssText=cat.style.cssText;
- [["default","Sélection Prix Malin"],["az","Nom : A à Z"],["za","Nom : Z à A"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;sort.append(o)});
- sortLabel.append(sort);
- const note=document.createElement("p");note.textContent="Choisis une catégorie puis ouvre une fiche pour consulter les offres disponibles chez les vendeurs. Le tri par prix utilise les recherches du vendeur lorsqu’elles sont ouvertes.";note.style.cssText="font-size:12px;color:#666;line-height:1.5;margin:0";
- const apply=document.createElement("button");apply.className="modal-primary";apply.textContent="Appliquer les filtres";apply.style.cssText="padding:12px;border-radius:10px;border:0;font-weight:700";
- apply.onclick=()=>{activeCategory=cat.value;currentSort=sort.value;document.querySelectorAll("#categories [data-category]").forEach(c=>c.classList.toggle("active",c.dataset.category===activeCategory));renderProducts();closeModal()};
- wrap.append(catLabel,sortLabel,note,apply);content.append(wrap);document.getElementById("modal").classList.add("open");
+ const wrap=document.createElement("div");
+ wrap.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-height:62vh;overflow:auto;padding:2px 3px 10px";
+ const selectField=(label,id,options,current)=>{const l=document.createElement("label");l.textContent=label;l.style.cssText="font-weight:700;font-size:14px;display:grid;gap:7px;min-width:0";const s=document.createElement("select");s.id=id;s.style.cssText="width:100%;min-width:0;box-sizing:border-box;padding:12px 8px;border:1px solid #ddd;border-radius:12px;background:#fff;font-size:14px";options.forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;o.selected=current===v;s.append(o)});l.append(s);return l};
+ const inputField=(label,id,placeholder,value)=>{const l=document.createElement("label");l.textContent=label;l.style.cssText="font-weight:700;font-size:14px;display:grid;gap:7px";const i=document.createElement("input");i.id=id;i.type="number";i.min="0";i.placeholder=placeholder;i.value=value||"";i.style.cssText="width:100%;box-sizing:border-box;padding:12px 8px;border:1px solid #ddd;border-radius:12px;font-size:14px";l.append(i);return l};
+ wrap.append(selectField("Catégorie","filterCategory",[["all","Toutes"],["tech","Électronique"],["fashion","Mode"],["home","Maison"],["garden","Jardin"],["sport","Sport"],["beauty","Beauté"],["baby","Bébé"]],activeCategory));
+ wrap.append(selectField("Sexe / public","filterGender",[["all","Tous"],["homme","Homme"],["femme","Femme"],["mixte","Mixte / unisexe"]],productFilters.gender));
+ wrap.append(selectField("Couleur","filterColor",[["all","Toutes"],["noir","Noir"],["blanc","Blanc"],["rouge","Rouge"],["bleu","Bleu"],["vert","Vert"],["gris","Gris"],["rose","Rose"],["beige","Beige"]],productFilters.color));
+ wrap.append(selectField("Taille / format","filterSize",[["all","Toutes"],["xs","XS"],["s","S"],["m","M"],["l","L"],["xl","XL"],["xxl","XXL"],["petit","Petit format"],["compact","Compact"],["grand","Grand format"]],productFilters.size));
+ wrap.append(selectField("Marque (si indiquée)","filterBrand",[["all","Toutes"],["apple","Apple"],["samsung","Samsung"],["nike","Nike"],["adidas","Adidas"],["sony","Sony"],["lacoste","Lacoste"]],productFilters.brand));
+ wrap.append(selectField("Ordre d’affichage","sortProducts",[["default","Sélection Prix Malin"],["az","Nom : A à Z"],["za","Nom : Z à A"],["priceAsc","Prix croissant*"],["priceDesc","Prix décroissant*"]],currentSort));
+ wrap.append(inputField("Prix minimum (€)","filterMinPrice","Ex. 10",productFilters.minPrice));
+ wrap.append(inputField("Prix maximum (€)","filterMaxPrice","Ex. 100",productFilters.maxPrice));
+ const favLabel=document.createElement("label");favLabel.style.cssText="grid-column:1/-1;display:flex;gap:10px;align-items:center;font-size:15px;font-weight:600;padding:6px 0";const fav=document.createElement("input");fav.type="checkbox";fav.id="filterFavorites";fav.checked=productFilters.onlyFavorites;fav.style.cssText="width:20px;height:20px";favLabel.append(fav,document.createTextNode("Afficher uniquement mes favoris"));wrap.append(favLabel);
+ const note=document.createElement("p");note.style.cssText="grid-column:1/-1;font-size:13px;color:#666;line-height:1.5;margin:0";note.textContent="Les filtres dépendent des informations présentes dans chaque fiche. Les prix du catalogue ne sont pas encore tous chiffrés : le filtre de prix ne retient que les fiches avec un prix numérique.";wrap.append(note);
+ const apply=document.createElement("button");apply.className="modal-primary";apply.textContent="Appliquer les filtres";apply.style.cssText="grid-column:1/-1;padding:15px;border-radius:12px;border:0;font-weight:700;font-size:17px";
+ apply.onclick=()=>{activeCategory=document.getElementById("filterCategory").value;productFilters={gender:document.getElementById("filterGender").value,color:document.getElementById("filterColor").value,size:document.getElementById("filterSize").value,brand:document.getElementById("filterBrand").value,minPrice:document.getElementById("filterMinPrice").value,maxPrice:document.getElementById("filterMaxPrice").value,onlyFavorites:document.getElementById("filterFavorites").checked};currentSort=document.getElementById("sortProducts").value;document.querySelectorAll("#categories [data-category]").forEach(x=>x.classList.toggle("active",x.dataset.category===activeCategory));renderProducts();closeModal()};
+ const reset=document.createElement("button");reset.type="button";reset.textContent="Réinitialiser";reset.style.cssText="padding:12px;border:0;border-radius:12px;background:#f2f2f2;font-weight:700";reset.onclick=()=>{activeCategory="all";currentSort="default";productFilters={gender:"all",color:"all",size:"all",brand:"all",minPrice:"",maxPrice:"",onlyFavorites:false};renderProducts();closeModal()};wrap.append(reset);
+ content.append(wrap);document.getElementById("modal").classList.add("open");
+};
+nd(catLabel,sortLabel,note,apply);content.append(wrap);document.getElementById("modal").classList.add("open");
 };
 document.getElementById("compareButton").onclick=()=>document.getElementById("query").focus();
 document.getElementById("seeAll").onclick=()=>{window.location.href="catalogue.html"};
