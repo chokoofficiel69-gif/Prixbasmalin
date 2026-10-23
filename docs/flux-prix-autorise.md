@@ -30,4 +30,26 @@ Le workflow GitHub Actions exécute aussi ce générateur lorsqu'un changement e
 
 ## Correspondance catalogue
 
-`catalog_product_id` doit être identique à un identifiant de produit du tableau `productData` dans `catalogue.html`. Le générateur extrait les identifiants de `productData` dans `catalogue.html` et rejette toute offre dont `catalog_product_id` ne correspond pas exactement à un identifiant existant. Les offres admissibles qui réutilisent un même `offer_id` sont également rejetées. Les offres ne sont jamais rapprochées automatiquement par nom approximatif afin d'éviter de comparer des variantes différentes.
+`catalog_product_id` doit être identique à un identifiant de produit du tableau `productData` dans `catalogue.html`. Le générateur extrait les identifiants de `productData` dans `catalogue.html` et rejette toute offre dont `catalog_product_id` ne correspond pas exactement à un identifiant existant. Les offres admissibles qui réutilisent un même `offer_id` sont également rejetées. Les GTIN sont contrôlés (longueur et clé de contrôle), les ASIN doivent contenir 10 caractères alphanumériques et les MPN exigent une marque. Toutes les offres publiées sous une même fiche catalogue doivent avoir exactement la même identité normalisée. Si deux offres valides d'une fiche ont des identités différentes, toutes les offres de cette fiche sont écartées. Les offres ne sont jamais rapprochées automatiquement par nom approximatif afin d'éviter de comparer des variantes différentes.
+
+
+## Exemple d'identité exacte
+
+Pour une référence EAN/GTIN :
+```json
+{
+  "identity_type": "gtin",
+  "identity_value": "4006381333931"
+}
+```
+
+Pour une référence fabricant, fournir également la marque :
+```json
+{
+  "identity_type": "mpn",
+  "identity_value": "MODEL-123",
+  "brand": "Marque fabricant"
+}
+```
+
+L'exemple GTIN ci-dessus illustre uniquement le format du champ. Il ne constitue pas une offre commerciale ni une correspondance avec un produit du catalogue. Une identité exacte doit être confirmée à partir des données du marchand.
