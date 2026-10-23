@@ -69,11 +69,11 @@ jobs:
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin-attribution.chokoofficiel69.workers.dev/health --output /tmp/worker-health.json
-          node --input-type=module -e '
-            import fs from "node:fs";
-            const data = JSON.parse(fs.readFileSync("/tmp/worker-health.json", "utf8"));
-            if (data.ok !== true || data.service !== "prixbasmalin-attribution") {
-              throw new Error("Le Worker attribution n'a pas renvoyé le statut attendu");
-            }
-            console.log("Worker attribution joignable et sain.");
-          '
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/worker-health.json", "utf8"));
+          if (data.ok !== true || data.service !== "prixbasmalin-attribution") {
+            throw new Error("Le Worker attribution n'a pas renvoyé le statut attendu");
+          }
+          console.log("Worker attribution joignable et sain.");
+          NODE
