@@ -12,13 +12,13 @@ IDENTITIES = ROOT / "data" / "catalogue-identities.json"
 
 def read_catalogue():
     text = CATALOGUE.read_text(encoding="utf-8")
-    match = re.search(r"const\\s+productData\\s*=\\s*\\[(.*?)\\];", text, re.S)
+    match = re.search(r"const\s+productData\s*=\s*\[(.*?)\];", text, re.S)
     if not match:
         raise ValueError("Impossible de trouver productData dans catalogue.html")
     products = []
-    for obj in re.findall(r"\\{([^{}]*)\\}", match.group(1), re.S):
-        id_match = re.search(r"""\\bid\\s*:\\s*["']([^"']+)["']""", obj)
-        name_match = re.search(r"""\\bname\\s*:\\s*["']([^"']+)["']""", obj)
+    for obj in re.findall(r"\{([^{}]*)\}", match.group(1), re.S):
+        id_match = re.search(r"""\bid\s*:\s*["']([^"']+)["']""", obj)
+        name_match = re.search(r"""\bname\s*:\s*["']([^"']+)["']""", obj)
         if id_match and name_match:
             products.append({"id": id_match.group(1), "name": name_match.group(1)})
     if not products:
@@ -38,7 +38,7 @@ def valid_mapping(mapping):
         return False
     if kind == "mpn" and not (isinstance(mapping.get("brand"), str) and mapping["brand"].strip()):
         return False
-    if kind == "gtin" and not re.fullmatch(r"(?:\\d{8}|\\d{12,14})", value.strip()):
+    if kind == "gtin" and not re.fullmatch(r"(?:\d{8}|\d{12,14})", value.strip()):
         return False
     if kind == "asin" and not re.fullmatch(r"[A-Za-z0-9]{10}", value.strip()):
         return False
