@@ -6,6 +6,8 @@
     "Modèle d'entrée vide : aucune offre n'est inventée.",
     "N'ajouter que des offres fournies par un programme marchand ou une source autorisée.",
     "catalog_product_id doit correspondre exactement à un id existant dans catalogue.html.",
+    "identity_type et identity_value sont obligatoires : gtin (avec clé de contrôle valide), asin (10 caractères alphanumériques) ou mpn (avec brand obligatoire).",
+    "Toutes les offres associées à une même fiche catalogue doivent partager la même identité exacte, sinon toute la fiche est écartée.",
     "checked_at doit être l'heure réelle du relevé au format ISO 8601 avec fuseau horaire.",
     "shipping_price doit être connu pour calculer le coût total comparable ; mettre 0 si la livraison est gratuite.",
     "Ne jamais ajouter de clé API, cookie, mot de passe ou flux privé."
