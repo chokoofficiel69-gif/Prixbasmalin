@@ -1,0 +1,76 @@
+name: Validate verified price feed
+
+on:
+  pull_request:
+    paths:
+      - "data/prices.json"
+      - ".github/workflows/validate-prices-feed.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "data/prices.json"
+      - ".github/workflows/validate-prices-feed.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate price feed without inventing data
+        run: |
+          python - <<'PY'
+          import json
+          import math
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          path = Path("data/prices.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          assert isinstance(data, dict), "feed must be a JSON object"
+          assert isinstance(data.get("products"), list), "products must be an array"
+          assert isinstance(data.get("offers"), list), "offers must be an array"
+
+          def parse_date(value, label):
+              assert isinstance(value, str) and value, f"{label} must be a date string"
+              parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+              assert parsed.tzinfo is not None, f"{label} must include timezone"
+              return parsed
+
+          generated_at = None
+          if data.get("generated_at") is not None:
+              generated_at = parse_date(data["generated_at"], "generated_at")
+              assert generated_at <= datetime.now(timezone.utc), "generated_at cannot be in the future"
+
+          ids = set()
+          for index, product in enumerate(data["products"]):
+              label = f"product #{index + 1}"
+              assert isinstance(product, dict), f"{label} must be an object"
+              assert isinstance(product.get("id"), str) and product["id"].strip(), f"{label}: missing id"
+              assert product["id"] not in ids, f"{label}: duplicate id"
+              ids.add(product["id"])
+              price = product.get("best_price_eur")
+              assert isinstance(price, (int, float)) and not isinstance(price, bool) and math.isfinite(price) and price >= 0, f"{label}: invalid best_price_eur"
+              offers = product.get("offers")
+              assert isinstance(offers, list) and offers, f"{label}: at least one offer is required"
+              valid_dates = []
+              for offer_index, offer in enumerate(offers):
+                  offer_label = f"{label}, offer #{offer_index + 1}"
+                  assert isinstance(offer, dict), f"{offer_label} must be an object"
+                  url = urlparse(offer.get("product_url", ""))
+                  assert url.scheme == "https" and url.netloc, f"{offer_label}: product_url must be HTTPS"
+                  checked_at = parse_date(offer.get("checked_at"), f"{offer_label}.checked_at")
+                  assert checked_at <= datetime.now(timezone.utc), f"{offer_label}: checked_at cannot be in the future"
+                  if generated_at:
+                      assert checked_at <= generated_at, f"{offer_label}: checked_at is after generated_at"
+                  valid_dates.append(checked_at)
+          print(f"Structure valide : {len(data['products'])} produit(s) avec prix vérifié, {len(data['offers'])} offre(s) au niveau racine.")
+          if not data["products"]:
+              print("AVERTISSEMENT : aucun prix vérifié n'est disponible. Aucun prix de démonstration n'a été ajouté.")
+          PY
