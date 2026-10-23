@@ -797,7 +797,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
       <a class="flyer-ticker-card brother-tmax-ad" href="https://www.snapchat.com/add/Rayonironman3" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-ironman-tmax.webp" alt="Flyer TMAX 560 à louer" loading="eager"></span><span class="flyer-ticker-copy"><strong>TMAX 560 À LOUER</strong><small>Annonce de location • contact direct</small><em>CONTACTER RAYONIRONMAN3 ↗</em></span></a>
       <a class="flyer-ticker-card ramadan-ad" href="https://www.snapchat.com/add/rlbz10" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-riyad-constantine.webp" alt="Flyer de solidarité à Constantine" loading="eager"></span><span class="flyer-ticker-copy"><strong>RIYAD · SOLIDARITÉ</strong><small>Appel aux dons pour les familles de Constantine</small><em>CONTACTER RLBZ10 SUR SNAP ↗</em></span></a>
       <a class="flyer-ticker-card flyer-zero-franchise" href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-photo-wrap"><img class="flyer-ticker-photo" src="assets/flyers/flyer-300-euros.webp" alt="Flyer La Maille : offre cadeau" loading="lazy"></span><span class="flyer-ticker-copy"><strong>LA MAILLE · OFFRE CADEAU</strong><small>Découvrez l’offre présentée sur le flyer</small><em>CONTACTER LOZEILL69 SUR SNAP ↗</em></span></a>
-      <a class="flyer-ticker-card amazon-ad" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">🛍️</span><span class="flyer-ticker-copy"><strong>OFFRES AMAZON</strong><small>Explore les offres du moment</small><em>VOIR LES OFFRES ↗</em></span></a>
+      <a class="flyer-ticker-card amazon-ad" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="noopener noreferrer"><span class="flyer-ticker-icon">🛍️</span><span class="flyer-ticker-copy"><strong>OFFRES AMAZON</strong><small>Explore les offres du moment</small><em>VOIR LES OFFRES ↗</em></span></a>
       <a class="flyer-ticker-card deals-ad" href="catalogue.html"><span class="flyer-ticker-icon">％</span><span class="flyer-ticker-copy"><strong>PRIX MALIN</strong><small>Compare avant de payer</small><em>EXPLORER LE CATALOGUE ↗</em></span></a>
     </div></div>
   </section>
@@ -836,7 +836,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
     </article>
     <article class="ad-card ad-amazon">
       <span class="ad-kicker">OFFRES PARTENAIRES · AMAZON</span>
-      <div class="ad-copy"><h2>Explorer les offres Amazon</h2><p>Retrouvez les offres high-tech et maison sur Amazon. Les prix et la disponibilité sont à confirmer chez le vendeur ; Prix Malin peut percevoir une commission sur certains achats.</p><a href="https://www.amazon.fr/s?k=high-tech&amp;tag=prixbasmalin2021" target="_blank" rel="sponsored nofollow noopener" class="ad-cta">Comparer les offres ↗</a></div>
+      <div class="ad-copy"><h2>Explorer les offres Amazon</h2><p>Retrouvez les offres high-tech et maison sur Amazon. Les prix et la disponibilité sont à confirmer chez le vendeur ; Prix Malin peut percevoir une commission sur certains achats.</p><a href="https://www.amazon.fr/s?k=high-tech&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener" class="ad-cta">Comparer les offres ↗</a></div>
     </article>
     <article class="ad-card ad-partner">
       <span class="ad-kicker">POUR LES COMMERÇANTS ET CRÉATEURS</span>
@@ -998,8 +998,8 @@ let cart=JSON.parse(localStorage.getItem("prixMalinCart")||"[]");
 function saveFavorites(){localStorage.setItem("prixMalinFavorites",JSON.stringify(favorites))}
 function saveCart(){localStorage.setItem("prixMalinCart",JSON.stringify(cart));updateCartCount()}
 function updateCartCount(){document.getElementById("cartCount").textContent=cart.length}
-function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag=prixbasmalin2021"}
-function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag=prixbasmalin2021"}
+function merchantUrl(p){return "https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag=prixbasmalin2-21"}
+function amazonSearchUrl(q){return "https://www.amazon.fr/s?k="+encodeURIComponent(q)+"&tag=prixbasmalin2-21"}
 function getRelated(p){
  const name=p.name.toLowerCase();
  let type="";
@@ -1094,7 +1094,7 @@ function renderProducts(){
  if(currentSort==="priceAsc"||currentSort==="priceDesc")list.sort((a,b)=>{const n=x=>Number(String(x.price||"").match(/[0-9]+(?:[.,][0-9]+)?/)?.[0]?.replace(",","."))||Infinity;return currentSort==="priceAsc"?n(a)-n(b):n(b)-n(a)});
  if(q){
   const term=encodeURIComponent(q);
-  const links=[["Amazon","https://www.amazon.fr/s?k="+term+"&tag=prixbasmalin2021"],["Google Shopping","https://www.google.com/search?tbm=shop&q="+term],["idealo","https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+term],["Le Dénicheur","https://ledenicheur.fr/search?search="+term],["Fnac","https://www.fnac.com/SearchResult/ResultList.aspx?Search="+term],["Cdiscount","https://www.cdiscount.com/search/10/"+term+".html"]];
+  const links=[["Amazon","https://www.amazon.fr/s?k="+term+"&tag=prixbasmalin2-21"],["Google Shopping","https://www.google.com/search?tbm=shop&q="+term],["idealo","https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+term],["Le Dénicheur","https://ledenicheur.fr/search?search="+term],["Fnac","https://www.fnac.com/SearchResult/ResultList.aspx?Search="+term],["Cdiscount","https://www.cdiscount.com/search/10/"+term+".html"]];
   banner.innerHTML=`<div class="amazon-banner"><strong>Élargir la comparaison : « ${escapeHtml(q)} »</strong><p style="font-size:12px;line-height:1.45;color:#555;margin:7px 0 10px">En attendant l’activation de flux/API partenaires, ces liens ouvrent des recherches externes. Les prix et disponibilités sont à vérifier chez chaque vendeur ; Prix Malin ne les récupère pas encore automatiquement.</p><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">${links.map(([name,url])=>`<a href="${url}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:9px 11px;border:1px solid #f0d7ce;border-radius:9px;background:#fff;color:#222;font-size:12px;font-weight:700;text-decoration:none">${name} ↗</a>`).join("")}</div></div>`;
  }
  if(!list.length){
@@ -1244,13 +1244,13 @@ document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>{
  const key=btn.dataset.info;
  if(key==="merchants"){
   document.getElementById("modalTitle").textContent="Marchands et offres";
-  document.getElementById("modalContent").innerHTML='<p>Choisis un vendeur pour ouvrir les offres disponibles sur son site.</p><div class="all-products"><a class="amazon-big" target="_blank" rel="sponsored noopener" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021">Offres Amazon du jour ↗</a><a class="amazon-big" target="_blank" rel="noopener" href="https://www.fnac.com/">Fnac ↗</a><a class="amazon-big" target="_blank" rel="noopener" href="https://www.cdiscount.com/">Cdiscount ↗</a></div><p class="notice">Les offres, prix et stocks sont affichés par chaque marchand et peuvent changer.</p>';
+  document.getElementById("modalContent").innerHTML='<p>Choisis un vendeur pour ouvrir les offres disponibles sur son site.</p><div class="all-products"><a class="amazon-big" target="_blank" rel="sponsored noopener" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21">Offres Amazon du jour ↗</a><a class="amazon-big" target="_blank" rel="noopener" href="https://www.fnac.com/">Fnac ↗</a><a class="amazon-big" target="_blank" rel="noopener" href="https://www.cdiscount.com/">Cdiscount ↗</a></div><p class="notice">Les offres, prix et stocks sont affichés par chaque marchand et peuvent changer.</p>';
   document.getElementById("modal").classList.add("open");
  } else if(key==="prices"){
   document.getElementById("modalTitle").textContent="Comparer les prix";
   document.getElementById("modalContent").innerHTML='<p>Recherche le même produit chez plusieurs vendeurs, puis compare le prix total, la livraison, le vendeur et les conditions de retour.</p><form id="quickCompare" class="assistant-form"><input id="quickCompareQuery" required placeholder="Ex. : casque Bluetooth Sony" aria-label="Produit à comparer"><button type="submit">Comparer chez plusieurs vendeurs ↗</button></form><p class="notice">Les liens ouvrent les recherches des vendeurs ; les résultats peuvent varier selon le produit.</p>';
   document.getElementById("modal").classList.add("open");
-  document.getElementById("quickCompare").onsubmit=e=>{e.preventDefault();const q=document.getElementById("quickCompareQuery").value.trim();if(!q)return;const enc=encodeURIComponent(q);[ "https://www.amazon.fr/s?k="+enc+"&tag=prixbasmalin2021","https://www.google.com/search?tbm=shop&q="+enc,"https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+enc].forEach(url=>window.open(url,"_blank","noopener"));};
+  document.getElementById("quickCompare").onsubmit=e=>{e.preventDefault();const q=document.getElementById("quickCompareQuery").value.trim();if(!q)return;const enc=encodeURIComponent(q);[ "https://www.amazon.fr/s?k="+enc+"&tag=prixbasmalin2-21","https://www.google.com/search?tbm=shop&q="+enc,"https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+enc].forEach(url=>window.open(url,"_blank","noopener"));};
  } else {
   document.getElementById("modalTitle").textContent="Achats malins";
   document.getElementById("modalContent").innerHTML='<p>Prix Malin est gratuit à utiliser. Explore les produits, ajoute tes favoris et ouvre les offres chez les vendeurs.</p><p><strong>Favoris enregistrés sur cet appareil :</strong> '+favorites.length+'</p><p><strong>Produits dans ton panier :</strong> '+cart.length+'</p><p class="notice">Les favoris et le panier sont conservés dans ce navigateur ; aucun compte n’est requis.</p>';
@@ -1259,13 +1259,13 @@ document.querySelectorAll(".trust-card").forEach(btn=>btn.onclick=()=>{
 });
 function showDeals(){
  const deals=[
-  ["Offres du jour Amazon","https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2021","Promotions mises en avant par Amazon"],
-  ["High-tech au prix le plus bas","https://www.amazon.fr/s?k=high-tech&s=price-asc-rank&tag=prixbasmalin2021","Recherche Amazon triée par prix croissant"],
-  ["Écouteurs sans fil","https://www.amazon.fr/s?k=%C3%A9couteurs+sans+fil&s=price-asc-rank&tag=prixbasmalin2021","Comparer les modèles et les prix"],
-  ["Casques Bluetooth","https://www.amazon.fr/s?k=casque+bluetooth&s=price-asc-rank&tag=prixbasmalin2021","Trouver des options selon le budget"],
-  ["Montres connectées","https://www.amazon.fr/s?k=montre+connect%C3%A9e&s=price-asc-rank&tag=prixbasmalin2021","Voir les offres disponibles"],
-  ["Aspirateurs robots","https://www.amazon.fr/s?k=aspirateur+robot&s=price-asc-rank&tag=prixbasmalin2021","Comparer les prix affichés par Amazon"],
-  ["Maison et cuisine","https://www.amazon.fr/s?k=maison+cuisine&s=price-asc-rank&tag=prixbasmalin2021","Explorer les offres maison"]
+  ["Offres du jour Amazon","https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21","Promotions mises en avant par Amazon"],
+  ["High-tech au prix le plus bas","https://www.amazon.fr/s?k=high-tech&s=price-asc-rank&tag=prixbasmalin2-21","Recherche Amazon triée par prix croissant"],
+  ["Écouteurs sans fil","https://www.amazon.fr/s?k=%C3%A9couteurs+sans+fil&s=price-asc-rank&tag=prixbasmalin2-21","Comparer les modèles et les prix"],
+  ["Casques Bluetooth","https://www.amazon.fr/s?k=casque+bluetooth&s=price-asc-rank&tag=prixbasmalin2-21","Trouver des options selon le budget"],
+  ["Montres connectées","https://www.amazon.fr/s?k=montre+connect%C3%A9e&s=price-asc-rank&tag=prixbasmalin2-21","Voir les offres disponibles"],
+  ["Aspirateurs robots","https://www.amazon.fr/s?k=aspirateur+robot&s=price-asc-rank&tag=prixbasmalin2-21","Comparer les prix affichés par Amazon"],
+  ["Maison et cuisine","https://www.amazon.fr/s?k=maison+cuisine&s=price-asc-rank&tag=prixbasmalin2-21","Explorer les offres maison"]
  ];
  document.getElementById("modalTitle").textContent="Offres Amazon du moment";
  document.getElementById("modalContent").innerHTML='<p>Accès rapide aux promotions Amazon et aux recherches triées du moins cher au plus cher.</p><div class="deal-list">'+deals.map(([title,url,desc])=>'<a class="deal-row" href="'+url+'" target="_blank" rel="sponsored noopener"><span><strong>'+title+'</strong><small>'+desc+'</small></span><b>Voir ↗</b></a>').join("")+'</div><p class="notice">Les promotions et les prix changent en permanence. Ces liens affichent les offres actuelles chez Amazon ; Prix Malin ne prétend pas les avoir vérifiées ni classées en temps réel.</p>';
