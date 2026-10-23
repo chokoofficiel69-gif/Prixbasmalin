@@ -738,13 +738,36 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 .pm-rail-step:focus-visible{outline:3px solid #155eef;outline-offset:2px}
 .pm-step-caption{padding:8px 3px 1px;border-top:1px solid #f0e7e1;color:#7b6255;font-size:9px;line-height:1.35;text-align:center}
 .pm-scroll-progress{display:none!important}
-@media(max-width:1479px){.pm-step-rail{display:none}}
+@media(max-width:1479px){
+ .pm-step-rail{left:5px;width:38px;padding:8px 4px;gap:7px;border-radius:16px;background:rgba(255,255,255,.96);box-shadow:0 4px 18px rgba(31,41,55,.15)}
+ .pm-step-rail:before{left:17px;top:22px;bottom:22px}
+ .pm-step-rail-progress{left:17px;top:22px}
+ .pm-rail-step{display:flex;justify-content:center;min-height:34px;padding:1px 0}
+ .pm-rail-step-number{width:27px;height:27px;font-size:10px}
+ .pm-rail-step-label,.pm-step-caption{display:none}
+ .pm-step-rail-progress{height:0}
+}
+@media(max-width:420px){
+ .pm-step-rail{left:3px;width:34px;padding:7px 2px}
+ .pm-step-rail:before,.pm-step-rail-progress{left:15px}
+ .pm-rail-step-number{width:25px;height:25px}
+}
+@media(prefers-reduced-motion:reduce){.pm-rail-step-number,.pm-step-rail-progress{transition:none!important}}
 @media(prefers-reduced-motion:reduce){.pm-rail-step-number,.pm-step-rail-progress{transition:none!important}}
 /* Icônes cohérentes pour les contrôles courants; logo et avatar restent inchangés */
 #cartBtn .pm-cart-svg{width:21px;height:21px;display:block}
 .flyer-ticker-head .pm-megaphone-svg{width:16px;height:16px;vertical-align:-3px;margin-right:5px}
 .category[data-category="sport"] .category-icon,.category[data-category="beauty"] .category-icon,.category[data-category="baby"] .category-icon{display:grid;place-items:center}
 .pm-step-rail{isolation:isolate}
+
+
+/* Accès permanent à l'accueil : toujours visible, sans remplacer les liens de page */
+.pm-home-shortcut{position:fixed;right:14px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:9990;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:0 14px;border:1px solid rgba(255,101,8,.25);border-radius:999px;background:#fff;color:#c84612;font-size:12px;font-weight:800;box-shadow:0 6px 22px rgba(31,41,55,.17);transition:transform .18s ease,box-shadow .18s ease}
+.pm-home-shortcut:hover{transform:translateY(-2px);box-shadow:0 9px 25px rgba(31,41,55,.2)}
+.pm-home-shortcut:focus-visible{outline:3px solid #155eef;outline-offset:3px}
+.pm-home-shortcut svg{width:17px;height:17px;flex:none}
+@media(min-width:700px){.pm-home-shortcut{bottom:24px}}
+@media(prefers-reduced-motion:reduce){.pm-home-shortcut{transition:none}}
 
 </style>
 
@@ -1469,6 +1492,20 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.addEventListener('scroll',updateRail,{passive:true});
   window.addEventListener('resize',updateRail);
   updateRail();
+})();
+
+</script>
+<script>
+
+/* Le visiteur peut revenir à l'accueil à tout moment, même au milieu d'une page */
+(function(){
+ if(document.querySelector('.pm-home-shortcut'))return;
+ const home=document.createElement('a');
+ home.className='pm-home-shortcut';
+ home.href='index.html';
+ home.setAttribute('aria-label','Revenir à l’accueil Prix Malin');
+ home.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-6h6v6"/></svg><span>Accueil</span>';
+ document.body.appendChild(home);
 })();
 
 </script>
