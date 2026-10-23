@@ -729,17 +729,17 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 .pm-step-rail{position:fixed;z-index:24;top:50%;left:max(12px,calc((100vw - 1240px)/2 - 118px));transform:translateY(-50%);width:94px;padding:13px 9px;border:1px solid rgba(255,101,8,.2);border-radius:18px;background:rgba(255,255,255,.94);box-shadow:0 10px 32px rgba(31,41,55,.08);backdrop-filter:blur(12px);display:grid;gap:7px}
 .pm-step-rail:before{content:"";position:absolute;left:24px;top:34px;bottom:34px;width:2px;border-radius:3px;background:#f1e4dc}
 .pm-step-rail-progress{position:absolute;left:24px;top:34px;width:2px;height:0;border-radius:3px;background:linear-gradient(180deg,#ff9a60,#ff6508);box-shadow:0 0 9px rgba(255,101,8,.5);transition:height .25s ease}
-.pm-step{position:relative;display:grid;grid-template-columns:30px 1fr;align-items:center;gap:5px;min-height:42px;padding:4px 0;border:0;background:transparent;text-align:left;color:#727782;border-radius:10px}
-.pm-step-number{width:29px;height:29px;display:grid;place-items:center;border:1px solid #e4e7eb;border-radius:50%;background:#fff;color:#69707b;font-size:11px;font-weight:800;transition:all .2s ease}
-.pm-step-label{font-size:10px;font-weight:700;line-height:1.15}
-.pm-step[aria-current="step"] .pm-step-number{border-color:#ff6508;background:#ff6508;color:#fff;box-shadow:0 0 0 4px rgba(255,101,8,.11),0 0 15px rgba(255,101,8,.24)}
-.pm-step[aria-current="step"] .pm-step-label{color:#252a31}
-.pm-step:hover .pm-step-number{border-color:#ff9b70}
-.pm-step:focus-visible{outline:3px solid #155eef;outline-offset:2px}
+.pm-rail-step{position:relative;display:grid;grid-template-columns:30px 1fr;align-items:center;gap:5px;min-height:42px;padding:4px 0;border:0;background:transparent;text-align:left;color:#727782;border-radius:10px}
+.pm-rail-step-number{width:29px;height:29px;display:grid;place-items:center;border:1px solid #e4e7eb;border-radius:50%;background:#fff;color:#69707b;font-size:11px;font-weight:800;transition:all .2s ease}
+.pm-rail-step-label{font-size:10px;font-weight:700;line-height:1.15}
+.pm-rail-step[aria-current="step"] .pm-rail-step-number{border-color:#ff6508;background:#ff6508;color:#fff;box-shadow:0 0 0 4px rgba(255,101,8,.11),0 0 15px rgba(255,101,8,.24)}
+.pm-rail-step[aria-current="step"] .pm-rail-step-label{color:#252a31}
+.pm-rail-step:hover .pm-rail-step-number{border-color:#ff9b70}
+.pm-rail-step:focus-visible{outline:3px solid #155eef;outline-offset:2px}
 .pm-step-caption{padding:8px 3px 1px;border-top:1px solid #f0e7e1;color:#7b6255;font-size:9px;line-height:1.35;text-align:center}
 .pm-scroll-progress{display:none!important}
 @media(max-width:1479px){.pm-step-rail{display:none}}
-@media(prefers-reduced-motion:reduce){.pm-step-number,.pm-step-rail-progress{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.pm-rail-step-number,.pm-step-rail-progress{transition:none!important}}
 /* Icônes cohérentes pour les contrôles courants; logo et avatar restent inchangés */
 #cartBtn .pm-cart-svg{width:21px;height:21px;display:block}
 .flyer-ticker-head .pm-megaphone-svg{width:16px;height:16px;vertical-align:-3px;margin-right:5px}
@@ -1432,8 +1432,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   const steps=[
     {label:'Recherche',selectors:['#searchForm'],fallback:'#query'},
     {label:'Comparaison',selectors:['#popular','#products']},
-    {label:'Offres',selectors:['.ad-showcase','.flyer-gallery','.flyer-ticker']},
-    {label:'Achat',selectors:['#products','.product-action']}
+    {label:'Offres',selectors:['.ad-showcase','.flyer-gallery','#amazonBanner']},
+    {label:'Achat',selectors:['.product-action','#products']}
   ];
   const rail=document.createElement('nav');
   rail.className='pm-step-rail';
@@ -1441,8 +1441,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   const progress=document.createElement('span');progress.className='pm-step-rail-progress';progress.setAttribute('aria-hidden','true');rail.appendChild(progress);
   const buttons=[];
   steps.forEach((step,i)=>{
-    const button=document.createElement('button');button.type='button';button.className='pm-step';button.setAttribute('aria-label','Étape '+(i+1)+' : '+step.label);
-    button.innerHTML='<span class="pm-step-number">'+(i+1)+'</span><span class="pm-step-label">'+step.label+'</span>';
+    const button=document.createElement('button');button.type='button';button.className='pm-rail-step';button.setAttribute('aria-label','Étape '+(i+1)+' : '+step.label);
+    button.innerHTML='<span class="pm-rail-step-number">'+(i+1)+'</span><span class="pm-rail-step-label">'+step.label+'</span>';
     button.addEventListener('click',()=>{
       let target=findTarget(step.selectors);
       if(i===3)target=document.querySelector('.product-action')?.closest('.product')||target;
