@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "generated_at": "2026-10-23T03:16:12.270Z",
-  "schedule": "toutes les 10 heures",
-  "methodology": "Prix lus dans les données structurées publiques Product/Offer des pages marchands. Aucune estimation ni prix inventé.",
+  "generated_at": "2026-10-23T13:13:49.858685Z",
+  "schedule": "généré lors de la mise à jour du flux source autorisé",
+  "methodology": "Offres normalisées fournies par une source autorisée. Prix classés frais de livraison inclus. Aucune estimation ni collecte web automatique.",
   "products": [],
   "offers": [],
   "errors": [],
-  "previous_generated_at": "2026-10-22T22:56:44.511Z"
+  "previous_generated_at": "2026-10-23T03:16:12.270Z"
 }
