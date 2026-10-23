@@ -30,4 +30,4 @@ Le workflow GitHub Actions exécute aussi ce générateur lorsqu'un changement e
 
 ## Correspondance catalogue
 
-`catalog_product_id` doit être identique à un identifiant de produit du tableau `productData` dans `catalogue.html`. Les offres ne sont jamais rapprochées automatiquement par nom approximatif afin d'éviter de comparer des variantes différentes.
+`catalog_product_id` doit être identique à un identifiant de produit du tableau `productData` dans `catalogue.html`. Le générateur extrait les identifiants de `productData` dans `catalogue.html` et rejette toute offre dont `catalog_product_id` ne correspond pas exactement à un identifiant existant. Les offres admissibles qui réutilisent un même `offer_id` sont également rejetées. Les offres ne sont jamais rapprochées automatiquement par nom approximatif afin d'éviter de comparer des variantes différentes.
