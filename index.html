@@ -1375,7 +1375,7 @@ renderProducts();
 <script>
 document.querySelectorAll('[data-video-sound]').forEach(function(button){button.addEventListener('click',function(){const video=button.closest('.ad-card').querySelector('video');if(!video)return;video.muted=!video.muted;button.textContent=video.muted?'Activer le son':'Couper le son';if(!video.muted){const p=video.play();if(p&&p.catch)p.catch(()=>{});}})});
 </script>
-  <script src="js/track-outbound.js?v=20261022" defer></script>
+  <script src="js/track-outbound.js?v=20261023" defer></script>
 <script>
 /* Keep the main shopping experience first; place general ads and full flyers after the product catalogue. */
 document.addEventListener("DOMContentLoaded",()=>{
