@@ -16,16 +16,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build-and-validate:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
       - name: Build catalogue feed from authorized source data
         run: python3 scripts/build_prices_feed.py
       - name: Validate generated feed
@@ -42,8 +40,27 @@ jobs:
               assert product["offers"][0]["total_price_eur"] == product["best_price_eur"]
           print("Flux généré valide.")
           PY
+      - name: Upload generated feed for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-price-feed
+          path: data/prices.json
+          if-no-files-found: error
+
+  publish-generated-feed:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Rebuild feed
+        run: python3 scripts/build_prices_feed.py
       - name: Commit generated feed on main
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           if git diff --quiet -- data/prices.json; then
             echo "Le flux généré n'a pas changé."
