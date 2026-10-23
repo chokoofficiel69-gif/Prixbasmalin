@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "generated_at": null,
+  "offers": [],
+  "notes": [
+    "Modèle d'entrée vide : aucune offre n'est inventée.",
+    "N'ajouter que des offres fournies par un programme marchand ou une source autorisée.",
+    "catalog_product_id doit correspondre exactement à un id existant dans catalogue.html.",
+    "checked_at doit être l'heure réelle du relevé au format ISO 8601 avec fuseau horaire.",
+    "shipping_price doit être connu pour calculer le coût total comparable ; mettre 0 si la livraison est gratuite.",
+    "Ne jamais ajouter de clé API, cookie, mot de passe ou flux privé."
+  ]
+}
