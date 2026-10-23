@@ -16,6 +16,14 @@ h1{font-family:Outfit;font-size:1.8rem;margin:24px 5% 8px}
 .card h3{font-family:Outfit;margin:0 0 6px;font-size:1.05rem}
 .card p{font-size:.85rem;color:#676b73;margin:0 0 14px}
 .btn{display:block;text-align:center;background:#202124;color:#fff;padding:10px;border-radius:10px;font-weight:600;font-size:.85rem}
+
+/* Raccourci permanent vers le menu principal Prix Malin */
+.pm-home-shortcut{position:fixed;right:14px;bottom:18px;z-index:9990;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:0 14px;border:1px solid rgba(255,101,8,.25);border-radius:999px;background:#fff;color:#c84612;font:800 12px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:0 6px 22px rgba(31,41,55,.17);text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
+.pm-home-shortcut:hover{transform:translateY(-2px);box-shadow:0 9px 25px rgba(31,41,55,.2)}
+.pm-home-shortcut:focus-visible{outline:3px solid #155eef;outline-offset:3px}
+.pm-home-shortcut svg{width:17px;height:17px;flex:none}
+@media(prefers-reduced-motion:reduce){.pm-home-shortcut{transition:none}}
+
 </style>
   <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"581731ca0ab54223acdf63ecfca342b0"}'></script>
@@ -37,5 +45,17 @@ h1{font-family:Outfit;font-size:1.8rem;margin:24px 5% 8px}
   <article class="card"><h3>Tablette</h3><p>Tablettes et accessoires</p><a class="btn" href="https://www.amazon.fr/s?k=tablette&tag=prixbasmalin2-21" target="_blank">Voir sur Amazon</a></article>
 </div>
   <script src="js/track-outbound.js?v=20261022" defer></script>
+<script>
+
+(function(){
+ if(document.querySelector('.pm-home-shortcut'))return;
+ const home=document.createElement('a');
+ home.className='pm-home-shortcut';home.href='index.html';
+ home.setAttribute('aria-label','Revenir au menu principal Prix Malin');
+ home.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-6h6v6"/></svg><span>Menu principal</span>';
+ document.body.appendChild(home);
+})();
+
+</script>
 </body>
 </html>
