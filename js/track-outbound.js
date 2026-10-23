@@ -61,7 +61,7 @@
       body: JSON.stringify({ page_path: location.pathname || "/", visitor_id: sessionId, source: attribution.source, medium: attribution.medium, campaign: attribution.campaign })
     }).catch(function () {});
     // L'ancien endpoint reste actif pour conserver les statistiques historiques.
-    fetch(endpoint.replace(/\\/track$/, "/view"), {
+    fetch(endpoint.replace(/\/track$/, "/view"), {
       method: "POST", mode: "cors", credentials: "omit", keepalive: true,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ page_path: location.pathname || "/", visitor_id: sessionId })
