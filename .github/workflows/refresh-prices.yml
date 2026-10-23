@@ -1,9 +1,7 @@
-name: Actualiser les prix publics
+name: Actualiser les prix publics (sources configurées uniquement)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0,10,20 * * *"
 
 permissions:
   contents: write

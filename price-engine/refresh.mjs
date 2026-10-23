@@ -5,6 +5,10 @@ const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
 const now = new Date().toISOString();
 const config = JSON.parse(await fs.readFile(CONFIG, "utf8"));
+if (!Array.isArray(config.products) || config.products.length === 0) {
+  console.log("Aucune source produit configurée : relevé existant conservé, aucun prix remplacé.");
+  process.exit(0);
+}
 const previous = await fs.readFile(OUTPUT, "utf8").then(JSON.parse).catch(() => ({version:1,offers:[]}));
 const offers = [];
 const errors = [];

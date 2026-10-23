@@ -1,0 +1,77 @@
+name: Build authorized price feed
+
+on:
+  pull_request:
+    paths:
+      - "data/merchant-offers.json"
+      - "scripts/build_prices_feed.py"
+      - "tests/**"
+      - ".github/workflows/build-authorized-price-feed.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "data/merchant-offers.json"
+      - "scripts/build_prices_feed.py"
+      - "tests/**"
+      - ".github/workflows/build-authorized-price-feed.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Test feed validation rules
+        run: python3 -m unittest discover -s tests -v
+      - name: Build catalogue feed from authorized source data
+        run: python3 scripts/build_prices_feed.py
+      - name: Validate generated feed
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("data/prices.json").read_text(encoding="utf-8"))
+          assert isinstance(data.get("products"), list)
+          assert isinstance(data.get("offers"), list)
+          for product in data["products"]:
+              assert isinstance(product.get("best_price_eur"), (int, float))
+              assert product.get("offers")
+              assert product["offers"][0]["total_price_eur"] == product["best_price_eur"]
+          print("Flux généré valide.")
+          PY
+      - name: Upload generated feed for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-price-feed
+          path: data/prices.json
+          if-no-files-found: error
+
+  publish-generated-feed:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Rebuild feed
+        run: python3 scripts/build_prices_feed.py
+      - name: Commit generated feed on main
+        run: |
+          if git diff --quiet -- data/prices.json; then
+            echo "Le flux généré n'a pas changé."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/prices.json
+          git commit -m "data: rebuild verified catalogue price feed"
+          git push
