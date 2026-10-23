@@ -155,9 +155,9 @@ export default {
         else if (candidate && typeof candidate.message === "string") providerMessage = candidate.message;
       } catch {}
       providerMessage = String(providerMessage)
-        .replace(/Bearer\\s+\\S+/gi, "Bearer [redacted]")
+        .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
         .replace(/sk-[A-Za-z0-9_-]{8,}/g, "[redacted]")
-        .replace(/[\\r\\n\\t]+/g, " ")
+        .replace(/[\r\n\t]+/g, " ")
         .slice(0, 240);
       return json({
         error: "AI provider request failed",
