@@ -119,17 +119,6 @@ def main():
         except ValueError as exc:
             errors.append(str(exc))
             continue
-        if product_id in identities and identities[product_id][0] != identity_key:
-            errors.append(
-                f"{label}: identité produit différente pour {product_id}; "
-                "toutes les offres de cette fiche sont écartées pour éviter une comparaison trompeuse"
-            )
-            conflicted_products.add(product_id)
-            grouped.pop(product_id, None)
-            identities.pop(product_id, None)
-            continue
-        identities[product_id] = (identity_key, identity)
-
         if not all(isinstance(offer.get(k), str) and offer[k].strip() for k in ("product_name", "merchant_name", "source")):
             errors.append(f"{label}: nom du produit, marchand ou source manquant")
             continue
@@ -167,6 +156,16 @@ def main():
             errors.append(f"{label}: offer_id dupliqué")
             continue
         seen_offer_ids.add(offer_id)
+        if product_id in identities and identities[product_id][0] != identity_key:
+            errors.append(
+                f"{label}: identité produit différente pour {product_id}; "
+                "toutes les offres de cette fiche sont écartées pour éviter une comparaison trompeuse"
+            )
+            conflicted_products.add(product_id)
+            grouped.pop(product_id, None)
+            identities.pop(product_id, None)
+            continue
+        identities[product_id] = (identity_key, identity)
         normalized = {
             "offer_id": offer_id,
             "merchant_name": offer["merchant_name"].strip(),
