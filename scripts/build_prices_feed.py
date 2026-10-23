@@ -6,6 +6,7 @@ with a known shipping price are eligible for price ranking.
 """
 import json
 import math
+import re
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -14,6 +15,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 INPUT = ROOT / "data" / "merchant-offers.json"
 OUTPUT = ROOT / "data" / "prices.json"
+CATALOGUE = ROOT / "catalogue.html"
 MAX_AGE = timedelta(hours=48)
 
 
@@ -46,8 +48,17 @@ def main():
     if not isinstance(raw, dict) or raw.get("schema_version") != 1 or not isinstance(raw.get("offers"), list):
         raise ValueError("Format invalide dans data/merchant-offers.json")
 
+    catalogue_text = CATALOGUE.read_text(encoding="utf-8")
+    catalogue_match = re.search(r"const\\s+productData\\s*=\\s*\\[(.*?)\\];", catalogue_text, re.S)
+    if not catalogue_match:
+        raise ValueError("Impossible de lire les identifiants productData dans catalogue.html")
+    catalogue_ids = set(re.findall(r"""\\bid\\s*:\\s*["']([^"']+)["']""", catalogue_match.group(1)))
+    if not catalogue_ids:
+        raise ValueError("Aucun identifiant de produit trouvé dans catalogue.html")
+
     grouped = {}
     errors = []
+    seen_offer_ids = set()
     for index, offer in enumerate(raw["offers"], 1):
         label = f"offre #{index}"
         if not isinstance(offer, dict):
@@ -60,6 +71,9 @@ def main():
         product_url = offer.get("product_url")
         if not isinstance(product_id, str) or not product_id.strip():
             errors.append(f"{label}: catalog_product_id manquant")
+            continue
+        if product_id.strip() not in catalogue_ids:
+            errors.append(f"{label}: catalog_product_id absent du catalogue")
             continue
         if not all(isinstance(offer.get(k), str) and offer[k].strip() for k in ("product_name", "merchant_name", "source")):
             errors.append(f"{label}: nom du produit, marchand ou source manquant")
@@ -90,8 +104,13 @@ def main():
         if not isinstance(offer_id, str) or not offer_id.strip():
             errors.append(f"{label}: offer_id manquant")
             continue
+        offer_id = offer_id.strip()
+        if offer_id in seen_offer_ids:
+            errors.append(f"{label}: offer_id dupliqué")
+            continue
+        seen_offer_ids.add(offer_id)
         normalized = {
-            "offer_id": offer_id.strip(),
+            "offer_id": offer_id,
             "merchant_name": offer["merchant_name"].strip(),
             "source": offer["source"].strip(),
             "price_eur": round(float(price), 2),
