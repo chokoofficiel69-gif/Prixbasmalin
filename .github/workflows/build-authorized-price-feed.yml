@@ -1,0 +1,56 @@
+name: Build authorized price feed
+
+on:
+  pull_request:
+    paths:
+      - "data/merchant-offers.json"
+      - "scripts/build_prices_feed.py"
+      - ".github/workflows/build-authorized-price-feed.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "data/merchant-offers.json"
+      - "scripts/build_prices_feed.py"
+      - ".github/workflows/build-authorized-price-feed.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Build catalogue feed from authorized source data
+        run: python3 scripts/build_prices_feed.py
+      - name: Validate generated feed
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("data/prices.json").read_text(encoding="utf-8"))
+          assert isinstance(data.get("products"), list)
+          assert isinstance(data.get("offers"), list)
+          for product in data["products"]:
+              assert isinstance(product.get("best_price_eur"), (int, float))
+              assert product.get("offers")
+              assert product["offers"][0]["total_price_eur"] == product["best_price_eur"]
+          print("Flux généré valide.")
+          PY
+      - name: Commit generated feed on main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if git diff --quiet -- data/prices.json; then
+            echo "Le flux généré n'a pas changé."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/prices.json
+          git commit -m "data: rebuild verified catalogue price feed"
+          git push
