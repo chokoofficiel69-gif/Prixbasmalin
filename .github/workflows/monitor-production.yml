@@ -35,13 +35,19 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/ --output /tmp/home.html
           grep -qi "Prix Malin" /tmp/home.html
-      - name: Vérifier le catalogue et le flux JSON
+      - name: Vérifier que le catalogue est publié
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/catalogue.html --output /tmp/catalogue.html
-          grep -q "productData" /tmp/catalogue.html
+          test -s /tmp/catalogue.html
+      - name: Vérifier le code catalogue attendu
+        run: grep -q "productData" /tmp/catalogue.html
+      - name: Vérifier que le flux de prix est publié
+        run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/data/prices.json --output /tmp/prices.json
+      - name: Valider la structure du flux de prix
+        run: |
           node --input-type=module -e '
             import fs from "node:fs";
             const data = JSON.parse(fs.readFileSync("/tmp/prices.json", "utf8"));
