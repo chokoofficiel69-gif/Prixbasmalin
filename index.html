@@ -739,17 +739,17 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 .pm-step-caption{padding:8px 3px 1px;border-top:1px solid #f0e7e1;color:#7b6255;font-size:9px;line-height:1.35;text-align:center}
 .pm-scroll-progress{display:none!important}
 @media(max-width:1479px){
- .pm-step-rail{left:3px;top:23vh;bottom:23vh;width:30px;padding:0;gap:8px}
- .pm-step-rail:before{left:14px;top:13px;bottom:13px}
- .pm-step-rail-progress{left:14px;top:13px;bottom:13px}
+ .pm-step-rail{left:1px;top:20vh;bottom:20vh;width:23px;padding:0;gap:8px}
+ .pm-step-rail:before{left:10px;top:11px;bottom:11px}
+ .pm-step-rail-progress{left:10px;top:11px;bottom:11px}
  .pm-rail-step{display:flex;justify-content:center;min-height:28px;padding:0}
- .pm-rail-step-number{width:25px;height:25px;font-size:10px;box-shadow:0 1px 5px rgba(31,41,55,.09)}
+ .pm-rail-step-number{width:20px;height:20px;font-size:9px;box-shadow:0 1px 5px rgba(31,41,55,.09)}
  .pm-rail-step-label,.pm-step-caption{display:none}
 }
 @media(max-width:420px){
- .pm-step-rail{left:2px;top:24vh;bottom:24vh;width:27px}
- .pm-step-rail:before,.pm-step-rail-progress{left:12px}
- .pm-rail-step-number{width:23px;height:23px}
+ .pm-step-rail{left:1px;top:20vh;bottom:20vh;width:22px}
+ .pm-step-rail:before,.pm-step-rail-progress{left:10px}
+ .pm-rail-step-number{width:19px;height:19px}
 }
 @media(prefers-reduced-motion:reduce){.pm-rail-step-number,.pm-step-rail-progress{transition:none!important}}
 /* Icônes cohérentes pour les contrôles courants; logo et avatar restent inchangés */
@@ -1498,6 +1498,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 /* Le visiteur peut revenir à l'accueil à tout moment, même au milieu d'une page */
 (function(){
  if(document.querySelector('.pm-home-shortcut'))return;
+ /* Sur l'accueil, la navigation fixe du bas contient déjà le bouton Accueil. */
+ if(location.pathname==='/'||location.pathname.endsWith('/index.html'))return;
  const home=document.createElement('a');
  home.className='pm-home-shortcut';
  home.href='index.html';
