@@ -32,7 +32,7 @@
   }, true);
 
 
-  // Mesure anonyme des pages vues : identifiant de session temporaire, sans cookie.
+  // Mesure anonyme + attribution première source de la session, sans cookie.
   try {
     var sessionKey = "pm_analytics_session";
     var sessionId = sessionStorage.getItem(sessionKey);
@@ -41,11 +41,28 @@
         "pm-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
       sessionStorage.setItem(sessionKey, sessionId);
     }
-    fetch(endpoint.replace(/\/track$/, "/view"), {
-      method: "POST",
-      mode: "cors",
-      credentials: "omit",
-      keepalive: true,
+    var attributionKey = "pm_traffic_attribution";
+    var attribution = null;
+    try { attribution = JSON.parse(sessionStorage.getItem(attributionKey) || "null"); } catch (_) {}
+    if (!attribution) {
+      var params = new URLSearchParams(location.search);
+      var source = params.get("utm_source") || "";
+      var medium = params.get("utm_medium") || "";
+      var campaign = params.get("utm_campaign") || "";
+      if (!source && document.referrer) {
+        try { source = new URL(document.referrer).hostname.replace(/^www\./, ""); medium = "referral"; } catch (_) {}
+      }
+      attribution = { source: source || "direct", medium: medium || (source ? "unspecified" : "direct"), campaign: campaign || "none" };
+      sessionStorage.setItem(attributionKey, JSON.stringify(attribution));
+    }
+    fetch("https://prixbasmalin-attribution.chokoofficiel69.workers.dev/view", {
+      method: "POST", mode: "cors", credentials: "omit", keepalive: true,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page_path: location.pathname || "/", visitor_id: sessionId, source: attribution.source, medium: attribution.medium, campaign: attribution.campaign })
+    }).catch(function () {});
+    // L'ancien endpoint reste actif pour conserver les statistiques historiques.
+    fetch(endpoint.replace(/\\/track$/, "/view"), {
+      method: "POST", mode: "cors", credentials: "omit", keepalive: true,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ page_path: location.pathname || "/", visitor_id: sessionId })
     }).catch(function () {});
