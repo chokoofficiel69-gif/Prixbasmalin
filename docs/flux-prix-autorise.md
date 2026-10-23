@@ -8,7 +8,9 @@ Le flux source `data/merchant-offers.json` est volontairement vide. Aucun prix n
 
 Chaque entrée de `offers` doit contenir :
 - `offer_id` : identifiant stable de l'offre
-- `catalog_product_id` : identifiant exact du produit dans `catalogue.html`
+- `catalog_product_id` : identifiant de fiche dans `catalogue.html`
+- `identity_type` et `identity_value` : identité exacte commune à toutes les offres comparées (`gtin`, `asin` ou `mpn`)
+- `brand` : obligatoire pour `identity_type: "mpn"`
 - `product_name`, `merchant_name`, `source`
 - `product_url` : URL produit HTTPS officielle
 - `price`, `shipping_price` : nombres en euros, livraison connue (0 si gratuite)
@@ -26,16 +28,16 @@ Lancer localement :
 python3 scripts/build_prices_feed.py
 ```
 
-Le workflow GitHub Actions exécute aussi ce générateur lorsqu'un changement est poussé dans le fichier source sur `main), puis met à jour `data/prices.json` si le résultat change. Le workflow ne collecte pas les prix sur Internet et ne tourne pas selon un horaire fixe : il transforme uniquement les données sources fournies.
+Le workflow GitHub Actions exécute aussi ce générateur lorsqu'un changement est poussé dans le fichier source sur `main`, puis met à jour `data/prices.json` si le résultat change. Le workflow ne collecte pas les prix sur Internet et ne tourne pas selon un horaire fixe : il transforme uniquement les données sources fournies.
 
 ## Correspondance catalogue
 
-`catalog_product_id` doit être identique à un identifiant de produit du tableau `productData` dans `catalogue.html`. Le générateur extrait les identifiants de `productData` dans `catalogue.html` et rejette toute offre dont `catalog_product_id` ne correspond pas exactement à un identifiant existant. Les offres admissibles qui réutilisent un même `offer_id` sont également rejetées. Les GTIN sont contrôlés (longueur et clé de contrôle), les ASIN doivent contenir 10 caractères alphanumériques et les MPN exigent une marque. Toutes les offres publiées sous une même fiche catalogue doivent avoir exactement la même identité normalisée. Si deux offres valides d'une fiche ont des identités différentes, toutes les offres de cette fiche sont écartées. Les offres ne sont jamais rapprochées automatiquement par nom approximatif afin d'éviter de comparer des variantes différentes.
-
+`catalog_product_id` doit correspondre à un identifiant existant du tableau `productData` dans `catalogue.html`. Le générateur rejette les identifiants inconnus et les `offer_id` dupliqués. Les GTIN sont contrôlés (longueur et clé de contrôle), les ASIN doivent contenir 10 caractères alphanumériques et les MPN exigent une marque. Toutes les offres publiées sous une même fiche catalogue doivent avoir exactement la même identité normalisée. Si deux offres valides d'une fiche ont des identités différentes, toutes les offres de cette fiche sont écartées. Les offres ne sont jamais rapprochées automatiquement par nom approximatif afin d'éviter de comparer des variantes différentes.
 
 ## Exemple d'identité exacte
 
 Pour une référence EAN/GTIN :
+
 ```json
 {
   "identity_type": "gtin",
@@ -44,6 +46,7 @@ Pour une référence EAN/GTIN :
 ```
 
 Pour une référence fabricant, fournir également la marque :
+
 ```json
 {
   "identity_type": "mpn",
