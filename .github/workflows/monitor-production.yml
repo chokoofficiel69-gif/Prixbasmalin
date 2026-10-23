@@ -50,9 +50,15 @@ jobs:
         run: |
           node --input-type=module -e '
             import fs from "node:fs";
-            const data = JSON.parse(fs.readFileSync("/tmp/prices.json", "utf8"));
+            const raw = fs.readFileSync("/tmp/prices.json", "utf8");
+            let data;
+            try {
+              data = JSON.parse(raw);
+            } catch {
+              throw new Error("Le serveur n'a pas renvoyé du JSON : " + raw.slice(0, 180).replace(/\\s+/g, " "));
+            }
             if (!Array.isArray(data.products) || !Array.isArray(data.offers) || !Array.isArray(data.errors)) {
-              throw new Error("Structure du flux de prix invalide");
+              throw new Error("Structure du flux invalide. Clés reçues : " + Object.keys(data).join(", "));
             }
             if (data.offers.length === 0) {
               console.log("AVERTISSEMENT : aucun prix vérifié publié ; aucune valeur n'est inventée.");
