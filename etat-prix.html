@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>État des prix — Prix Malin</title>
+<meta name="description" content="Consultez l'état réel des prix vérifiés et des sources marchandes de Prix Malin.">
+<style>
+:root{--orange:#ff650b;--ink:#252a32;--muted:#69717d;--line:#e8e9ec;--soft:#fff5ef;--ok:#137547;--warn:#8a5700}
+*{box-sizing:border-box}body{margin:0;background:#f7f8fa;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+header{background:#fff;border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.back{font-size:25px;color:var(--orange);text-decoration:none;padding:0 6px}.brand{font-size:20px;font-weight:850;color:var(--ink);text-decoration:none}.brand span{color:var(--orange)}
+main{max-width:820px;margin:0 auto;padding:20px 14px 80px}
+.hero{background:var(--soft);border:1px solid #ffd7c4;border-radius:18px;padding:20px;margin-bottom:16px}
+h1{font-size:25px;line-height:1.15;margin:0 0 8px;letter-spacing:-.5px}.hero p{margin:0;color:#5f6368}
+.status{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid #ffd7c4;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:750;color:var(--warn);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px;min-width:0}
+.label{font-size:12px;color:var(--muted);margin-bottom:5px}.value{font-size:26px;font-weight:850;line-height:1.15;overflow-wrap:anywhere}.detail{font-size:12px;color:var(--muted);margin-top:6px}
+.section{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;margin-top:14px}
+h2{font-size:17px;margin:0 0 8px}.section p{font-size:14px;color:#555;margin:0 0 10px}.section ul{padding-left:20px;margin:8px 0 0;font-size:14px}.section li{margin:6px 0}
+.notice{border-left:4px solid var(--orange);padding:10px 12px;background:#fff8f4;border-radius:0 9px 9px 0;font-size:13px;margin-top:12px}
+.links{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 13px;border-radius:10px;text-decoration:none;font-weight:750;font-size:13px;background:var(--orange);color:#fff}.link.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+@media(min-width:600px){main{padding-top:28px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{padding:26px}h1{font-size:32px}}
+</style>
+</head>
+<body>
+<header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a></header>
+<main>
+<section class="hero">
+<div class="status" id="statusBadge">● Vérification en cours</div>
+<h1>État réel des prix</h1>
+<p>Un tableau de bord simple pour distinguer les prix réellement vérifiés des fiches qui attendent encore une source marchande.</p>
+</section>
+<section class="grid" aria-live="polite">
+<article class="card"><div class="label">Fiches catalogue</div><div class="value" id="catalogueCount">—</div><div class="detail">Produits et catégories référencés</div></article>
+<article class="card"><div class="label">Fiches avec identité</div><div class="value" id="identityCount">—</div><div class="detail" id="identityDetail">GTIN, ASIN ou référence fabricant confirmée</div></article>
+<article class="card"><div class="label">Produits avec prix vérifié</div><div class="value" id="verifiedProducts">—</div><div class="detail">Données du flux publié</div></article>
+<article class="card"><div class="label">Offres marchandes</div><div class="value" id="verifiedOffers">—</div><div class="detail" id="generatedAt">Dernière génération : —</div></article>
+</section>
+<section class="section">
+<h2>Diagnostic</h2>
+<p id="diagnosticText">Chargement des données publiques du catalogue…</p>
+<ul id="diagnosticList"><li>Lecture des sources publiques en cours.</li></ul>
+<div class="notice">Un prix n'est considéré comme vérifié que si une source autorisée le fournit et que l'identité du produit est suffisamment précise. Aucune promotion ni économie n'est inventée pour remplir les cases vides.</div>
+</section>
+<section class="section">
+<h2>Ce qu'il manque pour activer la comparaison</h2>
+<ul>
+<li>Une source marchande autorisée (flux produit ou API accessible au compte éditeur).</li>
+<li>Des identifiants exacts pour relier chaque offre au bon modèle.</li>
+<li>Un prix réel, les frais de livraison connus, la date de vérification et un lien marchand valide.</li>
+</ul>
+<div class="links"><a class="link" href="catalogue.html">Voir le catalogue</a><a class="link secondary" href="https://github.com/chokoofficiel69-gif/Prixbasmalin">Suivre le développement</a></div>
+</section>
+<footer>Les chiffres sont chargés depuis les fichiers publics de Prix Malin. Si les données ne sont pas accessibles, le tableau de bord l'indique au lieu de deviner.</footer>
+</main>
+<script>
+(async function(){
+ const $=id=>document.getElementById(id);
+ const list=$('diagnosticList');
+ const notes=[];
+ try{
+   const responses=await Promise.all([
+     fetch('/data/prices.json',{cache:'no-store'}),
+     fetch('/data/catalogue-identities.json',{cache:'no-store'}),
+     fetch('/catalogue.html',{cache:'no-store'})
+   ]);
+   if(responses.some(r=>!r.ok))throw new Error('Une ou plusieurs sources publiques ne sont pas accessibles (HTTP).');
+   const [prices,identities,catalogueHtml]=await Promise.all(responses.map(r=>r.text()));
+   const feed=JSON.parse(prices), registry=JSON.parse(identities);
+   const match=catalogueHtml.match(/const\s+productData\s*=\s*\[([\s\S]*?)\];/);
+   if(!match)throw new Error('Impossible de compter les fiches du catalogue.');
+   const ids=[...match[1].matchAll(/\bid\s*:\s*["']([^"']+)["']/g)].map(m=>m[1]);
+   const mapping=registry.products||{};
+   const identityCount=Object.keys(mapping).filter(id=>ids.includes(id)&&mapping[id]&&['gtin','asin','mpn'].includes(mapping[id].identity_type)&&typeof mapping[id].identity_value==='string'&&mapping[id].identity_value.trim()).length;
+   const products=Array.isArray(feed.products)?feed.products:[];
+   const offers=Array.isArray(feed.offers)?feed.offers:[];
+   $('catalogueCount').textContent=ids.length;
+   $('identityCount').textContent=identityCount;
+   $('verifiedProducts').textContent=products.length;
+   $('verifiedOffers').textContent=offers.length;
+   $('identityDetail').textContent=ids.length?Math.round(identityCount/ids.length*100)+' % des fiches ont une identité déclarée':'Couverture non calculable';
+   $('generatedAt').textContent='Dernière génération : '+(feed.generated_at?new Date(feed.generated_at).toLocaleString('fr-FR'):'non renseignée');
+   list.replaceChildren();
+   if(identityCount===0)notes.push('Aucune identité exacte n’est encore enregistrée dans le registre.');
+   else notes.push(identityCount+' fiche(s) ont une identité déclarée.');
+   if(products.length===0||offers.length===0)notes.push('Aucune offre vérifiée n’est publiée pour le moment.');
+   if(feed.errors&&feed.errors.length)notes.push(feed.errors.length+' avertissement(s) figurent dans le dernier flux.');
+   notes.forEach(note=>{const li=document.createElement('li');li.textContent=note;list.appendChild(li);});
+   $('diagnosticText').textContent=offers.length?'Le flux contient des offres publiées. Vérifiez chaque fiche et sa date de mise à jour.':'Le site est accessible, mais la comparaison de prix réelle n’est pas encore active : aucune offre marchande vérifiée n’est publiée.';
+   $('statusBadge').textContent=offers.length?'● Flux contenant des offres':'● En attente de flux marchand';
+   $('statusBadge').style.color=offers.length?'#137547':'#8a5700';
+   $('statusBadge').style.borderColor=offers.length?'#bfe5ce':'#ffd7c4';
+ }catch(error){
+   $('statusBadge').textContent='● Données non disponibles';
+   $('diagnosticText').textContent='Le tableau de bord n’a pas pu lire toutes les données publiques.';
+   list.replaceChildren();const li=document.createElement('li');li.textContent=error.message||'Erreur de lecture';list.appendChild(li);
+   ['catalogueCount','identityCount','verifiedProducts','verifiedOffers'].forEach(id=>$(id).textContent='—');
+ }
+})();
+</script>
+</body>
+</html>
