@@ -1,0 +1,67 @@
+name: Vérifier le site en production
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/monitor-production.yml"
+      - "js/track-outbound.js"
+      - "catalogue.html"
+      - "data/prices.json"
+      - "CNAME"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/monitor-production.yml"
+      - "js/track-outbound.js"
+      - "catalogue.html"
+      - "data/prices.json"
+      - "CNAME"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    name: Site, catalogue et Worker attribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Vérifier la page d'accueil
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin.fr/ --output /tmp/home.html
+          grep -qi "Prix Malin" /tmp/home.html
+      - name: Vérifier le catalogue et le flux JSON
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin.fr/catalogue.html --output /tmp/catalogue.html
+          grep -q "productData" /tmp/catalogue.html
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin.fr/data/prices.json --output /tmp/prices.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const data = JSON.parse(fs.readFileSync("/tmp/prices.json", "utf8"));
+            if (!Array.isArray(data.products) || !Array.isArray(data.offers) || !Array.isArray(data.errors)) {
+              throw new Error("Structure du flux de prix invalide");
+            }
+            if (data.offers.length === 0) {
+              console.log("AVERTISSEMENT : aucun prix vérifié publié ; aucune valeur n'est inventée.");
+            }
+            console.log("Flux JSON valide :", data.products.length, "produits,", data.offers.length, "offres.");
+          '
+      - name: Vérifier le Worker d'attribution
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin-attribution.chokoofficiel69.workers.dev/health --output /tmp/worker-health.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const data = JSON.parse(fs.readFileSync("/tmp/worker-health.json", "utf8"));
+            if (data.ok !== true || data.service !== "prixbasmalin-attribution") {
+              throw new Error("Le Worker attribution n'a pas renvoyé le statut attendu");
+            }
+            console.log("Worker attribution joignable et sain.");
+          '
