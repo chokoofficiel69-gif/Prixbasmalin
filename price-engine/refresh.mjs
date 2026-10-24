@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import {secureUrl, isSafeMerchantUrl, extractOfferFromJsonLd, mergeFreshAndStaleOffers, markOffersStale} from "./price-utils.mjs";
+import {secureUrl, isSafeMerchantUrl, resolveSafeRedirect, extractOfferFromJsonLd, mergeFreshAndStaleOffers, markOffersStale} from "./price-utils.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
@@ -24,8 +24,8 @@ async function fetchPublicMerchantPage(initialUrl) {
       const location = response.headers.get("location");
       if (!location) throw new Error("Redirection sans en-tête Location");
       if (hop === 5) throw new Error("Trop de redirections");
-      const nextUrl = secureUrl(location, currentUrl);
-      if (!nextUrl || !isSafeMerchantUrl(nextUrl)) {
+      const nextUrl = resolveSafeRedirect(location, currentUrl);
+      if (!nextUrl) {
         throw new Error("Redirection vers une URL non autorisée refusée");
       }
       currentUrl = nextUrl;
