@@ -117,6 +117,15 @@ for (const product of config.products) {
   }
 }
 
+// Pour les produits dont toutes les sources ont échoué, conserver les dernières offres en les marquant périmées.
+const successfulIds = new Set(offers.filter(o => !o.stale).map(o => o.product_id));
+const previousOffers = Array.isArray(previous.offers) ? previous.offers : [];
+for (const oldOffer of previousOffers) {
+  if (!successfulIds.has(oldOffer.product_id) && config.products.some(p => p.id === oldOffer.product_id)) {
+    offers.push({...oldOffer, stale:true, comparison_note:"Dernier prix connu : actualisation échouée, vérifier chez le marchand"});
+  }
+}
+
 // Ne jamais remplacer un relevé existant par un tableau vide si tous les marchands échouent.
 if (offers.length === 0) {
   console.error(`Aucune offre valide récupérée; relevé précédent conservé. Erreurs: ${errors.length}`);
