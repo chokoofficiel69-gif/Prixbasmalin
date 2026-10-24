@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
-import { isIP } from "node:net";
-import { secureUrl } from "./price-utils.mjs";
+import { isSafeMerchantUrl } from "./price-utils.mjs";
 
 const configUrl = new URL("./products.json", import.meta.url);
 const config = JSON.parse(await fs.readFile(configUrl, "utf8"));
@@ -51,22 +50,8 @@ for (const [index, product] of products.entries()) {
     } else {
       retailers.add(source.retailer.trim().toLowerCase());
     }
-    const url = secureUrl(source.url);
-    if (!url) {
-      problems.push(`${sourcePrefix}.url : URL HTTPS publique valide requise.`);
-    } else {
-      const parsed = new URL(url);
-      const hostname = parsed.hostname.toLowerCase();
-      const hostForIpCheck = hostname.startsWith("[") && hostname.endsWith("]")
-        ? hostname.slice(1, -1)
-        : hostname;
-      if (isIP(hostForIpCheck) !== 0 ||
-          hostname === "localhost" || hostname.endsWith(".localhost") ||
-          hostname.endsWith(".local") || hostname.endsWith(".internal") ||
-          parsed.username || parsed.password ||
-          (parsed.port && parsed.port !== "443")) {
-        problems.push(`${sourcePrefix}.url : domaine public HTTPS requis ; URL avec IP, identifiants ou port non standard refusée.`);
-      }
+    if (!isSafeMerchantUrl(source.url)) {
+      problems.push(`${sourcePrefix}.url : domaine public HTTPS requis ; URL avec IP, hôte local, identifiants ou port non standard refusée.`);
     }
   }
 }
