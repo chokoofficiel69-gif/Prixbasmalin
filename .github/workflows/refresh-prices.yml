@@ -29,7 +29,11 @@ jobs:
         run: node --test price-engine/*.test.mjs
       - name: Valider les fiches produit et sources marchandes
         run: node price-engine/validate-config.mjs
-      - name: Lire les prix publiquement disponibles
+      - name: Lire les prix publics et la source eBay autorisée
+        env:
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+          EBAY_CAMPAIGN_ID: ${{ secrets.EBAY_CAMPAIGN_ID }}
         run: node price-engine/refresh.mjs
       - name: Enregistrer le relevé
         run: |
