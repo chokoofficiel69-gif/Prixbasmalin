@@ -1,10 +1,11 @@
 {
   "version": 1,
   "updated_at": "2026-10-24",
-  "notes": "Première source candidate : l'offre ne sera publiée que si le moteur confirme l'identité du produit et une offre EUR explicite dans les données structurées publiques. Si la page ne fournit pas ces données, aucune offre ne sera inventée.",
+  "notes": "Une seule source candidate est conservée tant que les autres URLs n'ont pas été testées manuellement. L'offre n'est publiée que si le produit et le prix EUR sont confirmés.",
   "products": [
     {
       "id": "apple-airpods-4-usb-c",
+      "ean": "0195949688591",
       "name": "Apple AirPods 4 Blanc avec Boîtier de charge USB-C Ecouteurs sans fil",
       "match_terms": [
         "Apple AirPods 4",
@@ -13,7 +14,8 @@
       "sources": [
         {
           "retailer": "Fnac",
-          "url": "https://www.fnac.com/Apple-Airpods-4-Blanc-avec-Boitier-de-charge-USB-C-Ecouteurs-sans-fil/a20833050/w-4"
+          "url": "https://www.fnac.com/Apple-Airpods-4-Blanc-avec-Boitier-de-charge-USB-C-Ecouteurs-sans-fil/a20833050/w-4",
+          "access": "public_json_ld_candidate"
         }
       ]
     }
