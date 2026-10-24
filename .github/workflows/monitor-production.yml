@@ -59,6 +59,7 @@ jobs:
             ["redirections validées avec le résolveur sûr", engine.includes("resolveSafeRedirect(location, currentUrl)")],
             ["tests de redirection non sûre présents", tests.includes("résout uniquement les redirections vers des URL HTTPS publiques")],
             ["résolveur de redirection strict disponible", utils.includes("export function resolveSafeRedirect")],
+            ["statut historique si toutes les sources échouent", engine.includes('status:hasFreshOffers ? "fresh_offers_available" : "historical_only"')],
           ];
           const failures = checks.filter(([, ok]) => !ok);
           for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
