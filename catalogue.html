@@ -281,7 +281,8 @@ function renderVerifiedProducts(products){
   verifiedShelf.hidden=false;
   usable.forEach(p=>{
     const rows=p.offers.filter(o=>Number.isFinite(Number(o.price_eur))&&Number(o.price_eur)>0);
-    const fresh=rows.filter(isCurrentVerifiedOffer).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
+    const totalForSort=o=>Number(o.price_eur)+(Number.isFinite(Number(o.shipping_cost))&&o.shipping_cost!==null?Number(o.shipping_cost):0);
+    const fresh=rows.filter(isCurrentVerifiedOffer).sort((a,b)=>totalForSort(a)-totalForSort(b));
     const stale=rows.filter(o=>!isCurrentVerifiedOffer(o)).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
     const ordered=[...fresh,...stale];
     const best=fresh[0]||stale[0];
@@ -320,9 +321,7 @@ function renderVerifiedProducts(products){
       const storeName=document.createElement("strong");
       storeName.textContent=offerData.retailer||"Marchand";
       const storeState=document.createElement("span");
-      storeState.textContent=offerIsCurrent
-        ?"Relevé "+new Date(offerData.checked_at).toLocaleString("fr-FR")
-        :"Dernier prix connu — à confirmer";
+      if(offerIsCurrent){const stamp=Date.parse(offerData.verified_at||offerData.checked_at||"");const ageHours=Math.max(0,Math.floor((Date.now()-stamp)/3600000));storeState.textContent="Vérifié il y a "+ageHours+" h";}else storeState.textContent="Périmé (>24 h) — vérifier chez le marchand";
       const priceBox=document.createElement("div");
       priceBox.className="verified-offer-price";
       const offerPrice=document.createElement("strong");

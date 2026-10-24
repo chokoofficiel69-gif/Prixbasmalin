@@ -222,3 +222,16 @@ test("résout uniquement les redirections vers des URL HTTPS publiques", () => {
   assert.equal(resolveSafeRedirect("https://autre-marchand.example:8443/p", base), null);
   assert.equal(resolveSafeRedirect("", base), null);
 });
+
+
+import {extractShippingFromJsonLd, isValidEan13} from "./price-utils.mjs";
+test("extrait les frais de livraison seulement s'ils sont explicitement présents en EUR", () => {
+  assert.equal(extractShippingFromJsonLd({shippingDetails:{shippingRate:{value:"4.99",currency:"EUR"}}}),4.99);
+  assert.equal(extractShippingFromJsonLd({shippingDetails:{shippingRate:{value:"4,90",currency:"EUR"}}}),4.9);
+  assert.equal(extractShippingFromJsonLd({shippingDetails:{shippingRate:{value:"4.99",currency:"USD"}}}),null);
+  assert.equal(extractShippingFromJsonLd({}),null);
+});
+test("valide la clé de contrôle EAN-13", () => {
+  assert.equal(isValidEan13("0195949688591"), true);
+  assert.equal(isValidEan13("0194253405395"), false);
+});

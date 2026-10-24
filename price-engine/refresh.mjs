@@ -5,6 +5,34 @@ const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
 const now = new Date().toISOString();
 const config = JSON.parse(await fs.readFile(CONFIG, "utf8"));
+const quality = {generated_at:now, sources:{}, global:{products_configured:0,offers_verified:0,offers_stale:0,coverage_rate:0}};
+async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+  const retryStatuses = new Set([429,500,502,503,504]);
+  for (let attempt = 0; ; attempt++) {
+    const response = await fetch(url, options);
+    if (!retryStatuses.has(response.status) || attempt >= maxRetries) return response;
+    const delayMs = 1000 * (2 ** attempt);
+    console.warn(`HTTP ${response.status} pour ${new URL(url).hostname}; nouvelle tentative dans ${delayMs} ms (${attempt + 1}/${maxRetries})`);
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+  }
+}
+function sourceStats(retailer) {
+  if (!quality.sources[retailer]) quality.sources[retailer] = {attempts:0,success:0,failures:0,last_success_at:null,products_without_offer:[]};
+  return quality.sources[retailer];
+}
+async function writeQuality(offers, products, errors) {
+  quality.global.products_configured = products.length;
+  quality.global.offers_verified = offers.filter(o => !o.stale && o.verification_status === "verified_json_ld").length;
+  quality.global.offers_stale = offers.filter(o => o.stale).length;
+  quality.global.coverage_rate = products.length ? Number((new Set(offers.filter(o => !o.stale).map(o => o.product_id)).size / products.length).toFixed(4)) : 0;
+  for (const error of errors) {
+    if (!error.retailer) continue;
+    const stats = sourceStats(error.retailer);
+    if (error.reason?.includes("Prix EUR absent")) stats.products_without_offer.push(error.product_id);
+  }
+  await fs.mkdir(new URL("../data/", import.meta.url), {recursive:true});
+  await fs.writeFile(new URL("../data/quality.json", import.meta.url), JSON.stringify(quality,null,2)+"\n");
+}
 
 async function fetchPublicMerchantPage(initialUrl) {
   let currentUrl = initialUrl;
@@ -12,12 +40,12 @@ async function fetchPublicMerchantPage(initialUrl) {
     if (!isSafeMerchantUrl(currentUrl)) {
       throw new Error("URL marchande non sûre : seuls les domaines publics HTTPS sont autorisés");
     }
-    const response = await fetch(currentUrl, {
+    const response = await fetchWithRetry(currentUrl, {
       headers: {
         "user-agent":"PrixMalinPriceBot/1.0 (+https://prixbasmalin.fr; public product price monitoring)",
         "accept":"text/html,application/xhtml+xml"
       },
-      signal:AbortSignal.timeout(12000),
+      signal:AbortSignal.timeout(10000),
       redirect:"manual"
     });
     if (response.status >= 300 && response.status < 400) {
@@ -107,6 +135,8 @@ if (validProducts.length === 0) {
 
 for (const product of validProducts) {
   for (const source of product.sources) {
+    const stats = sourceStats(source?.retailer || "Marchand inconnu");
+    stats.attempts++;
     const sourceUrl = secureUrl(source?.url, source?.url);
     if (!sourceUrl || !isSafeMerchantUrl(sourceUrl) || !source?.retailer) {
       errors.push({product_id:product.id,retailer:source?.retailer ?? null,reason:"Source HTTPS ou nom du marchand manquant"});
@@ -132,6 +162,7 @@ for (const product of validProducts) {
       if (found) offers.push(found);
       else errors.push({product_id:product.id,retailer:source.retailer,url:sourceUrl,reason:"Prix EUR absent des données structurées publiques"});
     } catch (error) {
+      stats.failures++;
       errors.push({product_id:product.id,retailer:source.retailer,url:sourceUrl,reason:String(error.message ?? error).slice(0,180)});
     }
     await new Promise(resolve => setTimeout(resolve, 1200));
@@ -146,6 +177,8 @@ offers.splice(0, offers.length, ...mergedOffers);
 // Si toutes les sources échouent et qu'aucune ancienne offre n'existe,
 // ne pas remplacer un relevé vide par un faux relevé de succès.
 if (offers.length === 0) {
+  for (const error of errors) console.error(`[SOURCE_DIAGNOSTIC] ${JSON.stringify(error)}`);
+  await writeQuality(offers, validProducts, errors);
   console.error(`Aucune offre valide récupérée; relevé précédent conservé. Erreurs: ${errors.length}`);
   process.exitCode = 1;
 } else {

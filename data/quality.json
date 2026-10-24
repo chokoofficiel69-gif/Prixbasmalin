@@ -1,0 +1,12 @@
+{
+  "generated_at": null,
+  "status": "not_run_in_this_environment",
+  "sources": {},
+  "global": {
+    "products_configured": 0,
+    "offers_verified": 0,
+    "offers_stale": 0,
+    "coverage_rate": 0
+  },
+  "note": "Ce fichier sera généré par price-engine/refresh.mjs. Aucun résultat réel n'a été simulé."
+}
