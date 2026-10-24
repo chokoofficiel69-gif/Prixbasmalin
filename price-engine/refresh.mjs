@@ -35,7 +35,7 @@ async function saveHistoricalSnapshot(snapshot, reason) {
     offers: staleOffers
   };
   if (JSON.stringify(output) !== JSON.stringify(snapshot)) {
-    await fs.writeFile(OUTPUT, JSON.stringify(output,null,2)+"\\n");
+  await fs.writeFile(OUTPUT, JSON.stringify(output,null,2)+"\n");
   }
 }
 
@@ -61,6 +61,12 @@ for (const product of config.products) {
   }
   seenProductIds.add(product.id);
   validProducts.push(product);
+}
+
+if (validProducts.length === 0) {
+  await saveHistoricalSnapshot(previous, "Configuration source invalide ou absente : dernier prix connu à revérifier");
+  console.error("Aucun produit valide dans la configuration. Les anciens prix, s'il y en a, restent marqués historiques.");
+  process.exit(0);
 }
 
 function flattenJsonLd(value, out = []) {
