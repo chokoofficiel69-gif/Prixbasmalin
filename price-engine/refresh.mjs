@@ -5,12 +5,14 @@ const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
 const now = new Date().toISOString();
 const config = JSON.parse(await fs.readFile(CONFIG, "utf8"));
+if (!Array.isArray(config.products)) {
+  throw new Error("Configuration invalide : products doit être un tableau.");
+}
 
 const previous = await fs.readFile(OUTPUT, "utf8").then(JSON.parse).catch(() => ({version:1,offers:[]}));
 
 async function saveHistoricalSnapshot(snapshot, reason) {
   const previousOffers = Array.isArray(snapshot.offers) ? snapshot.offers : [];
-  if (previousOffers.length === 0) return;
   const staleOffers = markOffersStale(previousOffers, reason);
   const previousProducts = Array.isArray(snapshot.products) ? snapshot.products : [];
   const products = previousProducts.map(product => {
@@ -22,15 +24,18 @@ async function saveHistoricalSnapshot(snapshot, reason) {
       ...product,
       offers: rows,
       offer_count: rows.length,
-      best_price_eur: best?.price_eur ?? product.best_price_eur ?? null,
+      best_price_eur: best?.price_eur ?? (rows.length === 0 ? null : product.best_price_eur ?? null),
       has_fresh_offer: false
     };
   });
   const output = {
     ...snapshot,
+    status: previousOffers.length ? "historical_only" : "no_sources_configured",
     generated_at: snapshot.generated_at ?? now,
-    schedule: "Aucune source configurée : les derniers prix sont historiques",
-    methodology: "Derniers prix connus conservés à titre indicatif et marqués périmés. Aucune source active, aucun nouveau prix validé.",
+    schedule: "Pas d'actualisation automatique tant que des sources marchandes ne sont pas configurées",
+    methodology: previousOffers.length
+      ? "Derniers prix connus conservés à titre indicatif et marqués périmés. Aucune source active, aucun nouveau prix validé."
+      : "Aucun produit ni offre vérifiée configuré. Aucun prix fictif n'est généré.",
     products,
     offers: staleOffers
   };
@@ -39,7 +44,7 @@ async function saveHistoricalSnapshot(snapshot, reason) {
   }
 }
 
-if (!Array.isArray(config.products) || config.products.length === 0) {
+if (config.products.length === 0) {
   await saveHistoricalSnapshot(previous, "Aucune source configurée : dernier prix connu à revérifier chez le marchand");
   console.log("Aucune source produit configurée : prix inchangés, offres historiques marquées comme périmées.");
   process.exit(0);
@@ -51,8 +56,8 @@ const seenProductIds = new Set();
 for (const product of config.products) {
   if (!product || typeof product.id !== "string" || !product.id.trim() ||
       typeof product.name !== "string" || !product.name.trim() ||
-      !Array.isArray(product.sources)) {
-    errors.push({product_id:product?.id ?? null,reason:"Configuration produit invalide"});
+      !Array.isArray(product.sources) || product.sources.length === 0) {
+    errors.push({product_id:product?.id ?? null,reason:"Configuration produit invalide ou sans source marchande"});
     continue;
   }
   if (seenProductIds.has(product.id)) {
