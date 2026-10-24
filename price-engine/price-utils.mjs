@@ -166,3 +166,12 @@ export function extractOfferFromJsonLd(value, product, retailer, responseUrl, ch
   }
   return null;
 }
+
+export function isOfferCurrent(offer, now = Date.now(), maxAgeMs = 24 * 60 * 60 * 1000) {
+  if (!offer || offer.stale) return false;
+  const checkedAt = Date.parse(offer.checked_at ?? "");
+  if (!Number.isFinite(checkedAt)) return false;
+  const age = now - checkedAt;
+  const allowedClockSkewMs = 5 * 60 * 1000;
+  return age >= -allowedClockSkewMs && age <= maxAgeMs;
+}
