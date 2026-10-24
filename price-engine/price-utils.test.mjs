@@ -222,3 +222,20 @@ test("résout uniquement les redirections vers des URL HTTPS publiques", () => {
   assert.equal(resolveSafeRedirect("https://autre-marchand.example:8443/p", base), null);
   assert.equal(resolveSafeRedirect("", base), null);
 });
+
+
+import {extractShippingFromJsonLd} from "./price-utils.mjs";
+test("extrait les frais de livraison seulement s'ils sont explicitement présents en EUR", () => {
+  assert.equal(extractShippingFromJsonLd({shippingDetails:{shippingRate:{value:"4.99",currency:"EUR"}}}),4.99);
+  assert.equal(extractShippingFromJsonLd({shippingDetails:{shippingRate:{value:"4,90",currency:"EUR"}}}),4.9);
+  assert.equal(extractShippingFromJsonLd({shippingDetails:{shippingRate:{value:"4.99",currency:"USD"}}}),null);
+  assert.equal(extractShippingFromJsonLd({}),null);
+});
+test("refuse un EAN-13 dont la clé de contrôle est invalide", async () => {
+  const {isValidEan13} = await import("./validate-config.mjs").catch(() => ({isValidEan13:null}));
+  // validate-config.mjs is an executable validator; checksum examples are also covered
+  // by the isolated implementation check in the workflow's config validation step.
+  assert.equal(typeof isValidEan13, "function");
+  assert.equal(isValidEan13("0195949688591"), true);
+  assert.equal(isValidEan13("0194253405395"), false);
+});
