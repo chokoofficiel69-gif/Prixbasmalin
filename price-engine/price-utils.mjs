@@ -91,3 +91,48 @@ export function markOffersStale(offers, reason) {
     comparison_note: reason
   }));
 }
+
+function flattenJsonLd(value, out = []) {
+  if (Array.isArray(value)) {
+    value.forEach(item => flattenJsonLd(item, out));
+  } else if (value && typeof value === "object") {
+    out.push(value);
+    if (value["@graph"]) flattenJsonLd(value["@graph"], out);
+    if (value.mainEntity) flattenJsonLd(value.mainEntity, out);
+  }
+  return out;
+}
+
+export function extractOfferFromJsonLd(value, product, retailer, responseUrl, checkedAt) {
+  for (const node of flattenJsonLd(value)) {
+    const type = node["@type"];
+    if (!(type === "Product" || (Array.isArray(type) && type.includes("Product")))) continue;
+    if (!matchesProductIdentity(node, product)) continue;
+    const rawOffers = Array.isArray(node.offers) ? node.offers : [node.offers];
+    for (const raw of rawOffers) {
+      if (!raw) continue;
+      const parsedOffer = parseExplicitEuroOffer(raw);
+      const productUrl = secureUrl(raw.url ?? node.url ?? responseUrl, responseUrl);
+      if (!parsedOffer || !productUrl) continue;
+      return {
+        product_id: product.id,
+        product_name: product.name,
+        retailer,
+        price_eur: Math.round(parsedOffer.price * 100) / 100,
+        currency: "EUR",
+        shipping_price_eur: null,
+        total_price_eur: null,
+        availability: String(raw.availability ?? "").includes("InStock")
+          ? "in_stock"
+          : String(raw.availability ?? "").includes("OutOfStock")
+            ? "out_of_stock"
+            : "unknown",
+        product_url: productUrl,
+        checked_at: checkedAt,
+        source: "public_json_ld",
+        comparison_note: "Livraison non incluse : frais non confirmés"
+      };
+    }
+  }
+  return null;
+}
