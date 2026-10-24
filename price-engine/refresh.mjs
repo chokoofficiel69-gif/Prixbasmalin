@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import {parsePrice, secureUrl, matchesProductIdentity} from "./price-utils.mjs";
+import {parsePrice, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers} from "./price-utils.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
@@ -95,18 +95,13 @@ for (const product of config.products) {
   }
 }
 
-// Pour les produits dont toutes les sources ont échoué, conserver les dernières offres en les marquant périmées.
-const successfulIds = new Set(offers.filter(o => !o.stale).map(o => o.product_id));
+// Conserver séparément les dernières offres des marchands qui ont échoué.
 const previousOffers = Array.isArray(previous.offers) ? previous.offers : [];
-if (offers.length > 0) {
-  for (const oldOffer of previousOffers) {
-    if (!successfulIds.has(oldOffer.product_id) && config.products.some(p => p.id === oldOffer.product_id)) {
-      offers.push({...oldOffer, stale:true, comparison_note:"Dernier prix connu : actualisation échouée, vérifier chez le marchand"});
-    }
-  }
-}
+const mergedOffers = mergeFreshAndStaleOffers(offers, previousOffers, config.products);
+offers.splice(0, offers.length, ...mergedOffers);
 
-// Ne jamais remplacer un relevé existant par un tableau vide si tous les marchands échouent.
+// Si toutes les sources échouent et qu'aucune ancienne offre n'existe,
+// ne pas remplacer un relevé vide par un faux relevé de succès.
 if (offers.length === 0) {
   console.error(`Aucune offre valide récupérée; relevé précédent conservé. Erreurs: ${errors.length}`);
   process.exitCode = 1;
@@ -114,7 +109,7 @@ if (offers.length === 0) {
   const productIds = [...new Set(config.products.map(p => p.id))];
   const output = {
     version:1,
-    generated_at:now,
+    generated_at:offers.some(o => !o.stale) ? now : (previous.generated_at ?? now),
     schedule:"vérification automatique toutes les heures (si des sources sont configurées)",
     methodology:"Prix lus dans les données structurées publiques Product/Offer. Frais de livraison inconnus exclus du prix; aucune estimation ni prix inventé.",
     products:productIds.map(id => {
