@@ -265,6 +265,13 @@ function render(){
   });
 }
 
+function isCurrentVerifiedOffer(offer){
+  if(!offer||offer.stale)return false;
+  const checkedAt=Date.parse(offer.checked_at||"");
+  const age=Date.now()-checkedAt;
+  return Number.isFinite(checkedAt)&&age>=-5*60*1000&&age<=24*60*60*1000;
+}
+
 function renderVerifiedProducts(products){
   verifiedProductsEl.innerHTML="";
   const usable=products.filter(p=>p&&p.id&&p.name&&Array.isArray(p.offers)&&p.offers.some(o=>
@@ -274,8 +281,8 @@ function renderVerifiedProducts(products){
   verifiedShelf.hidden=false;
   usable.forEach(p=>{
     const rows=p.offers.filter(o=>Number.isFinite(Number(o.price_eur))&&Number(o.price_eur)>0);
-    const fresh=rows.filter(o=>!o.stale).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
-    const stale=rows.filter(o=>o.stale).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
+    const fresh=rows.filter(isCurrentVerifiedOffer).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
+    const stale=rows.filter(o=>!isCurrentVerifiedOffer(o)).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
     const ordered=[...fresh,...stale];
     const best=fresh[0]||stale[0];
     const isHistorical=!fresh.length&&!!stale.length;
@@ -306,15 +313,16 @@ function renderVerifiedProducts(products){
     list.setAttribute("aria-label","Prix par marchand");
     ordered.forEach(offerData=>{
       const row=document.createElement("div");
-      row.className="verified-offer-row"+(offerData.stale?" stale":"");
+      const offerIsCurrent=isCurrentVerifiedOffer(offerData);
+      row.className="verified-offer-row"+(offerIsCurrent?"":" stale");
       const store=document.createElement("div");
       store.className="verified-offer-store";
       const storeName=document.createElement("strong");
       storeName.textContent=offerData.retailer||"Marchand";
       const storeState=document.createElement("span");
-      storeState.textContent=offerData.stale
-        ?"Dernier prix connu — à confirmer"
-        :"Relevé "+new Date(offerData.checked_at||Date.now()).toLocaleString("fr-FR");
+      storeState.textContent=offerIsCurrent
+        ?"Relevé "+new Date(offerData.checked_at).toLocaleString("fr-FR")
+        :"Dernier prix connu — à confirmer";
       const priceBox=document.createElement("div");
       priceBox.className="verified-offer-price";
       const offerPrice=document.createElement("strong");
