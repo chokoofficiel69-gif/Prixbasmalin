@@ -1,7 +1,7 @@
 {
   "version": 1,
   "updated_at": "2026-10-24",
-  "notes": "Une seule source candidate est conservée tant que les autres URLs n'ont pas été testées manuellement. L'offre n'est publiée que si le produit et le prix EUR sont confirmés.",
+  "notes": "Une seule source candidate Fnac reste configurée ; son accès renvoie HTTP 403 depuis GitHub Actions. Aucune offre n'est publiée sans prix EUR et correspondance produit vérifiés. Ne pas ajouter d'URL marchande non testée.",
   "products": [
     {
       "id": "apple-airpods-4-usb-c",
@@ -15,16 +15,6 @@
         {
           "retailer": "Fnac",
           "url": "https://www.fnac.com/Apple-Airpods-4-Blanc-avec-Boitier-de-charge-USB-C-Ecouteurs-sans-fil/a20833050/w-4",
-          "access": "public_json_ld_candidate"
-        },
-        {
-          "retailer": "Boulanger",
-          "url": "https://www.boulanger.com/ref/1212701",
-          "access": "public_json_ld_candidate"
-        },
-        {
-          "retailer": "Darty",
-          "url": "https://www.darty.com/nav/achat/accessoires/casque_ecouteurs/casque_intra-auriculaire/apple_airpods_4.html",
           "access": "public_json_ld_candidate"
         }
       ]
