@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 22
       - name: Tester les utilitaires de prix
-        run: node --test price-engine/price-utils.test.mjs
+        run: node --test price-engine/*.test.mjs
       - name: Valider les fiches produit et sources marchandes
         run: node price-engine/validate-config.mjs
       - name: Lire les prix publiquement disponibles
