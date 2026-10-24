@@ -40,8 +40,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Tester parseur, URL et identité produit
+      - name: Tester parseur, URL, identité produit et offres historiques
         run: node --test price-engine/price-utils.test.mjs
+      - name: Vérifier la syntaxe du moteur de prix
+        run: node --check price-engine/refresh.mjs
+      - name: Extraire le JavaScript du catalogue de la branche
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("catalogue.html", "utf8");
+          const inlineScripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
+            .filter(([, attrs, body]) => !/\\bsrc\\s*=/i.test(attrs) && body.trim())
+            .map(([, , body]) => body);
+          if (inlineScripts.length === 0) throw new Error("Aucun script inline trouvé dans catalogue.html");
+          fs.writeFileSync("/tmp/catalogue-inline.js", inlineScripts.join("\\n;\\n"));
+          console.log("Scripts inline trouvés :", inlineScripts.length);
+          NODE
+      - name: Vérifier la syntaxe JavaScript du catalogue
+        run: node --check /tmp/catalogue-inline.js
       - name: Vérifier la page d'accueil
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
