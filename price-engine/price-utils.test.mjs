@@ -140,3 +140,30 @@ test("n'invente pas la devise quand elle manque dans JSON-LD", () => {
   "https://marchand.example/alpha","2026-10-24T10:00:00.000Z");
   assert.equal(result, null);
 });
+
+test("ignore les offres en rupture ou arrêtées", () => {
+  const product = {id:"router-x",name:"Routeur X"};
+  const responseUrl = "https://marchand.example/routeur-x";
+  for (const availability of [
+    "https://schema.org/OutOfStock",
+    "https://schema.org/Discontinued",
+    "https://schema.org/SoldOut"
+  ]) {
+    const result = extractOfferFromJsonLd({
+      "@type":"Product",
+      "name":"Routeur X",
+      "offers":{"@type":"Offer","price":"89.90","priceCurrency":"EUR",availability}
+    }, product, "Marchand", responseUrl, "2026-10-24T10:00:00.000Z");
+    assert.equal(result, null);
+  }
+});
+
+test("refuse explicitement un AggregateOffer même si des champs de prix y figurent", () => {
+  const result = extractOfferFromJsonLd({
+    "@type":"Product",
+    "name":"Routeur X",
+    "offers":{"@type":"AggregateOffer","price":"89.90","lowPrice":"79.90","priceCurrency":"EUR"}
+  }, {id:"router-x",name:"Routeur X"}, "Marchand",
+  "https://marchand.example/routeur-x","2026-10-24T10:00:00.000Z");
+  assert.equal(result, null);
+});
