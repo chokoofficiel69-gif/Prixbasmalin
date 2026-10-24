@@ -85,8 +85,6 @@ jobs:
           }
           changed = "true" if before != after else "false"
           Path('/tmp/useful-changed.txt').write_text(changed, encoding="utf-8")
-          with open(__import__("os").environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
-              out.write(f"changed={changed}\\n")
           print("Contenu utile modifié : " + ("oui" if before != after else "non"))
           PY
       - name: Add diagnostic summary to job summary
