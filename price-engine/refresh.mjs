@@ -1,10 +1,41 @@
 import fs from "node:fs/promises";
-import {secureUrl, extractOfferFromJsonLd, mergeFreshAndStaleOffers, markOffersStale} from "./price-utils.mjs";
+import {secureUrl, isSafeMerchantUrl, extractOfferFromJsonLd, mergeFreshAndStaleOffers, markOffersStale} from "./price-utils.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
 const now = new Date().toISOString();
 const config = JSON.parse(await fs.readFile(CONFIG, "utf8"));
+
+async function fetchPublicMerchantPage(initialUrl) {
+  let currentUrl = initialUrl;
+  for (let hop = 0; hop <= 5; hop++) {
+    if (!isSafeMerchantUrl(currentUrl)) {
+      throw new Error("URL marchande non sûre : seuls les domaines publics HTTPS sont autorisés");
+    }
+    const response = await fetch(currentUrl, {
+      headers: {
+        "user-agent":"PrixMalinPriceBot/1.0 (+https://prixbasmalin.fr; public product price monitoring)",
+        "accept":"text/html,application/xhtml+xml"
+      },
+      signal:AbortSignal.timeout(12000),
+      redirect:"manual"
+    });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location) throw new Error("Redirection sans en-tête Location");
+      if (hop === 5) throw new Error("Trop de redirections");
+      const nextUrl = secureUrl(location, currentUrl);
+      if (!nextUrl || !isSafeMerchantUrl(nextUrl)) {
+        throw new Error("Redirection vers une URL non autorisée refusée");
+      }
+      currentUrl = nextUrl;
+      continue;
+    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return {response, url:currentUrl};
+  }
+  throw new Error("Trop de redirections");
+}
 if (!Array.isArray(config.products)) {
   throw new Error("Configuration invalide : products doit être un tableau.");
 }
@@ -77,21 +108,12 @@ if (validProducts.length === 0) {
 for (const product of validProducts) {
   for (const source of product.sources) {
     const sourceUrl = secureUrl(source?.url, source?.url);
-    if (!sourceUrl || !source?.retailer) {
+    if (!sourceUrl || !isSafeMerchantUrl(sourceUrl) || !source?.retailer) {
       errors.push({product_id:product.id,retailer:source?.retailer ?? null,reason:"Source HTTPS ou nom du marchand manquant"});
       continue;
     }
     try {
-      const response = await fetch(sourceUrl, {
-        headers: {
-          "user-agent":"PrixMalinPriceBot/1.0 (+https://prixbasmalin.fr; public product price monitoring)",
-          "accept":"text/html,application/xhtml+xml"
-        },
-        signal:AbortSignal.timeout(12000),
-        redirect:"follow"
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      if (new URL(response.url).protocol !== "https:") throw new Error("Redirection non HTTPS refusée");
+      const {response, url:finalUrl} = await fetchPublicMerchantPage(sourceUrl);
       const html = await response.text();
       const blocks = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
       let found = null;
@@ -101,7 +123,7 @@ for (const product of validProducts) {
             JSON.parse(block[1]),
             product,
             source.retailer,
-            response.url,
+            finalUrl,
             now
           );
         } catch {}
