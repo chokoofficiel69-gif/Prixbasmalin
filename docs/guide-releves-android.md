@@ -36,6 +36,7 @@ Dans un CSV, les champs contenant une virgule doivent être entre guillemets sel
 
 1. Vérifiez l'identité, le prix total (prix + livraison), l'URL et l'heure.
 2. Enregistrez le fichier sur une branche dédiée, jamais directement sur `main`.
-3. Le workflow de préparation exécute les tests, importe le CSV, reconstruit le flux sur une branche de données et ouvre une PR en brouillon. Le brouillon doit être relu; il ne fusionne ni ne déploie rien.
+3. **Faites relire puis fusionner la PR le jour même du relevé**, si possible : les offres doivent encore être dans la fenêtre de fraîcheur de 48 heures au moment de la reconstruction. Si la PR attend, refaites les relevés et mettez à jour `checked_at` uniquement après une nouvelle vérification réelle du prix.
+4. Le workflow de préparation exécute les tests, importe le CSV, reconstruit le flux sur une branche de données et ouvre une PR en brouillon. Le brouillon doit être relu; il ne fusionne ni ne déploie rien.
 
 Une fiche produit peut être écartée si le GTIN/ASIN/MPN ne correspond pas exactement entre offres, si le prix ou les frais sont inconnus, ou si le relevé dépasse la fenêtre de fraîcheur configurée.
