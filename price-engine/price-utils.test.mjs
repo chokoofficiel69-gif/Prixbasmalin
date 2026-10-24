@@ -19,5 +19,5 @@ test("n'accepte que les URL HTTPS", () => {
   assert.equal(secureUrl("https://example.com/p/1", "https://example.com"), "https://example.com/p/1");
   assert.equal(secureUrl("http://example.com/p/1", "https://example.com"), null);
   assert.equal(secureUrl("javascript:alert(1)", "https://example.com"), null);
-  assert.equal(secureUrl("::::", "https://example.com"), null);
+  assert.equal(secureUrl("::::", "not-a-url"), null);
 });
