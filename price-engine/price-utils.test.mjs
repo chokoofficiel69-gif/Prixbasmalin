@@ -12,6 +12,9 @@ test("parse les prix anglais avec virgule de milliers", () => {
 test("refuse les valeurs vides, négatives et non numériques", () => {
   assert.equal(parsePrice(""), null);
   assert.equal(parsePrice("gratuit"), null);
+  assert.equal(parsePrice("prix : 79,99"), null);
+  assert.equal(parsePrice("79,99 EUR"), null);
+  assert.equal(parsePrice("£79.99"), null);
   assert.equal(parsePrice("-15,00"), null);
   assert.equal(parsePrice("0"), null);
 });
