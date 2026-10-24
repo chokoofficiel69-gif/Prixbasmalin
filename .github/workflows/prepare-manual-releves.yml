@@ -8,7 +8,6 @@ permissions:
 
 jobs:
   prepare:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -17,16 +16,50 @@ jobs:
       - name: Refuse non-main dispatch
         if: github.ref != 'refs/heads/main'
         run: |
-          echo 'Ce workflow doit être lancé depuis main.' >&2
+          echo "::error::Ce workflow doit être lancé depuis main. Aucun fichier ni branche ne sera créé." >&2
           exit 1
       - name: Checkout main only
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
+      - name: Stop cleanly when CSV has no offer rows
+        id: csv
+        shell: python
+        run: |
+          import csv
+          import os
+          from pathlib import Path
+          path = Path("data/inbox/releves.csv")
+          with path.open("r", encoding="utf-8-sig", newline="") as f:
+              reader = csv.DictReader(f)
+              rows = [row for row in reader if any((value or "").strip() for value in row.values())]
+          if not rows:
+              print("Aucun relevé : CSV sans ligne de données. Fin normale, aucune PR créée.")
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+                  out.write("has_rows=false\n")
+          else:
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+                  out.write("has_rows=true\n")
+      - name: Snapshot useful data before rebuilding
+        if: steps.csv.outputs.has_rows == 'true'
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          offers = json.loads(Path("data/merchant-offers.json").read_text(encoding="utf-8")).get("offers", [])
+          feed = json.loads(Path("data/prices.json").read_text(encoding="utf-8"))
+          Path("/tmp/before-useful.json").write_text(json.dumps({
+              "offers": offers,
+              "products": feed.get("products", []),
+              "feed_offers": feed.get("offers", [])
+          }, sort_keys=True, ensure_ascii=False), encoding="utf-8")
+          PY
       - name: Run unit tests
+        if: steps.csv.outputs.has_rows == 'true'
         run: python3 -m unittest discover -s tests -v
       - name: Import manual CSV and rebuild feed
+        if: steps.csv.outputs.has_rows == 'true'
         shell: bash
         run: |
           set -o pipefail
@@ -44,6 +77,14 @@ jobs:
               print(f"- {error}")
           if not feed.get('offers'):
               print('ATTENTION : aucune offre exploitable; aucun prix fictif ne sera ajouté.')
+          before = json.loads(Path('/tmp/before-useful.json').read_text(encoding='utf-8'))
+          after = {
+              "offers": json.loads(Path("data/merchant-offers.json").read_text(encoding="utf-8")).get("offers", []),
+              "products": feed.get("products", []),
+              "feed_offers": feed.get("offers", [])
+          }
+          Path('/tmp/useful-changed.txt').write_text("true" if before != after else "false", encoding="utf-8")
+          print("Contenu utile modifié : " + ("oui" if before != after else "non"))
           PY
       - name: Add diagnostic summary to job summary
         if: always()
@@ -51,19 +92,35 @@ jobs:
         run: |
           {
             echo '## Résumé préparation des relevés'
-            echo '- Déclenchement autorisé uniquement depuis main.'
-            echo '- Les tests et la reconstruction se font dans le runner, sans déploiement.'
-            if [ -f /tmp/feed-summary.txt ]; then cat /tmp/feed-summary.txt; fi
-            if [ -f /tmp/import.log ]; then echo '### Journal import CSV'; tail -n 40 /tmp/import.log; fi
-            if [ -f /tmp/build.log ]; then echo '### Journal construction'; tail -n 40 /tmp/build.log; fi
+            if [ "${{ steps.csv.outputs.has_rows }}" = "false" ]; then
+              echo 'CSV sans ligne de données : arrêt normal, aucune PR créée.'
+            else
+              echo '- Déclenchement autorisé uniquement depuis main.'
+              if [ -f /tmp/feed-summary.txt ]; then cat /tmp/feed-summary.txt; fi
+              if [ -f /tmp/import.log ]; then echo '### Journal import CSV'; tail -n 40 /tmp/import.log; fi
+              if [ -f /tmp/build.log ]; then echo '### Journal construction'; tail -n 40 /tmp/build.log; fi
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Stop cleanly if useful offer data did not change
+        if: steps.csv.outputs.has_rows == 'true' && success()
+        shell: bash
+        run: |
+          if [ "$(cat /tmp/useful-changed.txt)" != "true" ]; then
+            echo "Aucune modification utile des offres/produits; les horodatages de génération seuls ne justifient pas une PR."
+            echo "Aucune PR ne sera créée."
+            exit 0
+          fi
       - name: Create dated branch and draft PR (never push main)
-        if: success()
+        if: steps.csv.outputs.has_rows == 'true' && success()
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
+          if [ "$(cat /tmp/useful-changed.txt)" != "true" ]; then
+            echo "Aucune modification utile : arrêt sans PR."
+            exit 0
+          fi
           BRANCH="data/releves-$(date -u +%F)-run${GITHUB_RUN_NUMBER}"
           if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
             echo "La branche $BRANCH existe déjà; arrêt sans écraser de branche." >&2
@@ -73,10 +130,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/merchant-offers.json data/prices.json
-          if git diff --cached --quiet; then
-            echo 'Aucun changement de données à proposer; aucune PR créée.'
-            exit 0
-          fi
           git commit -m "data: prepare manual price relevés $(date -u +%F)"
           git push origin "$BRANCH"
           gh pr create --draft --base main --head "$BRANCH" \
