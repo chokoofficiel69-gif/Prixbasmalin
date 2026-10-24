@@ -14,6 +14,22 @@ if (!Array.isArray(config.products) || config.products.length === 0) {
 const previous = await fs.readFile(OUTPUT, "utf8").then(JSON.parse).catch(() => ({version:1,offers:[]}));
 const offers = [];
 const errors = [];
+const validProducts = [];
+const seenProductIds = new Set();
+for (const product of validProducts) {
+  if (!product || typeof product.id !== "string" || !product.id.trim() ||
+      typeof product.name !== "string" || !product.name.trim() ||
+      !Array.isArray(product.sources)) {
+    errors.push({product_id:product?.id ?? null,reason:"Configuration produit invalide"});
+    continue;
+  }
+  if (seenProductIds.has(product.id)) {
+    errors.push({product_id:product.id,reason:"Identifiant produit dupliqué dans la configuration"});
+    continue;
+  }
+  seenProductIds.add(product.id);
+  validProducts.push(product);
+}
 
 function flattenJsonLd(value, out = []) {
   if (Array.isArray(value)) value.forEach(v => flattenJsonLd(v, out));
@@ -98,7 +114,7 @@ for (const product of config.products) {
 
 // Conserver séparément les dernières offres des marchands qui ont échoué.
 const previousOffers = Array.isArray(previous.offers) ? previous.offers : [];
-const mergedOffers = mergeFreshAndStaleOffers(offers, previousOffers, config.products);
+const mergedOffers = mergeFreshAndStaleOffers(offers, previousOffers, validProducts);
 offers.splice(0, offers.length, ...mergedOffers);
 
 // Si toutes les sources échouent et qu'aucune ancienne offre n'existe,
@@ -107,14 +123,14 @@ if (offers.length === 0) {
   console.error(`Aucune offre valide récupérée; relevé précédent conservé. Erreurs: ${errors.length}`);
   process.exitCode = 1;
 } else {
-  const productIds = [...new Set(config.products.map(p => p.id))];
+  const productIds = validProducts.map(p => p.id);
   const output = {
     version:1,
     generated_at:offers.some(o => !o.stale) ? now : (previous.generated_at ?? now),
     schedule:"vérification automatique toutes les heures (si des sources sont configurées)",
     methodology:"Prix lus dans les données structurées publiques Product/Offer. Frais de livraison inconnus exclus du prix; aucune estimation ni prix inventé.",
     products:productIds.map(id => {
-      const product = config.products.find(p => p.id === id);
+      const product = validProducts.find(p => p.id === id);
       const rows = offers.filter(o => o.product_id === id).sort((a,b) => a.price_eur - b.price_eur);
       const freshRows = rows.filter(o => !o.stale);
       const best = (freshRows.length ? freshRows : rows)[0];
