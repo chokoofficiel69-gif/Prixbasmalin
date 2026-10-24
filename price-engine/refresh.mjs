@@ -177,6 +177,7 @@ offers.splice(0, offers.length, ...mergedOffers);
 // Si toutes les sources échouent et qu'aucune ancienne offre n'existe,
 // ne pas remplacer un relevé vide par un faux relevé de succès.
 if (offers.length === 0) {
+  for (const error of errors) console.error(`[SOURCE_DIAGNOSTIC] ${JSON.stringify(error)}`);
   await writeQuality(offers, validProducts, errors);
   console.error(`Aucune offre valide récupérée; relevé précédent conservé. Erreurs: ${errors.length}`);
   process.exitCode = 1;
