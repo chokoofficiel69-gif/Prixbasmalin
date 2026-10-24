@@ -82,8 +82,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
    const validOffer=offer=>Number.isFinite(Number(offer?.price_eur))&&Number(offer.price_eur)>0;
    const freshOffers=offers.filter(offer=>!offer?.stale&&validOffer(offer));
    const historicalOffers=offers.filter(offer=>!!offer?.stale&&validOffer(offer));
-   const freshProductIds=new Set(freshOffers.map(offer=>offer.product_id).filter(Boolean));
-   const historicalOnlyProductIds=new Set(historicalOffers.map(offer=>offer.product_id).filter(id=>id&&!freshProductIds.has(id)));
+   const freshOfferProductIds=new Set(freshOffers.map(offer=>offer.product_id).filter(Boolean));
+   const freshProductIds=new Set(products
+     .filter(product=>product&&product.id&&freshOfferProductIds.has(product.id)&&
+       (product.has_fresh_offer===true||
+        (Array.isArray(product.offers)&&product.offers.some(offer=>!offer?.stale&&validOffer(offer)))))
+     .map(product=>product.id));
+   const historicalOnlyOffers=historicalOffers.filter(offer=>offer.product_id&&!freshProductIds.has(offer.product_id));
+   const historicalOnlyProductIds=new Set(historicalOnlyOffers.map(offer=>offer.product_id));
    $('catalogueCount').textContent=ids.length;
    $('identityCount').textContent=identityCount;
    $('verifiedProducts').textContent=freshProductIds.size;
@@ -96,7 +102,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
    else notes.push(identityCount+' fiche(s) ont une identité déclarée.');
    if(freshOffers.length===0)notes.push('Aucune offre actuelle vérifiée n’est publiée pour le moment.');
    else notes.push(freshOffers.length+' offre(s) actuelles pour '+freshProductIds.size+' produit(s) exact(s).');
-   if(historicalOffers.length>0)notes.push(historicalOffers.length+' offre(s) historique(s) concernent '+historicalOnlyProductIds.size+' produit(s) sans offre actuelle ; elles ne sont pas comptées comme des prix actuels.');
+   if(historicalOffers.length>0)notes.push(historicalOffers.length+' offre(s) historique(s) conservée(s) et marquée(s) comme telles ; elles ne sont pas comptées comme des prix actuels.');
+   if(historicalOnlyOffers.length>0)notes.push(historicalOnlyOffers.length+' offre(s) historique(s) concernent '+historicalOnlyProductIds.size+' produit(s) sans offre actuelle.');
    if(feed.status==='no_sources_configured')notes.push('Aucune source marchande n’est configurée pour actualiser les prix.');
    if(feed.status==='historical_only')notes.push('Le flux ne contient que des derniers prix connus : actualisation à relancer.');
    if(feed.errors&&feed.errors.length)notes.push(feed.errors.length+' avertissement(s) figurent dans le dernier flux.');
