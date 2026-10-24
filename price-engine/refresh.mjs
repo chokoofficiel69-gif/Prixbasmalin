@@ -60,8 +60,8 @@ for (const product of config.products) {
             const rawOffers = Array.isArray(node.offers) ? node.offers : [node.offers];
             for (const raw of rawOffers) {
               if (!raw) continue;
-              const price = parsePrice(raw.price ?? raw.lowPrice ?? raw.priceSpecification?.price);
-              const currency = raw.priceCurrency ?? raw.priceSpecification?.priceCurrency ?? "EUR";
+              const price = parsePrice(raw.price ?? raw.priceSpecification?.price);
+              const currency = String(raw.priceCurrency ?? raw.priceSpecification?.priceCurrency ?? "").toUpperCase();
               const productUrl = secureUrl(raw.url ?? node.url ?? response.url, response.url);
               if (price !== null && currency === "EUR" && productUrl) {
                 found = {
