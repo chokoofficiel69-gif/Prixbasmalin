@@ -320,9 +320,7 @@ function renderVerifiedProducts(products){
       const storeName=document.createElement("strong");
       storeName.textContent=offerData.retailer||"Marchand";
       const storeState=document.createElement("span");
-      storeState.textContent=offerIsCurrent
-        ?"Relevé "+new Date(offerData.checked_at).toLocaleString("fr-FR")
-        :"Dernier prix connu — à confirmer";
+      if(offerIsCurrent){const stamp=Date.parse(offerData.verified_at||offerData.checked_at||"");const ageHours=Math.max(0,Math.floor((Date.now()-stamp)/3600000));storeState.textContent="Vérifié il y a "+ageHours+" h";}else storeState.textContent="Périmé (>24 h) — vérifier chez le marchand";
       const priceBox=document.createElement("div");
       priceBox.className="verified-offer-price";
       const offerPrice=document.createElement("strong");
