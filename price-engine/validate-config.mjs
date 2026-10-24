@@ -1,12 +1,5 @@
 import fs from "node:fs/promises";
-import { isSafeMerchantUrl } from "./price-utils.mjs";
-
-export function isValidEan13(value) {
-  if (typeof value !== "string" || !/^\\d{13}$/.test(value)) return false;
-  const digits = [...value].map(Number);
-  const sum = digits.slice(0, 12).reduce((total, digit, index) => total + digit * (index % 2 === 0 ? 1 : 3), 0);
-  return (10 - (sum % 10)) % 10 === digits[12];
-}
+import { isSafeMerchantUrl, isValidEan13 } from "./price-utils.mjs";
 
 const configUrl = new URL("./products.json", import.meta.url);
 const config = JSON.parse(await fs.readFile(configUrl, "utf8"));
