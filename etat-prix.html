@@ -37,8 +37,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
 <section class="grid" aria-live="polite">
 <article class="card"><div class="label">Fiches catalogue</div><div class="value" id="catalogueCount">—</div><div class="detail">Produits et catégories référencés</div></article>
 <article class="card"><div class="label">Fiches avec identité</div><div class="value" id="identityCount">—</div><div class="detail" id="identityDetail">GTIN, ASIN ou référence fabricant confirmée</div></article>
-<article class="card"><div class="label">Produits avec prix vérifié</div><div class="value" id="verifiedProducts">—</div><div class="detail">Données du flux publié</div></article>
-<article class="card"><div class="label">Offres marchandes</div><div class="value" id="verifiedOffers">—</div><div class="detail" id="generatedAt">Dernière génération : —</div></article>
+<article class="card"><div class="label">Produits avec prix actuel</div><div class="value" id="verifiedProducts">—</div><div class="detail">Au moins une offre fraîche et vérifiée</div></article>
+<article class="card"><div class="label">Offres actuelles</div><div class="value" id="verifiedOffers">—</div><div class="detail" id="generatedAt">Dernière génération : —</div></article>
+<article class="card"><div class="label">Offres historiques</div><div class="value" id="historicalOffers">—</div><div class="detail">Anciens prix à revérifier chez le marchand</div></article>
 </section>
 <section class="section">
 <h2>Diagnostic</h2>
@@ -78,22 +79,43 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
    const identityCount=Object.keys(mapping).filter(id=>ids.includes(id)&&mapping[id]&&['gtin','asin','mpn'].includes(mapping[id].identity_type)&&typeof mapping[id].identity_value==='string'&&mapping[id].identity_value.trim()).length;
    const products=Array.isArray(feed.products)?feed.products:[];
    const offers=Array.isArray(feed.offers)?feed.offers:[];
+   const validOffer=offer=>Number.isFinite(Number(offer?.price_eur))&&Number(offer.price_eur)>0;
+   const freshOffers=offers.filter(offer=>!offer?.stale&&validOffer(offer));
+   const historicalOffers=offers.filter(offer=>!!offer?.stale&&validOffer(offer));
+   const freshProductIds=new Set(freshOffers.map(offer=>offer.product_id).filter(Boolean));
+   const historicalOnlyProductIds=new Set(historicalOffers.map(offer=>offer.product_id).filter(id=>id&&!freshProductIds.has(id)));
    $('catalogueCount').textContent=ids.length;
    $('identityCount').textContent=identityCount;
-   $('verifiedProducts').textContent=products.length;
-   $('verifiedOffers').textContent=offers.length;
+   $('verifiedProducts').textContent=freshProductIds.size;
+   $('verifiedOffers').textContent=freshOffers.length;
+   $('historicalOffers').textContent=historicalOffers.length;
    $('identityDetail').textContent=ids.length?Math.round(identityCount/ids.length*100)+' % des fiches ont une identité déclarée':'Couverture non calculable';
    $('generatedAt').textContent='Dernière génération : '+(feed.generated_at?new Date(feed.generated_at).toLocaleString('fr-FR'):'non renseignée');
    list.replaceChildren();
    if(identityCount===0)notes.push('Aucune identité exacte n’est encore enregistrée dans le registre.');
    else notes.push(identityCount+' fiche(s) ont une identité déclarée.');
-   if(products.length===0||offers.length===0)notes.push('Aucune offre vérifiée n’est publiée pour le moment.');
+   if(freshOffers.length===0)notes.push('Aucune offre actuelle vérifiée n’est publiée pour le moment.');
+   else notes.push(freshOffers.length+' offre(s) actuelles pour '+freshProductIds.size+' produit(s) exact(s).');
+   if(historicalOffers.length>0)notes.push(historicalOffers.length+' offre(s) historique(s) concernent '+historicalOnlyProductIds.size+' produit(s) sans offre actuelle ; elles ne sont pas comptées comme des prix actuels.');
+   if(feed.status==='no_sources_configured')notes.push('Aucune source marchande n’est configurée pour actualiser les prix.');
+   if(feed.status==='historical_only')notes.push('Le flux ne contient que des derniers prix connus : actualisation à relancer.');
    if(feed.errors&&feed.errors.length)notes.push(feed.errors.length+' avertissement(s) figurent dans le dernier flux.');
    notes.forEach(note=>{const li=document.createElement('li');li.textContent=note;list.appendChild(li);});
-   $('diagnosticText').textContent=offers.length?'Le flux contient des offres publiées. Vérifiez chaque fiche et sa date de mise à jour.':'Le site est accessible, mais la comparaison de prix réelle n’est pas encore active : aucune offre marchande vérifiée n’est publiée.';
-   $('statusBadge').textContent=offers.length?'● Flux contenant des offres':'● En attente de flux marchand';
-   $('statusBadge').style.color=offers.length?'#137547':'#8a5700';
-   $('statusBadge').style.borderColor=offers.length?'#bfe5ce':'#ffd7c4';
+   let badgeText,diagnostic;
+   if(freshOffers.length>0){
+     badgeText='● Prix actuels disponibles';
+     diagnostic='Le flux contient des offres marchandes marquées comme actuelles. Contrôlez le modèle, la date et les conditions de livraison avant achat.';
+   }else if(historicalOffers.length>0){
+     badgeText='● Prix historiques à revérifier';
+     diagnostic='Aucun prix actuel confirmé : seules des offres historiques sont conservées à titre indicatif. Vérifiez leur disponibilité et leur prix chez le marchand.';
+   }else{
+     badgeText='● En attente de source marchande';
+     diagnostic='Le site est accessible, mais la comparaison de prix réelle n’est pas active : aucune offre marchande vérifiée n’est publiée.';
+   }
+   $('diagnosticText').textContent=diagnostic;
+   $('statusBadge').textContent=badgeText;
+   $('statusBadge').style.color=freshOffers.length?'#137547':'#8a5700';
+   $('statusBadge').style.borderColor=freshOffers.length?'#bfe5ce':'#ffd7c4';
  }catch(error){
    $('statusBadge').textContent='● Données non disponibles';
    $('diagnosticText').textContent='Le tableau de bord n’a pas pu lire toutes les données publiques.';
