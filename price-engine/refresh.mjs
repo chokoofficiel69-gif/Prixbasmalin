@@ -135,7 +135,8 @@ if (validProducts.length === 0) {
 
 for (const product of validProducts) {
   for (const source of product.sources) {
-    const stats = sourceStats(source?.retailer || "Marchand inconnu");\n    stats.attempts++;
+    const stats = sourceStats(source?.retailer || "Marchand inconnu");
+    stats.attempts++;
     const sourceUrl = secureUrl(source?.url, source?.url);
     if (!sourceUrl || !isSafeMerchantUrl(sourceUrl) || !source?.retailer) {
       errors.push({product_id:product.id,retailer:source?.retailer ?? null,reason:"Source HTTPS ou nom du marchand manquant"});
