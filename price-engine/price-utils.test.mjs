@@ -167,3 +167,16 @@ test("refuse explicitement un AggregateOffer même si des champs de prix y figur
   "https://marchand.example/routeur-x","2026-10-24T10:00:00.000Z");
   assert.equal(result, null);
 });
+
+test("fusionne les offres marchandes sans dépendre des majuscules ou espaces", () => {
+  const old = {product_id:"p1",retailer:" DARTY ",price_eur:120};
+  const fresh = {product_id:"p1",retailer:"darty",price_eur:125,stale:false};
+  const merged = mergeFreshAndStaleOffers(
+    [fresh],
+    [old],
+    [{id:"p1",sources:[{retailer:"Darty"}]}]
+  );
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].price_eur, 125);
+  assert.equal(merged[0].stale, false);
+});
