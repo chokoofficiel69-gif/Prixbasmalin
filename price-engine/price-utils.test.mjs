@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {parsePrice, secureUrl, isSafeMerchantUrl, matchesProductIdentity, mergeFreshAndStaleOffers, parseExplicitEuroOffer, markOffersStale, extractOfferFromJsonLd} from "./price-utils.mjs";
+import {parsePrice, secureUrl, isSafeMerchantUrl, matchesProductIdentity, mergeFreshAndStaleOffers, parseExplicitEuroOffer, markOffersStale, extractOfferFromJsonLd, isOfferCurrent} from "./price-utils.mjs";
 
 test("parse les prix français avec espaces et virgule décimale", () => {
   assert.equal(parsePrice("1 299,99 €"), 1299.99);
@@ -198,4 +198,13 @@ test("rejette les URL HTTP, les adresses IP, les hôtes locaux et les ports non 
     "https://marchand.example:8443/produit",
     "not-a-url"
   ]) assert.equal(isSafeMerchantUrl(url), false, url);
+});
+
+test("un prix n'est actuel que s'il a été vérifié dans les dernières 24 heures", () => {
+  const now = Date.parse("2026-10-24T10:00:00.000Z");
+  assert.equal(isOfferCurrent({checked_at:"2026-10-24T09:30:00.000Z"}, now), true);
+  assert.equal(isOfferCurrent({checked_at:"2026-10-23T09:00:00.000Z"}, now), false);
+  assert.equal(isOfferCurrent({checked_at:"2026-10-24T10:10:00.000Z"}, now), false);
+  assert.equal(isOfferCurrent({checked_at:"2026-10-24T09:30:00.000Z",stale:true}, now), false);
+  assert.equal(isOfferCurrent({price_eur:42}, now), false);
 });
