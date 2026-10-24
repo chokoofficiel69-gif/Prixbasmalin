@@ -44,6 +44,10 @@ jobs:
         run: node --test price-engine/price-utils.test.mjs
       - name: Vérifier la syntaxe du moteur de prix
         run: node --check price-engine/refresh.mjs
+      - name: Vérifier la syntaxe du validateur de configuration
+        run: node --check price-engine/validate-config.mjs
+      - name: Valider la configuration des produits et marchands
+        run: node price-engine/validate-config.mjs
       - name: Extraire le JavaScript du catalogue de la branche
         run: |
           node --input-type=module <<'NODE'
