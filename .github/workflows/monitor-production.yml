@@ -86,7 +86,7 @@ jobs:
           const checks = [
             ["compteur d'offres actuelles séparé", html.includes('id="verifiedOffers"') && html.includes("freshOffers.length")],
             ["compteur historique séparé", html.includes('id="historicalOffers"') && html.includes("historicalOffers.length")],
-            ["les offres périmées sont exclues des prix actuels", html.includes("!offer?.stale&&validOffer(offer)")],
+            ["les prix de plus de 24 h ne sont pas comptés comme actuels", html.includes("age<=24*60*60*1000") && html.includes("isCurrentOffer(offer)&&validOffer(offer)")],
             ["état sans source clairement décrit", html.includes("feed.status==='no_sources_configured'")],
           ];
           const failures = checks.filter(([, ok]) => !ok);
