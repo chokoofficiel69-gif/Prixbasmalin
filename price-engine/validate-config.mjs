@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { isIP } from "node:net";
 import { secureUrl } from "./price-utils.mjs";
 
 const configUrl = new URL("./products.json", import.meta.url);
@@ -54,13 +55,17 @@ for (const [index, product] of products.entries()) {
     if (!url) {
       problems.push(`${sourcePrefix}.url : URL HTTPS publique valide requise.`);
     } else {
-      const hostname = new URL(url).hostname.toLowerCase();
-      if (hostname === "localhost" || hostname.endsWith(".localhost") ||
-          hostname.endsWith(".local") || /^127\./.test(hostname) ||
-          hostname === "0.0.0.0" || hostname === "::1" ||
-          /^10\./.test(hostname) || /^192\.168\./.test(hostname) ||
-          /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)) {
-        problems.push(`${sourcePrefix}.url : hôte local/privé refusé.`);
+      const parsed = new URL(url);
+      const hostname = parsed.hostname.toLowerCase();
+      const hostForIpCheck = hostname.startsWith("[") && hostname.endsWith("]")
+        ? hostname.slice(1, -1)
+        : hostname;
+      if (isIP(hostForIpCheck) !== 0 ||
+          hostname === "localhost" || hostname.endsWith(".localhost") ||
+          hostname.endsWith(".local") || hostname.endsWith(".internal") ||
+          parsed.username || parsed.password ||
+          (parsed.port && parsed.port !== "443")) {
+        problems.push(`${sourcePrefix}.url : domaine public HTTPS requis ; URL avec IP, identifiants ou port non standard refusée.`);
       }
     }
   }
