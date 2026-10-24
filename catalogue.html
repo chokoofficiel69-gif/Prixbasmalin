@@ -5,6 +5,15 @@
 .verified-shelf-head h2{margin:0 0 6px;font-size:20px;letter-spacing:-.02em}
 .verified-shelf-head p{margin:0 0 14px;color:#686868;font-size:13px;line-height:1.5}
 .verified-shelf .verified-meta{margin:9px 0 12px;padding:9px 10px;border-radius:9px;background:#f7f7f7;color:#5d6066;font-size:11px;line-height:1.45}
+.verified-offers{display:grid;gap:8px;margin:10px 0 12px}
+.verified-offer-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #eee;border-radius:10px;padding:10px;background:#fff}
+.verified-offer-row.stale{background:#fff8f3;border-color:#ffd6c2}
+.verified-offer-store{min-width:0;display:flex;flex-direction:column;gap:3px}
+.verified-offer-store strong{font-size:12px;overflow-wrap:anywhere}
+.verified-offer-store span{font-size:10px;color:#777;line-height:1.35}
+.verified-offer-price{flex:none;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.verified-offer-price strong{font-size:13px;color:var(--orange);white-space:nowrap}
+.verified-offer-price a{font-size:11px;font-weight:750;color:#a8440d;text-decoration:underline;white-space:nowrap}
 .verified-shelf .verified-stale{background:#fff1e7;color:#9a3d0a}
 .verified-shelf .verified-image{width:100%;aspect-ratio:1/1;border-radius:11px;background:#fff0e7;display:grid;place-items:center;color:#b84d10;font-weight:850;font-size:36px}
 .verified-shelf .verified-model{font-size:10px;color:#ac4712;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin-top:10px}
@@ -244,6 +253,7 @@ function renderVerifiedProducts(products){
     const rows=p.offers.filter(o=>Number.isFinite(Number(o.price_eur))&&Number(o.price_eur)>0);
     const fresh=rows.filter(o=>!o.stale).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
     const stale=rows.filter(o=>o.stale).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
+    const ordered=[...fresh,...stale];
     const best=fresh[0]||stale[0];
     const isHistorical=!fresh.length&&!!stale.length;
     const card=document.createElement("article");
@@ -264,20 +274,42 @@ function renderVerifiedProducts(products){
     const meta=document.createElement("div");
     meta.className="verified-meta"+(isHistorical?" verified-stale":"");
     if(isHistorical){
-      meta.textContent="Dernier prix connu • "+stale.length+" offre(s) historique(s) à vérifier";
+      meta.textContent="Dernier prix connu — actualisation à vérifier. Aucun tarif actuel confirmé.";
     }else{
-      meta.textContent=fresh.length+" offre(s) actualisée(s)"+(stale.length?" • "+stale.length+" ancienne(s) offre(s) à revérifier":"");
+      meta.textContent=fresh.length+" offre(s) actuelle(s) lue(s)"+(stale.length?" • "+stale.length+" offre(s) historique(s) à vérifier":"");
     }
+    const list=document.createElement("div");
+    list.className="verified-offers";
+    list.setAttribute("aria-label","Prix par marchand");
+    ordered.forEach(offerData=>{
+      const row=document.createElement("div");
+      row.className="verified-offer-row"+(offerData.stale?" stale":"");
+      const store=document.createElement("div");
+      store.className="verified-offer-store";
+      const storeName=document.createElement("strong");
+      storeName.textContent=offerData.retailer||"Marchand";
+      const storeState=document.createElement("span");
+      storeState.textContent=offerData.stale
+        ?"Dernier prix connu — à confirmer"
+        :"Relevé "+new Date(offerData.checked_at||Date.now()).toLocaleString("fr-FR");
+      const priceBox=document.createElement("div");
+      priceBox.className="verified-offer-price";
+      const offerPrice=document.createElement("strong");
+      offerPrice.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(offerData.price_eur));
+      const offerLink=document.createElement("a");
+      offerLink.href=offerData.product_url||("https://www.google.com/search?q="+encodeURIComponent(p.name+" "+(offerData.retailer||"")));
+      offerLink.target="_blank";
+      offerLink.rel="noopener noreferrer";
+      offerLink.textContent="Vérifier ↗";
+      store.append(storeName,storeState);
+      priceBox.append(offerPrice,offerLink);
+      row.append(store,priceBox);
+      list.append(row);
+    });
     const date=document.createElement("div");
     date.className="merchant";
-    date.textContent="Relevé "+new Date(best.checked_at||Date.now()).toLocaleString("fr-FR")+" • livraison non confirmée";
-    const link=document.createElement("a");
-    link.className="offer";
-    link.textContent=fresh.length?"Vérifier / comparer chez le marchand ↗":"Vérifier le prix chez le marchand ↗";
-    link.href=best.product_url||("https://www.google.com/search?q="+encodeURIComponent(p.name));
-    link.target="_blank";
-    link.rel="noopener noreferrer";
-    card.append(photo,model,name,price,meta,date,link);
+    date.textContent="Prix affichés hors livraison si non confirmée. Vérifiez le modèle et le prix final chez le marchand.";
+    card.append(photo,model,name,price,meta,list,date);
     const multi=document.createElement("button");
     multi.type="button";
     multi.className="multi-search-btn";
@@ -287,6 +319,7 @@ function renderVerifiedProducts(products){
     verifiedProductsEl.append(card);
   });
 }
+
 const merchantOverlay=document.createElement("div");merchantOverlay.className="pm-search-overlay";merchantOverlay.id="pmMerchantSearch";merchantOverlay.setAttribute("role","dialog");merchantOverlay.setAttribute("aria-modal","true");merchantOverlay.setAttribute("aria-labelledby","pmMerchantSearchTitle");merchantOverlay.innerHTML='<section class="pm-search-panel"><div class="pm-search-head"><div><h2 class="pm-search-title" id="pmMerchantSearchTitle">Comparer les résultats</h2><p class="pm-search-subtitle" id="pmMerchantSearchQuery"></p></div><button type="button" class="pm-search-close" aria-label="Fermer">×</button></div><div class="pm-search-links" id="pmMerchantSearchLinks"></div><p class="pm-search-disclaimer">Ces boutons ouvrent des résultats de recherche externes, pas des offres vérifiées par Prix Malin. Comparez le modèle exact, le prix final, la livraison et les conditions avant d’acheter. Seul le lien Amazon utilise actuellement le tag affilié Prix Malin.</p></section>';
 document.body.append(merchantOverlay);
 const merchantPanel=merchantOverlay.querySelector(".pm-search-panel");
