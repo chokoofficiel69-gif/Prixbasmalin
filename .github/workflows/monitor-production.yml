@@ -9,6 +9,7 @@ on:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
       - "catalogue.html"
+      - "index.html"
       - "etat-prix.html"
       - "data/prices.json"
       - "CNAME"
@@ -69,6 +70,20 @@ jobs:
         run: node --check price-engine/validate-config.mjs
       - name: Valider la configuration des produits et marchands
         run: node price-engine/validate-config.mjs
+      - name: Extraire le JavaScript inline de l’accueil
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("index.html", "utf8");
+          const inlineScripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
+            .filter(([, attrs, body]) => !/\\bsrc\\s*=/i.test(attrs) && body.trim())
+            .map(([, , body]) => body);
+          if (inlineScripts.length === 0) throw new Error("Aucun script inline trouvé dans index.html");
+          fs.writeFileSync("/tmp/index-inline.js", inlineScripts.join("\\n;\\n"));
+          console.log("Scripts inline trouvés dans index.html :", inlineScripts.length);
+          NODE
+      - name: Vérifier la syntaxe JavaScript de l’accueil
+        run: node --check /tmp/index-inline.js
       - name: Extraire le JavaScript du catalogue de la branche
         run: |
           node --input-type=module <<'NODE'
