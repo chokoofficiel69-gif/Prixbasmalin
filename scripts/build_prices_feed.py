@@ -95,6 +95,7 @@ def main():
 
     grouped = {}
     identities = {}
+    names = {}
     conflicted_products = set()
     errors = []
     seen_offer_ids = set()
@@ -164,11 +165,14 @@ def main():
             conflicted_products.add(product_id)
             grouped.pop(product_id, None)
             identities.pop(product_id, None)
+            names.pop(product_id, None)
             continue
         identities[product_id] = (identity_key, identity)
+        names.setdefault(product_id, offer["product_name"].strip())
         normalized = {
             "offer_id": offer_id,
             "merchant_name": offer["merchant_name"].strip(),
+            "retailer": offer["merchant_name"].strip(),
             "source": offer["source"].strip(),
             "identity": identity,
             "price_eur": round(float(price), 2),
@@ -188,6 +192,7 @@ def main():
         offers.sort(key=lambda item: (item["total_price_eur"], item["checked_at"]))
         products.append({
             "id": product_id,
+            "name": names[product_id],
             "identity": identities[product_id][1],
             "best_price_eur": offers[0]["total_price_eur"],
             "offer_count": len(offers),
