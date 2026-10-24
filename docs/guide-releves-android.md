@@ -8,6 +8,14 @@ Ce guide sert à saisir manuellement une offre visible sur une source marchande 
 2. Ouvrez `data/inbox/releves.csv`, puis le crayon **Edit**. Vous pouvez aussi télécharger le fichier et l'ouvrir dans Google Sheets.
 3. Gardez la première ligne intacte. Ajoutez une offre par ligne, sans supprimer ni renommer les colonnes. Si vous utilisez Sheets, exportez/téléchargez ensuite en **CSV** et conservez le nom `releves.csv`.
 
+## 1 bis. Choisir comment transmettre le CSV
+
+**Option A — recommandée sur téléphone : modifier le CSV directement sur `main`.** Le propriétaire enregistre `data/inbox/releves.csv` sur `main` depuis GitHub. Ce fichier est un fichier de staging : son commit ne publie aucun prix sur le site. Ensuite, le propriétaire lance manuellement **Actions → Prepare manual price relevés** depuis `main`. Le workflow lit le CSV sur `main`, reconstruit les fichiers de données sur une branche dédiée et ouvre une PR en brouillon; il ne fusionne ni ne déploie.
+
+**Option B — tout faire par PR :** créer une première PR qui modifie le CSV, la faire relire et fusionner; puis lancer le workflow depuis `main` et relire la seconde PR contenant les données générées. C'est plus prudent si chaque modification du CSV doit elle-même être approuvée, mais cela ajoute une étape et retarde le relevé.
+
+Ne lancez pas le workflow avant que le CSV soit présent sur `main` : il fait volontairement un checkout de `main`, pas de la branche de votre PR de staging.
+
 ## 2. Trouver l'identité exacte du produit
 
 - **GTIN/EAN** : cherchez le code-barres sur l'emballage, sous les barres, généralement 8, 12, 13 ou 14 chiffres. Recopiez tous les chiffres, sans espaces. Pour une fiche en ligne, utilisez uniquement le GTIN affiché explicitement par le fabricant ou le marchand.
@@ -28,16 +36,16 @@ Ce guide sert à saisir manuellement une offre visible sur une source marchande 
 - `currency` : `EUR`.
 - `product_url` : URL HTTPS de la fiche produit.
 - `tracking_url` : laisser vide sauf si vous disposez d'un lien de suivi/affiliation explicitement autorisé. Ne jamais ajouter de jeton secret.
-- `checked_at` : date et heure réelles du relevé en ISO 8601 **avec fuseau**. Exemple France en été : `2026-10-25T14:30:00+02:00` seulement si ce décalage est correct à cette date; en octobre après le changement d'heure, la France métropolitaine est généralement `+01:00`. Le format UTC `2026-10-25T13:30:00Z` est aussi valide si l'heure correspond à UTC. Ne pas saisir une date approximative.
+- `checked_at` : date et heure réelles du relevé en ISO 8601 **avec fuseau**. Exemple en UTC : `2026-10-25T13:30:00Z`. Le suffixe `Z` signifie UTC; en France métropolitaine, le 25 octobre 2026 après le passage à l'heure d'hiver, 13:30 UTC correspond à 14:30 heure locale (`+01:00`). Saisissez l'heure réelle et convertissez-la correctement en UTC; ne recopiez pas l'exemple si l'heure réelle est différente.
 
 Dans un CSV, les champs contenant une virgule doivent être entre guillemets selon les règles CSV; plus simple : utiliser un point décimal (`129.99`) ou un tableur qui exporte correctement le CSV. Le script accepte aussi la virgule décimale dans un champ prix.
 
 ## 4. Envoyer sans publier automatiquement
 
 1. Vérifiez l'identité, le prix total (prix + livraison), l'URL et l'heure.
-2. Enregistrez le fichier sur une branche dédiée, jamais directement sur `main`.
-3. **Faites relire puis fusionner la PR le jour même du relevé**, si possible : les offres doivent encore être dans la fenêtre de fraîcheur de 48 heures au moment de la reconstruction. Si la PR attend, refaites les relevés et mettez à jour `checked_at` uniquement après une nouvelle vérification réelle du prix.
-4. Le workflow de préparation exécute les tests, importe le CSV, reconstruit le flux sur une branche de données et ouvre une PR en brouillon. Le brouillon doit être relu; il ne fusionne ni ne déploie rien.
+2. Suivez l'option A recommandée ci-dessus : enregistrez le CSV de staging sur `main`. Ce commit ne modifie pas directement le flux de prix publié.
+3. Lancez **Actions → Prepare manual price relevés** depuis `main`. Le workflow importe le CSV et ouvre une PR en brouillon pour les fichiers de données générés; cette seconde PR doit être relue et fusionnée manuellement.
+4. **Faites relire puis fusionner la PR de données le jour même du relevé**, si possible : les offres doivent encore être dans la fenêtre de fraîcheur de 48 heures au moment de la reconstruction. Si la PR attend, refaites les relevés et mettez à jour `checked_at` uniquement après une nouvelle vérification réelle du prix.
 
 **Important : le CSV remplace toutes les offres à chaque lancement, il ne s'agit pas d'un ajout cumulatif.** `data/merchant-offers.json` est reconstruit à partir des seules lignes présentes dans `data/inbox/releves.csv`. Gardez donc dans le CSV toutes les offres que vous souhaitez conserver, et pas uniquement la nouvelle offre du jour.
 
