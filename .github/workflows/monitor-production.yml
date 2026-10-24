@@ -46,6 +46,24 @@ jobs:
         run: node --test price-engine/price-utils.test.mjs
       - name: Vérifier la syntaxe du moteur de prix
         run: node --check price-engine/refresh.mjs
+      - name: Vérifier le blocage des redirections non sûres
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const engine = fs.readFileSync("price-engine/refresh.mjs", "utf8");
+          const utils = fs.readFileSync("price-engine/price-utils.mjs", "utf8");
+          const tests = fs.readFileSync("price-engine/price-utils.test.mjs", "utf8");
+          const checks = [
+            ["redirections HTTP désactivées", engine.includes('redirect:"manual"')],
+            ["URL cible validée avant chaque requête", engine.includes("if (!isSafeMerchantUrl(currentUrl))")],
+            ["redirections validées avec le résolveur sûr", engine.includes("resolveSafeRedirect(location, currentUrl)")],
+            ["tests de redirection non sûre présents", tests.includes("résout uniquement les redirections vers des URL HTTPS publiques")],
+            ["résolveur de redirection strict disponible", utils.includes("export function resolveSafeRedirect")],
+          ];
+          const failures = checks.filter(([, ok]) => !ok);
+          for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
+          if (failures.length) process.exit(1);
+          NODE
       - name: Vérifier la syntaxe du validateur de configuration
         run: node --check price-engine/validate-config.mjs
       - name: Valider la configuration des produits et marchands
