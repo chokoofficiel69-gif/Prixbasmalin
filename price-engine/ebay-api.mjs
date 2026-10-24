@@ -22,7 +22,7 @@ export async function getEbayApplicationToken({clientId, clientSecret, fetchImpl
 }
 
 function normalizeTitle(value) {
-  return String(value ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("fr").replace(/[^a-z0-9]+/g, " ").trim().replace(/\\s+/g, " ");
+  return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr").replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
 }
 
 function parseEurAmount(value) {
