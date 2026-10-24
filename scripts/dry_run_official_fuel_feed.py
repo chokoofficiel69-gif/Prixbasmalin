@@ -12,6 +12,24 @@ import urllib.error
 import urllib.request
 from urllib.parse import urlparse
 
+class SameHostRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Refuse les redirections hors domaine avant de contacter la cible."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        target = urlparse(newurl)
+        if (
+            target.scheme != "https"
+            or target.hostname != "data.economie.gouv.fr"
+            or target.username
+            or target.password
+            or target.port not in (None, 443)
+        ):
+            raise urllib.error.URLError(
+                "Redirection refusée : la cible doit rester en HTTPS sur data.economie.gouv.fr."
+            )
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 DEFAULT_URL = (
     "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/"
     "prix-des-carburants-en-france-flux-instantane-v2/exports/csv"
@@ -33,7 +51,8 @@ def main():
 
     request = urllib.request.Request(args.url, headers={"User-Agent": "Prixbasmalin-dry-run/1.0"})
     try:
-        with urllib.request.urlopen(request, timeout=45) as response:
+        opener = urllib.request.build_opener(SameHostRedirectHandler())
+        with opener.open(request, timeout=45) as response:
             final_url = urlparse(response.geturl())
             if final_url.scheme != "https" or final_url.hostname != "data.economie.gouv.fr":
                 print("ERREUR : redirection hors du domaine officiel refusée.", file=sys.stderr)
