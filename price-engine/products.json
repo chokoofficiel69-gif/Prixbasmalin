@@ -21,6 +21,11 @@
           "retailer": "Boulanger",
           "url": "https://www.boulanger.com/ref/1212701",
           "access": "public_json_ld_candidate"
+        },
+        {
+          "retailer": "Darty",
+          "url": "https://www.darty.com/nav/achat/accessoires/casque_ecouteurs/casque_intra-auriculaire/apple_airpods_4.html",
+          "access": "public_json_ld_candidate"
         }
       ]
     }
