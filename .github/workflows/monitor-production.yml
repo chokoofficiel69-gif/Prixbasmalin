@@ -11,6 +11,8 @@ on:
       - "catalogue.html"
       - "data/prices.json"
       - "CNAME"
+      - "price-engine/**"
+      - ".github/workflows/refresh-prices.yml"
   push:
     branches:
       - main
@@ -30,6 +32,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Récupérer le dépôt pour les tests
+        uses: actions/checkout@v4
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tester parseur, URL et identité produit
+        run: node --test price-engine/price-utils.test.mjs
       - name: Vérifier la page d'accueil
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
