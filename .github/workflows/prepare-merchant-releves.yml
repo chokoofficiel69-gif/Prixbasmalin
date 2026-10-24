@@ -16,12 +16,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Refuser tout lancement hors de main
-        if: github.ref != 'refs/heads/main'
-        run: |
-          echo "::error::Ce workflow doit être lancé depuis main."
-          exit 1
-
       - name: Checkout main
         uses: actions/checkout@v4
         with:
@@ -35,23 +29,39 @@ jobs:
       - name: Tests unitaires
         id: tests
         continue-on-error: true
-        run: python3 -m unittest discover -s tests -v
+        run: |
+          set +e
+          python3 -m unittest discover -s tests -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
 
       - name: Importer le CSV fourni
         id: import
         continue-on-error: true
-        run: python3 scripts/import_partner_csv.py data/inbox/releves.csv --output data/merchant-offers.json
+        run: |
+          set +e
+          python3 scripts/import_partner_csv.py data/inbox/releves.csv --output data/merchant-offers.json 2>&1 | tee "$RUNNER_TEMP/import.log"
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
 
       - name: Générer le flux sur la branche de brouillon uniquement
         id: build
         continue-on-error: true
-        run: python3 scripts/build_prices_feed.py
+        run: |
+          set +e
+          python3 scripts/build_prices_feed.py 2>&1 | tee "$RUNNER_TEMP/build.log"
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
 
       - name: Vérifier le flux généré
         id: validate
         continue-on-error: true
         run: |
-          python3 - <<'PY'
+          set +e
+          python3 - <<'PY' 2>&1 | tee "$RUNNER_TEMP/validate.log"
           import json
           from pathlib import Path
           p = Path("data/prices.json")
@@ -64,6 +74,9 @@ jobs:
           for error in feed.get("errors", []):
               print(f"AVERTISSEMENT: {error}")
           PY
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
 
       - name: Résumé des tests et erreurs
         if: always()
@@ -81,10 +94,19 @@ jobs:
             echo "- Validation du flux : **$VALIDATE_OUTCOME**"
             echo "- Source : `data/inbox/releves.csv` (aucune offre d'exemple)"
             echo "- Cette exécution ne fusionne rien et ne déploie rien."
+            for log in "$RUNNER_TEMP/tests.log" "$RUNNER_TEMP/import.log" "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/validate.log"; do
+              if [ -s "$log" ]; then
+                echo ""
+                echo "### $(basename "$log")"
+                echo '~~~text'
+                tail -n 80 "$log"
+                echo '~~~'
+              fi
+            done
             if [ "$TESTS_OUTCOME" != "success" ] || [ "$IMPORT_OUTCOME" != "success" ] || [ "$BUILD_OUTCOME" != "success" ] || [ "$VALIDATE_OUTCOME" != "success" ]; then
               echo ""
               echo "### Action requise"
-              echo "Consulter les logs des étapes en échec avant toute validation."
+              echo "Consulter les logs complets des étapes en échec avant toute validation."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
