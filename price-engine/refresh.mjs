@@ -150,9 +150,11 @@ if (offers.length === 0) {
   process.exitCode = 1;
 } else {
   const productIds = validProducts.map(p => p.id);
+  const hasFreshOffers = offers.some(o => !o.stale);
   const output = {
     version:1,
-    generated_at:offers.some(o => !o.stale) ? now : (previous.generated_at ?? now),
+    status:hasFreshOffers ? "fresh_offers_available" : "historical_only",
+    generated_at:hasFreshOffers ? now : (previous.generated_at ?? now),
     schedule:"vérification automatique toutes les heures (si des sources sont configurées)",
     methodology:"Prix lus dans les données structurées publiques Product/Offer. Frais de livraison inconnus exclus du prix; aucune estimation ni prix inventé.",
     products:productIds.map(id => {
