@@ -58,13 +58,13 @@ export function normalizeEbayListing(item, {productId, productName, ean, checked
 
 /** Search by GTIN via eBay Browse API. Requires approved application credentials. */
 export async function searchEbayByGtin({gtin, productId, productName, clientId, clientSecret, affiliateCampaignId, fetchImpl = fetch, checkedAt = new Date().toISOString()}) {
-  if (!/^\\d{8,14}$/.test(String(gtin ?? ""))) throw new Error("GTIN invalide.");
+  if (!/^\d{8,14}$/.test(String(gtin ?? ""))) throw new Error("GTIN invalide.");
   const token = await getEbayApplicationToken({clientId, clientSecret, fetchImpl});
   const url = new URL(SEARCH_URL);
   url.searchParams.set("gtin", String(gtin));
   url.searchParams.set("limit", "50");
   const headers = {authorization:`Bearer ${token}`, accept:"application/json", "X-EBAY-C-MARKETPLACE-ID":"EBAY_FR"};
-  if (affiliateCampaignId && /^\\d{10}$/.test(affiliateCampaignId)) {
+  if (affiliateCampaignId && /^\d{10}$/.test(affiliateCampaignId)) {
     headers["X-EBAY-C-ENDUSERCTX"] = `affiliateCampaignId=${affiliateCampaignId}`;
   }
   const response = await fetchImpl(url, {headers, signal:AbortSignal.timeout(15000)});
