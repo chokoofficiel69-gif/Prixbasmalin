@@ -73,3 +73,13 @@ export function mergeFreshAndStaleOffers(freshOffers, previousOffers, configured
   }
   return merged;
 }
+
+export function parseExplicitEuroOffer(offer) {
+  const currency = String(
+    offer?.priceCurrency ?? offer?.priceSpecification?.priceCurrency ?? ""
+  ).toUpperCase();
+  if (currency !== "EUR") return null;
+  const price = parsePrice(offer?.price ?? offer?.priceSpecification?.price);
+  if (price === null) return null;
+  return {price, currency};
+}
