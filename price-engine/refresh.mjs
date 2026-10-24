@@ -1,17 +1,49 @@
 import fs from "node:fs/promises";
-import {parseExplicitEuroOffer, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers} from "./price-utils.mjs";
+import {parseExplicitEuroOffer, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers, markOffersStale} from "./price-utils.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
 const now = new Date().toISOString();
 const config = JSON.parse(await fs.readFile(CONFIG, "utf8"));
 
-if (!Array.isArray(config.products) || config.products.length === 0) {
-  console.log("Aucune source produit configurée : relevé existant conservé, aucun prix remplacé.");
-  process.exit(0);
+const previous = await fs.readFile(OUTPUT, "utf8").then(JSON.parse).catch(() => ({version:1,offers:[]}));
+
+async function saveHistoricalSnapshot(snapshot, reason) {
+  const previousOffers = Array.isArray(snapshot.offers) ? snapshot.offers : [];
+  if (previousOffers.length === 0) return;
+  const staleOffers = markOffersStale(previousOffers, reason);
+  const previousProducts = Array.isArray(snapshot.products) ? snapshot.products : [];
+  const products = previousProducts.map(product => {
+    const rows = staleOffers
+      .filter(offer => offer.product_id === product.id)
+      .sort((a,b) => Number(a.price_eur) - Number(b.price_eur));
+    const best = rows[0];
+    return {
+      ...product,
+      offers: rows,
+      offer_count: rows.length,
+      best_price_eur: best?.price_eur ?? product.best_price_eur ?? null,
+      has_fresh_offer: false
+    };
+  });
+  const output = {
+    ...snapshot,
+    generated_at: snapshot.generated_at ?? now,
+    schedule: "Aucune source configurée : les derniers prix sont historiques",
+    methodology: "Derniers prix connus conservés à titre indicatif et marqués périmés. Aucune source active, aucun nouveau prix validé.",
+    products,
+    offers: staleOffers
+  };
+  if (JSON.stringify(output) !== JSON.stringify(snapshot)) {
+    await fs.writeFile(OUTPUT, JSON.stringify(output,null,2)+"\\n");
+  }
 }
 
-const previous = await fs.readFile(OUTPUT, "utf8").then(JSON.parse).catch(() => ({version:1,offers:[]}));
+if (!Array.isArray(config.products) || config.products.length === 0) {
+  await saveHistoricalSnapshot(previous, "Aucune source configurée : dernier prix connu à revérifier chez le marchand");
+  console.log("Aucune source produit configurée : prix inchangés, offres historiques marquées comme périmées.");
+  process.exit(0);
+}
 const offers = [];
 const errors = [];
 const validProducts = [];
