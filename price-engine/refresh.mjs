@@ -131,7 +131,9 @@ if (offers.length === 0) {
     products:productIds.map(id => {
       const product = config.products.find(p => p.id === id);
       const rows = offers.filter(o => o.product_id === id).sort((a,b) => a.price_eur - b.price_eur);
-      return {id,name:product.name,offers:rows,best_price_eur:rows[0]?.price_eur ?? null,offer_count:rows.length};
+      const freshRows = rows.filter(o => !o.stale);
+      const best = (freshRows.length ? freshRows : rows)[0];
+      return {id,name:product.name,offers:rows,best_price_eur:best?.price_eur ?? null,offer_count:rows.length,has_fresh_offer:freshRows.length>0};
     }),
     offers,
     errors,
