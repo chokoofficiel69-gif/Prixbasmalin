@@ -80,13 +80,19 @@ footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
    const products=Array.isArray(feed.products)?feed.products:[];
    const offers=Array.isArray(feed.offers)?feed.offers:[];
    const validOffer=offer=>Number.isFinite(Number(offer?.price_eur))&&Number(offer.price_eur)>0;
-   const freshOffers=offers.filter(offer=>!offer?.stale&&validOffer(offer));
-   const historicalOffers=offers.filter(offer=>!!offer?.stale&&validOffer(offer));
+   const isCurrentOffer=offer=>{
+     if(!offer||offer.stale)return false;
+     const checkedAt=Date.parse(offer.checked_at||'');
+     const age=Date.now()-checkedAt;
+     return Number.isFinite(checkedAt)&&age>=-5*60*1000&&age<=24*60*60*1000;
+   };
+   const freshOffers=offers.filter(offer=>isCurrentOffer(offer)&&validOffer(offer));
+   const historicalOffers=offers.filter(offer=>!isCurrentOffer(offer)&&validOffer(offer));
    const freshOfferProductIds=new Set(freshOffers.map(offer=>offer.product_id).filter(Boolean));
    const freshProductIds=new Set(products
      .filter(product=>product&&product.id&&freshOfferProductIds.has(product.id)&&
        (product.has_fresh_offer===true||
-        (Array.isArray(product.offers)&&product.offers.some(offer=>!offer?.stale&&validOffer(offer)))))
+        (Array.isArray(product.offers)&&product.offers.some(offer=>isCurrentOffer(offer)&&validOffer(offer)))))
      .map(product=>product.id));
    const historicalOnlyOffers=historicalOffers.filter(offer=>offer.product_id&&!freshProductIds.has(offer.product_id));
    const historicalOnlyProductIds=new Set(historicalOnlyOffers.map(offer=>offer.product_id));
