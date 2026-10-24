@@ -16,7 +16,7 @@ const offers = [];
 const errors = [];
 const validProducts = [];
 const seenProductIds = new Set();
-for (const product of validProducts) {
+for (const product of config.products) {
   if (!product || typeof product.id !== "string" || !product.id.trim() ||
       typeof product.name !== "string" || !product.name.trim() ||
       !Array.isArray(product.sources)) {
@@ -41,11 +41,7 @@ function flattenJsonLd(value, out = []) {
   return out;
 }
 
-for (const product of config.products) {
-  if (!product?.id || !product?.name || !Array.isArray(product.sources)) {
-    errors.push({product_id: product?.id ?? null, reason:"Configuration produit invalide"});
-    continue;
-  }
+for (const product of validProducts) {
   for (const source of product.sources) {
     const sourceUrl = secureUrl(source?.url, source?.url);
     if (!sourceUrl || !source?.retailer) {
