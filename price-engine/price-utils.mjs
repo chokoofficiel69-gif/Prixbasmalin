@@ -1,5 +1,11 @@
 import {isIP} from "node:net";
 // Utilitaires partagés et testables du moteur de prix.
+export function isValidEan13(value) {
+  if (typeof value !== "string" || !/^\\d{13}$/.test(value)) return false;
+  const digits = [...value].map(Number);
+  const sum = digits.slice(0, 12).reduce((total, digit, index) => total + digit * (index % 2 === 0 ? 1 : 3), 0);
+  return (10 - (sum % 10)) % 10 === digits[12];
+}
 export function parsePrice(value) {
   if (value == null) return null;
   let s = String(value).trim().replace(/[\s\u00a0\u202f€]/g, "");
