@@ -21,6 +21,10 @@ export async function getEbayApplicationToken({clientId, clientSecret, fetchImpl
   return data.access_token;
 }
 
+function normalizeTitle(value) {
+  return String(value ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("fr").replace(/[^a-z0-9]+/g, " ").trim().replace(/\\s+/g, " ");
+}
+
 function parseEurAmount(value) {
   if (!value || String(value.currency ?? "").toUpperCase() !== "EUR") return null;
   const amount = Number(value.value);
@@ -28,11 +32,13 @@ function parseEurAmount(value) {
 }
 
 /** Map an eBay listing into a normalized candidate; identity still needs validation. */
-export function normalizeEbayListing(item, {productId, productName, ean, checkedAt = new Date().toISOString()} = {}) {
+export function normalizeEbayListing(item, {productId, productName, ean, matchTerms = [], checkedAt = new Date().toISOString()} = {}) {
   if (!item || typeof item !== "object") return null;
   const price = parseEurAmount(item.price);
   const url = typeof item.itemWebUrl === "string" && item.itemWebUrl.startsWith("https://") ? item.itemWebUrl : null;
-  if (price === null || !url || item.itemEndDate && Date.parse(item.itemEndDate) < Date.now()) return null;
+  const title = normalizeTitle(item.title);
+  const requiredTerms = Array.isArray(matchTerms) ? matchTerms.map(normalizeTitle).filter(Boolean) : [];
+  if (price === null || !url || !title || (requiredTerms.length && !requiredTerms.every(term => title.includes(term))) || item.itemEndDate && Date.parse(item.itemEndDate) < Date.now()) return null;
   const shippingOptions = Array.isArray(item.shippingOptions) ? item.shippingOptions : [];
   const shipping = shippingOptions.map(s => parseEurAmount(s.shippingCost)).find(v => v !== null) ?? null;
   return {
@@ -57,7 +63,7 @@ export function normalizeEbayListing(item, {productId, productName, ean, checked
 }
 
 /** Search by GTIN via eBay Browse API. Requires approved application credentials. */
-export async function searchEbayByGtin({gtin, productId, productName, clientId, clientSecret, affiliateCampaignId, fetchImpl = fetch, checkedAt = new Date().toISOString()}) {
+export async function searchEbayByGtin({gtin, productId, productName, matchTerms = [], clientId, clientSecret, affiliateCampaignId, fetchImpl = fetch, checkedAt = new Date().toISOString()}) {
   if (!/^\d{8,14}$/.test(String(gtin ?? ""))) throw new Error("GTIN invalide.");
   const token = await getEbayApplicationToken({clientId, clientSecret, fetchImpl});
   const url = new URL(SEARCH_URL);
@@ -71,5 +77,5 @@ export async function searchEbayByGtin({gtin, productId, productName, clientId, 
   if (!response.ok) throw new Error(`eBay Browse API HTTP ${response.status}`);
   const data = await response.json();
   const rows = Array.isArray(data.itemSummaries) ? data.itemSummaries : [];
-  return rows.map(item => normalizeEbayListing(item, {productId, productName, ean:gtin, checkedAt})).filter(Boolean);
+  return rows.map(item => normalizeEbayListing(item, {productId, productName, ean:gtin, matchTerms, checkedAt})).filter(Boolean);
 }
