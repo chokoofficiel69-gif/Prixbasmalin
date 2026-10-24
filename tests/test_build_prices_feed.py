@@ -112,5 +112,32 @@ class PriceFeedValidationTests(unittest.TestCase):
         self.assertTrue(any("brand obligatoire" in error for error in result["errors"]))
 
 
+    def test_rejects_urls_with_embedded_credentials(self):
+        for url in (
+            "https://user:password@merchant.example/product/1",
+            "https://user@merchant.example/product/1",
+        ):
+            with self.subTest(url=url):
+                result = self.run_builder([dict(self.base_offer, product_url=url)])
+                self.assertEqual(result["products"], [])
+                self.assertTrue(any("URL produit HTTPS obligatoire" in error for error in result["errors"]))
+
+    def test_rejects_malformed_or_ambiguous_https_urls(self):
+        for url in (
+            "https://merchant.example:99999/product/1",
+            "https://merchant.example/product with space",
+            "https:///missing-host",
+        ):
+            with self.subTest(url=url):
+                result = self.run_builder([dict(self.base_offer, product_url=url)])
+                self.assertEqual(result["products"], [])
+                self.assertTrue(any("URL produit HTTPS obligatoire" in error for error in result["errors"]))
+
+    def test_rejects_tracking_urls_with_embedded_credentials(self):
+        offer = dict(self.base_offer, tracking_url="https://user:password@track.example/click")
+        result = self.run_builder([offer])
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("URL de suivi HTTPS invalide" in error for error in result["errors"]))
+
 if __name__ == "__main__":
     unittest.main()
