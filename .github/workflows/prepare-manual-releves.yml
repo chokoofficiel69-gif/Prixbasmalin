@@ -23,6 +23,8 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+      # data/inbox/releves.csv is a staging input committed to main by the owner.
+      # Committing this CSV does not publish prices; this workflow only proposes generated JSON in a draft PR.
       - name: Stop cleanly when CSV has no offer rows
         id: csv
         shell: python
