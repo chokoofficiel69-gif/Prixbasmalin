@@ -83,3 +83,11 @@ export function parseExplicitEuroOffer(offer) {
   if (price === null) return null;
   return {price, currency};
 }
+
+export function markOffersStale(offers, reason) {
+  return offers.map(offer => ({
+    ...offer,
+    stale: true,
+    comparison_note: reason
+  }));
+}
