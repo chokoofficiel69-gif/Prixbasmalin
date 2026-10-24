@@ -182,6 +182,7 @@ for (const product of validProducts) {
         gtin:product.ean,
         productId:product.id,
         productName:product.name,
+        matchTerms:product.match_terms ?? [],
         clientId:process.env.EBAY_CLIENT_ID,
         clientSecret:process.env.EBAY_CLIENT_SECRET,
         affiliateCampaignId:process.env.EBAY_CAMPAIGN_ID || undefined,
