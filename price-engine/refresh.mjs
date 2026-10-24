@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import {parsePrice, secureUrl} from "./price-utils.mjs";
+import {parsePrice, secureUrl, matchesProductIdentity} from "./price-utils.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
@@ -24,9 +24,6 @@ function flattenJsonLd(value, out = []) {
   }
   return out;
 }
-
-
-
 
 for (const product of config.products) {
   if (!product?.id || !product?.name || !Array.isArray(product.sources)) {
@@ -59,6 +56,7 @@ for (const product of config.products) {
           for (const node of nodes) {
             const type = node["@type"];
             if (!(type === "Product" || (Array.isArray(type) && type.includes("Product")))) continue;
+            if (!matchesProductIdentity(node, product)) continue;
             const rawOffers = Array.isArray(node.offers) ? node.offers : [node.offers];
             for (const raw of rawOffers) {
               if (!raw) continue;
