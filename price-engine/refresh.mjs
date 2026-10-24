@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import {parsePrice, secureUrl} from "./price-utils.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
@@ -24,29 +25,8 @@ function flattenJsonLd(value, out = []) {
   return out;
 }
 
-// Accepte les formats français (1 299,99), anglais (1,299.99) et décimaux simples.
-function parsePrice(value) {
-  if (value == null) return null;
-  let s = String(value).trim().replace(/[\s\u00a0\u202f€]/g, "").replace(/[^0-9,.-]/g, "");
-  if (!s || s === "-" || s === "." || s === ",") return null;
-  const comma = s.lastIndexOf(",");
-  const dot = s.lastIndexOf(".");
-  if (comma >= 0 && dot >= 0) {
-    s = comma > dot ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
-  } else if (comma >= 0) {
-    s = s.replace(",", ".");
-  }
-  const n = Number(s);
-  return Number.isFinite(n) && n > 0 ? n : null;
-}
-function secureUrl(value, base) {
-  try {
-    const url = new URL(value, base);
-    return url.protocol === "https:" ? url.href : null;
-  } catch {
-    return null;
-  }
-}
+
+
 
 for (const product of config.products) {
   if (!product?.id || !product?.name || !Array.isArray(product.sources)) {
