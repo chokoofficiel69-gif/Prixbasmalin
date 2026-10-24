@@ -1,0 +1,84 @@
+name: Prepare manual price relevés (draft PR only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Refuse non-main dispatch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo 'Ce workflow doit être lancé depuis main.' >&2
+          exit 1
+      - name: Checkout main only
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Import manual CSV and rebuild feed
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 scripts/import_partner_csv.py data/inbox/releves.csv --output data/merchant-offers.json 2>&1 | tee /tmp/import.log
+          python3 scripts/build_prices_feed.py 2>&1 | tee /tmp/build.log
+          python3 - <<'PY' | tee /tmp/feed-summary.txt
+          import json
+          from pathlib import Path
+          feed = json.loads(Path('data/prices.json').read_text(encoding='utf-8'))
+          print(f"Produits retenus : {len(feed.get('products', []))}")
+          print(f"Offres retenues : {len(feed.get('offers', []))}")
+          errors = feed.get('errors', [])
+          print(f"Erreurs/écarts signalés : {len(errors)}")
+          for error in errors:
+              print(f"- {error}")
+          if not feed.get('offers'):
+              print('ATTENTION : aucune offre exploitable; aucun prix fictif ne sera ajouté.')
+          PY
+      - name: Add diagnostic summary to job summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## Résumé préparation des relevés'
+            echo '- Déclenchement autorisé uniquement depuis main.'
+            echo '- Les tests et la reconstruction se font dans le runner, sans déploiement.'
+            if [ -f /tmp/feed-summary.txt ]; then cat /tmp/feed-summary.txt; fi
+            if [ -f /tmp/import.log ]; then echo '### Journal import CSV'; tail -n 40 /tmp/import.log; fi
+            if [ -f /tmp/build.log ]; then echo '### Journal construction'; tail -n 40 /tmp/build.log; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Create dated branch and draft PR (never push main)
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          BRANCH="data/releves-$(date -u +%F)-run${GITHUB_RUN_NUMBER}"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            echo "La branche $BRANCH existe déjà; arrêt sans écraser de branche." >&2
+            exit 1
+          fi
+          git switch -c "$BRANCH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/merchant-offers.json data/prices.json
+          if git diff --cached --quiet; then
+            echo 'Aucun changement de données à proposer; aucune PR créée.'
+            exit 0
+          fi
+          git commit -m "data: prepare manual price relevés $(date -u +%F)"
+          git push origin "$BRANCH"
+          gh pr create --draft --base main --head "$BRANCH" \
+            --title "Données : relevés manuels $(date -u +%F)" \
+            --body "Préparation automatique en brouillon depuis le CSV manuel autorisé. Tests exécutés avant création. Vérifier les identités, dates, prix et frais de livraison. Aucune fusion ni aucun déploiement automatiques."
