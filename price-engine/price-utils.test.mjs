@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {parsePrice, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers, parseExplicitEuroOffer, markOffersStale, extractOfferFromJsonLd} from "./price-utils.mjs";
+import {parsePrice, secureUrl, isSafeMerchantUrl, matchesProductIdentity, mergeFreshAndStaleOffers, parseExplicitEuroOffer, markOffersStale, extractOfferFromJsonLd} from "./price-utils.mjs";
 
 test("parse les prix français avec espaces et virgule décimale", () => {
   assert.equal(parsePrice("1 299,99 €"), 1299.99);
@@ -179,4 +179,23 @@ test("fusionne les offres marchandes sans dépendre des majuscules ou espaces", 
   assert.equal(merged.length, 1);
   assert.equal(merged[0].price_eur, 125);
   assert.equal(merged[0].stale, false);
+});
+
+test("accepte les URL marchandes HTTPS à nom de domaine public uniquement", () => {
+  assert.equal(isSafeMerchantUrl("https://marchand.example/produit"), true);
+  assert.equal(isSafeMerchantUrl("https://marchand.example:443/produit"), true);
+});
+test("rejette les URL HTTP, les adresses IP, les hôtes locaux et les ports non standards", () => {
+  for (const url of [
+    "http://marchand.example/produit",
+    "https://127.0.0.1/produit",
+    "https://192.168.1.20/produit",
+    "https://[::1]/produit",
+    "https://localhost/produit",
+    "https://service.local/produit",
+    "https://service.internal/produit",
+    "https://user:password@marchand.example/produit",
+    "https://marchand.example:8443/produit",
+    "not-a-url"
+  ]) assert.equal(isSafeMerchantUrl(url), false, url);
 });
