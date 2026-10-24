@@ -45,3 +45,31 @@ export function matchesProductIdentity(node, product) {
     : [];
   return terms.length > 0 && terms.every(term => actual.includes(term));
 }
+
+export function mergeFreshAndStaleOffers(freshOffers, previousOffers, configuredProducts) {
+  const configured = new Map();
+  for (const product of configuredProducts) {
+    if (!product?.id) continue;
+    configured.set(product.id, new Set(
+      (Array.isArray(product.sources) ? product.sources : [])
+        .map(source => source?.retailer)
+        .filter(retailer => typeof retailer === "string" && retailer.trim())
+    ));
+  }
+  const freshKeys = new Set(
+    freshOffers.map(offer => JSON.stringify([offer.product_id, offer.retailer]))
+  );
+  const merged = [...freshOffers];
+  for (const oldOffer of previousOffers) {
+    const retailers = configured.get(oldOffer?.product_id);
+    if (!retailers || !retailers.has(oldOffer?.retailer)) continue;
+    const key = JSON.stringify([oldOffer.product_id, oldOffer.retailer]);
+    if (freshKeys.has(key)) continue;
+    merged.push({
+      ...oldOffer,
+      stale: true,
+      comparison_note: "Dernier prix connu : actualisation échouée, vérifier chez le marchand"
+    });
+  }
+  return merged;
+}
