@@ -9,6 +9,7 @@ on:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
       - "catalogue.html"
+      - "etat-prix.html"
       - "data/prices.json"
       - "CNAME"
       - "price-engine/**"
@@ -20,6 +21,7 @@ on:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
       - "catalogue.html"
+      - "etat-prix.html"
       - "data/prices.json"
       - "CNAME"
       - "price-engine/**"
@@ -62,6 +64,20 @@ jobs:
           NODE
       - name: Vérifier la syntaxe JavaScript du catalogue
         run: node --check /tmp/catalogue-inline.js
+      - name: Extraire le JavaScript du tableau de bord des prix
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("etat-prix.html", "utf8");
+          const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+            .filter(([, attrs, body]) => !/\bsrc\s*=/i.test(attrs) && body.trim())
+            .map(([, , body]) => body);
+          if (inlineScripts.length === 0) throw new Error("Aucun script inline trouvé dans etat-prix.html");
+          fs.writeFileSync("/tmp/etat-prix-inline.js", inlineScripts.join("\n;\n"));
+          console.log("Scripts inline trouvés :", inlineScripts.length);
+          NODE
+      - name: Vérifier la syntaxe JavaScript du tableau de bord
+        run: node --check /tmp/etat-prix-inline.js
       - name: Vérifier la séparation catalogue découverte / tarifs vérifiés
         run: |
           node --input-type=module <<'NODE'
