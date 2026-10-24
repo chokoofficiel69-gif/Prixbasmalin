@@ -4,7 +4,7 @@ import {normalizeEbayListing, getEbayApplicationToken, searchEbayByGtin} from ".
 
 test("normalise une annonce eBay avec prix EUR et livraison explicite", () => {
   const offer = normalizeEbayListing({
-    title:"Apple AirPods 4 USB-C",
+    title:"Apple AirPods 4 Blanc avec Boîtier de charge USB-C",
     price:{value:"129.99",currency:"EUR"},
     itemWebUrl:"https://www.ebay.fr/itm/123",
     shippingOptions:[{shippingCost:{value:"4.99",currency:"EUR"}}]
