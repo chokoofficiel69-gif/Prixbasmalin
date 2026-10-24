@@ -22,6 +22,8 @@ on:
       - "catalogue.html"
       - "data/prices.json"
       - "CNAME"
+      - "price-engine/**"
+      - ".github/workflows/refresh-prices.yml"
 
 permissions:
   contents: read
