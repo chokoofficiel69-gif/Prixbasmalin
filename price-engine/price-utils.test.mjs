@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {parsePrice, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers, parseExplicitEuroOffer, markOffersStale} from "./price-utils.mjs";
+import {parsePrice, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers, parseExplicitEuroOffer, markOffersStale, extractOfferFromJsonLd} from "./price-utils.mjs";
 
 test("parse les prix français avec espaces et virgule décimale", () => {
   assert.equal(parsePrice("1 299,99 €"), 1299.99);
@@ -80,4 +80,63 @@ test("marque toutes les anciennes offres périmées sans modifier leurs prix", (
   assert.equal(stale[0].stale, true);
   assert.equal(stale[0].comparison_note, "Aucune source configurée");
   assert.equal(input[0].stale, undefined);
+});
+
+test("extrait une offre JSON-LD exacte avec prix EUR et URL HTTPS", () => {
+  const jsonLd = {
+    "@context":"https://schema.org",
+    "@graph":[{
+      "@type":"Product",
+      "name":"Casque Audio Z 2",
+      "url":"https://marchand.example/casque-z2",
+      "offers":{
+        "@type":"Offer",
+        "price":"1 299,99",
+        "priceCurrency":"EUR",
+        "availability":"https://schema.org/InStock"
+      }
+    }]
+  };
+  const result = extractOfferFromJsonLd(
+    jsonLd,
+    {id:"headset-z2",name:"Casque Audio Z 2"},
+    "Marchand",
+    "https://marchand.example/casque-z2",
+    "2026-10-24T10:00:00.000Z"
+  );
+  assert.equal(result.product_id, "headset-z2");
+  assert.equal(result.price_eur, 1299.99);
+  assert.equal(result.availability, "in_stock");
+  assert.equal(result.product_url, "https://marchand.example/casque-z2");
+  assert.equal(result.shipping_price_eur, null);
+  assert.equal(result.stale, undefined);
+});
+
+test("refuse les produits proches mais différents, le prix agrégé et une URL HTTP", () => {
+  const product = {id:"earbuds4",name:"Écouteurs Alpha 4"};
+  const base = "https://marchand.example/alpha";
+  const different = extractOfferFromJsonLd({
+    "@type":"Product",name:"Écouteurs Alpha Pro 2",
+    offers:{price:"89.99",priceCurrency:"EUR"}
+  }, product, "Marchand", base, "2026-10-24T10:00:00.000Z");
+  assert.equal(different, null);
+  const aggregateOnly = extractOfferFromJsonLd({
+    "@type":"Product",name:"Écouteurs Alpha 4",
+    offers:{ "@type":"AggregateOffer", lowPrice:"49.99",priceCurrency:"EUR" }
+  }, product, "Marchand", base, "2026-10-24T10:00:00.000Z");
+  assert.equal(aggregateOnly, null);
+  const insecure = extractOfferFromJsonLd({
+    "@type":"Product",name:"Écouteurs Alpha 4",
+    offers:{ "@type":"Offer", price:"49.99",priceCurrency:"EUR",url:"http://marchand.example/alpha" }
+  }, product, "Marchand", base, "2026-10-24T10:00:00.000Z");
+  assert.equal(insecure, null);
+});
+
+test("n'invente pas la devise quand elle manque dans JSON-LD", () => {
+  const result = extractOfferFromJsonLd({
+    "@type":"Product",name:"Écouteurs Alpha 4",
+    offers:{ "@type":"Offer",price:"49.99" }
+  }, {id:"earbuds4",name:"Écouteurs Alpha 4"}, "Marchand",
+  "https://marchand.example/alpha","2026-10-24T10:00:00.000Z");
+  assert.equal(result, null);
 });
