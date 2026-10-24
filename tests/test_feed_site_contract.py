@@ -50,10 +50,10 @@ class FeedSiteContractTests(unittest.TestCase):
         self.assertTrue(feed["products"], "le test doit produire un produit de test")
         for product in feed["products"]:
             self.assertTrue(product.get("name"), f"produit sans name: {product}")
-            for item in product.get("offers", []):
-                self.assertTrue(item.get("retailer"), f"offre sans retailer: {item}")
-                self.assertIn("total_price_eur", item, f"offre sans total_price_eur: {item}")
-                self.assertIsInstance(item["total_price_eur"], (int, float))
+        for item in feed["offers"]:
+            self.assertTrue(item.get("retailer"), f"offre sans retailer: {item}")
+            self.assertIn("total_price_eur", item, f"offre sans total_price_eur: {item}")
+            self.assertIsInstance(item["total_price_eur"], (int, float))
 
 
 if __name__ == "__main__":
