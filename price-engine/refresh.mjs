@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import {parseExplicitEuroOffer, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers, markOffersStale} from "./price-utils.mjs";
+import {secureUrl, extractOfferFromJsonLd, mergeFreshAndStaleOffers, markOffersStale} from "./price-utils.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
@@ -69,16 +69,6 @@ if (validProducts.length === 0) {
   process.exit(0);
 }
 
-function flattenJsonLd(value, out = []) {
-  if (Array.isArray(value)) value.forEach(v => flattenJsonLd(v, out));
-  else if (value && typeof value === "object") {
-    out.push(value);
-    if (value["@graph"]) flattenJsonLd(value["@graph"], out);
-    if (value.mainEntity) flattenJsonLd(value.mainEntity, out);
-  }
-  return out;
-}
-
 for (const product of validProducts) {
   for (const source of product.sources) {
     const sourceUrl = secureUrl(source?.url, source?.url);
@@ -102,38 +92,13 @@ for (const product of validProducts) {
       let found = null;
       for (const block of blocks) {
         try {
-          const nodes = flattenJsonLd(JSON.parse(block[1]));
-          for (const node of nodes) {
-            const type = node["@type"];
-            if (!(type === "Product" || (Array.isArray(type) && type.includes("Product")))) continue;
-            if (!matchesProductIdentity(node, product)) continue;
-            const rawOffers = Array.isArray(node.offers) ? node.offers : [node.offers];
-            for (const raw of rawOffers) {
-              if (!raw) continue;
-              const parsedOffer = parseExplicitEuroOffer(raw);
-              const price = parsedOffer?.price ?? null;
-              const currency = parsedOffer?.currency ?? null;
-              const productUrl = secureUrl(raw.url ?? node.url ?? response.url, response.url);
-              if (price !== null && currency === "EUR" && productUrl) {
-                found = {
-                  product_id:product.id,
-                  product_name:product.name,
-                  retailer:source.retailer,
-                  price_eur:Math.round(price * 100) / 100,
-                  currency:"EUR",
-                  shipping_price_eur:null,
-                  total_price_eur:null,
-                  availability:String(raw.availability ?? "").includes("InStock") ? "in_stock" : String(raw.availability ?? "").includes("OutOfStock") ? "out_of_stock" : "unknown",
-                  product_url:productUrl,
-                  checked_at:now,
-                  source:"public_json_ld",
-                  comparison_note:"Livraison non incluse : frais non confirmés"
-                };
-                break;
-              }
-            }
-            if (found) break;
-          }
+          found = extractOfferFromJsonLd(
+            JSON.parse(block[1]),
+            product,
+            source.retailer,
+            response.url,
+            now
+          );
         } catch {}
         if (found) break;
       }
