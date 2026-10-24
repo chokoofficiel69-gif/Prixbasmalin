@@ -8,11 +8,15 @@ test("normalise une annonce eBay avec prix EUR et livraison explicite", () => {
     price:{value:"129.99",currency:"EUR"},
     itemWebUrl:"https://www.ebay.fr/itm/123",
     shippingOptions:[{shippingCost:{value:"4.99",currency:"EUR"}}]
-  }, {productId:"airpods4",productName:"Apple AirPods 4",ean:"0195949688591",checkedAt:"2026-10-24T10:00:00.000Z"});
+  }, {productId:"airpods4",productName:"Apple AirPods 4",ean:"0195949688591",matchTerms:["Apple AirPods 4","Boîtier de charge USB-C"],checkedAt:"2026-10-24T10:00:00.000Z"});
   assert.equal(offer.price_eur,129.99);
   assert.equal(offer.shipping_price_eur,4.99);
   assert.equal(offer.total_price_eur,134.98);
   assert.equal(offer.verification_status,"verified_ebay_api");
+});
+
+test("refuse une annonce dont le titre ne correspond pas à la variante attendue", () => {
+  assert.equal(normalizeEbayListing({title:"Apple AirPods Pro 2",price:{value:"99",currency:"EUR"},itemWebUrl:"https://www.ebay.fr/itm/123"}, {matchTerms:["Apple AirPods 4","USB-C"]}),null);
 });
 
 test("refuse devise non EUR, prix absent et URL non HTTPS", () => {
