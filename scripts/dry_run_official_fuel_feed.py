@@ -10,6 +10,7 @@ import io
 import sys
 import urllib.error
 import urllib.request
+from urllib.parse import urlparse
 
 DEFAULT_URL = (
     "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/"
@@ -25,9 +26,18 @@ def main():
     if args.sample < 0 or args.sample > 10:
         parser.error("--sample doit être compris entre 0 et 10")
 
+    parsed_url = urlparse(args.url)
+    if parsed_url.scheme != "https" or parsed_url.hostname != "data.economie.gouv.fr" or parsed_url.username or parsed_url.password or parsed_url.port not in (None, 443):
+        print("ERREUR : --url doit utiliser HTTPS sur le domaine exact data.economie.gouv.fr.", file=sys.stderr)
+        return 2
+
     request = urllib.request.Request(args.url, headers={"User-Agent": "Prixbasmalin-dry-run/1.0"})
     try:
         with urllib.request.urlopen(request, timeout=45) as response:
+            final_url = urlparse(response.geturl())
+            if final_url.scheme != "https" or final_url.hostname != "data.economie.gouv.fr":
+                print("ERREUR : redirection hors du domaine officiel refusée.", file=sys.stderr)
+                return 2
             charset = response.headers.get_content_charset() or "utf-8"
             content = response.read().decode(charset, errors="replace")
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
