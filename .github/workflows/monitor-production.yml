@@ -58,6 +58,21 @@ jobs:
           NODE
       - name: Vérifier la syntaxe JavaScript du catalogue
         run: node --check /tmp/catalogue-inline.js
+      - name: Vérifier la séparation catalogue découverte / tarifs vérifiés
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("catalogue.html", "utf8");
+          const checks = [
+            ["section des modèles exacts", html.includes('id="verifiedShelf"')],
+            ["rendu dédié aux prix marchands", html.includes("function renderVerifiedProducts(products)")],
+            ["liste par marchand", html.includes('list.setAttribute("aria-label","Prix par marchand")')],
+            ["catalogue générique sans raccordement direct aux prix exacts", !html.includes("verifiedPriceIndex.get(p.id)")],
+          ];
+          const failures = checks.filter(([, ok]) => !ok);
+          for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
+          if (failures.length) process.exit(1);
+          NODE
 
   smoke-test:
     name: Disponibilité de production et Worker attribution
