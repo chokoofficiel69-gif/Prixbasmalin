@@ -218,26 +218,41 @@ function render(){
     desc.textContent=p.desc;
     const price=document.createElement("div");
     price.className="price";
-    price.textContent="Prix à vérifier chez le vendeur";
+    price.textContent="Prix direct non encore disponible";
     const merchant=document.createElement("div");
     merchant.className="merchant";
-    merchant.textContent="Fiche de découverte • aucun tarif présenté comme vérifié";
-
-    const offer=document.createElement("a");
-    offer.className="offer";
-    offer.textContent="Voir les résultats Amazon ↗";
-    offer.href="https://www.amazon.fr/s?k="+encodeURIComponent(p.query)+"&tag=prixbasmalin2-21";
-    offer.target="_blank";
-    offer.rel="noopener noreferrer";
-    card.append(photo,name,desc,price,merchant,offer);
-
-    const multi=document.createElement("button");
-    multi.type="button";
-    multi.className="multi-search-btn";
-    multi.textContent="Comparer chez plusieurs marchands";
-    multi.setAttribute("aria-label","Rechercher "+p.name+" chez plusieurs marchands");
-    multi.addEventListener("click",()=>openMerchantSearch(p));
-    card.append(multi);
+    merchant.textContent="Aucun prix vérifié pour cette fiche générique";
+    const heading=document.createElement("div");
+    heading.className="discovery-compare-heading";
+    heading.textContent="Rechercher ce produit chez les marchands";
+    const list=document.createElement("div");
+    list.className="discovery-compare";
+    const enc=encodeURIComponent(p.query||p.name);
+    const links=[
+      {name:"Amazon",url:"https://www.amazon.fr/s?k="+enc+"&tag=prixbasmalin2-21"},
+      {name:"Google Shopping",url:"https://www.google.com/search?tbm=shop&q="+enc},
+      {name:"eBay France",url:"https://www.ebay.fr/sch/i.html?_nkw="+enc},
+      {name:"Fnac",url:"https://www.fnac.com/SearchResult/ResultList.aspx?Search="+enc},
+      {name:"Cdiscount",url:"https://www.cdiscount.com/search/10/"+enc+".html"},
+      {name:"Darty",url:"https://www.darty.com/nav/recherche?text="+enc}
+    ];
+    links.forEach(item=>{
+      const row=document.createElement("div");
+      row.className="discovery-compare-row";
+      const label=document.createElement("span");
+      label.textContent=item.name;
+      const link=document.createElement("a");
+      link.href=item.url;
+      link.target="_blank";
+      link.rel="noopener noreferrer";
+      link.textContent="Voir les offres ↗";
+      row.append(label,link);
+      list.append(row);
+    });
+    const note=document.createElement("p");
+    note.className="discovery-disclaimer";
+    note.textContent="Liens de recherche, pas des prix en direct. Les prix vérifiés apparaissent séparément uniquement lorsqu'une offre exacte est disponible.";
+    card.append(photo,name,desc,price,merchant,heading,list,note);
     productsEl.append(card);
   });
 }
