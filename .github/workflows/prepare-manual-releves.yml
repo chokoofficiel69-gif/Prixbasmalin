@@ -83,7 +83,10 @@ jobs:
               "products": feed.get("products", []),
               "feed_offers": feed.get("offers", [])
           }
-          Path('/tmp/useful-changed.txt').write_text("true" if before != after else "false", encoding="utf-8")
+          changed = "true" if before != after else "false"
+          Path('/tmp/useful-changed.txt').write_text(changed, encoding="utf-8")
+          with open(__import__("os").environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"changed={changed}\\n")
           print("Contenu utile modifié : " + ("oui" if before != after else "non"))
           PY
       - name: Add diagnostic summary to job summary
@@ -102,16 +105,19 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Stop cleanly if useful offer data did not change
+        id: change
         if: steps.csv.outputs.has_rows == 'true' && success()
         shell: bash
         run: |
           if [ "$(cat /tmp/useful-changed.txt)" != "true" ]; then
             echo "Aucune modification utile des offres/produits; les horodatages de génération seuls ne justifient pas une PR."
             echo "Aucune PR ne sera créée."
-            exit 0
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Create dated branch and draft PR (never push main)
-        if: steps.csv.outputs.has_rows == 'true' && success()
+        if: steps.csv.outputs.has_rows == 'true' && steps.change.outputs.changed == 'true' && success()
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
