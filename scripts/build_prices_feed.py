@@ -33,10 +33,25 @@ def parse_date(value, label):
 
 
 def https_url(value):
-    if not isinstance(value, str):
+    """Accept only absolute HTTPS URLs without embedded credentials or malformed ports."""
+    if not isinstance(value, str) or not value or value != value.strip():
         return False
-    parsed = urlparse(value)
-    return parsed.scheme == "https" and bool(parsed.netloc)
+    # Control characters and whitespace can make URLs ambiguous across parsers.
+    if any(char.isspace() or ord(char) < 32 for char in value):
+        return False
+    try:
+        parsed = urlparse(value)
+        # Accessing .port also validates malformed and out-of-range port values.
+        port = parsed.port
+    except ValueError:
+        return False
+    return (
+        parsed.scheme.lower() == "https"
+        and bool(parsed.hostname)
+        and parsed.username is None
+        and parsed.password is None
+        and (port is None or 1 <= port <= 65535)
+    )
 
 
 def valid_money(value):
