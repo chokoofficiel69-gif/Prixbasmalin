@@ -780,6 +780,111 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"581731ca0ab54223acdf63ecfca342b0"}'></script>
 <!-- End Cloudflare Web Analytics -->
+
+<style id="prixmalin-2027-redesign">
+/* Prix Malin 2027 — refonte visuelle progressive, sans supprimer les fonctions existantes */
+:root{
+ --orange:#ff5a36;--orange-dark:#e74725;--ink:#172033;--muted:#667085;
+ --line:#e5e9f0;--soft:#f4f7fb;--green:#16845b;--surface:#fff;
+ --shadow:0 14px 40px rgba(24,39,75,.08);--pm-navy:#111b32;--pm-lime:#d9f66f;
+}
+body{background:#f7f8fc;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.01em}
+header{height:76px;padding:12px max(20px,calc((100vw - 1160px)/2));background:rgba(255,255,255,.94);border-bottom:1px solid #e8ebf2;box-shadow:0 3px 18px rgba(16,24,40,.035);position:sticky;top:0;z-index:25;backdrop-filter:blur(14px)}
+.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,#ff704b,#f04424);box-shadow:0 7px 16px #ff5a3638;font-size:15px}
+.brand-name{font-size:21px;letter-spacing:-.8px;color:#172033}
+.tagline{font-size:11px;color:#7b8497;font-weight:550}
+main{max-width:1160px;padding:0 22px}
+.search-row{padding:22px 0 10px;gap:12px}
+.search{height:54px;background:#fff;border:1px solid #e1e6ef;border-radius:16px;box-shadow:0 5px 18px #17203308}
+.search:focus-within{border-color:#ff8b72;box-shadow:0 0 0 4px #ff5a3617,0 8px 24px #1720330b}
+.search input{font-size:15px;padding:0 18px}
+.search button{width:58px;font-size:20px;background:linear-gradient(135deg,#ff704b,#f04424)}
+.filter-button{width:54px;background:#fff;border:1px solid #e1e6ef;border-radius:16px}
+.categories{padding:12px 0 22px;gap:12px}
+.category{min-width:76px;font-size:12px;color:#586174}
+.category-icon{width:52px;height:52px;border-radius:17px;background:#fff;border-color:#e4e8f0;box-shadow:0 3px 12px #17203308;transition:transform .2s,border-color .2s}
+.category:active .category-icon{transform:scale(.96)}
+.category.active .category-icon{background:var(--pm-navy);border-color:var(--pm-navy);color:var(--pm-lime)}
+.banner{margin:4px 0 28px;min-height:220px;border-radius:26px;padding:clamp(24px,4vw,44px);gap:28px;background:radial-gradient(circle at 88% 16%,#ffffff26 0 1px,transparent 2px),linear-gradient(115deg,#111b32 0%,#1d2d4e 58%,#344363 100%);box-shadow:0 20px 44px #15234225;position:relative;overflow:hidden}
+.banner:after{content:"";position:absolute;width:260px;height:260px;right:8%;top:-115px;border:1px solid #ffffff22;border-radius:50%;box-shadow:0 0 0 30px #ffffff08,0 0 0 65px #ffffff06;pointer-events:none}
+.banner-copy{position:relative;z-index:1;max-width:640px}
+.banner h1{font-size:clamp(27px,4vw,43px);line-height:1.04;letter-spacing:-1.4px;font-weight:850;margin-bottom:12px;max-width:620px}
+.banner p{font-size:15px;line-height:1.6;color:#e2e8f3;max-width:540px;margin-bottom:20px}
+.primary-link{background:var(--pm-lime);color:#172033;border-radius:12px;padding:12px 17px;font-size:13px;box-shadow:0 5px 0 #a9c74d;transition:transform .18s,box-shadow .18s}
+.primary-link:hover{transform:translateY(-2px);box-shadow:0 7px 0 #a9c74d}
+.discount-art{width:120px;min-height:120px;position:relative;z-index:1}
+.discount-tag{width:90px;height:104px;border-radius:18px;transform:rotate(8deg);box-shadow:0 18px 35px #0003}
+.discount-tag span{font-size:34px}
+.section{padding:0 0 28px}
+.section-head{margin-bottom:14px}
+.section-head h2{font-size:clamp(19px,2vw,24px);letter-spacing:-.7px}
+.text-link{font-size:13px}
+.products{gap:16px;padding:2px 2px 12px}
+.product{min-width:190px;max-width:220px;border:1px solid #e8ebf2;border-radius:19px;padding:14px;background:#fff;box-shadow:0 5px 18px #17203306;text-align:left;align-items:stretch;transition:transform .2s,box-shadow .2s,border-color .2s}
+.product:hover{transform:translateY(-4px);box-shadow:0 16px 32px #17203312;border-color:#ffd0c4}
+.product-image{height:140px;border-radius:13px;background:linear-gradient(145deg,#f6f8fb,#eef2f7);margin-bottom:12px}
+.product h3{font-size:14px;line-height:1.35;color:#172033;min-height:36px}
+.desc{font-size:11px;color:#7c879b}
+.price{font-size:20px;letter-spacing:-.6px;color:#ed4c2b;margin-top:5px}
+.old-price{font-size:12px;color:#8b95a7}
+.saving{display:inline-flex;align-self:flex-start;background:#eaf8f0;color:#16764c;border-radius:6px;padding:4px 7px;font-size:11px;margin-top:6px}
+.merchant{font-size:11px;color:#788399}
+.product-action{margin-top:10px;padding:10px;border-radius:10px;background:#fff1ec;color:#d94322;text-align:center}
+.trust{gap:12px;padding:0 0 30px}
+.trust-card{border:1px solid #e5e9f0;border-radius:16px;background:#fff;padding:18px 12px;box-shadow:0 5px 18px #17203305}
+.trust-icon{font-size:24px;margin-bottom:7px}
+.trust-card h3{font-size:13px;color:#172033}
+.trust-card p{font-size:11px;color:#778196;line-height:1.45}
+.amazon-banner{margin:0 0 24px;padding:20px;border-radius:16px;background:#fff;border-color:#e5e9f0}
+.all-products{gap:14px}
+.all-products .product{min-width:0;max-width:none;width:100%}
+.bottom-nav{background:rgba(255,255,255,.96);border-top:1px solid #e4e8f0;box-shadow:0 -8px 24px #17203308;backdrop-filter:blur(16px);padding-top:10px}
+.bottom-nav button{font-size:11px;gap:5px}
+.nav-icon{font-size:21px}
+.agent{right:18px;bottom:90px}
+.agent-button{height:54px;width:54px;box-shadow:0 8px 22px #17203325;border:2px solid #fff}
+.modal-panel{max-width:680px;margin:0 auto;border-radius:24px 24px 0 0;padding:24px max(22px,calc((100% - 620px)/2)) max(24px,env(safe-area-inset-bottom))}
+.pm-scroll-progress{background:linear-gradient(90deg,#ff5a36,#d9f66f);height:3px!important;z-index:100}
+.pm-step-rail{border-radius:16px!important;box-shadow:0 10px 30px #17203314!important;border:1px solid #e5e9f0!important}
+@media(min-width:900px){
+ body{padding-bottom:32px}
+ .bottom-nav{position:static;max-width:620px;margin:12px auto 24px;border:1px solid #e4e8f0;border-radius:18px;box-shadow:0 5px 20px #17203308}
+ .search-row{padding-top:30px}
+ .categories{justify-content:flex-start}
+ .products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible}
+ .product{max-width:none;min-width:0}
+ .all-products{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .trust{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ header{height:66px;padding:8px 14px}
+ .brand-name{font-size:18px}
+ main{padding:0 14px}
+ .search-row{padding:14px 0 8px}
+ .categories{padding:8px 0 18px;gap:8px}
+ .category{min-width:62px}
+ .category-icon{width:46px;height:46px;border-radius:15px}
+ .banner{margin:0 0 22px;padding:22px 18px;border-radius:22px;min-height:0;gap:8px}
+ .banner h1{font-size:27px;letter-spacing:-.8px}
+ .banner p{font-size:13px;line-height:1.5}
+ .discount-art{width:64px;min-height:70px}
+ .discount-tag{width:48px;height:60px;border-radius:12px}
+ .discount-tag span{font-size:22px}
+ .section{padding-bottom:22px}
+ .section-head h2{font-size:19px}
+ .product{min-width:164px;max-width:174px;border-radius:16px;padding:10px}
+ .product-image{height:105px}
+ .product h3{font-size:13px}
+ .price{font-size:18px}
+ .trust{gap:7px;padding-bottom:24px}
+ .trust-card{padding:12px 5px;border-radius:13px}
+ .trust-card h3{font-size:10px}
+ .trust-card p{font-size:9px}
+ .agent{right:12px;bottom:86px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+
 </head>
 <body><a class="skip-link" href="#popular">Aller directement aux produits</a>
 <header>

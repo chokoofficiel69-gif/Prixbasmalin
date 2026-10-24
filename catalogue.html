@@ -88,6 +88,63 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 .pm-search-disclaimer{font-size:11px;line-height:1.5;color:#777;margin:14px 0 0}
 @media(min-width:600px){.pm-search-overlay{align-items:center;padding:18px}.pm-search-panel{border-radius:20px;padding:22px;max-height:80vh}}
 
+
+/* Prix Malin 2027 — harmonisation du catalogue avec la nouvelle identité */
+:root{--pm-navy:#111b35;--pm-navy-2:#1b2b4b;--pm-coral:#ff6848;--pm-lime:#d9f56a;--pm-muted:#657087;--pm-line:#e3e8f0;--orange:var(--pm-coral);--ink:var(--pm-navy);--muted:var(--pm-muted);--line:var(--pm-line);color-scheme:light}
+body{background:#f5f7fb;color:var(--pm-navy)}
+header{background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--pm-line);box-shadow:0 4px 18px rgba(17,27,53,.04)}
+.brand{letter-spacing:-.045em;font-size:23px;color:var(--pm-navy)}
+.brand span{color:var(--pm-coral)}
+.back{color:var(--pm-coral);border-radius:12px;background:#fff0ec}
+main{padding-top:26px}
+.intro{position:relative;overflow:hidden;background:linear-gradient(125deg,var(--pm-navy),var(--pm-navy-2));border:0;border-radius:24px;padding:clamp(22px,4vw,38px);color:white;box-shadow:0 14px 35px rgba(17,27,53,.13)}
+.intro:after{content:"";position:absolute;width:210px;height:210px;right:-64px;top:-90px;border:34px solid rgba(217,245,106,.16);border-radius:50%;pointer-events:none}
+.intro h1{position:relative;z-index:1;font-size:clamp(28px,4vw,42px);letter-spacing:-.045em;line-height:1.08;max-width:720px}
+.intro p{position:relative;z-index:1;max-width:680px;color:#d7deec;font-size:15px}
+.tools{margin:22px 0}
+.search{min-height:54px;border:1px solid #dce2ed;border-radius:15px;background:white;padding:15px 18px;box-shadow:0 6px 20px rgba(17,27,53,.04);font-size:15px}
+.search:focus{border-color:var(--pm-coral);box-shadow:0 0 0 4px rgba(255,104,72,.12);outline:0}
+.filters{gap:9px;padding:3px 2px 9px}
+.filters button{border:1px solid #e0e5ee;background:#fff;color:#34405a;border-radius:999px;min-height:42px;padding:10px 16px;font-weight:750}
+.filters button.active{background:var(--pm-navy);border-color:var(--pm-navy);color:white;box-shadow:0 5px 14px rgba(17,27,53,.16)}
+.count{font-size:13px;font-weight:700;color:#69758b}
+.grid{gap:15px}
+.product{background:#fff;border:1px solid #e6eaf1;border-radius:20px;padding:12px;box-shadow:0 5px 20px rgba(17,27,53,.035);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.product:hover{transform:translateY(-3px);border-color:#d1d9e7;box-shadow:0 13px 30px rgba(17,27,53,.09)}
+.photo{background:linear-gradient(145deg,#f7f9fc,#eef2f8);border-radius:14px}
+.name{font-size:14px;line-height:1.4;letter-spacing:-.015em;color:var(--pm-navy)}
+.desc{color:#758096;line-height:1.45}
+.price{font-size:17px;color:var(--pm-navy);letter-spacing:-.025em}
+.merchant{color:#788298}
+.offer{background:var(--pm-coral);color:#24192b;border-radius:12px;min-height:44px;box-shadow:none}
+.offer:hover{background:#ff8066;box-shadow:0 6px 14px rgba(255,104,72,.2);transform:translateY(-1px)}
+.verified-shelf{background:#fff;border:1px solid #dfe5ef;border-radius:22px;box-shadow:0 8px 28px rgba(17,27,53,.045);padding:20px}
+.verified-shelf-head h2{color:var(--pm-navy);letter-spacing:-.035em}
+.verified-shelf-head p{color:#69758b}
+.verified-offer-row{border-color:#e5e9f0;border-radius:12px}
+.verified-offer-price strong{color:var(--pm-navy)}
+.verified-offer-price a{color:#b8422b}
+.verified-shelf .verified-model{color:#b8422b}
+.verified-shelf .verified-image{background:#f2f5fa;color:var(--pm-navy);border-radius:14px}
+.verified-shelf .verified-meta{background:#f5f7fb;color:#626e83;border-radius:10px}
+.discovery-compare-row{border-color:#e2e7ef;background:#f8f9fc;border-radius:11px}
+.discovery-compare-row span{color:var(--pm-navy)}
+.discovery-compare-row a{color:#b8422b}
+.multi-search-btn{border-color:#ffd1c7;background:#fff4f1;color:#a83e2d;border-radius:12px;min-height:44px}
+.multi-search-btn:hover{background:#ffe8e2}
+.pm-search-overlay{background:rgba(12,20,39,.66);backdrop-filter:blur(5px)}
+.pm-search-panel{border:1px solid #e7ebf2;background:#fff}
+.pm-search-title{color:var(--pm-navy);letter-spacing:-.035em}
+.pm-search-link{border-color:#e1e6ef;border-radius:13px}
+.pm-search-link.primary{border-color:#ffc7b9;background:#fff2ee;color:#a83e2d}
+.pm-home-shortcut{border:1px solid #e1e6ef;background:var(--pm-navy);color:#fff;box-shadow:0 8px 24px rgba(17,27,53,.24)}
+.pm-home-shortcut:hover{background:var(--pm-navy-2);box-shadow:0 10px 28px rgba(17,27,53,.3)}
+.note{color:#69758b}
+.empty{background:#fff;border:1px dashed #d5dce8;border-radius:18px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425fe8;outline-offset:3px}
+@media(min-width:700px){.product{padding:14px}.verified-shelf{padding:24px}.name{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.product,.offer,.filters button,.pm-home-shortcut{transition:none}.product:hover,.offer:hover,.pm-home-shortcut:hover{transform:none}}
+
 </style>  <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"581731ca0ab54223acdf63ecfca342b0"}'></script>
 <!-- End Cloudflare Web Analytics -->
