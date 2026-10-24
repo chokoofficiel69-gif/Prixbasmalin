@@ -1,3 +1,4 @@
+import {isIP} from "node:net";
 // Utilitaires partagés et testables du moteur de prix.
 export function parsePrice(value) {
   if (value == null) return null;
@@ -20,6 +21,26 @@ export function secureUrl(value, base) {
     return url.protocol === "https:" ? url.href : null;
   } catch {
     return null;
+  }
+}
+
+export function isSafeMerchantUrl(value) {
+  const normalized = secureUrl(value);
+  if (!normalized) return false;
+  try {
+    const url = new URL(normalized);
+    const hostname = url.hostname.toLowerCase();
+    const hostForIpCheck = hostname.startsWith("[") && hostname.endsWith("]")
+      ? hostname.slice(1, -1)
+      : hostname;
+    if (isIP(hostForIpCheck) !== 0) return false;
+    if (hostname === "localhost" || hostname.endsWith(".localhost") ||
+        hostname.endsWith(".local") || hostname.endsWith(".internal")) return false;
+    if (url.username || url.password) return false;
+    if (url.port && url.port !== "443") return false;
+    return true;
+  } catch {
+    return false;
   }
 }
 
