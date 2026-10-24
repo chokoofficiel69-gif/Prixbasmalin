@@ -1,6 +1,8 @@
 name: Actualiser les prix publics (sources configurées uniquement)
 
 on:
+  schedule:
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -21,6 +23,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Tester les utilitaires de prix
+        run: node --test price-engine/price-utils.test.mjs
+      - name: Valider les fiches produit et sources marchandes
+        run: node price-engine/validate-config.mjs
       - name: Lire les prix publiquement disponibles
         run: node price-engine/refresh.mjs
       - name: Enregistrer le relevé

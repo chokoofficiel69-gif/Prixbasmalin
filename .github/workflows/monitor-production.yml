@@ -9,8 +9,11 @@ on:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
       - "catalogue.html"
+      - "etat-prix.html"
       - "data/prices.json"
       - "CNAME"
+      - "price-engine/**"
+      - ".github/workflows/refresh-prices.yml"
   push:
     branches:
       - main
@@ -18,15 +21,117 @@ on:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
       - "catalogue.html"
+      - "etat-prix.html"
       - "data/prices.json"
       - "CNAME"
+      - "price-engine/**"
+      - ".github/workflows/refresh-prices.yml"
 
 permissions:
   contents: read
 
 jobs:
+  validate-code:
+    name: Tests et syntaxe du code de la branche
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le dépôt pour les tests
+        uses: actions/checkout@v4
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tester parseur, URL, identité produit et offres historiques
+        run: node --test price-engine/price-utils.test.mjs
+      - name: Vérifier la syntaxe du moteur de prix
+        run: node --check price-engine/refresh.mjs
+      - name: Vérifier le blocage des redirections non sûres
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const engine = fs.readFileSync("price-engine/refresh.mjs", "utf8");
+          const utils = fs.readFileSync("price-engine/price-utils.mjs", "utf8");
+          const tests = fs.readFileSync("price-engine/price-utils.test.mjs", "utf8");
+          const checks = [
+            ["redirections HTTP désactivées", engine.includes('redirect:"manual"')],
+            ["URL cible validée avant chaque requête", engine.includes("if (!isSafeMerchantUrl(currentUrl))")],
+            ["redirections validées avec le résolveur sûr", engine.includes("resolveSafeRedirect(location, currentUrl)")],
+            ["tests de redirection non sûre présents", tests.includes("résout uniquement les redirections vers des URL HTTPS publiques")],
+            ["résolveur de redirection strict disponible", utils.includes("export function resolveSafeRedirect")],
+            ["statut historique si toutes les sources échouent", engine.includes('status:hasFreshOffers ? "fresh_offers_available" : "historical_only"')],
+          ];
+          const failures = checks.filter(([, ok]) => !ok);
+          for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
+          if (failures.length) process.exit(1);
+          NODE
+      - name: Vérifier la syntaxe du validateur de configuration
+        run: node --check price-engine/validate-config.mjs
+      - name: Valider la configuration des produits et marchands
+        run: node price-engine/validate-config.mjs
+      - name: Extraire le JavaScript du catalogue de la branche
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("catalogue.html", "utf8");
+          const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+            .filter(([, attrs, body]) => !/\bsrc\s*=/i.test(attrs) && body.trim())
+            .map(([, , body]) => body);
+          if (inlineScripts.length === 0) throw new Error("Aucun script inline trouvé dans catalogue.html");
+          fs.writeFileSync("/tmp/catalogue-inline.js", inlineScripts.join("\n;\n"));
+          console.log("Scripts inline trouvés :", inlineScripts.length);
+          NODE
+      - name: Vérifier la syntaxe JavaScript du catalogue
+        run: node --check /tmp/catalogue-inline.js
+      - name: Extraire le JavaScript du tableau de bord des prix
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("etat-prix.html", "utf8");
+          const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+            .filter(([, attrs, body]) => !/\bsrc\s*=/i.test(attrs) && body.trim())
+            .map(([, , body]) => body);
+          if (inlineScripts.length === 0) throw new Error("Aucun script inline trouvé dans etat-prix.html");
+          fs.writeFileSync("/tmp/etat-prix-inline.js", inlineScripts.join("\n;\n"));
+          console.log("Scripts inline trouvés :", inlineScripts.length);
+          NODE
+      - name: Vérifier la syntaxe JavaScript du tableau de bord
+        run: node --check /tmp/etat-prix-inline.js
+      - name: Vérifier les métriques du tableau de bord des prix
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("etat-prix.html", "utf8");
+          const checks = [
+            ["compteur d'offres actuelles séparé", html.includes('id="verifiedOffers"') && html.includes("freshOffers.length")],
+            ["compteur historique séparé", html.includes('id="historicalOffers"') && html.includes("historicalOffers.length")],
+            ["les prix de plus de 24 h ne sont pas comptés comme actuels", html.includes("age<=24*60*60*1000") && html.includes("isCurrentOffer(offer)&&validOffer(offer)")],
+            ["état sans source clairement décrit", html.includes("feed.status==='no_sources_configured'")],
+          ];
+          const failures = checks.filter(([, ok]) => !ok);
+          for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
+          if (failures.length) process.exit(1);
+          NODE
+      - name: Vérifier la séparation catalogue découverte / tarifs vérifiés
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("catalogue.html", "utf8");
+          const checks = [
+            ["section des modèles exacts", html.includes('id="verifiedShelf"')],
+            ["rendu dédié aux prix marchands", html.includes("function renderVerifiedProducts(products)")],
+            ["liste par marchand", html.includes('list.setAttribute("aria-label","Prix par marchand")')],
+            ["catalogue générique sans raccordement direct aux prix exacts", !html.includes("verifiedPriceIndex.get(p.id)")],
+            ["liens par marchand stylés", html.includes(".discovery-compare-row") && html.includes(".discovery-disclaimer")],
+            ["six destinations de recherche", ["Amazon","Google Shopping","eBay France","Fnac","Cdiscount","Darty"].every(name => html.includes('name:"' + name + '"'))],
+          ];
+          const failures = checks.filter(([, ok]) => !ok);
+          for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
+          if (failures.length) process.exit(1);
+          NODE
+
   smoke-test:
-    name: Site, catalogue et Worker attribution
+    name: Disponibilité de production et Worker attribution
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

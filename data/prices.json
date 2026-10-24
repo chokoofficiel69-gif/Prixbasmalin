@@ -1,10 +1,11 @@
 {
   "version": 1,
   "generated_at": "2026-10-23T19:53:07.893103Z",
-  "schedule": "généré lors de la mise à jour du flux source autorisé",
-  "methodology": "Offres autorisées, identité exacte commune et prix classés frais de livraison inclus. Aucune estimation ni collecte web automatique.",
+  "schedule": "Pas d'actualisation automatique tant que des sources marchandes ne sont pas configurées",
+  "methodology": "Aucun produit ni offre vérifiée configuré. Aucun prix fictif n'est généré.",
   "products": [],
   "offers": [],
   "errors": [],
-  "previous_generated_at": "2026-10-23T14:14:21.207223Z"
+  "previous_generated_at": "2026-10-23T14:14:21.207223Z",
+  "status": "no_sources_configured"
 }
