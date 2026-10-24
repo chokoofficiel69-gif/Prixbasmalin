@@ -1,0 +1,38 @@
+name: Tests du moteur de prix
+
+on:
+  push:
+    branches:
+      - main
+      - feat/phase1-price-quality-ean
+      - feat/ebay-authorized-price-source
+  pull_request:
+    branches:
+      - main
+      - feat/phase1-price-quality-ean
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Tests unitaires et validation statique
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vérifier la syntaxe des modules
+        run: |
+          node --check price-engine/price-utils.mjs
+          node --check price-engine/refresh.mjs
+          node --check price-engine/ebay-api.mjs
+      - name: Exécuter les tests unitaires
+        run: node --test price-engine/*.test.mjs
+      - name: Valider la configuration des produits
+        run: node price-engine/validate-config.mjs

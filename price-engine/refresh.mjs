@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import {secureUrl, isSafeMerchantUrl, resolveSafeRedirect, extractOfferFromJsonLd, mergeFreshAndStaleOffers, markOffersStale} from "./price-utils.mjs";
+import {searchEbayByGtin} from "./ebay-api.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
@@ -22,7 +23,7 @@ function sourceStats(retailer) {
 }
 async function writeQuality(offers, products, errors) {
   quality.global.products_configured = products.length;
-  quality.global.offers_verified = offers.filter(o => !o.stale && o.verification_status === "verified_json_ld").length;
+  quality.global.offers_verified = offers.filter(o => !o.stale && ["verified_json_ld","verified_ebay_api"].includes(o.verification_status)).length;
   quality.global.offers_stale = offers.filter(o => o.stale).length;
   quality.global.coverage_rate = products.length ? Number((new Set(offers.filter(o => !o.stale).map(o => o.product_id)).size / products.length).toFixed(4)) : 0;
   for (const error of errors) {
@@ -167,6 +168,39 @@ for (const product of validProducts) {
     }
     await new Promise(resolve => setTimeout(resolve, 1200));
   }
+
+  // Source complémentaire autorisée : API officielle eBay Browse.
+  // Elle reste désactivée sans secrets GitHub, sans bloquer le relevé public existant.
+  if (process.env.EBAY_CLIENT_ID && process.env.EBAY_CLIENT_SECRET) {
+    const stats = sourceStats("eBay");
+    stats.attempts++;
+    try {
+      if (!/^\d{8,14}$/.test(String(product.ean ?? ""))) {
+        throw new Error("GTIN absent ou invalide pour la recherche eBay");
+      }
+      const ebayOffers = await searchEbayByGtin({
+        gtin:product.ean,
+        productId:product.id,
+        productName:product.name,
+        matchTerms:product.match_terms ?? [],
+        clientId:process.env.EBAY_CLIENT_ID,
+        clientSecret:process.env.EBAY_CLIENT_SECRET,
+        affiliateCampaignId:process.env.EBAY_CAMPAIGN_ID || undefined,
+        checkedAt:now
+      });
+      // Recherche par GTIN et validation par l’adaptateur : pas de prix inventé.
+      offers.push(...ebayOffers);
+      if (ebayOffers.length) {
+        stats.success += ebayOffers.length;
+        stats.last_success_at = now;
+      } else {
+        errors.push({product_id:product.id,retailer:"eBay",reason:"Aucune annonce EUR valide trouvée pour le GTIN recherché"});
+      }
+    } catch (error) {
+      stats.failures++;
+      errors.push({product_id:product.id,retailer:"eBay",reason:String(error.message ?? error).slice(0,180)});
+    }
+  }
 }
 
 // Conserver séparément les dernières offres des marchands qui ont échoué.
@@ -189,7 +223,7 @@ if (offers.length === 0) {
     status:hasFreshOffers ? "fresh_offers_available" : "historical_only",
     generated_at:hasFreshOffers ? now : (previous.generated_at ?? now),
     schedule:"vérification automatique toutes les heures (si des sources sont configurées)",
-    methodology:"Prix lus dans les données structurées publiques Product/Offer. Frais de livraison inconnus exclus du prix; aucune estimation ni prix inventé.",
+    methodology:"Prix lus dans les données structurées publiques Product/Offer et, si les identifiants sont configurés, via l’API officielle eBay Browse. Frais de livraison inconnus exclus du total; aucune estimation ni prix inventé.",
     products:productIds.map(id => {
       const product = validProducts.find(p => p.id === id);
       const rows = offers.filter(o => o.product_id === id).sort((a,b) => a.price_eur - b.price_eur);
