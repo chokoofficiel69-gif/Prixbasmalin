@@ -88,6 +88,8 @@ jobs:
             ["rendu dédié aux prix marchands", html.includes("function renderVerifiedProducts(products)")],
             ["liste par marchand", html.includes('list.setAttribute("aria-label","Prix par marchand")')],
             ["catalogue générique sans raccordement direct aux prix exacts", !html.includes("verifiedPriceIndex.get(p.id)")],
+            ["liens par marchand stylés", html.includes(".discovery-compare-row") && html.includes(".discovery-disclaimer")],
+            ["six destinations de recherche", ["Amazon","Google Shopping","eBay France","Fnac","Cdiscount","Darty"].every(name => html.includes('name:"' + name + '"'))],
           ];
           const failures = checks.filter(([, ok]) => !ok);
           for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
