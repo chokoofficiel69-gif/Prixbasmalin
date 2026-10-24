@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {parsePrice, secureUrl} from "./price-utils.mjs";
+import {parsePrice, secureUrl, matchesProductIdentity} from "./price-utils.mjs";
 
 test("parse les prix français avec espaces et virgule décimale", () => {
   assert.equal(parsePrice("1 299,99 €"), 1299.99);
@@ -20,4 +20,21 @@ test("n'accepte que les URL HTTPS", () => {
   assert.equal(secureUrl("http://example.com/p/1", "https://example.com"), null);
   assert.equal(secureUrl("javascript:alert(1)", "https://example.com"), null);
   assert.equal(secureUrl("::::", "not-a-url"), null);
+});
+
+test("n'accepte pas un autre modèle présent dans les données structurées", () => {
+  assert.equal(matchesProductIdentity({name:"Apple AirPods Pro 2"}, {name:"Apple AirPods 4"}), false);
+  assert.equal(matchesProductIdentity({name:"Apple AirPods 4"}, {name:"Apple AirPods 4"}), true);
+});
+test("permet une variante de titre seulement avec des termes distinctifs", () => {
+  assert.equal(
+    matchesProductIdentity({name:"Apple AirPods 4 — boîtier USB-C"},
+      {name:"AirPods 4", match_terms:["AirPods 4", "USB-C"]}),
+    true
+  );
+  assert.equal(
+    matchesProductIdentity({name:"Apple AirPods Pro 2"},
+      {name:"AirPods 4", match_terms:["AirPods 4"]}),
+    false
+  );
 });
