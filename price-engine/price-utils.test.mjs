@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {parsePrice, secureUrl, isSafeMerchantUrl, matchesProductIdentity, mergeFreshAndStaleOffers, parseExplicitEuroOffer, markOffersStale, extractOfferFromJsonLd, isOfferCurrent} from "./price-utils.mjs";
+import {parsePrice, secureUrl, isSafeMerchantUrl, resolveSafeRedirect, matchesProductIdentity, mergeFreshAndStaleOffers, parseExplicitEuroOffer, markOffersStale, extractOfferFromJsonLd, isOfferCurrent} from "./price-utils.mjs";
 
 test("parse les prix français avec espaces et virgule décimale", () => {
   assert.equal(parsePrice("1 299,99 €"), 1299.99);
@@ -210,4 +210,15 @@ test("un prix n'est actuel que s'il a été vérifié dans les dernières 24 heu
   assert.equal(isOfferCurrent({checked_at:"2026-10-24T10:10:00.000Z"}, now), false);
   assert.equal(isOfferCurrent({checked_at:"2026-10-24T09:30:00.000Z",stale:true}, now), false);
   assert.equal(isOfferCurrent({price_eur:42}, now), false);
+});
+
+test("résout uniquement les redirections vers des URL HTTPS publiques", () => {
+  const base = "https://marchand.example/produit";
+  assert.equal(resolveSafeRedirect("/produit-v2", base), "https://marchand.example/produit-v2");
+  assert.equal(resolveSafeRedirect("https://autre-marchand.example/p", base), "https://autre-marchand.example/p");
+  assert.equal(resolveSafeRedirect("http://autre-marchand.example/p", base), null);
+  assert.equal(resolveSafeRedirect("https://127.0.0.1/admin", base), null);
+  assert.equal(resolveSafeRedirect("https://localhost/admin", base), null);
+  assert.equal(resolveSafeRedirect("https://autre-marchand.example:8443/p", base), null);
+  assert.equal(resolveSafeRedirect("", base), null);
 });
