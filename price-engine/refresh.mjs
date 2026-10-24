@@ -31,7 +31,7 @@ async function writeQuality(offers, products, errors) {
     if (error.reason?.includes("Prix EUR absent")) stats.products_without_offer.push(error.product_id);
   }
   await fs.mkdir(new URL("../data/", import.meta.url), {recursive:true});
-  await fs.writeFile(new URL("../data/quality.json", import.meta.url), JSON.stringify(quality,null,2)+"\\n");
+  await fs.writeFile(new URL("../data/quality.json", import.meta.url), JSON.stringify(quality,null,2)+"\n");
 }
 
 async function fetchPublicMerchantPage(initialUrl) {
