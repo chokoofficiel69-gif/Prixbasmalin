@@ -44,6 +44,12 @@ export function isSafeMerchantUrl(value) {
   }
 }
 
+export function resolveSafeRedirect(location, currentUrl) {
+  if (typeof location !== "string" || !location.trim()) return null;
+  const resolved = secureUrl(location, currentUrl);
+  return resolved && isSafeMerchantUrl(resolved) ? resolved : null;
+}
+
 function normalizeProductName(value) {
   return String(value ?? "")
     .normalize("NFD")
