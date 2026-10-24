@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import {parsePrice, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers} from "./price-utils.mjs";
+import {parseExplicitEuroOffer, secureUrl, matchesProductIdentity, mergeFreshAndStaleOffers} from "./price-utils.mjs";
 
 const CONFIG = new URL("./products.json", import.meta.url);
 const OUTPUT = new URL("../data/prices.json", import.meta.url);
@@ -60,8 +60,9 @@ for (const product of config.products) {
             const rawOffers = Array.isArray(node.offers) ? node.offers : [node.offers];
             for (const raw of rawOffers) {
               if (!raw) continue;
-              const price = parsePrice(raw.price ?? raw.priceSpecification?.price);
-              const currency = String(raw.priceCurrency ?? raw.priceSpecification?.priceCurrency ?? "").toUpperCase();
+              const parsedOffer = parseExplicitEuroOffer(raw);
+              const price = parsedOffer?.price ?? null;
+              const currency = parsedOffer?.currency ?? null;
               const productUrl = secureUrl(raw.url ?? node.url ?? response.url, response.url);
               if (price !== null && currency === "EUR" && productUrl) {
                 found = {
