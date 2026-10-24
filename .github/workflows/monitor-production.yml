@@ -78,6 +78,21 @@ jobs:
           NODE
       - name: Vérifier la syntaxe JavaScript du tableau de bord
         run: node --check /tmp/etat-prix-inline.js
+      - name: Vérifier les métriques du tableau de bord des prix
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("etat-prix.html", "utf8");
+          const checks = [
+            ["compteur d'offres actuelles séparé", html.includes('id="verifiedOffers"') && html.includes("freshOffers.length")],
+            ["compteur historique séparé", html.includes('id="historicalOffers"') && html.includes("historicalOffers.length")],
+            ["les offres périmées sont exclues des prix actuels", html.includes("!offer?.stale&&validOffer(offer)")],
+            ["état sans source clairement décrit", html.includes("feed.status==='no_sources_configured'")],
+          ];
+          const failures = checks.filter(([, ok]) => !ok);
+          for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
+          if (failures.length) process.exit(1);
+          NODE
       - name: Vérifier la séparation catalogue découverte / tarifs vérifiés
         run: |
           node --input-type=module <<'NODE'
