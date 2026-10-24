@@ -75,11 +75,11 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from "node:fs";
           const html = fs.readFileSync("index.html", "utf8");
-          const inlineScripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-            .filter(([, attrs, body]) => !/\\bsrc\\s*=/i.test(attrs) && body.trim())
+          const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+            .filter(([, attrs, body]) => !/\bsrc\s*=/i.test(attrs) && body.trim())
             .map(([, , body]) => body);
           if (inlineScripts.length === 0) throw new Error("Aucun script inline trouvé dans index.html");
-          fs.writeFileSync("/tmp/index-inline.js", inlineScripts.join("\\n;\\n"));
+          fs.writeFileSync("/tmp/index-inline.js", inlineScripts.join("\n;\n"));
           console.log("Scripts inline trouvés dans index.html :", inlineScripts.length);
           NODE
       - name: Vérifier la syntaxe JavaScript de l’accueil
