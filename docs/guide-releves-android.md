@@ -39,4 +39,8 @@ Dans un CSV, les champs contenant une virgule doivent être entre guillemets sel
 3. **Faites relire puis fusionner la PR le jour même du relevé**, si possible : les offres doivent encore être dans la fenêtre de fraîcheur de 48 heures au moment de la reconstruction. Si la PR attend, refaites les relevés et mettez à jour `checked_at` uniquement après une nouvelle vérification réelle du prix.
 4. Le workflow de préparation exécute les tests, importe le CSV, reconstruit le flux sur une branche de données et ouvre une PR en brouillon. Le brouillon doit être relu; il ne fusionne ni ne déploie rien.
 
+**Important : le CSV remplace toutes les offres à chaque lancement, il ne s'agit pas d'un ajout cumulatif.** `data/merchant-offers.json` est reconstruit à partir des seules lignes présentes dans `data/inbox/releves.csv`. Gardez donc dans le CSV toutes les offres que vous souhaitez conserver, et pas uniquement la nouvelle offre du jour.
+
+Le flux de prix écarte les relevés de plus de **48 heures**. Si toutes les lignes du CSV sont périmées au moment de la reconstruction, la PR peut aboutir à un flux contenant **zéro prix publié**. C'est préférable à afficher un prix ancien comme s'il était actuel : refaites les vérifications des offres et actualisez `checked_at` uniquement après un contrôle réel, puis relancez la préparation.
+
 Une fiche produit peut être écartée si le GTIN/ASIN/MPN ne correspond pas exactement entre offres, si le prix ou les frais sont inconnus, ou si le relevé dépasse la fenêtre de fraîcheur configurée.
