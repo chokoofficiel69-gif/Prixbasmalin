@@ -1032,13 +1032,32 @@ function showProductDetail(p){
  if(related.length){
   relatedHtml='<div style="margin-top:16px;font-weight:700">Autres '+p.name.split(" ")[0].toLowerCase()+'s</div><div class="related" id="related"></div>';
  }
- const content=`<img class="detail-img" src="${p.image}" alt="${p.name}"><h3 style="margin:0 0 6px">${p.name}</h3><p style="margin:0 0 8px;color:#666">${p.desc}</p><div class="price" style="font-size:18px">${p.price}</div><div class="old-price">${p.old}</div><div class="saving">${p.save}</div><p style="margin-top:10px;font-size:13px">Consulte les offres du vendeur pour voir le prix actuel, les frais de livraison et la disponibilité.</p>${relatedHtml}`;
+ const content=`<img class="detail-img" src="${p.image}" alt="${p.name}"><h3 style="margin:0 0 6px">${p.name}</h3><p style="margin:0 0 8px;color:#666">${p.desc}</p><div class="price" style="font-size:18px">Prix exact à confirmer chez le vendeur</div><p style="margin-top:8px;font-size:13px;color:#555">Choisis une source ci-dessous. Amazon est prioritaire ; les autres sites permettent d'élargir la recherche. Les prix externes ne sont pas encore récupérés automatiquement par Prix Malin.</p><div id="detailMerchantPrices" style="display:grid;gap:8px;margin:12px 0"></div>${relatedHtml}`;
  document.getElementById("modalTitle").textContent=p.name;
  document.getElementById("modalContent").innerHTML=content;
+ const term=encodeURIComponent(p.query||p.name);
+ const sources=[
+  {name:"Amazon",url:"https://www.amazon.fr/s?k="+term+"&tag=prixbasmalin2-21",primary:true,detail:"Partenaire prioritaire"},
+  {name:"Google Shopping",url:"https://www.google.com/search?tbm=shop&q="+term,detail:"Comparer plusieurs vendeurs"},
+  {name:"idealo",url:"https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+term,detail:"Comparateur de prix"},
+  {name:"Le Dénicheur",url:"https://ledenicheur.fr/search?search="+term,detail:"Comparateur de prix"},
+  {name:"Fnac",url:"https://www.fnac.com/SearchResult/ResultList.aspx?Search="+term,detail:"Recherche marchand"},
+  {name:"Cdiscount",url:"https://www.cdiscount.com/search/10/"+term+".html",detail:"Recherche marchand"},
+  {name:"Darty",url:"https://www.darty.com/nav/recherche?text="+term,detail:"Recherche marchand"}
+ ];
+ const sourceList=document.getElementById("detailMerchantPrices");
+ sources.forEach((source,index)=>{
+  const a=document.createElement("a");a.href=source.url;a.target="_blank";a.rel=index===0?"sponsored nofollow noopener":"noopener noreferrer";
+  a.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid "+(source.primary?"#ffb38e":"#e8e8e8")+";border-radius:12px;background:"+(source.primary?"#fff4ed":"#fff")+";text-decoration:none;color:#252a32";
+  const left=document.createElement("span");left.style.cssText="display:flex;flex-direction:column;gap:3px";
+  const name=document.createElement("strong");name.textContent=source.name;name.style.color=source.primary?"#b8450b":"#252a32";
+  const detail=document.createElement("small");detail.textContent=source.detail;detail.style.color="#777";
+  const arrow=document.createElement("strong");arrow.textContent="↗";arrow.style.fontSize="18px";
+  left.append(name,detail);a.append(left,arrow);sourceList.append(a);
+ });
  const actions=document.createElement("div");actions.className="modal-actions";
- const add=document.createElement("button");add.className="modal-primary";add.textContent="Ajouter au panier";add.onclick=()=>{if(!cart.includes(p.id)){cart.push(p.id);saveCart();closeModal();renderProducts()}};
- const amazon=document.createElement("a");amazon.href=merchantUrl(p);amazon.target="_blank";amazon.rel="sponsored noopener";amazon.className="modal-secondary";amazon.style.textDecoration="none";amazon.style.display="inline-flex";amazon.style.alignItems="center";amazon.textContent="Voir sur Amazon";
- actions.append(add,amazon);document.getElementById("modalContent").append(actions);
+ const add=document.createElement("button");add.className="modal-secondary";add.textContent="Ajouter au panier";add.onclick=()=>{if(!cart.includes(p.id)){cart.push(p.id);saveCart();closeModal();renderProducts()}};
+ actions.append(add);document.getElementById("modalContent").append(actions);
  if(related.length){
   const relEl=document.getElementById("related");
   related.forEach(r=>relEl.append(productCard(r)));
