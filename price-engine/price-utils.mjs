@@ -111,6 +111,10 @@ export function extractOfferFromJsonLd(value, product, retailer, responseUrl, ch
     const rawOffers = Array.isArray(node.offers) ? node.offers : [node.offers];
     for (const raw of rawOffers) {
       if (!raw) continue;
+      const offerType = raw["@type"];
+      if (offerType === "AggregateOffer" || (Array.isArray(offerType) && offerType.includes("AggregateOffer"))) continue;
+      const availability = String(raw.availability ?? "");
+      if (/OutOfStock|SoldOut|Discontinued|PreOrder/i.test(availability)) continue;
       const parsedOffer = parseExplicitEuroOffer(raw);
       const productUrl = secureUrl(raw.url ?? node.url ?? responseUrl, responseUrl);
       if (!parsedOffer || !productUrl) continue;
@@ -122,9 +126,9 @@ export function extractOfferFromJsonLd(value, product, retailer, responseUrl, ch
         currency: "EUR",
         shipping_price_eur: null,
         total_price_eur: null,
-        availability: String(raw.availability ?? "").includes("InStock")
+        availability: availability.includes("InStock")
           ? "in_stock"
-          : String(raw.availability ?? "").includes("OutOfStock")
+          : availability.includes("OutOfStock")
             ? "out_of_stock"
             : "unknown",
         product_url: productUrl,
