@@ -396,21 +396,6 @@ button:disabled{opacity:.48;cursor:not-allowed;box-shadow:none;transform:none}
 @media(max-width:520px){.category-icon{width:60px;height:60px;border-radius:17px}.category-icon img{border-radius:12px}}
 
 
-/* Bannière flottante de promotion — prête à évoluer vers un emplacement affilié */
-.floating-promo{position:fixed;z-index:28;left:12px;right:12px;bottom:calc(82px + env(safe-area-inset-bottom));max-width:620px;margin:0 auto;display:flex;align-items:center;gap:11px;padding:13px 42px 13px 13px;background:rgba(255,250,246,.97);border:1px solid #ffd2bd;border-radius:17px;box-shadow:0 8px 28px rgba(52,32,18,.16);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--ink)}
-.floating-promo-tag{align-self:flex-start;flex:none;padding:6px 7px;border-radius:8px;background:#ff5a1f;color:#fff;font-size:9px;font-weight:800;letter-spacing:.35px}
-.floating-promo-copy{display:grid;gap:4px;min-width:0;flex:1}
-.floating-promo-copy strong{font-size:12px;line-height:1.25;font-weight:800}
-.floating-promo-copy span{font-size:10px;line-height:1.35;color:#6c625c}
-.floating-promo-cta{flex:none;display:inline-flex;align-items:center;gap:5px;padding:10px 11px;border-radius:10px;background:#ff5a1f;color:#fff;font-size:11px;font-weight:800;white-space:nowrap}
-.floating-promo-cta:hover{background:#e7470d}
-.floating-promo-close{position:absolute;right:7px;top:7px;width:25px;height:25px;border:0;border-radius:50%;background:#f2e5dc;color:#65554b;font-size:18px;line-height:1}
-body.promo-dismissed .floating-promo{display:none}
-body.promo-visible .agent{bottom:calc(158px + env(safe-area-inset-bottom))}
-@media(min-width:700px){.floating-promo{bottom:22px;left:auto;right:22px;margin:0}.floating-promo-copy strong{font-size:13px}.floating-promo-copy span{font-size:11px}body.promo-visible .agent{bottom:105px}}
-@media(max-width:390px){.floating-promo{gap:8px;padding:11px 35px 11px 10px}.floating-promo-tag{font-size:8px;padding:5px}.floating-promo-copy strong{font-size:11px}.floating-promo-copy span{font-size:9px}.floating-promo-cta{padding:9px 8px;font-size:10px}}
-
-
 /* Publicités vidéo — Prixbasmalin */
 .ad-video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;background:#111}
 .ad-card-video{display:block;position:relative;overflow:hidden;border-radius:12px;width:100%;background:#111}
@@ -1059,15 +1044,7 @@ main{max-width:1160px;padding:0 22px}
   <button data-nav="account"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Compte</span></button>
 </nav>
 
-<aside class="floating-promo" id="floatingPromo" aria-label="Flyer partenaire La Maille">
-  <button class="floating-promo-close" id="closeFloatingPromo" aria-label="Fermer la bannière">×</button>
-  <span class="floating-promo-tag">PARTENAIRE</span>
-  <div class="floating-promo-copy">
-    <strong>La Maille · retrouve-moi sur Snap 👻</strong>
-    <span>@lozeill69 — contact direct</span>
-  </div>
-  <a href="https://www.snapchat.com/add/lozeill69" target="_blank" rel="noopener noreferrer" class="floating-promo-cta">Ajouter ↗</a>
-</aside>
+
 
 <div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l’assistant Prix Malin" title="Besoin d’aide ?"><img src="assets/mascotte-malin.svg" alt=""></button></div><button id="accessibilityButton" class="accessibility-button" aria-label="Ouvrir les options d’accessibilité" title="Accessibilité">♿</button>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -1571,16 +1548,6 @@ if(localStorage.getItem("pmLargeText")==="1")document.body.classList.add("large-
 
 document.getElementById("modalClose").onclick=closeModal;
 document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
-
-const floatingPromo=document.getElementById("floatingPromo");
-if(floatingPromo){
- document.body.classList.add("promo-visible");
- document.getElementById("closeFloatingPromo").addEventListener("click",()=>{
-   floatingPromo.remove();
-   document.body.classList.remove("promo-visible");
-   document.body.classList.add("promo-dismissed");
- });
-}
 
 updateCartCount();
 renderProducts();
