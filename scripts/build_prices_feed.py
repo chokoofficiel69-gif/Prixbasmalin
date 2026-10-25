@@ -222,6 +222,7 @@ def main():
             "price_eur": round(float(price), 2),
             "shipping_price_eur": round(float(shipping), 2),
             "total_price_eur": round(float(price) + float(shipping), 2),
+            "freshness_max_age_hours": max_age_hours,
             "product_url": product_url,
             "checked_at": checked_at.isoformat().replace("+00:00", "Z"),
         }
