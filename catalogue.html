@@ -623,4 +623,53 @@ searchEl.addEventListener("input",render);document.getElementById("filters").add
 </script>
 <script src="/js/cookie-consent.js" defer></script>
 <script type="module" src="/js/prix-malin-auth.js"></script>
+
+<style id="pm-favorites-style">
+.pm-fav-toggle{position:absolute;right:8px;top:8px;z-index:4;width:36px;height:36px;border:1px solid #eadfd8;border-radius:50%;background:#fff;color:#8a817b;display:grid;place-items:center;font-size:21px;line-height:1;box-shadow:0 2px 8px #00000012;cursor:pointer}
+.pm-fav-toggle[aria-pressed="true"]{color:#e9571c;border-color:#ffc4aa;background:#fff3ed}
+.product{position:relative}
+.pm-fav-launch{position:fixed;z-index:9980;right:14px;bottom:18px;min-height:44px;padding:0 15px;border:0;border-radius:999px;background:#191919;color:#fff;font:750 13px system-ui,sans-serif;box-shadow:0 6px 22px #0003;display:flex;align-items:center;gap:8px;cursor:pointer}
+.pm-fav-count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#ff5a1f;color:#fff;font-size:11px}
+.pm-fav-overlay{position:fixed;inset:0;z-index:10020;background:#17171780;display:none;align-items:flex-end;justify-content:center}
+.pm-fav-overlay.open{display:flex}
+.pm-fav-panel{width:100%;max-width:620px;max-height:82vh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:20px 16px max(18px,env(safe-area-inset-bottom));box-shadow:0 -8px 35px #0002}
+.pm-fav-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pm-fav-head h2{font-size:21px;margin:0 0 6px;font-weight:850}
+.pm-fav-close{width:38px;height:38px;border:0;border-radius:50%;background:#f2f3f5;font-size:23px;cursor:pointer}
+.pm-fav-help{font-size:13px;line-height:1.5;color:#666;margin:4px 0 14px}
+.pm-fav-list{display:grid;gap:9px}
+.pm-fav-row{display:grid;grid-template-columns:60px minmax(0,1fr) auto;gap:11px;align-items:center;border:1px solid #eee;border-radius:12px;padding:9px}
+.pm-fav-row img{width:60px;height:60px;object-fit:contain;background:#f7f7f7;border-radius:8px}
+.pm-fav-row strong{display:block;font-size:13px;line-height:1.35}
+.pm-fav-row a{font-size:11px;color:#b9470b;text-decoration:underline;overflow-wrap:anywhere}
+.pm-fav-remove{border:1px solid #eee;border-radius:8px;background:#fff;padding:8px;color:#555;font-size:12px}
+.pm-fav-empty{padding:22px 14px;border:1px dashed #ddd;border-radius:12px;text-align:center;color:#666;font-size:13px;line-height:1.5}
+@media(min-width:760px){.pm-fav-overlay{align-items:center;padding:20px}.pm-fav-panel{border-radius:20px}}
+@media(prefers-reduced-motion:reduce){.pm-fav-toggle,.pm-fav-launch{transition:none!important}}
+</style>
+<script id="pm-favorites-script">
+(function(){
+  const KEY='pmSavedProductsV1';
+  const read=()=>{try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(value)?value.filter(x=>x&&typeof x.key==='string'&&typeof x.title==='string').slice(0,100):[]}catch(_){return []}};
+  const write=items=>{try{localStorage.setItem(KEY,JSON.stringify(items.slice(0,100)));return true}catch(_){return false}};
+  let saved=read();
+  const keyFor=(title,url)=>title.trim().toLocaleLowerCase('fr')+'|'+(url||'');
+  const titleFor=card=>(card.querySelector('h3,.name,.cart-item-name,.product-name')?.textContent||card.getAttribute('data-title')||'Produit').replace(/\s+/g,' ').trim();
+  const imageFor=card=>card.querySelector('img')?.getAttribute('src')||'';
+  const linkFor=card=>{const a=card.querySelector('a[href]');return a?.getAttribute('href')||''};
+  const makeButton=(label,pressed)=>{const b=document.createElement('button');b.type='button';b.className='pm-fav-toggle';b.setAttribute('aria-label',label);b.setAttribute('aria-pressed',String(pressed));b.textContent=pressed?'♥':'♡';return b};
+  const syncButtons=()=>document.querySelectorAll('.pm-fav-toggle').forEach(b=>{const card=b.closest('.product,[data-product-card]');if(!card)return;const title=titleFor(card),url=linkFor(card),key=keyFor(title,url),active=saved.some(x=>x.key===key);b.setAttribute('aria-pressed',String(active));b.setAttribute('aria-label',(active?'Retirer des favoris : ':'Ajouter aux favoris : ')+title);b.textContent=active?'♥':'♡'});
+  const overlay=document.createElement('div');overlay.className='pm-fav-overlay';overlay.id='pmFavoritesOverlay';overlay.innerHTML='<section class="pm-fav-panel" role="dialog" aria-modal="true" aria-labelledby="pmFavTitle"><div class="pm-fav-head"><div><h2 id="pmFavTitle">Mes favoris</h2></div><button type="button" class="pm-fav-close" aria-label="Fermer les favoris">×</button></div><p class="pm-fav-help">Retrouve les produits enregistrés sur cet appareil. Les favoris sont locaux à ce navigateur : ils ne sont pas synchronisés entre appareils et ne garantissent pas la disponibilité ni le prix actuel.</p><div class="pm-fav-list" id="pmFavoritesList"></div></section>';
+  document.body.appendChild(overlay);
+  const launch=document.createElement('button');launch.type='button';launch.className='pm-fav-launch';launch.innerHTML='<span aria-hidden="true">♡</span><span>Mes favoris</span><span class="pm-fav-count" id="pmFavCount">0</span>';launch.setAttribute('aria-haspopup','dialog');document.body.appendChild(launch);
+  const renderList=()=>{const list=overlay.querySelector('#pmFavoritesList');list.replaceChildren();saved.forEach(item=>{const row=document.createElement('div');row.className='pm-fav-row';if(item.image){const img=document.createElement('img');img.src=item.image;img.alt='';img.loading='lazy';row.appendChild(img)}else{const blank=document.createElement('div');blank.setAttribute('aria-hidden','true');blank.style.cssText='width:60px;height:60px;border-radius:8px;background:#f7f7f7';row.appendChild(blank)}const info=document.createElement('div');const title=document.createElement('strong');title.textContent=item.title;info.appendChild(title);if(item.url){const a=document.createElement('a');a.href=item.url;a.textContent='Ouvrir le produit ↗';if(/^https?:/i.test(item.url)){a.target='_blank';a.rel='noopener noreferrer'}info.appendChild(a)}row.appendChild(info);const remove=document.createElement('button');remove.type='button';remove.className='pm-fav-remove';remove.textContent='Retirer';remove.setAttribute('aria-label','Retirer '+item.title+' des favoris');remove.addEventListener('click',()=>{saved=saved.filter(x=>x.key!==item.key);write(saved);renderList();syncButtons()});row.appendChild(remove);list.appendChild(row)});if(!saved.length){const empty=document.createElement('div');empty.className='pm-fav-empty';empty.textContent='Aucun favori pour le moment. Appuie sur le cœur d’un produit pour le retrouver ici.';list.appendChild(empty)}document.getElementById('pmFavCount').textContent=String(saved.length);};
+  const open=()=>{renderList();overlay.classList.add('open');overlay.querySelector('.pm-fav-close').focus()};
+  const close=()=>{overlay.classList.remove('open');launch.focus()};
+  launch.addEventListener('click',open);overlay.querySelector('.pm-fav-close').addEventListener('click',close);overlay.addEventListener('click',e=>{if(e.target===overlay)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))close()});
+  const decorate=()=>{document.querySelectorAll('.product,[data-product-card]').forEach(card=>{if(card.querySelector('.pm-fav-toggle'))return;const title=titleFor(card);if(!title||title==='Produit')return;card.appendChild(makeButton('Ajouter aux favoris : '+title,false))});syncButtons()};
+  document.addEventListener('click',e=>{const button=e.target.closest('.pm-fav-toggle');if(!button)return;e.preventDefault();e.stopPropagation();const card=button.closest('.product,[data-product-card]');if(!card)return;const title=titleFor(card),url=linkFor(card),key=keyFor(title,url),found=saved.some(x=>x.key===key);if(found)saved=saved.filter(x=>x.key!==key);else{saved.unshift({key,title,image:imageFor(card),url});saved=saved.slice(0,100)}if(!write(saved)){saved=read();alert('Le navigateur ne permet pas d’enregistrer les favoris. Vérifie ses réglages de stockage.')}renderList();syncButtons()});
+  decorate();new MutationObserver(decorate).observe(document.body,{childList:true,subtree:true});window.addEventListener('storage',e=>{if(e.key===KEY){saved=read();renderList();syncButtons()}});
+  renderList();
+})();
+</script>
 </body></html>
