@@ -165,6 +165,28 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 #verifiedProducts .multi-search-btn{display:none!important}
 @media(min-width:700px){#verifiedProducts{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}#verifiedProducts .product{padding:14px}#verifiedProducts .name{font-size:16px}#verifiedProducts .price{font-size:26px}}
 @media(min-width:1000px){#verifiedProducts{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Fiche enrichie Prix Malin : variantes, accessoires et alternatives */
+.pm-detail-btn{width:100%;margin-top:9px;border:1px solid #dce3ef;border-radius:11px;background:#f7f9fc;color:#172342;font:800 12px system-ui,-apple-system,sans-serif;min-height:42px;padding:10px;cursor:pointer}
+.pm-detail-btn:hover{border-color:#ffb39b;background:#fff3ef}
+.pm-detail-overlay{position:fixed;inset:0;z-index:11000;background:rgba(10,18,37,.66);display:none;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(4px)}
+.pm-detail-overlay.open{display:flex}
+.pm-detail-panel{width:100%;max-width:760px;max-height:90vh;overflow:auto;background:#f7f8fb;border-radius:22px 22px 0 0;padding:20px 16px max(22px,env(safe-area-inset-bottom));box-shadow:0 -12px 40px #0002}
+.pm-detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.pm-detail-title{font-size:23px;line-height:1.18;letter-spacing:-.04em;color:#111b35;margin:0 0 7px}
+.pm-detail-subtitle{font-size:13px;line-height:1.5;color:#68748a;margin:0 0 16px}
+.pm-detail-close{width:40px;height:40px;flex:none;border:0;border-radius:50%;background:#e9edf4;color:#172342;font-size:24px;cursor:pointer}
+.pm-detail-section{margin-top:18px}
+.pm-detail-section h3{font-size:17px;letter-spacing:-.02em;color:#111b35;margin:0 0 10px}
+.pm-detail-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pm-detail-card{background:white;border:1px solid #e2e7f0;border-radius:14px;padding:12px;min-width:0}
+.pm-detail-card strong{display:block;font-size:13px;line-height:1.35;color:#172342}
+.pm-detail-card p{font-size:11px;line-height:1.45;color:#68748a;margin:6px 0 10px}
+.pm-detail-card a{display:block;text-align:center;border-radius:9px;background:#ff6848;color:#21182a;font-size:12px;font-weight:800;padding:10px 8px}
+.pm-detail-footnote{font-size:11px;line-height:1.5;color:#68748a;margin:16px 0 0}
+@media(min-width:600px){.pm-detail-overlay{align-items:center;padding:18px}.pm-detail-panel{border-radius:22px;padding:24px;max-height:84vh}.pm-detail-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.pm-detail-btn{transition:none}}
+
 </style>  <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"581731ca0ab54223acdf63ecfca342b0"}'></script>
 <!-- End Cloudflare Web Analytics -->
@@ -340,6 +362,14 @@ function render(){
     note.className="discovery-disclaimer";
     note.textContent="Liens de recherche, pas des prix en direct. Les prix vérifiés apparaissent séparément uniquement lorsqu'une offre exacte est disponible.";
     card.append(photo,name,desc,price,merchant,heading,list,note);
+    card.dataset.pmProductName=p.name;
+    card.dataset.pmProductQuery=p.query||p.name;
+    card.dataset.pmProductCategory=p.category||"tech";
+    const detailButton=document.createElement("button");
+    detailButton.type="button";
+    detailButton.className="pm-detail-btn";
+    detailButton.textContent="Accessoires & produits similaires";
+    card.append(detailButton);
     productsEl.append(card);
   });
 }
@@ -429,6 +459,14 @@ function renderVerifiedProducts(products){
     date.textContent="Prix affichés hors livraison si non confirmée. Vérifiez le modèle et le prix final chez le marchand.";
     if(!(original>Number(best.price_eur))) card.append(photo,model,name,price);
     card.append(meta,list,date);
+    card.dataset.pmProductName=p.name;
+    card.dataset.pmProductQuery=p.name;
+    card.dataset.pmProductCategory="verified";
+    const detailButton=document.createElement("button");
+    detailButton.type="button";
+    detailButton.className="pm-detail-btn";
+    detailButton.textContent="Accessoires & produits similaires";
+    card.append(detailButton);
     verifiedProductsEl.append(card);
   });
 }
@@ -457,6 +495,95 @@ function openMerchantSearch(p){
  links.forEach(item=>{const a=document.createElement("a");a.className="pm-search-link"+(item.primary?" primary":"");a.href=item.url;a.target="_blank";a.rel="noopener noreferrer";const label=document.createElement("span");label.textContent=item.name;const arrow=document.createElement("span");arrow.textContent="↗";a.append(label,arrow);box.append(a);});
  merchantOverlay.classList.add("open");document.body.style.overflow="hidden";merchantOverlay.querySelector(".pm-search-close").focus();
 }
+
+/* Fiches relationnelles : les liens ouvrent une recherche marchande, sans inventer de prix. */
+const pmDetailOverlay=document.createElement("div");
+pmDetailOverlay.className="pm-detail-overlay";
+pmDetailOverlay.id="pmProductDetails";
+pmDetailOverlay.setAttribute("role","dialog");
+pmDetailOverlay.setAttribute("aria-modal","true");
+pmDetailOverlay.setAttribute("aria-labelledby","pmDetailTitle");
+pmDetailOverlay.innerHTML='<section class="pm-detail-panel"><div class="pm-detail-header"><div><h2 class="pm-detail-title" id="pmDetailTitle">Autour de ce produit</h2><p class="pm-detail-subtitle" id="pmDetailSubtitle"></p></div><button type="button" class="pm-detail-close" aria-label="Fermer">×</button></div><div id="pmDetailContent"></div><p class="pm-detail-footnote">Les liens ouvrent des recherches chez les marchands : ce ne sont pas des prix vérifiés par Prix Malin. Vérifiez la référence exacte, la compatibilité, le vendeur, le stock et les frais avant achat. Les accessoires peuvent dépendre de la variante du produit.</p></section>';
+document.body.append(pmDetailOverlay);
+function pmNorm(s){return String(s||"").toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
+function pmRelations(name,query,cat){
+ const n=pmNorm(name+" "+query);
+ if(/switch|game boy|gameboy|console portable/.test(n))return {
+  accessories:[["Manettes supplémentaires","Contrôleurs pour jouer à plusieurs","manette Nintendo Switch 2 compatible"],["Pochette de transport","Protection en déplacement","pochette transport Nintendo Switch 2"],["Carte mémoire","Vérifier le format compatible avec la console","carte microSD Express Nintendo Switch 2"],["Protection d’écran","Vérifier le modèle exact","protection écran Nintendo Switch 2"]],
+  similar:[["Autres consoles Nintendo","Comparer les modèles et leurs caractéristiques","console Nintendo Switch modèles"],["Consoles portables alternatives","Comparer les performances et le prix","console portable gaming alternative"]]
+ };
+ if(/airpods|ecouteurs|buds|oreillettes/.test(n))return {
+  accessories:[["Étui de protection","Choisir la coque correspondant au boîtier exact",name+" coque protection"],["Embouts de rechange","Compatibilité à vérifier selon la référence",name+" embouts de rechange"],["Chargeur USB-C","Vérifier le câble et les besoins du boîtier",name+" chargeur USB-C"]],
+  similar:[["Écouteurs sans fil alternatifs","Comparer autonomie, réduction de bruit et confort","écouteurs sans fil réduction de bruit"],["Casques Bluetooth","Alternative pour une écoute couvrante","casque Bluetooth réduction de bruit"]]
+ };
+ if(/dyson|aspirateur|robot/.test(n))return {
+  accessories:[["Filtres de rechange","Vérifier la référence exacte de l’appareil",name+" filtre compatible"],["Brosses et accessoires","Compatibilité à confirmer selon le modèle",name+" brosse accessoire compatible"],["Batterie de remplacement","Vérifier impérativement la référence",name+" batterie remplacement"]],
+  similar:[["Aspirateurs sans fil similaires","Comparer autonomie, poids et accessoires","aspirateur balai sans fil comparatif"],["Aspirateurs robots","Alternative pour l’entretien des sols","aspirateur robot comparatif"]]
+ };
+ if(/telephone|smartphone|galaxy|iphone/.test(n))return {
+  accessories:[["Coque de protection","Sélectionner la bonne taille et le bon modèle",name+" coque compatible"],["Protection d’écran","Choisir la version exacte du téléphone",name+" protection écran"],["Chargeur USB-C","Puissance et compatibilité à vérifier",name+" chargeur compatible"],["Écouteurs","Choisir selon le connecteur et les usages",name+" écouteurs compatibles"]],
+  similar:[["Smartphones de la même gamme","Comparer stockage, taille et autonomie",name+" alternatives smartphones"],["Modèles moins chers","Chercher un modèle adapté au budget", "smartphone meilleur rapport qualité prix"]]
+ };
+ if(/ordinateur|laptop|tablette/.test(n))return {
+  accessories:[["Housse ou sacoche","Choisir selon la taille de l’écran",name+" housse sacoche"],["Souris sans fil","Vérifier les ports et la connectivité", "souris sans fil ordinateur"],["Hub USB-C","Vérifier les ports compatibles",name+" hub USB-C"],["Stockage externe","Choisir la capacité nécessaire", "SSD externe"]],
+  similar:[["Modèles équivalents","Comparer mémoire, stockage et processeur",name+" alternatives"],["Modèles plus abordables","Comparer les caractéristiques essentielles","ordinateur tablette petit budget"]]
+ };
+ if(/casque|enceinte|audio|haut.parleur/.test(n))return {
+  accessories:[["Étui de transport","Vérifier la forme et la taille",name+" étui transport"],["Câble audio ou USB","Choisir le bon connecteur",name+" câble compatible"],["Support ou rangement","Selon le type d’appareil",name+" support rangement"]],
+  similar:[["Autres modèles audio","Comparer autonomie et qualité sonore",name+" alternatives"],["Audio petit budget","Comparer les caractéristiques utiles","casque enceinte bluetooth petit budget"]]
+ };
+ if(/machine a cafe|cafe|air fryer|friteuse|blender|mixeur|bouilloire|grille.pain|cuisine/.test(n))return {
+  accessories:[["Accessoires d’entretien","Vérifier les accessoires compatibles avec la référence",name+" accessoires entretien"],["Pièces et consommables","Choisir la référence exacte",name+" consommables compatibles"]],
+  similar:[["Appareils similaires","Comparer capacité, puissance et dimensions",name+" alternatives"],["Alternatives économiques","Comparer les fonctions essentielles",name+" petit budget"]]
+ };
+ if(/chaussure|basket|jean|pantalon|veste|robe|sac|montre|lunette|vetement/.test(n))return {
+  accessories:[["Accessoires assortis","Compléments de style selon le produit",name+" accessoires"],["Entretien et protection","Selon la matière et l’usage",name+" entretien protection"]],
+  similar:[["Styles similaires","Comparer coupe, matière et tailles",name+" modèles similaires"],["Alternatives petit budget","Comparer les modèles disponibles",name+" petit prix"]]
+ };
+ const byCategory={
+  tech:{a:[["Protection et rangement","À choisir selon la référence exacte",name+" protection accessoires"],["Câbles et recharge","Vérifier les connecteurs nécessaires",name+" câble chargeur compatible"]],s:[["Produits similaires","Comparer les caractéristiques essentielles",name+" alternatives"],["Alternatives petit budget","Comparer les modèles proches",name+" petit budget"]]},
+  home:{a:[["Accessoires d’entretien","Vérifier la compatibilité avec l’appareil",name+" accessoires entretien"],["Rangement et consommables","Selon l’usage et la référence",name+" accessoires"]],s:[["Équipements similaires","Comparer fonctions et dimensions",name+" modèles similaires"],["Alternatives économiques","Comparer les fonctions essentielles",name+" petit prix"]]},
+  fashion:{a:[["Accessoires assortis","À adapter au style et à l’usage",name+" accessoires"],["Entretien","Selon la matière du produit",name+" entretien"]],s:[["Styles similaires","Comparer matière, taille et coupe",name+" similaires"],["Alternatives petit budget","Comparer les modèles proches",name+" petit prix"]]},
+  garden:{a:[["Accessoires de jardin","Vérifier les dimensions et raccords",name+" accessoires"],["Entretien et rangement","Selon l’usage prévu",name+" entretien"]],s:[["Produits de jardin similaires","Comparer capacité et dimensions",name+" alternatives"],["Alternatives économiques","Comparer les caractéristiques utiles",name+" petit budget"]]},
+  sport:{a:[["Équipement complémentaire","Choisir selon l’activité pratiquée",name+" accessoires"],["Rangement et entretien","Selon le type de matériel",name+" rangement entretien"]],s:[["Équipements similaires","Comparer taille, matière et fonctions",name+" alternatives"],["Alternatives économiques","Comparer les caractéristiques essentielles",name+" petit budget"]]},
+  beauty:{a:[["Accessoires compatibles","Selon la référence et l’usage",name+" accessoires"],["Entretien et consommables","Vérifier les références adaptées",name+" consommables"]],s:[["Produits similaires","Comparer les fonctions et formats",name+" alternatives"],["Alternatives petit budget","Comparer les modèles disponibles",name+" petit prix"]]},
+  baby:{a:[["Accessoires compatibles","Vérifier modèle, âge et sécurité",name+" accessoires compatibles"],["Rangement et entretien","Selon le produit concerné",name+" entretien rangement"]],s:[["Produits similaires","Comparer âge recommandé et caractéristiques",name+" alternatives"],["Alternatives économiques","Vérifier normes et caractéristiques",name+" petit budget"]]}
+ };
+ const rel=byCategory[cat]||byCategory.tech;
+ return {accessories:rel.a,similar:rel.s};
+}
+function pmDetailCard(item){
+ const card=document.createElement("article");card.className="pm-detail-card";
+ const title=document.createElement("strong");title.textContent=item[0];
+ const desc=document.createElement("p");desc.textContent=item[1];
+ const link=document.createElement("a");link.href="https://www.google.com/search?tbm=shop&q="+encodeURIComponent(item[2]);link.target="_blank";link.rel="noopener noreferrer";link.textContent="Rechercher les offres ↗";
+ card.append(title,desc,link);return card;
+}
+function pmOpenDetails(name,query,cat){
+ const rel=pmRelations(name,query,cat);
+ document.getElementById("pmDetailTitle").textContent=name;
+ document.getElementById("pmDetailSubtitle").textContent="Accessoires, produits complémentaires et alternatives";
+ const content=document.getElementById("pmDetailContent");content.replaceChildren();
+ [["Accessoires associés",rel.accessories],["Produits similaires",rel.similar]].forEach(section=>{
+  const wrap=document.createElement("section");wrap.className="pm-detail-section";
+  const h=document.createElement("h3");h.textContent=section[0];
+  const grid=document.createElement("div");grid.className="pm-detail-cards";
+  section[1].forEach(item=>grid.append(pmDetailCard(item)));
+  wrap.append(h,grid);content.append(wrap);
+ });
+ pmDetailOverlay.classList.add("open");document.body.style.overflow="hidden";pmDetailOverlay.querySelector(".pm-detail-close").focus();
+}
+function pmCloseDetails(){pmDetailOverlay.classList.remove("open");document.body.style.overflow="";}
+pmDetailOverlay.querySelector(".pm-detail-close").addEventListener("click",pmCloseDetails);
+pmDetailOverlay.addEventListener("click",e=>{if(e.target===pmDetailOverlay)pmCloseDetails();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&pmDetailOverlay.classList.contains("open"))pmCloseDetails();});
+function pmDetailClick(e){
+ const button=e.target.closest(".pm-detail-btn");if(!button)return;
+ const card=button.closest(".product");if(!card)return;
+ pmOpenDetails(card.dataset.pmProductName||"Produit",card.dataset.pmProductQuery||card.dataset.pmProductName,card.dataset.pmProductCategory||"tech");
+}
+productsEl.addEventListener("click",pmDetailClick);
+verifiedProductsEl.addEventListener("click",pmDetailClick);
 searchEl.addEventListener("input",render);document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();
 </script>  <script src="js/track-outbound.js?v=20261023fix1" defer></script>
 <script>
