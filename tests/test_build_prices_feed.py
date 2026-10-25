@@ -147,6 +147,7 @@ class PriceFeedValidationTests(unittest.TestCase):
         long_result = self.run_builder([stale_by_default], config=long_window)
         self.assertEqual(len(long_result["products"]), 1)
         self.assertEqual(long_result["products"][0]["offer_count"], 1)
+        self.assertEqual(long_result["products"][0]["offers"][0]["freshness_max_age_hours"], 72)
 
     def test_invalid_source_freshness_config_fails_closed(self):
         invalid_config = {
