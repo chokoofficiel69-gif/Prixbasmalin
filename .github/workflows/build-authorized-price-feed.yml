@@ -9,6 +9,7 @@ on:
       - "tests/**"
       - "supabase/migrations/**"
       - "docs/auth-and-price-alerts.md"
+      - "js/prix-malin-auth.js"
       - ".github/workflows/build-authorized-price-feed.yml"
   push:
     branches:
