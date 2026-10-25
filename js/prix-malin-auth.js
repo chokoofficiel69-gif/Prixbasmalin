@@ -192,7 +192,7 @@ $("pmAlertSaveButton").addEventListener("click", async () => {
   if (!Number.isFinite(target) || target <= 0) { $("pmAlertSaveMessage").textContent = "Entre un prix supérieur à zéro."; return; }
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) { alertOverlay.classList.remove("open"); openAuth(); return; }
-  const productId = alertOverlay.dataset.productId || productName.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 120);
+  const productId = alertOverlay.dataset.productId || productName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 120);
   const payload = { user_id: user.id, product_id: productId, product_name: productName, target_price_eur: target };
   const { error } = await supabase.from("price_alerts").upsert(payload, { onConflict: "user_id,product_id,target_price_eur" });
   $("pmAlertSaveMessage").textContent = error ? error.message : "Alerte enregistrée sur ton compte.";
@@ -221,7 +221,7 @@ document.addEventListener("click", e => {
     if (card) {
       const nameEl = card.querySelector(".name, h3, .verified-name, [data-pm-product-name]");
       const name = (card.dataset.pmProductName || nameEl?.textContent || "").trim();
-      const id = (card.dataset.pmProductId || card.dataset.productId || name.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")).slice(0, 120);
+      const id = (card.dataset.pmProductId || card.dataset.productId || name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")).slice(0, 120);
       if (name && id) {
         e.preventDefault();
         e.stopImmediatePropagation();
