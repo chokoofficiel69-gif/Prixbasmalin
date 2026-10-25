@@ -1745,6 +1745,31 @@ document.addEventListener("DOMContentLoaded",()=>{
 .pm-fav-empty{padding:22px 14px;border:1px dashed #ddd;border-radius:12px;text-align:center;color:#666;font-size:13px;line-height:1.5}
 @media(min-width:760px){.pm-fav-overlay{align-items:center;padding:20px}.pm-fav-panel{border-radius:20px}}
 @media(prefers-reduced-motion:reduce){.pm-fav-toggle,.pm-fav-launch{transition:none!important}}
+
+/* Correctif mobile : garder la navigation principale accessible sur les petits écrans.
+   Certaines règles responsives précédentes la masquaient ou la sortaient du flux. */
+@media(max-width:899px){
+  body{padding-bottom:calc(88px + env(safe-area-inset-bottom, 0px))!important}
+  nav.bottom-nav{
+    display:grid!important;
+    position:fixed!important;
+    z-index:1000!important;
+    left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;max-width:none!important;
+    margin:0!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    border-radius:0!important;
+    padding:8px 4px max(8px,env(safe-area-inset-bottom, 0px))!important;
+    background:rgba(255,255,255,.98)!important;
+    border-top:1px solid #e5e7eb!important;
+    box-shadow:0 -5px 20px rgba(23,32,51,.10)!important;
+    backdrop-filter:blur(14px);
+  }
+  nav.bottom-nav button{min-width:0!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  .agent{bottom:calc(96px + env(safe-area-inset-bottom, 0px))!important}
+  .accessibility-button{bottom:calc(154px + env(safe-area-inset-bottom, 0px))!important}
+}
+
 </style>
 <script id="pm-favorites-script">
 (function(){
