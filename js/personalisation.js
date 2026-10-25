@@ -1,0 +1,21 @@
+(function(){
+"use strict";
+var KEY="pm_personalisation_v1";
+var categories=["High-tech","Maison","Vélo & sport","Vêtements","Beauté","Gaming"];
+var brands=["Apple","Samsung","Dyson","Lacoste","Nike","Adidas"];
+function read(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}}
+function save(p){try{localStorage.setItem(KEY,JSON.stringify(p))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function build(){
+ var featured=document.getElementById("pmFeatured"); if(!featured||document.getElementById("pmPersonalisation"))return;
+ var saved=read()||{categories:[],brands:[]};
+ var section=document.createElement("section");section.id="pmPersonalisation";section.setAttribute("aria-labelledby","pmPersonalTitle");
+ section.innerHTML='<style>#pmPersonalisation{margin:20px auto 24px;max-width:1180px;padding:20px;border:1px solid #e5e9f1;border-radius:20px;background:linear-gradient(135deg,#f8faff,#fff);color:#17213b}#pmPersonalisation h2{margin:0 0 6px;font-size:clamp(20px,3vw,26px)}#pmPersonalisation p{margin:0 0 14px;color:#5c6679;line-height:1.5}#pmPersonalisation .pm-pref-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}#pmPersonalisation fieldset{margin:0;padding:0;border:0}#pmPersonalisation legend{font-weight:750;margin-bottom:9px}#pmPersonalisation .pm-pref-options{display:flex;flex-wrap:wrap;gap:8px}#pmPersonalisation label{display:inline-flex;align-items:center;gap:7px;border:1px solid #dce2ec;border-radius:999px;background:#fff;padding:9px 12px;font-size:14px}#pmPersonalisation input{accent-color:#f05a36}#pmPersonalisation .pm-pref-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}#pmPersonalisation button{border:0;border-radius:11px;padding:11px 15px;font-weight:700;cursor:pointer;background:#17213b;color:white}#pmPersonalisation button.pm-pref-reset{background:#eef1f6;color:#17213b}#pmPersonalisation .pm-pref-status{font-size:13px;margin:10px 0 0}#pmPersonalisation .pm-pref-status:empty{display:none}</style><h2 id="pmPersonalTitle">Un accueil qui vous ressemble</h2><p>Choisissez vos catégories et marques favorites. Vos choix restent sur cet appareil et ne sont pas envoyés à Prix Malin. Aucun historique de navigation n’est collecté par cette fonctionnalité.</p><div class="pm-pref-groups"><fieldset><legend>Catégories préférées</legend><div class="pm-pref-options" id="pmPrefCategories"></div></fieldset><fieldset><legend>Marques préférées</legend><div class="pm-pref-options" id="pmPrefBrands"></div></fieldset></div><div class="pm-pref-actions"><button type="button" id="pmPrefSave">Enregistrer mes préférences</button><button type="button" class="pm-pref-reset" id="pmPrefReset">Effacer mes choix</button></div><p class="pm-pref-status" id="pmPrefStatus" role="status" aria-live="polite"></p>';
+ function opts(id,items,selected){document.getElementById(id).innerHTML=items.map(function(v){return '<label><input type="checkbox" value="'+esc(v)+'" '+(selected.indexOf(v)>=0?'checked':'')+'> '+esc(v)+'</label>'}).join("")}
+ opts("pmPrefCategories",categories,saved.categories||[]);opts("pmPrefBrands",brands,saved.brands||[]);
+ section.querySelector("#pmPrefSave").addEventListener("click",function(){var c=Array.from(section.querySelectorAll("#pmPrefCategories input:checked")).map(function(x){return x.value}),b=Array.from(section.querySelectorAll("#pmPrefBrands input:checked")).map(function(x){return x.value});save({categories:c,brands:b,savedAt:Date.now()});section.querySelector("#pmPrefStatus").textContent="Préférences enregistrées sur cet appareil. Elles guideront les sélections dès que des offres correspondantes seront disponibles.";});
+ section.querySelector("#pmPrefReset").addEventListener("click",function(){try{localStorage.removeItem(KEY)}catch(e){}section.querySelectorAll("input").forEach(function(x){x.checked=false});section.querySelector("#pmPrefStatus").textContent="Vos préférences locales ont été effacées.";});
+ featured.insertAdjacentElement("afterend",section);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",build);else build();
+})();
