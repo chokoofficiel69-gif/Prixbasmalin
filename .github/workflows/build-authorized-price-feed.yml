@@ -5,8 +5,10 @@ on:
     paths:
       - "data/merchant-offers.json"
       - "data/catalogue-identities.json"
+      - "data/inbox/releves.csv"
       - "scripts/**"
       - "tests/**"
+      - ".github/workflows/prepare-manual-releves.yml"
       - ".github/workflows/build-authorized-price-feed.yml"
   push:
     branches:
@@ -14,8 +16,10 @@ on:
     paths:
       - "data/merchant-offers.json"
       - "data/catalogue-identities.json"
+      - "data/inbox/releves.csv"
       - "scripts/**"
       - "tests/**"
+      - ".github/workflows/prepare-manual-releves.yml"
       - ".github/workflows/build-authorized-price-feed.yml"
   workflow_dispatch:
 
