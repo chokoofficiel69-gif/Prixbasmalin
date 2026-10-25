@@ -170,6 +170,21 @@ function installAlertButtons() {
   });
 }
 document.addEventListener("click", e => {
+  const alertButton = e.target.closest(".pm-alert-btn");
+  if (alertButton) {
+    const card = alertButton.closest(".product");
+    if (card) {
+      const nameEl = card.querySelector(".name, h3, .verified-name, [data-pm-product-name]");
+      const name = (card.dataset.pmProductName || nameEl?.textContent || "").trim();
+      const id = (card.dataset.pmProductId || card.dataset.productId || name.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")).slice(0, 120);
+      if (name && id) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        openAlert(name, id);
+        return;
+      }
+    }
+  }
   const account = e.target.closest('[data-nav="account"]');
   if (account) { e.preventDefault(); e.stopImmediatePropagation(); openAuth(); }
 }, true);
