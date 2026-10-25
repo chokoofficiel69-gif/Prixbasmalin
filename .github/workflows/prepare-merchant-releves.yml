@@ -1,0 +1,138 @@
+name: Préparer les relevés marchands (brouillon)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: releves-prix-malins
+  cancel-in-progress: false
+
+jobs:
+  prepare-draft:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Définir la date UTC de la branche
+        id: date
+        run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Tests unitaires
+        id: tests
+        continue-on-error: true
+        run: |
+          set +e
+          python3 -m unittest discover -s tests -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
+
+      - name: Importer le CSV fourni
+        id: import
+        continue-on-error: true
+        run: |
+          set +e
+          python3 scripts/import_partner_csv.py data/inbox/releves.csv --output data/merchant-offers.json 2>&1 | tee "$RUNNER_TEMP/import.log"
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
+
+      - name: Générer le flux sur la branche de brouillon uniquement
+        id: build
+        continue-on-error: true
+        run: |
+          set +e
+          python3 scripts/build_prices_feed.py 2>&1 | tee "$RUNNER_TEMP/build.log"
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
+
+      - name: Vérifier le flux généré
+        id: validate
+        continue-on-error: true
+        run: |
+          set +e
+          python3 - <<'PY' 2>&1 | tee "$RUNNER_TEMP/validate.log"
+          import json
+          from pathlib import Path
+          p = Path("data/prices.json")
+          if not p.exists():
+              raise SystemExit("data/prices.json absent après génération")
+          feed = json.loads(p.read_text(encoding="utf-8"))
+          assert isinstance(feed.get("products"), list)
+          assert isinstance(feed.get("offers"), list)
+          print(f"Produits: {len(feed['products'])}; offres: {len(feed['offers'])}; erreurs: {len(feed.get('errors', []))}")
+          for error in feed.get("errors", []):
+              print(f"AVERTISSEMENT: {error}")
+          PY
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
+
+      - name: Résumé des tests et erreurs
+        if: always()
+        env:
+          TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          IMPORT_OUTCOME: ${{ steps.import.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+        run: |
+          {
+            echo "## Préparation des relevés — résumé"
+            echo "- Tests unitaires : **$TESTS_OUTCOME**"
+            echo "- Import CSV : **$IMPORT_OUTCOME**"
+            echo "- Construction du flux : **$BUILD_OUTCOME**"
+            echo "- Validation du flux : **$VALIDATE_OUTCOME**"
+            echo "- Source : `data/inbox/releves.csv` (aucune offre d'exemple)"
+            echo "- Cette exécution ne fusionne rien et ne déploie rien."
+            for log in "$RUNNER_TEMP/tests.log" "$RUNNER_TEMP/import.log" "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/validate.log"; do
+              if [ -s "$log" ]; then
+                echo ""
+                echo "### $(basename "$log")"
+                echo '~~~text'
+                tail -n 80 "$log"
+                echo '~~~'
+              fi
+            done
+            if [ "$TESTS_OUTCOME" != "success" ] || [ "$IMPORT_OUTCOME" != "success" ] || [ "$BUILD_OUTCOME" != "success" ] || [ "$VALIDATE_OUTCOME" != "success" ]; then
+              echo ""
+              echo "### Action requise"
+              echo "Consulter les logs complets des étapes en échec avant toute validation."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Créer une PR brouillon depuis une branche datée
+        if: always() && github.ref == 'refs/heads/main'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ github.token }}
+          base: main
+          branch: data/releves-${{ steps.date.outputs.date }}
+          delete-branch: false
+          draft: true
+          commit-message: "data: préparer les relevés marchands"
+          title: "Brouillon — relevés marchands ${{ steps.date.outputs.date }}"
+          body: |
+            PR générée par workflow_dispatch lancé depuis main.
+            
+            - Import source : data/inbox/releves.csv
+            - Aucune offre d'exemple n'est ajoutée.
+            - Tests : ${{ steps.tests.outcome }}
+            - Import : ${{ steps.import.outcome }}
+            - Génération : ${{ steps.build.outcome }}
+            - Validation : ${{ steps.validate.outcome }}
+            
+            **Aucune fusion ni aucun déploiement n'est effectué par ce workflow.**
+          add-paths: |
+            data/inbox/releves.csv
+            data/merchant-offers.json
+            data/prices.json
