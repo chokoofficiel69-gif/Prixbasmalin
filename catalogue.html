@@ -335,34 +335,20 @@ function render(){
     merchant.textContent="Aucun prix vérifié pour cette fiche générique";
     const heading=document.createElement("div");
     heading.className="discovery-compare-heading";
-    heading.textContent="Rechercher ce produit chez les marchands";
+    heading.textContent="Comparaison des prix";
     const list=document.createElement("div");
     list.className="discovery-compare";
-    const enc=encodeURIComponent(p.query||p.name);
-    const links=[
-      {name:"Amazon",url:"https://www.amazon.fr/s?k="+enc+"&tag=prixbasmalin2-21"},
-      {name:"Google Shopping",url:"https://www.google.com/search?tbm=shop&q="+enc},
-      {name:"eBay France",url:"https://www.ebay.fr/sch/i.html?_nkw="+enc},
-      {name:"Fnac",url:"https://www.fnac.com/SearchResult/ResultList.aspx?Search="+enc},
-      {name:"Cdiscount",url:"https://www.cdiscount.com/search/10/"+enc+".html"},
-      {name:"Darty",url:"https://www.darty.com/nav/recherche?text="+enc}
-    ];
-    links.forEach(item=>{
-      const row=document.createElement("div");
-      row.className="discovery-compare-row";
-      const label=document.createElement("span");
-      label.textContent=item.name;
-      const link=document.createElement("a");
-      link.href=item.url;
-      link.target="_blank";
-      link.rel="noopener noreferrer";
-      link.textContent="Voir les offres ↗";
-      row.append(label,link);
-      list.append(row);
-    });
+    const row=document.createElement("div");
+    row.className="discovery-compare-row";
+    const label=document.createElement("span");
+    label.textContent="Tarifs comparés";
+    const status=document.createElement("span");
+    status.textContent="En attente de prix marchands vérifiés";
+    status.style.cssText="font-size:11px;text-align:right;color:#777;max-width:58%";
+    row.append(label,status);list.append(row);
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
-    note.textContent="Liens de recherche, pas des prix en direct. Les prix vérifiés apparaissent séparément uniquement lorsqu'une offre exacte est disponible.";
+    note.textContent="Prix Malin affiche uniquement des prix vérifiés pour le modèle exact. Aucun prix n'est inventé.";
     card.append(photo,name,desc,price,merchant,heading,list,note);
     card.dataset.pmProductName=p.name;
     card.dataset.pmProductQuery=p.query||p.name;
@@ -507,7 +493,7 @@ function openMerchantSearch(p){
 }
 
 
-const pmAlertOverlay=document.createElement('div');pmAlertOverlay.className='pm-alert-overlay';pmAlertOverlay.id='pmPriceAlert';pmAlertOverlay.setAttribute('role','dialog');pmAlertOverlay.setAttribute('aria-modal','true');pmAlertOverlay.setAttribute('aria-labelledby','pmAlertTitle');pmAlertOverlay.innerHTML='<section class="pm-alert-panel"><div class="pm-alert-top"><div><h2 class="pm-alert-title" id="pmAlertTitle">Ne ratez pas une baisse de prix</h2><p class="pm-alert-sub" id="pmAlertProduct"></p></div><button type="button" class="pm-alert-close" aria-label="Fermer">×</button></div><div class="pm-alert-benefits"><div class="pm-alert-benefit"><strong>Compte gratuit</strong><p>Retrouvez vos produits suivis et vos alertes au même endroit.</p></div><div class="pm-alert-benefit"><strong>Email ou SMS</strong><p>Choisissez votre canal et votre seuil de prix.</p></div></div><div class="pm-alert-status"><strong>Activation technique en cours</strong><p>Le parcours est préparé, mais l’inscription sécurisée et l’envoi réel des emails/SMS ne sont pas encore raccordés. Aucune coordonnée n’est demandée ni transmise ici.</p></div><a class="pm-alert-cta" href="mailto:contact@prixbasmalin.fr?subject=Alertes%20Prix%20Malin">Demander l’ouverture des alertes</a></section>';document.body.append(pmAlertOverlay);function pmOpenAlert(name){document.getElementById('pmAlertProduct').textContent='Produit souhaité : '+name;pmAlertOverlay.classList.add('open');document.body.style.overflow='hidden';pmAlertOverlay.querySelector('.pm-alert-close').focus()}function pmCloseAlert(){pmAlertOverlay.classList.remove('open');document.body.style.overflow=''}pmAlertOverlay.querySelector('.pm-alert-close').addEventListener('click',pmCloseAlert);pmAlertOverlay.addEventListener('click',e=>{if(e.target===pmAlertOverlay)pmCloseAlert()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&pmAlertOverlay.classList.contains('open'))pmCloseAlert()});verifiedProductsEl.addEventListener('click',e=>{const button=e.target.closest('.pm-alert-btn');if(button){const card=button.closest('.product');pmOpenAlert(card?.dataset.pmProductName||'Produit suivi')}});
+const pmAlertOverlay=document.createElement('div');pmAlertOverlay.className='pm-alert-overlay';pmAlertOverlay.id='pmPriceAlert';pmAlertOverlay.setAttribute('role','dialog');pmAlertOverlay.setAttribute('aria-modal','true');pmAlertOverlay.setAttribute('aria-labelledby','pmAlertTitle');pmAlertOverlay.innerHTML='<section class="pm-alert-panel"><div class="pm-alert-top"><div><h2 class="pm-alert-title" id="pmAlertTitle">Ne ratez pas une baisse de prix</h2><p class="pm-alert-sub" id="pmAlertProduct"></p></div><button type="button" class="pm-alert-close" aria-label="Fermer">×</button></div><div class="pm-alert-benefits"><div class="pm-alert-benefit"><strong>Compte gratuit</strong><p>Retrouvez vos produits suivis et vos alertes au même endroit.</p></div><div class="pm-alert-benefit"><strong>Email ou SMS</strong><p>Choisissez votre canal et votre seuil de prix.</p></div></div><div class="pm-alert-status"><strong>Activation technique en cours</strong><p>Le parcours est préparé, mais l’inscription sécurisée et l’envoi réel des emails/SMS ne sont pas encore raccordés. Aucune coordonnée n’est demandée ni transmise ici.</p></div><a class="pm-alert-cta" href="mailto:contact@prixbasmalin.fr?subject=Alertes%20Prix%20Malin">Demander l’ouverture des alertes</a></section>';document.body.append(pmAlertOverlay);function pmOpenAlert(name){document.getElementById('pmAlertProduct').textContent='Produit souhaité : '+name;pmAlertOverlay.classList.add('open');document.body.style.overflow='hidden';pmAlertOverlay.querySelector('.pm-alert-close').focus()}function pmCloseAlert(){pmAlertOverlay.classList.remove('open');document.body.style.overflow=''}pmAlertOverlay.querySelector('.pm-alert-close').addEventListener('click',pmCloseAlert);pmAlertOverlay.addEventListener('click',e=>{if(e.target===pmAlertOverlay)pmCloseAlert()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&pmAlertOverlay.classList.contains('open'))pmCloseAlert()});verifiedProductsEl.addEventListener('click',e=>{const button=e.target.closest('.pm-alert-btn');if(button){const card=button.closest('.product');pmOpenAlert(card?.dataset.pmProductName||'Produit suivi')}});const pmGlobalAlert=document.createElement("button");pmGlobalAlert.type="button";pmGlobalAlert.className="pm-alert-btn pm-global-alert";pmGlobalAlert.textContent="🔔 Mes alertes prix";pmGlobalAlert.style.cssText="position:fixed;left:16px;right:16px;bottom:max(14px,env(safe-area-inset-bottom));z-index:1000;width:auto;max-width:520px;margin:0 auto;box-shadow:0 8px 28px #17203324";pmGlobalAlert.addEventListener("click",()=>pmOpenAlert("Tous les produits"));document.body.append(pmGlobalAlert);
 /* Fiches relationnelles : les liens ouvrent une recherche marchande, sans inventer de prix. */
 const pmDetailOverlay=document.createElement("div");
 pmDetailOverlay.className="pm-detail-overlay";
