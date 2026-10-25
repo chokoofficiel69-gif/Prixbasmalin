@@ -1771,5 +1771,36 @@ document.addEventListener("DOMContentLoaded",()=>{
   renderList();
 })();
 </script>
+
+<script>
+/* Garde-fou d'accueil mobile : éviter une longue zone vide si le catalogue ne se rend pas. */
+(function(){
+  function ensureCatalogFeedback(){
+    const section=document.getElementById("popular");
+    const products=document.getElementById("products");
+    if(!section||!products||products.children.length)return;
+    let feedback=document.getElementById("pmCatalogLoadFallback");
+    if(!feedback){
+      feedback=document.createElement("p");
+      feedback.id="pmCatalogLoadFallback";
+      feedback.setAttribute("role","status");
+      feedback.textContent="Le catalogue ne s’est pas chargé correctement. Tu peux ouvrir le catalogue complet ou réessayer dans quelques instants.";
+      feedback.style.cssText="margin:12px 14px 24px;padding:16px;border:1px solid #ffd2bf;border-radius:14px;background:#fff8f4;color:#343b4a;font-size:14px;line-height:1.5";
+      const link=document.createElement("a");
+      link.href="catalogue.html";
+      link.textContent="Ouvrir le catalogue complet →";
+      link.style.cssText="display:block;margin-top:8px;color:#e65324;font-weight:800;text-decoration:underline";
+      feedback.appendChild(link);
+      section.appendChild(feedback);
+    }
+    section.style.minHeight="0";
+    products.style.minHeight="0";
+    products.style.height="auto";
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(ensureCatalogFeedback,1200),{once:true});
+  else setTimeout(ensureCatalogFeedback,1200);
+  window.addEventListener("pageshow",()=>setTimeout(ensureCatalogFeedback,1200));
+})();
+</script>
 </body>
 </html>
