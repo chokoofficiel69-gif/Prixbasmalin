@@ -386,6 +386,26 @@ function render(){
   });
 }
 
+function verifiedComparablePrice(offer){
+  if(!offer)return NaN;
+  const total=Number(offer.total_price_eur);
+  if(Number.isFinite(total)&&total>=0)return total;
+  const base=Number(offer.price_eur);
+  const shipping=Number(offer.shipping_price_eur);
+  if(Number.isFinite(base)&&base>=0&&Number.isFinite(shipping)&&shipping>=0)return base+shipping;
+  return Number.isFinite(base)&&base>=0?base:NaN;
+}
+
+function verifiedPriceBreakdown(offer){
+  const base=Number(offer&&offer.price_eur);
+  const shipping=Number(offer&&offer.shipping_price_eur);
+  if(Number.isFinite(base)&&base>=0&&Number.isFinite(shipping)&&shipping>=0){
+    const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(value);
+    return "Produit "+money(base)+" + livraison "+money(shipping);
+  }
+  return "Livraison à confirmer chez le marchand";
+}
+
 function isCurrentVerifiedOffer(offer){
   if(!offer||offer.stale)return false;
   const checkedAt=Date.parse(offer.checked_at||"");
@@ -396,16 +416,18 @@ function isCurrentVerifiedOffer(offer){
 function renderVerifiedProducts(products){
   verifiedProductsEl.innerHTML="";
   const usable=products.filter(p=>p&&p.id&&p.name&&Array.isArray(p.offers)&&p.offers.some(o=>
-    Number.isFinite(Number(o.price_eur))&&Number(o.price_eur)>0
+    Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0
   ));
   if(!usable.length){verifiedProductsEl.innerHTML='<p class="comparison-empty">Les comparatifs marchands apparaîtront ici dès que des prix vérifiés pour un même modèle seront disponibles. Aucun tarif n’est estimé ni inventé.</p>';return;}
   verifiedShelf.hidden=false;
   usable.forEach(p=>{
-    const rows=p.offers.filter(o=>Number.isFinite(Number(o.price_eur))&&Number(o.price_eur)>0);
-    const fresh=rows.filter(isCurrentVerifiedOffer).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
-    const stale=rows.filter(o=>!isCurrentVerifiedOffer(o)).sort((a,b)=>Number(a.price_eur)-Number(b.price_eur));
+    const rows=p.offers.filter(o=>Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
+    const byComparablePrice=(a,b)=>verifiedComparablePrice(a)-verifiedComparablePrice(b);
+    const fresh=rows.filter(isCurrentVerifiedOffer).sort(byComparablePrice);
+    const stale=rows.filter(o=>!isCurrentVerifiedOffer(o)).sort(byComparablePrice);
     const ordered=[...fresh,...stale];
     const best=fresh[0]||stale[0];
+    const bestComparablePrice=verifiedComparablePrice(best);
     const isHistorical=!fresh.length&&!!stale.length;
     const card=document.createElement("article");
     card.className="product";
@@ -434,9 +456,9 @@ function renderVerifiedProducts(products){
     name.textContent=p.name;
     const price=document.createElement("div");
     price.className="price";
-    price.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(best.price_eur));
+    price.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice);
     const original=Number(p.original_price_eur||p.regular_price_eur||0);
-    if(original>Number(best.price_eur)){
+    if(original>bestComparablePrice){
       const old=document.createElement("div");old.className="verified-original";
       old.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(original);
       const discount=document.createElement("div");discount.className="verified-discount";
@@ -468,16 +490,19 @@ function renderVerifiedProducts(products){
       const priceBox=document.createElement("div");
       priceBox.className="verified-offer-price";
       const offerPrice=document.createElement("strong");
-      offerPrice.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(offerData.price_eur));
+      offerPrice.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(verifiedComparablePrice(offerData));
+      const breakdown=document.createElement("span");
+      breakdown.textContent=verifiedPriceBreakdown(offerData);
+      breakdown.style.cssText="display:block;margin-top:3px;font-size:10px;line-height:1.3;color:#777;text-align:right";
       store.append(storeName,storeState);
-      priceBox.append(offerPrice);
+      priceBox.append(offerPrice,breakdown);
       row.append(store,priceBox);
       list.append(row);
     });
     const date=document.createElement("div");
     date.className="merchant";
-    date.textContent="Prix affichés hors livraison si non confirmée. Vérifiez le modèle et le prix final chez le marchand.";
-    if(!(original>Number(best.price_eur))) card.append(photo,model,name,price);
+    date.textContent="Comparaison frais de livraison inclus lorsqu’ils sont connus. Vérifiez le modèle et le prix final chez le marchand.";
+    if(!(original>bestComparablePrice)) card.append(photo,model,name,price);
     card.append(meta,list,date);
     const alertButton=document.createElement("button");alertButton.type="button";alertButton.className="pm-alert-btn";alertButton.textContent="♧ Créer une alerte gratuite";alertButton.setAttribute("aria-label","Créer une alerte de prix gratuite pour "+p.name);card.append(alertButton);
     card.dataset.pmProductName=p.name;
