@@ -1745,6 +1745,14 @@ document.addEventListener("DOMContentLoaded",()=>{
 .pm-fav-empty{padding:22px 14px;border:1px dashed #ddd;border-radius:12px;text-align:center;color:#666;font-size:13px;line-height:1.5}
 @media(min-width:760px){.pm-fav-overlay{align-items:center;padding:20px}.pm-fav-panel{border-radius:20px}}
 @media(prefers-reduced-motion:reduce){.pm-fav-toggle,.pm-fav-launch{transition:none!important}}
+
+/* Outils flottants séparés et repositionnables sur mobile et ordinateur */
+.agent,.accessibility-button{touch-action:none;user-select:none;-webkit-user-select:none}
+.agent{right:16px;bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:10020}
+.accessibility-button{right:20px;bottom:calc(166px + env(safe-area-inset-bottom,0px));z-index:10021;width:48px;height:48px;display:grid;place-items:center}
+.agent.pm-float-dragging,.accessibility-button.pm-float-dragging{transition:none!important;cursor:grabbing;opacity:.92}
+.agent.pm-float-draggable,.accessibility-button.pm-float-draggable{cursor:grab}
+@media(min-width:700px){.agent{bottom:24px}.accessibility-button{bottom:84px}}
 </style>
 <script id="pm-favorites-script">
 (function(){
@@ -1802,5 +1810,66 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.addEventListener("pageshow",()=>setTimeout(ensureCatalogFeedback,1200));
 })();
 </script>
+
+<script id="pm-floating-tools-drag">
+(function(){
+  "use strict";
+  var items=[
+    {el:document.querySelector(".agent"),key:"pmFloatAgentV1"},
+    {el:document.getElementById("accessibilityButton"),key:"pmFloatAccessibilityV1"}
+  ];
+  items.forEach(function(item){
+    var el=item.el;if(!el)return;
+    el.classList.add("pm-float-draggable");
+    try{
+      var saved=JSON.parse(localStorage.getItem(item.key)||"null");
+      if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y)){
+        el.style.left=Math.max(0,Math.min(saved.x,window.innerWidth-el.offsetWidth))+"px";
+        el.style.top=Math.max(0,Math.min(saved.y,window.innerHeight-el.offsetHeight))+"px";
+        el.style.right="auto";el.style.bottom="auto";
+      }
+    }catch(_){}
+    var start=null,moved=false,pointerId=null,oldX=0,oldY=0;
+    el.addEventListener("pointerdown",function(e){
+      if(e.button!==undefined&&e.button!==0)return;
+      start={x:e.clientX,y:e.clientY,left:el.getBoundingClientRect().left,top:el.getBoundingClientRect().top};
+      moved=false;pointerId=e.pointerId;oldX=e.clientX;oldY=e.clientY;
+    });
+    el.addEventListener("pointermove",function(e){
+      if(!start||e.pointerId!==pointerId)return;
+      var dx=e.clientX-start.x,dy=e.clientY-start.y;
+      if(!moved&&Math.hypot(dx,dy)<7)return;
+      moved=true;el.classList.add("pm-float-dragging");
+      var x=Math.max(0,Math.min(start.left+dx,window.innerWidth-el.offsetWidth));
+      var y=Math.max(0,Math.min(start.top+dy,window.innerHeight-el.offsetHeight));
+      el.style.left=x+"px";el.style.top=y+"px";el.style.right="auto";el.style.bottom="auto";
+      if(e.cancelable)e.preventDefault();
+    },{passive:false});
+    function finish(e){
+      if(!start||(e&&e.pointerId!==undefined&&e.pointerId!==pointerId))return;
+      if(moved){
+        try{localStorage.setItem(item.key,JSON.stringify({x:parseFloat(el.style.left)||0,y:parseFloat(el.style.top)||0}));}catch(_){}
+        el.dataset.pmDragged="1";
+        window.setTimeout(function(){delete el.dataset.pmDragged;},350);
+      }
+      start=null;pointerId=null;el.classList.remove("pm-float-dragging");
+    }
+    el.addEventListener("pointerup",finish);
+    el.addEventListener("pointercancel",finish);
+    el.addEventListener("click",function(e){
+      if(el.dataset.pmDragged==="1"){e.preventDefault();e.stopImmediatePropagation();}
+    },true);
+  });
+  window.addEventListener("resize",function(){
+    items.forEach(function(item){var el=item.el;if(!el||!el.style.left||!el.style.top)return;
+      var x=Math.max(0,Math.min(parseFloat(el.style.left)||0,window.innerWidth-el.offsetWidth));
+      var y=Math.max(0,Math.min(parseFloat(el.style.top)||0,window.innerHeight-el.offsetHeight));
+      el.style.left=x+"px";el.style.top=y+"px";
+      try{localStorage.setItem(item.key,JSON.stringify({x:x,y:y}));}catch(_){}
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
