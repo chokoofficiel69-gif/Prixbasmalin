@@ -145,6 +145,26 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 @media(min-width:700px){.product{padding:14px}.verified-shelf{padding:24px}.name{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.product,.offer,.filters button,.pm-home-shortcut{transition:none}.product:hover,.offer:hover,.pm-home-shortcut:hover{transform:none}}
 
+
+/* Prix Malin : grille tarifaire directe, mobile-first */
+#verifiedProducts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#verifiedProducts .product{position:relative;padding:10px;border:1px solid #e7e7e7;border-radius:15px;box-shadow:0 2px 9px #00000008;min-width:0}
+#verifiedProducts .verified-image{aspect-ratio:1/1;width:100%;background:#f6f7f8;color:#7a8793;border-radius:11px;display:grid;place-items:center;font-size:46px;font-weight:800}
+#verifiedProducts .verified-model{font-size:11px;color:#718096;text-transform:none;letter-spacing:0;margin-top:9px}
+#verifiedProducts .name{font-size:14px;line-height:1.35;min-height:38px}
+#verifiedProducts .price{font-size:23px;line-height:1.2;margin:9px 0 5px;color:#e64b00;font-weight:850}
+#verifiedProducts .verified-meta{background:transparent;padding:0;margin:0 0 8px;font-size:11px;color:#718096}
+#verifiedProducts .verified-offers{margin:8px 0;gap:7px}
+#verifiedProducts .verified-offer-row{align-items:flex-start;padding:9px;border-radius:10px}
+#verifiedProducts .verified-offer-store strong{font-size:12px}
+#verifiedProducts .verified-offer-price strong{font-size:15px;color:#e64b00}
+#verifiedProducts .verified-offer-price a{display:inline-block;background:#ff650b;color:white;text-decoration:none;padding:9px 12px;border-radius:999px;font-size:12px}
+#verifiedProducts .verified-original{font-size:12px;color:#737b84;text-decoration:line-through;margin:0 0 5px}
+#verifiedProducts .verified-discount{display:inline-block;background:#e64b00;color:white;border-radius:7px;padding:5px 8px;font-size:12px;font-weight:800;margin:0 0 5px}
+#verifiedProducts .verified-direct-note{font-size:11px;color:#68717d;line-height:1.4;margin-top:8px}
+#verifiedProducts .multi-search-btn{display:none!important}
+@media(min-width:700px){#verifiedProducts{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}#verifiedProducts .product{padding:14px}#verifiedProducts .name{font-size:16px}#verifiedProducts .price{font-size:26px}}
+@media(min-width:1000px){#verifiedProducts{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>  <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"581731ca0ab54223acdf63ecfca342b0"}'></script>
 <!-- End Cloudflare Web Analytics -->
@@ -360,6 +380,14 @@ function renderVerifiedProducts(products){
     const price=document.createElement("div");
     price.className="price";
     price.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(best.price_eur));
+    const original=Number(p.original_price_eur||p.regular_price_eur||0);
+    if(original>Number(best.price_eur)){
+      const old=document.createElement("div");old.className="verified-original";
+      old.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(original);
+      const discount=document.createElement("div");discount.className="verified-discount";
+      discount.textContent="-"+Math.round((1-Number(best.price_eur)/original)*100)+" %";
+      card.append(photo,model,name,discount,price,old);
+    }
     const meta=document.createElement("div");
     meta.className="verified-meta"+(isHistorical?" verified-stale":"");
     if(isHistorical){
@@ -399,13 +427,8 @@ function renderVerifiedProducts(products){
     const date=document.createElement("div");
     date.className="merchant";
     date.textContent="Prix affichés hors livraison si non confirmée. Vérifiez le modèle et le prix final chez le marchand.";
-    card.append(photo,model,name,price,meta,list,date);
-    const multi=document.createElement("button");
-    multi.type="button";
-    multi.className="multi-search-btn";
-    multi.textContent="Comparer ce modèle chez plusieurs marchands";
-    multi.addEventListener("click",()=>openMerchantSearch({name:p.name,query:p.name}));
-    card.append(multi);
+    if(!(original>Number(best.price_eur))) card.append(photo,model,name,price);
+    card.append(meta,list,date);
     verifiedProductsEl.append(card);
   });
 }
