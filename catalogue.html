@@ -410,7 +410,10 @@ function isCurrentVerifiedOffer(offer){
   if(!offer||offer.stale)return false;
   const checkedAt=Date.parse(offer.checked_at||"");
   const age=Date.now()-checkedAt;
-  return Number.isFinite(checkedAt)&&age>=-5*60*1000&&age<=24*60*60*1000;
+  const configuredHours=Number(offer.freshness_max_age_hours);
+  const maxAgeHours=Number.isInteger(configuredHours)&&configuredHours>=1&&configuredHours<=720
+    ?configuredHours:48;
+  return Number.isFinite(checkedAt)&&age>=-5*60*1000&&age<=maxAgeHours*60*60*1000;
 }
 
 function renderVerifiedProducts(products){
