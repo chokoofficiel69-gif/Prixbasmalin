@@ -21,6 +21,7 @@ on:
       - "tests/**"
       - "supabase/migrations/**"
       - "docs/auth-and-price-alerts.md"
+      - "js/prix-malin-auth.js"
       - ".github/workflows/build-authorized-price-feed.yml"
   workflow_dispatch:
 
@@ -33,6 +34,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Check Prix Malin auth client syntax
+        run: node --check js/prix-malin-auth.js
       - name: Test validation rules
         run: python3 -m unittest discover -s tests -v
       - name: Audit exact product identity coverage
