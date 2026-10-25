@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a50019"/><stop offset="1" stop-color="#ef233c"/></linearGradient><radialGradient id="glow"><stop stop-color="#ffb3bd" stop-opacity=".35"/><stop offset="1" stop-color="#ffb3bd" stop-opacity="0"/></radialGradient></defs>
+<rect width="900" height="1200" fill="url(#bg)"/><circle cx="720" cy="220" r="430" fill="url(#glow)"/><path d="M0 850 Q300 700 900 900 V1200 H0Z" fill="#6b0010" opacity=".5"/>
+<rect x="48" y="48" width="804" height="1104" rx="34" fill="none" stroke="#ffd7dc" stroke-width="3" opacity=".8"/>
+<text x="450" y="145" fill="#fff" font-family="Arial,sans-serif" font-size="35" font-weight="700" text-anchor="middle" letter-spacing="8">SOLIDARITÉ</text>
+<path d="M270 285 Q270 220 335 220 Q395 220 450 285 Q505 220 565 220 Q630 220 630 285 Q630 390 450 510 Q270 390 270 285Z" fill="#fff1f2" opacity=".96"/>
+<path d="M340 330 L405 395 L555 255" fill="none" stroke="#c8102e" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="450" y="610" fill="#fff" font-family="Arial,sans-serif" font-size="68" font-weight="900" text-anchor="middle">AIDONS</text>
+<text x="450" y="690" fill="#fff" font-family="Arial,sans-serif" font-size="68" font-weight="900" text-anchor="middle">CONSTANTINE</text>
+<text x="450" y="775" fill="#ffe6e9" font-family="Arial,sans-serif" font-size="31" text-anchor="middle">Appel aux dons pour les familles</text>
+<text x="450" y="820" fill="#ffe6e9" font-family="Arial,sans-serif" font-size="31" text-anchor="middle">qui en ont besoin</text>
+<rect x="165" y="905" width="570" height="100" rx="50" fill="#fff"/><text x="450" y="968" fill="#b00020" font-family="Arial,sans-serif" font-size="32" font-weight="800" text-anchor="middle">CONTACT : RLBZ10</text>
+<text x="450" y="1080" fill="#ffe6e9" font-family="Arial,sans-serif" font-size="23" text-anchor="middle">Merci pour votre générosité</text></svg>
