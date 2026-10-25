@@ -387,9 +387,19 @@ function renderVerifiedProducts(products){
     card.className="product";
     const photo=document.createElement("div");
     photo.className="verified-image";
-    const catalogueMatch=(typeof productData!=="undefined"?productData:[]).find(item=>
+    const catalogueItems=typeof productData!=="undefined"?productData:[];
+    const catalogueMatch=catalogueItems.find(item=>
       pmNorm(item.name)===pmNorm(p.name)||pmNorm(p.name).includes(pmNorm(item.name))||pmNorm(item.name).includes(pmNorm(p.name))
-    );
+    )||catalogueItems.find(item=>{
+      const n=pmNorm(p.name);
+      if(/dyson|aspirateur|roborock|roomba/.test(n))return item.id==="vacuum";
+      if(/iphone|samsung|galaxy|smartphone/.test(n))return item.id==="tablet"||item.id==="phonecase";
+      if(/airpods|ecouteurs/.test(n))return item.id==="earbuds";
+      if(/macbook|ordinateur|laptop/.test(n))return item.id==="laptop";
+      if(/casque/.test(n))return item.id==="headphones";
+      if(/montre/.test(n))return item.id==="watch";
+      return false;
+    });
     const productImage=p.image||p.image_url||p.imageUrl||(catalogueMatch&&catalogueMatch.image);
     if(productImage){
       const image=document.createElement("img");
