@@ -60,7 +60,8 @@ jobs:
       # Always test the code, even when the staging CSV contains only its header.
       # An empty CSV should skip data generation, not skip regression tests.
       - name: Run unit tests
-        if: always()
+        # Run on main even for an header-only CSV, but only after checkout and CSV inspection succeeded.
+        if: always() && steps.csv.outcome == 'success'
         run: python3 -m unittest discover -s tests -v
       - name: Import manual CSV and rebuild feed
         if: steps.csv.outputs.has_rows == 'true'
