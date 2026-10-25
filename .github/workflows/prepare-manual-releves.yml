@@ -57,8 +57,10 @@ jobs:
               "feed_offers": feed.get("offers", [])
           }, sort_keys=True, ensure_ascii=False), encoding="utf-8")
           PY
+      # Always test the code, even when the staging CSV contains only its header.
+      # An empty CSV should skip data generation, not skip regression tests.
       - name: Run unit tests
-        if: steps.csv.outputs.has_rows == 'true'
+        if: always()
         run: python3 -m unittest discover -s tests -v
       - name: Import manual CSV and rebuild feed
         if: steps.csv.outputs.has_rows == 'true'
