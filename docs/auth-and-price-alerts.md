@@ -11,14 +11,13 @@ Cette migration crée le stockage des alertes dans **un projet Supabase dédié 
 
 ## Étapes d'intégration restantes
 
-1. Créer ou désigner explicitement un projet Supabase dédié à Prix Malin.
-2. Appliquer `supabase/migrations/202610250001_price_alerts.sql` à ce projet.
-3. Configurer les URL de redirection d'authentification pour le domaine Prix Malin et vérifier les modèles d'email.
-4. Ajouter le client Supabase côté navigateur avec uniquement l'URL et la clé publishable/anon du projet dédié.
-5. Remplacer la fenêtre « Compte » de `index.html` par inscription, connexion, déconnexion et récupération de mot de passe.
-6. Relier le bouton d'alerte du catalogue à la session et à `public.price_alerts`.
-7. Implémenter l'envoi des notifications côté serveur (Edge Function/cron) après validation de la source de prix. Ne jamais placer une clé service-role dans le navigateur.
-8. Tester inscription, confirmation email, connexion, isolation entre deux comptes, création/modification/suppression d'alerte et livraison de notification avant activation en production.
+1. Projet dédié créé : `eulzthypxffmfpaqzqld` (région `eu-west-1`, statut initial actif).
+2. Migration `create_price_alerts` appliquée ; la table `public.price_alerts` et RLS ont été vérifiées via le connecteur.
+3. Le client `js/prix-malin-auth.js` raccorde l'interface compte à Supabase Auth (inscription, connexion, déconnexion, réinitialisation) et propose l'enregistrement d'un seuil de prix dans `public.price_alerts`.
+4. Configurer/valider dans Supabase les URL de redirection et l'envoi des e-mails de confirmation/réinitialisation pour `prixbasmalin.fr`.
+5. Tester inscription, confirmation email, connexion, isolation entre deux comptes, création d'alerte et persistance après reconnexion.
+6. Implémenter l'envoi automatique des notifications côté serveur (Edge Function/cron) après validation de la source de prix. Ne jamais placer une clé service-role dans le navigateur.
+7. Tester le site déployé et le parcours complet avant fusion/activation en production.
 
 ## Critères d'acceptation
 
