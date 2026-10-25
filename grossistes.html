@@ -13,7 +13,7 @@
 @media(prefers-reduced-motion:reduce){.pm-home-shortcut{transition:none}}
 
 </style>  <!-- Cloudflare Web Analytics -->
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"581731ca0ab54223acdf63ecfca342b0"}'></script>
+
 <!-- End Cloudflare Web Analytics -->
 </head><body>
 <header><a href="index.html"><span class="logo">PRIX</span> MALIN</a><a href="index.html">← Retour au comparateur</a></header>
@@ -35,7 +35,7 @@ const qty=document.getElementById('qty'),unit=document.getElementById('unit'),sh
 function update(){const q=Math.max(1,Number(qty.value)||1),u=Number(unit.value),s=Math.max(0,Number(ship.value)||0),f=Math.max(0,Number(fees.value)||0);if(unit.value===''||!Number.isFinite(u)||u<0){calc.textContent="Saisis un prix unitaire pour calculer le total et le coût moyen par article.";return}const total=q*u+s+f;calc.innerHTML='<strong>Total estimé : '+total.toLocaleString('fr-FR',{style:'currency',currency:'EUR'})+'</strong><br>Coût moyen : '+(total/q).toLocaleString('fr-FR',{style:'currency',currency:'EUR'})+' par article (hors frais non renseignés).'}
 [qty,unit,ship,fees].forEach(x=>x.addEventListener('input',update));
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));if(b.dataset.mode==='bulk'){qty.value=30;document.getElementById('alibaba').scrollIntoView({behavior:'smooth',block:'center'})}else{qty.value=1;document.getElementById('aliExpress').scrollIntoView({behavior:'smooth',block:'center'})}update()}));
-</script>  <script src="js/track-outbound.js?v=20261022" defer></script>
+</script>  
 <script>
 
 (function(){
@@ -48,4 +48,5 @@ document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',(
 })();
 
 </script>
+<script src="/js/cookie-consent.js" defer></script>
 </body></html>
