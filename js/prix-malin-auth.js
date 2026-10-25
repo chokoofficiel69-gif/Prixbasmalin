@@ -160,7 +160,7 @@ function installAlertButtons() {
   cards.forEach((card, index) => {
     const nameEl = card.querySelector(".name, h3, .verified-name, [data-pm-product-name]");
     const name = (card.dataset.pmProductName || nameEl?.textContent || "").trim();
-    if (!name || card.querySelector(".pm-auth-alert-button")) return;
+    if (!name || card.querySelector(".pm-auth-alert-button") || card.querySelector(".pm-alert-btn")) return;
     const id = (card.dataset.pmProductId || card.dataset.productId || name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")).slice(0,120) || `product-${index}`;
     const button = document.createElement("button");
     button.type = "button"; button.className = "pm-alert-btn pm-auth-alert-button";
