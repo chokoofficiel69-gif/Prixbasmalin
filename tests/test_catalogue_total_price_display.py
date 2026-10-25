@@ -25,6 +25,12 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn('"Produit "+money(base)+" + livraison "+money(shipping)', source)
         self.assertIn("Comparaison frais de livraison inclus lorsqu’ils sont connus.", source)
 
+    def test_catalogue_uses_source_freshness_window_with_48_hour_fallback(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn("offer.freshness_max_age_hours", source)
+        self.assertIn("?configuredHours:48;", source)
+        self.assertIn("age<=maxAgeHours*60*60*1000", source)
+
 
 if __name__ == "__main__":
     unittest.main()
