@@ -401,8 +401,20 @@ function renderVerifiedProducts(products){
     card.className="product";
     const photo=document.createElement("div");
     photo.className="verified-image";
-    photo.setAttribute("aria-hidden","true");
-    photo.textContent=String(p.name).trim().charAt(0).toLocaleUpperCase("fr")||"P";
+    const catalogueMatch=(typeof productData!=="undefined"?productData:[]).find(item=>
+      pmNorm(item.name)===pmNorm(p.name)||pmNorm(p.name).includes(pmNorm(item.name))||pmNorm(item.name).includes(pmNorm(p.name))
+    );
+    const productImage=p.image||p.image_url||p.imageUrl||(catalogueMatch&&catalogueMatch.image);
+    if(productImage){
+      const image=document.createElement("img");
+      image.src=productImage;image.alt=p.name;image.loading="lazy";image.decoding="async";
+      image.style.cssText="width:100%;height:100%;object-fit:contain;padding:8px";
+      image.onerror=()=>{photo.textContent="Image indisponible";};
+      photo.append(image);
+    }else{
+      photo.textContent="Image produit à confirmer";
+      photo.setAttribute("aria-label","Aucune image vérifiée disponible pour "+p.name);
+    }
     const model=document.createElement("div");
     model.className="verified-model";
     model.textContent="Modèle exact suivi";
@@ -446,13 +458,8 @@ function renderVerifiedProducts(products){
       priceBox.className="verified-offer-price";
       const offerPrice=document.createElement("strong");
       offerPrice.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(offerData.price_eur));
-      const offerLink=document.createElement("a");
-      offerLink.href=offerData.product_url||("https://www.google.com/search?q="+encodeURIComponent(p.name+" "+(offerData.retailer||"")));
-      offerLink.target="_blank";
-      offerLink.rel="noopener noreferrer";
-      offerLink.textContent="Vérifier ↗";
       store.append(storeName,storeState);
-      priceBox.append(offerPrice,offerLink);
+      priceBox.append(offerPrice);
       row.append(store,priceBox);
       list.append(row);
     });
