@@ -68,7 +68,29 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python3 scripts/import_partner_csv.py data/inbox/releves.csv --output data/merchant-offers.json 2>&1 | tee /tmp/import.log
+          python3 scripts/import_partner_csv.py data/inbox/releves.csv --output /tmp/imported-offers.json 2>&1 | tee /tmp/import.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          current_path = Path("data/merchant-offers.json")
+          imported_path = Path("/tmp/imported-offers.json")
+          current = json.loads(current_path.read_text(encoding="utf-8"))
+          imported = json.loads(imported_path.read_text(encoding="utf-8"))
+          existing_offers = current.get("offers", [])
+          imported_offers = imported.get("offers", [])
+          if not isinstance(existing_offers, list) or not isinstance(imported_offers, list):
+              raise SystemExit("Format invalide : offers doit être une liste.")
+          # Keep existing authorized offers; a newly submitted offer_id replaces only itself.
+          merged = {offer.get("offer_id"): offer for offer in existing_offers if isinstance(offer, dict) and offer.get("offer_id")}
+          for offer in imported_offers:
+              merged[offer["offer_id"]] = offer
+          current["schema_version"] = 1
+          current["generated_at"] = imported.get("generated_at")
+          current["offers"] = list(merged.values())
+          current_path.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+          print(f"Offres conservées : {len(existing_offers)}; importées : {len(imported_offers)}; total fusionné : {len(current['offers'])}.")
+          PY
           python3 scripts/build_prices_feed.py 2>&1 | tee /tmp/build.log
           python3 - <<'PY' | tee /tmp/feed-summary.txt
           import json
