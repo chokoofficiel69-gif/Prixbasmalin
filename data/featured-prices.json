@@ -1,7 +1,7 @@
 {
-  "version": 1,
-  "generated_at": "2026-10-25T09:53:00Z",
-  "methodology": "Relevé manuel depuis une page publique officielle de marchand. Prix affiché hors livraison si les frais ne sont pas confirmés. Ne pas confondre avec une comparaison exhaustive de tous les marchands.",
+  "version": 2,
+  "generated_at": "2026-10-25T10:00:00Z",
+  "methodology": "Relevés manuels de pages publiques de marchands consultées le 25/10/2026. Ce sont des prix observés, pas une comparaison exhaustive du marché. Quand l'URL mène à une liste de produits, vérifier la variante exacte sur le marchand. Frais de livraison et prix final à confirmer avant achat.",
   "products": [
     {
       "id": "featured-airpods-4-anc-2026-10-25",
@@ -14,18 +14,55 @@
           "price_eur": 134,
           "currency": "EUR",
           "checked_at": "2026-10-25T09:53:00Z",
-          "product_url": "https://www.boulanger.com/ref/1212702",
-          "source": "relevé manuel de la page publique Boulanger",
+          "product_url": "https://www.boulanger.com/c/airpods",
+          "source": "page publique Boulanger consultée le 25/10/2026",
           "stale": false,
-          "comparison_note": "Prix affiché relevé le 25/10/2026. Frais de livraison à confirmer avant achat; prix final à vérifier sur la page du marchand."
+          "comparison_note": "134 € affichés pour les AirPods 4 ANC sur la page Boulanger. Vérifier le prix final et la disponibilité avant achat."
+        }
+      ]
+    },
+    {
+      "id": "featured-galaxy-buds-fe-graphite-2026-10-25",
+      "name": "Samsung Galaxy Buds FE — Graphite",
+      "best_price_eur": 89.99,
+      "offer_count": 1,
+      "offers": [
+        {
+          "retailer": "Cdiscount",
+          "price_eur": 89.99,
+          "currency": "EUR",
+          "checked_at": "2026-10-25T10:00:00Z",
+          "product_url": "https://www.cdiscount.com/telephonie/accessoires-portable-gsm/le-bluetooth/oreillette-bluetooth/samsung-galaxy-buds/l-14420110101.html",
+          "source": "page publique Cdiscount consultée le 25/10/2026",
+          "stale": false,
+          "comparison_note": "89,99 € affichés pour la variante Graphite dans la liste Cdiscount. Confirmer la variante, le vendeur et la disponibilité sur la page avant achat."
+        }
+      ]
+    },
+    {
+      "id": "featured-dyson-v8-advanced-2026-10-25",
+      "name": "Dyson V8 Advanced — aspirateur balai sans fil",
+      "best_price_eur": 249,
+      "offer_count": 1,
+      "offers": [
+        {
+          "retailer": "BUT",
+          "price_eur": 249,
+          "currency": "EUR",
+          "checked_at": "2026-10-25T10:00:00Z",
+          "product_url": "https://appshop.but.fr/themes/promos-et-bons-plans/index-c10444/NW-125-type-de-produit~aspirateur-balai/NW-125-type-de-produit~seche-linge?PageIndex=2",
+          "source": "page publique de promotions BUT consultée le 25/10/2026",
+          "stale": false,
+          "comparison_note": "249 € affichés pour le Dyson V8 Advanced sur la page de promotions BUT. Vérifier la référence exacte, la disponibilité et les frais éventuels."
         }
       ]
     }
   ],
   "notes": [
-    "Première offre mise en avant à partir d'une page publique officielle consultée le 25/10/2026.",
-    "Une seule offre ne permet pas de garantir qu'il s'agit du meilleur prix du marché.",
-    "Le prix et la disponibilité peuvent changer; vérifier le montant final chez le marchand.",
-    "Cette sélection manuelle est séparée du flux généré à partir des sources marchandes autorisées."
+    "Prix relevés manuellement sur des pages publiques consultées le 25/10/2026.",
+    "Les montants sont des prix observés chez un marchand, pas une garantie du meilleur prix de tout le marché.",
+    "Les liens de liste peuvent afficher plusieurs variantes : contrôler la référence exacte, le vendeur, le stock et les frais avant achat.",
+    "Les prix peuvent changer après le relevé; la date de vérification est affichée.",
+    "Cette sélection manuelle reste séparée du flux généré à partir de sources marchandes autorisées."
   ]
 }
