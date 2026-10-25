@@ -158,9 +158,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 <section class="grid" id="products" aria-live="polite"></section><p class="note">Les visuels sont illustratifs. Les prix et disponibilités peuvent évoluer : vérifiez toujours le montant final et les conditions directement chez le vendeur avant l’achat. </p></main><script>
 const verifiedShelf=document.getElementById("verifiedShelf");
 const verifiedProductsEl=document.getElementById("verifiedProducts");
-fetch("/data/prices.json",{cache:"no-store"})
-  .then(r=>r.ok?r.json():null)
-  .then(data=>{if(data)renderVerifiedProducts(data.products||[]);})
+Promise.all([fetch("/data/prices.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),fetch("/data/featured-prices.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null)])
+  .then(([verified,featured])=>{
+    const combined=[...(verified?.products||[]),...(featured?.products||[])];
+    if(combined.length)renderVerifiedProducts(combined);
+  })
   .catch(()=>{});
 const productData=[
  {id:"t1",name:"T-shirt blanc",desc:"Coton basique",category:"fashion",query:"t-shirt blanc",image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
