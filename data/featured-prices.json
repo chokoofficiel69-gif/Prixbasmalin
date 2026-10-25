@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "generated_at": "2026-10-25T09:53:00Z",
+  "methodology": "Relevé manuel depuis une page publique officielle de marchand. Prix affiché hors livraison si les frais ne sont pas confirmés. Ne pas confondre avec une comparaison exhaustive de tous les marchands.",
+  "products": [
+    {
+      "id": "featured-airpods-4-anc-2026-10-25",
+      "name": "Apple AirPods 4 avec réduction active du bruit (ANC)",
+      "best_price_eur": 134,
+      "offer_count": 1,
+      "offers": [
+        {
+          "retailer": "Boulanger",
+          "price_eur": 134,
+          "currency": "EUR",
+          "checked_at": "2026-10-25T09:53:00Z",
+          "product_url": "https://www.boulanger.com/ref/1212702",
+          "source": "relevé manuel de la page publique Boulanger",
+          "stale": false,
+          "comparison_note": "Prix affiché relevé le 25/10/2026. Frais de livraison à confirmer avant achat; prix final à vérifier sur la page du marchand."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Première offre mise en avant à partir d'une page publique officielle consultée le 25/10/2026.",
+    "Une seule offre ne permet pas de garantir qu'il s'agit du meilleur prix du marché.",
+    "Le prix et la disponibilité peuvent changer; vérifier le montant final chez le marchand.",
+    "Cette sélection manuelle est séparée du flux généré à partir des sources marchandes autorisées."
+  ]
+}
