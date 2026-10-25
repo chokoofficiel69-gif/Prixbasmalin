@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "default_max_age_hours": 48,
+  "sources": {}
+}
