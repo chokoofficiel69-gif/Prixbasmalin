@@ -107,6 +107,8 @@ class FeedSiteContractTests(unittest.TestCase):
         for product in feed["products"]:
             self.assertEqual(contract_problems(product), [])
         self.assertEqual(feed["products"][0]["best_price_eur"], 14.00)
+        for offer in feed["offers"]:
+            self.assertIsInstance(offer["total_price_eur"], (int, float))
 
     def test_contract_check_detects_what_the_site_would_hide(self):
         broken = {
