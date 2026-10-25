@@ -5,6 +5,7 @@ on:
     paths:
       - "data/merchant-offers.json"
       - "data/catalogue-identities.json"
+      - "data/source-freshness.json"
       - "data/inbox/releves.csv"
       - "scripts/**"
       - "tests/**"
@@ -19,6 +20,7 @@ on:
     paths:
       - "data/merchant-offers.json"
       - "data/catalogue-identities.json"
+      - "data/source-freshness.json"
       - "data/inbox/releves.csv"
       - "scripts/**"
       - "tests/**"
