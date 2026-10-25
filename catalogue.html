@@ -190,7 +190,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 
 .pm-alert-btn{width:100%;margin-top:8px;min-height:42px;border:1px solid #ffb99f;border-radius:11px;background:#fff3ed;color:#b83c0c;font:800 12px system-ui,sans-serif;padding:10px;cursor:pointer}.pm-alert-overlay{position:fixed;inset:0;z-index:12000;display:none;align-items:flex-end;justify-content:center;background:#0e1422ad;padding:0}.pm-alert-overlay.open{display:flex}.pm-alert-panel{width:100%;max-width:560px;max-height:90vh;overflow:auto;background:#fff;border-radius:22px 22px 0 0;padding:22px 18px max(24px,env(safe-area-inset-bottom))}.pm-alert-top{display:flex;justify-content:space-between;gap:12px}.pm-alert-title{font-size:24px;line-height:1.15;margin:0 0 8px}.pm-alert-sub{font-size:13px;line-height:1.5;color:#687080;margin:0 0 18px}.pm-alert-close{width:40px;height:40px;flex:none;border:0;border-radius:50%;background:#f0f1f4;font-size:24px}.pm-alert-benefits{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.pm-alert-benefit{border:1px solid #f1e2da;border-radius:12px;padding:12px;background:#fff9f6;font-size:12px}.pm-alert-status{padding:13px 14px;border-radius:12px;background:#f6f7f9;border:1px solid #e4e7ed;color:#414957;font-size:12px;line-height:1.55}.pm-alert-cta{display:block;text-align:center;margin-top:14px;border-radius:11px;background:#ff5a1f;color:#fff;font-weight:800;padding:13px}@media(min-width:600px){.pm-alert-overlay{align-items:center;padding:18px}.pm-alert-panel{border-radius:22px;padding:24px;max-height:84vh}}
 </style>  <!-- Cloudflare Web Analytics -->
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"581731ca0ab54223acdf63ecfca342b0"}'></script>
+
 <!-- End Cloudflare Web Analytics -->
 </head><body><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a></header><main><section class="intro"><h1>Tous les produits</h1><p>Parcourez les fiches illustrées, filtrez par catégorie et recherchez un produit.</p></section><div class="tools"><input id="search" class="search" type="search" placeholder="Rechercher : téléphone, casque, baskets…" aria-label="Rechercher un produit"><div class="filters" id="filters"><button class="active" data-cat="all">Tout</button><button data-cat="tech">Électronique</button><button data-cat="fashion">Mode</button><button data-cat="home">Maison</button><button data-cat="garden">Jardin</button><button data-cat="sport">Sport</button><button data-cat="beauty">Beauté</button><button data-cat="baby">Bébé</button></div></div><div class="count" id="count"></div>
 <section id="verifiedShelf" class="verified-shelf" hidden aria-live="polite">
@@ -590,7 +590,7 @@ function pmDetailClick(e){
 productsEl.addEventListener("click",pmDetailClick);
 verifiedProductsEl.addEventListener("click",pmDetailClick);
 searchEl.addEventListener("input",render);document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();
-</script>  <script src="js/track-outbound.js?v=20261023fix1" defer></script>
+</script>  
 <script>
 
 (function(){
@@ -603,4 +603,5 @@ searchEl.addEventListener("input",render);document.getElementById("filters").add
 })();
 
 </script>
+<script src="/js/cookie-consent.js" defer></script>
 </body></html>
