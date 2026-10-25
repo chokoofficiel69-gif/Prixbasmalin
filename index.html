@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>Prix Malin — Comparez. Économisez. Malin.</title>
-<link rel="preload" as="image" href="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=180&h=180&fit=crop&fm=webp&q=65" fetchpriority="high">
+
 <style>
 :root{--orange:#ff5a1f;--orange-dark:#e7470d;--ink:#191919;--muted:#666;--line:#e9e9e9;--soft:#f7f7f8;--green:#167a3b;--surface:#fff;--shadow:0 8px 28px rgba(25,25,25,.06)}
 *{box-sizing:border-box}
@@ -776,6 +776,28 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 @media(min-width:700px){.pm-home-shortcut{bottom:24px}}
 @media(prefers-reduced-motion:reduce){.pm-home-shortcut{transition:none}}
 
+
+/* Sélection mise en avant : images produit, prix observé et marchand */
+.pm-featured{margin:8px 14px 22px;padding:18px 14px 16px;border-radius:22px;background:linear-gradient(145deg,#111b35,#26385c);color:#fff;box-shadow:0 12px 30px rgba(17,27,53,.16)}
+.pm-featured-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.pm-featured-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.13em;font-weight:800;color:#d9f56a;margin:0 0 6px}
+.pm-featured h2{font-size:22px;line-height:1.1;letter-spacing:-.04em;margin:0}
+.pm-featured-sub{font-size:12px;color:#d8deeb;line-height:1.45;margin:7px 0 0}
+.pm-featured-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pm-featured-card{min-width:0;overflow:hidden;border-radius:16px;background:#fff;color:#111b35;display:flex;flex-direction:column}
+.pm-featured-image{height:130px;background:#f5f7fb;display:grid;place-items:center;padding:10px}
+.pm-featured-image img{width:100%;height:100%;object-fit:contain}
+.pm-featured-body{padding:11px;display:flex;flex-direction:column;flex:1}
+.pm-featured-label{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#68748a;font-weight:800}
+.pm-featured-name{font-size:13px;line-height:1.3;font-weight:800;margin:5px 0 8px}
+.pm-featured-price{font-size:22px;font-weight:900;letter-spacing:-.04em;color:#ff6848;line-height:1.1}
+.pm-featured-store{font-size:11px;color:#68748a;margin-top:5px}
+.pm-featured-date{font-size:9px;line-height:1.4;color:#7b8495;margin-top:8px}
+.pm-featured-link{margin-top:10px;border-radius:10px;background:#ff6848;color:#fff;text-align:center;font-size:11px;font-weight:800;padding:10px 7px}
+.pm-featured-disclaimer{font-size:10px;line-height:1.45;color:#d8deeb;margin:12px 1px 0}
+.pm-featured-empty{grid-column:1/-1;color:#d8deeb;font-size:12px;line-height:1.5}
+@media(min-width:600px){.pm-featured{padding:22px}.pm-featured-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.pm-featured-image{height:170px}.pm-featured-name{font-size:14px}}
+
 </style>
 
 <meta name="description" content="Prix Malin vous aide à explorer des pistes de comparaison pour acheter malin. Découvrez le catalogue, les achats en quantité et les partenaires.">
@@ -922,6 +944,11 @@ main{max-width:1160px;padding:0 22px}
     <button class="filter-button" id="filterButton" aria-label="Filtres">☰</button>
   </div>
   <div id="amazonBanner"></div>
+  <section class="pm-featured" id="pmFeatured" aria-labelledby="pmFeaturedTitle">
+    <div class="pm-featured-head"><div><p class="pm-featured-kicker">Sélection Prix Malin</p><h2 id="pmFeaturedTitle">Les produits à la une</h2><p class="pm-featured-sub">Prix observés, marchand identifié, accès direct à l’offre.</p></div></div>
+    <div class="pm-featured-grid" id="pmFeaturedGrid"><p class="pm-featured-empty">Chargement des offres vérifiées…</p></div>
+    <p class="pm-featured-disclaimer">Un prix observé n’est pas une garantie du meilleur prix du marché. Vérifie le prix final, le vendeur, la disponibilité et la livraison chez le marchand.</p>
+  </section>
   <div class="categories" id="categories" aria-label="Catégories">
     <button class="category active" data-category="all"><span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span><span>Toutes</span></button>
     <button class="category" data-category="tech"><span class="category-icon"><img src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=80&h=80&fit=crop&fm=webp&q=65" alt="" loading="lazy" decoding="async"></span><span>Électronique</span></button>
@@ -1695,6 +1722,34 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 
 </script>
+
+<script>
+/* La sélection de la page d’accueil lit le même flux que le catalogue : aucun prix inventé ici. */
+(async function(){
+ const grid=document.getElementById('pmFeaturedGrid');
+ if(!grid)return;
+ const money=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(Number(n));
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const productImages={
+  'featured-airpods-4-anc-2026-10-25':'https://cdsassets.apple.com/live/7WUAS350/images/tech-specs/121204-airpods-4-anc.png',
+  'featured-galaxy-buds-fe-graphite-2026-10-25':'https://images.samsung.com/is/image/samsung/p6pim/fr/sm-r400nzaaxef/gallery/fr-galaxy-buds-fe-sm-r400nzaaxef-538474713?$1164_776_PNG$='
+ };
+ try{
+  const response=await fetch('/data/featured-prices.json',{cache:'no-store'});
+  if(!response.ok)throw new Error('Flux indisponible');
+  const data=await response.json();
+  const items=(data.products||[]).filter(p=>(p.offers||[]).some(o=>Number.isFinite(Number(o.price_eur))&&Number(o.price_eur)>0&&o.product_url&&!o.stale));
+  if(!items.length){grid.innerHTML='<p class="pm-featured-empty">Aucune offre avec prix et lien disponibles pour le moment. Nous préférons ne pas afficher de prix non vérifié.</p>';return;}
+  grid.innerHTML=items.slice(0,3).map(p=>{
+   const offer=(p.offers||[]).find(o=>Number.isFinite(Number(o.price_eur))&&Number(o.price_eur)>0&&o.product_url&&!o.stale);
+   const date=offer.checked_at?new Date(offer.checked_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}):'Date non renseignée';
+   const image=productImages[p.id]||'';
+   return '<article class="pm-featured-card"><div class="pm-featured-image">'+(image?'<img src="'+esc(image)+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async" onerror="this.closest(\'.pm-featured-image\').innerHTML=\'<span aria-hidden=\"true\" style=\"font-size:42px;color:#9aa5b8\">▧</span>\'">':'<span aria-hidden="true" style="font-size:42px;color:#9aa5b8">▧</span>')+'</div><div class="pm-featured-body"><span class="pm-featured-label">Prix observé</span><div class="pm-featured-name">'+esc(p.name)+'</div><div class="pm-featured-price">'+money(offer.price_eur)+'</div><div class="pm-featured-store">Chez '+esc(offer.retailer||'marchand')+'</div><div class="pm-featured-date">Relevé le '+esc(date)+' · prix à confirmer</div><a class="pm-featured-link" href="'+esc(offer.product_url)+'" target="_blank" rel="noopener noreferrer">Voir l’offre ↗</a></div></article>';
+  }).join('');
+ }catch(e){grid.innerHTML='<p class="pm-featured-empty">Les offres ne sont pas accessibles pour le moment. Aucun prix estimé n’est affiché.</p>';}
+})();
+</script>
+
 <script src="/js/cookie-consent.js" defer></script>
 </body>
 </html>
