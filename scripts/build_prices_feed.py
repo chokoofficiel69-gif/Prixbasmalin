@@ -16,8 +16,45 @@ ROOT = Path(__file__).resolve().parents[1]
 INPUT = ROOT / "data" / "merchant-offers.json"
 OUTPUT = ROOT / "data" / "prices.json"
 CATALOGUE = ROOT / "catalogue.html"
-MAX_AGE = timedelta(hours=48)
+FRESHNESS_CONFIG = ROOT / "data" / "source-freshness.json"
+DEFAULT_MAX_AGE_HOURS = 48
+MIN_MAX_AGE_HOURS = 1
+MAX_MAX_AGE_HOURS = 720
 IDENTITY_TYPES = {"gtin", "asin", "mpn"}
+
+
+def _validate_max_age_hours(value, label):
+    if isinstance(value, bool) or not isinstance(value, int) or not MIN_MAX_AGE_HOURS <= value <= MAX_MAX_AGE_HOURS:
+        raise ValueError(
+            f"{label}: nombre entier d'heures requis, entre {MIN_MAX_AGE_HOURS} et {MAX_MAX_AGE_HOURS}"
+        )
+    return value
+
+
+def load_freshness_config(path):
+    """Load per-source freshness limits; invalid configuration fails closed."""
+    try:
+        config = json.loads(Path(path).read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError("Configuration de fraîcheur JSON invalide") from exc
+    if not isinstance(config, dict) or config.get("schema_version") != 1:
+        raise ValueError("Configuration de fraîcheur invalide (schema_version=1 requis)")
+
+    default_hours = _validate_max_age_hours(
+        config.get("default_max_age_hours", DEFAULT_MAX_AGE_HOURS),
+        "default_max_age_hours",
+    )
+    source_hours = config.get("sources", {})
+    if not isinstance(source_hours, dict):
+        raise ValueError("Configuration de fraîcheur invalide : sources doit être un objet")
+
+    normalized_sources = {}
+    for source, hours in source_hours.items():
+        if not isinstance(source, str) or not source.strip():
+            raise ValueError("Configuration de fraîcheur invalide : nom de source vide")
+        normalized_sources[source.strip()] = _validate_max_age_hours(hours, f"sources.{source}")
+
+    return {"default_max_age_hours": default_hours, "sources": normalized_sources}
 
 
 def parse_date(value, label):
@@ -81,6 +118,7 @@ def normalize_identity(offer, label):
 
 def main():
     now = datetime.now(timezone.utc)
+    freshness = load_freshness_config(FRESHNESS_CONFIG)
     raw = json.loads(INPUT.read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or raw.get("schema_version") != 1 or not isinstance(raw.get("offers"), list):
         raise ValueError("Format invalide dans data/merchant-offers.json")
@@ -144,8 +182,14 @@ def main():
             errors.append(str(exc))
             continue
         age = now - checked_at
-        if age < timedelta(0) or age > MAX_AGE:
-            errors.append(f"{label}: relevé hors fenêtre de 48 heures")
+        source_name = offer["source"].strip()
+        max_age_hours = freshness["sources"].get(source_name, freshness["default_max_age_hours"])
+        max_age = timedelta(hours=max_age_hours)
+        if age < timedelta(0) or age > max_age:
+            errors.append(
+                f"{label}: relevé hors fenêtre de fraîcheur de {max_age_hours} heures "
+                f"(source : {source_name})"
+            )
             continue
 
         offer_id = offer.get("offer_id")
@@ -178,6 +222,7 @@ def main():
             "price_eur": round(float(price), 2),
             "shipping_price_eur": round(float(shipping), 2),
             "total_price_eur": round(float(price) + float(shipping), 2),
+            "freshness_max_age_hours": max_age_hours,
             "product_url": product_url,
             "checked_at": checked_at.isoformat().replace("+00:00", "Z"),
         }

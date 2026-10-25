@@ -4,7 +4,7 @@ import io
 import json
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -32,15 +32,21 @@ class PriceFeedValidationTests(unittest.TestCase):
             "checked_at": self.now,
         }
 
-    def run_builder(self, offers):
+    def run_builder(self, offers, config=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source = root / "merchant-offers.json"
             output = root / "prices.json"
             catalogue = root / "catalogue.html"
+            freshness_config = root / "source-freshness.json"
             source.write_text(json.dumps({
                 "schema_version": 1,
                 "offers": offers,
+            }), encoding="utf-8")
+            freshness_config.write_text(json.dumps(config if config is not None else {
+                "schema_version": 1,
+                "default_max_age_hours": 48,
+                "sources": {},
             }), encoding="utf-8")
             catalogue.write_text(
                 'const productData=[{id:"t1",name:"T-shirt blanc"}];',
@@ -49,6 +55,7 @@ class PriceFeedValidationTests(unittest.TestCase):
             with patch.object(BUILDER, "INPUT", source), \
                  patch.object(BUILDER, "OUTPUT", output), \
                  patch.object(BUILDER, "CATALOGUE", catalogue), \
+                 patch.object(BUILDER, "FRESHNESS_CONFIG", freshness_config), \
                  contextlib.redirect_stdout(io.StringIO()):
                 BUILDER.main()
             return json.loads(output.read_text(encoding="utf-8"))
@@ -111,6 +118,45 @@ class PriceFeedValidationTests(unittest.TestCase):
         self.assertEqual(result["products"], [])
         self.assertTrue(any("brand obligatoire" in error for error in result["errors"]))
 
+
+    def test_default_freshness_window_remains_48_hours(self):
+        old_date = (datetime.now(timezone.utc) - timedelta(hours=49)).isoformat()
+        stale = dict(self.base_offer, checked_at=old_date)
+        result = self.run_builder([stale])
+
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("48 heures" in error for error in result["errors"]))
+
+    def test_source_specific_freshness_window_overrides_default(self):
+        old_date = (datetime.now(timezone.utc) - timedelta(hours=60)).isoformat()
+        stale_by_default = dict(self.base_offer, checked_at=old_date)
+        short_window = {
+            "schema_version": 1,
+            "default_max_age_hours": 48,
+            "sources": {"Flux autorisé de test": 24},
+        }
+        short_result = self.run_builder([stale_by_default], config=short_window)
+        self.assertEqual(short_result["products"], [])
+        self.assertTrue(any("24 heures" in error for error in short_result["errors"]))
+
+        long_window = {
+            "schema_version": 1,
+            "default_max_age_hours": 48,
+            "sources": {"Flux autorisé de test": 72},
+        }
+        long_result = self.run_builder([stale_by_default], config=long_window)
+        self.assertEqual(len(long_result["products"]), 1)
+        self.assertEqual(long_result["products"][0]["offer_count"], 1)
+        self.assertEqual(long_result["products"][0]["offers"][0]["freshness_max_age_hours"], 72)
+
+    def test_invalid_source_freshness_config_fails_closed(self):
+        invalid_config = {
+            "schema_version": 1,
+            "default_max_age_hours": 48,
+            "sources": {"Flux autorisé de test": 0},
+        }
+        with self.assertRaisesRegex(ValueError, "entre 1 et 720"):
+            self.run_builder([self.base_offer], config=invalid_config)
 
 if __name__ == "__main__":
     unittest.main()
