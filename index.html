@@ -61,8 +61,8 @@ main{max-width:860px;margin:0 auto}
 .trust-icon{font-size:20px;margin-bottom:2px}
 .trust-card h3{font-size:11px;margin:0 0 2px;font-weight:700}
 .trust-card p{font-size:9px;color:#999;margin:0;line-height:1.2}
-.bottom-nav{position:fixed;z-index:20;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eaeaea;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));padding:6px 1px max(8px,env(safe-area-inset-bottom));}
-.bottom-nav button{border:0;background:transparent;color:#999;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:8px;font-weight:600;min-width:0}
+.bottom-nav{position:fixed;z-index:20;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eaeaea;display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px max(8px,env(safe-area-inset-bottom));}
+.bottom-nav button{border:0;background:transparent;color:#999;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;min-width:0}
 .bottom-nav button.active{color:var(--orange)}
 .nav-icon{font-size:20px;line-height:1}
 .agent{position:fixed;right:12px;bottom:80px;z-index:30}
@@ -70,8 +70,6 @@ main{max-width:860px;margin:0 auto}
 .agent-button img{width:100%;height:100%;object-fit:cover}
 .modal{position:fixed;inset:0;z-index:50;background:#0006;display:none;align-items:flex-end}
 .modal.open{display:flex}
-/* Masquer les flyers partenaires derrière les fenêtres modales, notamment l’assistant IA. */
-body.pm-modal-open .flyer-ticker{visibility:hidden!important;pointer-events:none!important}
 .modal-panel{background:#fff;width:100%;max-height:85vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px 14px max(16px,env(safe-area-inset-bottom))}
 .modal-panel h2{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0 0 10px;font-size:18px}
 .modal-panel p{line-height:1.4;color:#555;font-size:13px}
@@ -94,20 +92,6 @@ body.pm-modal-open .flyer-ticker{visibility:hidden!important;pointer-events:none
 
 .agent-button{font-size:24px;color:#fff;background:var(--orange);display:grid;place-items:center}
 .accessibility-button{position:fixed;right:12px;bottom:138px;z-index:30;width:46px;height:46px;border:2px solid #222;border-radius:50%;background:#fff;color:#111;font-size:22px;box-shadow:0 3px 12px #0002}
-
-/* Outils flottants déplaçables, masquables et restaurables depuis la barre du bas. */
-.agent,.accessibility-button,.accessibility-float{touch-action:none;cursor:grab}.agent:active,.accessibility-float:active{cursor:grabbing}
-.pm-floating-hidden{display:none!important}
-.pm-float-dismiss{position:absolute;top:-7px;right:-7px;width:23px;height:23px;border:1px solid #fff;border-radius:50%;background:#222;color:#fff;font:700 15px/1 system-ui;display:grid;place-items:center;z-index:3;box-shadow:0 2px 6px #0003;padding:0}
-.agent{touch-action:none}
-.accessibility-float{position:fixed;right:12px;bottom:138px;z-index:30;width:46px;height:46px;touch-action:none;cursor:grab}
-.accessibility-float .accessibility-button{position:absolute;inset:0;right:auto;bottom:auto;width:46px;height:46px}
-.agent .pm-float-dismiss{top:-6px;right:-6px}
-@media(max-width:899px){
- .bottom-nav button .nav-icon{font-size:17px;display:flex;align-items:center;justify-content:center}.bottom-nav button .nav-icon svg{width:19px;height:19px;display:block}
- .bottom-nav button span:last-child{font-size:7px;white-space:nowrap;letter-spacing:-.35px}
-}
-
 :focus-visible{outline:3px solid #155eef!important;outline-offset:3px}
 .skip-link{position:absolute;left:8px;top:-60px;background:#111;color:#fff;padding:12px;z-index:100;border-radius:8px}
 .skip-link:focus{top:8px}
@@ -1056,27 +1040,18 @@ main{max-width:1160px;padding:0 22px}
 <nav class="bottom-nav" aria-label="Navigation principale">
   <button class="active" data-nav="home"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span><span>Accueil</span></button>
   <button data-nav="categories"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span><span>Catégories</span></button>
-  <button data-nav="alerts"><span class="nav-icon">🔔</span><span>Alertes</span></button>
   <button data-nav="deals"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13 13 20 3 10V4h6l11 9Z"/><circle cx="7" cy="8" r="1"/></svg></span><span>Plans</span></button>
   <button data-nav="favorites"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.8 4.8 0 0 1 12 6.4a4.8 4.8 0 0 1 8.8 2.4Z"/></svg></span><span>Favoris</span></button>
   <button data-nav="account"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Compte</span></button>
-  <button data-nav="assistant"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="3"/><path d="M12 3v4M8 12h.01M16 12h.01M9 16h6M2 12h2M20 12h2"/></svg></span><span>Assistant IA</span></button>
-  <button data-nav="accessibility"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M5 8h14M12 8l-2 6 4 2M10 14l-3 6M14 16l4 4"/></svg></span><span>Accessibilité</span></button>
 </nav>
 
 
 
-<div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l’assistant Prix Malin" title="Besoin d’aide ?"><img src="assets/mascotte-malin.svg" alt=""></button></div><div class="accessibility-float"><button id="accessibilityButton" class="accessibility-button" aria-label="Ouvrir les options d’accessibilité" title="Accessibilité">♿</button></div>
+<div class="agent"><button class="agent-button" id="agentButton" aria-label="Ouvrir l’assistant Prix Malin" title="Besoin d’aide ?"><img src="assets/mascotte-malin.svg" alt=""></button></div><button id="accessibilityButton" class="accessibility-button" aria-label="Ouvrir les options d’accessibilité" title="Accessibilité">♿</button>
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-panel"><h2 id="modalTitle">Prix Malin</h2><div id="modalContent"></div><div class="modal-actions"><button class="modal-secondary" id="modalClose">Fermer</button></div></div>
 </div>
 <script>
-const pmModalForFlyers=document.getElementById("modal");
-if(pmModalForFlyers){
- const syncFlyerVisibility=()=>document.body.classList.toggle("pm-modal-open",pmModalForFlyers.classList.contains("open"));
- new MutationObserver(syncFlyerVisibility).observe(pmModalForFlyers,{attributes:true,attributeFilter:["class"]});
- syncFlyerVisibility();
-}
 const synonyms={
  "pantalon":["jeans","jean","vetement","vêtement","mode","pantalons"],
  "jeans":["pantalon","jean","vetement","vêtement"],
@@ -1322,10 +1297,10 @@ function showAllProducts(page=1){
  document.getElementById("modalTitle").textContent="Tous les produits";
  document.getElementById("modalContent").innerHTML="";
  document.getElementById("modalContent").append(toolbar,content,pager);
- modal.classList.add("open");document.body.classList.add("pm-modal-open");
+ modal.classList.add("open");
 }
-function openModal(title,text){document.getElementById("modalTitle").textContent=title;document.getElementById("modalContent").innerHTML='<p>'+text+'</p>';document.getElementById("modal").classList.add("open");document.body.classList.add("pm-modal-open")}
-function closeModal(){const modal=document.getElementById("modal");modal.classList.remove("open","catalog-mode");document.body.classList.remove("pm-modal-open")}
+function openModal(title,text){document.getElementById("modalTitle").textContent=title;document.getElementById("modalContent").innerHTML='<p>'+text+'</p>';document.getElementById("modal").classList.add("open")}
+function closeModal(){const modal=document.getElementById("modal");modal.classList.remove("open","catalog-mode")}
 
 /* Suggestions de recherche : aide à la saisie sans prétendre à une correction magique */
 const suggestionTerms = [
@@ -1440,61 +1415,8 @@ function showDeals(){
  document.getElementById("modalContent").innerHTML='<p>Accès rapide aux promotions Amazon et aux recherches triées du moins cher au plus cher.</p><div class="deal-list">'+deals.map(([title,url,desc])=>'<a class="deal-row" href="'+url+'" target="_blank" rel="sponsored noopener"><span><strong>'+title+'</strong><small>'+desc+'</small></span><b>Voir ↗</b></a>').join("")+'</div><p class="notice">Les promotions et les prix changent en permanence. Ces liens affichent les offres actuelles chez Amazon ; Prix Malin ne prétend pas les avoir vérifiées ni classées en temps réel.</p>';
  document.getElementById("modal").classList.add("open");
 }
-document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="alerts"){window.location.href="catalogue.html?alerte=1"}else if(action==="deals"){window.location.href="offres.html"}else if(action==="favorites"){const favLaunch=document.querySelector(".pm-fav-launch");if(favLaunch){favLaunch.click()}else{showingFavorites=true;document.getElementById("query").value="";renderProducts();document.getElementById("popular").scrollIntoView({behavior:"smooth"})}}else if(action==="assistant"){const el=document.querySelector(".agent");if(el&&el.classList.contains("pm-floating-hidden")){el.classList.remove("pm-floating-hidden");localStorage.removeItem("pmHideAgent");}else{document.getElementById("agentButton").click()}}else if(action==="accessibility"){const el=document.getElementById("accessibilityButton");if(el&&el.classList.contains("pm-floating-hidden")){el.classList.remove("pm-floating-hidden");localStorage.removeItem("pmHideAccessibility");}else{document.getElementById("accessibilityButton").click()}}else if(action==="account"){document.getElementById("modalTitle").textContent="Mon espace Prix Malin";document.getElementById("modalContent").innerHTML='<p>Pas besoin de créer un compte pour utiliser Prix Malin.</p><div class="account-stats"><div><strong>'+favorites.length+'</strong><span>Favoris enregistrés</span></div><div><strong>'+cart.length+'</strong><span>Articles dans le panier</span></div></div><button class="modal-primary" id="accountFavorites" style="margin-top:12px">Voir mes favoris</button><button class="modal-secondary" id="accountCart" style="margin-top:12px">Ouvrir mon panier</button><p class="notice">Tes favoris et ton panier sont conservés sur cet appareil.</p>';document.getElementById("modal").classList.add("open");document.getElementById("accountFavorites").onclick=()=>{closeModal();showingFavorites=true;document.getElementById("query").value="";renderProducts();document.getElementById("popular").scrollIntoView({behavior:"smooth"})};document.getElementById("accountCart").onclick=showCart}};
+document.querySelector(".bottom-nav").onclick=e=>{const btn=e.target.closest("[data-nav]");if(!btn)return;document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b===btn));const action=btn.dataset.nav;if(action==="home"){activeCategory="all";showingFavorites=false;document.getElementById("query").value="";renderProducts();window.scrollTo({top:0,behavior:"smooth"})}else if(action==="categories"){document.getElementById("categories").scrollIntoView({behavior:"smooth"})}else if(action==="deals"){window.location.href="offres.html"}else if(action==="favorites"){showingFavorites=true;document.getElementById("query").value="";renderProducts();document.getElementById("popular").scrollIntoView({behavior:"smooth"})}else if(action==="account"){document.getElementById("modalTitle").textContent="Mon espace Prix Malin";document.getElementById("modalContent").innerHTML='<p>Pas besoin de créer un compte pour utiliser Prix Malin.</p><div class="account-stats"><div><strong>'+favorites.length+'</strong><span>Favoris enregistrés</span></div><div><strong>'+cart.length+'</strong><span>Articles dans le panier</span></div></div><button class="modal-primary" id="accountFavorites" style="margin-top:12px">Voir mes favoris</button><button class="modal-secondary" id="accountCart" style="margin-top:12px">Ouvrir mon panier</button><p class="notice">Tes favoris et ton panier sont conservés sur cet appareil.</p>';document.getElementById("modal").classList.add("open");document.getElementById("accountFavorites").onclick=()=>{closeModal();showingFavorites=true;document.getElementById("query").value="";renderProducts();document.getElementById("popular").scrollIntoView({behavior:"smooth"})};document.getElementById("accountCart").onclick=showCart}};
 document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrollTo({top:0,behavior:"smooth"})};
-
-
-/* Gestion des outils flottants : déplacement tactile/souris, masquage et restauration. */
-(function(){
- const agent=document.querySelector(".agent");
- const access=document.querySelector(".accessibility-float");
- const controls=[{el:agent,key:"pmAgentPosition",hideKey:"pmHideAgent",name:"Assistant"},{el:access,key:"pmAccessPosition",hideKey:"pmHideAccessibility",name:"Accessibilité"}];
- controls.forEach(({el,key,hideKey,name})=>{
-  if(!el)return;
-  const dragTarget=el;
-  const close=document.createElement("button");
-  close.type="button";close.className="pm-float-dismiss";close.textContent="×";
-  close.setAttribute("aria-label","Masquer "+name);
-  close.title="Masquer "+name;
-  if(getComputedStyle(el).position!=="fixed")el.style.position="fixed";
-  el.appendChild(close);
-  close.addEventListener("pointerdown",e=>e.stopPropagation());
-  close.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();el.classList.add("pm-floating-hidden");try{localStorage.setItem(hideKey,"1")}catch(_){}});
-  try{
-   const saved=JSON.parse(localStorage.getItem(key)||"null");
-   if(saved&&Number.isFinite(saved.left)&&Number.isFinite(saved.top)){
-    el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,saved.left))+"px";
-    el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,saved.top))+"px";
-    el.style.right="auto";el.style.bottom="auto";
-   }
-   if(localStorage.getItem(hideKey)==="1")el.classList.add("pm-floating-hidden");
-  }catch(_){}
-  let startX=0,startY=0,originX=0,originY=0,moved=false;
-  dragTarget.addEventListener("pointerdown",e=>{
-   if(e.target.closest(".pm-float-dismiss"))return;
-   startX=e.clientX;startY=e.clientY;
-   const rect=el.getBoundingClientRect();originX=rect.left;originY=rect.top;moved=false;
-   try{dragTarget.setPointerCapture(e.pointerId)}catch(_){}
-  });
-  dragTarget.addEventListener("pointermove",e=>{
-   if(!dragTarget.hasPointerCapture||!dragTarget.hasPointerCapture(e.pointerId))return;
-   const dx=e.clientX-startX,dy=e.clientY-startY;
-   if(Math.abs(dx)>4||Math.abs(dy)>4)moved=true;
-   if(!moved)return;
-   const left=Math.max(0,Math.min(innerWidth-el.offsetWidth,originX+dx));
-   const top=Math.max(0,Math.min(innerHeight-el.offsetHeight,originY+dy));
-   el.style.left=left+"px";el.style.top=top+"px";el.style.right="auto";el.style.bottom="auto";
-   el.dataset.dragged="1";
-  });
-  dragTarget.addEventListener("pointerup",()=>{
-   if(moved){const rect=el.getBoundingClientRect();try{localStorage.setItem(key,JSON.stringify({left:rect.left,top:rect.top}))}catch(_){}}
-   setTimeout(()=>{moved=false;},0);
-  });
-  dragTarget.addEventListener("click",e=>{
-   if(el.dataset.dragged==="1"){e.preventDefault();e.stopImmediatePropagation();delete el.dataset.dragged;}
-  },true);
- });
-})();
 
 document.getElementById("agentButton").onclick=()=>{
  const content=document.getElementById("modalContent");
@@ -1799,7 +1721,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 <script src="/js/personalisation.js" defer></script>
 <script src="/js/cookie-consent.js" defer></script>
 <script type="module" src="/js/prix-malin-auth.js"></script>
-
+<a href="catalogue.html?alerte=1" aria-label="Ouvrir les alertes de prix" style="position:fixed;left:16px;right:16px;bottom:max(14px,env(safe-area-inset-bottom));z-index:1000;width:auto;max-width:520px;margin:0 auto;box-sizing:border-box;display:block;text-align:center;padding:14px 18px;border-radius:999px;background:#ff5a1f;color:#fff;font-weight:800;text-decoration:none;box-shadow:0 8px 28px #17203324">🔔 Mes alertes prix</a>
 
 <style id="pm-favorites-style">
 .pm-fav-toggle{position:absolute;right:8px;top:8px;z-index:4;width:36px;height:36px;border:1px solid #eadfd8;border-radius:50%;background:#fff;color:#8a817b;display:grid;place-items:center;font-size:21px;line-height:1;box-shadow:0 2px 8px #00000012;cursor:pointer}
@@ -1835,7 +1757,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     left:0!important;right:0!important;bottom:0!important;
     width:100%!important;max-width:none!important;
     margin:0!important;
-    grid-template-columns:repeat(8,minmax(0,1fr))!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
     border-radius:0!important;
     padding:8px 4px max(8px,env(safe-area-inset-bottom, 0px))!important;
     background:rgba(255,255,255,.98)!important;
@@ -1848,12 +1770,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   .accessibility-button{bottom:calc(154px + env(safe-area-inset-bottom, 0px))!important}
 }
 
-
-/* Navigation intégrée : les actions sont dans la barre du bas. */
-@media(max-width:899px){
- body{padding-bottom:calc(76px + env(safe-area-inset-bottom, 0px))!important}
- .pm-fav-launch{display:none!important}
-}
 </style>
 <script id="pm-favorites-script">
 (function(){
