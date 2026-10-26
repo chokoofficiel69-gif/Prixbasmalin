@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
+      - "js/prix-malin-auth.js"
       - "catalogue.html"
       - "index.html"
       - "etat-prix.html"
@@ -47,6 +48,8 @@ jobs:
         run: node --test price-engine/price-utils.test.mjs
       - name: Vérifier la syntaxe du moteur de prix
         run: node --check price-engine/refresh.mjs
+      - name: Vérifier la syntaxe du module compte et alertes
+        run: node --check js/prix-malin-auth.js
       - name: Vérifier le blocage des redirections non sûres
         run: |
           node --input-type=module <<'NODE'
