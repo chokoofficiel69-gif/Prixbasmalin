@@ -147,6 +147,12 @@ offers.splice(0, offers.length, ...mergedOffers);
 // ne pas remplacer un relevé vide par un faux relevé de succès.
 if (offers.length === 0) {
   console.error(`Aucune offre valide récupérée; relevé précédent conservé. Erreurs: ${errors.length}`);
+  if (errors.length) {
+    console.error("Diagnostic détaillé des sources (aucun prix n'a été inventé) :");
+    for (const [index, error] of errors.entries()) {
+      console.error(`[${index + 1}] ${JSON.stringify(error)}`);
+    }
+  }
   process.exitCode = 1;
 } else {
   const productIds = validProducts.map(p => p.id);
