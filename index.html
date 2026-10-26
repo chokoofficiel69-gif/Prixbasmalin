@@ -94,14 +94,14 @@ main{max-width:860px;margin:0 auto}
 .accessibility-button{position:fixed;right:12px;bottom:138px;z-index:30;width:46px;height:46px;border:2px solid #222;border-radius:50%;background:#fff;color:#111;font-size:22px;box-shadow:0 3px 12px #0002}
 
 /* Outils flottants déplaçables, masquables et restaurables depuis la barre du bas. */
-.agent,.accessibility-button{touch-action:none}
+.agent,.accessibility-button,.accessibility-float{touch-action:none;cursor:grab}.agent:active,.accessibility-float:active{cursor:grabbing}
 .pm-floating-hidden{display:none!important}
 .pm-float-dismiss{position:absolute;top:-7px;right:-7px;width:23px;height:23px;border:1px solid #fff;border-radius:50%;background:#222;color:#fff;font:700 15px/1 system-ui;display:grid;place-items:center;z-index:3;box-shadow:0 2px 6px #0003;padding:0}
 .agent{touch-action:none}
 .agent .pm-float-dismiss{top:-6px;right:-6px}
 @media(max-width:899px){
- .bottom-nav button .nav-icon{font-size:17px}
- .bottom-nav button span:last-child{font-size:8px;white-space:nowrap;letter-spacing:-.2px}
+ .bottom-nav button .nav-icon{font-size:17px;display:flex;align-items:center;justify-content:center}.bottom-nav button .nav-icon svg{width:19px;height:19px;display:block}
+ .bottom-nav button span:last-child{font-size:7px;white-space:nowrap;letter-spacing:-.35px}
 }
 
 :focus-visible{outline:3px solid #155eef!important;outline-offset:3px}
@@ -1056,8 +1056,8 @@ main{max-width:1160px;padding:0 22px}
   <button data-nav="deals"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13 13 20 3 10V4h6l11 9Z"/><circle cx="7" cy="8" r="1"/></svg></span><span>Plans</span></button>
   <button data-nav="favorites"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.8 4.8 0 0 1 12 6.4a4.8 4.8 0 0 1 8.8 2.4Z"/></svg></span><span>Favoris</span></button>
   <button data-nav="account"><span class="nav-icon"><svg class="" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Compte</span></button>
-  <button data-nav="assistant"><span class="nav-icon">🤖</span><span>Assistant</span></button>
-  <button data-nav="accessibility"><span class="nav-icon">♿</span><span>Access.</span></button>
+  <button data-nav="assistant"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="3"/><path d="M12 3v4M8 12h.01M16 12h.01M9 16h6M2 12h2M20 12h2"/></svg></span><span>Assistant IA</span></button>
+  <button data-nav="accessibility"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M5 8h14M12 8l-2 6 4 2M10 14l-3 6M14 16l4 4"/></svg></span><span>Accessibilité</span></button>
 </nav>
 
 
@@ -1441,7 +1441,7 @@ document.getElementById("brandHome").onclick=e=>{e.preventDefault();window.scrol
  const controls=[{el:agent,key:"pmAgentPosition",hideKey:"pmHideAgent",name:"Assistant"},{el:access,key:"pmAccessPosition",hideKey:"pmHideAccessibility",name:"Accessibilité"}];
  controls.forEach(({el,key,hideKey,name})=>{
   if(!el)return;
-  const dragTarget=el.querySelector("button")||el;
+  const dragTarget=el;
   const close=document.createElement("button");
   close.type="button";close.className="pm-float-dismiss";close.textContent="×";
   close.setAttribute("aria-label","Masquer "+name);
