@@ -1071,6 +1071,12 @@ main{max-width:1160px;padding:0 22px}
   <div class="modal-panel"><h2 id="modalTitle">Prix Malin</h2><div id="modalContent"></div><div class="modal-actions"><button class="modal-secondary" id="modalClose">Fermer</button></div></div>
 </div>
 <script>
+const pmModalForFlyers=document.getElementById("modal");
+if(pmModalForFlyers){
+ const syncFlyerVisibility=()=>document.body.classList.toggle("pm-modal-open",pmModalForFlyers.classList.contains("open"));
+ new MutationObserver(syncFlyerVisibility).observe(pmModalForFlyers,{attributes:true,attributeFilter:["class"]});
+ syncFlyerVisibility();
+}
 const synonyms={
  "pantalon":["jeans","jean","vetement","vêtement","mode","pantalons"],
  "jeans":["pantalon","jean","vetement","vêtement"],
