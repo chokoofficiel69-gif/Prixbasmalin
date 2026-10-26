@@ -1771,8 +1771,26 @@ document.addEventListener("DOMContentLoaded",()=>{
 }
 
 
-/* Mobile: separate the fixed alert and favorites controls. */
-@media(max-width:899px){body>a[aria-label="Ouvrir les alertes de prix"]{left:12px!important;right:auto!important;width:calc(100vw - 176px)!important;max-width:520px!important;bottom:18px!important;z-index:9981!important;padding:12px 10px!important;font-size:13px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.pm-fav-launch{right:12px!important;bottom:18px!important;max-width:156px!important;padding:0 11px!important;gap:6px!important;white-space:nowrap!important}}
+/* Mobile fix v2: stack fixed actions vertically so they never overlap. */
+@media(max-width:899px){
+  body{padding-bottom:150px!important}
+  body>a[aria-label="Ouvrir les alertes de prix"]{
+    position:fixed!important;left:12px!important;right:12px!important;
+    bottom:max(12px,env(safe-area-inset-bottom, 0px))!important;
+    width:auto!important;max-width:none!important;margin:0!important;
+    z-index:9981!important;box-sizing:border-box!important;
+    display:block!important;padding:13px 12px!important;
+    font-size:14px!important;line-height:1.25!important;
+    white-space:nowrap!important;text-align:center!important;
+  }
+  body>.pm-fav-launch{
+    position:fixed!important;left:12px!important;right:12px!important;
+    bottom:calc(max(12px,env(safe-area-inset-bottom, 0px)) + 60px)!important;
+    width:auto!important;max-width:none!important;min-height:44px!important;
+    justify-content:center!important;padding:0 14px!important;
+    z-index:9982!important;white-space:nowrap!important;
+  }
+}
 </style>
 <script id="pm-favorites-script">
 (function(){
