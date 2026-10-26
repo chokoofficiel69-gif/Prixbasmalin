@@ -1770,6 +1770,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   .accessibility-button{bottom:calc(154px + env(safe-area-inset-bottom, 0px))!important}
 }
 
+
+/* Mobile: separate the fixed alert and favorites controls. */
+@media(max-width:899px){body>a[aria-label="Ouvrir les alertes de prix"]{left:12px!important;right:auto!important;width:calc(100vw - 176px)!important;max-width:520px!important;bottom:18px!important;z-index:9981!important;padding:12px 10px!important;font-size:13px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.pm-fav-launch{right:12px!important;bottom:18px!important;max-width:156px!important;padding:0 11px!important;gap:6px!important;white-space:nowrap!important}}
 </style>
 <script id="pm-favorites-script">
 (function(){
