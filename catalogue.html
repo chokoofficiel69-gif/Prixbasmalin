@@ -720,4 +720,105 @@ searchEl.addEventListener("input",render);document.getElementById("filters").add
   renderList();
 })();
 </script>
+
+<style id="pm-mobile-nav-fix">
+@media(max-width:759px){
+ body{padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}
+ .pm-global-alert,.pm-fav-launch{display:none!important}
+ #pmMobileNav{position:fixed;z-index:9990;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0;padding:7px 2px max(7px,env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.98);border-top:1px solid #e7e7e7;box-shadow:0 -5px 20px #0000000d;backdrop-filter:blur(12px)}
+ #pmMobileNav button{min-width:0;padding:3px 0;border:0;background:transparent;color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:600 8px/1.1 system-ui,sans-serif;white-space:nowrap}
+ #pmMobileNav .pm-nav-icon{font-size:17px;line-height:1}
+ #pmMobileNav button:active,#pmMobileNav button.pm-active{color:#ff5a1f}
+ #pmMobileNav button:focus-visible{outline:2px solid #155eef;outline-offset:-2px}
+ #pmAssistFloat,#pmAccessFloat{position:fixed;z-index:9985;touch-action:none;user-select:none}
+ #pmAssistFloat{right:14px;bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+ #pmAccessFloat{right:18px;bottom:calc(145px + env(safe-area-inset-bottom,0px))}
+ #pmAssistFloat button.pm-float-main,#pmAccessFloat button.pm-float-main{width:48px;height:48px;border-radius:50%;border:1px solid #eee;background:#fff;box-shadow:0 4px 14px #0002;display:grid;place-items:center;font-size:23px;padding:0;touch-action:none}
+ #pmAssistFloat button.pm-float-main{background:#fff4ed;border-color:#ffc9b2}
+ #pmAssistFloat img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+ .pm-floating-hidden{display:none!important}
+ .pm-float-dismiss{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border:1px solid #fff;border-radius:50%;background:#222;color:#fff;font:700 15px/1 system-ui;display:grid;place-items:center;padding:0;z-index:3;box-shadow:0 2px 6px #0003}
+ #pmMobilePanel{position:fixed;inset:0;z-index:10030;display:none;align-items:flex-end;background:#0006}
+ #pmMobilePanel.open{display:flex}
+ #pmMobilePanel .pm-mobile-panel-card{width:100%;max-height:80vh;overflow:auto;background:#fff;border-radius:18px 18px 0 0;padding:20px 16px max(18px,env(safe-area-inset-bottom,0px));color:#222}
+ #pmMobilePanel h2{margin:0 0 10px;font-size:21px}
+ #pmMobilePanel p{font-size:14px;line-height:1.5;color:#555}
+ #pmMobilePanel .pm-panel-actions{display:grid;gap:9px}
+ #pmMobilePanel .pm-panel-actions button{border:1px solid #e5e5e5;border-radius:10px;background:#fff;padding:12px;text-align:left;font:700 14px system-ui;color:#222}
+ #pmMobilePanel .pm-panel-actions button[aria-pressed="true"]{background:#fff1e9;border-color:#ff9b72}
+ #pmMobilePanel .pm-panel-close{float:right;border:0;border-radius:50%;width:36px;height:36px;background:#f1f1f1;font-size:22px}
+ body.pm-large-text{font-size:120%!important}
+ body.pm-high-contrast{filter:contrast(1.15)}
+}
+@media(min-width:760px){#pmMobileNav,#pmAssistFloat,#pmAccessFloat,#pmMobilePanel{display:none!important}}
+</style>
+
+<script id="pm-mobile-nav-fix-script">
+(function(){
+ if(window.__pmMobileNavFix)return;window.__pmMobileNavFix=true;
+ const mobile=()=>window.matchMedia('(max-width: 759px)').matches;
+ const style=document.getElementById('pm-mobile-nav-fix');
+ if(!style)return;
+ const nav=document.createElement('nav');nav.id='pmMobileNav';nav.setAttribute('aria-label','Navigation principale');
+ nav.innerHTML=
+ '<button data-pm-nav="home"><span class="pm-nav-icon">⌂</span><span>Accueil</span></button>'+
+ '<button data-pm-nav="categories"><span class="pm-nav-icon">▦</span><span>Catégories</span></button>'+
+ '<button data-pm-nav="alerts"><span class="pm-nav-icon">♧</span><span>Alertes</span></button>'+
+ '<button data-pm-nav="deals"><span class="pm-nav-icon">％</span><span>Plans</span></button>'+
+ '<button data-pm-nav="favorites"><span class="pm-nav-icon">♡</span><span>Favoris</span></button>'+
+ '<button data-pm-nav="account"><span class="pm-nav-icon">♙</span><span>Compte</span></button>'+
+ '<button data-pm-nav="assistant"><span class="pm-nav-icon">🤖</span><span>Assistant</span></button>'+
+ '<button data-pm-nav="accessibility"><span class="pm-nav-icon">♿</span><span>Access.</span></button>';
+ document.body.appendChild(nav);
+ const panel=document.createElement('div');panel.id='pmMobilePanel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
+ panel.innerHTML='<section class="pm-mobile-panel-card"><button class="pm-panel-close" type="button" aria-label="Fermer">×</button><h2 id="pmMobilePanelTitle">Prix Malin</h2><div id="pmMobilePanelContent"></div></section>';
+ document.body.appendChild(panel);
+ const closePanel=()=>panel.classList.remove('open');
+ panel.querySelector('.pm-panel-close').addEventListener('click',closePanel);
+ panel.addEventListener('click',e=>{if(e.target===panel)closePanel()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel()});
+ function showPanel(title,html){document.getElementById('pmMobilePanelTitle').textContent=title;document.getElementById('pmMobilePanelContent').innerHTML=html;panel.classList.add('open')}
+ const alertOpen=()=>{const b=document.querySelector('.pm-global-alert');if(b)b.click();else if(typeof window.pmOpenAlert==='function')window.pmOpenAlert('Tous les produits');else location.href='catalogue.html?alerte=1'};
+ const favOpen=()=>{const b=document.querySelector('.pm-fav-launch');if(b)b.click();else showPanel('Mes favoris','<p>Utilise le cœur sur une fiche produit pour enregistrer un favori.</p>')};
+ function makeFloat(id,hideKey,name,icon,html,positionKey){
+  const box=document.createElement('div');box.id=id;
+  const main=document.createElement('button');main.type='button';main.className='pm-float-main';main.setAttribute('aria-label',name);main.innerHTML=html||icon;
+  const close=document.createElement('button');close.type='button';close.className='pm-float-dismiss';close.textContent='×';close.setAttribute('aria-label','Masquer '+name);
+  box.append(main,close);document.body.appendChild(box);
+  close.addEventListener('pointerdown',e=>e.stopPropagation());
+  close.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();box.classList.add('pm-floating-hidden');try{localStorage.setItem(hideKey,'1')}catch(_){}});
+  try{if(localStorage.getItem(hideKey)==='1')box.classList.add('pm-floating-hidden');const p=JSON.parse(localStorage.getItem(positionKey)||'null');if(p&&Number.isFinite(p.left)&&Number.isFinite(p.top)){box.style.left=Math.max(0,Math.min(innerWidth-54,p.left))+'px';box.style.top=Math.max(0,Math.min(innerHeight-54,p.top))+'px';box.style.right='auto';box.style.bottom='auto'}}catch(_){}
+  let sx=0,sy=0,ox=0,oy=0,moved=false,dragging=false;
+  main.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;const r=box.getBoundingClientRect();ox=r.left;oy=r.top;moved=false;dragging=true;try{main.setPointerCapture(e.pointerId)}catch(_){}});
+  main.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>5||Math.abs(dy)>5)moved=true;if(!moved)return;box.style.left=Math.max(0,Math.min(innerWidth-box.offsetWidth,ox+dx))+'px';box.style.top=Math.max(0,Math.min(innerHeight-box.offsetHeight,oy+dy))+'px';box.style.right='auto';box.style.bottom='auto'});
+  const end=()=>{if(moved){const r=box.getBoundingClientRect();try{localStorage.setItem(positionKey,JSON.stringify({left:r.left,top:r.top}))}catch(_){}}dragging=false};
+  main.addEventListener('pointerup',end);main.addEventListener('pointercancel',end);
+  main.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopImmediatePropagation();moved=false}},true);
+  return {box,main};
+ }
+ const assistant=makeFloat('pmAssistFloat','pmHideAgent','Assistant','🤖','<img src="/assets/mascotte-malin.svg" alt="">','pmAgentPosition');
+ assistant.main.addEventListener('click',()=>{if(assistant.box.dataset.dragged==='1')return;showPanel('Assistant Prix Malin','<p>Je peux t’aider à naviguer dans le comparateur, retrouver une offre ou comprendre les alertes de prix.</p><div class="pm-panel-actions"><button type="button" data-pm-assist="products">Voir les produits</button><button type="button" data-pm-assist="alerts">Gérer mes alertes prix</button></div>')});
+ const access=makeFloat('pmAccessFloat','pmHideAccessibility','Accessibilité','♿','♿','pmAccessPosition');
+ access.main.addEventListener('click',()=>showPanel('Accessibilité','<div class="pm-panel-actions"><button type="button" data-pm-access="text" aria-pressed="'+document.body.classList.contains('pm-large-text')+'">Agrandir le texte</button><button type="button" data-pm-access="contrast" aria-pressed="'+document.body.classList.contains('pm-high-contrast')+'">Contraste renforcé</button><button type="button" data-pm-access="reset">Réinitialiser</button></div>'));
+ panel.addEventListener('click',e=>{
+  const a=e.target.closest('[data-pm-access]');if(a){const k=a.dataset.pmAccess;if(k==='text')document.body.classList.toggle('pm-large-text');if(k==='contrast')document.body.classList.toggle('pm-high-contrast');if(k==='reset')document.body.classList.remove('pm-large-text','pm-high-contrast');panel.querySelectorAll('[data-pm-access]').forEach(b=>{if(b.dataset.pmAccess==='text')b.setAttribute('aria-pressed',String(document.body.classList.contains('pm-large-text')));if(b.dataset.pmAccess==='contrast')b.setAttribute('aria-pressed',String(document.body.classList.contains('pm-high-contrast')))});return}
+  const b=e.target.closest('[data-pm-assist]');if(b){closePanel();if(b.dataset.pmAssist==='products'){document.getElementById('products')?.scrollIntoView({behavior:'smooth'});document.getElementById('verifiedShelf')?.scrollIntoView({behavior:'smooth'})}else alertOpen()}
+ });
+ nav.addEventListener('click',e=>{
+  const b=e.target.closest('[data-pm-nav]');if(!b)return;nav.querySelectorAll('button').forEach(x=>x.classList.toggle('pm-active',x===b));
+  switch(b.dataset.pmNav){
+   case 'home':location.href='index.html';break;
+   case 'categories':(document.getElementById('categories')||document.getElementById('products')||document.getElementById('verifiedShelf')||document.querySelector('main')).scrollIntoView({behavior:'smooth'});break;
+   case 'alerts':alertOpen();break;
+   case 'deals':location.href='offres.html';break;
+   case 'favorites':favOpen();break;
+   case 'account':showPanel('Mon compte','<p>Ton espace Prix Malin regroupe les outils enregistrés sur cet appareil.</p><div class="pm-panel-actions"><button type="button" data-pm-account="alerts">Mes alertes prix</button><button type="button" data-pm-account="favorites">Mes favoris</button></div>');break;
+   case 'assistant':if(assistant.box.classList.contains('pm-floating-hidden')){assistant.box.classList.remove('pm-floating-hidden');try{localStorage.removeItem('pmHideAgent')}catch(_){}}else assistant.main.click();break;
+   case 'accessibility':if(access.box.classList.contains('pm-floating-hidden')){access.box.classList.remove('pm-floating-hidden');try{localStorage.removeItem('pmHideAccessibility')}catch(_){}}else access.main.click();break;
+  }
+ });
+ panel.addEventListener('click',e=>{const b=e.target.closest('[data-pm-account]');if(!b)return;closePanel();if(b.dataset.pmAccount==='alerts')alertOpen();else favOpen()});
+ window.addEventListener('resize',()=>{if(!mobile())return;[assistant.box,access.box].forEach(el=>{if(el.style.left){const r=el.getBoundingClientRect();el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,r.left))+'px';el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,r.top))+'px'}})});
+})();
+</script>
 </body></html>
