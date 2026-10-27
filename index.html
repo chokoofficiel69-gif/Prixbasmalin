@@ -1770,6 +1770,29 @@ document.addEventListener("DOMContentLoaded",()=>{
   .accessibility-button{bottom:calc(154px + env(safe-area-inset-bottom, 0px))!important}
 }
 
+
+/* Garde-fou mobile : le contenu ne doit jamais rester invisible si l'observateur de défilement échoue. */
+@media(max-width:899px){
+  main .pm-reveal,
+  main .pm-reveal.pm-delay-1,
+  main .pm-reveal.pm-delay-2,
+  main .pm-reveal.pm-delay-3{
+    opacity:1!important;
+    visibility:visible!important;
+    transform:none!important;
+    transition:none!important;
+  }
+  main .search-row,
+  main .pm-featured,
+  main .categories,
+  main #popular,
+  main .pm-how,
+  main .ad-showcase,
+  main .trust,
+  main .pm-contact-section{
+    visibility:visible!important;
+  }
+}
 </style>
 <script id="pm-favorites-script">
 (function(){
