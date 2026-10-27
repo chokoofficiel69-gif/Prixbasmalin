@@ -822,3 +822,9 @@ searchEl.addEventListener("input",render);document.getElementById("filters").add
 })();
 </script>
 </body></html>
+/* Mobile cleanup: the fixed numbered storytelling rail blocks product cards on small screens. */
+@media (max-width: 699px){
+  .pm-step-rail{display:none!important}
+  .agent{right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
+  .pm-access-float{right:10px;bottom:calc(150px + env(safe-area-inset-bottom,0px));}
+}
