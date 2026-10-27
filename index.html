@@ -1892,6 +1892,13 @@ document.addEventListener("DOMContentLoaded",()=>{
  body.pm-large-text{font-size:120%!important}
  body.pm-high-contrast{filter:contrast(1.15)}
 }
+
+/* Mobile cleanup: the fixed numbered storytelling rail blocks product cards on small screens. */
+@media (max-width: 699px){
+  .pm-step-rail{display:none!important}
+  .agent{right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
+  .pm-access-float{right:10px;bottom:calc(150px + env(safe-area-inset-bottom,0px));}
+}
 </style>
 
 <script id="pm-home-mobile-controls-fix-script">
@@ -1945,9 +1952,3 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
-/* Mobile cleanup: the fixed numbered storytelling rail blocks product cards on small screens. */
-@media (max-width: 699px){
-  .pm-step-rail{display:none!important}
-  .agent{right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
-  .pm-access-float{right:10px;bottom:calc(150px + env(safe-area-inset-bottom,0px));}
-}
