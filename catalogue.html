@@ -758,6 +758,13 @@ searchEl.addEventListener("input",render);document.getElementById("filters").add
   .agent{right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
   .pm-access-float{right:10px;bottom:calc(150px + env(safe-area-inset-bottom,0px));}
 }
+
+/* Keep mobile catalogue navigation compact and on one row. */
+@media(max-width:759px){
+ #pmMobileNav{grid-template-columns:repeat(8,minmax(0,1fr))!important;padding:5px 2px max(7px,env(safe-area-inset-bottom,0px))!important}
+ #pmMobileNav button{padding:3px 0!important;gap:3px!important;font-size:8px!important;line-height:1.1!important;white-space:nowrap!important}
+ #pmMobileNav .pm-nav-icon{font-size:17px!important;line-height:1!important}
+}
 </style>
 
 <script id="pm-mobile-nav-fix-script">
