@@ -1771,6 +1771,19 @@ document.addEventListener("DOMContentLoaded",()=>{
 }
 
 
+/* Correctif mobile prioritaire : le bandeau flyers ne doit jamais recouvrir le catalogue. */
+@media(max-width:899px){
+  .flyer-ticker{
+    position:relative!important;
+    top:auto!important;
+    z-index:1!important;
+    margin:0 0 14px!important;
+    border-radius:0 0 14px 14px!important;
+  }
+  .flyer-ticker-window{max-height:112px!important;overflow:hidden!important}
+  .flyer-ticker-track{animation:none!important;transform:none!important}
+  .flyer-ticker-card{min-height:78px!important;max-height:92px!important}
+}
 /* Garde-fou mobile : le contenu ne doit jamais rester invisible si l'observateur de défilement échoue. */
 @media(max-width:899px){
   main .pm-reveal,
