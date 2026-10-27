@@ -751,6 +751,13 @@ searchEl.addEventListener("input",render);document.getElementById("filters").add
  body.pm-high-contrast{filter:contrast(1.15)}
 }
 @media(min-width:760px){#pmMobileNav,#pmAssistFloat,#pmAccessFloat,#pmMobilePanel{display:none!important}}
+
+/* Mobile cleanup: the fixed numbered storytelling rail blocks product cards on small screens. */
+@media (max-width: 699px){
+  .pm-step-rail{display:none!important}
+  .agent{right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
+  .pm-access-float{right:10px;bottom:calc(150px + env(safe-area-inset-bottom,0px));}
+}
 </style>
 
 <script id="pm-mobile-nav-fix-script">
