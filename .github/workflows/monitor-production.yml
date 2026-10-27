@@ -136,7 +136,7 @@ jobs:
           test -s /tmp/catalogue.html
       - name: Vérifier le flux des offres à la une
         run: |
-          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \\
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/data/featured-prices.json --output /tmp/featured-prices.json
           node --input-type=module <<'NODE'
           import fs from "node:fs";
