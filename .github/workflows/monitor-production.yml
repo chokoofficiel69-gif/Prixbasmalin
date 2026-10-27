@@ -22,6 +22,8 @@ on:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
       - "catalogue.html"
+      - "index.html"
+      - "data/featured-prices.json"
       - "etat-prix.html"
       - "data/prices.json"
       - "CNAME"
@@ -132,6 +134,16 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/catalogue.html --output /tmp/catalogue.html
           test -s /tmp/catalogue.html
+      - name: Vérifier le flux des offres à la une
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin.fr/data/featured-prices.json --output /tmp/featured-prices.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/featured-prices.json", "utf8"));
+          if (!Array.isArray(data.products)) throw new Error("Le flux featured-prices.json ne contient pas de tableau products.");
+          console.log("Flux à la une valide :", data.products.length, "produits.");
+          NODE
       - name: Vérifier le code catalogue attendu
         run: grep -q "productData" /tmp/catalogue.html
       - name: Vérifier que le flux de prix est publié
