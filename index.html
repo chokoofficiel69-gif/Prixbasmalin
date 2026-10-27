@@ -1899,6 +1899,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   .agent{right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
   .pm-access-float{right:10px;bottom:calc(150px + env(safe-area-inset-bottom,0px));}
 }
+
+/* Keep all eight mobile navigation shortcuts on one compact row. */
+@media(max-width:699px){
+ .bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:0!important;padding:5px 2px max(7px,env(safe-area-inset-bottom,0px))!important}
+ .bottom-nav button{padding:3px 0!important;gap:3px!important;font-size:8px!important;line-height:1.1!important;white-space:nowrap!important}
+ .bottom-nav .nav-icon{font-size:17px!important;line-height:1!important}
+}
 </style>
 
 <script id="pm-home-mobile-controls-fix-script">
