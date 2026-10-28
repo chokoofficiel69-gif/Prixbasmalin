@@ -1,4 +1,4 @@
-name: Actualiser les prix publics (sources configurées uniquement)
+name: Actualiser les prix (sources autorisées uniquement)
 
 on:
   schedule:
@@ -27,9 +27,18 @@ jobs:
         run: node --test price-engine/price-utils.test.mjs
       - name: Valider les fiches produit et sources marchandes
         run: node price-engine/validate-config.mjs
-      - name: Lire les prix publiquement disponibles
+      - name: Vérifier si une source autorisée est configurée
+        id: sources
+        run: |
+          node -e "const fs=require('node:fs');const c=JSON.parse(fs.readFileSync('price-engine/products.json','utf8'));process.stdout.write('configured='+(Array.isArray(c.products)&&c.products.some(p=>Array.isArray(p.sources)&&p.sources.length>0)?'true':'false')+'\n')" >> "$GITHUB_OUTPUT"
+      - name: Lire les prix des sources configurées
+        if: steps.sources.outputs.configured == 'true'
         run: node price-engine/refresh.mjs
+      - name: Ne rien collecter tant qu'Amazon n'est pas autorisé
+        if: steps.sources.outputs.configured != 'true'
+        run: echo "Aucune source autorisée configurée. Les fiches continuent à renvoyer vers Amazon ; aucun prix n'est inventé."
       - name: Enregistrer le relevé
+        if: steps.sources.outputs.configured == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
