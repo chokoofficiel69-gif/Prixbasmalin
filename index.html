@@ -1245,7 +1245,7 @@ function productCard(p){
  const actions=document.createElement("div");actions.style.cssText="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px";
  const addCart=document.createElement("button");addCart.className="product-action";addCart.textContent=inCart?"Ajouté":"Ajouter";addCart.onclick=e=>{e.stopPropagation();if(!cart.includes(p.id)){cart.push(p.id);saveCart();renderProducts()}};
  const fav=document.createElement("button");fav.type="button";fav.className="product-action";fav.textContent=isFav?"♥":"♡";fav.onclick=e=>{e.stopPropagation();favorites=isFav?favorites.filter(id=>id!==p.id):[...favorites,p.id];saveFavorites();renderProducts();};
- actions.append(addCart,fav);if(p.sourceUrl){const source=document.createElement("a");source.className="product-action";source.href=p.sourceUrl;source.target="_blank";source.rel="noopener noreferrer";source.textContent="Voir chez le marchand ↗";source.style.textDecoration="none";actions.append(source)}card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
+ actions.append(addCart,fav);const source=document.createElement("a");source.className="product-action";source.href=amazonSearchUrl((p.brand?p.brand+" ":"")+p.query);source.target="_blank";source.rel="noopener noreferrer sponsored";source.textContent="Voir sur Amazon ↗";source.setAttribute("aria-label","Voir "+p.name+" sur Amazon");source.style.textDecoration="none";actions.append(source);card.append(imgWrap,title,desc,price,old,saving,merchant,actions);return card;
 }
 function matchesSearch(p,q){
  const text=(p.name+" "+p.query+" "+p.desc).toLowerCase();
@@ -1284,7 +1284,7 @@ function renderProducts(){
  if(currentSort==="priceAsc"||currentSort==="priceDesc")list.sort((a,b)=>{const n=x=>Number(String(x.price||"").match(/[0-9]+(?:[.,][0-9]+)?/)?.[0]?.replace(",","."))||Infinity;return currentSort==="priceAsc"?n(a)-n(b):n(b)-n(a)});
  if(q){
   const term=encodeURIComponent(q);
-  const links=[["Amazon","https://www.amazon.fr/s?k="+term+"&tag=prixbasmalin2-21"],["Google Shopping","https://www.google.com/search?tbm=shop&q="+term],["idealo","https://www.idealo.fr/prix/MainSearchProductCategory.html?q="+term],["Le Dénicheur","https://ledenicheur.fr/search?search="+term],["Fnac","https://www.fnac.com/SearchResult/ResultList.aspx?Search="+term],["Cdiscount","https://www.cdiscount.com/search/10/"+term+".html"]];
+  const links=[["Amazon","https://www.amazon.fr/s?k="+term+"&tag=prixbasmalin2-21"]];
   banner.innerHTML=`<div class="amazon-banner"><strong>Élargir la comparaison : « ${escapeHtml(q)} »</strong><p style="font-size:12px;line-height:1.45;color:#555;margin:7px 0 10px">En attendant l’activation de flux/API partenaires, ces liens ouvrent des recherches externes. Les prix et disponibilités sont à vérifier chez chaque vendeur ; Prix Malin ne les récupère pas encore automatiquement.</p><div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">${links.map(([name,url])=>`<a href="${url}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:9px 11px;border:1px solid #f0d7ce;border-radius:9px;background:#fff;color:#222;font-size:12px;font-weight:700;text-decoration:none">${name} ↗</a>`).join("")}</div></div>`;
  }
  if(!list.length){
