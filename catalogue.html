@@ -226,6 +226,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 #products .product{display:flex}
 @media(max-width:600px){.discovery-shelf{padding:14px;margin-top:20px}.discovery-shelf-head p{font-size:12px}#products.grid{grid-template-columns:minmax(0,1fr)!important}}
 
+/* Marques visibles et repli propre quand une image externe échoue */
+.pm-brand-suggestions{display:flex;flex-direction:column;gap:3px;width:100%;margin:7px 0 9px;padding:9px 10px;background:#fff5ef;border:1px solid #ffe0d2;border-radius:10px;text-align:left}
+.pm-brand-suggestions span{font-size:10px;font-weight:700;color:#9a4a2c;text-transform:uppercase;letter-spacing:.04em}
+.pm-brand-suggestions strong{font-size:12px;line-height:1.4;color:#252a31}
+.photo-unavailable{background:linear-gradient(135deg,#fff7f2,#f1f4f9)!important}
+.pm-image-fallback{width:100%;height:100%;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;color:#252a31}
+.pm-fallback-icon{font-size:36px;line-height:1}
+.pm-image-fallback strong{font-size:14px}
+.pm-image-fallback small{font-size:11px;color:#6b7280}
 </style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
@@ -341,6 +350,9 @@ const productData=[
  {id:"fa30",name:"Portefeuille",desc:"Accessoires • quotidien",category:"fashion",query:"portefeuille homme",image:"https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=400&fit=crop",merchant:"Amazon",price:"Voir les offres",old:"",save:""}
 
 ];
+const suggestedBrands={airfryer:["Philips","Moulinex","Ninja"],vacuum:["Dyson","Rowenta","Bosch"],lamp:["Philips Hue","Xiaomi","IKEA"],dress:["Only","Vero Moda","Amazon Essentials"],coffee:["De’Longhi","Krups","Philips"],blender:["Moulinex","Ninja","Philips"],chair:["IKEA","SONGMICS","Hbada"],bedding:["Emma","Linvosges","Amazon Basics"],backpack:["Eastpak","The North Face"],handbag:["Guess","Desigual","Amazon Essentials"],sunglasses:["Ray-Ban","Polaroid","Hawkers"],running:["Nike","Adidas","Asics"],headphones:["Sony","JBL","Bose"],earbuds:["Apple","Samsung","JBL"],smartwatch:["Apple","Samsung","Xiaomi"],powerbank:["Anker","Belkin","INIU"],camera:["Canon","Sony","Fujifilm"],hoodie:["Nike","Adidas","Levi’s"],jacket:["The North Face","Columbia","Levi’s"],jeans1:["Levi’s","Wrangler","Lee"],jeans2:["Levi’s","Only","Lee"],t1:["Uniqlo","Levi’s","Amazon Essentials"],t2:["Uniqlo","Levi’s","Amazon Essentials"],polo1:["Lacoste","Ralph Lauren","Tommy Hilfiger"],fa28:["Nike","Adidas","Asics"],fa29:["Nike","Adidas","Puma"],fa30:["Secrid","Levi’s","Eastpak"]};
+const categoryBrands={fashion:["Levi’s","Nike","Adidas"],home:["Philips","Moulinex","Bosch"],tech:["Samsung","Apple","Xiaomi"],beauty:["L’Oréal Paris","Nivea","Maybelline"],kids:["LEGO","VTech","Fisher-Price"]};
+function brandsFor(p){return suggestedBrands[p.id]||categoryBrands[p.category]||["Philips","Samsung","Xiaomi"];}
 const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count");let category="all";
 function render(){
   const q=searchEl.value.trim().toLocaleLowerCase("fr");
@@ -363,7 +375,16 @@ function render(){
     img.src=p.image;
     img.alt=p.name;
     img.loading="lazy";
-    img.onerror=()=>{photo.innerHTML='<span>Image indisponible</span>'};
+    img.onerror=()=>{
+      photo.classList.add("photo-unavailable");
+      photo.innerHTML="";
+      const fallback=document.createElement("div");fallback.className="pm-image-fallback";
+      const symbol=document.createElement("span");symbol.className="pm-fallback-icon";
+      symbol.textContent=p.category==="fashion"?"👕":p.category==="home"?"🏠":p.category==="kids"?"🧸":"🔎";
+      const label=document.createElement("strong");label.textContent="Voir les marques";
+      const hint=document.createElement("small");hint.textContent="Image produit à confirmer";
+      fallback.append(symbol,label,hint);photo.append(fallback);
+    };
     photo.append(img);
 
     const name=document.createElement("div");
@@ -372,6 +393,13 @@ function render(){
     const desc=document.createElement("div");
     desc.className="desc";
     desc.textContent=p.desc;
+    const brands=document.createElement("div");
+    brands.className="pm-brand-suggestions";
+    const brandsLabel=document.createElement("span");
+    brandsLabel.textContent="Marques à comparer";
+    const brandsList=document.createElement("strong");
+    brandsList.textContent=brandsFor(p).join(" · ");
+    brands.append(brandsLabel,brandsList);
     const price=document.createElement("div");
     price.className="price";
     price.textContent="Prix direct non encore disponible";
@@ -394,7 +422,7 @@ function render(){
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
     note.textContent="Prix Malin affiche uniquement des prix vérifiés pour le modèle exact. Aucun prix n'est inventé.";
-    card.append(photo,name,desc,price,merchant,heading,list,note);
+    card.append(photo,name,desc,brands,price,merchant,heading,list,note);
     card.dataset.pmProductName=p.name;
     card.dataset.pmProductQuery=p.query||p.name;
     card.dataset.pmProductCategory=p.category||"tech";
