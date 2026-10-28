@@ -1,20 +1,6 @@
 {
   "version": 1,
   "updated_at": "2026-10-28",
-  "notes": "Source officielle Apple pour AirPods 5. Le moteur ne publie le prix que si la page fournit une offre EUR explicite et une identité produit correspondante. Aucun prix n'est inventé.",
-  "products": [
-    {
-      "id": "apple-airpods-5-usb-c",
-      "name": "Apple AirPods 5",
-      "match_terms": [
-        "AirPods 5"
-      ],
-      "sources": [
-        {
-          "retailer": "Apple",
-          "url": "https://www.apple.com/fr/shop/buy-airpods/airpods-5"
-        }
-      ]
-    }
-  ]
+  "notes": "Aucune collecte marchande active tant que l'accès autorisé Amazon n'est pas configuré. Les cartes de découverte renvoient vers la recherche Amazon et n'affichent aucun prix inventé.",
+  "products": []
 }
