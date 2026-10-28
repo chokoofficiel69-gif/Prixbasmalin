@@ -1036,7 +1036,11 @@ main{max-width:1160px;padding:0 22px}
       <p>Découvrez des produits et comparez les options disponibles chez le vendeur.</p>
       <a class="primary-link" href="#popular" id="compareButton">Comparer →</a>
     </div>
-    <div class="discount-art mascot-banner-art" aria-hidden="true"><img src="assets/mascotte-malin.svg" alt="" width="92" height="100"></div>
+    <div class="discount-art pm-hero-products" aria-label="Produits tendance à découvrir">
+      <img src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&imwidth=600" alt="Polo Lacoste L.12.12" loading="eager">
+      <img src="https://nikeclprod.vtexassets.com/arquivos/ids/160793/CW2288_111_A_PREM.jpg?v=637654399803530000" alt="Nike Air Force 1 ’07" loading="eager">
+      <img src="https://cdn8.web4s.vn/media/products/3605/tai-nghe-airpods-pro-3-2025-chinh-hang-05.jpg" alt="Apple AirPods Pro 3" loading="eager">
+    </div>
   </section>
   <section class="pm-how section" aria-label="Comment utiliser Prix Malin">
     <div class="section-head"><p class="pm-eyebrow">SIMPLE, CLAIR, PRATIQUE</p><h2>Les bons choix, en 3 étapes.</h2><p class="pm-section-intro">Prix Malin vous aide à repérer des pistes, à consulter les offres et à décider en toute transparence.</p></div>
@@ -2011,7 +2015,20 @@ document.addEventListener("DOMContentLoaded",()=>{
 }
 @keyframes pmFlyerTickerLoop{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media(prefers-reduced-motion:reduce){.flyer-ticker-track{animation:pmFlyerTickerLoop 55s linear infinite!important;transform:translateX(0)}}
-#flyer-ticker .flyer-ticker-track,.flyer-ticker .flyer-ticker-track{animation:pmFlyerTickerLoop 34s linear infinite!important;will-change:transform}
+#flyer-ticker .flyer-ticker-track,/* Hero d’accueil : vrais visuels produit, façon vitrine shopping. */
+.pm-hero-products{position:relative!important;display:block!important;flex:0 0 190px!important;width:190px!important;height:132px!important;overflow:visible!important}
+.pm-hero-products img{position:absolute;width:94px;height:104px;object-fit:contain;padding:7px;background:#fff;border:1px solid #edf0f4;border-radius:14px;box-shadow:0 9px 24px rgba(17,27,53,.14)}
+.pm-hero-products img:nth-child(1){left:0;top:19px;transform:rotate(-10deg)}
+.pm-hero-products img:nth-child(2){left:47px;top:0;z-index:2;transform:rotate(2deg)}
+.pm-hero-products img:nth-child(3){right:0;top:22px;transform:rotate(10deg)}
+@media(max-width:699px){
+ .pm-hero-products{flex:0 0 112px!important;width:112px!important;height:105px!important}
+ .pm-hero-products img{width:59px;height:70px;padding:4px;border-radius:10px}
+ .pm-hero-products img:nth-child(1){left:0;top:21px}
+ .pm-hero-products img:nth-child(2){left:27px;top:6px}
+ .pm-hero-products img:nth-child(3){right:0;top:24px}
+}
+.flyer-ticker .flyer-ticker-track{animation:pmFlyerTickerLoop 34s linear infinite!important;will-change:transform}
 @media(prefers-reduced-motion:reduce){#flyer-ticker .flyer-ticker-track,.flyer-ticker .flyer-ticker-track{animation-duration:55s!important;animation-iteration-count:infinite!important}}
 </style>
 <script>
