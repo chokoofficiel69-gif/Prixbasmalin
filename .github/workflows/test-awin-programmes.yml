@@ -27,6 +27,22 @@ jobs:
             exit 1
           fi
 
+          accounts_code="$(curl --silent --show-error \
+            --output /tmp/awin-accounts.json \
+            --write-out "%{http_code}" \
+            --header "Authorization: Bearer ${AWIN_API_TOKEN}" \
+            --header "Accept: application/json" \
+            "https://api.awin.com/accounts?type=publisher")"
+          if [[ "$accounts_code" != "200" ]]; then
+            echo "::error::Impossible de vérifier le compte éditeur dans Awin (HTTP $accounts_code)."
+            exit 1
+          fi
+          publisher_match="$(jq -er --arg id "$AWIN_PUBLISHER_ID" 'if type == "array" then . else (.accounts // []) end | [ .[] | select(((.id // .accountId // .account_id // "") | tostring) == $id) ] | length' /tmp/awin-accounts.json)" || {
+            echo "::error::Format inattendu dans la réponse des comptes Awin."
+            exit 1
+          }
+          echo "Le compte éditeur configuré correspond à un compte Awin accessible : $publisher_match."
+
           for relationship in joined pending; do
             http_code="$(curl --silent --show-error \
               --output "/tmp/awin-${relationship}.json" \
