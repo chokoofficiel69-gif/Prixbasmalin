@@ -2013,5 +2013,61 @@ document.addEventListener("DOMContentLoaded",()=>{
  window.addEventListener('resize',()=>{if(!mobile())return;[agent,accessWrap].forEach(el=>{if(el&&el.style.left){const r=el.getBoundingClientRect();el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,r.left))+'px';el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,r.top))+'px'}})});
 })();
 </script>
+
+<style id="pm-mobile-one-row-and-flyer-motion">
+/* Correctif prioritaire mobile : les 8 raccourcis restent sur une seule ligne. */
+@media(max-width:899px){
+  nav.bottom-nav{
+    display:grid!important;
+    grid-template-columns:repeat(8,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:0!important;
+    min-height:0!important;
+    padding:7px 2px max(7px,env(safe-area-inset-bottom,0px))!important;
+  }
+  nav.bottom-nav button{
+    min-width:0!important;
+    width:100%!important;
+    padding:3px 0!important;
+    gap:3px!important;
+    flex-direction:column!important;
+    white-space:nowrap!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+  }
+  nav.bottom-nav button .nav-icon{font-size:17px!important;line-height:1!important}
+  nav.bottom-nav button span:last-child{font-size:8px!important;letter-spacing:-.25px!important;white-space:nowrap!important}
+  body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}
+  /* Ne pas laisser l'ancien correctif figer le bandeau flyers. */
+  .flyer-ticker-window{max-height:none!important;overflow:hidden!important}
+  .flyer-ticker-track{width:max-content!important;animation:pmFlyerTickerLoop 34s linear infinite!important;transform:none!important}
+  .flyer-ticker:hover .flyer-ticker-track,.flyer-ticker:focus-within .flyer-ticker-track{animation-play-state:paused!important}
+}
+@keyframes pmFlyerTickerLoop{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.flyer-ticker-track{animation:none!important;transform:none!important}}
+</style>
+<script>
+/* Duplique la série une fois : le bandeau défile en continu, sans s'arrêter après la première série. */
+(function(){
+  function enableFlyerLoop(){
+    const track=document.querySelector('.flyer-ticker-track');
+    if(!track||track.dataset.pmLoopReady==='1')return;
+    const cards=Array.from(track.children);
+    if(!cards.length)return;
+    cards.forEach(card=>{
+      const clone=card.cloneNode(true);
+      clone.setAttribute('aria-hidden','true');
+      clone.querySelectorAll('a,button').forEach(el=>el.setAttribute('tabindex','-1'));
+      clone.querySelectorAll('img').forEach(img=>img.setAttribute('alt',''));
+      track.appendChild(clone);
+    });
+    track.dataset.pmLoopReady='1';
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enableFlyerLoop,{once:true});
+  else enableFlyerLoop();
+  window.addEventListener('pageshow',enableFlyerLoop);
+})();
+</script>
+
 </body>
 </html>
