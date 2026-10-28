@@ -143,17 +143,37 @@ const previousOffers = Array.isArray(previous.offers) ? previous.offers : [];
 const mergedOffers = mergeFreshAndStaleOffers(offers, previousOffers, validProducts);
 offers.splice(0, offers.length, ...mergedOffers);
 
-// Si toutes les sources échouent et qu'aucune ancienne offre n'existe,
-// ne pas remplacer un relevé vide par un faux relevé de succès.
+// Une source peut refuser les lectures automatisées (par exemple HTTP 403).
+// Cela ne doit jamais créer de faux prix ni faire passer un relevé vide pour une offre valide.
+// On enregistre explicitement l'absence d'offre vérifiée, conserve l'ancien horodatage
+// et laisse le workflow terminé avec un avertissement lisible.
 if (offers.length === 0) {
-  console.error(`Aucune offre valide récupérée; relevé précédent conservé. Erreurs: ${errors.length}`);
-  if (errors.length) {
-    console.error("Diagnostic détaillé des sources (aucun prix n'a été inventé) :");
-    for (const [index, error] of errors.entries()) {
-      console.error(`[${index + 1}] ${JSON.stringify(error)}`);
-    }
+  const previousProducts = Array.isArray(previous.products) ? previous.products : [];
+  const output = {
+    ...previous,
+    version: 1,
+    status: "no_verified_offers",
+    generated_at: previous.generated_at ?? now,
+    schedule: "Tentative d'actualisation horaire; aucune offre vérifiée tant qu'une source n'est pas accessible",
+    methodology: "Aucun prix exploitable récupéré lors du dernier essai. Aucun prix fictif n'est généré; l'horodatage du dernier relevé reste inchangé.",
+    products: previousProducts.map(product => ({
+      ...product,
+      offers: [],
+      offer_count: 0,
+      best_price_eur: null,
+      has_fresh_offer: false
+    })),
+    offers: [],
+    errors,
+    previous_generated_at: previous.generated_at ?? null
+  };
+  await fs.mkdir(new URL("../data/", import.meta.url), {recursive:true});
+  await fs.writeFile(OUTPUT, JSON.stringify(output, null, 2) + "\n");
+  console.warn(`Aucune offre vérifiée récupérée; le relevé reste vide. Erreurs de source: ${errors.length}`);
+  for (const [index, error] of errors.entries()) {
+    console.warn(`[${index + 1}] ${JSON.stringify(error)}`);
   }
-  process.exitCode = 1;
+  console.log("Actualisation terminée sans prix actuel vérifié; aucun prix n'a été inventé.");
 } else {
   const productIds = validProducts.map(p => p.id);
   const hasFreshOffers = offers.some(o => !o.stale);
