@@ -2,6 +2,9 @@ name: Tester la connexion API Awin
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/test-awin-api.yml"
 
 permissions:
   contents: read
@@ -35,11 +38,10 @@ jobs:
             exit 1
           fi
 
-          if ! jq -e '.accounts | type == "array"' /tmp/awin-response.json >/dev/null; then
-            echo "::error::La réponse Awin ne contient pas la liste de comptes attendue."
+          account_count="$(jq -er 'if type == "array" then length elif (.accounts | type) == "array" then (.accounts | length) else error("format inattendu") end' /tmp/awin-response.json)" || {
+            echo "::error::La réponse Awin ne contient pas une liste de comptes reconnue."
             exit 1
-          fi
+          }
 
-          account_count="$(jq '.accounts | length' /tmp/awin-response.json)"
           echo "Connexion API Awin réussie. Nombre de comptes éditeur accessibles : $account_count."
-          echo "Aucun jeton ni détail de compte n’a été affiché.";
+          echo "Aucun jeton ni détail de compte n’a été affiché."
