@@ -1,0 +1,45 @@
+name: Tester la connexion API Awin
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-awin-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Vérifier le secret et appeler l’API Awin
+        env:
+          AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${AWIN_API_TOKEN:-}" ]]; then
+            echo "::error::Le secret AWIN_API_TOKEN est absent ou vide."
+            exit 1
+          fi
+
+          http_code="$(curl --silent --show-error \
+            --output /tmp/awin-response.json \
+            --write-out "%{http_code}" \
+            --header "Authorization: Bearer ${AWIN_API_TOKEN}" \
+            --header "Accept: application/json" \
+            "https://api.awin.com/accounts?type=publisher")"
+
+          if [[ "$http_code" != "200" ]]; then
+            echo "::error::Awin a répondu avec le code HTTP $http_code. Le corps de réponse est volontairement masqué pour éviter de divulguer des informations du compte."
+            exit 1
+          fi
+
+          if ! jq -e '.accounts | type == "array"' /tmp/awin-response.json >/dev/null; then
+            echo "::error::La réponse Awin ne contient pas la liste de comptes attendue."
+            exit 1
+          fi
+
+          account_count="$(jq '.accounts | length' /tmp/awin-response.json)"
+          echo "Connexion API Awin réussie. Nombre de comptes éditeur accessibles : $account_count."
+          echo "Aucun jeton ni détail de compte n’a été affiché.";
