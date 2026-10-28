@@ -414,6 +414,13 @@ function render(){
       brandsList.append(link);
     });
     brands.append(brandsLabel,brandsList);
+    const amazonButton=document.createElement("a");
+    amazonButton.className="offer";
+    amazonButton.textContent="Voir les offres sur Amazon ↗";
+    amazonButton.href="https://www.amazon.fr/s?k="+encodeURIComponent((p.brand?p.brand+" ":"")+p.query)+"&tag=prixbasmalin2-21";
+    amazonButton.target="_blank";
+    amazonButton.rel="noopener noreferrer sponsored";
+    amazonButton.setAttribute("aria-label","Voir les offres Amazon pour "+p.name);
     const price=document.createElement("div");
     price.className="price";
     price.textContent="Prix direct non encore disponible";
@@ -436,7 +443,7 @@ function render(){
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
     note.textContent="Prix Malin affiche uniquement des prix vérifiés pour le modèle exact. Aucun prix n'est inventé.";
-    card.append(photo,name,desc,brands,price,merchant,heading,list,note);
+    card.append(photo,name,desc,brands,amazonButton,price,merchant,heading,list,note);
     card.dataset.pmProductName=p.name;
     card.dataset.pmProductQuery=p.query||p.name;
     card.dataset.pmProductCategory=p.category||"tech";
