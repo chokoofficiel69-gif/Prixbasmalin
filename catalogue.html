@@ -229,7 +229,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 /* Marques visibles et repli propre quand une image externe échoue */
 .pm-brand-suggestions{display:flex;flex-direction:column;gap:3px;width:100%;margin:7px 0 9px;padding:9px 10px;background:#fff5ef;border:1px solid #ffe0d2;border-radius:10px;text-align:left}
 .pm-brand-suggestions span{font-size:10px;font-weight:700;color:#9a4a2c;text-transform:uppercase;letter-spacing:.04em}
-.pm-brand-suggestions strong{font-size:12px;line-height:1.4;color:#252a31}
+.pm-brand-links{display:flex;flex-wrap:wrap;gap:6px}
+.pm-brand-chip{display:inline-flex;align-items:center;border:1px solid #ffd4c2;border-radius:999px;background:#fff;color:#8f3517;padding:5px 8px;font-size:11px;line-height:1.2;font-weight:750;text-decoration:none}
+.pm-brand-chip:focus-visible{outline:2px solid #155eef;outline-offset:2px}
+.pm-brand-chip:hover{background:#ffe8de;border-color:#ffb897}
 .photo-unavailable{background:linear-gradient(135deg,#fff7f2,#f1f4f9)!important}
 .pm-image-fallback{width:100%;height:100%;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;color:#252a31}
 .pm-fallback-icon{font-size:36px;line-height:1}
@@ -397,8 +400,18 @@ function render(){
     brands.className="pm-brand-suggestions";
     const brandsLabel=document.createElement("span");
     brandsLabel.textContent="Marques à comparer";
-    const brandsList=document.createElement("strong");
-    brandsList.textContent=brandsFor(p).join(" · ");
+    const brandsList=document.createElement("div");
+    brandsList.className="pm-brand-links";
+    brandsFor(p).forEach(brand=>{
+      const link=document.createElement("a");
+      link.className="pm-brand-chip";
+      link.textContent=brand;
+      link.href="https://www.amazon.fr/s?k="+encodeURIComponent(brand+" "+p.query)+"&tag=prixbasmalin2-21";
+      link.target="_blank";
+      link.rel="noopener noreferrer sponsored";
+      link.setAttribute("aria-label","Voir les résultats Amazon pour "+brand+" "+p.name);
+      brandsList.append(link);
+    });
     brands.append(brandsLabel,brandsList);
     const price=document.createElement("div");
     price.className="price";
