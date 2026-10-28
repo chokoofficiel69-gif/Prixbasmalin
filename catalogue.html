@@ -238,10 +238,32 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 .pm-fallback-icon{font-size:36px;line-height:1}
 .pm-image-fallback strong{font-size:14px}
 .pm-image-fallback small{font-size:11px;color:#6b7280}
+
+/* Nouvelle direction visuelle saisonnière — Noël 2026 */
+.pm-noel-hero{display:grid;grid-template-columns:1fr 1.02fr;gap:clamp(18px,3vw,38px);align-items:center;margin:18px auto 28px;max-width:1240px;padding:clamp(18px,3vw,34px);border:1px solid #f0e4dc;border-radius:24px;background:radial-gradient(ellipse at 90% 0%,#f7e8df 0,transparent 42%),linear-gradient(125deg,#fffaf6,#fff 58%,#f4f7ef);overflow:hidden}
+.pm-noel-copy{padding:4px 0 4px 2px}.pm-noel-kicker{display:inline-flex;align-items:center;gap:8px;color:#9d302b;font-size:11px;font-weight:850;letter-spacing:1.5px}.pm-noel-kicker:before{content:"";width:22px;height:2px;background:#b53b35}
+.pm-noel-copy h1{font-size:clamp(32px,4.6vw,56px);line-height:1.02;letter-spacing:-1.8px;margin:16px 0;color:#1c3028;font-weight:850}.pm-noel-copy h1 em{font-style:normal;color:#b23832}
+.pm-noel-copy>p{max-width:440px;color:#5d665f;font-size:15px;line-height:1.65;margin:0 0 22px}
+.pm-noel-cta{display:inline-flex;align-items:center;gap:22px;background:#1e4537;color:#fff!important;text-decoration:none;padding:13px 18px;border-radius:10px;font-weight:800;box-shadow:0 8px 20px #1e453722;transition:transform .2s,background .2s}.pm-noel-cta:hover{transform:translateY(-2px);background:#17382d}
+.pm-noel-trust{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:#85877f;font-size:10px;margin-top:18px}
+.pm-noel-visual{position:relative;min-height:310px;height:clamp(310px,35vw,420px);border-radius:18px;overflow:hidden;background:#e9e2d8}
+.pm-noel-main-photo{width:100%;height:100%;display:block;object-fit:cover;object-position:center 55%;filter:saturate(.9)}
+.pm-noel-visual:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,#152c21a8);pointer-events:none}
+.pm-noel-photo-tag{position:absolute;z-index:1;bottom:16px;left:16px;right:16px;display:flex;gap:12px;align-items:center;padding:13px 15px;border:1px solid #ffffff80;background:#fffffff0;backdrop-filter:blur(10px);border-radius:13px;color:#20362b}
+.pm-sparkle{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:11px;background:#f5e6d8;color:#a3342d;font-size:23px}.pm-noel-photo-tag strong,.pm-noel-photo-tag small{display:block}.pm-noel-photo-tag strong{font-size:13px}.pm-noel-photo-tag small{font-size:11px;color:#73786f;margin-top:3px}
+@media(max-width:680px){.pm-noel-hero{grid-template-columns:1fr;gap:17px;margin:12px 12px 22px;padding:20px;border-radius:20px}.pm-noel-copy h1{font-size:38px;letter-spacing:-1.2px;margin:12px 0}.pm-noel-copy>p{font-size:13px;line-height:1.55;margin-bottom:17px}.pm-noel-visual{height:250px;min-height:250px;border-radius:15px}.pm-noel-trust{font-size:9px;margin-top:13px}.pm-noel-photo-tag{bottom:10px;left:10px;right:10px;padding:10px 12px}}
+
+.pm-noel-catalogue{margin-top:20px}.pm-noel-catalogue .pm-noel-copy h1{font-size:clamp(30px,4vw,48px)}
 </style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
 </head><body><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a></header><main><section class="intro"><h1>Catalogue Prix Malin : Amazon en priorité</h1><p>Choisissez un produit et ouvrez directement sa recherche Amazon. Pour le moment, les prix ne sont pas récupérés automatiquement : nous afficherons les tarifs dès qu’une source Amazon autorisée sera disponible. Aucun prix fictif, aucune dépendance à la Fnac.</p></section>
+
+<section class="pm-noel-hero pm-noel-catalogue" aria-labelledby="catalogueNoelTitle">
+ <div class="pm-noel-copy"><span class="pm-noel-kicker">SÉLECTION SPÉCIALE · NOËL 2026</span><h1 id="catalogueNoelTitle">Des cadeaux qui brillent.<br><em>Des choix malins.</em></h1><p>Tech, mode, beauté et idées pour toute la famille : découvre les sélections et compare les offres directement chez les marchands.</p><a class="pm-noel-cta" href="#products">Explorer les idées cadeaux <span aria-hidden="true">↗</span></a><div class="pm-noel-trust"><span>Photos produits renouvelées</span><span>•</span><span>Tarifs non inventés</span></div></div>
+ <div class="pm-noel-visual"><img class="pm-noel-main-photo" src="https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=1000&q=85" alt="Cadeaux de Noël joliment emballés au pied du sapin" fetchpriority="high"><div class="pm-noel-photo-tag"><span class="pm-sparkle" aria-hidden="true">✦</span><span><strong>Le catalogue des fêtes</strong><small>Des idées utiles, belles et bien choisies</small></span></div></div>
+</section>
+
 <section id="verifiedShelf" class="verified-shelf" aria-live="polite">
   <div class="verified-shelf-head">
     <div><h2>Prix directs — priorité Amazon</h2><p>Cette zone affichera les prix confirmés quand l’accès à une source Amazon autorisée sera disponible. En attendant, chaque fiche permet d’ouvrir la recherche Amazon correspondante.</p></div>
