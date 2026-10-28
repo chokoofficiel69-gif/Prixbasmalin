@@ -1,19 +1,18 @@
 {
   "version": 1,
-  "updated_at": "2026-10-24",
-  "notes": "Première source candidate : l'offre ne sera publiée que si le moteur confirme l'identité du produit et une offre EUR explicite dans les données structurées publiques. Si la page ne fournit pas ces données, aucune offre ne sera inventée.",
+  "updated_at": "2026-10-28",
+  "notes": "Source officielle Apple pour AirPods 5. Le moteur ne publie le prix que si la page fournit une offre EUR explicite et une identité produit correspondante. Aucun prix n'est inventé.",
   "products": [
     {
-      "id": "apple-airpods-4-usb-c",
-      "name": "Apple AirPods 4 Blanc avec Boîtier de charge USB-C Ecouteurs sans fil",
+      "id": "apple-airpods-5-usb-c",
+      "name": "Apple AirPods 5",
       "match_terms": [
-        "Apple AirPods 4",
-        "Boîtier de charge USB-C"
+        "AirPods 5"
       ],
       "sources": [
         {
-          "retailer": "Fnac",
-          "url": "https://www.fnac.com/Apple-Airpods-4-Blanc-avec-Boitier-de-charge-USB-C-Ecouteurs-sans-fil/a20833050/w-4"
+          "retailer": "Apple",
+          "url": "https://www.apple.com/fr/shop/buy-airpods/airpods-5"
         }
       ]
     }
