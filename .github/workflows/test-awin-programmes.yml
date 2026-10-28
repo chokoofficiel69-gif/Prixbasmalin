@@ -1,0 +1,61 @@
+name: Vérifier les programmes Awin autorisés
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/test-awin-programmes.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check-programmes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Vérifier les programmes rejoints et en attente
+        env:
+          AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
+          AWIN_PUBLISHER_ID: "3137386"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${AWIN_API_TOKEN:-}" ]]; then
+            echo "::error::Le secret AWIN_API_TOKEN est absent ou vide."
+            exit 1
+          fi
+
+          for relationship in joined pending; do
+            http_code="$(curl --silent --show-error \
+              --output "/tmp/awin-${relationship}.json" \
+              --write-out "%{http_code}" \
+              --header "Authorization: Bearer ${AWIN_API_TOKEN}" \
+              --header "Accept: application/json" \
+              "https://api.awin.com/publishers/${AWIN_PUBLISHER_ID}/programmes?relationship=${relationship}")"
+
+            if [[ "$http_code" != "200" ]]; then
+              echo "::error::Awin a répondu HTTP $http_code pour la liste des programmes (${relationship}). Le contenu de la réponse est masqué."
+              exit 1
+            fi
+          done
+
+          for relationship in joined pending; do
+            if ! jq -e 'type == "array"' "/tmp/awin-${relationship}.json" >/dev/null; then
+              echo "::error::Format inattendu dans la liste Awin (${relationship})."
+              exit 1
+            fi
+          done
+
+          joined_count="$(jq 'length' /tmp/awin-joined.json)"
+          pending_count="$(jq 'length' /tmp/awin-pending.json)"
+          decathlon_joined="$(jq '[.[] | select((.name // "" | ascii_downcase) | contains("decathlon"))] | length' /tmp/awin-joined.json)"
+          decathlon_pending="$(jq '[.[] | select((.name // "" | ascii_downcase) | contains("decathlon"))] | length' /tmp/awin-pending.json)"
+
+          echo "API Awin programmes : OK."
+          echo "Programmes rejoints accessibles : $joined_count."
+          echo "Programmes en attente accessibles : $pending_count."
+          echo "Programme correspondant à Decathlon parmi les rejoints : $decathlon_joined."
+          echo "Programme correspondant à Decathlon parmi les demandes en attente : $decathlon_pending."
+          echo "Aucun nom d’annonceur autre que le contrôle ciblé ni aucun jeton n’a été affiché."
