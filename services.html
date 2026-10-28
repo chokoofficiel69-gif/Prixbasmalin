@@ -74,7 +74,7 @@ h2{font-size:clamp(21px,3vw,28px);letter-spacing:-.035em;margin:30px 0 8px}.intr
 
 <section class="empty"><strong>Les premières offres arrivent progressivement</strong><p>Aucun prestataire n'est encore présenté comme partenaire confirmé sur cette page. Nous privilégions des informations vérifiées et des accords clairs avant de publier une offre.</p></section>
 <p class="notice">Prix Malin est une plateforme de mise en relation en développement, pas un service de réservation intégré à ce stade. Les commissions éventuelles sont convenues avec chaque professionnel. Toute publicité ou mise en avant payante sera identifiée comme telle.</p>
-<section class="bottom"><div><h2>Vous êtes professionnel indépendant ?</h2><p>Présentez votre activité et discutons de la manière de vous apporter des demandes de clients.</p></div><a class="cta" href="partenaires.html#courrier">Proposer une collaboration</a></section>
+<section class="bottom"><div><h2>Vous êtes professionnel indépendant ?</h2><p>Présentez votre activité et discutons de la manière de vous apporter des demandes de clients.</p></div><a class="cta" href="#proposer">Proposer mon activité</a></section>
 
 </main>
 <script>
@@ -87,7 +87,7 @@ form.addEventListener('submit',function(event){
 event.preventDefault();
 const value=id=>document.getElementById(id).value.trim();
 const price=value('providerPrice')||'À préciser';
-output.textContent='Bonjour Prix Malin,\\n\\nJe souhaite proposer mon activité comme prestataire partenaire.\\n\\nNom / activité : '+value('providerName')+'\\nZone d’intervention : '+value('providerCity')+'\\nCatégorie : '+value('providerCategory')+'\\nDescription : '+value('providerDescription')+'\\nPrix indicatif : '+price+'\\nContact : '+value('providerContact')+'\\nPartenariat envisagé : '+value('providerDeal')+'\\n\\nJe suis disponible pour échanger sur les modalités, le suivi des demandes et une éventuelle commission convenue à l’avance.\\n\\nCordialement,\\n'+value('providerName');
+output.textContent='Bonjour Prix Malin,\n\nJe souhaite proposer mon activité comme prestataire partenaire.\n\nNom / activité : '+value('providerName')+'\nZone d’intervention : '+value('providerCity')+'\nCatégorie : '+value('providerCategory')+'\nDescription : '+value('providerDescription')+'\nPrix indicatif : '+price+'\nContact : '+value('providerContact')+'\nPartenariat envisagé : '+value('providerDeal')+'\n\nJe suis disponible pour échanger sur les modalités, le suivi des demandes et une éventuelle commission convenue à l’avance.\n\nCordialement,\n'+value('providerName');
 result.hidden=false;status.textContent='Proposition générée. Elle n’a pas été envoyée.';
 result.scrollIntoView({behavior:'smooth',block:'nearest'});
 });
