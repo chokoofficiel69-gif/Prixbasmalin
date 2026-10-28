@@ -7,7 +7,7 @@ Périmètre : catalogue, alimentation des prix, fiabilité et SEO. Aucun déploi
 ## État constaté
 
 ### 1. Catalogue et données de prix
-- `catalogue.html` contient le catalogue visuel et un composant de comparaison des offres vérifiées.
+- `catalogue.html` contient 83 fiches dans `productData` et un composant de comparaison des offres vérifiées.
 - `price-engine/products.json` ne configure qu'un produit suivi : Apple AirPods 4 USB-C.
 - La seule source configurée est une page Fnac, qui répondait HTTP 403 lors du dernier relevé observé.
 - `data/prices.json` contient actuellement zéro produit et zéro offre vérifiée.
@@ -24,8 +24,14 @@ Périmètre : catalogue, alimentation des prix, fiabilité et SEO. Aucun déploi
 ### 3. SEO et accessibilité publique
 - `robots.txt` autorise l'exploration et référence `https://prixbasmalin.fr/sitemap.xml`.
 - `sitemap.xml` répertorie la page d'accueil, le catalogue et plusieurs pages thématiques/guides.
-- La page d'accueil possède un titre explicite, mais les métadonnées descriptives, les liens canoniques, les données structurées et l'alignement des pages du sitemap doivent être vérifiés page par page avant toute modification.
+- La page d'accueil et le guide smartphone possèdent déjà une description et une URL canonique. Avant les modifications de cette branche, trois pages du sitemap (high-tech, mode et offres) n'avaient pas de meta description ; sept pages listées dans le sitemap n'avaient pas de lien canonique.
 - Les pages thématiques sont pour l'instant surtout des pages de découverte avec des liens de recherche marchande, pas nécessairement des comparaisons de prix vérifiés.
+
+## Changements préparés dans cette branche
+- Ajout d'une meta description aux pages `high-tech.html`, `mode.html` et `offres.html`, en formulant leur rôle comme pages de découverte/recherche et sans prétendre afficher des prix vérifiés en direct.
+- Ajout d'un lien canonique à `catalogue.html`, `grossistes.html`, `high-tech.html`, `mode.html`, `offres.html`, `partenaires.html` et `publicite.html`.
+- Aucun changement de style, logo, couleur, contenu produit ou source de prix n'a été effectué.
+- Ces modifications restent dans la branche de revue ; elles n'ont pas été déployées.
 
 ## Plan d'exécution proposé
 
