@@ -270,8 +270,8 @@ const productData=[
  {id:"t2",name:"T-shirt noir",desc:"Coupe classique",category:"fashion",query:"t-shirt noir",image:"https://images.unsplash.com/photo-1499971442178-8c10fdf5f6ac?w=900&h=900&fit=crop&crop=center&auto=format&q=88",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
  {id:"jeans1",name:"Jeans homme",desc:"Pantalon denim",category:"fashion",query:"jeans pantalon homme",image:"https://images.unsplash.com/photo-1542272604-787c3835535d?w=900&h=900&fit=crop&crop=center&auto=format&q=88",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
  {id:"jeans2",name:"Jeans femme",desc:"Coupe droite",category:"fashion",query:"jeans femme",image:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=900&h=900&fit=crop&crop=center&auto=format&q=88",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
- {id:"sweat1",name:"Survêtement",desc:"Ensemble jogging",category:"fashion",query:"survêtement jogging",image:"https://images.unsplash.com/photo-1499972777470-6a932ea55420?w=900&h=900&fit=crop&crop=center&auto=format&q=88",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
- {id:"polo1",name:"Polo Lacoste style",desc:"Polo classique",category:"fashion",query:"polo lacoste",image:"https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=900&h=900&fit=crop&crop=center&auto=format&q=88",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"sweat1",name:"Ensemble jogging coordonné",desc:"Veste et pantalon • styles actuels",category:"fashion",query:"ensemble jogging coordonné homme femme neuf",image:"https://images.pexels.com/photos/13258257/pexels-photo-13258257.jpeg?auto=compress&dpr=1&h=1200&w=900",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
+ {id:"polo1",name:"Polo homme coupe moderne",desc:"Polo neuf • plusieurs coloris et coupes",category:"fashion",query:"polo homme coupe moderne neuf",image:"https://images.unsplash.com/photo-1761896902115-49793a359daf?auto=format&fit=crop&fm=webp&q=85&w=900",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
  {id:"sneakers1",name:"Baskets blanches",desc:"Running",category:"fashion",query:"baskets blanches",image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&h=900&fit=crop&crop=center&auto=format&q=88",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""},
  {id:"watch",name:"Montre connectée",desc:"Fitness",category:"tech",query:"montre connectée",image:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=900&h=900&fit=crop&crop=center&auto=format&q=88",merchant:"Amazon",price:"À vérifier sur Amazon",old:"",save:""}
 ,
@@ -507,7 +507,7 @@ function renderVerifiedProducts(products){
       const image=document.createElement("img");
       image.src=productImage;image.alt=p.name;image.loading="lazy";image.decoding="async";
       image.style.cssText="width:100%;height:100%;object-fit:contain;padding:8px";
-      image.onerror=()=>{photo.textContent="Image indisponible";};
+      image.onerror=()=>{photo.replaceChildren();photo.classList.add("photo-unavailable");const fallback=document.createElement("div");fallback.className="pm-image-fallback";fallback.style.cssText="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;height:100%;min-height:150px;background:linear-gradient(135deg,#f8fafc,#e9eef5);color:#17213b;text-align:center;padding:12px";const symbol=document.createElement("span");symbol.textContent="🛍️";symbol.style.fontSize="42px";const label=document.createElement("strong");label.textContent="Voir le produit chez le marchand";const hint=document.createElement("small");hint.textContent="Photo indisponible pour le moment";fallback.append(symbol,label,hint);photo.append(fallback);};
       photo.append(image);
     }else{
       photo.textContent="Image produit à confirmer";
