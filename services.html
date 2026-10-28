@@ -66,10 +66,10 @@ h2{font-size:clamp(21px,3vw,28px);letter-spacing:-.035em;margin:30px 0 8px}.intr
 <div id="providerResult" hidden>
 <h3>Ta proposition est prête</h3>
 <div class="provider-output" id="providerText" tabindex="0"></div>
-<div class="provider-actions"><button class="primary" id="providerCopy" type="button">Copier la proposition</button></div>
+<div class="provider-actions"><button class="primary" id="providerSend" type="button">Envoyer par e-mail</button><button class="secondary" id="providerCopy" type="button">Copier la proposition</button></div>
 <p id="providerStatus" class="provider-small" aria-live="polite"></p>
 </div>
-<p class="provider-small">Important : la génération reste sur ton appareil. Pour envoyer cette proposition, copie-la puis transmets-la via ton e-mail ou ton moyen de contact. Ne fournis pas d'informations sensibles.</p>
+<p class="provider-small">Le bouton « Envoyer par e-mail » ouvre ton application de messagerie avec la proposition adressée à yzr@hotmail.fr. Vérifie le message puis appuie toi-même sur Envoyer. Le formulaire ne transmet aucune donnée tant que tu ne valides pas l’envoi dans ta messagerie.</p>
 </section>
 
 <section class="empty"><strong>Les premières offres arrivent progressivement</strong><p>Aucun prestataire n'est encore présenté comme partenaire confirmé sur cette page. Nous privilégions des informations vérifiées et des accords clairs avant de publier une offre.</p></section>
@@ -92,6 +92,12 @@ result.hidden=false;status.textContent='Proposition générée. Elle n’a pas �
 result.scrollIntoView({behavior:'smooth',block:'nearest'});
 });
 form.addEventListener('reset',function(){result.hidden=true;status.textContent='';});
+document.getElementById('providerSend').addEventListener('click',function(){
+const subject='Proposition de partenariat — '+document.getElementById('providerName').value.trim();
+const body=output.textContent;
+window.location.href='mailto:yzr@hotmail.fr?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+status.textContent='Ta messagerie devrait s’ouvrir avec la proposition préremplie. Vérifie puis envoie le message.';
+});
 document.getElementById('providerCopy').addEventListener('click',async function(){
 try{await navigator.clipboard.writeText(output.textContent);status.textContent='Proposition copiée. Tu peux la coller dans ton e-mail ou message.';}
 catch(error){status.textContent='La copie automatique n’est pas disponible sur ce navigateur. Appuie longuement sur le texte pour le sélectionner et le copier.';}
