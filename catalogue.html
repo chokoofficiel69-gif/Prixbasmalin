@@ -355,14 +355,28 @@ function render(){
     img.src=p.image;
     img.alt=p.name;
     img.loading="lazy";
+    img.dataset.fallbackTried="0";
     img.onerror=()=>{
+      if(img.dataset.fallbackTried==="0"){
+        img.dataset.fallbackTried="1";
+        const fallbackImages={
+          fashion:"https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=80",
+          tech:"https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=900&q=80",
+          home:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80",
+          kids:"https://images.unsplash.com/photo-1599623560574-39d485900c95?auto=format&fit=crop&w=900&q=80",
+          beauty:"https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=900&q=80"
+        };
+        const backup=fallbackImages[p.category]||fallbackImages.tech;
+        if(img.src!==backup){img.src=backup;return;}
+      }
       photo.classList.add("photo-unavailable");
       photo.innerHTML="";
-      const fallback=document.createElement("div");fallback.className="pm-image-fallback";fallback.setAttribute("role","img");fallback.setAttribute("aria-label","Photo indisponible pour "+p.name);
-      const symbol=document.createElement("span");symbol.className="pm-fallback-icon";
-      symbol.textContent=p.category==="fashion"?"👕":p.category==="home"?"🏠":p.category==="kids"?"🧸":"🔎";
-      const label=document.createElement("strong");label.textContent="Voir les marques";
-      const hint=document.createElement("small");hint.textContent="Image produit à confirmer";
+      const fallback=document.createElement("div");fallback.className="pm-image-fallback";fallback.setAttribute("role","img");fallback.setAttribute("aria-label","Illustration de remplacement pour "+p.name);
+      const symbol=document.createElementNS("http://www.w3.org/2000/svg","svg");
+      symbol.setAttribute("viewBox","0 0 48 48");symbol.setAttribute("aria-hidden","true");symbol.classList.add("pm-fallback-icon");
+      symbol.innerHTML='<rect x="7" y="7" width="34" height="34" rx="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 31l8-9 6 6 4-5 4 8M17 17h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+      const label=document.createElement("strong");label.textContent=p.brand||"Prix Malin";
+      const hint=document.createElement("small");hint.textContent="Illustration de remplacement";
       fallback.append(symbol,label,hint);photo.append(fallback);
     };
     photo.append(img);
