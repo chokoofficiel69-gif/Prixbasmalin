@@ -2125,5 +2125,52 @@ document.addEventListener("DOMContentLoaded",()=>{
 @media(prefers-reduced-motion:reduce){nav.bottom-nav button{transition:none!important}}
 </style>
 
+
+<style id="pm-nav-redesign-v2">
+/* Refonte visuelle volontairement visible de la barre d'application mobile. */
+@media(max-width:899px){
+  nav.bottom-nav{
+    grid-template-columns:repeat(8,minmax(0,1fr))!important;
+    align-items:center!important;gap:1px!important;
+    padding:8px 3px max(8px,env(safe-area-inset-bottom,0px))!important;
+    background:#fff!important;border-top:1px solid #e7eaf0!important;
+    box-shadow:0 -6px 22px rgba(25,35,55,.09)!important;
+  }
+  nav.bottom-nav button{
+    min-width:0!important;width:100%!important;min-height:55px!important;
+    display:flex!important;flex-direction:column!important;
+    align-items:center!important;justify-content:center!important;
+    gap:4px!important;padding:4px 0!important;border-radius:12px!important;
+    background:transparent!important;color:#737b8b!important;
+    font-size:7.5px!important;font-weight:600!important;line-height:1.05!important;
+  }
+  nav.bottom-nav button .nav-icon{
+    width:31px!important;height:31px!important;border-radius:10px!important;
+    display:grid!important;place-items:center!important;
+    background:#f3f5f8!important;color:#5e6879!important;
+    font-size:0!important;line-height:1!important;
+  }
+  nav.bottom-nav button .nav-icon svg{
+    width:19px!important;height:19px!important;display:block!important;
+    fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;
+    stroke-linecap:round!important;stroke-linejoin:round!important;
+  }
+  nav.bottom-nav button span:last-child{
+    display:block!important;max-width:100%!important;white-space:nowrap!important;
+    overflow:hidden!important;text-overflow:clip!important;
+    font-size:7.5px!important;letter-spacing:-.25px!important;line-height:1.1!important;
+  }
+  nav.bottom-nav button.active{
+    background:#fff2ec!important;color:#e84f19!important;
+  }
+  nav.bottom-nav button.active .nav-icon{
+    background:#f15a24!important;color:#fff!important;
+    box-shadow:0 3px 8px rgba(241,90,36,.24)!important;
+  }
+  nav.bottom-nav button.active .nav-icon svg{stroke-width:2.1!important}
+}
+@media(prefers-reduced-motion:reduce){nav.bottom-nav button{transition:none!important}}
+</style>
+
 </body>
 </html>
