@@ -31,3 +31,33 @@ header a,.brand,.logo{color:var(--pm-text)}
 img{color:var(--pm-muted)}
 ::selection{background:#ff6508;color:#fff}
 @media(prefers-color-scheme:light){html{color-scheme:dark}}
+
+
+/* Accessibilité : contraste renforcé sur toutes les pages */
+:root{--pm-text:#ffffff;--pm-muted:#e1e7ef}
+body,main,section,article,aside,div,span,li,p,small,label,legend,dt,dd,figcaption,summary,blockquote{
+ text-shadow:none!important;
+}
+body{color:#fff!important}
+p,li,small,.muted,.sub,.intro,.lead,.eyebrow,.crumb,
+.small,.placement-card p,.placement-card ul,.placement-card li,
+.note,.template,.step p,.card p,.card li,footer,footer p,footer a{
+ color:#e1e7ef!important;
+ opacity:1!important;
+}
+h1,h2,h3,h4,h5,h6,strong,b,label,legend,.price,.brand{
+ color:#fff!important;opacity:1!important
+}
+.placement-label,.preview-card span:not(.preview-tag),.preview-feature small{
+ color:#dce5f0!important;opacity:1!important
+}
+a{color:#ff9a62!important}
+a:hover,a:focus-visible{color:#ffc09d!important}
+.btn,.button,button,.cta,.primary{color:#fff!important}
+.btn.alt,.secondary,.chip,button.secondary{
+ background:#1b2838!important;color:#fff!important;border-color:#60738b!important
+}
+input::placeholder,textarea::placeholder{color:#c4ceda!important;opacity:1!important}
+.card,.panel,.product,.tile,.category-card,.offer-card,.metric,.stat-card,.box,.faq-item,.step,.feature-card,.hero,.intro,.note,.callout,.summary,.result,.table-wrap{
+ color:#fff!important
+}
