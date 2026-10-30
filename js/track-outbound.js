@@ -12,7 +12,8 @@
       var payload = {
         page_path: location.pathname || "/",
         merchant_host: target.hostname.toLowerCase(),
-        click_type: type === "search" ? "search" : "outbound"
+        click_type: type === "search" ? "search" : "outbound",
+        affiliate_tag: (target.hostname.toLowerCase() === "amazon.fr" || target.hostname.toLowerCase().endsWith(".amazon.fr")) ? (target.searchParams.get("tag") || "").slice(0, 30) : ""
       };
       fetch(endpoint, {
         method: "POST",
