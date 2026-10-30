@@ -502,7 +502,14 @@ function isCurrentVerifiedOffer(offer){
 
 function renderVerifiedProducts(products){
   verifiedProductsEl.innerHTML="";
-  const usable=products.filter(p=>p&&p.id&&p.name&&Array.isArray(p.offers)&&p.offers.some(o=>
+  const catalogueItems=typeof productData!=="undefined"?productData:[];
+  const imageForProduct=p=>{
+    const match=catalogueItems.find(item=>
+      pmNorm(item.name)===pmNorm(p.name)||pmNorm(p.name).includes(pmNorm(item.name))||pmNorm(item.name).includes(pmNorm(p.name))
+    );
+    return p.image||p.image_url||p.imageUrl||(match&&match.image)||"";
+  };
+  const usable=products.filter(p=>p&&p.id&&p.name&&imageForProduct(p)&&Array.isArray(p.offers)&&p.offers.some(o=>
     Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0
   ));
   if(!usable.length){verifiedProductsEl.innerHTML='<p class="comparison-empty">Les comparatifs marchands apparaîtront ici dès que des prix vérifiés pour un même modèle seront disponibles. Aucun tarif n’est estimé ni inventé.</p>';return;}
@@ -520,21 +527,14 @@ function renderVerifiedProducts(products){
     card.className="product";
     const photo=document.createElement("div");
     photo.className="verified-image";
-    const catalogueItems=typeof productData!=="undefined"?productData:[];
-    const catalogueMatch=catalogueItems.find(item=>
-      pmNorm(item.name)===pmNorm(p.name)||pmNorm(p.name).includes(pmNorm(item.name))||pmNorm(item.name).includes(pmNorm(p.name))
-    );
-    const productImage=p.image||p.image_url||p.imageUrl||(catalogueMatch&&catalogueMatch.image);
+    const productImage=imageForProduct(p);
     if(productImage){
       const image=document.createElement("img");
       image.src=productImage;image.alt=p.name;image.loading="lazy";image.decoding="async";
       image.style.cssText="width:100%;height:100%;object-fit:contain;padding:8px";
-      image.onerror=()=>{photo.replaceChildren();photo.classList.add("photo-unavailable");const fallback=document.createElement("div");fallback.className="pm-image-fallback";fallback.style.cssText="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;height:100%;min-height:150px;background:linear-gradient(135deg,#f8fafc,#e9eef5);color:#17213b;text-align:center;padding:12px";const symbol=document.createElement("span");symbol.textContent="🛍️";symbol.style.fontSize="42px";const label=document.createElement("strong");label.textContent="Voir le produit chez le marchand";const hint=document.createElement("small");hint.textContent="Photo indisponible pour le moment";fallback.append(symbol,label,hint);photo.append(fallback);};
+      image.onerror=()=>{card.remove();};
       photo.append(image);
-    }else{
-      photo.textContent="Image produit à confirmer";
-      photo.setAttribute("aria-label","Aucune image vérifiée disponible pour "+p.name);
-    }
+    }else{return;}
     const model=document.createElement("div");
     model.className="verified-model";
     model.textContent="Modèle exact suivi";
@@ -789,10 +789,10 @@ searchEl.addEventListener("input",render);document.getElementById("filters").add
 @media(max-width:759px){
  body{padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))!important}
  .pm-global-alert,.pm-fav-launch{display:none!important}
- #pmMobileNav{position:fixed;z-index:9990;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0;padding:7px 2px max(7px,env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.98);border-top:1px solid #e7e7e7;box-shadow:0 -5px 20px #0000000d;backdrop-filter:blur(12px)}
- #pmMobileNav button{min-width:0;padding:3px 0;border:0;background:transparent;color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:600 8px/1.1 system-ui,sans-serif;white-space:nowrap}
+ #pmMobileNav{position:fixed;z-index:9990;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0;padding:7px 2px max(7px,env(safe-area-inset-bottom,0px));background:rgba(8,13,20,.97);border-top:1px solid #344357;box-shadow:0 -5px 20px #00000066;backdrop-filter:blur(12px)}
+ #pmMobileNav button{min-width:0;padding:3px 0;border:0;background:transparent;color:#dce4ef;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:600 8px/1.1 system-ui,sans-serif;white-space:nowrap}
  #pmMobileNav .pm-nav-icon{font-size:17px;line-height:1}
- #pmMobileNav button:active,#pmMobileNav button.pm-active{color:#ff5a1f}
+ #pmMobileNav button:active,#pmMobileNav button.pm-active{color:#ff8a43}
  #pmMobileNav button:focus-visible{outline:2px solid #155eef;outline-offset:-2px}
  #pmAssistFloat,#pmAccessFloat{position:fixed;z-index:9985;touch-action:none;user-select:none}
  #pmAssistFloat{right:14px;bottom:calc(88px + env(safe-area-inset-bottom,0px))}
