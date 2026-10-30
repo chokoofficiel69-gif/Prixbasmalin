@@ -104,7 +104,7 @@ export default {
         .replace(/\s+/g, " ")
         .trim();
       if (!query) query = message.trim();
-      const amazonSearchUrl = "https://www.amazon.fr/s?k=" + encodeURIComponent(query) + "&tag=prixbasmalin2021";
+      const amazonSearchUrl = "https://www.amazon.fr/s?k=" + encodeURIComponent(query) + "&tag=prixbasmalin2-21";
       return json({ ok: true, provider: "amazon", mode: "amazon_search", answer: "Je lance une recherche sur Amazon France pour : " + query + ". J’affiche les résultats Amazon correspondants ; je ne vais pas inventer des produits ni des prix.", amazonSearchUrl, amazonSearchQuery: query }, 200, cors);
     }
 
