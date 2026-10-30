@@ -59,6 +59,44 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding:28px 0;color:var
 </div></section>
 <section><div class="section-head"><h2>📊 Comparatif de prix en temps réel</h2><small>Exemple de présentation — données fictives</small></div><div class="compare"><div class="compare-main"><img src="https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=600&q=85" alt="Console de jeu"><div><h3>Console de jeu – édition standard</h3><p style="color:#ffc94a;margin:4px 0">★★★★★ <small style="color:#aab4c1">(exemple de fiche)</small></p><div class="offer-row"><strong>amazon</strong><span class="best">Meilleur prix</span><b>449,00 €</b><button class="demo-link">Voir l'offre →</button></div><div class="offer-row"><strong>fnac</strong><span></span><b>459,99 €</b><button class="demo-link">Voir l'offre →</button></div><div class="offer-row"><strong>boulanger</strong><span></span><b>469,00 €</b><button class="demo-link">Voir l'offre →</button></div><div class="offer-row"><strong>cdiscount</strong><span></span><b>479,99 €</b><button class="demo-link">Voir l'offre →</button></div></div></div><aside class="economy"><div>Économie totale</div><strong>-30,99 €</strong><p>Différence illustrative entre les prix de cet exemple.</p></aside></div></section>
 <footer><div class="wrap">Prix Malin — maquette de travail indépendante. Les données de démonstration seront remplacées par des offres vérifiées lorsque les sources marchands seront disponibles.</div></footer>
+<style>
+.legacy-tools{padding:24px 0}.legacy-tools .tool-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.legacy-tools a,.legacy-tools button{display:block;text-align:left;padding:16px;border:1px solid #293748;border-radius:14px;background:#101722;color:#f7f8fa;text-decoration:none;min-height:100px}
+.legacy-tools a b,.legacy-tools button b{display:block;color:#ff681c;margin-bottom:7px}.legacy-tools small{color:#aab4c1;line-height:1.45}
+.pm-old-quick{display:flex;gap:8px;margin-top:16px}.pm-old-quick input{flex:1;min-width:0;background:#101722;color:#fff;border:1px solid #293748;border-radius:10px;padding:12px}.pm-old-quick button{background:#ff681c;color:white;border:0;border-radius:10px;padding:0 16px}
+.pm-old-bottom{position:fixed;z-index:40;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px;padding:7px 3px max(8px,env(safe-area-inset-bottom));background:#080d14f5;border-top:1px solid #263343;backdrop-filter:blur(14px)}
+.pm-old-bottom a,.pm-old-bottom button{border:0;background:transparent;color:#c4ced9;text-align:center;font-size:9px;min-width:0;text-decoration:none;padding:4px 0}
+.pm-old-bottom span{display:block;font-size:17px;margin-bottom:3px}
+body{padding-bottom:84px!important}
+@media(max-width:640px){.legacy-tools .tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.legacy-tools a,.legacy-tools button{min-height:88px;padding:12px}}
+</style>
+<section class="legacy-tools" id="services">
+<div class="section-head"><h2>Tout l’univers Prix Malin</h2><small>Retrouvez les outils du site initial</small></div>
+<div class="tool-grid">
+<a href="catalogue.html"><b>🛍️ Catalogue complet</b><small>Mode, high-tech, maison, sport, beauté et toutes les sélections.</small></a>
+<a href="catalogue.html?alerte=1"><b>🔔 Alertes prix</b><small>Retrouvez l’espace de suivi et de demande d’alertes.</small></a>
+<a href="guide-cadeaux.html"><b>🎁 Guide cadeaux</b><small>Des idées cadeaux classées par occasion et budget.</small></a>
+<a href="guide-choisir-smartphone.html"><b>📱 Guide smartphone</b><small>Les critères pour choisir sans payer inutilement.</small></a>
+<a href="grossistes.html"><b>🏭 Grossistes & lots</b><small>Explorer Temu, AliExpress, Alibaba et les achats en quantité.</small></a>
+<a href="services.html"><b>🧰 Services</b><small>Découvrir les catégories de services et prestations.</small></a>
+<a href="partenaires.html"><b>🤝 Partenaires</b><small>Offres de professionnels et propositions de collaboration.</small></a>
+<a href="publicite.html"><b>📣 Publicité & flyers</b><small>Présenter une activité, un flyer ou une demande de visibilité.</small></a>
+<a href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="noopener"><b>🟠 Offres Amazon</b><small>Accéder aux offres Amazon avec le lien affilié du site.</small></a>
+<a href="https://www.fnac.com/" target="_blank" rel="noopener"><b>Fnac</b><small>Accéder au marchand.</small></a>
+<a href="https://www.cdiscount.com/" target="_blank" rel="noopener"><b>Cdiscount</b><small>Accéder au marchand.</small></a>
+<a href="publicite.html"><b>💼 Proposer un partenariat</b><small>Contacter Prix Malin pour une collaboration commerciale.</small></a>
+</div>
+<form class="pm-old-quick" id="pmQuickCompare"><input id="pmQuickQuery" placeholder="Comparer un produit (ex. aspirateur, téléphone…)" aria-label="Produit à comparer"><button type="submit">Comparer</button></form>
+</section>
+<nav class="pm-old-bottom" aria-label="Navigation Prix Malin">
+<a href="index.html"><span>⌂</span>Accueil</a><a href="catalogue.html"><span>▦</span>Catalogue</a><a href="#deals"><span>％</span>Promos</a><a href="catalogue.html?favoris=1"><span>♡</span>Favoris</a><a href="catalogue.html?panier=1"><span>🛒</span>Panier</a><a href="catalogue.html?alerte=1"><span>♧</span>Alertes</a><a href="guide-cadeaux.html"><span>🎁</span>Guides</a><a href="publicite.html"><span>☏</span>Contact</a>
+</nav>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script>
+<script src="/js/personalisation.js"></script><script src="/js/cookie-consent.js"></script><script src="/js/prix-malin-auth.js"></script>
+<script>
+document.getElementById('pmQuickCompare')?.addEventListener('submit',function(e){e.preventDefault();const q=document.getElementById('pmQuickQuery').value.trim();if(q)location.href='catalogue.html?q='+encodeURIComponent(q)});
+</script>
+
 </main>
 <script>
 const input=document.getElementById('q'), cards=[...document.querySelectorAll('.product')];
