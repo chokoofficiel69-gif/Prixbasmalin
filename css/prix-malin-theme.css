@@ -60,3 +60,23 @@ img{color:#d4dce6}
  color:#fff!important;
 }
 .pm-noel-hero .pm-noel-cta{color:#fff!important}
+
+/* Catalogue : contraste net sur les fiches sombres et les lignes marchands */
+#verifiedProducts .product{border-color:#53647a!important}
+#verifiedProducts .verified-model{color:#c5d0df!important}
+#verifiedProducts .name{color:#f7f9fc!important}
+#verifiedProducts .verified-meta{color:#d3dce8!important}
+#verifiedProducts .verified-offer-row{background:#172231!important;border:1px solid #53647a!important;color:#f7f9fc!important}
+#verifiedProducts .verified-offer-row span,
+#verifiedProducts .verified-offer-row strong,
+#verifiedProducts .verified-offer-row small{color:#f7f9fc!important}
+#verifiedProducts .verified-offer-price strong{color:#ff8a43!important}
+#verifiedProducts .verified-offer-price a{color:#ffad7c!important}
+#verifiedProducts .verified-image{background:#fff!important;border:1px solid #53647a!important}
+#verifiedProducts .verified-image img{object-fit:contain}
+#verifiedProducts .product hr,.verified-shelf hr,.verified-shelf .divider{border-color:#53647a!important}
+#pmMobileNav{background:rgba(8,13,20,.97)!important;border-top:1px solid #344357!important;box-shadow:0 -5px 22px #0008!important}
+#pmMobileNav button{background:transparent!important;color:#dce4ef!important}
+#pmMobileNav button:active,#pmMobileNav button.pm-active{background:transparent!important;color:#ff8a43!important}
+#pmMobileNav .pm-nav-icon{color:inherit!important}
+#pmMobileNav button:focus-visible{outline-color:#ff9a62!important}
