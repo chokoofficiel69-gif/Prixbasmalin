@@ -66,12 +66,12 @@ img{color:#d4dce6}
 #verifiedProducts .verified-model{color:#c5d0df!important}
 #verifiedProducts .name{color:#f7f9fc!important}
 #verifiedProducts .verified-meta{color:#d3dce8!important}
-#verifiedProducts .verified-offer-row{background:#172231!important;border:1px solid #53647a!important;color:#f7f9fc!important}
+#verifiedProducts .verified-offer-row{background:#fff7f2!important;border:1px solid #ffc9ad!important;color:#26313d!important}
 #verifiedProducts .verified-offer-row span,
 #verifiedProducts .verified-offer-row strong,
-#verifiedProducts .verified-offer-row small{color:#f7f9fc!important}
-#verifiedProducts .verified-offer-price strong{color:#ff8a43!important}
-#verifiedProducts .verified-offer-price a{color:#ffad7c!important}
+#verifiedProducts .verified-offer-row small{color:#26313d!important}
+#verifiedProducts .verified-offer-price strong{color:#e94f00!important}
+#verifiedProducts .verified-offer-price a{color:#a84316!important}
 #verifiedProducts .verified-image{background:#fff!important;border:1px solid #53647a!important}
 #verifiedProducts .verified-image img{object-fit:contain}
 #verifiedProducts .product hr,.verified-shelf hr,.verified-shelf .divider{border-color:#53647a!important}
