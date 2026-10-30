@@ -1132,9 +1132,9 @@ const synonyms={
 };
 const productData=[
  {"id":"mytech-tablette","name":"Tablette tactile","desc":"MyTech • lecture, vidéo et usage quotidien","category":"tech","brand":"Samsung","query":"tablette tactile Samsung Lenovo","image":"https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=900&q=85","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=tablette+tactile+Samsung+Lenovo&tag=prixbasmalin2-21"},
- {"id":"mytech-gaming","name":"Console et accessoires gaming","desc":"MyTech • jeux vidéo et accessoires","category":"tech","brand":"Gaming","query":"console jeu vidéo manette gaming","image":"https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=900&q=85","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=console+jeu+video+manette+gaming&tag=prixbasmalin2-21"},
- {"id":"cadeau-parfum","name":"Coffret parfum à offrir","desc":"Parfums et coffrets beauté • prix à vérifier","category":"beauty","brand":"Beauté","query":"coffret parfum femme homme cadeau","image":"https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=900&q=85","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=coffret+parfum+femme+homme+cadeau&tag=prixbasmalin2-21"},
- {"id":"lingerie-dentelle","name":"Ensembles lingerie en dentelle","desc":"Chic et délicat • compare les coupes, tailles et matières","category":"fashion","brand":"Lingerie femme","query":"ensemble lingerie dentelle femme","image":"https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?auto=format&fit=crop&w=900&q=85","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=ensemble+lingerie+dentelle+femme&tag=prixbasmalin2-21"},
+ {"id":"mytech-gaming","name":"Console et accessoires gaming","desc":"MyTech • jeux vidéo et accessoires","category":"tech","brand":"Gaming","query":"console jeu vidéo manette gaming","image":"https://gameonjo.com/cdn/shop/collections/playstation.webp?v=1759365656","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=console+jeu+video+manette+gaming&tag=prixbasmalin2-21"},
+ {"id":"cadeau-parfum","name":"Coffret parfum à offrir","desc":"Parfums et coffrets beauté • prix à vérifier","category":"beauty","brand":"Beauté","query":"coffret parfum femme homme cadeau","image":"https://www.prestige-luxury.store/storage/app/public/seo-meta-info/2026-02-25-699eda562f43f.png","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=coffret+parfum+femme+homme+cadeau&tag=prixbasmalin2-21"},
+ {"id":"lingerie-dentelle","name":"Ensembles lingerie en dentelle","desc":"Chic et délicat • compare les coupes, tailles et matières","category":"fashion","brand":"Lingerie femme","query":"ensemble lingerie dentelle femme","image":"https://www.cdiscount.com/pdt2/6/6/3/1/550x550/aaabe74663/rw/ensemble-soutien-gorge-et.jpg","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=ensemble+lingerie+dentelle+femme&tag=prixbasmalin2-21"},
  {"id":"airpodspro3","name":"Apple AirPods Pro 3","desc":"Apple • réduction active du bruit","category":"tech","brand":"Apple","query":"Apple AirPods Pro 3","image":"https://cdn8.web4s.vn/media/products/3605/tai-nghe-airpods-pro-3-2025-chinh-hang-05.jpg","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=Apple+AirPods+Pro+3&tag=prixbasmalin2-21"},
  {"id":"polo1","name":"Polo Lacoste L.12.12 Original","desc":"Polo iconique • coton Petit Piqué","category":"fashion","brand":"Lacoste","query":"Lacoste L.12.12 polo homme","image":"https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&imwidth=1920","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=polo+Lacoste+L.12.12+homme&tag=prixbasmalin2-21"},
  {"id":"levis501","name":"Jean Levi’s 501 Original","desc":"Le jean droit iconique • denim","category":"fashion","brand":"Levi’s","query":"Levi's 501 Original homme","image":"https://lsco.scene7.com/is/image/lsco/005013220-front-pdp?fit=crop%2C1&fmt=jpeg&hei=700&op_usm=0.6%2C0.6%2C8&qlt=85&resMode=sharp2&wid=700","merchant":"Amazon • prix à vérifier","price":"Voir sur Amazon","old":"","save":"","sourceUrl":"https://www.amazon.fr/s?k=Levi%27s+501+Original+homme&tag=prixbasmalin2-21"},
@@ -1209,6 +1209,53 @@ function showProductDetail(p){
   const arrow=document.createElement("strong");arrow.textContent="↗";arrow.style.fontSize="18px";
   left.append(name,detail);a.append(left,arrow);sourceList.append(a);
  });
+ const accessorySets={
+  "lingerie-dentelle":[
+   ["Bas et collants en dentelle","Pour compléter l’ensemble, plusieurs styles et tailles","bas collants dentelle femme"],
+   ["Déshabillé ou robe de chambre satin","Une pièce assortie pour compléter la tenue","déshabillé satin femme"],
+   ["Porte-jarretelles assorti","À choisir selon la couleur et la coupe de l’ensemble","porte jarretelles dentelle femme"],
+   ["Filet de lavage lingerie","Pour protéger la dentelle au lavage","filet lavage lingerie délicate"]
+  ],
+  "cadeau-parfum":[
+   ["Lait pour le corps assorti","Pour compléter le rituel parfumé","lait corps parfumé coffret cadeau"],
+   ["Gel douche parfumé","Un complément coordonné au parfum","gel douche parfumé femme homme"],
+   ["Miniature ou vaporisateur de voyage","Un petit format pratique à emporter","coffret miniatures parfum vaporisateur voyage"],
+   ["Trousse cadeau beauté","Pour présenter et ranger les produits","trousse cadeau parfum beauté"]
+  ],
+  "mytech-gaming":[
+   ["Jeux PS5","Découvrir les jeux d’aventure, sport, course et famille","jeux PlayStation 5 PS5"],
+   ["Manette DualSense supplémentaire","Pour jouer à deux ou remplacer une manette","manette Sony DualSense PS5"],
+   ["Casque gaming compatible PS5","Pour jouer avec le son et le chat vocal","casque gaming compatible PlayStation 5"],
+   ["Station de recharge manettes","Pour recharger et ranger les manettes","station recharge manettes PS5 DualSense"],
+   ["SSD compatible PS5","Pour augmenter le stockage, vérifier les caractéristiques requises","SSD M.2 compatible PS5 dissipateur"],
+   ["Support vertical et rangement","Pour organiser la console et les accessoires","support rangement console PS5"]
+  ]
+ };
+ const accessories=accessorySets[p.id]||[];
+ if(accessories.length){
+  const section=document.createElement("section");
+  section.style.cssText="margin:18px 0 8px;padding:14px;border:1px solid #e7eaf0;border-radius:14px;background:#f8f9fc";
+  const heading=document.createElement("h3");
+  heading.textContent=p.id==="mytech-gaming"?"Complète ton espace gaming":p.id==="cadeau-parfum"?"À ajouter au coffret cadeau":"À associer avec cet ensemble";
+  heading.style.cssText="margin:0 0 5px;font-size:17px;color:#111b35";
+  const intro=document.createElement("p");
+  intro.textContent="Des articles complémentaires avec un lien de recherche séparé pour chacun. Vérifie la compatibilité, le modèle, la taille et la disponibilité chez le vendeur.";
+  intro.style.cssText="margin:0 0 11px;font-size:12px;line-height:1.45;color:#68748a";
+  const grid=document.createElement("div");
+  grid.style.cssText="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px";
+  accessories.forEach(item=>{
+   const a=document.createElement("a");
+   a.href="https://www.amazon.fr/s?k="+encodeURIComponent(item[2])+"&tag=prixbasmalin2-21";
+   a.target="_blank";a.rel="sponsored nofollow noopener noreferrer";
+   a.style.cssText="display:flex;flex-direction:column;justify-content:space-between;gap:8px;min-height:94px;padding:11px;border:1px solid #e4e8ef;border-radius:11px;background:#fff;color:#172342;text-decoration:none";
+   const title=document.createElement("strong");title.textContent=item[0];title.style.cssText="font-size:12px;line-height:1.35";
+   const desc=document.createElement("span");desc.textContent=item[1];desc.style.cssText="font-size:10px;line-height:1.4;color:#68748a";
+   const cta=document.createElement("span");cta.textContent="Voir sur Amazon ↗";cta.style.cssText="font-size:11px;font-weight:800;color:#b8450b";
+   a.append(title,desc,cta);grid.append(a);
+  });
+  section.append(heading,intro,grid);
+  document.getElementById("modalContent").append(section);
+ }
  const actions=document.createElement("div");actions.className="modal-actions";
  const add=document.createElement("button");add.className="modal-secondary";add.textContent="Ajouter au panier";add.onclick=()=>{if(!cart.includes(p.id)){cart.push(p.id);saveCart();closeModal();renderProducts()}};
  actions.append(add);document.getElementById("modalContent").append(actions);
