@@ -528,13 +528,33 @@ function renderVerifiedProducts(products){
     const photo=document.createElement("div");
     photo.className="verified-image";
     const productImage=imageForProduct(p);
+    const showVerifiedImageFallback=()=>{
+      photo.classList.add("verified-image-fallback");
+      photo.innerHTML="";
+      const fallback=document.createElement("div");
+      fallback.setAttribute("role","img");
+      fallback.setAttribute("aria-label","Visuel indisponible pour "+p.name);
+      fallback.style.cssText="width:100%;height:100%;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:18px;box-sizing:border-box;text-align:center;color:#64748b;background:linear-gradient(145deg,#f8fafc,#e9eef5);border:1px solid #dbe3ed;border-radius:12px";
+      const symbol=document.createElement("span");
+      symbol.setAttribute("aria-hidden","true");
+      symbol.textContent="▧";
+      symbol.style.cssText="font-size:38px;line-height:1;color:#94a3b8";
+      const label=document.createElement("strong");
+      label.textContent=p.name;
+      label.style.cssText="font-size:13px;line-height:1.35;color:#334155";
+      const hint=document.createElement("small");
+      hint.textContent="Visuel momentanément indisponible";
+      hint.style.cssText="font-size:11px;color:#64748b";
+      fallback.append(symbol,label,hint);
+      photo.append(fallback);
+    };
     if(productImage){
       const image=document.createElement("img");
       image.src=productImage;image.alt=p.name;image.loading="lazy";image.decoding="async";
       image.style.cssText="width:100%;height:100%;object-fit:contain;padding:8px";
-      image.onerror=()=>{card.remove();};
+      image.onerror=()=>{image.remove();showVerifiedImageFallback();};
       photo.append(image);
-    }else{return;}
+    }else{showVerifiedImageFallback();}
     const model=document.createElement("div");
     model.className="verified-model";
     model.textContent="Modèle exact suivi";
