@@ -1,63 +1,62 @@
-/* Prix Malin — identité commune noir & orange */
+/* Prix Malin — thème global noir & orange, avec respect des panneaux clairs */
 :root{
  color-scheme:dark;
  --pm-bg:#080d14;--pm-surface:#101722;--pm-surface-2:#151e2a;
- --pm-text:#f5f7fa;--pm-muted:#aab4c1;--pm-line:#293748;
+ --pm-text:#f5f7fa;--pm-muted:#d4dce6;--pm-line:#293748;
  --pm-orange:#ff6508;--pm-green:#0b8b61;
 }
 html{background:var(--pm-bg)!important;color-scheme:dark}
 body{background:var(--pm-bg)!important;color:var(--pm-text)!important}
-header,nav,.nav,.topbar,.site-header{background:#080d14!important;color:var(--pm-text)!important;border-color:var(--pm-line)!important}
-main{background:transparent!important;color:var(--pm-text)!important}
-h1,h2,h3,h4,h5,h6,strong,b,label,legend{color:var(--pm-text)}
-p,li,small,.muted,.sub,.intro,.lead,.eyebrow,.crumb{color:var(--pm-muted)}
-a{color:#ff873d}
-a:hover{color:#ffad79}
-.card,.panel,.product,.tile,.category-card,.offer-card,.metric,.stat-card,.box,.faq-item,.step,.feature-card,.hero,.intro,.note,.callout,.summary,.result,.table-wrap{
- background:var(--pm-surface)!important;color:var(--pm-text)!important;border-color:var(--pm-line)!important;
+header,nav,.nav,.topbar,.site-header{background:#080d14!important;color:#f5f7fa!important;border-color:var(--pm-line)!important}
+main{background:transparent!important;color:inherit}
+a{color:#ff9a62}
+a:hover,a:focus-visible{color:#ffc09d}
+.card,.panel,.product,.tile,.category-card,.offer-card,.metric,.stat-card,.box,.faq-item,.step,.feature-card,.note,.callout,.summary,.result,.table-wrap{
+ background:var(--pm-surface)!important;color:#f5f7fa!important;border-color:var(--pm-line)!important;
 }
-article,section{color:var(--pm-text)}
-input,select,textarea{background:#111a26!important;color:var(--pm-text)!important;border:1px solid #344357!important}
-input::placeholder,textarea::placeholder{color:#8995a5!important}
+.card p,.card li,.panel p,.panel li,.product p,.product li,.offer-card p,.offer-card li,
+.metric p,.stat-card p,.faq-item p,.step p,.feature-card p,.note p,.callout p,
+.summary p,.result p,.table-wrap p{
+ color:#e1e7ef;
+}
+.card h1,.card h2,.card h3,.panel h1,.panel h2,.panel h3,.product h1,.product h2,.product h3,
+.offer-card h1,.offer-card h2,.offer-card h3,.feature-card h1,.feature-card h2,.feature-card h3{
+ color:#fff;
+}
+input,select,textarea{background:#111a26!important;color:#f5f7fa!important;border:1px solid #344357!important}
+input::placeholder,textarea::placeholder{color:#c4ceda!important;opacity:1}
 button,.btn,.button,.cta,.primary,.pm-noel-cta{background:var(--pm-orange)!important;color:#fff!important;border-color:var(--pm-orange)!important}
-button.secondary,.secondary,.btn.alt,.btn.secondary,.back,.chip,button[aria-pressed="false"]{background:#172231!important;color:#e7edf5!important;border-color:#344357!important}
-table{color:var(--pm-text)!important;border-color:var(--pm-line)!important}
-th{background:#172231!important;color:#fff!important}
-td,tr{border-color:var(--pm-line)!important}
-hr{border-color:var(--pm-line)!important}
-footer{background:#080d14!important;color:var(--pm-muted)!important;border-color:var(--pm-line)!important}
-header a,.brand,.logo{color:var(--pm-text)}
+button.secondary,.secondary,.btn.alt,.btn.secondary,.back,.chip,button[aria-pressed="false"]{background:#1b2838!important;color:#fff!important;border-color:#60738b!important}
+table{color:#f5f7fa;border-color:var(--pm-line)}
+th{background:#172231;color:#fff}
+td,tr{border-color:var(--pm-line)}
+hr{border-color:var(--pm-line)}
+footer{background:#080d14;color:#d4dce6;border-color:var(--pm-line)}
+header a,.brand,.logo{color:#f5f7fa}
 .brand span,.logo span{color:var(--pm-orange)}
-img{color:var(--pm-muted)}
+img{color:#d4dce6}
 ::selection{background:#ff6508;color:#fff}
-@media(prefers-color-scheme:light){html{color-scheme:dark}}
 
-
-/* Accessibilité : contraste renforcé sur toutes les pages */
-:root{--pm-text:#ffffff;--pm-muted:#e1e7ef}
-body,main,section,article,aside,div,span,li,p,small,label,legend,dt,dd,figcaption,summary,blockquote{
- text-shadow:none!important;
+/* Les panneaux éditoriaux crème/blanc du catalogue gardent leurs textes foncés */
+.pm-noel-hero,.pm-gift-discovery{
+ color:#26352e!important;
 }
-body{color:#fff!important}
-p,li,small,.muted,.sub,.intro,.lead,.eyebrow,.crumb,
-.small,.placement-card p,.placement-card ul,.placement-card li,
-.note,.template,.step p,.card p,.card li,footer,footer p,footer a{
- color:#e1e7ef!important;
- opacity:1!important;
+.pm-noel-hero h1,.pm-noel-hero h2,.pm-noel-hero h3,
+.pm-gift-discovery h1,.pm-gift-discovery h2,.pm-gift-discovery h3{
+ color:#20372e!important;
 }
-h1,h2,h3,h4,h5,h6,strong,b,label,legend,.price,.brand{
- color:#fff!important;opacity:1!important
+.pm-noel-hero p,.pm-noel-hero li,.pm-noel-hero small,
+.pm-gift-discovery p,.pm-gift-discovery li,.pm-gift-discovery small{
+ color:#46534b!important;opacity:1!important;
 }
-.placement-label,.preview-card span:not(.preview-tag),.preview-feature small{
- color:#dce5f0!important;opacity:1!important
+.pm-noel-hero .pm-noel-kicker,.pm-gift-discovery .pm-gift-overline{
+ color:#9d302b!important;
 }
-a{color:#ff9a62!important}
-a:hover,a:focus-visible{color:#ffc09d!important}
-.btn,.button,button,.cta,.primary{color:#fff!important}
-.btn.alt,.secondary,.chip,button.secondary{
- background:#1b2838!important;color:#fff!important;border-color:#60738b!important
+.pm-gift-discovery .pm-gift-tile,
+.pm-gift-discovery .pm-gift-tile-copy,
+.pm-gift-discovery .pm-gift-tile-copy strong,
+.pm-gift-discovery .pm-gift-tile-copy small,
+.pm-gift-discovery .pm-gift-tile-copy em{
+ color:#fff!important;
 }
-input::placeholder,textarea::placeholder{color:#c4ceda!important;opacity:1!important}
-.card,.panel,.product,.tile,.category-card,.offer-card,.metric,.stat-card,.box,.faq-item,.step,.feature-card,.hero,.intro,.note,.callout,.summary,.result,.table-wrap{
- color:#fff!important
-}
+.pm-noel-hero .pm-noel-cta{color:#fff!important}
