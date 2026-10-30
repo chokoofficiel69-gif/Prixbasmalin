@@ -1,0 +1,33 @@
+/* Prix Malin — identité commune noir & orange */
+:root{
+ color-scheme:dark;
+ --pm-bg:#080d14;--pm-surface:#101722;--pm-surface-2:#151e2a;
+ --pm-text:#f5f7fa;--pm-muted:#aab4c1;--pm-line:#293748;
+ --pm-orange:#ff6508;--pm-green:#0b8b61;
+}
+html{background:var(--pm-bg)!important;color-scheme:dark}
+body{background:var(--pm-bg)!important;color:var(--pm-text)!important}
+header,nav,.nav,.topbar,.site-header{background:#080d14!important;color:var(--pm-text)!important;border-color:var(--pm-line)!important}
+main{background:transparent!important;color:var(--pm-text)!important}
+h1,h2,h3,h4,h5,h6,strong,b,label,legend{color:var(--pm-text)}
+p,li,small,.muted,.sub,.intro,.lead,.eyebrow,.crumb{color:var(--pm-muted)}
+a{color:#ff873d}
+a:hover{color:#ffad79}
+.card,.panel,.product,.tile,.category-card,.offer-card,.metric,.stat-card,.box,.faq-item,.step,.feature-card,.hero,.intro,.note,.callout,.summary,.result,.table-wrap{
+ background:var(--pm-surface)!important;color:var(--pm-text)!important;border-color:var(--pm-line)!important;
+}
+article,section{color:var(--pm-text)}
+input,select,textarea{background:#111a26!important;color:var(--pm-text)!important;border:1px solid #344357!important}
+input::placeholder,textarea::placeholder{color:#8995a5!important}
+button,.btn,.button,.cta,.primary,.pm-noel-cta{background:var(--pm-orange)!important;color:#fff!important;border-color:var(--pm-orange)!important}
+button.secondary,.secondary,.btn.alt,.btn.secondary,.back,.chip,button[aria-pressed="false"]{background:#172231!important;color:#e7edf5!important;border-color:#344357!important}
+table{color:var(--pm-text)!important;border-color:var(--pm-line)!important}
+th{background:#172231!important;color:#fff!important}
+td,tr{border-color:var(--pm-line)!important}
+hr{border-color:var(--pm-line)!important}
+footer{background:#080d14!important;color:var(--pm-muted)!important;border-color:var(--pm-line)!important}
+header a,.brand,.logo{color:var(--pm-text)}
+.brand span,.logo span{color:var(--pm-orange)}
+img{color:var(--pm-muted)}
+::selection{background:#ff6508;color:#fff}
+@media(prefers-color-scheme:light){html{color-scheme:dark}}
