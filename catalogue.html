@@ -260,6 +260,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 .pm-gift-discovery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pm-gift-tile{height:clamp(190px,23vw,280px);min-width:0;position:relative;overflow:hidden;display:block;border-radius:15px;background:#e7e4dc;color:#fff!important;text-decoration:none;isolation:isolate}.pm-gift-tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}.pm-gift-tile:hover img{transform:scale(1.045)}.pm-gift-tile-shade{position:absolute;inset:0;background:linear-gradient(180deg,#10181000 30%,#101810d9 100%);z-index:1}.pm-gift-tile-copy{position:absolute;z-index:2;left:14px;right:12px;bottom:14px;display:flex;flex-direction:column;gap:4px}.pm-gift-tile-copy small{font-size:10px;opacity:.9}.pm-gift-tile-copy strong{font-size:clamp(14px,1.5vw,19px);line-height:1.15}.pm-gift-tile-copy em{font-style:normal;font-size:10px;font-weight:750;color:#fff4dc;margin-top:3px}
 @media(max-width:650px){.pm-gift-discovery{margin:8px 10px 22px;padding:15px;border-radius:18px}.pm-gift-discovery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.pm-gift-tile{height:205px;border-radius:12px}.pm-gift-tile-copy{left:10px;right:8px;bottom:10px}.pm-gift-tile-copy strong{font-size:14px}.pm-gift-tile-copy small,.pm-gift-tile-copy em{font-size:9px}.pm-gift-heading-mark{flex-basis:36px;height:36px}}
 
+
+/* Recherche directe Amazon depuis le champ catalogue */
+.pm-amazon-search-form{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;margin:10px 0 14px}
+.pm-amazon-search-submit{width:100%;min-height:48px;border:0;border-radius:12px;background:#ff6848;color:#21182a;font:800 14px system-ui,-apple-system,sans-serif;padding:12px 16px;cursor:pointer}
+.pm-amazon-search-submit:active{transform:scale(.99)}
+.pm-amazon-empty-cta{display:block;margin-top:12px;padding:14px;border:1px solid #ffc7b9;border-radius:13px;background:#fff2ee;color:#a83e2d;text-align:center;font-weight:800}
 </style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
@@ -288,7 +294,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 <section class="discovery-shelf" aria-labelledby="discoveryTitle">
   <div class="discovery-shelf-head"><h2 id="discoveryTitle">Explorer les produits</h2><p>Suggestions de recherche illustrées, pas des offres tarifaires. Chaque fiche indique clairement qu’aucun prix direct n’a été vérifié ; utilisez le bouton de chaque fiche pour explorer les produits similaires.</p></div>
   <label class="discovery-search-label" for="search">Rechercher un produit</label>
-  <input id="search" class="search" type="search" placeholder="Ex. écouteurs, téléphone, jean…" autocomplete="off" value="">
+  <form id="pmAmazonSearchForm" class="pm-amazon-search-form" role="search"><input id="search" class="search" type="search" placeholder="Ex. PlayStation, iPhone, télé…" autocomplete="off" value=""><button class="pm-amazon-search-submit" type="submit">Rechercher sur Amazon ↗</button></form>
   <div class="count" id="count" aria-live="polite"></div>
   <div id="filters" hidden></div>
   <section class="grid" id="products" aria-live="polite"></section>
@@ -381,7 +387,8 @@ function render(){
   productsEl.innerHTML="";
   countEl.textContent=found.length+" produit(s) de découverte";
   if(!found.length){
-    productsEl.innerHTML='<div class="empty">Aucun produit trouvé. Essayez un autre mot.</div>';
+    productsEl.innerHTML='<div class="empty">Aucun produit dans notre sélection pour cette recherche.<a class="pm-amazon-empty-cta" href="https://www.amazon.fr/s?k=PlayStation&s=price-asc-rank&tag=prixbasmalin2-21" id="pmAmazonFallback">Voir les résultats Amazon ↗</a></div>';
+     const fallback=document.getElementById("pmAmazonFallback");if(fallback){const url="https://www.amazon.fr/s?"+new URLSearchParams({k:searchEl.value.trim(),s:"price-asc-rank",tag:"prixbasmalin2-21"}).toString();fallback.href=url;}
     return;
   }
   found.forEach(p=>{
@@ -753,6 +760,15 @@ function pmDetailClick(e){
 }
 productsEl.addEventListener("click",pmDetailClick);
 verifiedProductsEl.addEventListener("click",pmDetailClick);
+
+const amazonSearchForm=document.getElementById("pmAmazonSearchForm");
+function openAmazonSearch(term){
+ const query=String(term||"").trim();
+ if(!query)return;
+ const url="https://www.amazon.fr/s?"+new URLSearchParams({k:query,s:"price-asc-rank",tag:"prixbasmalin2-21"}).toString();
+ window.location.href=url;
+}
+amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();openAmazonSearch(searchEl.value)});
 searchEl.addEventListener("input",render);document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();
 </script>  
 <script>
