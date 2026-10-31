@@ -367,11 +367,15 @@ const productData=[
 const suggestedBrands={airfryer:["Philips","Moulinex","Ninja"],vacuum:["Dyson","Rowenta","Bosch"],lamp:["Philips Hue","Xiaomi","IKEA"],dress:["Only","Vero Moda","Amazon Essentials"],coffee:["De’Longhi","Krups","Philips"],blender:["Moulinex","Ninja","Philips"],chair:["IKEA","SONGMICS","Hbada"],bedding:["Emma","Linvosges","Amazon Basics"],backpack:["Eastpak","The North Face"],handbag:["Guess","Desigual","Amazon Essentials"],sunglasses:["Ray-Ban","Polaroid","Hawkers"],running:["Nike","Adidas","Asics"],headphones:["Sony","JBL","Bose"],earbuds:["Apple","Samsung","JBL"],smartwatch:["Apple","Samsung","Xiaomi"],powerbank:["Anker","Belkin","INIU"],camera:["Canon","Sony","Fujifilm"],hoodie:["Nike","Adidas","Levi’s"],jacket:["The North Face","Columbia","Levi’s"],jeans1:["Levi’s","Wrangler","Lee"],jeans2:["Levi’s","Only","Lee"],t1:["Uniqlo","Levi’s","Amazon Essentials"],t2:["Uniqlo","Levi’s","Amazon Essentials"],polo1:["Lacoste","Ralph Lauren","Tommy Hilfiger"],fa28:["Nike","Adidas","Asics"],fa29:["Nike","Adidas","Puma"],fa30:["Secrid","Levi’s","Eastpak"]};
 const categoryBrands={fashion:["Levi’s","Nike","Adidas"],home:["Philips","Moulinex","Bosch"],tech:["Samsung","Apple","Xiaomi"],beauty:["L’Oréal Paris","Nivea","Maybelline"],kids:["LEGO","VTech","Fisher-Price"]};
 function brandsFor(p){return suggestedBrands[p.id]||categoryBrands[p.category]||["Philips","Samsung","Xiaomi"];}
-const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count");let category="all";
+const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count");
+const categoryParam=new URLSearchParams(location.search).get("cat")||"all";
+const categoryAliases={tech:["tech"],fashion:["fashion"],home:["home"],beauty:["beauty"],kids:["kids"],sport:["fashion","tech"],auto:"all",diy:"all",appliances:["home"],gifts:"all"};
+let category=categoryAliases[categoryParam]||"all";
+searchEl.value=new URLSearchParams(location.search).get("q")||"";
 function render(){
   const q=searchEl.value.trim().toLocaleLowerCase("fr");
   const found=productData.filter(p=>
-    (category==="all"||p.category===category)&&
+    (category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category))&&
     (!q||(p.name+" "+p.desc+" "+p.query).toLocaleLowerCase("fr").includes(q))
   );
   productsEl.innerHTML="";
