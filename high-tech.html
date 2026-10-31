@@ -31,7 +31,13 @@ h1{font-family:Outfit;font-size:1.8rem;margin:24px 5% 8px}
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"581731ca0ab54223acdf63ecfca342b0"}'></script>
 <!-- End Cloudflare Web Analytics -->
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=3">
-</head>
+<style id="pm-selection-card-fixes">
+.selection-thumb{display:block!important;width:100%!important;height:112px!important;object-fit:cover!important;border-radius:10px!important;margin:0 0 12px!important;background:#202b38}
+.grid .card{min-height:0!important;padding:14px!important;gap:0!important;display:flex!important;flex-direction:column!important}
+.grid .card .btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;align-self:flex-start!important;width:auto!important;max-width:100%!important;min-height:40px!important;padding:9px 12px!important;font-size:13px!important;line-height:1.25!important;white-space:normal!important;margin-top:auto!important}
+.grid{align-items:stretch!important}
+@media(max-width:700px){.selection-thumb{height:94px!important}.grid .card{padding:11px!important}.grid .card .btn{font-size:12px!important;padding:9px 10px!important;min-height:36px!important}}
+</style></head>
 <body>
 <header>
   <a href="index.html" class="logo">PM</a>
