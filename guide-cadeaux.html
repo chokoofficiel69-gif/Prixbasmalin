@@ -14,7 +14,13 @@ header{border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justif
 main{max-width:980px;margin:auto;padding:24px 16px 56px}.eyebrow{color:var(--orange);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:12px}h1{font-size:clamp(30px,6vw,48px);line-height:1.08;letter-spacing:-.04em;margin:8px 0 12px}h2{font-size:23px;line-height:1.2;margin:0 0 8px}.intro{font-size:17px;color:var(--muted);max-width:700px}.note{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px;margin:20px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0 30px}.card{border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;align-items:flex-start;min-height:210px}.emoji{font-size:30px;margin-bottom:10px}.card p{color:var(--muted);margin:6px 0 16px}.card .btn{margin-top:auto}.budget{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 30px}.budget a{border:1px solid var(--line);border-radius:999px;padding:9px 13px;text-decoration:none;font-weight:700}.budget a:hover{border-color:var(--orange);color:var(--orange)}.small{font-size:13px;color:var(--muted)}footer{border-top:1px solid var(--line);padding:20px 16px;color:var(--muted);font-size:13px;text-align:center}a:focus-visible{outline:3px solid #222;outline-offset:3px}
 .selection-thumb{display:block;width:100%;height:112px;object-fit:cover;border-radius:10px;margin:0 0 12px;background:#202b38}.card{min-height:0;gap:0}.card .btn{align-self:flex-start;width:auto;max-width:100%;white-space:normal}.grid{align-items:stretch}@media(max-width:700px){.selection-thumb{height:94px}.card{padding:11px}.card .btn{font-size:12px;padding:9px 10px}}</style>
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=3">
-</head>
+<style id="pm-selection-card-fixes">
+.selection-thumb{display:block!important;width:100%!important;height:112px!important;object-fit:cover!important;border-radius:10px!important;margin:0 0 12px!important;background:#202b38}
+.grid .card{min-height:0!important;padding:14px!important;gap:0!important;display:flex!important;flex-direction:column!important}
+.grid .card .btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;align-self:flex-start!important;width:auto!important;max-width:100%!important;min-height:40px!important;padding:9px 12px!important;font-size:13px!important;line-height:1.25!important;white-space:normal!important;margin-top:auto!important}
+.grid{align-items:stretch!important}
+@media(max-width:700px){.selection-thumb{height:94px!important}.grid .card{padding:11px!important}.grid .card .btn{font-size:12px!important;padding:9px 10px!important;min-height:36px!important}}
+</style></head>
 <body>
 <header><a class="brand" href="index.html" aria-label="Prix Malin, accueil">Prix <span>Malin</span></a><a href="index.html">Accueil ↗</a></header>
 <main>
