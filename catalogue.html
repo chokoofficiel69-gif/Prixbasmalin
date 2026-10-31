@@ -929,4 +929,5 @@ searchEl.addEventListener("input",render);document.getElementById("filters").add
  window.addEventListener('resize',()=>{if(!mobile())return;[assistant.box,access.box].forEach(el=>{if(el.style.left){const r=el.getBoundingClientRect();el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,r.left))+'px';el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,r.top))+'px'}})});
 })();
 </script>
+<footer class="pm-legal-footer" style="margin:34px auto 0;padding:22px 18px 100px;max-width:1200px;border-top:1px solid #e3e8f0;color:#657087;font:13px/1.7 system-ui,sans-serif;text-align:center"><a href="/mentions-legales.html">Mentions légales</a> · <a href="/confidentialite.html">Confidentialité et cookies</a> · <a href="/publicite.html">Contact et partenariats</a><p style="margin:8px 0 0;font-size:11px">Prix Malin · Les prix et disponibilités sont à vérifier auprès des marchands. Certains liens peuvent être affiliés.</p></footer>
 </body></html>
