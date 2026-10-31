@@ -369,7 +369,7 @@ const categoryBrands={fashion:["Levi’s","Nike","Adidas"],home:["Philips","Moul
 function brandsFor(p){return suggestedBrands[p.id]||categoryBrands[p.category]||["Philips","Samsung","Xiaomi"];}
 const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count");
 const categoryParam=new URLSearchParams(location.search).get("cat")||"all";
-const categoryAliases={tech:["tech"],fashion:["fashion"],home:["home"],beauty:["beauty"],kids:["kids"],sport:["fashion","tech"],auto:["home","tech"],diy:["home"],appliances:["home"],gifts:["all"]};
+const categoryAliases={tech:["tech"],fashion:["fashion"],home:["home"],beauty:["beauty"],kids:["kids"],sport:["fashion","tech"],auto:"all",diy:"all",appliances:["home"],gifts:"all"};
 let category=categoryAliases[categoryParam]||"all";
 searchEl.value=new URLSearchParams(location.search).get("q")||"";
 function render(){
