@@ -1,0 +1,51 @@
+name: Actualiser les historiques PrixTracker
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "price-engine/import-prixtracker*.mjs"
+      - ".github/workflows/import-prixtracker.yml"
+  pull_request:
+    paths:
+      - "price-engine/import-prixtracker*.mjs"
+      - ".github/workflows/import-prixtracker.yml"
+  schedule:
+    - cron: "35 5 * * *"
+permissions:
+  contents: write
+concurrency:
+  group: prixtracker-history
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Télécharger les CSV publics PrixTracker
+        run: |
+          mkdir -p /tmp/prixtracker
+          curl --fail --location --retry 3 --retry-delay 3 "https://prixtracker.fr/donnees/prix-par-marchand.csv" -o /tmp/prixtracker/prix-par-marchand.csv
+          curl --fail --location --retry 3 --retry-delay 3 "https://prixtracker.fr/donnees/meilleur-prix-du-jour.csv" -o /tmp/prixtracker/meilleur-prix-du-jour.csv
+          test "$(wc -c < /tmp/prixtracker/prix-par-marchand.csv)" -gt 100
+          test "$(wc -c < /tmp/prixtracker/meilleur-prix-du-jour.csv)" -gt 100
+      - name: Importer et valider les relevés
+        run: |
+          node price-engine/import-prixtracker.mjs --input /tmp/prixtracker/prix-par-marchand.csv
+          node price-engine/import-prixtracker-best-daily.mjs --input /tmp/prixtracker/meilleur-prix-du-jour.csv
+          node --input-type=module -e "import fs from 'node:fs'; for (const f of ['data/prixtracker-prices.json','data/prixtracker-best-daily.json']) { const d=JSON.parse(fs.readFileSync(f,'utf8')); if (!d.counts?.rows || !d.products?.length) throw new Error('Dataset vide: '+f); if (d.status !== 'historical_reference') throw new Error('Statut historique manquant: '+f); console.log(f, d.counts); }"
+      - name: Publier uniquement si les fichiers ont changé
+        if: github.event_name != 'pull_request'
+        run: |
+          if git diff --quiet -- data/prixtracker-prices.json data/prixtracker-best-daily.json; then
+            echo "Aucune évolution des données."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/prixtracker-prices.json data/prixtracker-best-daily.json
+          git commit -m "data: actualiser les historiques PrixTracker"
+          git push
