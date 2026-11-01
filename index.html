@@ -357,6 +357,101 @@ body{padding-bottom:90px!important}
  .hero-proof span{font-size:7px}
  .new-arrival{grid-template-columns:35% 65%}
 }
+/* Ajustement strict à la composition de la maquette fournie */
+.hero{min-height:450px;background:radial-gradient(ellipse at 50% 60%,#472011 0%,#151019 48%,#080b11 82%);border-radius:0}
+.hero-copy{left:43%;right:2%;top:8%;grid-template-columns:1fr auto}
+.hero-kicker{display:none}
+.hero h1{font-size:clamp(42px,5.3vw,68px);font-weight:950}
+.hero p{font-size:19px;font-weight:700}
+.hero-proof{grid-column:2;grid-row:1/3;align-self:center;font-size:16px}
+.hero-proof span:before{content:"✓";font-size:14px}
+.hero-mascot{width:33%;left:0}
+.hero-sticker{left:23%;top:8%;font-size:20px;padding:15px 25px;border-radius:35px}
+.hero-sticker strong{font-size:25px}
+.hero-laptop{width:49%;height:48%;right:9%;top:46%}
+.hero-phone{width:13%;right:1%;height:50%}
+.hero-shelf{left:30%;right:8%;bottom:7%;height:40%}
+.trust{grid-template-columns:repeat(4,minmax(0,1fr));}
+.trust div{justify-content:center;font-size:14px}
+.categories{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.cat{height:auto;aspect-ratio:1.06}
+.cat img{height:100%}
+.new-arrivals-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.new-arrival{grid-template-columns:40% 60%;min-height:205px}
+.new-arrival-media{height:100%;min-height:205px}
+.new-arrival-copy{padding:13px 12px}
+.new-arrival h3{font-size:17px}
+.new-arrival p{font-size:13px}
+.new-arrival a{font-size:14px}
+.pm-old-bottom{grid-template-columns:repeat(7,minmax(0,1fr))}
+.pm-old-bottom a.active{color:#ff8a25}
+.pm-old-bottom a.active span{color:#ff8a25}
+@media(max-width:900px){
+ .hero{min-height:400px}
+ .hero-copy{left:41%;right:2%}
+ .hero-mascot{width:38%}
+ .hero-sticker{left:26%;font-size:16px}
+ .hero-sticker strong{font-size:20px}
+ .hero-proof{font-size:13px}
+ .hero-laptop{width:48%;right:10%}
+ .hero-phone{width:13%}
+ .cat{height:auto}
+ .new-arrival{min-height:180px;grid-template-columns:39% 61%}
+ .new-arrival-media{min-height:180px}
+}
+@media(max-width:650px){
+ .top{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand tools" "search search";gap:8px}
+ .brand .bag{width:43px;height:43px}
+ .brand b{font-size:24px}
+ .tools{gap:7px}
+ .tools a{min-width:34px;font-size:8px}
+ .tools a span{font-size:21px}
+ .catsnav{gap:6px;justify-content:flex-start}
+ .catsnav a{font-size:10px;padding:7px 8px;min-height:43px}
+ .hero{min-height:335px}
+ .hero-copy{left:40%;right:2%;top:9%;grid-template-columns:1fr;display:block}
+ .hero h1{font-size:29px}
+ .hero p{font-size:12px;margin:3px 0}
+ .hero-proof{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;font-size:8px}
+ .hero-proof span:before{width:15px;height:15px;margin-right:3px;font-size:9px}
+ .hero-mascot{width:42%;height:82%;left:-2%}
+ .hero-mascot svg{max-height:250px}
+ .hero-sticker{left:25%;top:35%;font-size:9px;padding:7px 10px}
+ .hero-sticker strong{font-size:12px}
+ .hero-laptop{width:52%;height:34%;right:8%;top:62%;padding:4px;border-width:3px}
+ .device-screen{padding:4px}
+ .device-screen>b{font-size:8px}
+ .device-search{height:8px;margin:4px 0}
+ .device-products i{height:27px;font-size:14px}
+ .hero-phone{width:15%;height:34%;right:1%;bottom:1%;padding:4px 3px;border-width:3px}
+ .phone-brand{font-size:7px}
+ .phone-item{font-size:6px;padding:3px 2px}
+ .hero-shelf{left:36%;right:8%;bottom:7%;height:20%;gap:3px}
+ .shelf-item{width:20%;height:90%}
+ .shelf-emoji{font-size:23px}
+ .trust{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:7px 4px}
+ .trust div{font-size:8px;line-height:1.2;display:flex;flex-direction:column;text-align:center;gap:3px}
+ .trust b{width:24px;height:24px;font-size:14px}
+ section{padding-top:17px}
+ .section-head h2{font-size:16px}
+ .section-head small{font-size:8px;max-width:40%}
+ .categories{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+ .cat{aspect-ratio:1/1.12;border-radius:8px}
+ .cat div{font-size:8px;padding:16px 2px 6px}
+ .new-arrivals-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ .new-arrival{display:flex;flex-direction:column;min-height:0;border-radius:9px}
+ .new-arrival-media{height:74px;min-height:74px;padding:3px}
+ .new-arrival-copy{padding:6px}
+ .new-arrival-kicker{font-size:6px;padding:3px 4px}
+ .new-arrival h3{font-size:9px;margin:4px 0 3px}
+ .new-arrival p{font-size:7px;line-height:1.25}
+ .new-arrival-status{font-size:6px;margin-top:3px}
+ .new-arrival a{font-size:7px;min-height:22px;margin-top:5px;padding:4px}
+ .pm-old-bottom{grid-template-columns:repeat(7,minmax(0,1fr));padding:5px 2px max(7px,env(safe-area-inset-bottom))}
+ .pm-old-bottom a{font-size:7px}
+ .pm-old-bottom span{font-size:17px;margin-bottom:1px}
+ body{padding-bottom:70px!important}
+}
 </style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a><a class="pm-skip-link" href="#main-content">Aller au contenu</a>
@@ -364,11 +459,11 @@ body{padding-bottom:90px!important}
 <a class="brand" href="index.html" aria-label="Prix Malin, accueil"><div class="bag">🛍</div><div><b>Prix <span>Malin</span></b><div class="tag">Le bon plan au meilleur prix</div></div></a>
 <form class="search" id="search" role="search"><label class="sr-only" for="q">Rechercher dans Prix Malin</label><input id="q" type="search" autocomplete="off" aria-label="Rechercher un produit ou une marque" placeholder="Rechercher un produit, une marque, une idée cadeau…"><button type="submit" aria-label="Lancer la recherche">⌕</button></form>
 <nav class="tools" aria-label="Raccourcis personnels"><a href="catalogue.html?favoris=1"><span aria-hidden="true">♡</span>Favoris</a><a href="catalogue.html?alerte=1"><span class="alert-dot" aria-hidden="true">♧</span>Alertes</a><a href="#account" data-nav="account"><span aria-hidden="true">♙</span>Mon compte</a><a href="#services"><span aria-hidden="true">☰</span>Menu</a></nav>
-</div><nav class="catsnav wrap" aria-label="Navigation principale"><a class="nav-home" href="index.html">⌂ <span>Accueil</span></a><a href="high-tech.html">🎧 <span>High-Tech</span></a><a href="maison-deco.html">🛋 <span>Maison & Déco</span></a><a href="catalogue.html?cat=fashion">👕 <span>Mode</span></a><a href="catalogue.html?cat=beauty">🧴 <span>Beauté & Santé</span></a><a href="catalogue.html?cat=sport">⚽ <span>Sport & Loisirs</span></a><a href="catalogue.html?cat=auto">🚗 <span>Auto & Moto</span></a><a href="catalogue.html?cat=kids">🧸 <span>Bébé & Enfant</span></a><a href="guide-cadeaux.html">🎁 <span>Idées cadeaux</span></a><a href="#services">••• <span>Plus</span></a></nav></header>
+</div><nav class="catsnav wrap" aria-label="Navigation principale"><a class="nav-home" href="index.html">⌂ <span>Accueil</span></a><a href="high-tech.html">🎧 <span>High-Tech</span></a><a href="maison-deco.html">🛋 <span>Maison & Déco</span></a><a href="catalogue.html?cat=fashion">👕 <span>Mode</span></a><a href="catalogue.html?cat=beauty">🧴 <span>Beauté & Santé</span></a><a href="catalogue.html?cat=sport">⚽ <span>Sport & Loisirs</span></a><a href="catalogue.html?cat=auto">🚗 <span>Auto & Moto</span></a><a href="#services">••• <span>Plus</span></a></nav></header>
 <main class="wrap" id="main-content" tabindex="-1">
-<div class="hero"><div class="hero-copy"><span class="hero-kicker">LE COMPARATEUR QUI VOUS VEUT DU BIEN</span><h1>Le moins cher,<br><em>en un clic !</em></h1><p>Comparez les produits des grandes marques, repérez les bonnes pistes et retrouvez les offres chez les marchands.</p><div class="hero-actions"><a class="cta" href="catalogue.html">Voir les produits →</a><a class="hero-secondary" href="#deals">Nos sélections</a></div><div class="hero-proof"><span>✓ Gratuit</span><span>✓ Simple et rapide</span><span>✓ Sur mobile et ordinateur</span></div></div><div class="hero-art"><div class="hero-glow"></div><div class="hero-device hero-laptop"><div class="device-top"><span></span><span></span><span></span></div><div class="device-screen"><b>Prix<span>Malin</span></b><div class="device-search"></div><div class="device-products"><i>🎧</i><i>📱</i><i>👟</i></div></div></div><div class="hero-device hero-phone"><div class="phone-speaker"></div><div class="phone-brand">Prix<span>Malin</span></div><div class="phone-search"></div><div class="phone-item">🎧 <b>Écouteurs sans fil</b></div><div class="phone-item">📱 <b>Smartphone</b></div></div><div class="hero-mascot" aria-hidden="true"><svg viewBox="0 0 420 500"><defs><linearGradient id="bagOrange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff9a35"/><stop offset=".55" stop-color="#ff681c"/><stop offset="1" stop-color="#df3d08"/></linearGradient><linearGradient id="shoeWhite" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#d8dce3"/></linearGradient></defs><ellipse cx="210" cy="477" rx="145" ry="15" fill="#000" opacity=".35"/><path d="M148 382 125 445M265 382 291 444" stroke="#252b34" stroke-width="30" stroke-linecap="round"/><path d="M72 440q28-22 68 0l18 27q3 16-18 16H45q-20-5-5-24zM270 440q33-25 70 0l35 27q10 17-14 19h-91q-22-5-10-24z" fill="url(#shoeWhite)" stroke="#bfc5ce" stroke-width="3"/><path d="m90 455 48 0m-44 12 48 0m159-12 53 0m-48 12 52 0" stroke="#ff681c" stroke-width="7" stroke-linecap="round"/><path d="M80 150q8-40 50-40h170q42 0 50 40l17 212q3 35-34 35H96q-37 0-34-35z" fill="url(#bagOrange)" stroke="#ffb05a" stroke-width="5"/><path d="M142 120q-2-84 69-84t69 84" fill="none" stroke="#ff8a25" stroke-width="19" stroke-linecap="round"/><circle cx="138" cy="125" r="12" fill="#d8dce3"/><circle cx="282" cy="125" r="12" fill="#d8dce3"/><path d="M115 198q34-45 68-5M239 193q35-45 69 2" fill="none" stroke="#29232a" stroke-width="17" stroke-linecap="round"/><ellipse cx="157" cy="245" rx="36" ry="47" fill="#fff"/><ellipse cx="264" cy="245" rx="36" ry="47" fill="#fff"/><ellipse cx="163" cy="251" rx="19" ry="28" fill="#63351f"/><ellipse cx="258" cy="251" rx="19" ry="28" fill="#63351f"/><circle cx="169" cy="239" r="8" fill="#fff"/><circle cx="264" cy="239" r="8" fill="#fff"/><path d="M151 296q59 63 119 0q-6 77-62 77t-57-77" fill="#6c1c17"/><path d="M177 351q34-19 66 0q-17 30-34 28t-32-28" fill="#ff7b91"/><path d="M64 239q-46-7-52 32q-4 28 31 39l41 12" fill="none" stroke="#242a33" stroke-width="24" stroke-linecap="round"/><path d="M35 293q-21-22-9-44q9-17 22-5l-1-23q3-17 18-14q12 2 12 17l4 36q22-9 31 5q8 13-8 27l-29 27q-20 12-40-3z" fill="#fff" stroke="#dce0e5" stroke-width="4"/><path d="M350 247q43-18 57 16q11 27-19 48l-36 21" fill="none" stroke="#242a33" stroke-width="24" stroke-linecap="round"/><path d="M374 287q12-25 31-14q15 9 3 25l-13 16q24-2 29 15q4 17-17 24l-42 7q-24 0-31-20q-7-19 10-33z" fill="#fff" stroke="#dce0e5" stroke-width="4"/></svg></div><div class="hero-shelf" aria-label="Quelques univers à découvrir"><div class="shelf-platform"></div><div class="shelf-item"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Smartphone Apple"></div><div class="shelf-item"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Écouteurs sans fil"></div><div class="shelf-item shelf-emoji" aria-hidden="true">🎮</div><div class="shelf-item shelf-emoji" aria-hidden="true">⌚</div><div class="shelf-item shelf-emoji" aria-hidden="true">👟</div></div><div class="hero-sticker">LES BONS PLANS<br><strong>AU MÊME ENDROIT</strong> ✦</div></div></div>
-<div class="trust"><div><b>⌕</b>Recherche de produits</div><div><b>↗</b>Accès aux marchands</div><div><b>✓</b>Offres consultées chez le vendeur</div><div><b>♢</b>Service gratuit</div></div>
-<section id="categories"><div class="section-head"><h2>Nos grandes <span>catégories</span></h2><a class="all-categories-link" href="catalogue.html">Voir tout le catalogue →</a></div><div class="categories">
+<div class="hero"><div class="hero-copy"><span class="hero-kicker">LE MOINS CHER, EN UN CLIC !</span><h1>Prix <em>Malin</em></h1><p>Comparez, Trouvez, Économisez !</p><div class="hero-actions"><a class="cta" href="catalogue.html">Voir les produits →</a><a class="hero-secondary" href="#deals">Nos sélections</a></div><div class="hero-proof"><span>Des milliers de produits</span><span>Les meilleures offres</span><span>Simple et rapide</span></div></div><div class="hero-art"><div class="hero-glow"></div><div class="hero-device hero-laptop"><div class="device-top"><span></span><span></span><span></span></div><div class="device-screen"><b>Prix<span>Malin</span></b><div class="device-search"></div><div class="device-products"><i>🎧</i><i>📱</i><i>👟</i></div></div></div><div class="hero-device hero-phone"><div class="phone-speaker"></div><div class="phone-brand">Prix<span>Malin</span></div><div class="phone-search"></div><div class="phone-item">🎧 <b>Écouteurs sans fil</b></div><div class="phone-item">📱 <b>Smartphone</b></div></div><div class="hero-mascot" aria-hidden="true"><svg viewBox="0 0 420 500"><defs><linearGradient id="bagOrange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff9a35"/><stop offset=".55" stop-color="#ff681c"/><stop offset="1" stop-color="#df3d08"/></linearGradient><linearGradient id="shoeWhite" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#d8dce3"/></linearGradient></defs><ellipse cx="210" cy="477" rx="145" ry="15" fill="#000" opacity=".35"/><path d="M148 382 125 445M265 382 291 444" stroke="#252b34" stroke-width="30" stroke-linecap="round"/><path d="M72 440q28-22 68 0l18 27q3 16-18 16H45q-20-5-5-24zM270 440q33-25 70 0l35 27q10 17-14 19h-91q-22-5-10-24z" fill="url(#shoeWhite)" stroke="#bfc5ce" stroke-width="3"/><path d="m90 455 48 0m-44 12 48 0m159-12 53 0m-48 12 52 0" stroke="#ff681c" stroke-width="7" stroke-linecap="round"/><path d="M80 150q8-40 50-40h170q42 0 50 40l17 212q3 35-34 35H96q-37 0-34-35z" fill="url(#bagOrange)" stroke="#ffb05a" stroke-width="5"/><path d="M142 120q-2-84 69-84t69 84" fill="none" stroke="#ff8a25" stroke-width="19" stroke-linecap="round"/><circle cx="138" cy="125" r="12" fill="#d8dce3"/><circle cx="282" cy="125" r="12" fill="#d8dce3"/><path d="M115 198q34-45 68-5M239 193q35-45 69 2" fill="none" stroke="#29232a" stroke-width="17" stroke-linecap="round"/><ellipse cx="157" cy="245" rx="36" ry="47" fill="#fff"/><ellipse cx="264" cy="245" rx="36" ry="47" fill="#fff"/><ellipse cx="163" cy="251" rx="19" ry="28" fill="#63351f"/><ellipse cx="258" cy="251" rx="19" ry="28" fill="#63351f"/><circle cx="169" cy="239" r="8" fill="#fff"/><circle cx="264" cy="239" r="8" fill="#fff"/><path d="M151 296q59 63 119 0q-6 77-62 77t-57-77" fill="#6c1c17"/><path d="M177 351q34-19 66 0q-17 30-34 28t-32-28" fill="#ff7b91"/><path d="M64 239q-46-7-52 32q-4 28 31 39l41 12" fill="none" stroke="#242a33" stroke-width="24" stroke-linecap="round"/><path d="M35 293q-21-22-9-44q9-17 22-5l-1-23q3-17 18-14q12 2 12 17l4 36q22-9 31 5q8 13-8 27l-29 27q-20 12-40-3z" fill="#fff" stroke="#dce0e5" stroke-width="4"/><path d="M350 247q43-18 57 16q11 27-19 48l-36 21" fill="none" stroke="#242a33" stroke-width="24" stroke-linecap="round"/><path d="M374 287q12-25 31-14q15 9 3 25l-13 16q24-2 29 15q4 17-17 24l-42 7q-24 0-31-20q-7-19 10-33z" fill="#fff" stroke="#dce0e5" stroke-width="4"/></svg></div><div class="hero-shelf" aria-label="Quelques univers à découvrir"><div class="shelf-platform"></div><div class="shelf-item"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Smartphone Apple"></div><div class="shelf-item"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Écouteurs sans fil"></div><div class="shelf-item shelf-emoji" aria-hidden="true">🎮</div><div class="shelf-item shelf-emoji" aria-hidden="true">⌚</div><div class="shelf-item shelf-emoji" aria-hidden="true">👟</div></div><div class="hero-sticker">Le moins cher,<br><strong>en un clic !</strong></div></div></div>
+<div class="trust"><div><b>♢</b>100 % gratuit</div><div><b>♙</b>Sans inscription</div><div><b>ϟ</b>Rapide & simple</div><div><b>▣</b>Sur mobile et ordinateur</div></div>
+<section id="categories"><div class="section-head"><h2>🔥 Nos grandes catégories</h2><a class="all-categories-link" href="catalogue.html">Voir tout le catalogue →</a></div><div class="categories">
 <a class="cat" href="guide-cadeaux.html"><img src="https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&q=80" alt=""><div>Idées cadeaux</div></a>
 <a class="cat" href="high-tech.html"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" alt=""><div>High-Tech</div></a>
 <a class="cat" href="maison-deco.html"><img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&q=80" alt=""><div>Maison & Déco</div></a>
@@ -380,7 +475,7 @@ body{padding-bottom:90px!important}
 <a class="cat" href="catalogue.html?cat=diy"><img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&q=80" alt=""><div>Bricolage & Jardin</div></a>
 <a class="cat" href="catalogue.html?cat=appliances"><img src="https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400&q=80" alt=""><div>Électroménager</div></a>
 </div></section>
-<section class="new-arrivals" id="new-arrivals"><div class="section-head"><h2>✨ Nouveautés <span>à découvrir</span></h2><a class="all-categories-link" href="nouveautes.html">Toute l’actualité produits →</a></div><div class="new-arrivals-grid">
+<section class="new-arrivals" id="new-arrivals"><div class="section-head"><h2>🚀 Nouveautés <span>& Avant-premières</span></h2><small>Les derniers lancements des grandes marques</small></div><div class="new-arrivals-grid">
 <article class="new-arrival"><div class="new-arrival-media"><img src="https://static2.o9.de/resource/blob/2341334/d2b559bf7806f722e1a56b9046201184/jpg/apple-iphone-duo-farben-bild-uebersicht-bild-data.webp" alt="Apple iPhone Duo pliable en blanc stellaire et ciel nocturne" loading="lazy"></div><div class="new-arrival-copy"><span class="new-arrival-kicker">NOUVEAU</span><h3>Apple iPhone Duo</h3><p>Le premier iPhone pliable, avec un grand écran intérieur de 7,6 pouces.</p><div class="new-arrival-status"><strong>Disponible depuis le 23 octobre</strong></div><a href="https://www.apple.com/fr/iphone-duo/" target="_blank" rel="noopener noreferrer">Voir les offres →</a></div></article>
 <article class="new-arrival"><div class="new-arrival-media"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro en noir" loading="lazy"></div><div class="new-arrival-copy"><span class="new-arrival-kicker">NOUVEAU</span><h3>Apple iPhone 18 Pro</h3><p>Nouvelle caméra Fusion 48 Mpx, puce A20 Pro et finitions inédites.</p><div class="new-arrival-status"><strong>Disponible depuis le 18 septembre</strong></div><a href="https://www.apple.com/fr/iphone-18-pro/" target="_blank" rel="noopener noreferrer">Voir les offres →</a></div></article>
 <article class="new-arrival"><div class="new-arrival-media"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Apple AirPods 5 sur fond blanc" loading="lazy"></div><div class="new-arrival-copy"><span class="new-arrival-kicker">NOUVEAU</span><h3>Apple AirPods 5</h3><p>Écouteurs nouvelle génération, réduction active du bruit et audio adaptatif.</p><div class="new-arrival-status"><strong>Disponibles depuis le 18 septembre</strong></div><a href="https://www.apple.com/fr/airpods/" target="_blank" rel="noopener noreferrer">Voir les offres →</a></div></article>
@@ -430,7 +525,7 @@ body{padding-bottom:84px!important}
 <form class="pm-old-quick" id="pmQuickCompare"><input id="pmQuickQuery" placeholder="Comparer un produit (ex. aspirateur, téléphone…)" aria-label="Produit à comparer"><button type="submit">Comparer</button></form>
 </section>
 <nav class="pm-old-bottom" aria-label="Navigation Prix Malin">
-<a href="index.html"><span>⌂</span>Accueil</a><a href="catalogue.html"><span>▦</span>Catalogue</a><a href="#deals"><span>％</span>Promos</a><a href="catalogue.html?favoris=1"><span>♡</span>Favoris</a><a href="catalogue.html?alerte=1"><span>♧</span>Alertes</a><a href="guide-cadeaux.html"><span>🎁</span>Guides</a><a href="publicite.html"><span>☏</span>Contact</a>
+<a class="active" href="index.html"><span>⌂</span>Accueil</a><a href="catalogue.html"><span>▦</span>Catalogue</a><a href="#deals"><span>％</span>Promos</a><a href="catalogue.html?favoris=1"><span>♡</span>Favoris</a><a href="catalogue.html?alerte=1"><span>♧</span>Alertes</a><a href="guide-cadeaux.html"><span>♔</span>Guides & Conseils</a><a href="publicite.html"><span>✉</span>Contact</a>
 </nav>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script>
 <script src="/js/personalisation.js"></script><script src="/js/cookie-consent.js"></script><script src="/js/prix-malin-auth.js"></script>
