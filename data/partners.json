@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-01",
+  "note": "Statuts saisis d'après les informations communiquées par le propriétaire du site. Une demande envoyée ne vaut pas acceptation ni autorisation d'utiliser un flux, un logo ou des contenus protégés.",
+  "entries": [
+    {
+      "name": "Rakuten",
+      "type": "marketplace",
+      "contactStatus": "request_reported_sent",
+      "approvalStatus": "pending_confirmation",
+      "integration": "À connecter après validation et accès au flux autorisé"
+    },
+    {
+      "name": "Petit Bateau",
+      "type": "brand",
+      "contactStatus": "request_reported_sent",
+      "approvalStatus": "pending_confirmation",
+      "integration": "Catalogue de marque à intégrer selon accord"
+    },
+    {
+      "name": "Balenciaga",
+      "type": "brand",
+      "contactStatus": "request_reported_sent",
+      "approvalStatus": "pending_confirmation",
+      "integration": "Catalogue de marque à intégrer selon accord"
+    },
+    {
+      "name": "Lacoste",
+      "type": "brand",
+      "contactStatus": "request_reported_sent",
+      "approvalStatus": "pending_confirmation",
+      "integration": "Catalogue de marque à intégrer selon accord"
+    },
+    {
+      "name": "Decathlon",
+      "type": "retailer",
+      "contactStatus": "request_reported_sent",
+      "approvalStatus": "pending_confirmation",
+      "integration": "Flux marchand à connecter selon accord"
+    },
+    {
+      "name": "SHEIN",
+      "type": "marketplace",
+      "contactStatus": "request_reported_sent",
+      "approvalStatus": "pending_confirmation",
+      "integration": "Flux marchand à connecter selon accord"
+    },
+    {
+      "name": "Temu",
+      "type": "marketplace",
+      "contactStatus": "request_reported_sent",
+      "approvalStatus": "pending_confirmation",
+      "integration": "Flux marchand à connecter selon accord"
+    }
+  ]
+}
