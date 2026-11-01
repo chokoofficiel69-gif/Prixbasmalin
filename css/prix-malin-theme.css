@@ -80,3 +80,11 @@ img{color:#d4dce6}
 #pmMobileNav button:active,#pmMobileNav button.pm-active{background:transparent!important;color:#ff8a43!important}
 #pmMobileNav .pm-nav-icon{color:inherit!important}
 #pmMobileNav button:focus-visible{outline-color:#ff9a62!important}
+
+/* Accessibilité et confort communs — Prix Malin */
+.pm-skip-link{position:fixed;left:12px;top:10px;z-index:2147483647;transform:translateY(-160%);padding:12px 16px;border-radius:10px;background:#fff!important;color:#172033!important;font:800 14px/1.2 system-ui,sans-serif;box-shadow:0 5px 22px #0004}.pm-skip-link:focus{transform:translateY(0);outline:3px solid #ff6508;outline-offset:3px}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:3px solid #ffad75!important;outline-offset:3px!important}
+:where(button,a,input,select,textarea){touch-action:manipulation}
+img{max-width:100%}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+@media(max-width:520px){table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}button,.btn,.button{min-height:42px}}
