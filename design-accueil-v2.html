@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrixMalin — Le bon plan au meilleur prix (Design v2)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090d;
+  --panel: #11151c;
+  --panel2: #1a1f28;
+  --line: #2a3140;
+  --text: #f5f7fa;
+  --muted: #a0a8b8;
+  --orange: #ff6b00;
+  --orange-dark: #e55a00;
+  --orange-glow: rgba(255, 107, 0, 0.35);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.4;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+
+/* Header */
+header {
+  background: rgba(7, 9, 13, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 72px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #ff8c00, #ff5500);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  box-shadow: 0 4px 16px var(--orange-glow);
+}
+.logo-text b {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.logo-text b span { color: var(--orange); }
+.logo-tag {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: -2px;
+}
+.search-bar {
+  flex: 1;
+  display: flex;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 680px;
+}
+.search-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 14px 18px;
+  color: white;
+  font-size: 15px;
+  outline: none;
+}
+.search-bar button {
+  background: var(--orange);
+  border: none;
+  color: white;
+  padding: 0 22px;
+  font-size: 18px;
+  cursor: pointer;
+}
+.header-tools {
+  display: flex;
+  gap: 22px;
+  font-size: 12px;
+  text-align: center;
+}
+.header-tools a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+.header-tools a span { font-size: 22px; color: white; }
+.header-tools a:hover { color: var(--orange); }
+
+/* Category nav */
+.catsnav {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0;
+  overflow-x: auto;
+  border-top: 1px solid #1a1f28;
+}
+.catsnav a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d0d5de;
+  white-space: nowrap;
+}
+.catsnav a.active, .catsnav a:hover {
+  background: var(--orange);
+  color: white;
+}
+
+/* Hero */
+.hero {
+  margin: 24px 0;
+  background: linear-gradient(135deg, #0d1118 0%, #151b26 50%, #0a0e14 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  min-height: 380px;
+  display: grid;
+  grid-template-columns: 280px 1fr 200px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+.mascot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  position: relative;
+  z-index: 2;
+}
+.mascot svg { width: 240px; height: auto; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.6)); }
+.speech {
+  position: absolute;
+  top: 40px;
+  left: 180px;
+  background: var(--orange);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 16px 16px 16px 4px;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.3;
+  z-index: 3;
+  box-shadow: 0 6px 20px var(--orange-glow);
+}
+.hero-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 30px 20px;
+  z-index: 1;
+}
+.hero-center h1 {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+.hero-center h1 span { color: var(--orange); }
+.hero-center .slogan {
+  font-size: 16px;
+  color: #d0d5de;
+  margin-bottom: 16px;
+}
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+.checks div { display: flex; align-items: center; gap: 8px; }
+.check { color: var(--orange); font-weight: bold; }
+.products-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stage {
+  width: 100%;
+  height: 220px;
+  background: radial-gradient(ellipse at center, #1a2330, #0a0e14);
+  border-radius: 100px 100px 20px 20px;
+  border: 1px solid #2a3545;
+  position: relative;
+  box-shadow: 0 0 40px rgba(255,107,0,0.15);
+}
+.product-item {
+  position: absolute;
+  font-size: 48px;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+}
+.discount-badge {
+  position: absolute;
+  right: 20px;
+  top: 30px;
+  width: 100px;
+  height: 100px;
+  background: var(--orange);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1.1;
+  box-shadow: 0 8px 30px var(--orange-glow);
+  z-index: 2;
+}
+
+/* Trust bar */
+.trust {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin: 16px 0 28px;
+}
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.trust-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--orange);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+/* Sections */
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.section-title h2 {
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title a { color: var(--orange); font-size: 14px; font-weight: 600; }
+
+/* Categories */
+.categories {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 36px;
+}
+.cat-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: center;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.cat-card:hover { transform: translateY(-4px); border-color: var(--orange); }
+.cat-img {
+  height: 110px;
+  background-size: cover;
+  background-position: center;
+}
+.cat-card span {
+  display: block;
+  padding: 10px 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Nouveautés */
+.nouveautes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.nouveau-card {
+  background: white;
+  color: #111;
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 16px;
+  position: relative;
+}
+.nouveau-card .badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--orange);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.nouveau-img {
+  height: 160px;
+  display: grid;
+  place-items: center;
+  font-size: 64px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.nouveau-card h3 { font-size: 18px; margin-bottom: 6px; }
+.nouveau-card p { font-size: 13px; color: #555; margin-bottom: 14px; line-height: 1.4; }
+.btn-orange {
+  display: block;
+  text-align: center;
+  background: var(--orange);
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 14px;
+}
+.btn-orange:hover { background: var(--orange-dark); }
+
+/* Bottom nav (mobile style) */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0d1118;
+  border-top: 1px solid var(--line);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+.bottom-nav a {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.bottom-nav a span { font-size: 20px; }
+.bottom-nav a.active { color: var(--orange); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hero { grid-template-columns: 200px 1fr; }
+  .discount-badge { display: none; }
+  .categories { grid-template-columns: repeat(3, 1fr); }
+  .nouveautes { grid-template-columns: 1fr 1fr; }
+  .header-tools { display: none; }
+}
+@media (max-width: 700px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; padding-bottom: 20px; }
+  .mascot { order: 2; height: 200px; }
+  .speech { left: 20px; top: 20px; }
+  .categories { grid-template-columns: repeat(2, 1fr); }
+  .nouveautes { grid-template-columns: 1fr; }
+  .trust { grid-template-columns: 1fr 1fr; }
+  .bottom-nav { display: flex; }
+  body { padding-bottom: 70px; }
+  .search-bar { max-width: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap topbar">
+    <a class="logo" href="index.html">
+      <div class="logo-icon">🛍️</div>
+      <div class="logo-text">
+        <b>Prix<span>Malin</span></b>
+        <div class="logo-tag">Le bon plan au meilleur prix</div>
+      </div>
+    </a>
+    <form class="search-bar" action="catalogue.html">
+      <input type="text" placeholder="Rechercher un produit, une marque, une référence...">
+      <button type="submit">🔍</button>
+    </form>
+    <div class="header-tools">
+      <a href="#"><span>❤️</span>Favoris</a>
+      <a href="#"><span>🔔</span>Alertes</a>
+      <a href="#"><span>👤</span>Mon compte</a>
+      <a href="#"><span>☰</span></a>
+    </div>
+  </div>
+  <nav class="catsnav wrap">
+    <a class="active" href="#">🏠 Accueil</a>
+    <a href="#">🎧 High-Tech</a>
+    <a href="#">🛋️ Maison & Déco</a>
+    <a href="#">👕 Mode</a>
+    <a href="#">💅 Beauté & Santé</a>
+    <a href="#">⚽ Sport & Loisirs</a>
+    <a href="#">🚗 Auto & Moto</a>
+    <a href="#">••• Plus</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="mascot">
+      <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="250" rx="40" ry="12" fill="#000" opacity="0.3"/>
+        <rect x="50" y="80" width="100" height="130" rx="20" fill="#ff6b00"/>
+        <rect x="58" y="88" width="84" height="100" rx="16" fill="#ff8c00"/>
+        <path d="M70 80 Q70 30 100 30 Q130 30 130 80" stroke="#222" stroke-width="14" fill="none"/>
+        <circle cx="80" cy="130" r="12" fill="white"/>
+        <circle cx="120" cy="130" r="12" fill="white"/>
+        <circle cx="82" cy="132" r="6" fill="#222"/>
+        <circle cx="122" cy="132" r="6" fill="#222"/>
+        <path d="M85 155 Q100 170 115 155" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <rect x="20" y="120" width="30" height="18" rx="9" fill="#ff6b00" transform="rotate(-20 35 129)"/>
+        <rect x="150" y="110" width="35" height="18" rx="9" fill="#ff6b00" transform="rotate(15 167 119)"/>
+        <circle cx="25" cy="125" r="12" fill="white"/>
+        <circle cx="175" cy="115" r="12" fill="white"/>
+        <rect x="65" y="200" width="22" height="40" rx="8" fill="#ff6b00"/>
+        <rect x="113" y="200" width="22" height="40" rx="8" fill="#ff6b00"/>
+        <ellipse cx="76" cy="245" rx="18" ry="10" fill="white"/>
+        <ellipse cx="124" cy="245" rx="18" ry="10" fill="white"/>
+        <ellipse cx="76" cy="243" rx="12" ry="6" fill="#ff6b00"/>
+        <ellipse cx="124" cy="243" rx="12" ry="6" fill="#ff6b00"/>
+      </svg>
+      <div class="speech">Le moins cher,<br>en un clic !</div>
+    </div>
+    <div class="hero-center">
+      <h1>Prix<span>Malin</span></h1>
+      <p class="slogan">Comparez, Trouvez, Économisez !</p>
+      <div class="checks">
+        <div><span class="check">✓</span> Des milliers de produits</div>
+        <div><span class="check">✓</span> Les meilleures offres</div>
+        <div><span class="check">✓</span> Simple et rapide</div>
+      </div>
+    </div>
+    <div class="products-stage">
+      <div class="stage">
+        <div class="product-item" style="left:15%; top:30%;">🎧</div>
+        <div class="product-item" style="left:40%; top:20%;">📱</div>
+        <div class="product-item" style="left:60%; top:25%;">💻</div>
+        <div class="product-item" style="left:30%; top:50%;">🎮</div>
+        <div class="product-item" style="right:20%; top:40%;">⌚</div>
+        <div class="product-item" style="right:10%; bottom:10%;">👟</div>
+      </div>
+      <div class="discount-badge">Jusqu’à<br><span style="font-size:28px;">-70%</span></div>
+    </div>
+  </section>
+
+  <div class="trust">
+    <div class="trust-item"><div class="trust-icon">🛡️</div> 100 % gratuit</div>
+    <div class="trust-item"><div class="trust-icon">🔒</div> Sans inscription</div>
+    <div class="trust-item"><div class="trust-icon">⚡</div> Rapide & simple</div>
+    <div class="trust-item"><div class="trust-icon">📱</div> Sur mobile et ordinateur</div>
+  </div>
+
+  <section>
+    <div class="section-title">
+      <h2>🔥 Nos grandes catégories</h2>
+      <a href="catalogue.html">Voir tout le catalogue →</a>
+    </div>
+    <div class="categories">
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&q=80')"></div><span>Idées cadeaux</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80')"></div><span>High-Tech</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&q=80')"></div><span>Maison & Déco</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&q=80')"></div><span>Beauté & Santé</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80')"></div><span>Mode & Accessoires</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&q=80')"></div><span>Sport & Loisirs</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1559454403-b8fb88521f11?w=400&q=80')"></div><span>Bébé & Enfant</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=80')"></div><span>Auto & Moto</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&q=80')"></div><span>Bricolage & Jardin</span></a>
+      <a class="cat-card" href="#"><div class="cat-img" style="background-image:url('https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400&q=80')"></div><span>Électroménager</span></a>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <h2>🚀 Nouveautés & Avant-premières</h2>
+      <span style="color:var(--muted);font-size:14px;">Les derniers lancements des grandes marques</span>
+    </div>
+    <div class="nouveautes">
+      <div class="nouveau-card">
+        <div class="badge">NOUVEAU</div>
+        <div class="nouveau-img">📱📱</div>
+        <h3>Apple iPhone Duo</h3>
+        <p>Le premier iPhone pliable, avec un grand écran intérieur de 7,6".</p>
+        <a class="btn-orange" href="catalogue.html">Voir les offres →</a>
+      </div>
+      <div class="nouveau-card">
+        <div class="badge">NOUVEAU</div>
+        <div class="nouveau-img">📱</div>
+        <h3>Apple iPhone 18 Pro</h3>
+        <p>Caméra Fusion 48 Mpx, puce A20 Pro et finitions inédites.</p>
+        <a class="btn-orange" href="catalogue.html">Voir les offres →</a>
+      </div>
+      <div class="nouveau-card">
+        <div class="badge">NOUVEAU</div>
+        <div class="nouveau-img">🎧</div>
+        <h3>Apple AirPods 5</h3>
+        <p>Nouvelle génération, réduction active du bruit et audio adaptatif.</p>
+        <a class="btn-orange" href="catalogue.html">Voir les offres →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <a class="active" href="#"><span>🏠</span>Accueil</a>
+  <a href="catalogue.html"><span>🔲</span>Catalogue</a>
+  <a href="#"><span>%</span>Promos</a>
+  <a href="#"><span>❤️</span>Favoris</a>
+  <a href="#"><span>🔔</span>Alertes</a>
+  <a href="#"><span>🎁</span>Guides</a>
+  <a href="#"><span>✉️</span>Contact</a>
+</nav>
+
+</body>
+</html>
