@@ -513,9 +513,53 @@ body{padding-bottom:82px!important}
  .catsnav a{min-width:88px}
  .pm-old-bottom a{font-size:8px}
 }
+
+/* Correctifs mobile après contrôle visuel sur iPhone */
+@media(max-width:650px){
+ .pm-head-top{display:flex;flex-wrap:nowrap;justify-content:space-between;min-width:0;padding:7px 10px;height:72px;gap:7px}
+ .pm-head-top .brand{flex:1 1 auto;min-width:0;gap:5px}
+ .pm-head-top .brand-mark{width:39px;height:48px;flex:0 0 39px}
+ .pm-head-top .brand-copy{min-width:0}
+ .pm-head-top .brand b{font-size:clamp(19px,5.7vw,23px);letter-spacing:-1.1px}
+ .pm-head-top .brand .tag{font-size:8px;letter-spacing:-.15px;white-space:nowrap}
+ .pm-head-top .tools{flex:0 0 auto;gap:5px;margin:0}
+ .pm-head-top .tools a{min-width:25px;width:25px;gap:0;font-size:0;line-height:0}
+ .pm-head-top .tools svg{width:23px;height:23px}
+ .pm-head-top .tools a:last-child svg{width:25px;height:25px}
+ .pm-head-top .tools .alert-dot{right:0;top:-2px}
+ .pm-search-row{padding:0 10px 9px}
+ .pm-search-row .search{height:48px}
+ .catsnav a{min-width:82px;min-height:60px}
+ .hero{min-height:330px}
+ .hero-copy{left:43%;right:2%;top:8%;display:block}
+ .hero h1{font-size:clamp(23px,6vw,28px);white-space:nowrap;letter-spacing:-1px}
+ .hero p{font-size:11px;line-height:1.3}
+ .hero-proof{display:grid;grid-template-columns:1fr;gap:5px;margin-top:7px;font-size:9px}
+ .hero-proof span{font-size:9px;white-space:nowrap}
+ .hero-proof span:before{width:17px;height:17px;margin-right:5px}
+ .hero-mascot{width:40%;left:-1%;height:79%;bottom:1%}
+ .hero-mascot svg{max-height:240px}
+ .hero-sticker{left:25%;top:23%;right:auto;max-width:42%;padding:7px 10px;font-size:8px;line-height:1.2}
+ .hero-sticker strong{font-size:10px}
+ .hero-laptop{width:51%;right:8%;top:63%;height:31%}
+ .hero-phone{width:14%;right:1%;height:33%}
+ .hero-shelf{left:36%;right:8%;bottom:7%;height:18%}
+ .trust{margin-top:8px}
+}
+@media(max-width:380px){
+ .pm-head-top .brand-mark{width:35px;flex-basis:35px}
+ .pm-head-top .brand b{font-size:19px}
+ .pm-head-top .brand .tag{font-size:7px}
+ .pm-head-top .tools{gap:3px}
+ .pm-head-top .tools a{width:23px;min-width:23px}
+ .pm-head-top .tools svg{width:21px;height:21px}
+ .hero-copy{left:42%}
+ .hero h1{font-size:23px}
+ .hero-sticker{left:23%;top:22%}
+}
 </style>
 </head>
-<body><a class="skip-link" href="#main-content">Aller au contenu</a><a class="pm-skip-link" href="#main-content">Aller au contenu</a>
+<body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
 <div class="wrap pm-head-top">
 <a class="brand" href="index.html" aria-label="Prix Malin, accueil"><svg class="brand-mark" viewBox="0 0 64 72" aria-hidden="true"><path d="M18 20V14C18 5 25 2 32 2s14 3 14 12v6" fill="none" stroke="#24262a" stroke-width="5" stroke-linecap="round"/><path d="M8 20Q8 15 14 15H50Q56 15 56 21L60 59Q60 66 53 67H11Q4 66 4 59Z" fill="#ff681c"/><path d="M17 37q6-8 12 0M36 37q6-8 12 0" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path d="M18 48q14 15 28 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg><span class="brand-copy"><b>Prix <span>Malin</span></b><span class="tag">Le bon plan au meilleur prix</span></span></a>
