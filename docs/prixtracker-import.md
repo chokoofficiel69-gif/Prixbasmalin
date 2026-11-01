@@ -1,33 +1,36 @@
-# Import indépendant des relevés PrixTracker
+# Import indépendant des relevés historiques PrixTracker
 
-Ce module prépare un instantané historique séparé. Il ne modifie pas `data/prices.json`, `price-engine/products.json`, le catalogue ou le workflow horaire.
+Deux CSV distincts peuvent être importés sans modifier le moteur de prix actuel ni le catalogue public.
 
-## Utilisation
-
-Télécharger le CSV depuis la source officielle puis lancer :
+## 1. Prix par marchand
 
 ```bash
-node price-engine/import-prixtracker.mjs --input /chemin/vers/prix-par-marchand.csv
+node price-engine/import-prixtracker.mjs --input /chemin/prix-par-marchand.csv
 ```
 
-Le fichier produit est `data/prixtracker-prices.json`. Pour choisir un autre emplacement :
+Sortie par défaut : `data/prixtracker-prices.json`.
+
+## 2. Meilleur prix du jour
 
 ```bash
-node price-engine/import-prixtracker.mjs --input ./prix-par-marchand.csv --output ./tmp/prixtracker-preview.json
+node price-engine/import-prixtracker-best-daily.mjs --input /chemin/meilleur-prix-du-jour.csv
 ```
+
+Sortie par défaut : `data/prixtracker-best-daily.json`.
+
+Les deux outils acceptent `--output /chemin/fichier.json` pour choisir une autre destination.
 
 ## Garde-fous
 
-- Les dix colonnes attendues sont contrôlées.
-- Les lignes avec date, identité produit, marchand, prix ou nombre de relevés invalides sont rejetées et comptabilisées.
-- Le prix minimum et maximum TTC sont conservés séparément.
-- Les relevés restent datés et sont explicitement marqués comme historiques.
-- Aucun lien marchand, stock, frais de livraison ou disponibilité n'est inventé.
-- La sortie est indépendante du moteur de prix actuel.
-- La source et l'attribution sont conservées dans le JSON.
+- Les colonnes attendues sont contrôlées.
+- Les dates, identités produit, prix et champs marchands sont validés.
+- Les données sont triées par produit puis par date décroissante.
+- Les deux jeux de données restent séparés : le premier décrit les relevés par marchand, le second le meilleur prix observé par jour.
+- Les relevés sont explicitement marqués comme historiques.
+- Aucun lien marchand, stock, disponibilité ou frais de livraison n'est inventé.
+- La source et l'attribution PrixTracker sont conservées sous Licence Ouverte 2.0.
+- Aucune modification de `data/prices.json`, `price-engine/products.json`, du catalogue public, du workflow horaire ou du site en production.
 
-## Limite importante
+## Limites
 
-Le CSV contient des observations historiques. Un prix relevé n'est pas une offre actuelle vérifiée et ne doit pas être présenté comme tel. Avant affichage public, filtrer les produits/marchands et afficher la date du relevé ainsi que la mention « Source : PrixTracker ». La réutilisation doit respecter la Licence Ouverte 2.0 et ses obligations d'attribution.
-
-Aucun déploiement ni branchement au catalogue public n'est effectué par ce module.
+Le CSV « meilleur prix du jour » contient un seul marchand gagnant par produit et par date : il ne permet pas, à lui seul, de comparer simultanément plusieurs marchands pour une date donnée. Pour cette comparaison, utiliser le CSV « prix par marchand ». Les prix historiques ne doivent jamais être présentés comme des offres actuelles disponibles.
