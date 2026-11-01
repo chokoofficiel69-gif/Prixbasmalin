@@ -1,6 +1,11 @@
 name: Actualiser les historiques PrixTracker
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "price-engine/import-prixtracker*.mjs"
+      - ".github/workflows/import-prixtracker.yml"
   pull_request:
     paths:
       - "price-engine/import-prixtracker*.mjs"
