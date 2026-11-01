@@ -5230,12 +5230,39 @@ const categoryParam=new URLSearchParams(location.search).get("cat")||"all";
 const categoryAliases={tech:["tech"],fashion:["fashion"],home:["home"],beauty:["beauty"],kids:["kids"],sport:["fashion","tech"],auto:"all",diy:"all",appliances:["home"],gifts:"all"};
 let category=categoryAliases[categoryParam]||"all";
 searchEl.value=new URLSearchParams(location.search).get("q")||"";
+function pmSearchNorm(value){
+  return String(value||"").toLocaleLowerCase("fr")
+    .normalize("NFD").replace(/[\\u0300-\\u036f]/g,"")
+    .replace(/[’']/g," ").replace(/[^a-z0-9]+/g," ").trim();
+}
+const pmSearchSynonyms={
+  ordinateur:["ordinateur","ordi","pc","laptop","portable","notebook"],
+  pc:["pc","ordinateur","ordi","laptop","portable"],
+  chaussures:["chaussures","basket","baskets","sneakers","running"],
+  basket:["basket","baskets","chaussures","sneakers"],
+  telephone:["telephone","smartphone","mobile","iphone","android"],
+  smartphone:["smartphone","telephone","mobile","iphone","android"],
+  casque:["casque","audio","ecouteurs","headphones"],
+  ecouteurs:["ecouteurs","airpods","buds","earbuds","casque"],
+  television:["television","tv","smart tv","ecran"],
+  tv:["tv","television","smart tv","ecran"],
+  lave linge:["lave linge","machine a laver","lave linge"],
+  aspirateur:["aspirateur","robot aspirateur","dyson"],
+  parfum:["parfum","fragrance","eau de parfum"],
+  maquillage:["maquillage","beaute","cosmetique"]
+};
 function render(){
-  const q=searchEl.value.trim().toLocaleLowerCase("fr");
-  const found=productData.filter(p=>
-    (category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category))&&
-    (!q||(p.name+" "+p.desc+" "+p.query).toLocaleLowerCase("fr").includes(q))
-  );
+  const rawQuery=searchEl.value.trim();
+  const q=pmSearchNorm(rawQuery);
+  const queryTerms=q.split(" ").filter(Boolean);
+  const expandedTerms=[...new Set(queryTerms.flatMap(term=>pmSearchSynonyms[term]||[term]))];
+  const found=productData.filter(p=>{
+    const matchesCategory=category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category);
+    if(!matchesCategory)return false;
+    if(!q)return true;
+    const haystack=pmSearchNorm([p.name,p.desc,p.query,p.brand,p.category].join(" "));
+    return expandedTerms.every(term=>haystack.includes(pmSearchNorm(term)));
+  });
   productsEl.innerHTML="";
   countEl.textContent=found.length+" produit(s) de découverte";
   if(!found.length){
