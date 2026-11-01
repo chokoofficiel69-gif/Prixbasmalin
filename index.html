@@ -505,6 +505,83 @@ body{padding-bottom:90px!important}
 .pm-old-bottom span{display:block;font-size:17px;margin-bottom:3px}
 body{padding-bottom:84px!important}
 @media(max-width:640px){.legacy-tools .tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.legacy-tools a,.legacy-tools button{min-height:88px;padding:12px}}
+
+/* Correctif final responsive — composition de la maquette Prix Malin */
+.hero{display:block!important;position:relative!important;min-height:0!important;height:440px!important;margin:16px 0 0!important;overflow:hidden!important;border:1px solid #26364a!important;border-radius:18px!important;background:#080b12!important}
+.hero-art{position:absolute!important;inset:0!important;min-height:0!important;height:100%!important;width:100%!important;background:radial-gradient(ellipse at 75% 55%,#53240f 0%,#17131b 46%,#080b12 83%)!important}
+.hero-copy{position:absolute!important;left:39%!important;right:3%!important;top:8%!important;width:auto!important;padding:0!important;z-index:6!important;display:block!important}
+.hero-kicker{display:block!important;color:#ff9a62!important;font-size:12px!important;letter-spacing:.16em!important;font-weight:950!important;margin:0 0 9px!important}
+.hero h1{font-size:clamp(36px,5vw,62px)!important;line-height:.98!important;margin:0 0 9px!important;letter-spacing:-1.8px!important;color:#fff!important}
+.hero h1 em{color:#ff681c!important}
+.hero p{font-size:clamp(15px,1.8vw,20px)!important;line-height:1.25!important;max-width:450px!important;color:#f1f3f6!important;font-weight:750!important;margin:8px 0!important}
+.hero-actions{display:none!important}
+.hero-proof{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:7px!important;margin-top:13px!important;font-size:15px!important;font-weight:850!important;color:white!important}
+.hero-proof span{display:flex!important;align-items:center!important;gap:9px!important;padding:0!important}
+.hero-proof span:before{content:"✓"!important;display:inline-grid!important;place-items:center!important;width:24px!important;height:24px!important;border-radius:5px!important;background:#ff681c!important;color:white!important;font-size:16px!important;font-weight:1000!important;margin:0!important}
+.hero-mascot{position:absolute!important;left:0!important;bottom:0!important;width:34%!important;height:91%!important;z-index:5!important}
+.hero-mascot svg{width:100%!important;height:100%!important;max-height:none!important}
+.hero-laptop{position:absolute!important;width:48%!important;height:46%!important;left:38%!important;right:auto!important;top:52%!important}
+.hero-phone{position:absolute!important;width:12%!important;height:43%!important;right:2%!important;top:53%!important;bottom:auto!important}
+.hero-shelf{position:absolute!important;left:34%!important;right:9%!important;bottom:6%!important;height:23%!important}
+.hero-sticker{left:23%!important;right:auto!important;top:11%!important;padding:12px 18px!important;font-size:13px!important;border-radius:24px!important}
+.hero-sticker strong{font-size:18px!important}
+.trust{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;padding:13px 8px!important;margin:0!important;background:linear-gradient(90deg,#111923,#080b12)!important;border:1px solid #344153!important;border-radius:0 0 14px 14px!important}
+.trust div{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;font-size:clamp(10px,1.3vw,15px)!important;font-weight:850!important;text-align:left!important}
+.trust b{display:grid!important;place-items:center!important;flex:0 0 34px!important;width:34px!important;height:34px!important;border-radius:50%!important;background:#ff681c!important;color:white!important;font-size:20px!important}
+section{padding-top:24px!important}
+.section-head h2{font-size:clamp(20px,2.6vw,30px)!important;font-weight:950!important}
+.categories{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important}
+.cat{position:relative!important;height:auto!important;aspect-ratio:1.15!important;border:1px solid #526174!important;border-radius:15px!important;overflow:hidden!important}
+.cat img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}
+.cat div{position:absolute!important;left:0!important;right:0!important;bottom:0!important;padding:28px 5px 9px!important;background:linear-gradient(transparent,rgba(0,0,0,.9))!important;color:white!important;font-size:clamp(11px,1.4vw,17px)!important;font-weight:950!important;text-align:center!important}
+.new-arrivals-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+.new-arrival{display:grid!important;grid-template-columns:42% 58%!important;min-height:205px!important;background:#f7f7f8!important;color:#111827!important;border:1px solid #d5dbe3!important;border-radius:16px!important;overflow:hidden!important}
+.new-arrival-media{height:100%!important;min-height:205px!important;background:#fff!important}
+.new-arrival-media img{width:100%!important;height:100%!important;object-fit:contain!important;padding:9px!important}
+.new-arrival-copy{padding:12px!important;color:#111827!important}
+.new-arrival-kicker{display:inline-block!important;background:#ff681c!important;color:white!important;border-radius:12px!important;padding:5px 9px!important;font-size:10px!important}
+.new-arrival h3{font-size:clamp(12px,1.5vw,18px)!important;color:#111827!important}
+.new-arrival p{font-size:clamp(10px,1.1vw,13px)!important;color:#303846!important}
+.new-arrival-status,.new-arrival-status strong{color:#475467!important;font-size:10px!important}
+.new-arrival a{background:linear-gradient(100deg,#ff7e20,#f54c08)!important;color:#fff!important;font-size:clamp(10px,1.1vw,14px)!important;padding:8px 9px!important}
+.pm-old-bottom{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;background:#080d14!important;border-top:1px solid #39475a!important;z-index:1000!important}
+.pm-old-bottom a{font-size:clamp(8px,1vw,13px)!important}
+.pm-old-bottom span{font-size:clamp(17px,2vw,26px)!important}
+@media(max-width:650px){
+ main.wrap{padding-left:12px!important;padding-right:12px!important}
+ .hero{height:340px!important;margin-top:0!important}
+ .hero-copy{left:38%!important;right:3%!important;top:7%!important}
+ .hero-kicker{font-size:7px!important;letter-spacing:.1em!important;margin-bottom:5px!important}
+ .hero h1{font-size:clamp(24px,7vw,34px)!important;line-height:1!important}
+ .hero p{font-size:11px!important;line-height:1.2!important;margin:5px 0!important}
+ .hero-proof{gap:4px!important;margin-top:7px!important;font-size:8px!important}
+ .hero-proof span{gap:4px!important;font-size:8px!important}
+ .hero-proof span:before{width:15px!important;height:15px!important;font-size:10px!important}
+ .hero-mascot{width:42%!important;height:73%!important;left:-2%!important}
+ .hero-sticker{left:22%!important;top:34%!important;padding:6px 8px!important;font-size:7px!important}
+ .hero-sticker strong{font-size:9px!important}
+ .hero-laptop{left:36%!important;top:63%!important;width:53%!important;height:29%!important;right:auto!important;padding:4px!important}
+ .hero-phone{width:15%!important;height:29%!important;right:1%!important;top:auto!important;bottom:2%!important;padding:4px 3px!important}
+ .hero-shelf{left:37%!important;right:8%!important;bottom:5%!important;height:16%!important}
+ .trust{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;padding:9px 5px!important}
+ .trust div{justify-content:flex-start!important;font-size:9px!important;gap:6px!important}
+ .trust b{flex-basis:25px!important;width:25px!important;height:25px!important;font-size:14px!important}
+ .categories{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .cat{aspect-ratio:1.55!important;border-radius:12px!important}
+ .cat div{font-size:13px!important;padding:25px 5px 8px!important}
+ .new-arrivals-grid{grid-template-columns:1fr!important;gap:9px!important}
+ .new-arrival{grid-template-columns:38% 62%!important;min-height:142px!important}
+ .new-arrival-media{height:100%!important;min-height:142px!important}
+ .new-arrival-copy{padding:9px!important}
+ .new-arrival-kicker{font-size:8px!important;padding:3px 6px!important}
+ .new-arrival h3{font-size:14px!important;margin:5px 0 4px!important}
+ .new-arrival p{font-size:10px!important;line-height:1.3!important}
+ .new-arrival-status,.new-arrival-status strong{font-size:8px!important}
+ .new-arrival a{font-size:10px!important;min-height:28px!important;margin-top:6px!important}
+ .pm-old-bottom{padding:5px 2px max(7px,env(safe-area-inset-bottom))!important}
+ .pm-old-bottom a{font-size:8px!important}
+ .pm-old-bottom span{font-size:17px!important}
+}
 </style>
 <section class="legacy-tools" id="services">
 <div class="section-head"><h2>Tout l’univers Prix Malin</h2><small>Retrouvez les outils du site initial</small></div>
