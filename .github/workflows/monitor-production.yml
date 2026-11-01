@@ -11,6 +11,12 @@ on:
       - "catalogue.html"
       - "index.html"
       - "etat-prix.html"
+      - "historique-prix.html"
+      - "data/prixtracker-prices.json"
+      - "data/prixtracker-best-daily.json"
+      - "historique-prix.html"
+      - "data/prixtracker-prices.json"
+      - "data/prixtracker-best-daily.json"
       - "data/prices.json"
       - "CNAME"
       - "price-engine/**"
@@ -134,6 +140,23 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/catalogue.html --output /tmp/catalogue.html
           test -s /tmp/catalogue.html
+      - name: Vérifier la page d'historique publiée
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin.fr/historique-prix.html --output /tmp/historique-prix.html
+          grep -q "Les prix dans le temps" /tmp/historique-prix.html
+      - name: Vérifier les relevés historiques publiés
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin.fr/data/prixtracker-prices.json --output /tmp/prixtracker-prices.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/prixtracker-prices.json", "utf8"));
+          if (data.status !== "historical_reference" || !Array.isArray(data.offers) || data.offers.length === 0) {
+            throw new Error("Flux historique indisponible ou structure incorrecte.");
+          }
+          console.log("Historique public valide :", data.counts.rows, "relevés,", data.counts.products, "produits.");
+          NODE
       - name: Vérifier le flux des offres à la une
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
