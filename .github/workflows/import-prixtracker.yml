@@ -1,6 +1,10 @@
 name: Actualiser les historiques PrixTracker
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "price-engine/import-prixtracker*.mjs"
+      - ".github/workflows/import-prixtracker.yml"
   schedule:
     - cron: "35 5 * * *"
 permissions:
@@ -29,6 +33,7 @@ jobs:
           node price-engine/import-prixtracker-best-daily.mjs --input /tmp/prixtracker/meilleur-prix-du-jour.csv
           node --input-type=module -e "import fs from 'node:fs'; for (const f of ['data/prixtracker-prices.json','data/prixtracker-best-daily.json']) { const d=JSON.parse(fs.readFileSync(f,'utf8')); if (!d.counts?.rows || !d.products?.length) throw new Error('Dataset vide: '+f); if (d.status !== 'historical_reference') throw new Error('Statut historique manquant: '+f); console.log(f, d.counts); }"
       - name: Publier uniquement si les fichiers ont changé
+        if: github.event_name != 'pull_request'
         run: |
           if git diff --quiet -- data/prixtracker-prices.json data/prixtracker-best-daily.json; then
             echo "Aucune évolution des données."
