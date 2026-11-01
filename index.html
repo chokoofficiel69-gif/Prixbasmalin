@@ -30,13 +30,165 @@ footer{border-top:1px solid var(--line);margin-top:36px;padding:28px 0;color:var
 @media(max-width:1000px){.products{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{grid-template-columns:1fr 1fr}.hero-copy{padding:30px 24px}.hero-mascot{width:50%}}
 @media(max-width:650px){.hero{grid-template-columns:1fr;min-height:0;margin-top:14px}.hero-copy{padding:27px 22px 22px}.hero-kicker{font-size:9px}.hero h1{font-size:39px;letter-spacing:-1.5px}.hero p{font-size:15px;margin:12px 0}.hero-art{min-height:265px}.hero-mascot{width:52%;left:0;height:100%}.hero-mascot svg{max-height:270px}.hero-laptop{width:57%;height:53%;right:7%;top:12%;padding:8px}.device-screen{padding:8px}.device-screen>b{font-size:12px}.device-products i{height:48px;font-size:22px}.hero-phone{width:23%;height:58%;right:2%;bottom:4%;padding:8px 6px}.phone-item{padding:5px 3px;margin:5px 0}.hero-sticker{right:25%;top:5%;font-size:8px;padding:8px 10px}.hero-sticker strong{font-size:10px}.hero-proof{gap:6px;margin-top:14px}.hero-proof span{font-size:9px;padding:6px 8px}.hero .cta{padding:12px 15px;font-size:13px}.hero-secondary{padding:11px 12px;font-size:12px}.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.photo{height:130px}.pbody{padding:10px}.pname{font-size:13px;min-height:34px}.product-subtitle{font-size:11px!important;min-height:30px}.buy{font-size:11px;padding:9px 6px}.pm-old-bottom a{font-size:9px}.pm-old-bottom span{font-size:17px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.product{transition:none}}
+
+/* Refonte visuelle Prix Malin — cohérence avec la maquette de référence */
+header{z-index:100;background:rgba(7,10,15,.97);backdrop-filter:blur(16px)}
+.top{gap:18px}
+.brand{min-width:215px}
+.brand .bag{width:50px;height:50px;border-radius:15px;box-shadow:0 8px 24px #ff681c45}
+.brand b{font-size:29px}
+.tag{font-size:12px;font-weight:650;letter-spacing:.01em}
+.tools{display:flex;align-items:center;gap:16px}
+.tools a{display:flex;flex-direction:column;align-items:center;gap:3px;color:#e8edf4;font-size:11px;font-weight:750;min-width:48px}
+.tools a span{font-size:24px;line-height:1;color:#fff}
+.tools a:hover{color:#ff8a43}
+.search{border-radius:14px;border-color:#3b4c62;box-shadow:0 8px 24px #0003}
+.search input{font-size:16px;min-height:54px}
+.search button{min-width:62px;font-size:24px}
+.catsnav{gap:22px;padding-top:14px;padding-bottom:14px;font-size:14px}
+.catsnav a{font-weight:750}
+.hero{min-height:440px;border-radius:24px;border-color:#35465b;box-shadow:0 20px 55px #0007;isolation:isolate}
+.hero-copy{padding:46px 42px}
+.hero-kicker{font-size:11px;color:#ffb07c}
+.hero h1{font-size:clamp(42px,5vw,68px);max-width:620px}
+.hero p{font-size:18px;line-height:1.55}
+.hero .cta{min-height:54px;padding:15px 24px;border-radius:12px;font-size:16px}
+.hero-secondary{min-height:48px;border-radius:12px}
+.hero-art{min-height:440px;background:radial-gradient(ellipse at 60% 50%,#ff7b292e,transparent 56%),linear-gradient(135deg,#101b29,#202b3a 54%,#0b121c)}
+.hero-art:after{content:"";position:absolute;inset:auto 0 0;height:35%;background:linear-gradient(0deg,#080d14a8,transparent);pointer-events:none}
+.hero-glow{width:390px;height:390px;background:#ff681c3d;filter:blur(78px)}
+.hero-device{border-color:#708097;box-shadow:0 25px 55px #000b,0 0 0 1px #ffffff22}
+.hero-laptop{width:63%;height:58%;right:5%;top:13%;border-radius:18px 18px 8px 8px}
+.device-screen{background:linear-gradient(145deg,#1d3148,#0b121d)}
+.device-products i{background:linear-gradient(145deg,#fff,#e8edf3);font-size:37px}
+.hero-phone{border-color:#8795a8;background:#080d14}
+.hero-mascot{width:49%;left:0}
+.hero-mascot svg{filter:drop-shadow(0 14px 24px #0009)}
+.hero-sticker{background:linear-gradient(135deg,#ffb52e,#ff681c);color:#211308;border:1px solid #ffd27a}
+.trust{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 4px;padding:15px 16px;border:1px solid #34445a;border-radius:16px;background:linear-gradient(110deg,#111b29,#0b111a);box-shadow:0 10px 28px #0003}
+.trust div{font-size:12px;font-weight:750;line-height:1.35}
+.trust b{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:50%;background:linear-gradient(145deg,#ff9a28,#ff5c0a);color:white;font-size:20px;box-shadow:0 5px 15px #ff681c3b}
+section{padding-top:34px}
+.section-head{margin-bottom:18px}
+.section-head h2{font-size:clamp(23px,2.4vw,31px);font-weight:900}
+.categories{grid-template-columns:repeat(5,minmax(0,1fr));gap:13px}
+.cat{position:relative;border-radius:17px;min-height:160px;background:#121c29;border-color:#40516a;box-shadow:0 7px 18px #0003;transition:transform .18s ease,border-color .18s ease}
+.cat:hover{transform:translateY(-3px);border-color:#ff8a43}
+.cat img{height:125px;object-fit:cover;transition:transform .25s ease}
+.cat div{position:absolute;left:0;right:0;bottom:0;padding:24px 8px 12px;background:linear-gradient(0deg,#070b12f5,#070b1290 65%,transparent);font-size:14px;font-weight:850;text-shadow:0 2px 8px #000}
+.new-arrivals{padding-top:36px}
+.new-arrivals-grid{gap:16px}
+.new-arrival{border-radius:19px;background:#111a26;border-color:#3b4c62;box-shadow:0 12px 28px #0004;transition:transform .18s ease,border-color .18s ease}
+.new-arrival:hover{transform:translateY(-3px);border-color:#ff8a43}
+.new-arrival-media{height:220px;background:linear-gradient(145deg,#fff,#edf1f5);padding:10px}
+.new-arrival-media img{padding:4px;object-fit:contain}
+.new-arrival-copy{padding:17px}
+.new-arrival-kicker{color:#ff9a62;font-size:10px}
+.new-arrival h3{font-size:19px;font-weight:900}
+.new-arrival p{font-size:13px;line-height:1.5}
+.new-arrival a{border-radius:10px;padding:11px 15px;font-size:13px;min-height:42px}
+.products{gap:14px}
+.product{border-radius:17px}
+.photo{height:190px}
+.photo img{padding:12px}
+.pbody{padding:14px}
+.pname{font-size:15px;font-weight:850}
+.buy{border-radius:10px;min-height:42px;display:flex;align-items:center;justify-content:center}
+.pm-old-bottom{z-index:150;grid-template-columns:repeat(7,minmax(0,1fr));background:rgba(7,12,19,.96);border-top:1px solid #40516a;box-shadow:0 -10px 35px #0005;backdrop-filter:blur(18px);padding:8px 5px max(10px,env(safe-area-inset-bottom))}
+.pm-old-bottom a{font-size:11px;font-weight:750}
+.pm-old-bottom span{font-size:22px}
+body{padding-bottom:94px!important}
+@media(max-width:1000px){
+ .top{gap:12px}.brand{min-width:180px}.tools{gap:9px}
+ .hero{min-height:390px}.hero-art{min-height:390px}
+ .categories{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media(max-width:650px){
+ .wrap{padding-left:14px;padding-right:14px}
+ .top{min-height:0;padding:10px 0;display:grid;grid-template-columns:1fr auto;gap:10px}
+ .brand{min-width:0;gap:9px}
+ .brand .bag{width:43px;height:43px;font-size:22px}
+ .brand b{font-size:23px}
+ .tag{font-size:10px}
+ .tools{display:flex;gap:10px;align-self:center}
+ .tools a{min-width:35px;font-size:9px}
+ .tools a span{font-size:21px}
+ .search{grid-column:1/-1;order:initial;width:100%;margin-top:2px}
+ .search input{min-height:48px;padding:12px;font-size:14px}
+ .search button{min-width:52px}
+ .catsnav{gap:17px;padding:12px 14px;font-size:12px}
+ .hero{grid-template-columns:1fr;min-height:0;margin-top:13px;border-radius:20px}
+ .hero-copy{padding:25px 20px 19px}
+ .hero-kicker{font-size:9px;letter-spacing:.12em}
+ .hero h1{font-size:clamp(35px,9vw,43px);letter-spacing:-1.4px;line-height:1}
+ .hero p{font-size:14px;line-height:1.5;margin:11px 0}
+ .hero-actions{gap:8px}
+ .hero .cta{min-height:46px;padding:11px 14px;font-size:13px}
+ .hero-secondary{min-height:43px;padding:10px 12px;font-size:11px}
+ .hero-art{min-height:285px}
+ .hero-mascot{width:55%;left:-2%;height:100%}
+ .hero-mascot svg{max-height:280px}
+ .hero-laptop{width:58%;height:52%;right:6%;top:14%;padding:7px}
+ .device-screen{padding:7px}
+ .device-screen>b{font-size:12px}
+ .device-products{gap:5px}
+ .device-products i{height:43px;font-size:20px}
+ .hero-phone{width:24%;height:55%;right:1%;bottom:4%;padding:7px 5px}
+ .phone-brand{font-size:11px}
+ .phone-item{font-size:9px;padding:5px 3px;margin:5px 0}
+ .phone-item b{font-size:7px}
+ .hero-sticker{right:24%;top:4%;font-size:8px;padding:7px 9px}
+ .hero-sticker strong{font-size:9px}
+ .hero-proof{gap:5px;margin-top:12px}
+ .hero-proof span{font-size:9px;padding:6px 8px}
+ .trust{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:11px;padding:12px}
+ .trust div{font-size:10px;gap:7px}
+ .trust b{width:29px;height:29px;font-size:17px}
+ section{padding-top:27px}
+ .section-head{align-items:flex-start;gap:10px}
+ .section-head h2{font-size:22px;line-height:1.15}
+ .section-head small,.section-head>a{font-size:10px;max-width:42%;text-align:right}
+ .categories{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .cat{min-height:140px;border-radius:14px}
+ .cat img{height:140px}
+ .cat div{font-size:13px;padding:25px 8px 11px}
+ .new-arrivals{padding-top:28px}
+ .new-arrivals-grid{grid-template-columns:1fr;gap:11px}
+ .new-arrival{display:grid;grid-template-columns:39% minmax(0,1fr);min-height:164px}
+ .new-arrival-media{height:100%;min-height:164px;padding:7px}
+ .new-arrival-copy{padding:12px;justify-content:center}
+ .new-arrival-kicker{font-size:8px;letter-spacing:.08em}
+ .new-arrival h3{font-size:15px;margin:5px 0}
+ .new-arrival p{font-size:11px;line-height:1.35}
+ .new-arrival-status{font-size:10px;margin-top:6px}
+ .new-arrival a{font-size:11px;padding:8px 10px;min-height:36px;margin-top:9px}
+ .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .photo{height:145px}
+ .pbody{padding:10px}
+ .pname{font-size:13px;min-height:36px}
+ .product-subtitle{font-size:10px!important;min-height:30px}
+ .buy{font-size:11px;min-height:38px}
+ .banners{grid-template-columns:1fr}
+ .pm-old-bottom{padding-top:7px}
+ .pm-old-bottom a{font-size:9px}
+ .pm-old-bottom span{font-size:19px}
+ body{padding-bottom:88px!important}
+}
+@media(max-width:380px){
+ .tools{gap:6px}.tools a{min-width:31px;font-size:8px}.tools a span{font-size:19px}
+ .new-arrival{grid-template-columns:36% minmax(0,1fr)}
+ .new-arrival-copy{padding:10px}
+ .new-arrival h3{font-size:14px}
+ .new-arrival p{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.cat,.new-arrival{transition:none}}
 </style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a><a class="pm-skip-link" href="#main-content">Aller au contenu</a>
 <header><div class="wrap top">
 <a class="brand" href="index.html" aria-label="Prix Malin, accueil"><div class="bag">🛍</div><div><b>Prix <span>Malin</span></b><div class="tag">Le bon plan au meilleur prix</div></div></a>
 <form class="search" id="search" role="search"><label class="sr-only" for="q">Rechercher dans Prix Malin</label><input id="q" type="search" autocomplete="off" aria-label="Rechercher un produit ou une marque" placeholder="Rechercher un produit, une marque, une idée cadeau…"><button type="submit" aria-label="Lancer la recherche">⌕</button></form>
-<div class="tools"><div><span>♡</span>Favoris</div><div><span>♙</span>Mon compte</div><div><span>☰</span>Menu</div></div>
+<nav class="tools" aria-label="Raccourcis personnels"><a href="catalogue.html?favoris=1"><span aria-hidden="true">♡</span>Favoris</a><a href="catalogue.html?alerte=1"><span aria-hidden="true">♧</span>Alertes</a><a href="#services"><span aria-hidden="true">☰</span>Menu</a></nav>
 </div><nav class="catsnav wrap" aria-label="Catégories principales"><a href="nouveautes.html">✨ Nouveautés</a><a href="guide-cadeaux.html">🎁 Idées cadeaux</a><a href="high-tech.html">🎧 High-Tech</a><a href="maison-deco.html">🛋 Maison & Déco</a><a href="catalogue.html?cat=beauty">🌸 Beauté & Santé</a><a href="catalogue.html?cat=fashion">👟 Mode</a><a href="catalogue.html?cat=sport">🏀 Sport</a><a href="catalogue.html?cat=kids">🧸 Bébé & Enfant</a><a href="catalogue.html?cat=auto">🚗 Auto & Moto</a><a href="catalogue.html?cat=diy">🛠 Bricolage</a><a href="catalogue.html?cat=appliances">☕ Électroménager</a></nav></header>
 <main class="wrap" id="main-content" tabindex="-1">
 <div class="hero"><div class="hero-copy"><span class="hero-kicker">LE COMPARATEUR QUI VOUS VEUT DU BIEN</span><h1>Le moins cher,<br><em>en un clic !</em></h1><p>Comparez les produits des grandes marques, repérez les bonnes pistes et retrouvez les offres chez les marchands.</p><div class="hero-actions"><a class="cta" href="catalogue.html">Voir les produits →</a><a class="hero-secondary" href="#deals">Nos sélections</a></div><div class="hero-proof"><span>✓ Gratuit</span><span>✓ Simple et rapide</span><span>✓ Sur mobile et ordinateur</span></div></div><div class="hero-art"><div class="hero-glow"></div><div class="hero-device hero-laptop"><div class="device-top"><span></span><span></span><span></span></div><div class="device-screen"><b>Prix<span>Malin</span></b><div class="device-search"></div><div class="device-products"><i>🎧</i><i>📱</i><i>👟</i></div></div></div><div class="hero-device hero-phone"><div class="phone-speaker"></div><div class="phone-brand">Prix<span>Malin</span></div><div class="phone-search"></div><div class="phone-item">🎧 <b>Écouteurs sans fil</b></div><div class="phone-item">📱 <b>Smartphone</b></div></div><div class="hero-mascot" aria-hidden="true"><svg viewBox="0 0 420 500"><defs><linearGradient id="bagOrange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff9a35"/><stop offset=".55" stop-color="#ff681c"/><stop offset="1" stop-color="#df3d08"/></linearGradient><linearGradient id="shoeWhite" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#d8dce3"/></linearGradient></defs><ellipse cx="210" cy="477" rx="145" ry="15" fill="#000" opacity=".35"/><path d="M148 382 125 445M265 382 291 444" stroke="#252b34" stroke-width="30" stroke-linecap="round"/><path d="M72 440q28-22 68 0l18 27q3 16-18 16H45q-20-5-5-24zM270 440q33-25 70 0l35 27q10 17-14 19h-91q-22-5-10-24z" fill="url(#shoeWhite)" stroke="#bfc5ce" stroke-width="3"/><path d="m90 455 48 0m-44 12 48 0m159-12 53 0m-48 12 52 0" stroke="#ff681c" stroke-width="7" stroke-linecap="round"/><path d="M80 150q8-40 50-40h170q42 0 50 40l17 212q3 35-34 35H96q-37 0-34-35z" fill="url(#bagOrange)" stroke="#ffb05a" stroke-width="5"/><path d="M142 120q-2-84 69-84t69 84" fill="none" stroke="#ff8a25" stroke-width="19" stroke-linecap="round"/><circle cx="138" cy="125" r="12" fill="#d8dce3"/><circle cx="282" cy="125" r="12" fill="#d8dce3"/><path d="M115 198q34-45 68-5M239 193q35-45 69 2" fill="none" stroke="#29232a" stroke-width="17" stroke-linecap="round"/><ellipse cx="157" cy="245" rx="36" ry="47" fill="#fff"/><ellipse cx="264" cy="245" rx="36" ry="47" fill="#fff"/><ellipse cx="163" cy="251" rx="19" ry="28" fill="#63351f"/><ellipse cx="258" cy="251" rx="19" ry="28" fill="#63351f"/><circle cx="169" cy="239" r="8" fill="#fff"/><circle cx="264" cy="239" r="8" fill="#fff"/><path d="M151 296q59 63 119 0q-6 77-62 77t-57-77" fill="#6c1c17"/><path d="M177 351q34-19 66 0q-17 30-34 28t-32-28" fill="#ff7b91"/><path d="M64 239q-46-7-52 32q-4 28 31 39l41 12" fill="none" stroke="#242a33" stroke-width="24" stroke-linecap="round"/><path d="M35 293q-21-22-9-44q9-17 22-5l-1-23q3-17 18-14q12 2 12 17l4 36q22-9 31 5q8 13-8 27l-29 27q-20 12-40-3z" fill="#fff" stroke="#dce0e5" stroke-width="4"/><path d="M350 247q43-18 57 16q11 27-19 48l-36 21" fill="none" stroke="#242a33" stroke-width="24" stroke-linecap="round"/><path d="M374 287q12-25 31-14q15 9 3 25l-13 16q24-2 29 15q4 17-17 24l-42 7q-24 0-31-20q-7-19 10-33z" fill="#fff" stroke="#dce0e5" stroke-width="4"/></svg></div><div class="hero-sticker">LES BONS PLANS<br><strong>AU MÊME ENDROIT</strong> ✦</div></div></div>
