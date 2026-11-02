@@ -408,4 +408,19 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
 }
 </style>
 
+
+<style>
+/* Navigation catégories : pictogrammes plus discrets et mieux proportionnés */
+.catsnav { gap: 8px !important; padding-top: 7px !important; }
+.catsnav a { gap: 2px !important; padding: 6px 10px !important; font-size: 13px !important; }
+.catsnav .nav-emoji { width: 34px !important; height: 29px !important; }
+.catsnav .category-icon { width: 27px !important; height: 27px !important; filter: drop-shadow(0 1px 1px #0007) !important; }
+@media (max-width: 760px) {
+  .catsnav { gap: 4px !important; padding-top: 5px !important; }
+  .catsnav a { gap: 2px !important; padding: 5px 8px !important; font-size: 11px !important; }
+  .catsnav .nav-emoji { width: 29px !important; height: 26px !important; }
+  .catsnav .category-icon { width: 23px !important; height: 23px !important; }
+}
+</style>
+
 </body></html>
