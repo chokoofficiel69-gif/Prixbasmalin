@@ -122,11 +122,42 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   .pm-benefits-banner>.pm-benefit>span:last-child{min-width:0!important;overflow-wrap:anywhere!important}
 }
 </style>
+<style>
+
+/* Demande visuelle : logo sac exact + finitions dorées, sans changer la mise en page */
+.brand-bag-logo{
+  display:block!important;
+  width:54px!important;
+  height:48px!important;
+  flex:none!important;
+  object-fit:contain!important;
+  filter:drop-shadow(0 2px 5px #d59d3c44);
+}
+.hero.hero-home.hero-reference{
+  border:2px solid #dcb34f!important;
+  border-radius:18px!important;
+  box-shadow:0 0 0 1px #ffe7a055,0 0 18px #d6a33d99,0 12px 32px #0009!important;
+}
+.pm-benefits-banner{
+  border:2px solid #dcb34f!important;
+  box-shadow:0 0 0 1px #ffe7a055,0 0 18px #d6a33d99,inset 0 0 18px #d6a33d14!important;
+}
+@media(max-width:760px){
+  .brand-bag-logo{
+    width:43px!important;
+    height:38px!important;
+  }
+  .hero.hero-home.hero-reference{
+    border-radius:14px!important;
+  }
+}
+
+</style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
 <div class="wrap pm-head-top">
-<a class="brand" href="index.html" aria-label="Prix Malin, accueil"><img class="brand-mascot" src="assets/mascotte-malin.svg" alt="" width="54" height="58"><span class="brand-copy"><b>Prix <span>Malin</span></b><span class="tag">Comparez · Trouvez · Économisez</span></span></a>
+<a class="brand" href="index.html" aria-label="Prix Malin, accueil"><img class="brand-mascot brand-bag-logo" src="assets/logo-sac-prix-malin.png" alt="Sac orange Prix Malin" width="54" height="48"><span class="brand-copy"><b>Prix <span>Malin</span></b><span class="tag">Comparez · Trouvez · Économisez</span></span></a>
 <nav class="tools" aria-label="Raccourcis personnels"><a href="catalogue.html?favoris=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11S3.2 14 3.2 8.8A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.5Z"/></svg>Favoris</a><a href="catalogue.html?alerte=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>Alertes<i class="alert-dot"></i></a><a href="#account" data-nav="account"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.3-7 8-7s8 2.8 8 7"/></svg>Mon compte</a><a href="#services"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span class="sr-only">Menu</span></a></nav>
 </div>
 <div class="wrap pm-search-row"><form class="search" id="search" role="search"><label class="sr-only" for="q">Rechercher dans Prix Malin</label><input id="q" type="search" autocomplete="off" aria-label="Rechercher un produit, une marque, une référence" placeholder="Rechercher un produit, une marque, une référence…"><button type="submit" aria-label="Lancer la recherche"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"/><path d="m16 16 4.5 4.5"/></svg></button></form></div>
