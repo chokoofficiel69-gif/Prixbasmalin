@@ -89,6 +89,14 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 @media(max-width:370px){.hero-home{grid-template-columns:85px minmax(0,1fr);padding:13px 10px}.hero-home .hero-mascot-img{width:95px}.hero-home h1{font-size:26px}.hero-home .hero-copy p{font-size:10px}.hero-home .hero-secondary{display:none}}
 
 </style>
+<style>
+.pm-benefits-banner{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;gap:0;width:100%;box-sizing:border-box;margin:12px 0 20px;padding:12px 14px;border:2px solid #ff7a1a;border-radius:24px;background:linear-gradient(105deg,#10141d 0%,#080b11 50%,#171016 100%);box-shadow:0 0 16px #ff681c35,inset 0 0 18px #ff681c12}
+.pm-benefit{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;padding:2px 10px;color:#fff;font-size:clamp(12px,1.35vw,17px);font-weight:850;line-height:1.18}
+.pm-benefit+.pm-benefit{border-left:1px solid #59606b}
+.pm-benefit-icon{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;border-radius:50%;background:linear-gradient(145deg,#ffad22,#ff4c0b);box-shadow:0 0 12px #ff681c65}
+.pm-benefit-icon svg{width:29px;height:29px;display:block}
+@media(max-width:650px){.pm-benefits-banner{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 0;margin:8px 0 16px;padding:10px 6px;border-radius:16px}.pm-benefit{justify-content:flex-start;gap:7px;padding:4px 6px;font-size:clamp(10px,2.8vw,13px)}.pm-benefit:nth-child(3){border-left:0}.pm-benefit-icon{flex-basis:34px;width:34px;height:34px}.pm-benefit-icon svg{width:22px;height:22px}}
+</style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
@@ -101,7 +109,24 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 <main class="wrap" id="main-content" tabindex="-1">
 <section class="hero hero-home hero-reference" aria-label="Bannière Prix Malin — Le moins cher, en un clic">
   <img id="pm-hero-exact" class="hero-reference-image" alt="Bannière Prix Malin avec la mascotte, le slogan Le moins cher en un clic, des écouteurs, un smartphone, une PlayStation, un écran, des chaussures et une remise jusqu’à 70 %." width="768" height="284" fetchpriority="high" decoding="async">
-</section><div class="trust"><div><b>♢</b>100 % gratuit</div><div><b>♙</b>Sans inscription</div><div><b>ϟ</b>Rapide & simple</div><div><b>▣</b>Sur mobile et ordinateur</div></div>
+</section><section class="pm-benefits-banner" aria-label="Les avantages Prix Malin">
+  <div class="pm-benefit">
+    <span class="pm-benefit-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 3 41 10v12c0 11-7 18-17 23C14 40 7 33 7 22V10L24 3Z" fill="none" stroke="white" stroke-width="4" stroke-linejoin="round"/><path d="m15 24 6 6 13-14" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span>100 % gratuit</span>
+  </div>
+  <div class="pm-benefit">
+    <span class="pm-benefit-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="11" y="21" width="26" height="22" rx="5" fill="none" stroke="white" stroke-width="4"/><path d="M16 21v-7a8 8 0 0 1 16 0v7" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="31" r="3" fill="white"/><path d="M24 33v4" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></span>
+    <span>Sans inscription</span>
+  </div>
+  <div class="pm-benefit">
+    <span class="pm-benefit-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M27 3 9 27h12l-2 18 20-27H26l1-15Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+    <span>Rapide &amp; simple</span>
+  </div>
+  <div class="pm-benefit">
+    <span class="pm-benefit-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="13" y="4" width="22" height="40" rx="4" fill="none" stroke="white" stroke-width="4"/><path d="M20 9h8M21 38h6" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></span>
+    <span>Sur mobile et ordinateur</span>
+  </div>
+</section>
 <section id="categories"><div class="section-head"><h2>🔥 Nos grandes catégories</h2><a class="all-categories-link" href="catalogue.html">Voir tout le catalogue →</a></div><div class="categories">
 <a class="cat" href="guide-cadeaux.html"><img src="https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&q=80" alt=""><div>Idées cadeaux</div></a>
 <a class="cat" href="high-tech.html"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" alt=""><div>High-Tech</div></a>
