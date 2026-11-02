@@ -153,11 +153,55 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 }
 
 </style>
+<style id="pm-home-carousel-hq">
+
+/* Logo sac de la référence — fichier image haute définition */
+.brand-bag-logo{display:block!important;width:56px!important;height:49px!important;flex:0 0 56px!important;object-fit:contain!important;object-position:center!important;background:#080b10!important;border-radius:4px!important;filter:drop-shadow(0 2px 5px #d59d3c44)!important}
+.pm-benefits-banner{margin-top:-7px!important;position:relative!important;z-index:2!important}
+/* Carrousels horizontaux de nouveautés et de produits */
+.new-arrivals-grid{display:flex!important;flex-flow:row nowrap!important;gap:14px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;overscroll-behavior-x:contain!important;padding:4px 2px 14px!important;scrollbar-width:thin!important;scrollbar-color:#c79a3e #10141a!important}
+.new-arrival{display:flex!important;flex:0 0 clamp(270px,31vw,340px)!important;flex-direction:column!important;min-width:0!important;scroll-snap-align:start!important}
+.new-arrival-media{height:156px!important;min-height:156px!important;flex:none!important}
+.new-arrival-copy{padding:13px!important;display:flex!important;flex-direction:column!important;flex:1!important}
+.new-arrival h3{font-size:17px!important;line-height:1.2!important}
+.new-arrival p{font-size:12px!important;line-height:1.4!important}
+.new-arrival a{margin-top:auto!important}
+.pm-product-rail{position:relative!important;width:100%!important;min-width:0!important}
+.pm-product-rail .products{display:flex!important;flex-flow:row nowrap!important;grid-template-columns:none!important;gap:13px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important;min-width:0!important;padding:5px 2px 16px!important;scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;overscroll-behavior-x:contain!important;scrollbar-width:thin!important;scrollbar-color:#c79a3e #10141a!important}
+.pm-product-rail .product{display:flex!important;flex:0 0 238px!important;flex-direction:column!important;width:238px!important;min-width:0!important;scroll-snap-align:start!important;background:linear-gradient(160deg,#151e29,#0d121a)!important;border:1px solid #a77d31!important;border-radius:15px!important;overflow:hidden!important;box-shadow:0 5px 18px #0007!important}
+.pm-product-rail .photo{height:158px!important;min-height:158px!important;background:#f6f7f8!important;flex:none!important;display:grid!important;place-items:center!important;overflow:hidden!important}
+.pm-product-rail .photo img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;padding:10px!important;background:#fff!important}
+.pm-product-rail .pbody{display:flex!important;flex-direction:column!important;flex:1!important;padding:12px!important;min-height:132px!important}
+.pm-product-rail .pname{font-size:14px!important;font-weight:900!important;line-height:1.25!important;min-height:36px!important;color:#fff!important}
+.pm-product-rail .product-subtitle{font-size:11px!important;line-height:1.35!important;color:#c4ceda!important;min-height:30px!important}
+.pm-product-rail .buy{display:block!important;margin-top:auto!important;padding:10px 8px!important;border-radius:9px!important;background:linear-gradient(100deg,#ff9b21,#ff5b0b)!important;color:#fff!important;text-align:center!important;font-size:12px!important;font-weight:900!important}
+.pm-product-check{font-size:10px!important;color:#e3c77f!important;margin:4px 0 10px!important}
+.pm-product-brand{font-size:9px!important;text-transform:uppercase!important;letter-spacing:.08em!important;color:#e7bd63!important;font-weight:850!important;margin-bottom:5px!important}
+.pm-rail-button{position:absolute!important;top:43%!important;z-index:4!important;width:34px!important;height:34px!important;border:1px solid #e0b650!important;border-radius:50%!important;background:#080b10ed!important;color:#ffe0a0!important;font-size:27px!important;line-height:1!important;display:grid!important;place-items:center!important;box-shadow:0 2px 10px #0009!important;cursor:pointer!important}
+.pm-rail-prev{left:-8px!important}.pm-rail-next{right:-8px!important}
+.pm-rail-button:focus-visible,.pm-product-rail .products:focus-visible,.new-arrivals-grid:focus-visible{outline:2px solid #ffd66d!important;outline-offset:2px!important}
+@media(max-width:760px){
+ .brand-bag-logo{width:46px!important;height:42px!important;flex-basis:46px!important}
+ .new-arrivals-grid{gap:10px!important;padding-bottom:12px!important}
+ .new-arrival{flex-basis:84vw!important;max-width:330px!important;min-height:0!important;grid-template-columns:none!important}
+ .new-arrival-media{height:142px!important;min-height:142px!important}
+ .new-arrival-copy{padding:10px!important}
+ .new-arrival h3{font-size:15px!important}
+ .new-arrival p{font-size:11px!important}
+ .pm-product-rail .products{gap:10px!important;padding-bottom:14px!important}
+ .pm-product-rail .product{flex-basis:78vw!important;width:78vw!important;max-width:300px!important}
+ .pm-product-rail .photo{height:150px!important;min-height:150px!important}
+ .pm-product-rail .pbody{min-height:126px!important;padding:10px!important}
+ .pm-rail-button{display:none!important}
+ .pm-benefits-banner{margin-top:-6px!important}
+}
+
+</style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
 <div class="wrap pm-head-top">
-<a class="brand" href="index.html" aria-label="Prix Malin, accueil"><img class="brand-mascot brand-bag-logo" src="assets/logo-sac-prix-malin.svg" alt="Sac orange Prix Malin" width="54" height="48"><span class="brand-copy"><b>Prix <span>Malin</span></b><span class="tag">Comparez · Trouvez · Économisez</span></span></a>
+<a class="brand" href="index.html" aria-label="Prix Malin, accueil"><img class="brand-mascot brand-bag-logo" src="assets/logo-sac-prix-malin-hq.webp" alt="Sac orange souriant Prix Malin" width="56" height="49"><span class="brand-copy"><b>Prix <span>Malin</span></b><span class="tag">Comparez · Trouvez · Économisez</span></span></a>
 <nav class="tools" aria-label="Raccourcis personnels"><a href="catalogue.html?favoris=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11S3.2 14 3.2 8.8A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.5Z"/></svg>Favoris</a><a href="catalogue.html?alerte=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>Alertes<i class="alert-dot"></i></a><a href="#account" data-nav="account"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.3-7 8-7s8 2.8 8 7"/></svg>Mon compte</a><a href="#services"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span class="sr-only">Menu</span></a></nav>
 </div>
 <div class="wrap pm-search-row"><form class="search" id="search" role="search"><label class="sr-only" for="q">Rechercher dans Prix Malin</label><input id="q" type="search" autocomplete="off" aria-label="Rechercher un produit, une marque, une référence" placeholder="Rechercher un produit, une marque, une référence…"><button type="submit" aria-label="Lancer la recherche"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"/><path d="m16 16 4.5 4.5"/></svg></button></form></div>
@@ -202,14 +246,25 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 <article class="new-arrival"><div class="new-arrival-media"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Apple AirPods 5" loading="lazy" decoding="async"></div><div class="new-arrival-copy"><span class="new-arrival-kicker">À DÉCOUVRIR</span><h3>Apple AirPods 5</h3><p>Écouteurs sans fil et audio adaptatif.</p><a href="https://www.amazon.fr/s?k=Apple+AirPods+5&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres →</a></div></article>
 <article class="new-arrival"><div class="new-arrival-media"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-Watch-Series-12-black-aluminum-with-burgundy-plaid-Sport-Loop_inline.jpg.large.jpg" alt="Apple Watch Series 12" loading="lazy" decoding="async"></div><div class="new-arrival-copy"><span class="new-arrival-kicker">À DÉCOUVRIR</span><h3>Apple Watch Series 12</h3><p>Montre connectée et suivi au quotidien.</p><a href="https://www.amazon.fr/s?k=Apple+Watch+Series+12&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres →</a></div></article>
 </div></section>
-<section id="deals"><div class="section-head"><h2>🔥 Sélection Prix Malin</h2><small>Des références précises à découvrir chez les marchands</small></div><div class="products" id="products">
-<article class="product" data-name="Apple iPhone 18 Pro"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro noir" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple iPhone 18 Pro</div><p class="product-subtitle">Puce A20 Pro et caméra Fusion 48 Mpx.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+iPhone+18+Pro&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Apple Watch Series 12"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-Watch-Series-12-black-aluminum-with-burgundy-plaid-Sport-Loop_inline.jpg.large.jpg" alt="Apple Watch Series 12 noire avec bracelet sport" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple Watch Series 12</div><p class="product-subtitle">Puce S11 et nouveau système de suivi de santé.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+Watch+Series+12&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Apple AirPods 5"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Apple AirPods 5" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple AirPods 5</div><p class="product-subtitle">Réduction active du bruit en design ouvert.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+AirPods+5&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Polo Lacoste L.12.12 Original"><div class="photo"><img src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&imwidth=1920" alt="Polo Lacoste L.12.12" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Polo Lacoste L.12.12</div><p class="product-subtitle">Le polo iconique en coton Petit Piqué.</p><a class="buy" href="https://www.amazon.fr/s?k=Lacoste+L.12.12+polo&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Levi's 501 Original"><div class="photo"><img src="https://lsco.scene7.com/is/image/lsco/005013220-front-pdp?fit=crop%2C1&fmt=jpeg&hei=700&op_usm=0.6%2C0.6%2C8&qlt=85&resMode=sharp2&wid=700" alt="Jean Levi's 501 Original" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Levi’s 501 Original</div><p class="product-subtitle">Jean droit denim, modèle emblématique.</p><a class="buy" href="https://www.amazon.fr/s?k=Levis+501+Original&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Sony 1000X The ColleXion"><div class="photo"><img src="https://cdn.uc.assets.prezly.com/f5442a12-58b4-4188-a97d-64b1caa2eb85/1000X_THE_COLLEXION_In-situation_Color_Variation-Large.jpg" alt="Casque Sony 1000X The ColleXion" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Sony 1000X The ColleXion</div><p class="product-subtitle">Casque sans fil haut de gamme.</p><a class="buy" href="https://www.amazon.fr/s?k=Sony+1000X+The+ColleXion&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-</div><p class="note">Les boutons ouvrent les offres du vendeur. Les prix et stocks sont à vérifier sur sa page au moment de l’achat.</p></section>
+<section id="deals" class="pm-home-selection">
+<div class="section-head">
+  <h2>🔥 Toute la sélection Prix Malin</h2>
+  <small id="home-products-meta">341 références du catalogue à parcourir · prix et stock à vérifier chez le marchand</small>
+</div>
+<div class="pm-product-rail">
+  <button class="pm-rail-button pm-rail-prev" type="button" data-pm-scroll="prev" aria-label="Produits précédents" aria-controls="products">‹</button>
+  <div class="products" id="products" tabindex="0" aria-label="Produits Prix Malin, défilement horizontal">
+  <article class="product" data-name="Apple iPhone 18 Pro"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro noir" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple iPhone 18 Pro</div><p class="product-subtitle">Puce A20 Pro et caméra Fusion 48 Mpx.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+iPhone+18+Pro&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+  <article class="product" data-name="Apple Watch Series 12"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-Watch-Series-12-black-aluminum-with-burgundy-plaid-Sport-Loop_inline.jpg.large.jpg" alt="Apple Watch Series 12 noire" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple Watch Series 12</div><p class="product-subtitle">Montre connectée et suivi au quotidien.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+Watch+Series+12&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+  <article class="product" data-name="Apple AirPods 5"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Apple AirPods 5" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple AirPods 5</div><p class="product-subtitle">Écouteurs sans fil et audio adaptatif.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+AirPods+5&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+  <article class="product" data-name="Polo Lacoste L.12.12 Original"><div class="photo"><img src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&imwidth=1920" alt="Polo Lacoste L.12.12" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Polo Lacoste L.12.12</div><p class="product-subtitle">Le polo iconique en coton Petit Piqué.</p><a class="buy" href="https://www.amazon.fr/s?k=Lacoste+L.12.12+polo&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+  <article class="product" data-name="Levi's 501 Original"><div class="photo"><img src="https://lsco.scene7.com/is/image/lsco/005013220-front-pdp?fit=crop%2C1&fmt=jpeg&hei=700&op_usm=0.6%2C0.6%2C8&qlt=85&resMode=sharp2&wid=700" alt="Jean Levi's 501 Original" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Levi’s 501 Original</div><p class="product-subtitle">Jean droit denim, modèle emblématique.</p><a class="buy" href="https://www.amazon.fr/s?k=Levis+501+Original&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+  <article class="product" data-name="Sony 1000X The ColleXion"><div class="photo"><img src="https://cdn.uc.assets.prezly.com/f5442a12-58b4-4188-a97d-64b1caa2eb85/1000X_THE_COLLEXION_In-situation_Color_Variation-Large.jpg" alt="Casque Sony 1000X The ColleXion" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Sony 1000X The ColleXion</div><p class="product-subtitle">Casque sans fil haut de gamme.</p><a class="buy" href="https://www.amazon.fr/s?k=Sony+1000X+The+ColleXion&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+  </div>
+  <button class="pm-rail-button pm-rail-next" type="button" data-pm-scroll="next" aria-label="Produits suivants" aria-controls="products">›</button>
+</div>
+<p class="note">Les fiches ouvrent les pages des marchands. Aucun prix n’est inventé : le prix et la disponibilité sont à confirmer sur la page du vendeur.</p>
+</section>
 <section id="ideas"><div class="banners">
 <div class="banner" style="background-image:url('https://images.unsplash.com/photo-1512909006721-3d6018887383?w=900&q=85')"><div><h3>Idées cadeaux</h3><p>Pour toutes les occasions</p><a href="guide-cadeaux.html">Découvrir la sélection →</a></div></div>
 <div class="banner" style="background-image:url('https://images.unsplash.com/photo-1498049794561-7780e7231661?w=900&q=85')"><div><h3>High-Tech en promo</h3><p>Les nouveautés au meilleur prix</p><a href="offres.html">Voir toutes les offres →</a></div></div>
@@ -547,6 +602,113 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
   const base64 = Array.from(payload.children, part => part.textContent.trim()).join("");
   if (base64.length !== 36840) return;
   image.src = "data:image/webp;base64," + base64;
+})();
+</script>
+
+
+<script id="pm-home-catalogue-carousel">
+(() => {
+  const rail = document.getElementById("products");
+  const meta = document.getElementById("home-products-meta");
+  if (!rail || !meta) return;
+
+  document.querySelectorAll("[data-pm-scroll]").forEach(button => {
+    button.addEventListener("click", () => {
+      const direction = button.dataset.pmScroll === "next" ? 1 : -1;
+      rail.scrollBy({left: direction * Math.max(220, rail.clientWidth * 0.82), behavior: "smooth"});
+    });
+  });
+
+  const safeHttpUrl = value => {
+    try {
+      const url = new URL(value, window.location.origin);
+      return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+    } catch (_) { return ""; }
+  };
+
+  const updateCount = () => {
+    const count = rail.querySelectorAll(".product[data-pm-catalogue-product]").length;
+    if (count) meta.textContent = count + " produits illustrés du catalogue · prix et disponibilité à confirmer chez le marchand";
+  };
+
+  const makeCard = product => {
+    const imageUrl = safeHttpUrl(product.image);
+    const targetUrl = safeHttpUrl(product.sourceUrl);
+    if (!imageUrl || !targetUrl || !product.name) return null;
+
+    const card = document.createElement("article");
+    card.className = "product";
+    card.dataset.name = product.name;
+    card.dataset.pmCatalogueProduct = product.id || "";
+
+    const photo = document.createElement("div");
+    photo.className = "photo";
+    const image = document.createElement("img");
+    image.src = imageUrl;
+    image.alt = product.name;
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.addEventListener("error", () => {
+      card.remove();
+      updateCount();
+    }, {once:true});
+    photo.appendChild(image);
+
+    const body = document.createElement("div");
+    body.className = "pbody";
+    if (product.brand || product.category) {
+      const brand = document.createElement("span");
+      brand.className = "pm-product-brand";
+      brand.textContent = product.brand || product.category;
+      body.appendChild(brand);
+    }
+    const name = document.createElement("div");
+    name.className = "pname";
+    name.textContent = product.name;
+    body.appendChild(name);
+
+    if (product.desc) {
+      const description = document.createElement("p");
+      description.className = "product-subtitle";
+      description.textContent = product.desc;
+      body.appendChild(description);
+    }
+    const checked = document.createElement("p");
+    checked.className = "pm-product-check";
+    checked.textContent = "Prix à vérifier chez le marchand";
+    body.appendChild(checked);
+
+    const link = document.createElement("a");
+    link.className = "buy";
+    link.href = targetUrl;
+    link.target = "_blank";
+    link.rel = targetUrl.includes("amazon.") ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer";
+    link.textContent = "Voir les offres ↗";
+    body.appendChild(link);
+
+    card.append(photo, body);
+    return card;
+  };
+
+  fetch("/data/home-products.json", {cache:"no-store"})
+    .then(response => {
+      if (!response.ok) throw new Error("Flux produits indisponible");
+      return response.json();
+    })
+    .then(feed => {
+      if (!feed || !Array.isArray(feed.products) || !feed.products.length) return;
+      const fragment = document.createDocumentFragment();
+      feed.products.forEach(product => {
+        const card = makeCard(product);
+        if (card) fragment.appendChild(card);
+      });
+      if (!fragment.childNodes.length) return;
+      rail.replaceChildren(fragment);
+      updateCount();
+    })
+    .catch(() => {
+      // Les six fiches de secours déjà présentes restent affichées si le flux est indisponible.
+    });
 })();
 </script>
 
