@@ -31,18 +31,92 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
  .hero{margin:0 -12px!important;min-height:0!important;height:auto!important}
  .hero-art{min-height:0!important;height:auto!important}
 }
+
+/* Accueil refondu : véritable interface HTML, la publicité n'est jamais utilisée comme fond */
+.brand{min-width:0;gap:10px}
+.brand-mascot{display:block;width:54px;height:58px;object-fit:contain;flex:none}
+.brand-copy{display:flex;flex-direction:column;gap:3px}
+.brand-copy b{font-size:clamp(25px,3vw,36px);font-weight:950;letter-spacing:-1.4px;line-height:1;color:#fff}
+.brand-copy b span{color:#ff7a1a}
+.brand-copy .tag{font-size:11px;color:#cbd3df;font-weight:700;letter-spacing:.01em;margin:0}
+.hero-home{isolation:isolate;display:grid!important;grid-template-columns:minmax(150px,.78fr) minmax(270px,1.2fr) minmax(180px,.85fr);align-items:center;gap:18px;min-height:350px;margin:24px 0 18px!important;padding:28px 26px;border:1px solid #354253!important;border-radius:22px!important;overflow:hidden;background:radial-gradient(ellipse at 78% 48%,#44200f 0%,#1a1720 38%,#0c111a 76%)!important;box-shadow:0 18px 48px #0008}
+.hero-home .hero-glow{position:absolute;z-index:-1;inset:0;background:radial-gradient(circle at 76% 50%,#ff6b1c2b,transparent 36%),linear-gradient(115deg,transparent 48%,#ff7b1710);pointer-events:none}
+.hero-home .hero-mascot-wrap{display:flex;align-items:flex-end;justify-content:center;align-self:stretch;min-width:0}
+.hero-home .hero-mascot-img{display:block;width:min(100%,230px);height:auto;max-height:285px;object-fit:contain;filter:drop-shadow(0 15px 20px #0009)}
+.hero-home .hero-copy{display:flex!important;flex-direction:column;align-items:flex-start;gap:12px;min-width:0;padding:8px 0;position:relative;z-index:2}
+.hero-home .hero-kicker{font-size:10px;line-height:1.3;letter-spacing:.14em;color:#ff9a55;font-weight:950}
+.hero-home h1{font-size:clamp(32px,4.1vw,54px);line-height:.98;letter-spacing:-1.8px;margin:0;color:#fff}
+.hero-home h1 em{color:#ff8127;font-style:normal}
+.hero-home .hero-copy p{font-size:15px;line-height:1.5;color:#d5dce6;margin:0;max-width:420px}
+.hero-home .hero-actions{display:flex!important;flex-wrap:wrap;align-items:center;gap:12px;margin-top:5px}
+.hero-home .hero-cta{display:inline-flex;align-items:center;gap:12px;padding:13px 17px;border-radius:11px;background:linear-gradient(135deg,#ff9a20,#ff5b0b);color:white;font-weight:900;font-size:14px;box-shadow:0 8px 22px #ff681c40}
+.hero-home .hero-secondary{font-size:13px;color:#fff;font-weight:800;text-decoration:underline;text-decoration-color:#ff7b1a;text-underline-offset:4px}
+.hero-home .hero-proof{display:flex!important;flex-wrap:wrap;gap:7px;margin-top:5px}
+.hero-home .hero-proof span{font-size:10px;color:#e2e7ef;font-weight:750;padding:6px 9px;border:1px solid #536071;border-radius:30px;background:#111a25}
+.hero-home .hero-proof span:before{content:"✓";color:#ff8a34;margin-right:5px}
+.hero-home .hero-showcase{height:260px;position:relative;display:flex;align-items:center;justify-content:center;min-width:0}
+.showcase-orbit{position:absolute;border:1px solid #ff8a3540;border-radius:50%;transform:rotate(-18deg)}
+.orbit-one{width:230px;height:155px}.orbit-two{width:185px;height:225px;transform:rotate(38deg)}
+.showcase-product{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #ffffff24;border-radius:16px;background:linear-gradient(145deg,#263244eF,#111720f2);box-shadow:0 12px 28px #0008;width:92px;height:105px}
+.showcase-product span{font-size:39px;filter:drop-shadow(0 5px 6px #0008)}
+.showcase-product small{font-size:10px;color:#e9edf4;font-weight:850}
+.phone-product{left:2%;top:24px;transform:rotate(-8deg)}.audio-product{right:0;top:65px;transform:rotate(8deg)}.home-product{left:27%;bottom:5px;transform:rotate(-3deg)}
+.showcase-discount{position:absolute;right:2%;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:92px;height:92px;border:4px solid #ffb15d;border-radius:50%;background:linear-gradient(145deg,#ff8124,#e9430b);color:white;box-shadow:0 8px 26px #ff5a1f55;transform:rotate(8deg)}
+.showcase-discount b{font-size:8px;letter-spacing:.1em}.showcase-discount strong{font-size:25px;line-height:1.1}.showcase-discount small{font-size:8px;font-weight:800}
+@media(max-width:760px){
+ .brand-mascot{width:43px;height:49px}.brand-copy b{font-size:24px}.brand-copy .tag{font-size:8px}
+ .hero-home{grid-template-columns:100px minmax(0,1fr);grid-template-rows:auto auto;gap:8px 12px;min-height:0;margin:16px 0 12px!important;padding:17px 13px;border-radius:17px!important}
+ .hero-home .hero-mascot-wrap{grid-column:1;grid-row:1;align-self:center}
+ .hero-home .hero-mascot-img{width:112px;max-height:155px}
+ .hero-home .hero-copy{grid-column:2;grid-row:1;gap:8px;padding:0}
+ .hero-home .hero-kicker{font-size:8px;letter-spacing:.1em}
+ .hero-home h1{font-size:clamp(27px,7vw,38px);letter-spacing:-1px}
+ .hero-home .hero-copy p{font-size:11px;line-height:1.4}
+ .hero-home .hero-actions{gap:8px;margin-top:2px}
+ .hero-home .hero-cta{font-size:11px;padding:10px 11px;gap:6px}
+ .hero-home .hero-secondary{font-size:10px}
+ .hero-home .hero-proof{grid-column:1/-1;grid-row:2;gap:5px;margin-top:4px}
+ .hero-home .hero-proof span{font-size:8px;padding:5px 7px}
+ .hero-home .hero-showcase{grid-column:1/-1;grid-row:3;height:125px;margin-top:2px}
+ .orbit-one{width:175px;height:95px}.orbit-two{width:130px;height:130px}
+ .showcase-product{width:70px;height:76px;border-radius:12px;gap:2px}
+ .showcase-product span{font-size:29px}.showcase-product small{font-size:8px}
+ .phone-product{left:12%;top:4px}.audio-product{right:13%;top:11px}.home-product{left:39%;bottom:0}
+ .showcase-discount{width:68px;height:68px;border-width:3px;right:7%;bottom:0}
+ .showcase-discount strong{font-size:19px}
+ .trust{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:370px){.hero-home{grid-template-columns:85px minmax(0,1fr);padding:13px 10px}.hero-home .hero-mascot-img{width:95px}.hero-home h1{font-size:26px}.hero-home .hero-copy p{font-size:10px}.hero-home .hero-secondary{display:none}}
+
 </style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
 <div class="wrap pm-head-top">
-<a class="brand" href="index.html" aria-label="Prix Malin, accueil"><span class="brand-mark" role="img" aria-label="Prix Malin — Le bon plan au meilleur prix"></span><span class="sr-only">Prix Malin, le bon plan au meilleur prix</span></a>
+<a class="brand" href="index.html" aria-label="Prix Malin, accueil"><img class="brand-mascot" src="assets/mascotte-malin.svg" alt="" width="54" height="58"><span class="brand-copy"><b>Prix <span>Malin</span></b><span class="tag">Comparez · Trouvez · Économisez</span></span></a>
 <nav class="tools" aria-label="Raccourcis personnels"><a href="catalogue.html?favoris=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11S3.2 14 3.2 8.8A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.5Z"/></svg>Favoris</a><a href="catalogue.html?alerte=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>Alertes<i class="alert-dot"></i></a><a href="#account" data-nav="account"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.3-7 8-7s8 2.8 8 7"/></svg>Mon compte</a><a href="#services"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span class="sr-only">Menu</span></a></nav>
 </div>
 <div class="wrap pm-search-row"><form class="search" id="search" role="search"><label class="sr-only" for="q">Rechercher dans Prix Malin</label><input id="q" type="search" autocomplete="off" aria-label="Rechercher un produit, une marque, une référence" placeholder="Rechercher un produit, une marque, une référence…"><button type="submit" aria-label="Lancer la recherche"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"/><path d="m16 16 4.5 4.5"/></svg></button></form></div>
 <nav class="catsnav wrap" aria-label="Navigation principale"><a class="nav-home" href="index.html"><span class="nav-emoji">🏠</span><span>Accueil</span></a><a href="high-tech.html"><span class="nav-emoji">🎧</span><span>High-Tech</span></a><a href="maison-deco.html"><span class="nav-emoji">🛋️</span><span>Maison & Déco</span></a><a href="catalogue.html?cat=fashion"><span class="nav-emoji">👕</span><span>Mode</span></a><a href="catalogue.html?cat=beauty"><span class="nav-emoji">🧴</span><span>Beauté & Santé</span></a><a href="catalogue.html?cat=sport"><span class="nav-emoji">⚽</span><span>Sport & Loisirs</span></a><a href="catalogue.html?cat=auto"><span class="nav-emoji">🚗</span><span>Auto & Moto</span></a><a href="#services"><span class="nav-emoji">•••</span><span>Plus</span></a></nav></header>
 <main class="wrap" id="main-content" tabindex="-1">
-<div class="hero" aria-label="Publicité Prix Malin — Comparez, Trouvez, Économisez"><div class="hero-art"><img src="assets/prixmalin-publicite.webp" alt="Prix Malin : le moins cher en un clic. Comparez, trouvez, économisez. Des milliers de produits, les meilleures offres, simple et rapide, jusqu’à moins 70 pour cent." width="240" height="88" fetchpriority="high" decoding="async" style="display:block;width:100%;height:auto;max-height:442px;object-fit:contain"></div></div><div class="trust"><div><b>♢</b>100 % gratuit</div><div><b>♙</b>Sans inscription</div><div><b>ϟ</b>Rapide & simple</div><div><b>▣</b>Sur mobile et ordinateur</div></div>
+<section class="hero hero-home" aria-labelledby="home-hero-title">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-mascot-wrap"><img class="hero-mascot-img" src="assets/mascotte-malin.svg" alt="Malin, la mascotte Prix Malin" width="240" height="260" fetchpriority="high"></div>
+  <div class="hero-copy">
+    <span class="hero-kicker">LES BONS PLANS, SANS PERDRE DE TEMPS</span>
+    <h1 id="home-hero-title">Le moins cher,<br><em>en un clic&nbsp;!</em></h1>
+    <p>Comparez les offres, repérez les bonnes affaires et faites des économies.</p>
+    <div class="hero-actions"><a class="hero-cta" href="catalogue.html">Comparer les produits <span aria-hidden="true">→</span></a><a class="hero-secondary" href="#categories">Explorer les catégories</a></div>
+    <div class="hero-proof"><span>Des milliers de produits</span><span>Offres de marchands</span><span>Simple & rapide</span></div>
+  </div>
+  <div class="hero-showcase" aria-label="Univers produits">
+    <div class="showcase-orbit orbit-one"></div><div class="showcase-orbit orbit-two"></div>
+    <div class="showcase-product phone-product"><span aria-hidden="true">📱</span><small>High-Tech</small></div>
+    <div class="showcase-product audio-product"><span aria-hidden="true">🎧</span><small>Audio</small></div>
+    <div class="showcase-product home-product"><span aria-hidden="true">⌚</span><small>Maison & lifestyle</small></div>
+    <div class="showcase-discount"><b>JUSQU’À</b><strong>-70%</strong><small>sur une sélection</small></div>
+  </div>
+</section><div class="trust"><div><b>♢</b>100 % gratuit</div><div><b>♙</b>Sans inscription</div><div><b>ϟ</b>Rapide & simple</div><div><b>▣</b>Sur mobile et ordinateur</div></div>
 <section id="categories"><div class="section-head"><h2>🔥 Nos grandes catégories</h2><a class="all-categories-link" href="catalogue.html">Voir tout le catalogue →</a></div><div class="categories">
 <a class="cat" href="guide-cadeaux.html"><img src="https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&q=80" alt=""><div>Idées cadeaux</div></a>
 <a class="cat" href="high-tech.html"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" alt=""><div>High-Tech</div></a>
