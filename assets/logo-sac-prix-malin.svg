@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 112" role="img" aria-labelledby="title">
+<title id="title">Sac orange Prix Malin</title>
+<defs>
+ <linearGradient id="bag" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffad55"/><stop offset=".48" stop-color="#ff741d"/><stop offset="1" stop-color="#e94a0b"/></linearGradient>
+ <linearGradient id="handle" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5c18c"/><stop offset=".5" stop-color="#4b2920"/><stop offset="1" stop-color="#17191f"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="3"/><feOffset dy="3"/><feComponentTransfer><feFuncA type="linear" slope=".28"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<g filter="url(#shadow)">
+ <path d="M39 39V27C39 11 49 4 64 4s25 7 25 23v12" fill="none" stroke="#17191f" stroke-width="11" stroke-linecap="round"/>
+ <path d="M39 38V27C39 13 50 8 64 8s21 6 21 19v11" fill="none" stroke="url(#handle)" stroke-width="6" stroke-linecap="round"/>
+ <path d="M16 39Q17 31 27 31H101Q111 31 112 41L119 91Q120 103 108 105H20Q8 103 10 91Z" fill="url(#bag)" stroke="#ffb66d" stroke-width="3"/>
+ <path d="M21 42Q25 37 32 37H96" fill="none" stroke="#ffd4a8" stroke-width="3" opacity=".75" stroke-linecap="round"/>
+ <path d="M39 67Q64 99 89 67" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+ <path d="M23 47Q20 60 23 75" fill="none" stroke="#fff" stroke-width="3" opacity=".24" stroke-linecap="round"/>
+</g></svg>
