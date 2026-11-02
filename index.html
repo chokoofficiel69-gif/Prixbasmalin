@@ -96,6 +96,31 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 .pm-benefit-icon{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;border-radius:50%;background:linear-gradient(145deg,#ffad22,#ff4c0b);box-shadow:0 0 12px #ff681c65}
 .pm-benefit-icon svg{width:29px;height:29px;display:block}
 @media(max-width:650px){.pm-benefits-banner{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:8px 0 16px;padding:8px 4px;border-radius:14px}.pm-benefit{justify-content:center;gap:4px;padding:3px 3px;font-size:clamp(8px,2.25vw,10px);line-height:1.12;text-align:left}.pm-benefit+.pm-benefit{border-left:1px solid #59606b}.pm-benefit-icon{flex:0 0 25px;width:25px;height:25px;box-shadow:0 0 8px #ff681c55}.pm-benefit-icon svg{width:16px;height:16px}}
+
+/* Force les 4 avantages sur une seule bande, y compris sur les petits écrans */
+@media(max-width:760px){
+  .pm-benefits-banner{
+    display:flex!important;flex-flow:row nowrap!important;align-items:center!important;
+    width:100%!important;min-width:0!important;gap:0!important;
+    padding:8px 3px!important;margin:8px 0 16px!important;
+    overflow:hidden!important;box-sizing:border-box!important;
+    border-radius:14px!important;
+  }
+  .pm-benefits-banner>.pm-benefit{
+    display:flex!important;flex:1 1 25%!important;flex-direction:row!important;
+    flex-wrap:nowrap!important;justify-content:center!important;align-items:center!important;
+    min-width:0!important;gap:3px!important;padding:3px 2px!important;
+    font-size:clamp(7px,2.05vw,9px)!important;line-height:1.05!important;
+    white-space:normal!important;text-align:left!important;
+  }
+  .pm-benefits-banner>.pm-benefit+.pm-benefit{border-left:1px solid #59606b!important}
+  .pm-benefits-banner .pm-benefit-icon{
+    flex:0 0 22px!important;width:22px!important;height:22px!important;
+    box-shadow:0 0 7px #ff681c55!important;
+  }
+  .pm-benefits-banner .pm-benefit-icon svg{width:14px!important;height:14px!important}
+  .pm-benefits-banner>.pm-benefit>span:last-child{min-width:0!important;overflow-wrap:anywhere!important}
+}
 </style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
