@@ -270,4 +270,142 @@ const input=document.getElementById('q');
 document.getElementById('search').addEventListener('submit',e=>{e.preventDefault();const q=input.value.trim();location.href=q?'catalogue.html?q='+encodeURIComponent(q):'catalogue.html';});
 
 </script>
+
+<style>
+/* Prix Malin — composition mobile propre : éléments du vrai hero-home */
+@media (max-width: 650px) {
+  .hero.hero-home {
+    display: grid !important;
+    grid-template-columns: 104px minmax(0, 1fr) !important;
+    grid-template-rows: auto 218px !important;
+    align-items: center !important;
+    gap: 10px 12px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 18px 12px 12px !important;
+    overflow: hidden !important;
+    line-height: normal !important;
+    border: 1px solid #26364a !important;
+    border-radius: 18px !important;
+    background: radial-gradient(ellipse at 80% 65%, #321b13 0%, #0b0d13 62%) !important;
+  }
+  .hero.hero-home .hero-glow { z-index: 0 !important; }
+  .hero.hero-home .hero-mascot-wrap {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    align-self: center !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 150px !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+  .hero.hero-home .hero-mascot-img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 104px !important;
+    max-height: 145px !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+  .hero.hero-home .hero-copy {
+    position: relative !important;
+    inset: auto !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 2 !important;
+    text-align: left !important;
+  }
+  .hero.hero-home .hero-kicker {
+    font-size: 7px !important;
+    line-height: 1.25 !important;
+    letter-spacing: .08em !important;
+    margin: 0 !important;
+  }
+  .hero.hero-home h1 {
+    font-size: clamp(23px, 6.4vw, 30px) !important;
+    line-height: 1 !important;
+    letter-spacing: -1px !important;
+    margin: 0 !important;
+  }
+  .hero.hero-home .hero-copy p {
+    font-size: 11px !important;
+    line-height: 1.28 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  .hero.hero-home .hero-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 5px !important;
+    margin: 2px 0 0 !important;
+  }
+  .hero.hero-home .hero-cta {
+    font-size: 10px !important;
+    padding: 8px 10px !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+  }
+  .hero.hero-home .hero-secondary { font-size: 10px !important; }
+  .hero.hero-home .hero-proof {
+    display: none !important;
+  }
+  .hero.hero-home .hero-showcase {
+    position: relative !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 218px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    z-index: 1 !important;
+  }
+  .hero.hero-home .showcase-orbit { max-width: 80%; left: 10%; }
+  .hero.hero-home .showcase-product {
+    width: 82px !important;
+    height: 94px !important;
+  }
+  .hero.hero-home .showcase-product span { font-size: 32px !important; }
+  .hero.hero-home .phone-product { left: 2% !important; top: 24px !important; }
+  .hero.hero-home .audio-product { right: 2% !important; top: 30px !important; }
+  .hero.hero-home .home-product { left: 34% !important; bottom: 4px !important; }
+  .hero.hero-home .showcase-discount {
+    width: 76px !important;
+    height: 76px !important;
+    right: 3% !important;
+    bottom: 3px !important;
+  }
+  .hero.hero-home .showcase-discount strong { font-size: 21px !important; }
+}
+@media (max-width: 390px) {
+  .hero.hero-home {
+    grid-template-columns: 86px minmax(0, 1fr) !important;
+    grid-template-rows: auto 190px !important;
+    gap: 8px !important;
+    padding: 14px 9px 9px !important;
+  }
+  .hero.hero-home .hero-mascot-wrap { height: 132px !important; }
+  .hero.hero-home .hero-mascot-img { max-width: 86px !important; max-height: 128px !important; }
+  .hero.hero-home .hero-showcase { height: 190px !important; }
+  .hero.hero-home .hero-copy p { font-size: 10px !important; }
+  .hero.hero-home .hero-cta { font-size: 9px !important; }
+}
+</style>
+
 </body></html>
