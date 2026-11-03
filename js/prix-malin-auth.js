@@ -48,6 +48,30 @@ const $ = id => document.getElementById(id);
 const authForm = $("pmAuthForm");
 let mode = "signin";
 let pendingAlert = null;
+const PENDING_ALERT_STORAGE_KEY = "pmPendingPriceAlert";
+try {
+  const savedPending = JSON.parse(localStorage.getItem(PENDING_ALERT_STORAGE_KEY) || "null");
+  if (savedPending && typeof savedPending.name === "string" && typeof savedPending.id === "string") {
+    pendingAlert = savedPending;
+  }
+} catch (_) {}
+
+function persistPendingAlert(name, id) {
+  pendingAlert = { name: String(name || ""), id: String(id || "") };
+  try { localStorage.setItem(PENDING_ALERT_STORAGE_KEY, JSON.stringify(pendingAlert)); } catch (_) {}
+}
+
+function clearPendingAlert() {
+  pendingAlert = null;
+  try { localStorage.removeItem(PENDING_ALERT_STORAGE_KEY); } catch (_) {}
+}
+
+function resumePendingAlert(session) {
+  if (!session || !pendingAlert) return;
+  const next = pendingAlert;
+  clearPendingAlert();
+  setTimeout(() => openAlert(next.name, next.id), 160);
+}
 
 function message(text, error = false) {
   $("pmAuthMessage").textContent = text;
@@ -90,11 +114,7 @@ authForm.addEventListener("submit", async e => {
     } else {
       message(mode === "signup" ? "Compte créé et connecté." : "Connexion réussie.");
       await refreshAuthUI();
-      if (pendingAlert && result.data.session) {
-        closeAuth();
-        const next = pendingAlert; pendingAlert = null;
-        setTimeout(() => openAlert(next.name, next.id), 100);
-      }
+      resumePendingAlert(result.data.session);
     }
   } catch (err) {
     message(err.message || "Connexion impossible. Réessaie.", true);
@@ -142,7 +162,7 @@ alertOverlay.addEventListener("click", e => { if (e.target === alertOverlay) { a
 async function openAlert(name, id) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    pendingAlert = { name, id };
+    persistPendingAlert(name, id);
     openAuth();
     message("Connecte-toi ou crée un compte pour enregistrer cette alerte.");
     return;
@@ -159,15 +179,33 @@ async function openAlert(name, id) {
   alertOverlay.classList.add("open");
   document.body.style.overflow = "hidden";
 }
-$("pmAuthAlerts").addEventListener("click", async () => {
+async function openMyAlerts() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    openAuth();
+    message("Connecte-toi pour retrouver les alertes enregistrées sur ton compte.");
+    return;
+  }
   closeAuth();
   await openAlert("", "");
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  const { data, error } = await supabase.from("price_alerts").select("id,product_id,product_name,target_price_eur,is_active").eq("user_id", user.id).order("created_at", { ascending: false });
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   const list = $("pmAlertsList");
-  if (error) { $("pmAlertSaveMessage").textContent = "Impossible de charger les alertes pour le moment."; return; }
-  if (!data?.length) { list.textContent = "Aucune alerte pour le moment. Tu peux en créer une ci-dessus."; return; }
+  if (userError || !user) {
+    $("pmAlertSaveMessage").textContent = "Impossible de vérifier la connexion. Reconnecte-toi.";
+    return;
+  }
+  const { data, error } = await supabase.from("price_alerts")
+    .select("id,product_id,product_name,target_price_eur,is_active")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+  if (error) {
+    $("pmAlertSaveMessage").textContent = "Impossible de charger les alertes pour le moment.";
+    return;
+  }
+  if (!data?.length) {
+    list.textContent = "Aucune alerte pour le moment. Tu peux en créer une ci-dessus.";
+    return;
+  }
   data.forEach(item => {
     const row = document.createElement("div"); row.className = "pm-alert-item";
     row.innerHTML = '<span class="pm-alert-bell" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>';
@@ -183,7 +221,8 @@ $("pmAuthAlerts").addEventListener("click", async () => {
     });
     row.append(main, del); list.append(row);
   });
-});
+}
+$("pmAuthAlerts").addEventListener("click", openMyAlerts);
 
 $("pmAlertSaveButton").addEventListener("click", async () => {
   const productName = $("pmAlertGeneralName").value.trim();
@@ -230,9 +269,18 @@ document.addEventListener("click", e => {
       }
     }
   }
-  const account = e.target.closest('[data-nav="account"]');
-  if (account) { e.preventDefault(); e.stopImmediatePropagation(); openAuth(); }
+  const account = e.target.closest('[data-nav="account"], [data-pm-nav="account"]');
+  if (account) { e.preventDefault(); e.stopImmediatePropagation(); openAuth(); return; }
+  const alerts = e.target.closest('[data-nav="alerts"], [data-pm-nav="alerts"]');
+  if (alerts) { e.preventDefault(); e.stopImmediatePropagation(); void openMyAlerts(); return; }
 }, true);
 installAlertButtons();
 new MutationObserver(installAlertButtons).observe(document.body, { childList: true, subtree: true });
-supabase.auth.onAuthStateChange(() => { refreshAuthUI(); });
+supabase.auth.onAuthStateChange((_event, session) => {
+  refreshAuthUI();
+  if (session) resumePendingAlert(session);
+});
+supabase.auth.getSession().then(({ data: { session } }) => {
+  refreshAuthUI();
+  if (session) resumePendingAlert(session);
+}).catch(() => {});

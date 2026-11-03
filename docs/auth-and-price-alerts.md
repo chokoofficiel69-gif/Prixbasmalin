@@ -26,3 +26,15 @@ Cette migration crée le stockage des alertes dans **un projet Supabase dédié 
 - Une alerte enregistrée réapparaît après reconnexion.
 - Deux comptes ne peuvent pas consulter ou modifier les alertes de l'autre.
 - Aucune notification n'est envoyée sur la base d'un prix non vérifié.
+
+## Vérifications d'exploitation — 3 novembre 2026
+
+- Le projet Supabase dédié à Prix Malin a été restauré et son état est revenu à `ACTIVE_HEALTHY`.
+- La table `public.price_alerts` est présente ; la sécurité RLS est activée.
+- Les politiques SELECT/INSERT/UPDATE/DELETE sont limitées au rôle `authenticated` et vérifient `auth.uid() = user_id`.
+- Les privilèges Data API nécessaires sont présents. Les privilèges de table accordés au rôle `anon` ne donnent pas accès aux lignes : aucune politique RLS anonyme n'est définie.
+- Le contrôle Supabase Security Advisor n'a retourné aucun avertissement.
+- L'inscription réelle, la confirmation e-mail, les URL de redirection de production et la réinitialisation de mot de passe restent à tester avec une adresse contrôlée par l'éditeur.
+- Les alertes sont enregistrées et consultables, mais aucun moteur de surveillance des prix en arrière-plan ni envoi automatique d'e-mail de baisse n'est déclaré opérationnel. Il faudra une source de prix frais et autorisée ainsi qu'un canal d'envoi configuré.
+
+Ne pas présenter les alertes comme des notifications automatiques tant que ces deux dernières briques ne sont pas testées en production.
