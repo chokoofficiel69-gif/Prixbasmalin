@@ -323,8 +323,8 @@ const eligible = programmes
 
 log(eligible.length + " partenariat(s) rejoint(s) à examiner.");
 if (!eligible.length) {
-  log("Aucun partenariat Awin rejoint : aucune fiche ni aucun prix artificiel ne sera créé.");
-  process.exit(0);
+  log("BLOCAGE : aucun partenariat Awin rejoint n'est accessible au compte éditeur. Aucun prix ne peut être collecté tant qu'au moins un programme marchand n'a pas accepté Prix Malin.");
+  throw new Error("Aucun partenariat Awin rejoint : rejoindre et obtenir l'approbation d'au moins un programme marchand dans Awin.");
 }
 
 const rawOffers = [];
@@ -360,9 +360,9 @@ const standardImported = await loadStandardAwinFeeds(rawOffers);
 if (standardImported) log(standardImported+" offre(s) supplémentaire(s) depuis les flux standards.");
 
 if (!rawOffers.length) {
-  log("Aucun flux Enhanced fr_FR exploitable parmi les partenariats rejoints. Le dernier catalogue valide est conservé.");
+  log("BLOCAGE : aucun produit avec prix, image, stock et lien marchand n'a été fourni par les programmes Awin rejoints. Le dernier catalogue valide est conservé.");
   log("Codes HTTP rencontrés : " + JSON.stringify(statusCounts));
-  process.exit(0);
+  throw new Error("Aucune offre Awin exploitable : vérifier l'approbation des programmes, l'accès aux flux Enhanced fr_FR et les flux standards autorisés.");
 }
 
 const fetchedAt = new Date().toISOString();
