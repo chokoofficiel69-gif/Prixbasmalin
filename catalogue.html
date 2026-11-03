@@ -335,7 +335,7 @@ Promise.all([fetch("/data/prices.json",{cache:"no-store"}).then(r=>r.ok?r.json()
     if(combined.length)renderVerifiedProducts(combined);
   })
   .catch(()=>{});
-const productData=[
+const productData=[[
   {
     "id": "airpodspro3",
     "name": "Apple AirPods Pro 3",
@@ -1187,7 +1187,7 @@ const productData=[
     "category": "tech",
     "brand": "Apple",
     "query": "Apple MacBook Air 13 M5",
-    "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=85",
+    "image": "https://www.apple.com/v/macbook-air/z/images/overview/design/color/design_top_skyblue__eepkvlvjzcia_large.jpg",
     "merchant": "Amazon • prix à vérifier",
     "price": "Voir sur Amazon",
     "old": "",
@@ -1203,7 +1203,10 @@ const productData=[
       "Stockage": "SSD 512 Go (13 pouces) ou 1 To (15 pouces) selon configuration",
       "Écran": "Liquid Retina 13,6 ou 15,3 pouces selon modèle",
       "Autonomie annoncée": "Jusqu'à 18 h de streaming vidéo"
-    }
+    },
+    "imageSource": "https://www.apple.com/fr/macbook-air/",
+    "imageSourceName": "Apple",
+    "imageKind": "official"
   },
   {
     "id": "pc-apple-macbook-pro-14-pouces-m5-pro",
@@ -1219,7 +1222,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Apple%20MacBook%20Pro%2014%20M5%20Pro&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-apple-macbook-neo",
@@ -1235,7 +1239,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Apple%20MacBook%20Neo&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-lenovo-ideapad-slim-3",
@@ -1244,14 +1249,17 @@ const productData=[
     "category": "tech",
     "brand": "Lenovo",
     "query": "Lenovo IdeaPad Slim 3",
-    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=85",
+    "image": "https://p3-ofp.static.pub//fes/cms/2025/02/06/zuuuahb3p1wn1dwbt4luewmt77unqy546098.png?height=584&width=584",
     "merchant": "Amazon • prix à vérifier",
     "price": "Voir sur Amazon",
     "old": "",
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Lenovo%20IdeaPad%20Slim%203&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageSource": "https://www.lenovo.com/fr/fr/",
+    "imageSourceName": "Lenovo",
+    "imageKind": "official"
   },
   {
     "id": "pc-lenovo-yoga-slim-7i",
@@ -1283,7 +1291,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Lenovo%20Legion%205i%2015&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-lenovo-legion-pro-7i",
@@ -1299,7 +1308,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Lenovo%20Legion%20Pro%207i&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-dell-xps-14",
@@ -1325,7 +1335,8 @@ const productData=[
       "Poids": "À partir de 1,36 kg selon configuration"
     },
     "specificationSource": "https://www.dell.com/fr-fr/shop/dell-laptops/xps-14-laptop-2026/spd/xps-da14260-laptop",
-    "imageStatus": "manufacturer_image_to_add"
+    "imageStatus": "manufacturer_image_to_add",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-dell-xps-13",
@@ -1341,7 +1352,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Dell%20XPS%2013&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-hp-omnibook-5",
@@ -1350,7 +1362,7 @@ const productData=[
     "category": "tech",
     "brand": "HP",
     "query": "HP OmniBook 5",
-    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=85",
+    "image": "https://www.hp.com/content/dam/sites/worldwide/laptops/home-laptops/omnistudio/omnibook/frame-1104223376%402x5.png",
     "merchant": "Amazon • prix à vérifier",
     "price": "Voir sur Amazon",
     "old": "",
@@ -1367,7 +1379,10 @@ const productData=[
       "Poids": "À partir de 1,59 kg"
     },
     "specificationSource": "https://www.hp.com/fr-fr/shop/products/laptops/hp-omnibook-5-laptop-next-gen-ai-16-bf0008nf-c1ec2ea-abf",
-    "imageStatus": "manufacturer_image_to_add"
+    "imageStatus": "manufacturer_image_to_add",
+    "imageSource": "https://www.hp.com/fr-fr/laptops-and-2-in-1s/omnibook-5.html",
+    "imageSourceName": "HP",
+    "imageKind": "official"
   },
   {
     "id": "pc-hp-omnibook-ultra-14",
@@ -1383,7 +1398,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=HP%20OmniBook%20Ultra%2014&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-hp-omen-max-16",
@@ -1408,7 +1424,7 @@ const productData=[
     "category": "tech",
     "brand": "ASUS",
     "query": "ASUS Zenbook 14",
-    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=85",
+    "image": "https://dlcdnwebimgs.asus.com/gain/827c5809-1d54-487a-aad4-9b5c0aee3fb8/w800",
     "merchant": "Amazon • prix à vérifier",
     "price": "Voir sur Amazon",
     "old": "",
@@ -1424,7 +1440,10 @@ const productData=[
       "Stockage": "SSD M.2 NVMe PCIe 3.0, 256 Go sur la fiche consultée",
       "Écran": "14 pouces, 60 Hz, 300 nits, 100 % DCI-P3",
       "Connectique": "2 USB-C, 1 USB-A, HDMI 2.1, jack 3,5 mm"
-    }
+    },
+    "imageSource": "https://www.asus.com/fr/laptops/for-home/zenbook/",
+    "imageSourceName": "ASUS",
+    "imageKind": "official"
   },
   {
     "id": "pc-asus-zenbook-s14",
@@ -1440,7 +1459,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=ASUS%20Zenbook%20S14&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-asus-vivobook-s14",
@@ -1472,7 +1492,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=ASUS%20TUF%20Gaming%20A18&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-asus-rog-strix-scar-18",
@@ -1488,7 +1509,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=ASUS%20ROG%20Strix%20Scar%2018&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-acer-swift-16-ai",
@@ -1497,14 +1519,17 @@ const productData=[
     "category": "tech",
     "brand": "Acer",
     "query": "Acer Swift 16 AI",
-    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=85",
+    "image": "https://images.acer.com/is/image/acer/acer-laptop-swift-16-ai-main-banner-l?$image-2560w$=",
     "merchant": "Amazon • prix à vérifier",
     "price": "Voir sur Amazon",
     "old": "",
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Acer%20Swift%2016%20AI&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageSource": "https://www.acer.com/fr-fr/laptops/swift/swift-16-ai",
+    "imageSourceName": "Acer",
+    "imageKind": "official"
   },
   {
     "id": "pc-acer-nitro-v-16-ai",
@@ -1520,7 +1545,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Acer%20Nitro%20V%2016%20AI&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-msi-vector-16-hx-ai",
@@ -1529,14 +1555,17 @@ const productData=[
     "category": "tech",
     "brand": "MSI",
     "query": "MSI Vector 16 HX AI",
-    "image": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=900&q=85",
+    "image": "https://storage-asset.msi.com/global/picture/product/product_1736409237d3e130c0898585dcedcf212aa5d4c955.webp",
     "merchant": "Amazon • prix à vérifier",
     "price": "Voir sur Amazon",
     "old": "",
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=MSI%20Vector%2016%20HX%20AI&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageSource": "https://www.msi.com/Laptop/Vector-16-HX-AI-A2XWX",
+    "imageSourceName": "MSI",
+    "imageKind": "official"
   },
   {
     "id": "pc-msi-katana-15",
@@ -1552,7 +1581,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=MSI%20Katana%2015&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-samsung-galaxy-book6-ultra",
@@ -1584,7 +1614,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Acer%20Predator%20Helios&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-razer-blade-16",
@@ -1600,7 +1631,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Razer%20Blade%2016%202026&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "pc-alienware-16-area-51",
@@ -4845,7 +4877,7 @@ const productData=[
     "category": "tech",
     "brand": "Apple",
     "query": "Apple MacBook Air 13 M5",
-    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=85",
+    "image": "https://www.apple.com/v/macbook-air/z/images/overview/design/color/design_top_skyblue__eepkvlvjzcia_large.jpg",
     "merchant": "Recherche catalogue • offre à vérifier",
     "price": "Voir les offres",
     "old": "",
@@ -4861,7 +4893,10 @@ const productData=[
       "Stockage": "SSD 512 Go (13 pouces) ou 1 To (15 pouces) selon configuration",
       "Écran": "Liquid Retina 13,6 ou 15,3 pouces selon modèle",
       "Autonomie annoncée": "Jusqu'à 18 h de streaming vidéo"
-    }
+    },
+    "imageSource": "https://www.apple.com/fr/macbook-air/",
+    "imageSourceName": "Apple",
+    "imageKind": "official"
   },
   {
     "id": "apple-macbook-air-15-m5",
@@ -4870,7 +4905,7 @@ const productData=[
     "category": "tech",
     "brand": "Apple",
     "query": "Apple MacBook Air 15 M5",
-    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=85",
+    "image": "https://www.apple.com/v/macbook-air/z/images/overview/design/color/design_top_skyblue__eepkvlvjzcia_large.jpg",
     "merchant": "Recherche catalogue • offre à vérifier",
     "price": "Voir les offres",
     "old": "",
@@ -4886,7 +4921,10 @@ const productData=[
       "Stockage": "SSD 512 Go (13 pouces) ou 1 To (15 pouces) selon configuration",
       "Écran": "Liquid Retina 13,6 ou 15,3 pouces selon modèle",
       "Autonomie annoncée": "Jusqu'à 18 h de streaming vidéo"
-    }
+    },
+    "imageSource": "https://www.apple.com/fr/macbook-air/",
+    "imageSourceName": "Apple",
+    "imageKind": "official"
   },
   {
     "id": "apple-macbook-pro-14-m5-pro",
@@ -4902,7 +4940,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Apple%20MacBook%20Pro%2014%20M5%20Pro&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "apple-macbook-pro-16-m5-max",
@@ -4918,7 +4957,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Apple%20MacBook%20Pro%2016%20M5%20Max&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "dell-xps-14",
@@ -4944,7 +4984,8 @@ const productData=[
       "Poids": "À partir de 1,36 kg selon configuration"
     },
     "specificationSource": "https://www.dell.com/fr-fr/shop/dell-laptops/xps-14-laptop-2026/spd/xps-da14260-laptop",
-    "imageStatus": "manufacturer_image_to_add"
+    "imageStatus": "manufacturer_image_to_add",
+    "imageKind": "illustration"
   },
   {
     "id": "dell-inspiron-16-plus",
@@ -4992,7 +5033,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=HP%20OmniBook%20Ultra%20Flip%2014&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "hp-elitebook-x-g1i",
@@ -5040,7 +5082,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Lenovo%20ThinkPad%20X1%20Carbon%20Gen%2013&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "lenovo-yoga-slim-7i-aura-edition",
@@ -5072,7 +5115,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Lenovo%20Legion%20Pro%207i&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "asus-zenbook-s-14",
@@ -5088,7 +5132,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=ASUS%20Zenbook%20S%2014&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "asus-rog-zephyrus-g16",
@@ -5104,7 +5149,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=ASUS%20ROG%20Zephyrus%20G16&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "asus-tuf-gaming-a16",
@@ -5120,7 +5166,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=ASUS%20TUF%20Gaming%20A16&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "acer-swift-16-ai",
@@ -5129,14 +5176,17 @@ const productData=[
     "category": "tech",
     "brand": "Acer",
     "query": "Acer Swift 16 AI",
-    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=85",
+    "image": "https://images.acer.com/is/image/acer/acer-laptop-swift-16-ai-main-banner-l?$image-2560w$=",
     "merchant": "Recherche catalogue • offre à vérifier",
     "price": "Voir les offres",
     "old": "",
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Acer%20Swift%2016%20AI&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageSource": "https://www.acer.com/fr-fr/laptops/swift/swift-16-ai",
+    "imageSourceName": "Acer",
+    "imageKind": "official"
   },
   {
     "id": "acer-predator-helios-neo-16",
@@ -5152,7 +5202,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Acer%20Predator%20Helios%20Neo%2016&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "acer-nitro-v-16",
@@ -5168,7 +5219,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Acer%20Nitro%20V%2016&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "msi-stealth-16-ai-studio",
@@ -5200,7 +5252,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=MSI%20Vector%2016%20HX&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "samsung-galaxy-book6-ultra",
@@ -5232,7 +5285,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Microsoft%20Surface%20Laptop%207&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "razer-blade-16",
@@ -5248,7 +5302,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Razer%20Blade%2016&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "framework-laptop-13",
@@ -5264,7 +5319,8 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Framework%20Laptop%2013&tag=prixbasmalin2-21",
     "dataStatus": "model_reference_to_verify",
-    "imageStatus": "generic_category_visual"
+    "imageStatus": "generic_category_visual",
+    "imageKind": "illustration"
   },
   {
     "id": "iphone-duo",
@@ -5315,6 +5371,7 @@ const productData=[
       "Boîtier": "Recharge sans fil"
     }
   }
+]
 ];
 const suggestedBrands={airfryer:["Philips","Moulinex","Ninja"],vacuum:["Dyson","Rowenta","Bosch"],lamp:["Philips Hue","Xiaomi","IKEA"],dress:["Only","Vero Moda","Amazon Essentials"],coffee:["De’Longhi","Krups","Philips"],blender:["Moulinex","Ninja","Philips"],chair:["IKEA","SONGMICS","Hbada"],bedding:["Emma","Linvosges","Amazon Basics"],backpack:["Eastpak","The North Face"],handbag:["Guess","Desigual","Amazon Essentials"],sunglasses:["Ray-Ban","Polaroid","Hawkers"],running:["Nike","Adidas","Asics"],headphones:["Sony","JBL","Bose"],earbuds:["Apple","Samsung","JBL"],smartwatch:["Apple","Samsung","Xiaomi"],powerbank:["Anker","Belkin","INIU"],camera:["Canon","Sony","Fujifilm"],hoodie:["Nike","Adidas","Levi’s"],jacket:["The North Face","Columbia","Levi’s"],jeans1:["Levi’s","Wrangler","Lee"],jeans2:["Levi’s","Only","Lee"],t1:["Uniqlo","Levi’s","Amazon Essentials"],t2:["Uniqlo","Levi’s","Amazon Essentials"],polo1:["Lacoste","Ralph Lauren","Tommy Hilfiger"],fa28:["Nike","Adidas","Asics"],fa29:["Nike","Adidas","Puma"],fa30:["Secrid","Levi’s","Eastpak"]};
 const categoryBrands={fashion:["Levi’s","Nike","Adidas"],home:["Philips","Moulinex","Bosch"],tech:["Samsung","Apple","Xiaomi"],beauty:["L’Oréal Paris","Nivea","Maybelline"],kids:["LEGO","VTech","Fisher-Price"]};
