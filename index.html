@@ -4,6 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#080b10">
+<meta name="description" content="Explorez les sélections de Prix Malin, trouvez des idées par catégorie et suivez gratuitement vos produits avec des favoris et des alertes de prix. Les offres et tarifs doivent être confirmés chez le marchand.">
+<link rel="canonical" href="https://prixbasmalin.fr/">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Prix Malin">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://prixbasmalin.fr/">
+<meta property="og:title" content="Prix Malin — Trouvez, suivez et économisez">
+<meta property="og:description" content="Explorez les sélections produits et créez gratuitement des alertes pour suivre les prix.">
+<meta property="og:image" content="https://prixbasmalin.fr/assets/prixmalin-publicite.webp">
+<meta property="og:image:alt" content="Prix Malin — Comparez. Économisez. Malin.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Prix Malin — Trouvez, suivez et économisez">
+<meta name="twitter:description" content="Explorez les sélections produits et créez gratuitement des alertes pour suivre les prix.">
+<meta name="twitter:image" content="https://prixbasmalin.fr/assets/prixmalin-publicite.webp">
 <title>Prix Malin — Comparateur de prix et bonnes affaires</title>
 <style>
 :root{--bg:#080b10;--panel:#111821;--line:#303b49;--text:#f7f8fa;--muted:#b5bec9;--orange:#ff681c}
@@ -197,6 +212,24 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 }
 
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Prix Malin",
+  "url": "https://prixbasmalin.fr/",
+  "inLanguage": "fr-FR",
+  "description": "Sélections de produits, découverte de marchands et suivi gratuit de produits par alertes de prix.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://prixbasmalin.fr/catalogue.html?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
@@ -380,7 +413,7 @@ section{padding-top:24px!important}
 </section>
 <nav class="pm-old-bottom" aria-label="Navigation mobile"><a class="active" href="index.html"><span>⌂</span>Accueil</a><a href="catalogue.html"><span>▦</span>Catalogue</a><a href="#deals"><span>％</span>Promos</a><a href="catalogue.html?favoris=1"><span>♡</span>Favoris</a><a href="catalogue.html?alerte=1"><span>♧</span>Alertes</a><a href="guide-cadeaux.html"><span>🎁</span>Guides & Conseils</a><a href="publicite.html"><span>✉</span>Contact</a></nav>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script>
-<script src="/js/personalisation.js"></script><script src="/js/cookie-consent.js"></script><script src="/js/prix-malin-auth.js"></script>
+<script src="/js/personalisation.js"></script><script src="/js/cookie-consent.js"></script><script type="module" src="/js/prix-malin-auth.js"></script>
 <script>
 document.getElementById('pmQuickCompare')?.addEventListener('submit',function(e){e.preventDefault();const q=document.getElementById('pmQuickQuery').value.trim();if(q)location.href='catalogue.html?q='+encodeURIComponent(q)});
 </script>
