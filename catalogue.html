@@ -5667,12 +5667,28 @@ function render(){
     if(selectedBrand && pmSearchNorm(p.brand)!==pmSearchNorm(selectedBrand))return false;
     if(!q)return true;
     const haystack=pmSearchNorm([p.name,p.desc,p.query,p.brand,p.category,p.color,p.size,p.product_type,p.gtin,p.merchant].join(" "));
-    // Un synonyme suffit pour chaque mot saisi : ne pas exiger toutes les variantes à la fois.
     return correctedQuery.every(term=>{
       const variants=pmSearchSynonyms[term]||[term];
       return variants.some(variant=>(" "+haystack+" ").includes(" "+pmSearchNorm(variant)+" "));
     });
   });
+  // Si la recherche est trop précise, compléter avec des références proches de la même famille,
+  // sans les présenter comme des correspondances exactes.
+  const relatedCategoryRules=[
+    {terms:["survetement","jogging","sweat","pantalon","veste","t shirt","tshirt","polo","jean","robe","chaussure","basket","baskets","sneakers"],category:"fashion"},
+    {terms:["ordinateur","ordi","pc","laptop","smartphone","telephone","iphone","android","casque","ecouteur","tv","television","console","tablette","camera"],category:"tech"},
+    {terms:["aspirateur","lave linge","machine a laver","refrigerateur","frigo","four","cuisine","maison"],category:"home"},
+    {terms:["parfum","maquillage","creme","soin","beaute","cosmetique"],category:"beauty"}
+  ];
+  let exactMatchCount=found.length;
+  const relatedRule=relatedCategoryRules.find(rule=>rule.terms.some(term=>q.includes(term)));
+  if(q&&found.length<20&&relatedRule&&!selectedBrand){
+    const seen=new Set(found.map(p=>p.id));
+    const related=catalogueData.filter(p=>p.category===relatedRule.category&&!seen.has(p.id));
+    for(const product of related.slice(0,20-found.length)){
+      found.push({...product,_pmRelatedSuggestion:true});
+    }
+  }
   productsEl.innerHTML="";
   const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   filtersEl.innerHTML="";
@@ -5680,7 +5696,10 @@ function render(){
   const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";render();});filtersEl.append(allBrand);
   availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;render();});filtersEl.append(button);});
   const brandsCount=new Set(found.map(p=>p.brand).filter(Boolean)).size;
-  countEl.textContent=found.length+" produit(s) avec photo et prix issus d’un flux marchand";
+  const verifiedPriceCount=found.filter(p=>Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0).length;
+  countEl.textContent=q
+    ?(exactMatchCount+" résultat(s) correspondant exactement"+(found.length>exactMatchCount?" • "+(found.length-exactMatchCount)+" suggestions proches":"")+" • "+verifiedPriceCount+" prix vérifié(s)")
+    :(found.length+" références catalogue • "+verifiedPriceCount+" prix vérifié(s)");
   if(!found.length){
     const query=searchEl.value.trim();
     const empty=document.createElement("div");empty.className="empty pm-catalogue-no-feed";
@@ -5757,7 +5776,7 @@ function render(){
 
     const name=document.createElement("div");
     name.className="name";
-    name.textContent=p.name;
+    name.textContent=p.name+(p._pmRelatedSuggestion?" • suggestion proche":"");
     const desc=document.createElement("div");
     desc.className="desc";
     desc.textContent=p.desc;
