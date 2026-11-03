@@ -1,5 +1,5 @@
 <!doctype html><html lang="fr"><head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff"><title>Catalogue Amazon — Prix Malin</title><meta name="description" content="Catalogue Prix Malin : smartphones, audio, mode et accessoires. Amazon est la priorité ; les prix directs apparaîtront quand une source autorisée sera disponible.">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff"><title>Catalogue produits et marques — Prix Malin</title><meta name="description" content="Catalogue Prix Malin : smartphones, audio, mode et accessoires. Amazon est la priorité ; les prix directs apparaîtront quand une source autorisée sera disponible.">
 <link rel="canonical" href="https://prixbasmalin.fr/catalogue.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Prix Malin">
@@ -293,7 +293,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 .pm-detail-visual-card{overflow:hidden;padding:0 0 12px}\n.pm-detail-visual{height:112px;background:#f1f3f7;overflow:hidden;border-radius:12px 12px 0 0;margin-bottom:10px}\n.pm-detail-visual img{width:100%;height:100%;object-fit:cover;display:block}
 .pm-detail-visual-fallback{background:linear-gradient(135deg,#eef1f6,#dfe5ee)}
 .pm-detail-visual-card strong,.pm-detail-visual-card p,.pm-detail-visual-card a{margin-left:12px;margin-right:12px}\n.pm-detail-visual-card a{display:block}
-@media(max-width:390px){.pm-detail-cards{grid-template-columns:1fr}.pm-detail-visual{height:150px}}\n</style>  <!-- Cloudflare Web Analytics -->
+@media(max-width:390px){.pm-detail-cards{grid-template-columns:1fr}.pm-detail-visual{height:150px}}\n
+#products .photo{position:relative}
+.pm-photo-source{position:absolute;left:6px;bottom:6px;padding:4px 7px;border-radius:7px;background:#172033e8;color:#fff;font-size:9px;font-weight:800;text-decoration:none;z-index:2}
+.pm-photo-source.illustration{background:#596579e8}
+.pm-history-link{display:block;text-align:center;margin:7px 0;padding:9px 10px;border:1px solid #dce4f0;border-radius:10px;color:#263a58;background:#f6f8fb;font-size:12px;font-weight:800;text-decoration:none}
+.pm-detail-visual img{object-fit:contain;padding:10px;background:#fff}
+</style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=4">
@@ -5444,9 +5450,16 @@ function render(){
     img.alt=p.name;
     img.loading="lazy";
     img.dataset.fallbackTried="0";
+    const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
+    imageBadge.className="pm-photo-source"+(p.imageKind==="illustration"?" illustration":"");
+    imageBadge.textContent=p.imageSource?"Photo constructeur":(p.imageKind==="illustration"?"Illustration":"");
+    if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source de la photo : "+(p.imageSourceName||"constructeur"));}
+    if(imageBadge.textContent)photo.append(imageBadge);
     img.onerror=()=>{
       if(img.dataset.fallbackTried==="0"){
         img.dataset.fallbackTried="1";
+        imageBadge.textContent="Illustration";
+        imageBadge.classList.add("illustration");
         const fallbackImages={
           fashion:"https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=80",
           tech:"https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=900&q=80",
@@ -5499,6 +5512,8 @@ function render(){
     amazonButton.target="_blank";
     amazonButton.rel="noopener noreferrer sponsored";
     amazonButton.setAttribute("aria-label","Voir les offres Amazon pour "+p.name);
+    const historyLink=p.category==="tech"?document.createElement("a"):null;
+    if(historyLink){historyLink.className="pm-history-link";historyLink.href="/historique-prix.html?q="+encodeURIComponent(p.name);historyLink.textContent="Voir l’historique PrixTracker ↗";historyLink.setAttribute("aria-label","Consulter les relevés historiques PrixTracker pour "+p.name);}
     const price=document.createElement("div");
     price.className="price";
     price.textContent="Prix direct non encore disponible";
@@ -5521,7 +5536,9 @@ function render(){
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
     note.textContent="Prix Malin affiche uniquement des prix vérifiés pour le modèle exact. Aucun prix n'est inventé.";
-    card.append(photo,name,desc,brands,amazonButton,price,merchant,heading,list,note);
+    card.append(photo,name,desc,brands,amazonButton);
+    if(historyLink)card.append(historyLink);
+    card.append(price,merchant,heading,list,note);
     card.dataset.pmProductName=p.name;
     card.dataset.pmProductQuery=p.query||p.name;
     card.dataset.pmProductCategory=p.category||"tech";
@@ -6000,4 +6017,5 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
  window.addEventListener('resize',()=>{if(!mobile())return;[assistant.box,access.box].forEach(el=>{if(el.style.left){const r=el.getBoundingClientRect();el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,r.left))+'px';el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,r.top))+'px'}})});
 })();
 </script>
+<script defer src="/js/track-outbound.js"></script>
 </body></html>
