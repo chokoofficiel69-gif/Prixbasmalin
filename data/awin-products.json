@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "source": "Awin Publisher Enhanced Retail Feeds",
+  "publisher_id": "3137386",
+  "locale": "fr_FR",
+  "fetched_at": null,
+  "status": "waiting_for_first_authorized_feed_sync",
+  "counts": {
+    "joined_advertisers_checked": 0,
+    "products": 0,
+    "merchant_offers": 0,
+    "brands": 0
+  },
+  "products": [],
+  "attribution": "Aucune fiche n'est préchargée ou inventée. Les produits seront ajoutés uniquement depuis les flux Awin réellement accessibles au compte éditeur Prix Malin."
+}
