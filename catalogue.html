@@ -5739,7 +5739,7 @@ function openAmazonSearch(term){
  const url="https://www.amazon.fr/s?"+new URLSearchParams({k:query,s:"price-asc-rank",tag:"prixbasmalin2-21"}).toString();
  window.location.href=url;
 }
-amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();openAmazonSearch(searchEl.value)});
+amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();selectedBrand="";render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
 searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();
 </script>  
 <script>
