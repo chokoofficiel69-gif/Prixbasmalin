@@ -49,7 +49,7 @@ class PriceFeedValidationTests(unittest.TestCase):
                 "sources": {},
             }), encoding="utf-8")
             catalogue.write_text(
-                'const productData=[{id:"t1",name:"T-shirt blanc"}];',
+                'const productData=[{"id":"t1","name":"T-shirt blanc"}];',
                 encoding="utf-8",
             )
             with patch.object(BUILDER, "INPUT", source), \
