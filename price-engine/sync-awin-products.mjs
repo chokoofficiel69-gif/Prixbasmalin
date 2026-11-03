@@ -303,6 +303,13 @@ const programmesResponse = await request(
   "Liste des partenariats"
 );
 if (!programmesResponse.ok) {
+  if ([401,403].includes(programmesResponse.status)) {
+    log("Accès Awin Publisher refusé (HTTP " + programmesResponse.status + "). Le jeton AWIN_API_TOKEN présent dans les secrets n'est pas accepté par l'API éditeur. Aucune donnée produit ni aucun prix n'a été modifié.");
+    if (!process.env.AWIN_PRODUCT_DATA_API_KEY) {
+      log("La clé séparée AWIN_PRODUCT_DATA_API_KEY pour les flux produits standards n'est pas configurée. Il faut rétablir le jeton Publisher et/ou ajouter cette clé distincte dans les secrets Actions du dépôt.");
+    }
+    process.exit(0);
+  }
   throw new Error("API Awin programmes HTTP " + programmesResponse.status + " (aucune donnée catalogue écrite).");
 }
 const programmePayload = await programmesResponse.json();
