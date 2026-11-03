@@ -557,6 +557,57 @@ body{padding-bottom:82px!important}
  .hero h1{font-size:23px}
  .hero-sticker{left:23%;top:22%}
 }
+
+/* Sélection produits : rangée horizontale inspirée de la publicité Prix Malin */
+#deals .products{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  gap:12px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  padding:4px 2px 14px!important;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+}
+#deals .product{
+  flex:0 0 205px!important;
+  width:205px!important;
+  min-width:205px!important;
+  scroll-snap-align:start;
+  background:#f8f9fb!important;
+  color:#111722!important;
+  border:1px solid #d9dee6!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+}
+#deals .product .photo{height:145px!important;background:#fff!important}
+#deals .product .photo img{width:100%!important;height:100%!important;object-fit:contain!important;padding:9px!important}
+#deals .product .pbody{padding:11px!important}
+#deals .product .pname{color:#111722!important;font-size:14px!important;font-weight:850!important;min-height:36px}
+#deals .product .price-status{
+  display:block!important;
+  margin:7px 0 9px!important;
+  color:#d94812!important;
+  font-size:15px!important;
+  font-weight:900!important;
+}
+#deals .product .product-subtitle{color:#596575!important;min-height:0!important}
+#deals .product .buy{
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  background:#ff681c!important;
+  color:#fff!important;
+  border-radius:9px!important;
+  padding:10px 8px!important;
+  font-weight:850!important;
+}
+@media(max-width:700px){
+  #deals .products{margin-right:-18px!important;padding-right:18px!important}
+  #deals .product{flex-basis:176px!important;width:176px!important;min-width:176px!important}
+  #deals .product .photo{height:126px!important}
+}
+
 </style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
@@ -588,12 +639,12 @@ body{padding-bottom:82px!important}
 <article class="new-arrival"><div class="new-arrival-media"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Apple AirPods 5 sur fond blanc" loading="lazy"></div><div class="new-arrival-copy"><span class="new-arrival-kicker">NOUVEAU</span><h3>Apple AirPods 5</h3><p>Écouteurs nouvelle génération, réduction active du bruit et audio adaptatif.</p><div class="new-arrival-status"><strong>Disponibles depuis le 18 septembre</strong></div><a href="https://www.apple.com/fr/airpods/" target="_blank" rel="noopener noreferrer">Voir les offres →</a></div></article>
 </div></section>
 <section id="deals"><div class="section-head"><h2>🔥 Sélection Prix Malin</h2><small>Des références précises à découvrir chez les marchands</small></div><div class="products" id="products">
-<article class="product" data-name="Apple iPhone 18 Pro"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro noir" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple iPhone 18 Pro</div><p class="product-subtitle">Puce A20 Pro et caméra Fusion 48 Mpx.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+iPhone+18+Pro&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Apple Watch Series 12"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-Watch-Series-12-black-aluminum-with-burgundy-plaid-Sport-Loop_inline.jpg.large.jpg" alt="Apple Watch Series 12 noire avec bracelet sport" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple Watch Series 12</div><p class="product-subtitle">Puce S11 et nouveau système de suivi de santé.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+Watch+Series+12&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Apple AirPods 5"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Apple AirPods 5" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple AirPods 5</div><p class="product-subtitle">Réduction active du bruit en design ouvert.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+AirPods+5&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Polo Lacoste L.12.12 Original"><div class="photo"><img src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&imwidth=1920" alt="Polo Lacoste L.12.12" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Polo Lacoste L.12.12</div><p class="product-subtitle">Le polo iconique en coton Petit Piqué.</p><a class="buy" href="https://www.amazon.fr/s?k=Lacoste+L.12.12+polo&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Levi's 501 Original"><div class="photo"><img src="https://lsco.scene7.com/is/image/lsco/005013220-front-pdp?fit=crop%2C1&fmt=jpeg&hei=700&op_usm=0.6%2C0.6%2C8&qlt=85&resMode=sharp2&wid=700" alt="Jean Levi's 501 Original" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Levi’s 501 Original</div><p class="product-subtitle">Jean droit denim, modèle emblématique.</p><a class="buy" href="https://www.amazon.fr/s?k=Levis+501+Original&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
-<article class="product" data-name="Sony 1000X The ColleXion"><div class="photo"><img src="https://cdn.uc.assets.prezly.com/f5442a12-58b4-4188-a97d-64b1caa2eb85/1000X_THE_COLLEXION_In-situation_Color_Variation-Large.jpg" alt="Casque Sony 1000X The ColleXion" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Sony 1000X The ColleXion</div><p class="product-subtitle">Casque sans fil haut de gamme.</p><a class="buy" href="https://www.amazon.fr/s?k=Sony+1000X+The+ColleXion&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+<article class="product" data-name="Apple iPhone 18 Pro"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro noir" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple iPhone 18 Pro</div><div class="price-status">Prix à vérifier chez le marchand</div><p class="product-subtitle">Puce A20 Pro et caméra Fusion 48 Mpx.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+iPhone+18+Pro&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+<article class="product" data-name="Apple Watch Series 12"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-Watch-Series-12-black-aluminum-with-burgundy-plaid-Sport-Loop_inline.jpg.large.jpg" alt="Apple Watch Series 12 noire avec bracelet sport" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple Watch Series 12</div><div class="price-status">Prix à vérifier chez le marchand</div><p class="product-subtitle">Puce S11 et nouveau système de suivi de santé.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+Watch+Series+12&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+<article class="product" data-name="Apple AirPods 5"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Apple AirPods 5" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple AirPods 5</div><div class="price-status">Prix à vérifier chez le marchand</div><p class="product-subtitle">Réduction active du bruit en design ouvert.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+AirPods+5&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+<article class="product" data-name="Polo Lacoste L.12.12 Original"><div class="photo"><img src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&imwidth=1920" alt="Polo Lacoste L.12.12" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Polo Lacoste L.12.12</div><div class="price-status">Prix à vérifier chez le marchand</div><p class="product-subtitle">Le polo iconique en coton Petit Piqué.</p><a class="buy" href="https://www.amazon.fr/s?k=Lacoste+L.12.12+polo&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+<article class="product" data-name="Levi's 501 Original"><div class="photo"><img src="https://lsco.scene7.com/is/image/lsco/005013220-front-pdp?fit=crop%2C1&fmt=jpeg&hei=700&op_usm=0.6%2C0.6%2C8&qlt=85&resMode=sharp2&wid=700" alt="Jean Levi's 501 Original" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Levi’s 501 Original</div><div class="price-status">Prix à vérifier chez le marchand</div><p class="product-subtitle">Jean droit denim, modèle emblématique.</p><a class="buy" href="https://www.amazon.fr/s?k=Levis+501+Original&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
+<article class="product" data-name="Sony 1000X The ColleXion"><div class="photo"><img src="https://cdn.uc.assets.prezly.com/f5442a12-58b4-4188-a97d-64b1caa2eb85/1000X_THE_COLLEXION_In-situation_Color_Variation-Large.jpg" alt="Casque Sony 1000X The ColleXion" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Sony 1000X The ColleXion</div><div class="price-status">Prix à vérifier chez le marchand</div><p class="product-subtitle">Casque sans fil haut de gamme.</p><a class="buy" href="https://www.amazon.fr/s?k=Sony+1000X+The+ColleXion&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
 </div><p class="note">Les boutons ouvrent les offres du vendeur. Les prix et stocks sont à vérifier sur sa page au moment de l’achat.</p></section>
 <section id="ideas"><div class="banners">
 <div class="banner" style="background-image:url('https://images.unsplash.com/photo-1512909006721-3d6018887383?w=900&q=85')"><div><h3>Idées cadeaux</h3><p>Pour toutes les occasions</p><a href="guide-cadeaux.html">Découvrir la sélection →</a></div></div>
@@ -688,50 +739,6 @@ section{padding-top:24px!important}
  .pm-old-bottom{padding:5px 2px max(7px,env(safe-area-inset-bottom))!important}
  .pm-old-bottom a{font-size:8px!important}
  .pm-old-bottom span{font-size:17px!important}
-}
-
-/* Correction validée : catégories en longues cartes horizontales, jamais en mosaïque carrée */
-#categories .categories{
-  display:grid!important;
-  grid-template-columns:1fr!important;
-  gap:14px!important;
-}
-#categories .categories .cat{
-  position:relative!important;
-  display:block!important;
-  width:100%!important;
-  height:clamp(145px,24vw,220px)!important;
-  min-height:145px!important;
-  overflow:hidden!important;
-  border:1px solid #465365!important;
-  border-radius:22px!important;
-  background:#111821!important;
-  box-shadow:0 5px 18px rgba(0,0,0,.24)!important;
-}
-#categories .categories .cat img{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:cover!important;
-  object-position:center 48%!important;
-}
-#categories .categories .cat div{
-  position:absolute!important;
-  inset:auto 0 0!important;
-  padding:34px 18px 15px!important;
-  background:linear-gradient(0deg,rgba(0,0,0,.88),rgba(0,0,0,.25) 72%,transparent)!important;
-  color:#fff!important;
-  font-size:clamp(18px,2.4vw,25px)!important;
-  line-height:1.15!important;
-  font-weight:950!important;
-  text-align:left!important;
-  text-shadow:0 2px 8px #000!important;
-}
-#categories .categories .cat:hover img{transform:scale(1.025)}
-@media(max-width:700px){
-  #categories .categories{grid-template-columns:1fr!important;gap:12px!important}
-  #categories .categories .cat{height:170px!important;min-height:170px!important;border-radius:20px!important}
-  #categories .categories .cat div{font-size:21px!important;padding:36px 16px 14px!important}
 }
 
 </style>
