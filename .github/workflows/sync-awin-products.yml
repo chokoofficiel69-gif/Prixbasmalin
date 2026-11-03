@@ -34,6 +34,7 @@ jobs:
       - name: Télécharger les flux produits autorisés
         env:
           AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
+          AWIN_PRODUCT_DATA_API_KEY: ${{ secrets.AWIN_PRODUCT_DATA_API_KEY }}
           AWIN_PUBLISHER_ID: "3137386"
           AWIN_FEED_LOCALE: "fr_FR"
         run: node price-engine/sync-awin-products.mjs
