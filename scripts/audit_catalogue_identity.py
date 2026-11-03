@@ -12,22 +12,24 @@ IDENTITIES = ROOT / "data" / "catalogue-identities.json"
 
 def read_catalogue():
     text = CATALOGUE.read_text(encoding="utf-8")
-    match = re.search(r"const\s+productData\s*=\s*\[(.*?)\];", text, re.S)
+    match = re.search(r"const\s+productData\s*=\s*(\[.*?\])\s*;", text, re.S)
     if not match:
         raise ValueError("Impossible de trouver productData dans catalogue.html")
-    products = []
-    for obj in re.findall(r"\{([^{}]*)\}", match.group(1), re.S):
-        id_match = re.search(r"""\bid\s*:\s*["']([^"']+)["']""", obj)
-        name_match = re.search(r"""\bname\s*:\s*["']([^"']+)["']""", obj)
-        if id_match and name_match:
-            products.append({"id": id_match.group(1), "name": name_match.group(1)})
-    if not products:
+    try:
+        products = json.loads(match.group(1))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"productData n'est pas un tableau JSON valide: {exc}") from exc
+    if not isinstance(products, list) or not products:
         raise ValueError("Aucune fiche produit reconnue dans productData")
-    ids = [p["id"] for p in products]
+    normalized = []
+    for product in products:
+        if not isinstance(product, dict) or not product.get("id") or not product.get("name"):
+            raise ValueError("Fiche produit sans identifiant ou nom")
+        normalized.append({"id": str(product["id"]), "name": str(product["name"])})
+    ids = [product["id"] for product in normalized]
     if len(ids) != len(set(ids)):
         raise ValueError("Identifiants de fiches dupliqués dans productData")
-    return products
-
+    return normalized
 
 def valid_mapping(mapping):
     if not isinstance(mapping, dict):
