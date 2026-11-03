@@ -5314,6 +5314,7 @@ function pmSearchNorm(value){
     .normalize("NFD").replace(/[\\u0300-\\u036f]/g,"")
     .replace(/[’']/g," ").replace(/[^a-z0-9]+/g," ").trim();
 }
+const pmSpellCorrections={ordianteur:"ordinateur",ordinteur:"ordinateur",ordiinateur:"ordinateur",ordnateur:"ordinateur",laptpo:"laptop",portble:"portable",smartphoen:"smartphone",telephonne:"telephone",televison:"television",ecouteur:"ecouteurs"};
 const pmSearchSynonyms={
   ordinateur:["ordinateur","ordi","pc","laptop","portable","notebook"],
   pc:["pc","ordinateur","ordi","laptop","portable"],
@@ -5334,13 +5335,17 @@ function render(){
   const rawQuery=searchEl.value.trim();
   const q=pmSearchNorm(rawQuery);
   const queryTerms=q.split(" ").filter(Boolean);
-  const expandedTerms=[...new Set(queryTerms.flatMap(term=>pmSearchSynonyms[term]||[term]))];
+  const correctedQuery=queryTerms.map(term=>pmSpellCorrections[term]||term);
   const found=productData.filter(p=>{
     const matchesCategory=category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category);
     if(!matchesCategory)return false;
     if(!q)return true;
     const haystack=pmSearchNorm([p.name,p.desc,p.query,p.brand,p.category].join(" "));
-    return expandedTerms.every(term=>haystack.includes(pmSearchNorm(term)));
+    // Un synonyme suffit pour chaque mot saisi : ne pas exiger toutes les variantes à la fois.
+    return correctedQuery.every(term=>{
+      const variants=pmSearchSynonyms[term]||[term];
+      return variants.some(variant=>haystack.includes(pmSearchNorm(variant)));
+    });
   });
   productsEl.innerHTML="";
   countEl.textContent=found.length+" produit(s) de découverte";
