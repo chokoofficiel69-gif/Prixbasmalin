@@ -33,6 +33,8 @@ on:
       - "js/prix-malin-auth.js"
       - "catalogue.html"
       - "index.html"
+      - "partenaires.html"
+      - "publicite.html"
       - "data/featured-prices.json"
       - "etat-prix.html"
       - "data/prices.json"
