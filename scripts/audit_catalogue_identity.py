@@ -12,7 +12,7 @@ IDENTITIES = ROOT / "data" / "catalogue-identities.json"
 
 def read_catalogue():
     text = CATALOGUE.read_text(encoding="utf-8")
-    match = re.search(r"const\s+productData\s*=\s*\[(.*?)\];", text, re.S)
+    match = re.search(r"const\s+productData\s*=\s*(\[.*?\])\s*;", text, re.S)
     if not match:
         raise ValueError("Impossible de trouver productData dans catalogue.html")
     try:
