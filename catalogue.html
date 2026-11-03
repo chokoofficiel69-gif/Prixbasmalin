@@ -278,7 +278,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 .pm-amazon-search-submit{width:100%;min-height:48px;border:0;border-radius:12px;background:#ff6848;color:#21182a;font:800 14px system-ui,-apple-system,sans-serif;padding:12px 16px;cursor:pointer}
 .pm-amazon-search-submit:active{transform:scale(.99)}
 .pm-amazon-empty-cta{display:block;margin-top:12px;padding:14px;border:1px solid #ffc7b9;border-radius:13px;background:#fff2ee;color:#a83e2d;text-align:center;font-weight:800}
-</style>  <!-- Cloudflare Web Analytics -->
+\n.pm-catalogue-brand-filters{display:flex;gap:7px;overflow-x:auto;padding:4px 0 10px;margin:0 0 8px;scrollbar-width:thin}.pm-brand-filter{flex:none;border:1px solid #e8e1dc;background:#fff;color:#39322e;border-radius:999px;padding:8px 12px;font:inherit;font-size:12px;font-weight:700;white-space:nowrap}.pm-brand-filter.active{background:#ff650b;border-color:#ff650b;color:#fff}.pm-catalogue-brand-filters:empty{display:none}\n</style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=4">
@@ -308,7 +308,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
   <label class="discovery-search-label" for="search">Rechercher un produit</label>
   <form id="pmAmazonSearchForm" class="pm-amazon-search-form" role="search"><input id="search" class="search" type="search" placeholder="Ex. PlayStation, iPhone, télé…" autocomplete="off" value=""><button class="pm-amazon-search-submit" type="submit">Rechercher sur Amazon ↗</button></form>
   <div class="count" id="count" aria-live="polite"></div>
-  <div id="filters" hidden></div>
+  <div id="filters" class="pm-catalogue-brand-filters" aria-label="Filtrer par marque"></div>
   <section class="grid" id="products" aria-live="polite"></section>
 </section>
 <p class="note">Les offres et stocks doivent toujours être confirmés chez le marchand. Les fiches d’exploration ne constituent pas des prix comparés.</p></main><script>
@@ -5304,7 +5304,8 @@ const productData=[
 const suggestedBrands={airfryer:["Philips","Moulinex","Ninja"],vacuum:["Dyson","Rowenta","Bosch"],lamp:["Philips Hue","Xiaomi","IKEA"],dress:["Only","Vero Moda","Amazon Essentials"],coffee:["De’Longhi","Krups","Philips"],blender:["Moulinex","Ninja","Philips"],chair:["IKEA","SONGMICS","Hbada"],bedding:["Emma","Linvosges","Amazon Basics"],backpack:["Eastpak","The North Face"],handbag:["Guess","Desigual","Amazon Essentials"],sunglasses:["Ray-Ban","Polaroid","Hawkers"],running:["Nike","Adidas","Asics"],headphones:["Sony","JBL","Bose"],earbuds:["Apple","Samsung","JBL"],smartwatch:["Apple","Samsung","Xiaomi"],powerbank:["Anker","Belkin","INIU"],camera:["Canon","Sony","Fujifilm"],hoodie:["Nike","Adidas","Levi’s"],jacket:["The North Face","Columbia","Levi’s"],jeans1:["Levi’s","Wrangler","Lee"],jeans2:["Levi’s","Only","Lee"],t1:["Uniqlo","Levi’s","Amazon Essentials"],t2:["Uniqlo","Levi’s","Amazon Essentials"],polo1:["Lacoste","Ralph Lauren","Tommy Hilfiger"],fa28:["Nike","Adidas","Asics"],fa29:["Nike","Adidas","Puma"],fa30:["Secrid","Levi’s","Eastpak"]};
 const categoryBrands={fashion:["Levi’s","Nike","Adidas"],home:["Philips","Moulinex","Bosch"],tech:["Samsung","Apple","Xiaomi"],beauty:["L’Oréal Paris","Nivea","Maybelline"],kids:["LEGO","VTech","Fisher-Price"]};
 function brandsFor(p){return suggestedBrands[p.id]||categoryBrands[p.category]||["Philips","Samsung","Xiaomi"];}
-const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count");
+const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count"),filtersEl=document.getElementById("filters");
+let selectedBrand="";
 const categoryParam=new URLSearchParams(location.search).get("cat")||"all";
 const categoryAliases={tech:["tech"],fashion:["fashion"],home:["home"],beauty:["beauty"],kids:["kids"],sport:["fashion","tech"],auto:"all",diy:"all",appliances:["home"],gifts:"all"};
 let category=categoryAliases[categoryParam]||"all";
@@ -5339,6 +5340,7 @@ function render(){
   const found=productData.filter(p=>{
     const matchesCategory=category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category);
     if(!matchesCategory)return false;
+    if(selectedBrand && pmSearchNorm(p.brand)!==pmSearchNorm(selectedBrand))return false;
     if(!q)return true;
     const haystack=pmSearchNorm([p.name,p.desc,p.query,p.brand,p.category].join(" "));
     // Un synonyme suffit pour chaque mot saisi : ne pas exiger toutes les variantes à la fois.
@@ -5348,7 +5350,13 @@ function render(){
     });
   });
   productsEl.innerHTML="";
-  countEl.textContent=found.length+" produit(s) de découverte";
+  const availableBrands=[...new Set(productData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  filtersEl.innerHTML="";
+  filtersEl.hidden=false;
+  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";render();});filtersEl.append(allBrand);
+  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;render();});filtersEl.append(button);});
+  const brandsCount=new Set(found.map(p=>p.brand).filter(Boolean)).size;
+  countEl.textContent=found.length+" produit(s) • "+brandsCount+" marque(s)";
   if(!found.length){
     productsEl.innerHTML='<div class="empty">Aucun produit dans notre sélection pour cette recherche.<a class="pm-amazon-empty-cta" href="https://www.amazon.fr/s?k=PlayStation&s=price-asc-rank&tag=prixbasmalin2-21" id="pmAmazonFallback">Voir les résultats Amazon ↗</a></div>';
      const fallback=document.getElementById("pmAmazonFallback");if(fallback){const url="https://www.amazon.fr/s?"+new URLSearchParams({k:searchEl.value.trim(),s:"price-asc-rank",tag:"prixbasmalin2-21"}).toString();fallback.href=url;}
@@ -5732,7 +5740,7 @@ function openAmazonSearch(term){
  window.location.href=url;
 }
 amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();openAmazonSearch(searchEl.value)});
-searchEl.addEventListener("input",render);document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();
+searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();
 </script>  
 <script>
 
