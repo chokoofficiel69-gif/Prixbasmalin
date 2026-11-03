@@ -353,7 +353,7 @@ Promise.all([fetch("/data/prices.json",{cache:"no-store"}).then(r=>r.ok?r.json()
     if(combined.length)renderVerifiedProducts(combined);
   })
   .catch(()=>{});
-const productData=[[
+const productData=[
   {
     "id": "airpodspro3",
     "name": "Apple AirPods Pro 3",
@@ -5389,7 +5389,6 @@ const productData=[[
       "Boîtier": "Recharge sans fil"
     }
   }
-]
 ];
 const suggestedBrands={airfryer:["Philips","Moulinex","Ninja"],vacuum:["Dyson","Rowenta","Bosch"],lamp:["Philips Hue","Xiaomi","IKEA"],dress:["Only","Vero Moda","Amazon Essentials"],coffee:["De’Longhi","Krups","Philips"],blender:["Moulinex","Ninja","Philips"],chair:["IKEA","SONGMICS","Hbada"],bedding:["Emma","Linvosges","Amazon Basics"],backpack:["Eastpak","The North Face"],handbag:["Guess","Desigual","Amazon Essentials"],sunglasses:["Ray-Ban","Polaroid","Hawkers"],running:["Nike","Adidas","Asics"],headphones:["Sony","JBL","Bose"],earbuds:["Apple","Samsung","JBL"],smartwatch:["Apple","Samsung","Xiaomi"],powerbank:["Anker","Belkin","INIU"],camera:["Canon","Sony","Fujifilm"],hoodie:["Nike","Adidas","Levi’s"],jacket:["The North Face","Columbia","Levi’s"],jeans1:["Levi’s","Wrangler","Lee"],jeans2:["Levi’s","Only","Lee"],t1:["Uniqlo","Levi’s","Amazon Essentials"],t2:["Uniqlo","Levi’s","Amazon Essentials"],polo1:["Lacoste","Ralph Lauren","Tommy Hilfiger"],fa28:["Nike","Adidas","Asics"],fa29:["Nike","Adidas","Puma"],fa30:["Secrid","Levi’s","Eastpak"]};
 const categoryBrands={fashion:["Levi’s","Nike","Adidas"],home:["Philips","Moulinex","Bosch"],tech:["Samsung","Apple","Xiaomi"],beauty:["L’Oréal Paris","Nivea","Maybelline"],kids:["LEGO","VTech","Fisher-Price"]};
