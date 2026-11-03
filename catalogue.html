@@ -299,6 +299,18 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 .pm-photo-source.illustration{background:#596579e8}
 .pm-history-link{display:block;text-align:center;margin:7px 0;padding:9px 10px;border:1px solid #dce4f0;border-radius:10px;color:#263a58;background:#f6f8fb;font-size:12px;font-weight:800;text-decoration:none}
 .pm-detail-visual img{object-fit:contain;padding:10px;background:#fff}
+
+.pm-inline-accessory-section{grid-column:1/-1;width:100%;margin-top:8px;padding-top:12px;border-top:1px solid #edf0f4}
+.pm-inline-accessory-section h4{margin:0 0 9px;font-size:13px;color:#26364d}
+.pm-inline-accessory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pm-inline-accessory{min-width:0;border:1px solid #e5e9ef;border-radius:12px;padding:7px;background:#fff;display:flex;flex-direction:column;gap:6px}
+.pm-inline-accessory-photo{height:74px;border-radius:8px;background:#f4f6fa;display:grid;place-items:center;overflow:hidden}
+.pm-inline-accessory-photo img{width:100%;height:100%;object-fit:contain;padding:5px}
+.pm-inline-accessory strong{font-size:11px;line-height:1.25;color:#25344b}
+.pm-inline-accessory small{font-size:10px;line-height:1.3;color:#687488;flex:1}
+.pm-inline-accessory a{font-size:10px;font-weight:800;color:#fff;background:#ff650b;padding:7px 5px;text-align:center;border-radius:8px;text-decoration:none}
+.pm-inline-accessory-fallback{background:linear-gradient(135deg,#eef1f6,#dfe5ee)}
+@media(max-width:430px){.pm-inline-accessory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pm-inline-accessory-photo{height:88px}}
 </style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
@@ -5542,11 +5554,31 @@ function render(){
     card.dataset.pmProductName=p.name;
     card.dataset.pmProductQuery=p.query||p.name;
     card.dataset.pmProductCategory=p.category||"tech";
-    const detailButton=document.createElement("button");
-    detailButton.type="button";
-    detailButton.className="pm-detail-btn";
-    detailButton.textContent="Accessoires & produits similaires";
-    card.append(detailButton);
+    const isLaptop=/ordinateur|macbook|laptop|thinkpad|zenbook|omnibook|ideapad|legion|surface|blade|swift|nitro|vector|katana|predator|xps|pc portable|pc gamer/i.test(p.name+" "+(p.query||""));
+    if(isLaptop){
+      const related=pmRelations(p.name,p.query||p.name,p.category||"tech");
+      const accessorySection=document.createElement("section");accessorySection.className="pm-inline-accessory-section";
+      const accessoryHeading=document.createElement("h4");accessoryHeading.textContent="Accessoires à découvrir";accessorySection.append(accessoryHeading);
+      const accessoryGrid=document.createElement("div");accessoryGrid.className="pm-inline-accessory-grid";
+      related.accessories.forEach(item=>{
+        const tile=document.createElement("article");tile.className="pm-inline-accessory";
+        const photoWrap=document.createElement("div");photoWrap.className="pm-inline-accessory-photo";
+        const photoImg=document.createElement("img");photoImg.src=item[3].image;photoImg.alt="Photo officielle "+item[0];photoImg.loading="lazy";
+        photoImg.onerror=()=>{photoWrap.classList.add("pm-inline-accessory-fallback");photoImg.remove();};
+        photoWrap.append(photoImg);
+        const title=document.createElement("strong");title.textContent=item[0];
+        const noteText=document.createElement("small");noteText.textContent=item[1];
+        const link=document.createElement("a");link.href="https://www.amazon.fr/s?"+new URLSearchParams({k:item[2],tag:"prixbasmalin2-21"}).toString();link.target="_blank";link.rel="noopener noreferrer sponsored";link.textContent="Voir sur Amazon ↗";
+        tile.append(photoWrap,title,noteText,link);accessoryGrid.append(tile);
+      });
+      accessorySection.append(accessoryGrid);card.append(accessorySection);
+    }else{
+      const detailButton=document.createElement("button");
+      detailButton.type="button";
+      detailButton.className="pm-detail-btn";
+      detailButton.textContent="Accessoires & produits similaires";
+      card.append(detailButton);
+    }
     productsEl.append(card);
   });
 }
@@ -5761,6 +5793,18 @@ function pmRelations(name,query,cat){
   similar:[["Smartphones de la même gamme","Comparer stockage, taille et autonomie",name+" alternatives smartphones"],["Modèles moins chers","Chercher un modèle adapté au budget", "smartphone meilleur rapport qualité prix"]]
  };
  if(/ordinateur|macbook|laptop|thinkpad|zenbook|omnibook|ideapad|legion|surface|blade|swift|nitro|vector|katana|predator|xps|pc portable|pc gamer/.test(n))return {
+  accessories:[
+   ["Souris Logitech MX Master 3S","Produit réel. Vérifier le confort et la connexion souhaitée.","Logitech MX Master 3S",{image:"https://resource.logitech.com/w_544%2Ch_466%2Car_7%3A6%2Cc_pad%2Cq_auto%2Cf_auto%2Cdpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/mx-master-3s/2025-update/mx-master-3s-bluetooth-edition-top-view-graphite-new-1.png",source:"https://www.logitech.com/fr-fr/shop/p/mx-master-3s",sourceName:"Logitech"}],
+   ["Clavier Logitech MX Keys Mini","Produit réel. Choisir la disposition AZERTY ou QWERTY adaptée.","Logitech MX Keys Mini",{image:"https://resource.logitech.com/w_544%2Ch_466%2Car_7%3A6%2Cc_pad%2Cq_auto%2Cf_auto%2Cdpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/mx-keys-mini/gallery/fra/mx-keys-mini-top-graphite-fra.png",source:"https://www.logitech.com/fr-fr/shop/p/mx-keys-mini.920-010473",sourceName:"Logitech"}],
+   ["Chargeur Anker Nano II USB-C 65 W","Produit réel. Vérifier la puissance exigée par l’ordinateur.","Anker Nano II 65W",{image:"https://cdn.shopify.com/s/files/1/0732/1187/1548/files/Schwarz-01-removebg-preview_1_68f9fabf-6a07-44ec-b745-8cdcd06ef789.png?v=1732075344&width=1600",source:"https://www.anker.com/fr/products/a2663",sourceName:"Anker"}]
+  ],
+  similar:[
+   ["Apple MacBook Air M5","Photo officielle Apple. Comparer écran, mémoire, stockage et système.","Apple MacBook Air M5",{image:"https://www.apple.com/v/macbook-air/z/images/overview/design/color/design_top_skyblue__eepkvlvjzcia_large.jpg",source:"https://www.apple.com/fr/macbook-air/",sourceName:"Apple"}],
+   ["Lenovo IdeaPad Slim 3 Gen 10","Photo officielle Lenovo. Vérifier la configuration exacte avant comparaison.","Lenovo IdeaPad Slim 3 Gen 10",{image:"https://p3-ofp.static.pub//fes/cms/2025/02/06/zuuuahb3p1wn1dwbt4luewmt77unqy546098.png?height=584&width=584",source:"https://www.lenovo.com/fr/fr/",sourceName:"Lenovo"}],
+   ["Acer Swift 16 AI","Photo officielle Acer. Comparer les dimensions et les composants de chaque version.","Acer Swift 16 AI",{image:"https://images.acer.com/is/image/acer/acer-laptop-swift-16-ai-main-banner-l?$image-2560w$=",source:"https://www.acer.com/fr-fr/laptops/swift/swift-16-ai",sourceName:"Acer"}]
+  ]
+ };
+
   accessories:[
    ["Souris Logitech MX Master 3S","Photo officielle. Vérifier la connexion et l’usage souhaité.","Logitech MX Master 3S",{image:"https://resource.logitech.com/w_544%2Ch_466%2Car_7%3A6%2Cc_pad%2Cq_auto%2Cf_auto%2Cdpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/mx-master-3s/2025-update/mx-master-3s-bluetooth-edition-top-view-graphite-new-1.png",source:"https://www.logitech.com/fr-fr/shop/p/mx-master-3s",sourceName:"Logitech"}],
    ["Chargeur Anker Nano II USB-C 65 W","Photo officielle. Vérifier la puissance requise par l’ordinateur.","Anker Nano II 65W",{image:"https://cdn.shopify.com/s/files/1/0732/1187/1548/files/Schwarz-01-removebg-preview_1_68f9fabf-6a07-44ec-b745-8cdcd06ef789.png?v=1732075344&width=1600",source:"https://www.anker.com/fr/products/a2663",sourceName:"Anker"}]
@@ -6032,5 +6076,4 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
  window.addEventListener('resize',()=>{if(!mobile())return;[assistant.box,access.box].forEach(el=>{if(el.style.left){const r=el.getBoundingClientRect();el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,r.left))+'px';el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,r.top))+'px'}})});
 })();
 </script>
-<script defer src="/js/track-outbound.js"></script>
 </body></html>
