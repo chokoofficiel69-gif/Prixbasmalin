@@ -10,6 +10,7 @@ on:
   pull_request:
     paths:
       - "price-engine/import-prixtracker*.mjs"
+      - "price-engine/sync-prixtracker.mjs"
       - ".github/workflows/import-prixtracker.yml"
   schedule:
     - cron: "35 5 * * *"
