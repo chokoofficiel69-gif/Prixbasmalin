@@ -689,6 +689,51 @@ section{padding-top:24px!important}
  .pm-old-bottom a{font-size:8px!important}
  .pm-old-bottom span{font-size:17px!important}
 }
+
+/* Correction validée : catégories en longues cartes horizontales, jamais en mosaïque carrée */
+#categories .categories{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:14px!important;
+}
+#categories .categories .cat{
+  position:relative!important;
+  display:block!important;
+  width:100%!important;
+  height:clamp(145px,24vw,220px)!important;
+  min-height:145px!important;
+  overflow:hidden!important;
+  border:1px solid #465365!important;
+  border-radius:22px!important;
+  background:#111821!important;
+  box-shadow:0 5px 18px rgba(0,0,0,.24)!important;
+}
+#categories .categories .cat img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center 48%!important;
+}
+#categories .categories .cat div{
+  position:absolute!important;
+  inset:auto 0 0!important;
+  padding:34px 18px 15px!important;
+  background:linear-gradient(0deg,rgba(0,0,0,.88),rgba(0,0,0,.25) 72%,transparent)!important;
+  color:#fff!important;
+  font-size:clamp(18px,2.4vw,25px)!important;
+  line-height:1.15!important;
+  font-weight:950!important;
+  text-align:left!important;
+  text-shadow:0 2px 8px #000!important;
+}
+#categories .categories .cat:hover img{transform:scale(1.025)}
+@media(max-width:700px){
+  #categories .categories{grid-template-columns:1fr!important;gap:12px!important}
+  #categories .categories .cat{height:170px!important;min-height:170px!important;border-radius:20px!important}
+  #categories .categories .cat div{font-size:21px!important;padding:36px 16px 14px!important}
+}
+
 </style>
 <section class="legacy-tools" id="services">
 <div class="section-head"><h2>Tout l’univers Prix Malin</h2><small>Retrouvez les outils du site initial</small></div>
