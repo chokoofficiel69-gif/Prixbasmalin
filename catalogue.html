@@ -5603,7 +5603,7 @@ function brandsFor(p){return suggestedBrands[p.id]||categoryBrands[p.category]||
 const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count"),filtersEl=document.getElementById("filters");
 function pmHasRealProductImage(product){
   const image=String(product&&product.image||"");
-  return !!product?.isAwinProduct && /^https:\/\//i.test(image) && !/unsplash\.com/i.test(image);
+  return /^https:\/\//i.test(image) && !/unsplash\.com/i.test(image);
 }
 async function pmLoadAwinCatalogue(){
   try{
@@ -5660,7 +5660,7 @@ function render(){
   const q=pmSearchNorm(rawQuery);
   const queryTerms=q.split(" ").filter(Boolean);
   const correctedQuery=queryTerms.map(term=>pmSpellCorrections[term]||term);
-  const catalogueData=productData.filter(p=>pmHasRealProductImage(p)&&Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0);
+  const catalogueData=productData.filter(p=>p&&p.name&&/^https:\/\//i.test(String(p.sourceUrl||"")));
   const found=catalogueData.filter(p=>{
     const matchesCategory=category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category);
     if(!matchesCategory)return false;
@@ -5722,11 +5722,20 @@ function render(){
     card.className="product";
     const photo=document.createElement("div");
     photo.className="photo";
-    const img=document.createElement("img");
-    img.src=p.image;
-    img.alt=p.name;
-    img.loading="lazy";
-    img.dataset.fallbackTried="0";
+    const hasProductPhoto=pmHasRealProductImage(p);
+    const img=hasProductPhoto?document.createElement("img"):null;
+    if(img){
+      img.src=p.image;
+      img.alt=p.name;
+      img.loading="lazy";
+      img.dataset.fallbackTried="0";
+    }else{
+      photo.classList.add("photo-placeholder");
+      const placeholder=document.createElement("span");
+      placeholder.textContent=String(p.brand||p.category||"PM").slice(0,2).toUpperCase();
+      placeholder.setAttribute("aria-hidden","true");
+      photo.append(placeholder);
+    }
     const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
     imageBadge.className="pm-photo-source"+(p.imageKind==="illustration"?" illustration":"");
     imageBadge.textContent=p.imageSource?"Photo constructeur":(p.imageKind==="illustration"?"Illustration":"");
@@ -5780,32 +5789,37 @@ function render(){
     if(historyLink){historyLink.className="pm-history-link";historyLink.href="/historique-prix.html?q="+encodeURIComponent(p.name);historyLink.textContent="Voir l’historique PrixTracker ↗";historyLink.setAttribute("aria-label","Consulter les relevés historiques PrixTracker pour "+p.name);}
     const price=document.createElement("div");
     price.className="price";
-    price.textContent=p.price||new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(p.priceValue));
+    const hasVerifiedPrice=Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0;
+    price.textContent=hasVerifiedPrice?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(p.priceValue)):"Prix à consulter chez le marchand";
     const merchant=document.createElement("div");
     merchant.className="merchant";
     const fetchedDate=p.fetchedAt?new Date(p.fetchedAt):null;
-    merchant.textContent=(p.merchant||"Marchand")+" • flux Awin"+(fetchedDate&&!Number.isNaN(fetchedDate.getTime())?" • synchronisé le "+fetchedDate.toLocaleDateString("fr-FR"):"")+" • livraison à confirmer";
+    merchant.textContent=hasVerifiedPrice
+      ?(p.merchant||"Marchand")+" • prix issu d’un flux autorisé"+(fetchedDate&&!Number.isNaN(fetchedDate.getTime())?" • vérifié le "+fetchedDate.toLocaleDateString("fr-FR"):"")+" • livraison à confirmer"
+      :(p.merchant||"Lien marchand")+" • tarif non récupéré en direct";
     const heading=document.createElement("div");
     heading.className="discovery-compare-heading";
-    heading.textContent=Array.isArray(p.offers)&&p.offers.length>1?"Comparer les marchands":"Offre marchande";
+    heading.textContent=hasVerifiedPrice?"Offre marchande vérifiée":"Recherche chez le marchand";
     const list=document.createElement("div");
     list.className="discovery-compare";
-    const feedOffers=Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,price:p.price,priceValue:p.priceValue,url:p.sourceUrl}];
+    const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl}]):[];
     feedOffers.forEach(offer=>{
       const row=document.createElement("div");row.className="discovery-compare-row";
       const store=document.createElement("span");store.textContent=offer.merchant||"Marchand";
       const link=document.createElement("a");link.href=offer.url||p.sourceUrl;link.target="_blank";link.rel="noopener noreferrer sponsored";
-      link.textContent=offer.price||(Number.isFinite(Number(offer.priceValue))?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(offer.priceValue)):"Prix indisponible");
+      link.textContent=offer.price||(Number.isFinite(Number(offer.priceValue))?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(offer.priceValue)):"Voir l’offre");
       row.append(store,link);list.append(row);
     });
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
-    note.textContent="Prix Malin affiche uniquement des prix vérifiés pour le modèle exact. Aucun prix n'est inventé.";
+    note.textContent=hasVerifiedPrice?"Prix vérifié pour cette référence ; livraison à confirmer.":"Référence de catalogue : le prix exact et la disponibilité sont à vérifier sur le site marchand.";
     card.append(photo);
     if(gallery.children.length>1)card.append(gallery);
     card.append(name,desc,brands,amazonButton);
     if(historyLink)card.append(historyLink);
-    card.append(price,merchant,heading,list,note);
+    card.append(price,merchant,heading);
+    if(feedOffers.length)card.append(list);
+    card.append(note);
     card.dataset.pmProductName=p.name;
     card.dataset.pmProductQuery=p.query||p.name;
     card.dataset.pmProductCategory=p.category||"tech";
@@ -6390,4 +6404,15 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
  #products .pm-product-row-rail .photo{height:150px!important;min-height:150px!important}
 }
 @media(prefers-reduced-motion:reduce){#products .pm-product-row-rail{scroll-behavior:auto}}
+</style>
+
+<style id="pm-catalogue-search-results-and-contrast">
+#products .photo-placeholder{display:grid;place-items:center;background:linear-gradient(145deg,#f0f3f8,#e2e8f0);color:#344054;font-size:28px;font-weight:900;letter-spacing:.04em}
+#products .pm-catalogue-no-feed{background:#fff!important;color:#17212b!important;border:1px solid #d7dee8!important;box-shadow:0 8px 24px rgba(17,27,53,.06)!important}
+#products .pm-catalogue-no-feed strong{color:#17212b!important;font-weight:850;line-height:1.35}
+#products .pm-catalogue-no-feed p{color:#475467!important;line-height:1.6}
+#products .pm-catalogue-no-feed .pm-catalogue-external-searches a{color:#fff!important}
+#products .pm-catalogue-no-feed .pm-catalogue-external-searches a+a{color:#fff!important;background:#26364b!important;border-color:#52647b!important}
+#products .price{color:#b8422b!important;font-size:16px!important}
+#products .merchant,#products .discovery-disclaimer{color:#475467!important}
 </style>
