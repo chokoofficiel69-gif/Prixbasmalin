@@ -471,6 +471,59 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
  #products .pm-inline-accessory-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
  .pm-catalogue-toolbar .pm-amazon-search-form{grid-template-columns:minmax(0,1fr) 92px}
 }
+
+/* Catalogue Prix Malin : carrousel horizontal tactile, cartes verticales bien lisibles. */
+#products.grid{
+ display:flex!important;flex-wrap:nowrap!important;gap:16px!important;
+ overflow-x:auto!important;overflow-y:hidden!important;
+ padding:8px 4px 18px!important;scroll-snap-type:x mandatory!important;
+ scroll-padding-inline:8px;overscroll-behavior-x:contain;
+ -webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;
+}
+#products.grid::-webkit-scrollbar{height:6px}
+#products.grid::-webkit-scrollbar-thumb{background:#ff6a12;border-radius:8px}
+#products .product{
+ flex:0 0 min(84vw,350px)!important;width:min(84vw,350px)!important;
+ min-width:0!important;display:flex!important;flex-direction:column!important;
+ gap:9px!important;scroll-snap-align:start!important;
+ padding:14px!important;border:1px solid #263447!important;border-radius:20px!important;
+ background:linear-gradient(160deg,#111a27 0%,#080d14 100%)!important;
+ color:#f4f7fb!important;box-shadow:0 8px 22px #0007!important;
+}
+#products .photo{width:100%!important;height:205px!important;min-height:205px!important;
+ aspect-ratio:auto!important;background:#fff!important;border:1px solid #dce3eb!important;border-radius:14px!important}
+#products .photo img{width:100%!important;height:100%!important;object-fit:contain!important;padding:12px!important}
+#products .name{font-size:19px!important;line-height:1.25!important;color:#fff!important;margin:5px 0 0!important}
+#products .desc{font-size:13px!important;line-height:1.5!important;color:#cbd5e1!important;min-height:0!important}
+#products .pm-description-toggle{order:4;align-self:flex-start;border:1px solid #ff762d;border-radius:9px;
+ background:#20150f;color:#ff9a5c;padding:8px 11px;font:800 12px system-ui;cursor:pointer}
+#products .pm-description-collapsed{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#products .pm-description-expanded{display:block;overflow:visible}
+#products .pm-brand-suggestions{background:#111c2a!important;border:1px solid #344256!important;border-radius:12px!important}
+#products .pm-brand-suggestions,#products .pm-brand-suggestions span{color:#e7edf5!important}
+#products .pm-brand-chip{background:#202d3d!important;color:#ffad78!important;border-color:#45556b!important}
+#products .price{font-size:18px!important;color:#ff8b43!important}
+#products .merchant,#products .discovery-disclaimer{color:#b7c2d0!important}
+#products .offer{background:#ff650b!important;color:#fff!important}
+#products .pm-history-link{background:#182435!important;color:#ffd0b3!important;border-color:#40516a!important}
+#products .discovery-compare-heading{color:#ff9a5c!important}
+#products .discovery-compare-row{background:#172334!important;border-color:#35465d!important}
+#products .discovery-compare-row span{color:#eef3f8!important}
+#products .discovery-compare-row a{color:#ffad78!important}
+#products .pm-related-section{width:100%;margin-top:8px;padding-top:12px;border-top:1px solid #35465a}
+#products .pm-related-section h4{margin:0 0 9px;color:#ff995e;font-size:14px}
+#products .pm-related-rail{display:flex;gap:9px;overflow-x:auto;padding:2px 1px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+#products .pm-related-tile{flex:0 0 132px;min-width:0;display:flex;flex-direction:column;gap:6px;padding:8px;
+ border:1px solid #34455a;border-radius:12px;background:#121d2b;scroll-snap-align:start}
+#products .pm-related-visual{height:86px;border-radius:9px;background:#fff;display:grid;place-items:center;overflow:hidden;color:#ff762d;font-size:24px;font-weight:900}
+#products .pm-related-visual img{width:100%;height:100%;object-fit:contain;padding:6px}
+#products .pm-related-visual.pm-related-no-image{background:linear-gradient(135deg,#26384d,#111b29);border:1px dashed #60728a}
+#products .pm-related-tile strong{font-size:12px;line-height:1.3;color:#fff}
+#products .pm-related-tile small{font-size:10px;line-height:1.35;color:#bac6d4;flex:1}
+#products .pm-related-tile a{display:block;text-align:center;background:#ff650b;color:#fff;border-radius:8px;padding:8px 5px;font-size:11px;font-weight:800;text-decoration:none}
+#products .pm-inline-accessory-section{display:none!important}
+@media(min-width:760px){#products .product{flex-basis:340px!important;width:340px!important}#products .photo{height:220px!important}}
+
 </style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
@@ -5707,31 +5760,40 @@ function render(){
     card.dataset.pmProductName=p.name;
     card.dataset.pmProductQuery=p.query||p.name;
     card.dataset.pmProductCategory=p.category||"tech";
-    const isLaptop=/ordinateur|macbook|laptop|thinkpad|zenbook|omnibook|ideapad|legion|surface|blade|swift|nitro|vector|katana|predator|xps|pc portable|pc gamer/i.test(p.name+" "+(p.query||""));
-    if(isLaptop){
-      const related=pmRelations(p.name,p.query||p.name,p.category||"tech");
-      const accessorySection=document.createElement("section");accessorySection.className="pm-inline-accessory-section";
-      const accessoryHeading=document.createElement("h4");accessoryHeading.textContent="Accessoires à découvrir";accessorySection.append(accessoryHeading);
-      const accessoryGrid=document.createElement("div");accessoryGrid.className="pm-inline-accessory-grid";
-      related.accessories.forEach(item=>{
-        const tile=document.createElement("article");tile.className="pm-inline-accessory";
-        const photoWrap=document.createElement("div");photoWrap.className="pm-inline-accessory-photo";
-        const photoImg=document.createElement("img");photoImg.src=item[3].image;photoImg.alt="Photo officielle "+item[0];photoImg.loading="lazy";
-        photoImg.onerror=()=>{photoWrap.classList.add("pm-inline-accessory-fallback");photoImg.remove();};
-        photoWrap.append(photoImg);
-        const title=document.createElement("strong");title.textContent=item[0];
+    const descriptionToggle=document.createElement("button");
+    descriptionToggle.type="button";descriptionToggle.className="pm-description-toggle";
+    descriptionToggle.textContent="Voir le descriptif complet +";
+    desc.classList.add("pm-description-collapsed");
+    descriptionToggle.addEventListener("click",()=>{
+      const expanded=desc.classList.toggle("pm-description-expanded");
+      desc.classList.toggle("pm-description-collapsed",!expanded);
+      descriptionToggle.textContent=expanded?"Réduire le descriptif −":"Voir le descriptif complet +";
+      descriptionToggle.setAttribute("aria-expanded",String(expanded));
+    });
+    card.append(descriptionToggle);
+    const related=pmRelations(p.name,p.query||p.name,p.category||"tech");
+    const makeRelatedSection=(title,items)=>{
+      if(!Array.isArray(items)||!items.length)return;
+      const section=document.createElement("section");section.className="pm-related-section";
+      const heading=document.createElement("h4");heading.textContent=title;section.append(heading);
+      const rail=document.createElement("div");rail.className="pm-related-rail";
+      items.forEach(item=>{
+        const tile=document.createElement("article");tile.className="pm-related-tile";
+        const visual=document.createElement("div");visual.className="pm-related-visual";
+        if(item[3]&&item[3].image){
+          const relatedImg=document.createElement("img");relatedImg.src=item[3].image;relatedImg.alt="Photo "+item[0];relatedImg.loading="lazy";
+          relatedImg.onerror=()=>{visual.classList.add("pm-related-no-image");relatedImg.remove();visual.textContent="PM";};
+          visual.append(relatedImg);
+        }else{visual.classList.add("pm-related-no-image");visual.textContent=(item[0]||"PM").slice(0,2).toUpperCase();}
+        const titleText=document.createElement("strong");titleText.textContent=item[0];
         const noteText=document.createElement("small");noteText.textContent=item[1];
-        const link=document.createElement("a");link.href="https://www.amazon.fr/s?"+new URLSearchParams({k:item[2],tag:"prixbasmalin2-21"}).toString();link.target="_blank";link.rel="noopener noreferrer sponsored";link.textContent="Voir sur Amazon ↗";
-        tile.append(photoWrap,title,noteText,link);accessoryGrid.append(tile);
+        const link=document.createElement("a");link.href="https://www.amazon.fr/s?"+new URLSearchParams({k:item[2],tag:"prixbasmalin2-21"}).toString();link.target="_blank";link.rel="noopener noreferrer sponsored";link.textContent="Découvrir ↗";
+        tile.append(visual,titleText,noteText,link);rail.append(tile);
       });
-      accessorySection.append(accessoryGrid);card.append(accessorySection);
-    }else{
-      const detailButton=document.createElement("button");
-      detailButton.type="button";
-      detailButton.className="pm-detail-btn";
-      detailButton.textContent="Accessoires & produits similaires";
-      card.append(detailButton);
-    }
+      section.append(rail);card.append(section);
+    };
+    makeRelatedSection("Accessoires à associer",related.accessories);
+    makeRelatedSection("Produits similaires",related.similar);
     productsEl.append(card);
   });
 }
