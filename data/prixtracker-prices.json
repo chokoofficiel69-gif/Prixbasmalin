@@ -3,8 +3,8 @@
   "dataset": "PrixTracker — prix par marchand",
   "source_url": "https://prixtracker.fr/donnees/prix-par-marchand.csv",
   "license": "Licence Ouverte 2.0",
-  "attribution": "Source : PrixTracker (prixtracker.fr), données réutilisées sous Licence Ouverte 2.0.",
-  "generated_at": "2026-11-02T13:45:12.659Z",
+  "attribution": "Source : PrixTracker (prixtracker.fr/donnees), réutilisé sous Licence Ouverte 2.0 via data.gouv.fr.",
+  "generated_at": "2026-11-03T08:29:17.531Z",
   "dataset_period": {
     "from": "2026-10-09",
     "to": "2026-10-23"
@@ -85930,5 +85930,7 @@
       "source": "releve PrixTracker"
     }
   ],
-  "import_errors": []
+  "import_errors": [],
+  "source_dataset": "https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker",
+  "dataset_license": "Licence Ouverte 2.0"
 }
