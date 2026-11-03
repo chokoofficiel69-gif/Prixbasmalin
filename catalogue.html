@@ -5658,6 +5658,31 @@ function render(){
      const fallback=document.getElementById("pmAmazonFallback");if(fallback){const url="https://www.amazon.fr/s?"+new URLSearchParams({k:searchEl.value.trim(),s:"price-asc-rank",tag:"prixbasmalin2-21"}).toString();fallback.href=url;}
     return;
   }
+  // Regrouper les produits par famille : chaque famille devient un rail horizontal indépendant.
+  const categoryLabels={tech:"High-Tech & Multimédia",fashion:"Mode & Accessoires",home:"Maison & Électroménager",beauty:"Beauté & Santé",kids:"Bébé & Enfant",sport:"Sport & Loisirs",auto:"Auto & Moto",diy:"Bricolage & Jardin"};
+  productsEl.classList.add("pm-horizontal-catalogue");
+  const categoryRails=new Map();
+  const getCategoryRail=(product)=>{
+    const key=product.category||"other";
+    if(categoryRails.has(key))return categoryRails.get(key);
+    const section=document.createElement("section");
+    section.className="pm-product-row";
+    const head=document.createElement("div");
+    head.className="pm-product-row-head";
+    const title=document.createElement("h3");
+    title.textContent=categoryLabels[key]||"Autres produits";
+    const hint=document.createElement("span");
+    hint.textContent="Faire défiler  ← →";
+    head.append(title,hint);
+    const rail=document.createElement("div");
+    rail.className="pm-product-row-rail";
+    rail.setAttribute("role","region");
+    rail.setAttribute("aria-label","Produits : "+title.textContent);
+    section.append(head,rail);
+    productsEl.append(section);
+    categoryRails.set(key,rail);
+    return rail;
+  };
   found.forEach(p=>{
     const card=document.createElement("article");
     card.className="product";
@@ -5794,7 +5819,7 @@ function render(){
     };
     makeRelatedSection("Accessoires à associer",related.accessories);
     makeRelatedSection("Produits similaires",related.similar);
-    productsEl.append(card);
+    getCategoryRail(p).append(card);
   });
 }
 
@@ -6300,3 +6325,32 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 </style>
 
 </body></html>
+<style id="pm-catalogue-horizontal-product-rails">
+/* Catalogue mobile-first : chaque famille de produits forme une rangée horizontale tactile. */
+#products.grid.pm-horizontal-catalogue{display:flex!important;flex-direction:column!important;gap:24px!important;min-width:0;overflow:visible!important}
+#products .pm-product-row{display:block!important;min-width:0;width:100%;margin:0;padding:0;border:0;background:transparent}
+#products .pm-product-row-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px}
+#products .pm-product-row-head h3{margin:0;color:#f5f7fb;font-size:clamp(16px,2vw,21px);font-weight:850;line-height:1.25}
+#products .pm-product-row-head span{flex:none;color:#ff9a5c;font-size:11px;font-weight:750}
+#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;align-items:stretch;gap:12px;width:100%;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 14px;scroll-snap-type:x mandatory;scroll-padding-inline:2px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x; scrollbar-width:thin;scrollbar-color:#ff650b #182334}
+#products .pm-product-row-rail>.product{flex:0 0 218px!important;width:218px!important;max-width:218px!important;min-width:218px!important;scroll-snap-align:start;align-self:stretch;background:#111c2a!important;border:1px solid #35465a!important;border-radius:15px!important;color:#f4f7fb!important;box-shadow:0 5px 18px #0003!important}
+#products .pm-product-row-rail .photo{height:132px!important;min-height:132px!important;aspect-ratio:auto!important;background:#fff!important}
+#products .pm-product-row-rail .name{color:#fff!important;font-size:14px!important;line-height:1.3!important}
+#products .pm-product-row-rail .desc{color:#c2ccda!important}
+#products .pm-product-row-rail .price{color:#ff8a43!important}
+#products .pm-product-row-rail .merchant{color:#c2ccda!important}
+#products .pm-product-row-rail .discovery-compare-heading{color:#ff9a5c!important}
+#products .pm-product-row-rail .discovery-compare-row{background:#182435!important;border-color:#35465a!important}
+#products .pm-product-row-rail .discovery-compare-row span{color:#eef3f8!important}
+#products .pm-product-row-rail .pm-description-toggle{color:#ffb184!important}
+#products .pm-product-row-rail .pm-related-tile{flex-basis:132px!important;width:132px!important;max-width:132px!important}
+#products .pm-product-row-rail .offer{background:#ff650b!important;color:#fff!important;border-radius:9px!important}
+#products .pm-product-row-rail .pm-brand-suggestions{background:#182435!important;border-color:#35465a!important}
+#products .pm-product-row-rail .pm-brand-suggestions span{color:#ffb184!important}
+#products .pm-product-row-rail .pm-brand-chip{background:#202e40!important;border-color:#465b74!important;color:#ffe0cf!important}
+@media(min-width:700px){
+ #products .pm-product-row-rail>.product{flex-basis:238px!important;width:238px!important;max-width:238px!important;min-width:238px!important}
+ #products .pm-product-row-rail .photo{height:150px!important;min-height:150px!important}
+}
+@media(prefers-reduced-motion:reduce){#products .pm-product-row-rail{scroll-behavior:auto}}
+</style>
