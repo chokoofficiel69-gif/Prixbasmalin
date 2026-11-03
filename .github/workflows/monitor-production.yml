@@ -13,6 +13,9 @@ on:
       - "index.html"
       - "partenaires.html"
       - "publicite.html"
+      - "high-tech.html"
+      - "mode.html"
+      - "offres.html"
       - "etat-prix.html"
       - "historique-prix.html"
       - "data/prixtracker-prices.json"
@@ -70,7 +73,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import fs from "node:fs";
-          for (const file of ["partenaires.html", "publicite.html"]) {
+          for (const file of ["partenaires.html", "publicite.html", "high-tech.html", "mode.html", "offres.html"]) {
             const html = fs.readFileSync(file, "utf8");
             if (/beacon\.min\.js/i.test(html)) throw new Error(file + " charge directement le beacon avant le consentement.");
             if (!/cookie-consent\.js/i.test(html)) throw new Error(file + " ne charge pas le gestionnaire de consentement.");
