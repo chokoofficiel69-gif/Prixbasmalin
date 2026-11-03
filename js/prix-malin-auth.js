@@ -271,7 +271,7 @@ document.addEventListener("click", e => {
   }
   const account = e.target.closest('[data-nav="account"], [data-pm-nav="account"]');
   if (account) { e.preventDefault(); e.stopImmediatePropagation(); openAuth(); return; }
-  const alerts = e.target.closest('[data-pm-nav="alerts"]');
+  const alerts = e.target.closest('[data-nav="alerts"], [data-pm-nav="alerts"]');
   if (alerts) { e.preventDefault(); e.stopImmediatePropagation(); void openMyAlerts(); return; }
 }, true);
 installAlertButtons();
