@@ -294,8 +294,8 @@ function aggregateOffers(rawOffers, fetchedAt) {
 }
 
 if (!TOKEN) {
-  log("secret AWIN_API_TOKEN absent : synchronisation ignorée, le catalogue existant est conservé.");
-  process.exit(0);
+  log("BLOCAGE : secret AWIN_API_TOKEN absent. Le catalogue existant est conservé, mais aucune synchronisation Awin n'est possible.");
+  throw new Error("AWIN_API_TOKEN absent : renseigner un jeton éditeur Awin valide dans les secrets GitHub Actions.");
 }
 
 const programmesResponse = await request(
@@ -308,7 +308,7 @@ if (!programmesResponse.ok) {
     if (!process.env.AWIN_PRODUCT_DATA_API_KEY) {
       log("La clé séparée AWIN_PRODUCT_DATA_API_KEY pour les flux produits standards n'est pas configurée. Il faut rétablir le jeton Publisher et/ou ajouter cette clé distincte dans les secrets Actions du dépôt.");
     }
-    process.exit(0);
+    throw new Error("Authentification Awin refusée (HTTP " + programmesResponse.status + "). Le catalogue existant a été conservé. Renouveler AWIN_API_TOKEN et vérifier les droits éditeur ; AWIN_PRODUCT_DATA_API_KEY est une clé distincte facultative pour les flux standards.");
   }
   throw new Error("API Awin programmes HTTP " + programmesResponse.status + " (aucune donnée catalogue écrite).");
 }
