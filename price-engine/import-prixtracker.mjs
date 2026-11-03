@@ -92,7 +92,7 @@ const dates = offers.map(offer => offer.date).sort();
 const output = {
   version: 1,
   dataset: "PrixTracker — prix par marchand",
-  source_url: "https://prixtracker.fr/donnees/prix-par-marchand.csv",
+  source_url: process.env.PRIXTRACKER_SOURCE_URL || "https://prixtracker.fr/donnees/prix-par-marchand.csv",
   license: "Licence Ouverte 2.0",
   attribution: "Source : PrixTracker (prixtracker.fr), données réutilisées sous Licence Ouverte 2.0.",
   generated_at: new Date().toISOString(),
