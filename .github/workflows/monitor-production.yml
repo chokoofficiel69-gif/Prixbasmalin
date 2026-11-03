@@ -70,8 +70,8 @@ jobs:
           import fs from "node:fs";
           for (const file of ["partenaires.html", "publicite.html"]) {
             const html = fs.readFileSync(file, "utf8");
-            if (/beacon\\.min\\.js/i.test(html)) throw new Error(file + " charge directement le beacon avant le consentement.");
-            if (!/cookie-consent\\.js/i.test(html)) throw new Error(file + " ne charge pas le gestionnaire de consentement.");
+            if (/beacon\.min\.js/i.test(html)) throw new Error(file + " charge directement le beacon avant le consentement.");
+            if (!/cookie-consent\.js/i.test(html)) throw new Error(file + " ne charge pas le gestionnaire de consentement.");
             console.log("OK : mesure d'audience centralisée après consentement — " + file);
           }
           NODE
