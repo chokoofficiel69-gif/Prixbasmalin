@@ -401,25 +401,92 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
  #products .product{padding:11px!important;gap:8px 10px!important;border-radius:15px!important}
  #products .product .name{font-size:16px!important}
 }
+
+/* Refonte catalogue inspirée d'une marketplace mobile : navigation simple et lignes produits */
+body{background:#f4f6f8!important;color:#17212b!important}
+header{background:#090d13!important;border-bottom:1px solid #293341!important}
+main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!important}
+.pm-catalogue-heading{padding:10px 2px 16px}
+.pm-catalogue-kicker{display:block;color:#f26a24;font-size:11px;font-weight:900;letter-spacing:1.3px}
+.pm-catalogue-heading h1{margin:7px 0 5px;color:#17212b;font-size:clamp(23px,4vw,32px);line-height:1.15;letter-spacing:-.6px}
+.pm-catalogue-heading p{margin:0;color:#687482;font-size:14px;line-height:1.5}
+.pm-catalogue-toolbar{position:sticky;top:0;z-index:30;margin:0 -14px 16px;padding:10px 14px 8px;background:#f4f6f8f2;backdrop-filter:blur(12px);border-bottom:1px solid #e0e5eb}
+.pm-catalogue-toolbar .pm-amazon-search-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:0 0 8px}
+.pm-catalogue-toolbar .search{width:100%;min-width:0;height:46px;border:1px solid #d9e0e8;border-radius:12px;background:#fff;padding:0 13px;font-size:14px}
+.pm-catalogue-toolbar .pm-amazon-search-submit{width:auto;min-height:46px;padding:0 16px;border-radius:12px;background:#ff6b1a;color:#fff}
+.pm-catalogue-toolbar .pm-catalogue-brand-filters{margin:0;padding:3px 0 5px;gap:7px}
+.pm-catalogue-toolbar .pm-brand-filter{background:#fff;border-color:#dce2e9;color:#344054}
+.pm-catalogue-toolbar .pm-brand-filter.active{background:#17212b;border-color:#17212b;color:#fff}
+.verified-shelf{margin:0 0 18px;padding:14px;background:#fff;border:1px solid #e3e8ee;border-radius:15px}
+.verified-shelf-head h2,.discovery-shelf-head h2{margin:0 0 5px;font-size:19px;color:#17212b}
+.verified-shelf-head p,.discovery-shelf-head p{margin:0;color:#687482;font-size:12px;line-height:1.5}
+.discovery-shelf{margin:0}
+.discovery-shelf-head{padding:8px 2px 12px}
+.discovery-shelf-head h2{font-size:21px;margin-top:5px}
+#products.grid{display:flex!important;flex-direction:column!important;gap:13px!important}
+#products .product{display:grid!important;grid-template-columns:112px minmax(0,1fr)!important;grid-template-areas:
+ "photo name" "photo desc" "brands brands" "price merchant" "amazon history" "heading heading" "compare compare" "note note" "details details" "accessories accessories"!important;
+ align-items:start!important;gap:9px 12px!important;padding:12px!important;margin:0!important;
+ border:1px solid #e0e5eb!important;border-radius:15px!important;background:#fff!important;
+ color:#17212b!important;box-shadow:0 3px 12px #1522380a!important;min-width:0}
+#products .photo{grid-area:photo!important;width:112px!important;height:112px!important;min-height:112px!important;aspect-ratio:1!important;border:1px solid #edf0f3!important;border-radius:12px!important;background:#fff!important;overflow:hidden}
+#products .photo img{width:100%;height:100%;object-fit:contain!important;padding:5px}
+#products .name{grid-area:name!important;margin:2px 0 0!important;color:#17212b!important;font-size:15px!important;font-weight:850!important;line-height:1.3!important}
+#products .desc{grid-area:desc!important;margin:0!important;color:#667383!important;font-size:12px!important;line-height:1.4!important}
+#products .pm-brand-suggestions{grid-area:brands!important;width:100%;margin:2px 0!important;padding:9px 10px!important;background:#f7f8fa!important;border:1px solid #e8edf2!important;border-radius:11px!important}
+#products .pm-brand-suggestions>span{display:block;margin-bottom:6px;color:#687482!important;font-size:10px!important;font-weight:850!important;text-transform:uppercase;letter-spacing:.5px}
+#products .pm-brand-links{display:flex;flex-wrap:wrap;gap:6px}
+#products .pm-brand-chip{padding:6px 10px!important;border:1px solid #dce3eb!important;border-radius:999px!important;background:#fff!important;color:#344054!important;font-size:11px!important;font-weight:800!important;text-decoration:none!important}
+#products .price{grid-area:price!important;margin:0!important;color:#17212b!important;font-size:14px!important;font-weight:850!important}
+#products .merchant{grid-area:merchant!important;margin:0!important;color:#667383!important;font-size:11px!important;text-align:right}
+#products .offer{grid-area:amazon!important;margin:0!important;min-height:42px!important;padding:10px!important;border-radius:10px!important;background:#ff6b1a!important;color:#fff!important;font-size:12px!important;font-weight:900!important;text-align:center}
+#products .pm-history-link{grid-area:history!important;margin:0!important;padding:10px 7px!important;border-radius:10px!important;background:#f2f5f8!important;border:1px solid #dce3eb!important;color:#344054!important;font-size:11px!important}
+#products .discovery-compare-heading{grid-area:heading!important;margin:4px 0 0!important;color:#17212b!important;font-size:13px!important;font-weight:900!important}
+#products .discovery-compare{grid-area:compare!important;margin:0!important}
+#products .discovery-compare-row{display:flex!important;justify-content:space-between!important;gap:10px!important;padding:10px!important;background:#f7f8fa!important;border:1px solid #e7ebf0!important;border-radius:10px!important}
+#products .discovery-compare-row span{color:#344054!important;font-size:12px!important}
+#products .discovery-disclaimer{grid-area:note!important;margin:0!important;color:#758091!important;font-size:10px!important}
+#products .pm-detail-btn{grid-area:details!important;margin:0!important;background:#fff!important;color:#e85e16!important;border:1px solid #f2b18c!important}
+#products .pm-inline-accessory-section{grid-area:accessories!important;margin-top:3px!important;padding-top:11px!important;border-top:1px solid #e8edf2!important}
+#products .pm-inline-accessory-section h4{color:#17212b!important;font-size:13px!important}
+#products .pm-inline-accessory-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+#products .pm-inline-accessory{background:#f8f9fb!important;border:1px solid #e5e9ef!important;border-radius:11px!important;padding:7px!important}
+#products .pm-inline-accessory-photo{background:#fff!important;height:78px!important}
+#products .pm-inline-accessory strong{color:#263445!important;font-size:10px!important}
+#products .pm-inline-accessory small{color:#687482!important;font-size:9px!important}
+#products .pm-inline-accessory a{background:#ff6b1a!important;color:#fff!important;border-radius:8px!important}
+#products .pm-photo-source{background:#17212be8!important}
+#products .empty{padding:18px!important;background:#fff!important;border:1px solid #e0e5eb!important;border-radius:14px!important}
+.note{margin-top:15px!important;color:#718096!important;font-size:11px!important}
+@media(min-width:700px){
+ main{padding:26px 22px 110px!important}
+ #products .product{grid-template-columns:150px minmax(0,1fr)!important;padding:16px!important;gap:10px 16px!important}
+ #products .photo{width:150px!important;height:150px!important}
+ #products .name{font-size:18px!important}
+ #products .desc{font-size:13px!important}
+}
+@media(max-width:390px){
+ #products .product{grid-template-columns:92px minmax(0,1fr)!important;padding:10px!important;gap:8px!important}
+ #products .photo{width:92px!important;height:92px!important;min-height:92px!important}
+ #products .pm-inline-accessory-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .pm-catalogue-toolbar .pm-amazon-search-form{grid-template-columns:minmax(0,1fr) 92px}
+}
 </style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=4">
-</head><body><a class="pm-skip-link" href="#main-content">Aller au contenu</a><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a><a href="historique-prix.html" style="margin-left:auto;font-size:13px;font-weight:800;color:#a8442d">Historique des prix</a></header><main id="main-content" tabindex="-1"><section class="intro"><h1>Catalogue Prix Malin — idées cadeaux Noël 2026</h1><p>Explorez une sélection de produits et d’idées cadeaux pour Noël. Les fiches qui affichent « Voir sur Amazon » ouvrent une recherche marchand : ce n’est pas un prix vérifié. Les tarifs directs ne s’affichent que lorsqu’une source autorisée confirme le prix ; aucun prix fictif n’est ajouté.</p></section>
-<section class="pm-noel-hero pm-noel-catalogue" aria-labelledby="catalogueNoelTitle"><div class="pm-noel-copy"><span class="pm-noel-kicker">SÉLECTION SPÉCIALE · NOËL 2026</span><h1 id="catalogueNoelTitle">Des cadeaux qui brillent.<br><em>Des choix malins.</em></h1><p>Tech, mode, beauté et idées pour toute la famille : découvre les sélections et compare les offres directement chez les marchands.</p><a class="pm-noel-cta" href="#products">Explorer les idées cadeaux <span aria-hidden="true">↗</span></a><div class="pm-noel-trust"><span>Photos produits renouvelées</span><span>•</span><span>Tarifs non inventés</span></div></div><div class="pm-noel-visual"><img class="pm-noel-main-photo" src="https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=1000&q=85" alt="Cadeaux de Noël joliment emballés au pied du sapin" fetchpriority="high"><div class="pm-noel-photo-tag"><span class="pm-sparkle" aria-hidden="true">✦</span><span><strong>Le catalogue des fêtes</strong><small>Des idées utiles, belles et bien choisies</small></span></div></div></section>
-
-<section class="pm-gift-discovery" aria-labelledby="pmGiftDiscoveryTitle">
- <div class="pm-gift-discovery-heading"><div><span class="pm-gift-overline">SÉLECTION DE SAISON · 2026</span><h2 id="pmGiftDiscoveryTitle">Des idées cadeaux, vraiment variées</h2><p>Des photos différentes pour découvrir plusieurs univers, sans afficher de prix non vérifiés.</p></div><span class="pm-gift-heading-mark" aria-hidden="true">✦</span></div>
- <div class="pm-gift-discovery-grid">
-  <a class="pm-gift-tile" href="https://www.amazon.fr/s?k=casque+audio+bluetooth&tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer"><img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=700&q=85" alt="Casque audio moderne" loading="lazy"><span class="pm-gift-tile-shade"></span><span class="pm-gift-tile-copy"><small>Pour les mélomanes</small><strong>Audio & musique</strong><em>Découvrir les offres ↗</em></span></a>
-  <a class="pm-gift-tile" href="https://www.amazon.fr/s?k=parfum+coffret+cadeau&tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer"><img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=700&q=85" alt="Flacon de parfum élégant" loading="lazy"><span class="pm-gift-tile-shade"></span><span class="pm-gift-tile-copy"><small>Une attention raffinée</small><strong>Parfums & beauté</strong><em>Découvrir les offres ↗</em></span></a>
-  <a class="pm-gift-tile" href="https://www.amazon.fr/s?k=lego+jeu+construction+cadeau&tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer"><img src="https://images.unsplash.com/photo-1560961911-ba7ef651a56c?auto=format&fit=crop&w=700&q=85" alt="Jouets et jeux de construction colorés" loading="lazy"><span class="pm-gift-tile-shade"></span><span class="pm-gift-tile-copy"><small>Pour les petits créateurs</small><strong>Jeux & jouets</strong><em>Découvrir les offres ↗</em></span></a>
-  <a class="pm-gift-tile" href="https://www.amazon.fr/s?k=sac+a+main+cadeau&tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer"><img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=700&q=85" alt="Sac et accessoires de mode" loading="lazy"><span class="pm-gift-tile-shade"></span><span class="pm-gift-tile-copy"><small>Style au quotidien</small><strong>Mode & accessoires</strong><em>Découvrir les offres ↗</em></span></a>
-  <a class="pm-gift-tile" href="https://www.amazon.fr/s?k=montre+connectee+cadeau&tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer"><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=700&q=85" alt="Montre élégante" loading="lazy"><span class="pm-gift-tile-shade"></span><span class="pm-gift-tile-copy"><small>Utile et tendance</small><strong>Montres & tech</strong><em>Découvrir les offres ↗</em></span></a>
-  <a class="pm-gift-tile" href="https://www.amazon.fr/s?k=decoration+maison+cadeau&tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer"><img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=700&q=85" alt="Décoration chaleureuse pour la maison" loading="lazy"><span class="pm-gift-tile-shade"></span><span class="pm-gift-tile-copy"><small>Pour un intérieur cosy</small><strong>Maison & déco</strong><em>Découvrir les offres ↗</em></span></a>
- </div>
+</head><body><a class="pm-skip-link" href="#main-content">Aller au contenu</a><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a><a href="historique-prix.html" style="margin-left:auto;font-size:13px;font-weight:800;color:#a8442d">Historique des prix</a></header><main id="main-content" tabindex="-1"><section class="pm-catalogue-heading">
+ <div class="pm-catalogue-kicker">PRIX MALIN · CATALOGUE</div>
+ <h1>Trouvez le bon produit au bon prix.</h1>
+ <p>Parcourez les références, comparez les marchands et découvrez les accessoires utiles.</p>
 </section>
-
+<section class="pm-catalogue-toolbar" aria-label="Recherche et catégories">
+ <form id="pmAmazonSearchForm" class="pm-amazon-search-form" role="search">
+  <input id="search" class="search" type="search" placeholder="Rechercher un téléphone, un accessoire…" autocomplete="off" value="">
+  <button class="pm-amazon-search-submit" type="submit">Rechercher ↗</button>
+ </form>
+ <div id="filters" class="pm-catalogue-brand-filters" aria-label="Filtrer par marque"></div>
+</section>
 <section id="verifiedShelf" class="verified-shelf" aria-live="polite">
   <div class="verified-shelf-head">
     <div><h2>Prix directs — priorité Amazon</h2><p>Cette zone affichera les prix confirmés quand l’accès à une source Amazon autorisée sera disponible. En attendant, chaque fiche permet d’ouvrir la recherche Amazon correspondante.</p></div>
@@ -427,12 +494,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
   <div class="grid" id="verifiedProducts"><p class="comparison-empty">Aucun prix Amazon vérifié pour le moment. Explorez les références ci-dessous et vérifiez le prix directement sur Amazon.</p></div>
 </section>
 <section class="discovery-shelf" aria-labelledby="discoveryTitle">
-  <div class="discovery-shelf-head"><h2 id="discoveryTitle">Explorer les produits</h2><p>Suggestions de recherche illustrées, pas des offres tarifaires. Chaque fiche indique clairement qu’aucun prix direct n’a été vérifié ; utilisez le bouton de chaque fiche pour explorer les produits similaires.</p></div>
-  <label class="discovery-search-label" for="search">Rechercher un produit</label>
-  <form id="pmAmazonSearchForm" class="pm-amazon-search-form" role="search"><input id="search" class="search" type="search" placeholder="Ex. PlayStation, iPhone, télé…" autocomplete="off" value=""><button class="pm-amazon-search-submit" type="submit">Rechercher sur Amazon ↗</button></form>
-  <div class="count" id="count" aria-live="polite"></div>
-  <div id="filters" class="pm-catalogue-brand-filters" aria-label="Filtrer par marque"></div>
-  <section class="grid" id="products" aria-live="polite"></section>
+ <div class="discovery-shelf-head"><div><span class="pm-catalogue-kicker">SÉLECTION PRIX MALIN</span><h2 id="discoveryTitle">Tous les produits</h2><p>Des fiches claires, des photos, les offres marchands et les accessoires associés.</p></div></div>
+ <div class="count" id="count" aria-live="polite"></div>
+ <section class="grid" id="products" aria-live="polite"></section>
 </section>
 <p class="note">Les offres et stocks doivent toujours être confirmés chez le marchand. Les fiches d’exploration ne constituent pas des prix comparés.</p></main><script>
 const verifiedShelf=document.getElementById("verifiedShelf");
