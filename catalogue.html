@@ -6391,3 +6391,32 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 }
 @media(prefers-reduced-motion:reduce){#products .pm-product-row-rail{scroll-behavior:auto}}
 </style>
+
+
+<style id="pm-catalogue-empty-state-contrast-fix">
+/* Etat vide du catalogue : contraste lisible sur fond clair, y compris après les anciens styles sombres. */
+#products .pm-catalogue-no-feed{
+  background:#ffffff!important;
+  color:#17212b!important;
+  border:1px solid #d7dee8!important;
+  box-shadow:0 8px 24px rgba(17,27,53,.06)!important;
+}
+#products .pm-catalogue-no-feed strong{
+  display:block;
+  color:#17212b!important;
+  font-weight:850;
+  line-height:1.35;
+}
+#products .pm-catalogue-no-feed p{
+  color:#475467!important;
+  line-height:1.6;
+}
+#products .pm-catalogue-no-feed .pm-catalogue-external-searches a{
+  color:#ffffff!important;
+}
+#products .pm-catalogue-no-feed .pm-catalogue-external-searches a+a{
+  color:#ffffff!important;
+  background:#26364b!important;
+  border-color:#52647b!important;
+}
+</style>
