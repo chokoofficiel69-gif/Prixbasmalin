@@ -6281,4 +6281,22 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
  window.addEventListener('resize',()=>{if(!mobile())return;[assistant.box,access.box].forEach(el=>{if(el.style.left){const r=el.getBoundingClientRect();el.style.left=Math.max(0,Math.min(innerWidth-el.offsetWidth,r.left))+'px';el.style.top=Math.max(0,Math.min(innerHeight-el.offsetHeight,r.top))+'px'}})});
 })();
 </script>
+
+<style id="pm-catalogue-screenshot-fixes">
+/* Correctifs après contrôle sur téléphone : contraste du titre et rails réellement horizontaux. */
+.pm-catalogue-heading h1{color:#fff!important}
+.pm-catalogue-heading p{color:#d2d9e4!important}
+.pm-catalogue-heading{background:linear-gradient(145deg,#111923,#080d13)!important;border:1px solid #273446!important;border-radius:18px!important;padding:20px 16px!important;margin:0 0 14px!important}
+.pm-catalogue-toolbar{background:rgba(8,13,20,.97)!important;border-bottom:1px solid #29394c!important}
+.pm-catalogue-toolbar .search{background:#121b29!important;color:#f4f7fb!important;border:1px solid #40516a!important}
+.pm-catalogue-toolbar .search::placeholder{color:#aeb9c8!important;opacity:1}
+.pm-catalogue-toolbar .pm-brand-filter{background:#1b2635!important;border:1px solid #3b4c62!important;color:#f4f7fb!important}
+.pm-catalogue-toolbar .pm-brand-filter.active{background:#ff650b!important;border-color:#ff650b!important;color:#fff!important}
+#products .pm-related-rail{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:10px!important;touch-action:pan-x!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important}
+#products .pm-related-tile{flex:0 0 148px!important;width:148px!important;max-width:148px!important}
+#products .pm-inline-accessory-grid,#products .pm-detail-cards{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:10px!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important}
+#products .pm-inline-accessory-grid>* ,#products .pm-detail-cards>*{flex:0 0 148px!important;width:148px!important;max-width:148px!important;scroll-snap-align:start!important}
+#products .pm-related-visual.pm-related-no-image{background:linear-gradient(145deg,#26384d,#111b29)!important;border:1px solid #60728a!important;color:#ff8a43!important}
+</style>
+
 </body></html>
