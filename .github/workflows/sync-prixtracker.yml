@@ -1,0 +1,41 @@
+name: Synchroniser les données ouvertes PrixTracker
+
+on:
+  schedule:
+    - cron: '35 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prixtracker-open-data-sync
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Synchroniser les exports officiels data.gouv.fr / PrixTracker
+        run: node price-engine/sync-prixtracker.mjs
+      - name: Contrôler les JSON générés
+        run: |
+          node -e "for (const p of ['data/prixtracker-prices.json','data/prixtracker-best-daily.json']) { const d=JSON.parse(require('node:fs').readFileSync(p,'utf8')); if (!d.counts || !d.counts.rows || !d.counts.products) throw new Error('Export vide ou invalide: '+p); console.log(p, d.counts); }"
+      - name: Publier les relevés historiques
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/prixtracker-prices.json data/prixtracker-best-daily.json
+          if git diff --cached --quiet; then
+            echo "Les données PrixTracker n'ont pas changé."
+          else
+            git commit -m "Update open PrixTracker historical price data"
+            git push
+          fi
