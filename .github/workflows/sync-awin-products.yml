@@ -1,0 +1,52 @@
+name: Synchroniser le catalogue produits Awin autorisé
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "27 4 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "price-engine/sync-awin-products.mjs"
+      - ".github/workflows/sync-awin-products.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: awin-product-catalogue
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Télécharger les flux produits autorisés
+        env:
+          AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
+          AWIN_PUBLISHER_ID: "3137386"
+          AWIN_FEED_LOCALE: "fr_FR"
+        run: node price-engine/sync-awin-products.mjs
+      - name: Enregistrer le catalogue s'il a changé
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/awin-products.json; then
+            echo "Aucune nouvelle donnée catalogue ; aucun commit inutile."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/awin-products.json
+          git commit -m "Refresh authorized Awin product catalogue"
+          git push origin HEAD:main
