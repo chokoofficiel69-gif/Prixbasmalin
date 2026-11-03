@@ -93,7 +93,7 @@ class FeedSiteContractTests(unittest.TestCase):
             output = root / "prices.json"
             catalogue = root / "catalogue.html"
             source.write_text(json.dumps({"schema_version": 1, "offers": [offer]}), encoding="utf-8")
-            catalogue.write_text('const productData=[{id:"t1",name:"T-shirt blanc"}];', encoding="utf-8")
+            catalogue.write_text('const productData=[{"id":"t1","name":"T-shirt blanc"}];', encoding="utf-8")
             with patch.object(BUILDER, "INPUT", source), \
                  patch.object(BUILDER, "OUTPUT", output), \
                  patch.object(BUILDER, "CATALOGUE", catalogue), \
