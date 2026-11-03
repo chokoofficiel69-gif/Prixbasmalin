@@ -41,10 +41,14 @@ function findResource(resources, kind) {
   throw new Error("Ressource CSV « " + kind + " — toutes familles » absente du jeu de données PrixTracker");
 }
 function resourceUrl(resource) {
-  const candidate = resource.latest?.url || resource.latest || resource.url || resource.file?.url;
-  if (typeof candidate !== "string" || !/^https:\/\//i.test(candidate)) {
-    throw new Error("URL de téléchargement manquante pour " + (resource.title || "ressource"));
-  }
+  const candidates = [
+    resource.latest?.url,
+    typeof resource.latest === "string" ? resource.latest : null,
+    resource.url,
+    resource.file?.url
+  ];
+  const candidate = candidates.find(value => typeof value === "string" && /^https:\/\//i.test(value));
+  if (!candidate) throw new Error("URL de téléchargement manquante pour " + (resource.title || "ressource"));
   return candidate;
 }
 async function downloadCsv(resource) {
