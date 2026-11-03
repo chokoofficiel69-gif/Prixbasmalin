@@ -5601,6 +5601,28 @@ const suggestedBrands={airfryer:["Philips","Moulinex","Ninja"],vacuum:["Dyson","
 const categoryBrands={fashion:["Levi’s","Nike","Adidas"],home:["Philips","Moulinex","Bosch"],tech:["Samsung","Apple","Xiaomi"],beauty:["L’Oréal Paris","Nivea","Maybelline"],kids:["LEGO","VTech","Fisher-Price"]};
 function brandsFor(p){return suggestedBrands[p.id]||categoryBrands[p.category]||["Philips","Samsung","Xiaomi"];}
 const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count"),filtersEl=document.getElementById("filters");
+function pmHasRealProductImage(product){
+  const image=String(product&&product.image||"");
+  return !!product?.isAwinProduct && /^https:\/\//i.test(image) && !/unsplash\.com/i.test(image);
+}
+async function pmLoadAwinCatalogue(){
+  try{
+    const response=await fetch("/data/awin-products.json",{cache:"no-store"});
+    if(!response.ok)return;
+    const feed=await response.json();
+    if(feed?.status!=="ok"||!Array.isArray(feed.products))return;
+    const known=new Set(productData.map(product=>product.id));
+    feed.products.forEach(product=>{
+      if(!product||!product.id||known.has(product.id)||!product.name||!product.brand||
+         !pmHasRealProductImage(product)||!Number.isFinite(Number(product.priceValue))||
+         Number(product.priceValue)<=0||!/^https:\/\//i.test(String(product.sourceUrl||"")))return;
+      productData.push(product);
+      known.add(product.id);
+    });
+  }catch(error){
+    console.warn("Le flux de produits autorisés Awin est momentanément indisponible.");
+  }
+}
 let selectedBrand="";
 const categoryParam=new URLSearchParams(location.search).get("cat")||"all";
 const categoryAliases={tech:["tech"],fashion:["fashion"],home:["home"],beauty:["beauty"],kids:["kids"],sport:["fashion","tech"],auto:"all",diy:"all",appliances:["home"],gifts:"all"};
@@ -5626,19 +5648,25 @@ const pmSearchSynonyms={
   "lave linge":["lave linge","machine a laver"],
   aspirateur:["aspirateur","robot aspirateur","dyson"],
   parfum:["parfum","fragrance","eau de parfum"],
-  maquillage:["maquillage","beaute","cosmetique"]
+  maquillage:["maquillage","beaute","cosmetique"],
+  survetement:["survetement","survetements","jogging","ensemble de sport","tracksuit","training"],
+  jogging:["jogging","survetement","pantalon de sport","ensemble de sport"],
+  noir:["noir","black"],
+  blanche:["blanche","blanc","white"],
+  blanc:["blanc","blanche","white"]
 };
 function render(){
   const rawQuery=searchEl.value.trim();
   const q=pmSearchNorm(rawQuery);
   const queryTerms=q.split(" ").filter(Boolean);
   const correctedQuery=queryTerms.map(term=>pmSpellCorrections[term]||term);
-  const found=productData.filter(p=>{
+  const catalogueData=productData.filter(p=>pmHasRealProductImage(p)&&Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0);
+  const found=catalogueData.filter(p=>{
     const matchesCategory=category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category);
     if(!matchesCategory)return false;
     if(selectedBrand && pmSearchNorm(p.brand)!==pmSearchNorm(selectedBrand))return false;
     if(!q)return true;
-    const haystack=pmSearchNorm([p.name,p.desc,p.query,p.brand,p.category].join(" "));
+    const haystack=pmSearchNorm([p.name,p.desc,p.query,p.brand,p.category,p.color,p.size,p.product_type,p.gtin,p.merchant].join(" "));
     // Un synonyme suffit pour chaque mot saisi : ne pas exiger toutes les variantes à la fois.
     return correctedQuery.every(term=>{
       const variants=pmSearchSynonyms[term]||[term];
@@ -5646,16 +5674,22 @@ function render(){
     });
   });
   productsEl.innerHTML="";
-  const availableBrands=[...new Set(productData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   filtersEl.innerHTML="";
   filtersEl.hidden=false;
   const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";render();});filtersEl.append(allBrand);
   availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;render();});filtersEl.append(button);});
   const brandsCount=new Set(found.map(p=>p.brand).filter(Boolean)).size;
-  countEl.textContent=found.length+" référence(s) dans notre sélection";
+  countEl.textContent=found.length+" produit(s) avec photo et prix issus d’un flux marchand";
   if(!found.length){
-    productsEl.innerHTML='<div class="empty">Aucun produit dans notre sélection pour cette recherche.<a class="pm-amazon-empty-cta" href="https://www.amazon.fr/s?k=PlayStation&s=price-asc-rank&tag=prixbasmalin2-21" id="pmAmazonFallback">Voir les résultats Amazon ↗</a></div>';
-     const fallback=document.getElementById("pmAmazonFallback");if(fallback){const url="https://www.amazon.fr/s?"+new URLSearchParams({k:searchEl.value.trim(),s:"price-asc-rank",tag:"prixbasmalin2-21"}).toString();fallback.href=url;}
+    const query=searchEl.value.trim();
+    const empty=document.createElement("div");empty.className="empty pm-catalogue-no-feed";
+    const title=document.createElement("strong");title.textContent="Aucune fiche complète et vérifiée pour cette recherche pour le moment.";
+    const message=document.createElement("p");message.textContent="Prix Malin n’affiche pas de photo générique ni de prix inventé. Les fiches produits avec images et tarifs marchands arrivent depuis les flux autorisés.";
+    const links=document.createElement("div");links.className="pm-catalogue-external-searches";
+    const shopping=document.createElement("a");shopping.href="https://www.google.com/search?"+new URLSearchParams({tbm:"shop",q:query||"produits populaires"}).toString();shopping.target="_blank";shopping.rel="noopener noreferrer";shopping.textContent="Explorer Google Shopping ↗";
+    const amazon=document.createElement("a");amazon.href="https://www.amazon.fr/s?"+new URLSearchParams({k:query||"produits populaires",tag:"prixbasmalin2-21"}).toString();amazon.target="_blank";amazon.rel="noopener noreferrer sponsored";amazon.textContent="Voir Amazon ↗";
+    links.append(shopping,amazon);empty.append(title,message,links);productsEl.append(empty);
     return;
   }
   // Regrouper les produits par famille : chaque famille devient un rail horizontal indépendant.
@@ -5699,31 +5733,18 @@ function render(){
     if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source de la photo : "+(p.imageSourceName||"constructeur"));}
     if(imageBadge.textContent)photo.append(imageBadge);
     img.onerror=()=>{
-      if(img.dataset.fallbackTried==="0"){
-        img.dataset.fallbackTried="1";
-        imageBadge.textContent="Illustration";
-        imageBadge.classList.add("illustration");
-        const fallbackImages={
-          fashion:"https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=80",
-          tech:"https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=900&q=80",
-          home:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80",
-          kids:"https://images.unsplash.com/photo-1599623560574-39d485900c95?auto=format&fit=crop&w=900&q=80",
-          beauty:"https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=900&q=80"
-        };
-        const backup=fallbackImages[p.category]||fallbackImages.tech;
-        if(img.src!==backup){img.src=backup;return;}
-      }
-      photo.classList.add("photo-unavailable");
-      photo.innerHTML="";
-      const fallback=document.createElement("div");fallback.className="pm-image-fallback";fallback.setAttribute("role","img");fallback.setAttribute("aria-label","Illustration de remplacement pour "+p.name);
-      const symbol=document.createElementNS("http://www.w3.org/2000/svg","svg");
-      symbol.setAttribute("viewBox","0 0 48 48");symbol.setAttribute("aria-hidden","true");symbol.classList.add("pm-fallback-icon");
-      symbol.innerHTML='<rect x="7" y="7" width="34" height="34" rx="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 31l8-9 6 6 4-5 4 8M17 17h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-      const label=document.createElement("strong");label.textContent=p.brand||"Prix Malin";
-      const hint=document.createElement("small");hint.textContent="Illustration de remplacement";
-      fallback.append(symbol,label,hint);photo.append(fallback);
+      card.remove();
+      const remaining=productsEl.querySelectorAll(".pm-product-row-rail>.product").length;
+      countEl.textContent=remaining+" produit(s) avec photo et prix issus d’un flux marchand";
     };
     photo.append(img);
+    const gallery=document.createElement("div");gallery.className="pm-awin-gallery";
+    const galleryImages=Array.isArray(p.images)?p.images.filter((value,index,array)=>/^https:\/\//i.test(String(value||""))&&array.indexOf(value)===index).slice(0,5):[];
+    galleryImages.forEach((url,index)=>{
+      const thumb=document.createElement("button");thumb.type="button";thumb.className="pm-awin-thumb"+(index===0?" active":"");thumb.setAttribute("aria-label","Afficher la vue "+(index+1)+" de "+p.name);
+      const thumbImage=document.createElement("img");thumbImage.src=url;thumbImage.alt="";thumbImage.loading="lazy";thumbImage.onerror=()=>thumb.remove();thumb.append(thumbImage);
+      thumb.addEventListener("click",()=>{img.src=url;gallery.querySelectorAll(".pm-awin-thumb").forEach(button=>button.classList.toggle("active",button===thumb));});gallery.append(thumb);
+    });
 
     const name=document.createElement("div");
     name.className="name";
@@ -5750,36 +5771,39 @@ function render(){
     brands.append(brandsLabel,brandsList);
     const amazonButton=document.createElement("a");
     amazonButton.className="offer";
-    amazonButton.textContent="Voir les offres sur Amazon ↗";
-    amazonButton.href="https://www.amazon.fr/s?k="+encodeURIComponent((p.brand?p.brand+" ":"")+p.query)+"&tag=prixbasmalin2-21";
+    amazonButton.textContent="Voir chez "+(p.merchant||"le marchand")+" ↗";
+    amazonButton.href=p.sourceUrl;
     amazonButton.target="_blank";
     amazonButton.rel="noopener noreferrer sponsored";
-    amazonButton.setAttribute("aria-label","Voir les offres Amazon pour "+p.name);
+    amazonButton.setAttribute("aria-label","Voir "+p.name+" chez "+(p.merchant||"le marchand"));
     const historyLink=p.category==="tech"?document.createElement("a"):null;
     if(historyLink){historyLink.className="pm-history-link";historyLink.href="/historique-prix.html?q="+encodeURIComponent(p.name);historyLink.textContent="Voir l’historique PrixTracker ↗";historyLink.setAttribute("aria-label","Consulter les relevés historiques PrixTracker pour "+p.name);}
     const price=document.createElement("div");
     price.className="price";
-    price.textContent="Prix direct non encore disponible";
+    price.textContent=p.price||new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(p.priceValue));
     const merchant=document.createElement("div");
     merchant.className="merchant";
-    merchant.textContent="Aucun prix vérifié pour cette fiche générique";
+    const fetchedDate=p.fetchedAt?new Date(p.fetchedAt):null;
+    merchant.textContent=(p.merchant||"Marchand")+" • flux Awin"+(fetchedDate&&!Number.isNaN(fetchedDate.getTime())?" • synchronisé le "+fetchedDate.toLocaleDateString("fr-FR"):"")+" • livraison à confirmer";
     const heading=document.createElement("div");
     heading.className="discovery-compare-heading";
-    heading.textContent="Comparaison des prix";
+    heading.textContent=Array.isArray(p.offers)&&p.offers.length>1?"Comparer les marchands":"Offre marchande";
     const list=document.createElement("div");
     list.className="discovery-compare";
-    const row=document.createElement("div");
-    row.className="discovery-compare-row";
-    const label=document.createElement("span");
-    label.textContent="Tarifs comparés";
-    const status=document.createElement("span");
-    status.textContent="En attente de prix marchands vérifiés";
-    status.style.cssText="font-size:11px;text-align:right;color:#777;max-width:58%";
-    row.append(label,status);list.append(row);
+    const feedOffers=Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,price:p.price,priceValue:p.priceValue,url:p.sourceUrl}];
+    feedOffers.forEach(offer=>{
+      const row=document.createElement("div");row.className="discovery-compare-row";
+      const store=document.createElement("span");store.textContent=offer.merchant||"Marchand";
+      const link=document.createElement("a");link.href=offer.url||p.sourceUrl;link.target="_blank";link.rel="noopener noreferrer sponsored";
+      link.textContent=offer.price||(Number.isFinite(Number(offer.priceValue))?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(offer.priceValue)):"Prix indisponible");
+      row.append(store,link);list.append(row);
+    });
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
     note.textContent="Prix Malin affiche uniquement des prix vérifiés pour le modèle exact. Aucun prix n'est inventé.";
-    card.append(photo,name,desc,brands,amazonButton);
+    card.append(photo);
+    if(gallery.children.length>1)card.append(gallery);
+    card.append(name,desc,brands,amazonButton);
     if(historyLink)card.append(historyLink);
     card.append(price,merchant,heading,list,note);
     card.dataset.pmProductName=p.name;
@@ -6126,7 +6150,7 @@ function openAmazonSearch(term){
  window.location.href=url;
 }
 amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();selectedBrand="";render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
-searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();
+searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});pmLoadAwinCatalogue().finally(render);
 </script>  
 <script>
 
@@ -6324,6 +6348,19 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 #products .pm-related-visual.pm-related-no-image{background:linear-gradient(145deg,#26384d,#111b29)!important;border:1px solid #60728a!important;color:#ff8a43!important}
 </style>
 
+<style id="pm-awin-catalogue-ui">
+.pm-catalogue-no-feed{display:grid;gap:10px;text-align:left;padding:22px;border:1px solid #35465a;border-radius:16px;background:#111c2a;color:#eef3f8}
+.pm-catalogue-no-feed p{margin:0;color:#c2ccda;line-height:1.5}
+.pm-catalogue-external-searches{display:flex;flex-wrap:wrap;gap:9px;margin-top:4px}
+.pm-catalogue-external-searches a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 13px;border-radius:10px;background:#ff650b;color:#fff;font-weight:800;font-size:13px}
+.pm-catalogue-external-searches a+ a{background:#26364b;border:1px solid #52647b}
+.pm-awin-gallery{display:flex;gap:6px;overflow-x:auto;padding:7px 1px 1px;scrollbar-width:thin}
+.pm-awin-thumb{flex:0 0 42px;width:42px;height:42px;padding:2px;border:1px solid #45556a;border-radius:8px;background:#fff;overflow:hidden}
+.pm-awin-thumb.active{border:2px solid #ff650b}
+.pm-awin-thumb img{width:100%;height:100%;object-fit:contain}
+#products .pm-product-row-rail .discovery-compare-row a{flex:none;max-width:52%;color:#ffb184;font-size:12px;font-weight:850;white-space:nowrap}
+#products .pm-product-row-rail .discovery-compare-row span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+</style>
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
 /* Catalogue mobile-first : chaque famille de produits forme une rangée horizontale tactile. */
