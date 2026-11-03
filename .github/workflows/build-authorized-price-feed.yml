@@ -11,7 +11,6 @@ on:
       - "tests/**"
       - "supabase/migrations/**"
       - ".github/workflows/prepare-manual-releves.yml"
-      - ".github/workflows/build-authorized-price-feed.yml"
   push:
     branches:
       - main
@@ -24,7 +23,6 @@ on:
       - "tests/**"
       - "supabase/migrations/**"
       - ".github/workflows/prepare-manual-releves.yml"
-      - ".github/workflows/build-authorized-price-feed.yml"
   workflow_dispatch:
 
 permissions:
