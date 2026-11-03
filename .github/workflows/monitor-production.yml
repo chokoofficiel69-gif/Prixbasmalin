@@ -11,6 +11,8 @@ on:
       - "js/prix-malin-auth.js"
       - "catalogue.html"
       - "index.html"
+      - "partenaires.html"
+      - "publicite.html"
       - "etat-prix.html"
       - "historique-prix.html"
       - "data/prixtracker-prices.json"
@@ -61,6 +63,19 @@ jobs:
         run: node --check price-engine/sync-prixtracker.mjs
       - name: Vérifier la syntaxe du module compte et alertes
         run: node --check js/prix-malin-auth.js
+
+      - name: Vérifier que la mesure d'audience respecte le consentement
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          for (const file of ["partenaires.html", "publicite.html"]) {
+            const html = fs.readFileSync(file, "utf8");
+            if (/beacon\\.min\\.js/i.test(html)) throw new Error(file + " charge directement le beacon avant le consentement.");
+            if (!/cookie-consent\\.js/i.test(html)) throw new Error(file + " ne charge pas le gestionnaire de consentement.");
+            console.log("OK : mesure d'audience centralisée après consentement — " + file);
+          }
+          NODE
+
       - name: Vérifier le blocage des redirections non sûres
         run: |
           node --input-type=module <<'NODE'
