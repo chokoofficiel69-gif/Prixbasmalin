@@ -28,6 +28,7 @@ on:
     paths:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
+      - "js/prix-malin-auth.js"
       - "catalogue.html"
       - "index.html"
       - "data/featured-prices.json"
