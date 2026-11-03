@@ -124,7 +124,7 @@ def main():
         raise ValueError("Format invalide dans data/merchant-offers.json")
 
     catalogue_text = CATALOGUE.read_text(encoding="utf-8")
-    catalogue_match = re.search(r"const\\s+productData\\s*=\\s*(\\[.*?\\])\\s*;", catalogue_text, re.S)
+    catalogue_match = re.search(r"const\s+productData\s*=\s*(\[.*?\])\s*;", catalogue_text, re.S)
     if not catalogue_match:
         raise ValueError("Impossible de lire les identifiants productData dans catalogue.html")
     try:
