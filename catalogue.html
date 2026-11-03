@@ -278,7 +278,22 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #425f
 .pm-amazon-search-submit{width:100%;min-height:48px;border:0;border-radius:12px;background:#ff6848;color:#21182a;font:800 14px system-ui,-apple-system,sans-serif;padding:12px 16px;cursor:pointer}
 .pm-amazon-search-submit:active{transform:scale(.99)}
 .pm-amazon-empty-cta{display:block;margin-top:12px;padding:14px;border:1px solid #ffc7b9;border-radius:13px;background:#fff2ee;color:#a83e2d;text-align:center;font-weight:800}
-\n.pm-catalogue-brand-filters{display:flex;gap:7px;overflow-x:auto;padding:4px 0 10px;margin:0 0 8px;scrollbar-width:thin}.pm-brand-filter{flex:none;border:1px solid #e8e1dc;background:#fff;color:#39322e;border-radius:999px;padding:8px 12px;font:inherit;font-size:12px;font-weight:700;white-space:nowrap}.pm-brand-filter.active{background:#ff650b;border-color:#ff650b;color:#fff}.pm-catalogue-brand-filters:empty{display:none}\n\n/* Catalogue mobile-first : fiches en lignes, jamais en grille de colonnes */\n#products.grid{display:flex;flex-direction:column;gap:12px}\n#products .product{display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:auto;gap:10px;padding:12px;border-radius:16px;align-items:start}\n#products .photo{grid-column:1;grid-row:1 / span 6;width:112px;height:112px;aspect-ratio:1/1}\n#products .name{grid-column:2;margin:2px 0 0;font-size:15px;line-height:1.3}\n#products .desc,#products .price,#products .merchant{grid-column:2;min-height:0;margin:0;font-size:12px}\n#products .offer,#products .pm-product-details{grid-column:2}\n#filters{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;white-space:nowrap;padding:5px 0 12px}\n#filters .pm-brand-filter{flex:0 0 auto}\n@media(min-width:700px){#products .product{grid-template-columns:140px minmax(0,1fr);padding:16px}#products .photo{width:140px;height:140px}}\n\n.pm-detail-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}\n.pm-detail-visual-card{overflow:hidden;padding:0 0 12px}\n.pm-detail-visual{height:112px;background:#f1f3f7;overflow:hidden;border-radius:12px 12px 0 0;margin-bottom:10px}\n.pm-detail-visual img{width:100%;height:100%;object-fit:cover;display:block}\n.pm-detail-visual-fallback{background:linear-gradient(135deg,#eef1f6,#dfe5ee)}\n.pm-detail-visual-card strong,.pm-detail-visual-card p,.pm-detail-visual-card a{margin-left:12px;margin-right:12px}\n.pm-detail-visual-card a{display:block}\n@media(max-width:390px){.pm-detail-cards{grid-template-columns:1fr}.pm-detail-visual{height:150px}}\n</style>  <!-- Cloudflare Web Analytics -->
+\n.pm-catalogue-brand-filters{display:flex;gap:7px;overflow-x:auto;padding:4px 0 10px;margin:0 0 8px;scrollbar-width:thin}.pm-brand-filter{flex:none;border:1px solid #e8e1dc;background:#fff;color:#39322e;border-radius:999px;padding:8px 12px;font:inherit;font-size:12px;font-weight:700;white-space:nowrap}.pm-brand-filter.active{background:#ff650b;border-color:#ff650b;color:#fff}.pm-catalogue-brand-filters:empty{display:none}\n
+/* Catalogue mobile-first : fiches en lignes, jamais en grille de colonnes */\n#products.grid{display:flex;flex-direction:column;gap:12px}
+#products .product{display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:auto;gap:10px;padding:12px;border-radius:16px;align-items:start}
+#products .photo{grid-column:1;grid-row:1 / span 6;width:112px;height:112px;aspect-ratio:1/1}
+#products .name{grid-column:2;margin:2px 0 0;font-size:15px;line-height:1.3}
+#products .desc,#products .price,#products .merchant{grid-column:2;min-height:0;margin:0;font-size:12px}
+#products .offer,#products .pm-product-details{grid-column:2}
+#filters{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;white-space:nowrap;padding:5px 0 12px}
+#filters .pm-brand-filter{flex:0 0 auto}
+@media(min-width:700px){#products .product{grid-template-columns:140px minmax(0,1fr);padding:16px}#products .photo{width:140px;height:140px}}
+
+.pm-detail-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pm-detail-visual-card{overflow:hidden;padding:0 0 12px}\n.pm-detail-visual{height:112px;background:#f1f3f7;overflow:hidden;border-radius:12px 12px 0 0;margin-bottom:10px}\n.pm-detail-visual img{width:100%;height:100%;object-fit:cover;display:block}
+.pm-detail-visual-fallback{background:linear-gradient(135deg,#eef1f6,#dfe5ee)}
+.pm-detail-visual-card strong,.pm-detail-visual-card p,.pm-detail-visual-card a{margin-left:12px;margin-right:12px}\n.pm-detail-visual-card a{display:block}
+@media(max-width:390px){.pm-detail-cards{grid-template-columns:1fr}.pm-detail-visual{height:150px}}\n</style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=4">
