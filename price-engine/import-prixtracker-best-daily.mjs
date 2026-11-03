@@ -85,7 +85,7 @@ const dates = records.map(item => item.date).sort();
 const output = {
   version: 1,
   dataset: "PrixTracker — meilleur prix du jour",
-  source_url: "https://prixtracker.fr/donnees/meilleur-prix-du-jour.csv",
+  source_url: process.env.PRIXTRACKER_SOURCE_URL || "https://prixtracker.fr/donnees/meilleur-prix-du-jour.csv",
   license: "Licence Ouverte 2.0",
   attribution: "Source : PrixTracker (prixtracker.fr), données réutilisées sous Licence Ouverte 2.0.",
   generated_at: new Date().toISOString(),
