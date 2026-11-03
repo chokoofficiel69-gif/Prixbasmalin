@@ -5316,8 +5316,8 @@ function pmSearchNorm(value){
 }
 const pmSpellCorrections={ordianteur:"ordinateur",ordinteur:"ordinateur",ordiinateur:"ordinateur",ordnateur:"ordinateur",laptpo:"laptop",portble:"portable",smartphoen:"smartphone",telephonne:"telephone",televison:"television",ecouteur:"ecouteurs"};
 const pmSearchSynonyms={
-  ordinateur:["ordinateur","ordi","pc","laptop","portable","notebook"],
-  pc:["pc","ordinateur","ordi","laptop","portable"],
+  ordinateur:["ordinateur","ordi","pc","laptop","notebook","ordinateur portable"],
+  pc:["pc","ordinateur","ordi","laptop"],
   chaussures:["chaussures","basket","baskets","sneakers","running"],
   basket:["basket","baskets","chaussures","sneakers"],
   telephone:["telephone","smartphone","mobile","iphone","android"],
@@ -5344,7 +5344,7 @@ function render(){
     // Un synonyme suffit pour chaque mot saisi : ne pas exiger toutes les variantes à la fois.
     return correctedQuery.every(term=>{
       const variants=pmSearchSynonyms[term]||[term];
-      return variants.some(variant=>haystack.includes(pmSearchNorm(variant)));
+      return variants.some(variant=>(" "+haystack+" ").includes(" "+pmSearchNorm(variant)+" "));
     });
   });
   productsEl.innerHTML="";
