@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
+import {gunzipSync} from "node:zlib";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = path.join(ROOT, "data", "awin-products.json");
@@ -45,7 +46,8 @@ function currentSalePrice(row, now) {
 function imageList(row) {
   const extra = row.additional_image_link ?? row.additional_image_links ?? [];
   let values = Array.isArray(extra) ? extra : String(extra || "").split(/[|,;]/);
-  return [...new Set([row.image_link, ...values].map(httpsUrl).filter(Boolean))].slice(0, 6);
+  const alternate = [row.alternate_image,row.alternate_image_two,row.alternate_image_three,row.large_image,row.aw_image_url,row.merchant_image_url];
+  return [...new Set([row.image_link,row.merchant_image_url,row.large_image,row.aw_image_url,...values,...alternate].map(httpsUrl).filter(Boolean))].slice(0, 6);
 }
 function categoryFor(row) {
   const text = norm([row.google_product_category, row.product_type, row.product_category].join(" "));
@@ -94,6 +96,110 @@ async function request(url, label) {
   }
   throw new Error(label + " : " + (lastError?.name || "réseau"));
 }
+function parseCsv(text) {
+  const rows = [];
+  let row = [], field = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (quoted) {
+      if (char === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (char === '"') quoted = false;
+      else field += char;
+    } else if (char === '"') quoted = true;
+    else if (char === ",") { row.push(field); field = ""; }
+    else if (char === "\n") { row.push(field.replace(/\r$/, "")); rows.push(row); row = []; field = ""; }
+    else field += char;
+  }
+  if (quoted) throw new Error("CSV Awin invalide : guillemet non refermé.");
+  if (field.length || row.length) { row.push(field.replace(/\r$/, "")); rows.push(row); }
+  return rows.filter(item => item.some(cell => String(cell).trim() !== ""));
+}
+function objectRowsFromCsv(text) {
+  const rows = parseCsv(text);
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(value => norm(value.replace(/^\uFEFF/, "")).replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""));
+  return rows.slice(1).map(cells => Object.fromEntries(headers.map((header,index) => [header,String(cells[index] ?? "").trim()])));
+}
+function parseFeedRow(row, program, advertiser) {
+  const priceValue = row.search_price || row.store_price || row.price || "";
+  const currency = row.currency || "EUR";
+  const price = /[A-Z]{3}/i.test(String(priceValue)) ? priceValue : String(priceValue).replace(",", ".") + " " + currency;
+  const stockRaw = norm([row.stock_status,row.availability,row.is_for_sale,row.in_stock].join(" "));
+  const quantity = Number(row.stock_quantity || row.number_available || 0);
+  const inStock = /in stock|in_stock|available|yes|true|for sale/.test(stockRaw) || quantity > 0;
+  if (!inStock || /out of stock|out_of_stock|false|no/.test(stockRaw)) return null;
+  const extra = [row.alternate_image,row.alternate_image_two,row.alternate_image_three].filter(Boolean);
+  const normalized = {
+    id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.product_gtin,
+    title: row.product_name || row.title,
+    description: row.description || row.product_short_description,
+    brand: row.brand_name || row.brand,
+    product_type: row.merchant_category || row.category_name || row.product_type,
+    google_product_category: row.category_name || row.merchant_category,
+    color: row.colour || row.color,
+    size: row.size,
+    gtin: row.ean || row.product_gtin || row.upc,
+    mpn: row.mpn || row.model_number,
+    image_link: row.merchant_image_url || row.large_image || row.aw_image_url || row.aw_thumb_url,
+    additional_image_link: extra,
+    price,
+    availability: "in_stock",
+    aw_deep_link: row.aw_deep_link || row.merchant_deep_link || row.purl
+  };
+  return offerFromRow(normalized,program,advertiser);
+}
+async function loadStandardAwinFeeds(rawOffers) {
+  const key = process.env.AWIN_PRODUCT_DATA_API_KEY || "";
+  if (!key) {
+    log("Clé de flux Awin standard absente : seuls les flux Enhanced accessibles par l'API éditeur seront lus.");
+    return 0;
+  }
+  const listUrl = "https://productdata.awin.com/datafeed/list/apikey/" + encodeURIComponent(key);
+  const response = await fetch(listUrl,{headers:{Accept:"text/csv"},signal:AbortSignal.timeout(TIMEOUT_MS)});
+  if (!response.ok) {
+    log("Liste des flux standards Awin indisponible (HTTP "+response.status+").");
+    return 0;
+  }
+  const listText = await response.text();
+  const feedRows = objectRowsFromCsv(listText);
+  const joined = feedRows.filter(row => /joined|soft member|auto.?join/.test(norm(row.membership_status || row.membership)) && /^(fr|french|fr_fr)$/.test(norm(row.language || row.feed_language)));
+  log(joined.length+" flux standard(s) français accessibles dans la liste Awin.");
+  let cursor = 0;
+  let imported = 0;
+  async function standardWorker() {
+    while (cursor < joined.length && rawOffers.length < MAX_PRODUCTS) {
+      const row = joined[cursor++];
+      let feedUrl;
+      try { feedUrl = new URL(row.url || row.download_url || row.feed_url); } catch { continue; }
+      if (!["productdata.awin.com","datafeed.api.productserve.com"].includes(feedUrl.hostname) || !/^https?:$/.test(feedUrl.protocol)) continue;
+      feedUrl.protocol = "https:";
+      try {
+        const feedResponse = await fetch(feedUrl.href,{headers:{Accept:"text/csv,application/gzip,application/octet-stream"},signal:AbortSignal.timeout(TIMEOUT_MS)});
+        if (!feedResponse.ok) { log("Flux standard ignoré (HTTP "+feedResponse.status+")."); continue; }
+        let bytes = Buffer.from(await feedResponse.arrayBuffer());
+        if (bytes[0]===0x1f && bytes[1]===0x8b) bytes=gunzipSync(bytes);
+        const rows = objectRowsFromCsv(bytes.toString("utf8"));
+        const advertiser = String(row.advertiser_id || row.advertiserid || row.id || row.feed_id || "standard");
+        const program = {name:row.advertiser_name || row.advertiser || ("Annonceur Awin "+advertiser)};
+        let count = 0;
+        for (const productRow of rows) {
+          const offer = parseFeedRow(productRow,program,advertiser);
+          if (!offer) continue;
+          rawOffers.push(offer);
+          imported++;
+          count++;
+          if (count>=MAX_PER_ADVERTISER || rawOffers.length>=MAX_PRODUCTS) break;
+        }
+        if (count) log(program.name+" (flux standard) : "+count+" offre(s) importée(s).");
+      } catch (error) {
+        log("Flux standard ignoré ("+String(error.message||"erreur").slice(0,100)+").");
+      }
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(2,joined.length)},standardWorker));
+  return imported;
+}
+
 function advertiserId(program) {
   const value = program?.advertiserId ?? program?.advertiser_id ?? program?.advertiser?.id ?? program?.id;
   return String(value ?? "").trim();
@@ -243,6 +349,8 @@ async function worker() {
   }
 }
 await Promise.all(Array.from({ length: Math.min(CONCURRENCY, eligible.length) }, worker));
+const standardImported = await loadStandardAwinFeeds(rawOffers);
+if (standardImported) log(standardImported+" offre(s) supplémentaire(s) depuis les flux standards.");
 
 if (!rawOffers.length) {
   log("Aucun flux Enhanced fr_FR exploitable parmi les partenariats rejoints. Le dernier catalogue valide est conservé.");
