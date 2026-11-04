@@ -5679,7 +5679,7 @@ async function pmLoadAwinCatalogue(){
         // Les visuels du flux affilié autorisé remplacent les photos génériques,
         // sans toucher au nom, au lien, au prix ni aux autres données de la fiche.
         const currentImage=String(existing.image||"");
-        const isGeneric=/unsplash\\.com/i.test(currentImage)||
+        const isGeneric=/unsplash\.com/i.test(currentImage)||
           existing.imageStatus==="generic_category_visual"||
           existing.imageStatus==="illustration";
         if(isGeneric){
