@@ -909,4 +909,88 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
 })();
 </script>
 
+
+<style id="pm-seasonal-theme">
+/* Habillage saisonnier discret : l'identité noire/orange Prix Malin reste prioritaire. */
+#new-arrivals{position:relative;isolation:isolate}
+#new-arrivals .pm-season-ribbon{display:none}
+body.pm-season-noel #new-arrivals .pm-season-ribbon{
+ display:flex;align-items:center;gap:9px;width:max-content;max-width:100%;
+ margin:0 0 12px;padding:7px 13px;border:1px solid #d8b45c;border-radius:999px;
+ color:#ffe9b4;background:linear-gradient(100deg,#173c2c,#10251e 70%,#512126);
+ font-size:11px;font-weight:900;letter-spacing:.06em;box-shadow:0 4px 16px #0005
+}
+body.pm-season-noel #new-arrivals .pm-season-ribbon:before{content:"✦";color:#f6d47b}
+body.pm-season-noel #new-arrivals .section-head h2 span{color:#e6c36f}
+body.pm-season-noel #new-arrivals .new-arrival{border-color:#b9974c;box-shadow:0 7px 22px #0004}
+body.pm-season-noel #new-arrivals .new-arrival-kicker{color:#a12d35}
+body.pm-season-noel #new-arrivals .new-arrival a{background:linear-gradient(110deg,#17613d,#a52d36)}
+body.pm-season-noel #new-arrivals:after{
+ content:"✦  ·  ❄  ·  ✦";position:absolute;right:2px;top:0;color:#e6c36f;
+ font-size:17px;letter-spacing:7px;pointer-events:none;opacity:.85
+}
+body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px #c6a04b22,inset 0 0 18px #c6a04b12}
+@media(max-width:650px){body.pm-season-noel #new-arrivals:after{font-size:13px;letter-spacing:3px}}
+</style>
+<script id="pm-seasonal-campaign">
+(function(){
+ const now=new Date(), month=now.getMonth()+1, day=now.getDate();
+ let season="standard", label="Sélection Prix Malin", kicker="SÉLECTION RENOUVELÉE";
+ if((month===11)||(month===12&&day<=26)){
+   season="noel";label="La magie des fêtes commence ici";kicker="IDÉES & SÉLECTIONS DE NOËL";
+ }else if(month===12&&day>=27||month===1&&day<=5){
+   season="nouvel-an";label="Bien commencer la nouvelle année";kicker="SÉLECTION NOUVELLE ANNÉE";
+ }else if(month===1||month===2){
+   season="hiver";label="Les essentiels de l’hiver";kicker="SÉLECTION HIVER";
+ }else if(month>=3&&month<=5){
+   season="printemps";label="Le printemps malin";kicker="SÉLECTION PRINTEMPS";
+ }else if(month>=6&&month<=8){
+   season="ete";label="Cap sur l’été";kicker="SÉLECTION ÉTÉ";
+ }else if(month===10){
+   season="halloween";label="Les idées qui donnent des frissons";kicker="SÉLECTION HALLOWEEN";
+ }
+ document.body.classList.add("pm-season-"+season);
+ document.documentElement.dataset.pmSeason=season;
+ const section=document.querySelector("#new-arrivals");
+ if(!section)return;
+ const ribbon=document.createElement("div");
+ ribbon.className="pm-season-ribbon";
+ ribbon.textContent=label;
+ section.insertBefore(ribbon,section.firstChild);
+ const title=section.querySelector("#new-arrivals-title");
+ if(title&&season==="noel") title.innerHTML='🎄 Noël approche <span>· idées cadeaux</span>';
+ document.querySelectorAll("#new-arrivals .new-arrival-kicker").forEach(el=>el.textContent=kicker);
+ const categoryMap=[
+   {match:/guide-cadeaux/i,category:null},
+   {match:/high-tech/i,category:"tech"},
+   {match:/maison-deco/i,category:"home"},
+   {match:/cat=beauty/i,category:"beauty"},
+   {match:/cat=fashion/i,category:"fashion"},
+   {match:/cat=sport/i,category:"sport"},
+   {match:/cat=auto/i,category:"auto"},
+   {match:/cat=diy/i,category:"diy"},
+   {match:/cat=appliances/i,category:"home"}
+ ];
+ fetch("/data/home-products.json",{cache:"no-store"}).then(r=>{
+   if(!r.ok)throw new Error("Flux indisponible");return r.json();
+ }).then(feed=>{
+   const products=Array.isArray(feed.products)?feed.products:[];
+   document.querySelectorAll("#categories .cat").forEach((tile,index)=>{
+     const href=tile.getAttribute("href")||"";
+     const mapping=categoryMap.find(x=>x.match.test(href));
+     if(!mapping||!mapping.category)return;
+     const pool=products.filter(p=>p&&p.category===mapping.category&&typeof p.image==="string"&&/^https:\/\//i.test(p.image));
+     if(!pool.length)return;
+     const img=tile.querySelector("img");
+     if(!img)return;
+     const candidate=pool[(Math.floor(Date.now()/172800000)*7+index*3)%pool.length];
+     const previous=img.src;
+     img.onerror=()=>{img.onerror=null;img.src=previous;};
+     img.src=candidate.image;
+     img.alt=(tile.querySelector("div")?.textContent||candidate.name).trim();
+   });
+ }).catch(()=>{/* Les visuels déjà présents restent le secours. */});
+})();
+</script>
+
 </body></html>
