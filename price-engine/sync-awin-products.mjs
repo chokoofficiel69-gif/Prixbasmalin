@@ -157,7 +157,7 @@ function parseDirectFeedRow(row) {
   const shippingPrice = parseFeedMoney(row.delivery_cost || row.shipping_cost || row.shipping || "", currency, true);
   const stock = stockState([row.stock_status, row.availability, row.is_for_sale, row.in_stock].filter(Boolean).join(" "));
   const adultFlag = norm([row.adult, row.adult_content, row.is_adult].filter(Boolean).join(" "));
-  const categoryText = norm([row.merchant_category, row.category_name, row.product_type].filter(Boolean).join(" "));
+  const categoryText = norm([row.merchant_category, row.category_name, row.product_type, row.product_name].filter(Boolean).join(" "));
   if (/^(1|yes|true|adult)$/.test(adultFlag) || /adult products?|sex toys?|erotic|erotique/.test(categoryText)) return null;
   if (!price || currency !== "EUR" || stock === "out_of_stock") return null;
   const advertiser = String(row.merchant_id || row.advertiser_id || row.data_feed_id || "awin-standard").trim();
@@ -177,7 +177,7 @@ function parseDirectFeedRow(row) {
     additional_image_link: [row.alternate_image, row.alternate_image_two, row.alternate_image_three].filter(Boolean),
     price: price.toFixed(2) + " EUR",
     availability: stock,
-    aw_deep_link: row.aw_deep_link || row.merchant_deep_link || "",
+    aw_deep_link: row.aw_deep_link || "",
     shipping_price_eur: shippingPrice,
     last_updated: row.last_updated || ""
   };
