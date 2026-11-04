@@ -66,8 +66,28 @@ export default {
       return json({ error: "Origin not allowed" }, 403);
 
     const contentType = request.headers.get("Content-Type") || "";
-    if (!contentType.toLowerCase().includes("application/json"))
-      return json({ error: "Content-Type must be application/json" }, 415, cors);
+    // Accept application/json with optional parameters (for example charset=utf-8),
+    // but reject lookalike media types such as application/jsonp.
+    if (!/^application\\/json(?:\\s*;|\\s*$)/i.test(contentType)) {
+      const diagnostic = {
+        event: "ai_gateway_rejected_content_type",
+        status: 415,
+        method: request.method,
+        path: url.pathname,
+        origin: origin || null,
+        userAgent: (request.headers.get("User-Agent") || "").slice(0, 240) || null,
+        contentType: contentType.slice(0, 120) || null,
+        cfRay: request.headers.get("CF-Ray") || null
+      };
+      // Deliberately log request metadata only; never log the request body or secrets.
+      console.warn(JSON.stringify(diagnostic));
+      return json({
+        error: "Content-Type must be application/json",
+        requiredContentType: "application/json",
+        receivedContentType: contentType.slice(0, 120) || null,
+        requestId: request.headers.get("CF-Ray") || null
+      }, 415, cors);
+    }
 
     const declaredLength = Number(request.headers.get("Content-Length") || 0);
     if (declaredLength > 12_000)
