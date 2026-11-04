@@ -818,4 +818,179 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
 }
 </style>
 
+
+<script id="pm-automatic-visual-refresh">
+/* Sélection visuelle renouvelée tous les deux jours depuis le catalogue local. */
+(async function () {
+  const grid = document.querySelector(".new-arrivals-grid");
+  const categoryImages = [...document.querySelectorAll(".categories .cat")];
+  if (!grid && !categoryImages.length) return;
+  try {
+    const response = await fetch("/data/home-products.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Flux catalogue indisponible");
+    const feed = await response.json();
+    const products = (feed.products || []).filter(p =>
+      p && typeof p.name === "string" &&
+      typeof p.image === "string" && /^https:\/\//i.test(p.image)
+    );
+    if (products.length < 3) return;
+
+    // Même sélection pour tous les visiteurs, renouvelée par période de 48 h.
+    const period = Math.floor(Date.now() / (48 * 60 * 60 * 1000));
+    const categories = ["tech", "home", "beauty", "fashion", "sport", "kids", "auto", "diy"];
+    const categoryPool = category => products.filter(p => p.category === category);
+    const selected = [];
+    const used = new Set();
+    for (let step = 0; selected.length < 3 && step < products.length * 2; step++) {
+      const index = (period * 17 + step * 29) % products.length;
+      const p = products[index];
+      if (!used.has(p.id || p.name) && p.image) {
+        used.add(p.id || p.name);
+        selected.push(p);
+      }
+    }
+
+    if (grid && selected.length === 3) {
+      const fragment = document.createDocumentFragment();
+      selected.forEach(product => {
+        const card = document.createElement("article");
+        card.className = "new-arrival";
+        const media = document.createElement("div");
+        media.className = "new-arrival-media";
+        const img = document.createElement("img");
+        img.src = product.image;
+        img.alt = product.name;
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.onerror = () => { img.closest(".new-arrival")?.remove(); };
+        media.appendChild(img);
+        const copy = document.createElement("div");
+        copy.className = "new-arrival-copy";
+        const kicker = document.createElement("span");
+        kicker.className = "new-arrival-kicker";
+        kicker.textContent = "SÉLECTION RENOUVELÉE";
+        const title = document.createElement("h3");
+        title.textContent = product.name;
+        const desc = document.createElement("p");
+        desc.textContent = product.desc || "Découvrez cette référence dans le catalogue Prix Malin.";
+        const link = document.createElement("a");
+        link.href = product.sourceUrl || ("catalogue.html?q=" + encodeURIComponent(product.name));
+        link.target = product.sourceUrl ? "_blank" : "_self";
+        link.rel = product.sourceUrl && product.sourceUrl.includes("amazon.") ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer";
+        link.textContent = "Découvrir →";
+        copy.append(kicker, title, desc, link);
+        card.append(media, copy);
+        fragment.appendChild(card);
+      });
+      grid.replaceChildren(fragment);
+      grid.dataset.visualRotation = String(period);
+    }
+
+    // Renouvelle aussi les visuels des catégories à partir de produits correspondants.
+    categoryImages.forEach((tile, index) => {
+      const href = tile.getAttribute("href") || "";
+      const category = categories.find(key => href.includes("cat=" + key));
+      if (!category) return;
+      const pool = categoryPool(category);
+      if (!pool.length) return;
+      const product = pool[(period * 11 + index * 7) % pool.length];
+      const img = tile.querySelector("img");
+      if (img && product?.image) {
+        const previous = img.src;
+        img.onerror = () => { img.onerror = null; img.src = previous; };
+        img.src = product.image;
+        img.alt = tile.querySelector("div")?.textContent?.trim() || product.name;
+      }
+    });
+  } catch (error) {
+    // Les visuels éditoriaux déjà présents restent le repli en cas d'indisponibilité du flux.
+    console.warn("Rotation visuelle Prix Malin non appliquée :", error);
+  }
+})();
+</script>
+
+
+<style id="pm-seasonal-theme">
+/* Habillage saisonnier discret : l'identité noire/orange Prix Malin reste prioritaire. */
+#new-arrivals{position:relative;isolation:isolate}
+#new-arrivals .pm-season-ribbon{display:none}
+body.pm-season-noel #new-arrivals .pm-season-ribbon{
+ display:flex;align-items:center;gap:9px;width:max-content;max-width:100%;
+ margin:0 0 12px;padding:7px 13px;border:1px solid #d8b45c;border-radius:999px;
+ color:#ffe9b4;background:linear-gradient(100deg,#173c2c,#10251e 70%,#512126);
+ font-size:11px;font-weight:900;letter-spacing:.06em;box-shadow:0 4px 16px #0005
+}
+body.pm-season-noel #new-arrivals .pm-season-ribbon:before{content:"✦";color:#f6d47b}
+body.pm-season-noel #new-arrivals .section-head h2 span{color:#e6c36f}
+body.pm-season-noel #new-arrivals .new-arrival{border-color:#b9974c;box-shadow:0 7px 22px #0004}
+body.pm-season-noel #new-arrivals .new-arrival-kicker{color:#a12d35}
+body.pm-season-noel #new-arrivals .new-arrival a{background:linear-gradient(110deg,#17613d,#a52d36)}
+body.pm-season-noel #new-arrivals:after{
+ content:"✦  ·  ❄  ·  ✦";position:absolute;right:2px;top:0;color:#e6c36f;
+ font-size:17px;letter-spacing:7px;pointer-events:none;opacity:.85
+}
+body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px #c6a04b22,inset 0 0 18px #c6a04b12}
+@media(max-width:650px){body.pm-season-noel #new-arrivals:after{font-size:13px;letter-spacing:3px}}
+</style>
+<script id="pm-seasonal-campaign">
+(function(){
+ const now=new Date(), month=now.getMonth()+1, day=now.getDate();
+ let season="standard", label="Sélection Prix Malin", kicker="SÉLECTION RENOUVELÉE";
+ if((month===11)||(month===12&&day<=26)){
+   season="noel";label="La magie des fêtes commence ici";kicker="IDÉES & SÉLECTIONS DE NOËL";
+ }else if(month===12&&day>=27||month===1&&day<=5){
+   season="nouvel-an";label="Bien commencer la nouvelle année";kicker="SÉLECTION NOUVELLE ANNÉE";
+ }else if(month===1||month===2){
+   season="hiver";label="Les essentiels de l’hiver";kicker="SÉLECTION HIVER";
+ }else if(month>=3&&month<=5){
+   season="printemps";label="Le printemps malin";kicker="SÉLECTION PRINTEMPS";
+ }else if(month>=6&&month<=8){
+   season="ete";label="Cap sur l’été";kicker="SÉLECTION ÉTÉ";
+ }else if(month===10){
+   season="halloween";label="Les idées qui donnent des frissons";kicker="SÉLECTION HALLOWEEN";
+ }
+ document.body.classList.add("pm-season-"+season);
+ document.documentElement.dataset.pmSeason=season;
+ const section=document.querySelector("#new-arrivals");
+ if(!section)return;
+ const ribbon=document.createElement("div");
+ ribbon.className="pm-season-ribbon";
+ ribbon.textContent=label;
+ section.insertBefore(ribbon,section.firstChild);
+ const title=section.querySelector("#new-arrivals-title");
+ if(title&&season==="noel") title.innerHTML='🎄 Noël approche <span>· idées cadeaux</span>';
+ document.querySelectorAll("#new-arrivals .new-arrival-kicker").forEach(el=>el.textContent=kicker);
+ const categoryMap=[
+   {match:/guide-cadeaux/i,category:null},
+   {match:/high-tech/i,category:"tech"},
+   {match:/maison-deco/i,category:"home"},
+   {match:/cat=beauty/i,category:"beauty"},
+   {match:/cat=fashion/i,category:"fashion"},
+   {match:/cat=sport/i,category:"sport"},
+   {match:/cat=auto/i,category:"auto"},
+   {match:/cat=diy/i,category:"diy"},
+   {match:/cat=appliances/i,category:"home"}
+ ];
+ fetch("/data/home-products.json",{cache:"no-store"}).then(r=>{
+   if(!r.ok)throw new Error("Flux indisponible");return r.json();
+ }).then(feed=>{
+   const products=Array.isArray(feed.products)?feed.products:[];
+   document.querySelectorAll("#categories .cat").forEach((tile,index)=>{
+     const href=tile.getAttribute("href")||"";
+     const mapping=categoryMap.find(x=>x.match.test(href));
+     if(!mapping||!mapping.category)return;
+     const pool=products.filter(p=>p&&p.category===mapping.category&&typeof p.image==="string"&&/^https:\/\//i.test(p.image));
+     if(!pool.length)return;
+     const img=tile.querySelector("img");
+     if(!img)return;
+     const candidate=pool[(Math.floor(Date.now()/172800000)*7+index*3)%pool.length];
+     const previous=img.src;
+     img.onerror=()=>{img.onerror=null;img.src=previous;};
+     img.src=candidate.image;
+     img.alt=(tile.querySelector("div")?.textContent||candidate.name).trim();
+   });
+ }).catch(()=>{/* Les visuels déjà présents restent le secours. */});
+})();
+</script>
+
 </body></html>
