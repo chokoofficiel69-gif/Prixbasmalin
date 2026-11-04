@@ -68,6 +68,8 @@ jobs:
         run: node --check price-engine/sync-prixtracker.mjs
       - name: Vérifier la syntaxe du synchroniseur Awin
         run: node --check price-engine/sync-awin-products.mjs
+      - name: Tester le parseur et l'import direct Awin sans accès réseau
+        run: node price-engine/sync-awin-products.mjs --self-test
       - name: Vérifier la syntaxe du module compte et alertes
         run: node --check js/prix-malin-auth.js
 
