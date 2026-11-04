@@ -1,0 +1,44 @@
+/* Correctif mobile catalogue — empêcher le débordement horizontal global tout en gardant les rails tactiles. */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+#main-content, main, .discovery-shelf, #products,
+#products.pm-horizontal-catalogue, #products .pm-product-row {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+#products.pm-horizontal-catalogue {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+#products .pm-product-row-rail {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  touch-action: pan-x pan-y !important;
+  overscroll-behavior-x: contain;
+}
+#products .pm-product-row-rail > .product {
+  flex: 0 0 min(218px, 82vw) !important;
+  width: min(218px, 82vw) !important;
+  min-width: min(218px, 82vw) !important;
+  max-width: min(218px, 82vw) !important;
+  box-sizing: border-box;
+}
+#products .pm-product-row-rail .pm-related-rail,
+#products .pm-product-row-rail .pm-inline-accessory-grid,
+#products .pm-product-row-rail .pm-detail-cards {
+  max-width: 100%;
+  touch-action: pan-x pan-y !important;
+}
+@media (max-width: 520px) {
+  main { padding-left: 12px !important; padding-right: 12px !important; }
+  .pm-catalogue-toolbar { margin-left: -12px !important; margin-right: -12px !important; }
+}
