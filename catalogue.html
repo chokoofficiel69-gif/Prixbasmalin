@@ -524,6 +524,66 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 #products .pm-inline-accessory-section{display:none!important}
 @media(min-width:760px){#products .product{flex-basis:340px!important;width:340px!important}#products .photo{height:220px!important}}
 
+
+/* Harmonisation visuelle des photos catalogue — packshots lisibles, sans recadrage. */
+#products .product{
+  border:1px solid #303b49!important;
+  background:linear-gradient(155deg,#171d27 0%,#0b1018 100%)!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+#products .photo{
+  position:relative!important;
+  height:224px!important;min-height:224px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  overflow:hidden!important;
+  border:1px solid #e4e8ed!important;border-radius:15px!important;
+  background:radial-gradient(ellipse at 50% 42%,#fff 0%,#f8f9fb 72%,#edf0f4 100%)!important;
+  box-shadow:inset 0 0 24px rgba(18,31,48,.035)!important;
+}
+#products .photo img{
+  display:block!important;width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;padding:14px!important;
+  transition:transform .22s ease!important;
+}
+#products .product:hover .photo img{transform:scale(1.035)}
+#products .pm-photo-source{
+  position:absolute!important;left:9px!important;bottom:8px!important;
+  display:inline-flex!important;align-items:center!important;
+  max-width:calc(100% - 18px)!important;padding:4px 7px!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+  border:1px solid #e3e7ed!important;border-radius:999px!important;
+  background:rgba(255,255,255,.92)!important;color:#526071!important;
+  font-size:9px!important;font-weight:800!important;text-decoration:none!important;
+  box-shadow:0 2px 8px rgba(16,24,40,.08)!important;
+}
+#products .pm-photo-source.illustration{background:#f2f4f7!important;color:#667085!important}
+#products .pm-awin-gallery{
+  display:flex!important;gap:7px!important;width:100%!important;
+  overflow-x:auto!important;padding:2px 1px 5px!important;
+  scrollbar-width:thin!important;scrollbar-color:#ff7a2b #222a35!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#products .pm-awin-thumb{
+  flex:0 0 54px!important;width:54px!important;height:54px!important;
+  padding:3px!important;overflow:hidden!important;cursor:pointer!important;
+  border:1px solid #3b4655!important;border-radius:9px!important;
+  background:#fff!important;
+}
+#products .pm-awin-thumb.active{border:2px solid #ff762b!important;box-shadow:0 0 0 2px #ff762b24!important}
+#products .pm-awin-thumb img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}
+#products .photo-placeholder{
+  background:linear-gradient(145deg,#f7f8fa,#e9edf2)!important;
+  color:#667085!important;border:1px dashed #cbd3dd!important;
+}
+#products .photo-placeholder span{font-size:15px!important;font-weight:900!important;letter-spacing:.08em!important}
+@media(max-width:520px){
+  #products .product{flex-basis:min(88vw,350px)!important;width:min(88vw,350px)!important;padding:11px!important}
+  #products .photo{height:190px!important;min-height:190px!important}
+  #products .photo img{padding:11px!important}
+  #products .pm-awin-thumb{flex-basis:48px!important;width:48px!important;height:48px!important}
+}
+@media(prefers-reduced-motion:reduce){#products .photo img{transition:none!important}#products .product:hover .photo img{transform:none!important}}
 </style>  <!-- Cloudflare Web Analytics -->
 
 <!-- End Cloudflare Web Analytics -->
@@ -5611,13 +5671,33 @@ async function pmLoadAwinCatalogue(){
     if(!response.ok)return;
     const feed=await response.json();
     if(feed?.status!=="ok"||!Array.isArray(feed.products))return;
-    const known=new Set(productData.map(product=>product.id));
+    const known=new Map(productData.map(product=>[product.id,product]));
     feed.products.forEach(product=>{
-      if(!product||!product.id||known.has(product.id)||!product.name||
-         !pmHasRealProductImage(product)||!Number.isFinite(Number(product.priceValue))||
-         Number(product.priceValue)<=0||!/^https:\/\//i.test(String(product.sourceUrl||"")))return;
+      if(!product||!product.id||!product.name||!pmHasRealProductImage(product))return;
+      const existing=known.get(product.id);
+      if(existing){
+        // Les visuels du flux affilié autorisé remplacent les photos génériques,
+        // sans toucher au nom, au lien, au prix ni aux autres données de la fiche.
+        const currentImage=String(existing.image||"");
+        const isGeneric=/unsplash\\.com/i.test(currentImage)||
+          existing.imageStatus==="generic_category_visual"||
+          existing.imageStatus==="illustration";
+        if(isGeneric){
+          existing.image=product.image;
+          existing.images=Array.isArray(product.images)?product.images.filter(url=>/^https:\/\//i.test(String(url||""))).slice(0,5):[];
+          existing.imageSource=product.imageSource||product.sourceUrl||"";
+          existing.imageSourceName=product.imageSourceName||product.merchant||"Flux partenaire";
+          existing.imageKind="official";
+          existing.imageStatus="authorized_feed_image";
+        }else if(Array.isArray(product.images)&&!Array.isArray(existing.images)){
+          existing.images=product.images.filter(url=>/^https:\/\//i.test(String(url||""))).slice(0,5);
+        }
+        return;
+      }
+      if(!Number.isFinite(Number(product.priceValue))||Number(product.priceValue)<=0||
+         !/^https:\/\//i.test(String(product.sourceUrl||"")))return;
       productData.push(product);
-      known.add(product.id);
+      known.set(product.id,product);
     });
   }catch(error){
     console.warn("Le flux de produits autorisés Awin est momentanément indisponible.");
