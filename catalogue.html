@@ -5682,12 +5682,33 @@ function render(){
   ];
   let exactMatchCount=found.length;
   const relatedRule=relatedCategoryRules.find(rule=>rule.terms.some(term=>q.includes(term)));
-  if(q&&found.length<20&&relatedRule&&!selectedBrand){
+  // Une recherche doit d'abord montrer les correspondances réelles. Les suggestions
+  // de catégorie ne sont ajoutées que si aucun produit ne correspond.
+  if(q&&exactMatchCount===0&&found.length<20&&relatedRule&&!selectedBrand){
     const seen=new Set(found.map(p=>p.id));
     const related=catalogueData.filter(p=>p.category===relatedRule.category&&!seen.has(p.id));
     for(const product of related.slice(0,20-found.length)){
       found.push({...product,_pmRelatedSuggestion:true});
     }
+  }
+  if(q){
+    const score=(product)=>{
+      const name=pmSearchNorm(product.name);
+      const full=pmSearchNorm([product.name,product.brand,product.desc,product.product_type].join(" "));
+      let value=0;
+      if(name===q)value+=2000;
+      else if(name.startsWith(q))value+=1400;
+      else if(name.includes(q))value+=1000;
+      for(const term of correctedQuery){
+        if(name.split(" ").includes(term))value+=180;
+        else if(name.includes(term))value+=100;
+        else if(full.includes(term))value+=25;
+      }
+      if(product._pmRelatedSuggestion)value-=500;
+      if(Number(product.priceValue)>0)value+=2;
+      return value;
+    };
+    found.sort((a,b)=>score(b)-score(a)||a.name.localeCompare(b.name,"fr"));
   }
   productsEl.innerHTML="";
   const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
@@ -5716,14 +5737,14 @@ function render(){
   productsEl.classList.add("pm-horizontal-catalogue");
   const categoryRails=new Map();
   const getCategoryRail=(product)=>{
-    const key=product.category||"other";
+    const key=q?"search":(product.category||"other");
     if(categoryRails.has(key))return categoryRails.get(key);
     const section=document.createElement("section");
     section.className="pm-product-row";
     const head=document.createElement("div");
     head.className="pm-product-row-head";
     const title=document.createElement("h3");
-    title.textContent=categoryLabels[key]||"Autres produits";
+    title.textContent=key==="search"?"Résultats les plus pertinents":(categoryLabels[key]||"Autres produits");
     const hint=document.createElement("span");
     hint.textContent="Faire défiler  ← →";
     head.append(title,hint);
@@ -5761,9 +5782,17 @@ function render(){
     if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source de la photo : "+(p.imageSourceName||"constructeur"));}
     if(imageBadge.textContent)photo.append(imageBadge);
     img.onerror=()=>{
-      card.remove();
-      const remaining=productsEl.querySelectorAll(".pm-product-row-rail>.product").length;
-      countEl.textContent=remaining+" produit(s) avec photo et prix issus d’un flux marchand";
+      const failed=img.dataset.pmFailedImages?img.dataset.pmFailedImages.split("|"):[];
+      failed.push(img.src);
+      img.dataset.pmFailedImages=failed.join("|");
+      const alternatives=Array.isArray(p.images)?p.images.filter(url=>/^https:\/\//i.test(String(url||""))&&!failed.includes(url)):[];
+      if(alternatives.length){img.src=alternatives[0];return;}
+      photo.innerHTML="";
+      photo.classList.add("photo-placeholder");
+      const fallback=document.createElement("span");
+      fallback.textContent=String(p.brand||p.category||"PM").slice(0,2).toUpperCase();
+      fallback.setAttribute("aria-label","Photo indisponible pour "+p.name);
+      photo.append(fallback);
     };
     photo.append(img);
     const gallery=document.createElement("div");gallery.className="pm-awin-gallery";
