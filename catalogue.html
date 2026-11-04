@@ -5613,7 +5613,7 @@ async function pmLoadAwinCatalogue(){
     if(feed?.status!=="ok"||!Array.isArray(feed.products))return;
     const known=new Set(productData.map(product=>product.id));
     feed.products.forEach(product=>{
-      if(!product||!product.id||known.has(product.id)||!product.name||!product.brand||
+      if(!product||!product.id||known.has(product.id)||!product.name||
          !pmHasRealProductImage(product)||!Number.isFinite(Number(product.priceValue))||
          Number(product.priceValue)<=0||!/^https:\/\//i.test(String(product.sourceUrl||"")))return;
       productData.push(product);

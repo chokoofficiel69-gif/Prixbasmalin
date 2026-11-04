@@ -5,7 +5,7 @@ on:
   schedule:
     - cron: "27 4 * * *"
   push:
-    branches: [main]
+    branches: [main, awin-direct-feed-fix-2026-11-04]
     paths:
       - "price-engine/sync-awin-products.mjs"
       - ".github/workflows/sync-awin-products.yml"
@@ -25,7 +25,7 @@ jobs:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref }}
           persist-credentials: true
       - name: Installer Node.js
         uses: actions/setup-node@v4
@@ -34,6 +34,7 @@ jobs:
       - name: Télécharger les flux produits autorisés
         env:
           AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
+          AWIN_PRODUCT_DATA_FEED_URL: ${{ secrets.AWIN_PRODUCT_DATA_FEED_URL }}
           AWIN_PRODUCT_DATA_API_KEY: ${{ secrets.AWIN_PRODUCT_DATA_API_KEY }}
           AWIN_PUBLISHER_ID: "3137386"
           AWIN_FEED_LOCALE: "fr_FR"
@@ -50,4 +51,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/awin-products.json
           git commit -m "Refresh authorized Awin product catalogue"
-          git push origin HEAD:main
+          git push origin "HEAD:${GITHUB_REF_NAME}"

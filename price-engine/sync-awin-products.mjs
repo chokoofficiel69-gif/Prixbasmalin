@@ -120,14 +120,137 @@ function objectRowsFromCsv(text) {
   const headers = rows[0].map(value => norm(value.replace(/^\uFEFF/, "")).replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""));
   return rows.slice(1).map(cells => Object.fromEntries(headers.map((header,index) => [header,String(cells[index] ?? "").trim()])));
 }
+
+const DIRECT_FEED_HOSTS = new Set(["productdata.awin.com", "datafeed.api.productserve.com"]);
+
+function validateDirectFeedUrl(value) {
+  let url;
+  try { url = new URL(String(value || "")); } catch { throw new Error("AWIN_PRODUCT_DATA_FEED_URL n'est pas une URL valide."); }
+  if (url.protocol !== "https:" || !DIRECT_FEED_HOSTS.has(url.hostname.toLowerCase()) ||
+      url.username || url.password || (url.port && url.port !== "443")) {
+    throw new Error("Le flux Awin direct doit être une URL HTTPS officielle Awin.");
+  }
+  return url;
+}
+
+function parseFeedMoney(value, currency = "EUR", allowZero = false) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+  if (allowZero && /^(0+(?:[.,]0+)?)(?:\s*(?:EUR|€))?$/i.test(raw)) return 0;
+  if (allowZero && /^(free|gratuit|offert)$/i.test(raw)) return 0;
+  let normalized = raw.replace(/€/g, " EUR").trim();
+  if (!/[A-Z]{3}\s*$/i.test(normalized)) normalized += " " + String(currency || "").toUpperCase();
+  const amount = parseMoney(normalized);
+  return amount !== null && (allowZero || amount > 0) ? amount : null;
+}
+
+function stockState(value) {
+  const stock = norm(value).replace(/[_-]+/g, " ");
+  if (/out of stock|outofstock|rupture|discontinued|sold out|indisponible|false|\bno\b/.test(stock)) return "out_of_stock";
+  if (/in stock|instock|available|disponible|for sale|\byes\b|\btrue\b/.test(stock)) return "in_stock";
+  return "unknown";
+}
+
+function parseDirectFeedRow(row) {
+  const currency = String(row.currency || "EUR").trim().toUpperCase();
+  const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
+  const shippingPrice = parseFeedMoney(row.delivery_cost || row.shipping_cost || row.shipping || "", currency, true);
+  const stock = stockState([row.stock_status, row.availability, row.is_for_sale, row.in_stock].filter(Boolean).join(" "));
+  const adultFlag = norm([row.adult, row.adult_content, row.is_adult].filter(Boolean).join(" "));
+  const categoryText = norm([row.merchant_category, row.category_name, row.product_type, row.product_name].filter(Boolean).join(" "));
+  if (/^(1|yes|true|adult)$/.test(adultFlag) || /adult products?|sex toys?|erotic|erotique/.test(categoryText)) return null;
+  if (!price || currency !== "EUR" || stock === "out_of_stock") return null;
+  const advertiser = String(row.merchant_id || row.advertiser_id || row.data_feed_id || "awin-standard").trim();
+  const program = { name: String(row.merchant_name || ("Annonceur Awin " + advertiser)).trim() };
+  const normalized = {
+    id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.gtin || "",
+    title: row.product_name || row.title || "",
+    description: row.description || row.product_short_description || "",
+    brand: row.brand_name || row.brand || row.product_brand || "",
+    product_type: row.merchant_category || row.category_name || row.product_type || "",
+    google_product_category: row.category_name || row.merchant_category || "",
+    color: row.colour || row.color || "",
+    size: row.size || "",
+    gtin: row.ean || row.product_ean || row.product_gtin || row.gtin || row.upc || "",
+    mpn: row.mpn || row.model_number || "",
+    image_link: row.merchant_image_url || row.aw_image_url || row.image_link || row.aw_thumb_url || "",
+    additional_image_link: [row.alternate_image, row.alternate_image_two, row.alternate_image_three].filter(Boolean),
+    price: price.toFixed(2) + " EUR",
+    availability: stock,
+    aw_deep_link: row.aw_deep_link || "",
+    shipping_price_eur: shippingPrice,
+    last_updated: row.last_updated || ""
+  };
+  return offerFromRow(normalized, program, advertiser, { allowUnknownAvailability: true });
+}
+
+async function loadDirectAwinFeed(rawOffers) {
+  const initialUrl = validateDirectFeedUrl(process.env.AWIN_PRODUCT_DATA_FEED_URL);
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      let currentUrl = initialUrl;
+      let response;
+      for (let redirects = 0; redirects <= 3; redirects++) {
+        response = await fetch(currentUrl.href, {
+          headers: { Accept: "text/csv, application/gzip, application/octet-stream" },
+          redirect: "manual",
+          signal: AbortSignal.timeout(TIMEOUT_MS)
+        });
+        if (![301, 302, 303, 307, 308].includes(response.status)) break;
+        const location = response.headers.get("location");
+        if (!location) throw new Error("Redirection du flux Awin sans destination.");
+        currentUrl = validateDirectFeedUrl(new URL(location, currentUrl).href);
+      }
+      if ([301, 302, 303, 307, 308].includes(response.status)) throw new Error("Trop de redirections du flux Awin.");
+      if (response.status === 429 || response.status >= 500) {
+        if (attempt < 3) { await new Promise(resolve => setTimeout(resolve, 1200 * attempt)); continue; }
+      }
+      if (!response.ok) throw new Error("Téléchargement du flux Awin refusé (HTTP " + response.status + ").");
+      let bytes = Buffer.from(await response.arrayBuffer());
+      if (bytes.length >= 2 && bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = gunzipSync(bytes);
+      const csv = bytes.toString("utf8");
+      if (/^\s*<(!doctype|html)/i.test(csv)) throw new Error("Awin a renvoyé une page HTML au lieu du fichier produits.");
+      const rows = objectRowsFromCsv(csv);
+      if (!rows.length) throw new Error("Le flux Awin est vide ou son CSV est illisible.");
+      const headers = new Set(Object.keys(rows[0] || {}));
+      if (!headers.has("product_name") || !(headers.has("search_price") || headers.has("store_price") || headers.has("display_price"))) {
+        throw new Error("Les colonnes produit/prix attendues sont absentes du flux Awin.");
+      }
+      const perAdvertiser = new Map();
+      let imported = 0;
+      for (const row of rows) {
+        if (row.language && !/^(fr|french|fr_fr)$/i.test(String(row.language).trim())) continue;
+        const advertiser = String(row.merchant_id || row.advertiser_id || row.data_feed_id || "awin-standard");
+        const currentCount = perAdvertiser.get(advertiser) || 0;
+        if (currentCount >= MAX_PER_ADVERTISER || rawOffers.length >= MAX_PRODUCTS) continue;
+        const offer = parseDirectFeedRow(row);
+        if (!offer) continue;
+        rawOffers.push(offer);
+        perAdvertiser.set(advertiser, currentCount + 1);
+        imported++;
+      }
+      if (!imported) throw new Error("Aucune offre exploitable dans le flux Awin (prix EUR, image, lien HTTPS et données produit requis).");
+      log(imported + " offre(s) importée(s) depuis le flux produits Awin direct.");
+      return imported;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3 && /réseau|timeout|fetch failed|HTTP 429|HTTP 5/i.test(String(error.message || error))) {
+        await new Promise(resolve => setTimeout(resolve, 1200 * attempt));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error("Téléchargement du flux Awin impossible : " + String(lastError?.message || "erreur réseau"));
+}
+
+
 function parseFeedRow(row, program, advertiser) {
-  const priceValue = row.search_price || row.store_price || row.price || "";
   const currency = row.currency || "EUR";
-  const price = /[A-Z]{3}/i.test(String(priceValue)) ? priceValue : String(priceValue).replace(",", ".") + " " + currency;
-  const stockRaw = norm([row.stock_status,row.availability,row.is_for_sale,row.in_stock].join(" "));
-  const quantity = Number(row.stock_quantity || row.number_available || 0);
-  const inStock = /in stock|in_stock|available|yes|true|for sale/.test(stockRaw) || quantity > 0;
-  if (!inStock || /out of stock|out_of_stock|false|no/.test(stockRaw)) return null;
+  const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
+  const stock = stockState([row.stock_status,row.availability,row.is_for_sale,row.in_stock].filter(Boolean).join(" "));
+  if (!price || String(currency).toUpperCase() !== "EUR" || stock !== "in_stock") return null;
   const extra = [row.alternate_image,row.alternate_image_two,row.alternate_image_three].filter(Boolean);
   const normalized = {
     id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.product_gtin,
@@ -142,12 +265,15 @@ function parseFeedRow(row, program, advertiser) {
     mpn: row.mpn || row.model_number,
     image_link: row.merchant_image_url || row.large_image || row.aw_image_url || row.aw_thumb_url,
     additional_image_link: extra,
-    price,
+    price: price.toFixed(2) + " EUR",
     availability: "in_stock",
-    aw_deep_link: row.aw_deep_link || row.merchant_deep_link || row.purl
+    aw_deep_link: row.aw_deep_link || row.merchant_deep_link || row.purl,
+    shipping_price_eur: parseFeedMoney(row.delivery_cost || row.shipping, currency, true),
+    last_updated: row.last_updated || ""
   };
   return offerFromRow(normalized,program,advertiser);
 }
+
 async function loadStandardAwinFeeds(rawOffers) {
   const key = process.env.AWIN_PRODUCT_DATA_API_KEY || "";
   if (!key) {
@@ -209,17 +335,19 @@ function groupKey(row, advertiser) {
   if ([8, 12, 13, 14].includes(gtin.length)) return "gtin:" + gtin;
   return "awin:" + advertiser + ":" + String(row.id || row.product_id || "");
 }
-function offerFromRow(row, program, advertiser) {
+
+function offerFromRow(row, program, advertiser, { allowUnknownAvailability = false } = {}) {
   const name = String(row.title || row.product_name || "").trim().replace(/\s+/g, " ");
   const brand = String(row.brand || row.brand_name || "").trim();
   const images = imageList(row);
   const link = httpsUrl(row.aw_deep_link || row.link || row.mobile_link);
-  const availability = String(row.availability || row.stock_status || "").toLowerCase();
+  const availability = stockState(row.availability || row.stock_status || "");
   const regular = parseMoney(row.price || row.search_price);
   const sale = currentSalePrice(row, Date.now());
   const price = sale || regular;
-  if (!name || !brand || !images.length || !link || !price || availability !== "in_stock") return null;
-  if (String(row.adult || "").toLowerCase() === "yes") return null;
+  if (!name || !images.length || !link || !price || availability === "out_of_stock" ||
+      (availability !== "in_stock" && !allowUnknownAvailability)) return null;
+  if (/^(yes|true|1|adult)$/i.test(String(row.adult || row.adult_content || ""))) return null;
   const merchant = String(program?.name || program?.displayName || program?.advertiserName || ("Annonceur Awin " + advertiser)).trim();
   return {
     id: String(row.id || row.product_id || row.gtin || ""),
@@ -238,10 +366,14 @@ function offerFromRow(row, program, advertiser) {
     images,
     price_eur: price,
     regular_price_eur: regular && sale && regular > sale ? regular : null,
-    shipping: row.shipping || null,
+    availability,
+    shipping: row.shipping || row.delivery_cost || null,
+    shipping_price_eur: Number.isFinite(row.shipping_price_eur) ? row.shipping_price_eur : null,
+    merchant_updated_at: row.last_updated || null,
     url: link
   };
 }
+
 function aggregateOffers(rawOffers, fetchedAt) {
   const groups = new Map();
   for (const offer of rawOffers) {
@@ -268,6 +400,9 @@ function aggregateOffers(rawOffers, fetchedAt) {
       brand: first.brand,
       color: first.color,
       size: first.size,
+      availability: best.availability,
+      shippingPriceValue: best.shipping_price_eur,
+      merchantUpdatedAt: best.merchant_updated_at,
       gtin: first.gtin,
       mpn: first.mpn,
       image: best.images[0] || first.images[0],
@@ -283,7 +418,10 @@ function aggregateOffers(rawOffers, fetchedAt) {
         price: new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(item.price_eur),
         url: item.url,
         images: item.images,
-        shipping: item.shipping
+        shipping: item.shipping,
+        shippingPriceValue: item.shipping_price_eur,
+        availability: item.availability,
+        merchantUpdatedAt: item.merchant_updated_at
       })),
       isAwinProduct: true,
       priceSource: "Awin — flux marchand autorisé",
@@ -293,92 +431,117 @@ function aggregateOffers(rawOffers, fetchedAt) {
   return result.sort((a, b) => a.name.localeCompare(b.name, "fr"));
 }
 
-if (!TOKEN) {
-  log("BLOCAGE : secret AWIN_API_TOKEN absent. Le catalogue existant est conservé, mais aucune synchronisation Awin n'est possible.");
-  throw new Error("AWIN_API_TOKEN absent : renseigner un jeton éditeur Awin valide dans les secrets GitHub Actions.");
-}
 
-const programmesResponse = await request(
-  "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) + "/programmes?relationship=joined",
-  "Liste des partenariats"
-);
-if (!programmesResponse.ok) {
-  if ([401,403].includes(programmesResponse.status)) {
-    log("Accès Awin Publisher refusé (HTTP " + programmesResponse.status + "). Le jeton AWIN_API_TOKEN présent dans les secrets n'est pas accepté par l'API éditeur. Aucune donnée produit ni aucun prix n'a été modifié.");
-    if (!process.env.AWIN_PRODUCT_DATA_API_KEY) {
-      log("La clé séparée AWIN_PRODUCT_DATA_API_KEY pour les flux produits standards n'est pas configurée. Il faut rétablir le jeton Publisher et/ou ajouter cette clé distincte dans les secrets Actions du dépôt.");
-    }
-    throw new Error("Authentification Awin refusée (HTTP " + programmesResponse.status + "). Le catalogue existant a été conservé. Renouveler AWIN_API_TOKEN et vérifier les droits éditeur ; AWIN_PRODUCT_DATA_API_KEY est une clé distincte facultative pour les flux standards.");
+async function loadEnhancedAwinFeeds(rawOffers) {
+  if (!TOKEN) {
+    throw new Error("Configurer AWIN_PRODUCT_DATA_FEED_URL (flux direct) ou AWIN_API_TOKEN (API éditeur Awin).");
   }
-  throw new Error("API Awin programmes HTTP " + programmesResponse.status + " (aucune donnée catalogue écrite).");
-}
-const programmePayload = await programmesResponse.json();
-const programmes = Array.isArray(programmePayload)
-  ? programmePayload
-  : (programmePayload.programmes || programmePayload.programs || programmePayload.data || []);
-const eligible = programmes
-  .map(program => ({ program, id: advertiserId(program) }))
-  .filter(item => /^\d+$/.test(item.id))
-  .slice(0, MAX_PROGRAMMES);
-
-log(eligible.length + " partenariat(s) rejoint(s) à examiner.");
-if (!eligible.length) {
-  log("BLOCAGE : aucun partenariat Awin rejoint n'est accessible au compte éditeur. Aucun prix ne peut être collecté tant qu'au moins un programme marchand n'a pas accepté Prix Malin.");
-  throw new Error("Aucun partenariat Awin rejoint : rejoindre et obtenir l'approbation d'au moins un programme marchand dans Awin.");
-}
-
-const rawOffers = [];
-const statusCounts = {};
-let cursor = 0;
-async function worker() {
-  while (cursor < eligible.length && rawOffers.length < MAX_PRODUCTS) {
-    const item = eligible[cursor++];
-    const url = "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) +
-      "/awinfeeds/download/" + encodeURIComponent(item.id + "-retail-" + LOCALE + ".jsonl");
-    try {
-      const response = await request(url, "Flux annonceur " + item.id);
-      statusCounts[response.status] = (statusCounts[response.status] || 0) + 1;
-      if (!response.ok) continue;
-      const body = await response.text();
-      const rows = parseJsonl(body);
-      let accepted = 0;
-      for (const row of rows) {
-        const offer = offerFromRow(row, item.program, item.id);
-        if (!offer) continue;
-        rawOffers.push(offer);
-        accepted++;
-        if (accepted >= MAX_PER_ADVERTISER || rawOffers.length >= MAX_PRODUCTS) break;
+  const programmesResponse = await request(
+    "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) + "/programmes?relationship=joined",
+    "Liste des partenariats"
+  );
+  if (!programmesResponse.ok) {
+    if ([401,403].includes(programmesResponse.status)) {
+      log("Accès Awin Publisher refusé (HTTP " + programmesResponse.status + "). Le jeton éditeur n'est pas accepté ; aucune donnée produit n'a été modifiée.");
+      throw new Error("Authentification Awin Publisher refusée (HTTP " + programmesResponse.status + "). Vérifier AWIN_API_TOKEN et les droits éditeur.");
+    }
+    throw new Error("API Awin programmes HTTP " + programmesResponse.status + " (aucune donnée catalogue écrite).");
+  }
+  const programmePayload = await programmesResponse.json();
+  const programmes = Array.isArray(programmePayload)
+    ? programmePayload
+    : (programmePayload.programmes || programmePayload.programs || programmePayload.data || []);
+  const eligible = programmes
+    .map(program => ({ program, id: advertiserId(program) }))
+    .filter(item => /^\d+$/.test(item.id))
+    .slice(0, MAX_PROGRAMMES);
+  log(eligible.length + " partenariat(s) rejoint(s) à examiner.");
+  if (!eligible.length) {
+    throw new Error("Aucun partenariat Awin rejoint : ajouter AWIN_PRODUCT_DATA_FEED_URL ou obtenir l'approbation d'un programme marchand.");
+  }
+  const statusCounts = {};
+  let cursor = 0;
+  async function worker() {
+    while (cursor < eligible.length && rawOffers.length < MAX_PRODUCTS) {
+      const item = eligible[cursor++];
+      const url = "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) +
+        "/awinfeeds/download/" + encodeURIComponent(item.id + "-retail-" + LOCALE + ".jsonl");
+      try {
+        const response = await request(url, "Flux annonceur " + item.id);
+        statusCounts[response.status] = (statusCounts[response.status] || 0) + 1;
+        if (!response.ok) continue;
+        const rows = parseJsonl(await response.text());
+        let accepted = 0;
+        for (const row of rows) {
+          const offer = offerFromRow(row, item.program, item.id);
+          if (!offer) continue;
+          rawOffers.push(offer);
+          accepted++;
+          if (accepted >= MAX_PER_ADVERTISER || rawOffers.length >= MAX_PRODUCTS) break;
+        }
+        if (accepted) log((item.program?.name || "Annonceur " + item.id) + " : " + accepted + " offre(s) avec image, prix EUR, stock et lien.");
+      } catch (error) {
+        log("Flux " + item.id + " ignoré (" + String(error.message || "erreur").slice(0, 120) + ").");
       }
-      if (accepted) log((item.program?.name || "Annonceur " + item.id) + " : " + accepted + " offre(s) avec image, prix EUR, stock et lien.");
-    } catch (error) {
-      log("Flux " + item.id + " ignoré (" + String(error.message || "erreur").slice(0, 120) + ").");
     }
   }
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, eligible.length) }, worker));
+  const standardImported = await loadStandardAwinFeeds(rawOffers);
+  if (standardImported) log(standardImported + " offre(s) supplémentaire(s) depuis les flux standards.");
+  if (!rawOffers.length) {
+    log("Aucune offre Awin exploitable. Codes HTTP : " + JSON.stringify(statusCounts));
+    throw new Error("Aucune offre Awin exploitable : vérifier les partenariats, flux Enhanced et flux standards autorisés.");
+  }
+  return eligible.length;
 }
-await Promise.all(Array.from({ length: Math.min(CONCURRENCY, eligible.length) }, worker));
-const standardImported = await loadStandardAwinFeeds(rawOffers);
-if (standardImported) log(standardImported+" offre(s) supplémentaire(s) depuis les flux standards.");
 
-if (!rawOffers.length) {
-  log("BLOCAGE : aucun produit avec prix, image, stock et lien marchand n'a été fourni par les programmes Awin rejoints. Le dernier catalogue valide est conservé.");
-  log("Codes HTTP rencontrés : " + JSON.stringify(statusCounts));
-  throw new Error("Aucune offre Awin exploitable : vérifier l'approbation des programmes, l'accès aux flux Enhanced fr_FR et les flux standards autorisés.");
+function runSelfTests() {
+  const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated\n' +
+    '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z"';
+  const rows = objectRowsFromCsv(sampleCsv);
+  const offer = parseDirectFeedRow(rows[0]);
+  if (!offer) throw new Error("TEST ÉCHEC : un flux direct valide doit produire une offre.");
+  if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" || offer.brand !== "") {
+    throw new Error("TEST ÉCHEC : prix, livraison, marque absente ou disponibilité inconnue mal traités.");
+  }
+  if (parseDirectFeedRow({ ...rows[0], stock_status: "out_of_stock" }) !== null) {
+    throw new Error("TEST ÉCHEC : une offre explicitement en rupture doit être rejetée.");
+  }
+  if (parseDirectFeedRow({ ...rows[0], currency: "USD" }) !== null) {
+    throw new Error("TEST ÉCHEC : une offre non EUR doit être rejetée.");
+  }
+  let rejectsHttp = false;
+  try { validateDirectFeedUrl("http://productdata.awin.com/feed.csv"); } catch { rejectsHttp = true; }
+  if (!rejectsHttp) throw new Error("TEST ÉCHEC : une URL HTTP doit être rejetée.");
+  log("Autotests réussis : CSV, prix EUR, livraison, statut inconnu, rupture, devise et URL sécurisée.");
 }
 
+if (process.argv.includes("--self-test")) {
+  runSelfTests();
+} else {
+  const rawOffers = [];
+  const directFeedConfigured = Boolean(process.env.AWIN_PRODUCT_DATA_FEED_URL);
+  let joinedAdvertisersChecked = 0;
+  if (directFeedConfigured) {
+    await loadDirectAwinFeed(rawOffers);
+  } else {
+    joinedAdvertisersChecked = await loadEnhancedAwinFeeds(rawOffers);
+  }
+  if (!rawOffers.length) throw new Error("Aucune offre Awin exploitable : le catalogue précédent est conservé.");
 const fetchedAt = new Date().toISOString();
 const products = aggregateOffers(rawOffers, fetchedAt).slice(0, MAX_PRODUCTS);
 const output = {
   schema_version: 1,
-  source: "Awin Publisher Enhanced Retail Feeds",
+  source: directFeedConfigured ? "Awin Direct Product Data Feed" : "Awin Publisher Enhanced Retail Feeds",
   publisher_id: PUBLISHER_ID,
   locale: LOCALE,
   fetched_at: fetchedAt,
   status: "ok",
   counts: {
-    joined_advertisers_checked: eligible.length,
+    joined_advertisers_checked: joinedAdvertisersChecked,
     products: products.length,
     merchant_offers: rawOffers.length,
-    brands: new Set(products.map(product => norm(product.brand))).size
+    brands: new Set(products.map(product => norm(product.brand)).filter(Boolean)).size
   },
   products,
   attribution: "Données produits, prix, images et liens provenant des flux marchands Awin accessibles au compte éditeur Prix Malin. Prix et disponibilité à reconfirmer sur la fiche marchande."
@@ -388,3 +551,4 @@ await fs.mkdir(path.dirname(OUTPUT), { recursive: true });
 await fs.writeFile(OUTPUT, JSON.stringify(output) + "\n", "utf8");
 log(products.length + " fiche(s) produits, " + rawOffers.length + " offre(s), " + output.counts.brands + " marque(s).");
 log("Catalogue autorisé mis à jour : data/awin-products.json");
+}
