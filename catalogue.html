@@ -616,10 +616,12 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 <p class="note">Les offres et stocks doivent toujours être confirmés chez le marchand. Les fiches d’exploration ne constituent pas des prix comparés.</p></main><script>
 const verifiedShelf=document.getElementById("verifiedShelf");
 const verifiedProductsEl=document.getElementById("verifiedProducts");
+let pmBaseVerifiedProducts=[];
+let pmAwinVerifiedProducts=[];
 Promise.all([fetch("/data/prices.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),fetch("/data/featured-prices.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null)])
   .then(([verified,featured])=>{
-    const combined=[...(verified?.products||[]),...(featured?.products||[])];
-    if(combined.length)renderVerifiedProducts(combined);
+    pmBaseVerifiedProducts=[...(verified?.products||[]),...(featured?.products||[])];
+    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts]);
   })
   .catch(()=>{});
 const productData=[
@@ -5750,6 +5752,12 @@ async function pmLoadAwinCatalogue(){
     setStatus(status);
     const known=new Map(productData.map(product=>[product.id,product]));
     feedProducts.forEach(product=>{
+      if(product.isAwinProduct&&!product.imageSource&&product.sourceUrl){
+        product.imageSource=product.sourceUrl;
+        product.imageSourceName=product.merchant||"Marchand Awin";
+        product.imageKind="merchant_feed";
+        product.imageStatus="authorized_feed_image";
+      }
       const existing=known.get(product.id);
       if(existing){
         // Les visuels du flux affilié autorisé remplacent les photos génériques,
@@ -5763,7 +5771,7 @@ async function pmLoadAwinCatalogue(){
           existing.images=Array.isArray(product.images)?product.images.filter(url=>/^https:\/\//i.test(String(url||""))).slice(0,5):[];
           existing.imageSource=product.imageSource||product.sourceUrl||"";
           existing.imageSourceName=product.imageSourceName||product.merchant||"Flux partenaire";
-          existing.imageKind="official";
+          existing.imageKind="merchant_feed";
           existing.imageStatus="authorized_feed_image";
         }else if(Array.isArray(product.images)&&!Array.isArray(existing.images)){
           existing.images=product.images.filter(url=>/^https:\/\//i.test(String(url||""))).slice(0,5);
@@ -5773,6 +5781,26 @@ async function pmLoadAwinCatalogue(){
       productData.push(product);
       known.set(product.id,product);
     });
+    pmAwinVerifiedProducts=feedProducts.map(product=>{
+      const sourceOffers=Array.isArray(product.offers)&&product.offers.length?product.offers:[{
+        merchant:product.merchant,priceValue:product.priceValue,shippingPriceValue:product.shippingPriceValue,url:product.sourceUrl
+      }];
+      return {
+        id:product.id,
+        name:product.name,
+        image:product.image,
+        offers:sourceOffers.map(offer=>({
+          merchant:offer.merchant,
+          price_eur:Number(offer.priceValue),
+          shipping_price_eur:offer.shippingPriceValue===null||offer.shippingPriceValue===undefined?null:Number(offer.shippingPriceValue),
+          url:offer.url,
+          checked_at:product.fetchedAt||feed.fetched_at,
+          freshness_max_age_hours:48,
+          stale:false
+        }))
+      };
+    });
+    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts]);
   }catch(error){
     setStatus("Flux Awin momentanément indisponible ; les dernières données fiables ne sont pas remplacées.");
     console.warn("Le flux de produits autorisés Awin est momentanément indisponible.");
@@ -5866,7 +5894,21 @@ function render(){
       if(Number(product.priceValue)>0)value+=2;
       return value;
     };
-    found.sort((a,b)=>score(b)-score(a)||a.name.localeCompare(b.name,"fr"));
+    const offerRank=product=>{
+      const base=Number(product.priceValue);
+      const hasPrice=Number.isFinite(base)&&base>0;
+      const shippingKnown=product.shippingPriceValue!==null&&product.shippingPriceValue!==undefined&&
+        Number.isFinite(Number(product.shippingPriceValue))&&Number(product.shippingPriceValue)>=0;
+      return {hasPrice,shippingKnown,total:hasPrice?base+(shippingKnown?Number(product.shippingPriceValue):0):Infinity};
+    };
+    found.sort((a,b)=>{
+      const relevance=score(b)-score(a);
+      if(relevance)return relevance;
+      const pa=offerRank(a),pb=offerRank(b);
+      if(pa.hasPrice!==pb.hasPrice)return pa.hasPrice?-1:1;
+      if(pa.shippingKnown!==pb.shippingKnown)return pa.shippingKnown?-1:1;
+      return pa.total-pb.total||a.name.localeCompare(b.name,"fr");
+    });
   }
   productsEl.innerHTML="";
   const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
@@ -5938,8 +5980,8 @@ function render(){
     }
     const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
     imageBadge.className="pm-photo-source"+(p.imageKind==="illustration"?" illustration":"");
-    imageBadge.textContent=p.imageSource?"Photo constructeur":(p.imageKind==="illustration"?"Illustration":"");
-    if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source de la photo : "+(p.imageSourceName||"constructeur"));}
+    imageBadge.textContent=p.imageKind==="merchant_feed"?"Visuel marchand":(p.imageSource?"Photo constructeur":(p.imageKind==="illustration"?"Illustration":""));
+    if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source du visuel : "+(p.imageSourceName||"source marchande"));}
     if(imageBadge.textContent)photo.append(imageBadge);
     img.onerror=()=>{
       const failed=img.dataset.pmFailedImages?img.dataset.pmFailedImages.split("|"):[];
@@ -6145,7 +6187,13 @@ function renderVerifiedProducts(products){
   usable.forEach(p=>{
     const rows=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&o.merchant&&/^https:\/\//i.test(String(o.url||""))&&
       Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
-    const byComparablePrice=(a,b)=>verifiedComparablePrice(a)-verifiedComparablePrice(b);
+    const shippingKnown=offer=>offer.shipping_price_eur!==null&&offer.shipping_price_eur!==undefined&&
+      Number.isFinite(Number(offer.shipping_price_eur))&&Number(offer.shipping_price_eur)>=0;
+    const byComparablePrice=(a,b)=>{
+      const aKnown=shippingKnown(a),bKnown=shippingKnown(b);
+      if(aKnown!==bKnown)return aKnown?-1:1;
+      return verifiedComparablePrice(a)-verifiedComparablePrice(b);
+    };
     const fresh=rows.sort(byComparablePrice);
     const stale=[];
     const ordered=fresh;
@@ -6402,7 +6450,7 @@ function openAmazonSearch(term){
  window.location.href=url;
 }
 amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();selectedBrand="";render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
-searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmVisibleLimit=60;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});pmLoadAwinCatalogue().finally(render);
+searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmVisibleLimit=60;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();pmLoadAwinCatalogue().then(render);
 </script>  
 <script>
 

@@ -49,19 +49,25 @@ function imageList(row) {
   const alternate = [row.alternate_image,row.alternate_image_two,row.alternate_image_three,row.large_image,row.aw_image_url,row.merchant_image_url];
   return [...new Set([row.image_link,row.merchant_image_url,row.large_image,row.aw_image_url,...values,...alternate].map(httpsUrl).filter(Boolean))].slice(0, 6);
 }
-function categoryFor(row) {
-  const text = norm([row.google_product_category, row.product_type, row.product_category, row.product_name].join(" "));
-  // Éviter qu'un mot générique (« accessories », « clothing ») écrase la vraie famille.
+function classifyCategory(text) {
+  // Les familles explicites priment sur les mots du titre, souvent ambigus.
   if (/sport.*(sock|chaussette)|(sock|chaussette).*sport/.test(text)) return "sport";
   if (/baby|toys|toy|toys games|children|bebe|enfant|jouet|puericulture|nursery|kids/.test(text)) return "kids";
   if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile/.test(text)) return "auto";
   if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t shirt|tshirt|polo|fashion/.test(text)) return "fashion";
-  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor/.test(text)) return "home";
-  if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette/.test(text)) return "beauty";
+  if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette|shampoo|shampoing|conditioner|haircare|hair care|cheveux|capillaire|parapharmacie|supplement|nutrition|complement alimentaire|vitamin|vitamine/.test(text)) return "beauty";
+  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt/.test(text)) return "home";
   if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur/.test(text)) return "tech";
   if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation/.test(text)) return "sport";
   if (/accessories|accessoire/.test(text)) return "fashion";
   return "other";
+}
+function categoryFor(row) {
+  const metadata = norm([row.google_product_category, row.product_type, row.product_category].join(" "));
+  const metadataCategory = classifyCategory(metadata);
+  if (metadataCategory !== "other") return metadataCategory;
+  // Certains flux Awin placent le nom dans "title" après normalisation CSV.
+  return classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
 }
 function parseJsonl(body) {
   const rows = [];
@@ -160,7 +166,7 @@ function parseDirectFeedRow(row) {
   const shippingPrice = parseFeedMoney(row.delivery_cost || row.shipping_cost || row.shipping || "", currency, true);
   const stock = stockState([row.stock_status, row.availability, row.is_for_sale, row.in_stock].filter(Boolean).join(" "));
   const adultFlag = norm([row.adult, row.adult_content, row.is_adult].filter(Boolean).join(" "));
-  const categoryText = norm([row.merchant_category, row.category_name, row.product_type, row.product_name].filter(Boolean).join(" "));
+  const categoryText = norm([row.merchant_category, row.category_name, row.product_type, row.product_name, row.title, row.name].filter(Boolean).join(" "));
   if (/^(1|yes|true|adult)$/.test(adultFlag) || /adult products?|sex toys?|erotic|erotique/.test(categoryText)) return null;
   if (!price || currency !== "EUR" || stock === "out_of_stock") return null;
   const advertiser = String(row.merchant_id || row.advertiser_id || row.data_feed_id || "awin-standard").trim();
@@ -169,13 +175,13 @@ function parseDirectFeedRow(row) {
     id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.gtin || "",
     title: row.product_name || row.title || "",
     description: row.description || row.product_short_description || "",
-    brand: row.brand_name || row.brand || row.product_brand || row.manufacturer_name || row.manufacturer || "",
+    brand: row.brand_name || row.brand || row.product_brand || row.product_brand_name || row.manufacturer_name || row.manufacturer || "",
     product_type: row.merchant_category || row.category_name || row.google_product_category || row.product_type || "",
     google_product_category: row.google_product_category || row.category_name || row.merchant_category || "",
     color: row.colour || row.color || "",
     size: row.size || "",
-    gtin: row.gtin || row.ean || row.product_ean || row.product_gtin || row.upc || row.barcode || "",
-    mpn: row.mpn || row.model_number || row.manufacturer_part_number || row.product_mpn || row.manufacturer_sku || row.part_number || "",
+    gtin: row.gtin || row.ean || row.product_ean || row.product_gtin || row.upc || row.barcode || row.global_trade_item_number || "",
+    mpn: row.mpn || row.model_number || row.manufacturer_part_number || row.product_mpn || "",
     image_link: row.merchant_image_url || row.aw_image_url || row.image_link || row.aw_thumb_url || "",
     additional_image_link: [row.alternate_image, row.alternate_image_two, row.alternate_image_three].filter(Boolean),
     price: price.toFixed(2) + " EUR",
@@ -220,6 +226,17 @@ async function loadDirectAwinFeed(rawOffers) {
       if (!headers.has("product_name") || !(headers.has("search_price") || headers.has("store_price") || headers.has("display_price"))) {
         throw new Error("Les colonnes produit/prix attendues sont absentes du flux Awin.");
       }
+      const identityFields = {
+        marque: ["brand_name", "brand", "product_brand", "product_brand_name", "manufacturer_name", "manufacturer"],
+        gtin: ["gtin", "ean", "product_ean", "product_gtin", "upc", "barcode", "global_trade_item_number"],
+        mpn: ["mpn", "model_number", "manufacturer_part_number", "product_mpn"]
+      };
+      const identityCoverage = Object.entries(identityFields).map(([label, fields]) => {
+        const present = fields.filter(field => headers.has(field));
+        const populated = rows.filter(row => fields.some(field => String(row[field] || "").trim())).length;
+        return label + " " + populated + "/" + rows.length + " (colonnes : " + (present.join(", ") || "absentes") + ")";
+      });
+      log("Couverture des identifiants du flux Awin : " + identityCoverage.join(" ; ") + ".");
       const perAdvertiser = new Map();
       let imported = 0;
       for (const row of rows) {
@@ -333,15 +350,41 @@ function advertiserId(program) {
   const value = program?.advertiserId ?? program?.advertiser_id ?? program?.advertiser?.id ?? program?.id;
   return String(value ?? "").trim();
 }
+function isValidGtin(value) {
+  const digits = String(value || "").replace(/[^0-9]/g, "");
+  if (![8, 12, 13, 14].includes(digits.length)) return false;
+  let sum = 0;
+  let weight = 3;
+  for (let index = digits.length - 2; index >= 0; index--) {
+    sum += Number(digits[index]) * weight;
+    weight = weight === 3 ? 1 : 3;
+  }
+  return (10 - (sum % 10)) % 10 === Number(digits[digits.length - 1]);
+}
+
+function identityPart(value) {
+  return norm(value).replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
 function groupKey(row, advertiser) {
-  const gtin = String(row.gtin || row.product_gtin || row.product_GTIN || "").replace(/[^0-9]/g, "");
-  if ([8, 12, 13, 14].includes(gtin.length)) return "gtin:" + gtin;
+  const gtin = String(row.gtin || row.product_gtin || row.product_GTIN || row.ean || "").replace(/[^0-9]/g, "");
+  if (isValidGtin(gtin)) return "gtin:" + gtin;
+  const brand = identityPart(row.brand || row.brand_name || row.product_brand || row.product_brand_name || row.manufacturer_name || row.manufacturer || "");
+  const mpn = identityPart(row.mpn || row.model_number || row.manufacturer_part_number || row.product_mpn || "");
+  if (brand && mpn) {
+    const color = identityPart(row.color || row.colour || "");
+    const size = identityPart(row.size || "");
+    return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size;
+  }
   return "awin:" + advertiser + ":" + String(row.id || row.product_id || "");
 }
 
 function offerFromRow(row, program, advertiser, { allowUnknownAvailability = false } = {}) {
   const name = String(row.title || row.product_name || "").trim().replace(/\s+/g, " ");
-  const brand = String(row.brand || row.brand_name || "").trim();
+  const brand = String(row.brand || row.brand_name || row.product_brand || row.product_brand_name || row.manufacturer_name || row.manufacturer || "").trim();
+  const gtinCandidate = String(row.gtin || row.product_gtin || row.product_GTIN || row.ean || row.product_ean || row.upc || row.barcode || row.global_trade_item_number || "").replace(/[^0-9]/g, "");
+  const gtin = isValidGtin(gtinCandidate) ? gtinCandidate : "";
+  const mpn = String(row.mpn || row.model_number || row.manufacturer_part_number || row.product_mpn || "").trim();
   const images = imageList(row);
   const link = httpsUrl(row.aw_deep_link || row.link || row.mobile_link);
   const availability = stockState(row.availability || row.stock_status || "");
@@ -354,7 +397,7 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
   const merchant = String(program?.name || program?.displayName || program?.advertiserName || ("Annonceur Awin " + advertiser)).trim();
   return {
     id: String(row.id || row.product_id || row.gtin || ""),
-    identity: groupKey(row, advertiser),
+    identity: groupKey({ ...row, brand, gtin, mpn }, advertiser),
     advertiser_id: advertiser,
     merchant,
     name,
@@ -364,8 +407,8 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
     product_type: String(row.product_type || row.google_product_category || "").trim(),
     color: String(row.color || row.colour || "").trim(),
     size: String(row.size || "").trim(),
-    gtin: String(row.gtin || row.product_gtin || row.product_GTIN || "").trim(),
-    mpn: String(row.mpn || row.model_number || "").trim(),
+    gtin,
+    mpn,
     images,
     price_eur: price,
     regular_price_eur: regular && sale && regular > sale ? regular : null,
@@ -375,6 +418,15 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
     merchant_updated_at: row.last_updated || null,
     url: link
   };
+}
+
+function compareOfferCosts(a, b) {
+  const aShippingKnown = Number.isFinite(a.shipping_price_eur) && a.shipping_price_eur >= 0;
+  const bShippingKnown = Number.isFinite(b.shipping_price_eur) && b.shipping_price_eur >= 0;
+  if (aShippingKnown !== bShippingKnown) return aShippingKnown ? -1 : 1;
+  const aTotal = a.price_eur + (aShippingKnown ? a.shipping_price_eur : 0);
+  const bTotal = b.price_eur + (bShippingKnown ? b.shipping_price_eur : 0);
+  return aTotal - bTotal || a.price_eur - b.price_eur || String(a.merchant).localeCompare(String(b.merchant), "fr");
 }
 
 function aggregateOffers(rawOffers, fetchedAt) {
@@ -391,7 +443,7 @@ function aggregateOffers(rawOffers, fetchedAt) {
   }
   const result = [];
   for (const group of groups.values()) {
-    const offers = group.offers.sort((a, b) => a.price_eur - b.price_eur);
+    const offers = group.offers.sort(compareOfferCosts);
     const best = offers[0];
     const first = group.first;
     result.push({
@@ -408,8 +460,13 @@ function aggregateOffers(rawOffers, fetchedAt) {
       merchantUpdatedAt: best.merchant_updated_at,
       gtin: first.gtin,
       mpn: first.mpn,
+      identityType: group.identity.startsWith("gtin:") ? "gtin" : group.identity.startsWith("mpn:") ? "brand_mpn" : "merchant_product",
       image: best.images[0] || first.images[0],
       images: [...new Set(group.offers.flatMap(item => item.images))].slice(0, 6),
+      imageSource: best.url,
+      imageSourceName: best.merchant,
+      imageKind: "merchant_feed",
+      imageStatus: "authorized_feed_image",
       merchant: best.merchant,
       priceValue: best.price_eur,
       price: new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(best.price_eur),
@@ -500,12 +557,12 @@ async function loadEnhancedAwinFeeds(rawOffers) {
 
 function runSelfTests() {
   const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
-    '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","3701234567890","AB-X1"';
+    '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","4006381333931","AB-X1"';
   const rows = objectRowsFromCsv(sampleCsv);
   const offer = parseDirectFeedRow(rows[0]);
   if (!offer) throw new Error("TEST ÉCHEC : un flux direct valide doit produire une offre.");
   if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" ||
-      offer.brand !== "AudioBrand" || offer.gtin !== "3701234567890" || offer.mpn !== "AB-X1") {
+      offer.brand !== "AudioBrand" || offer.gtin !== "4006381333931" || offer.mpn !== "AB-X1") {
     throw new Error("TEST ÉCHEC : prix, livraison, marque, GTIN, MPN ou disponibilité mal traités.");
   }
   const categoryCases = [
@@ -517,12 +574,39 @@ function runSelfTests() {
     [{ product_type: "Home & Garden > Outdoor Furniture" }, "home"],
     [{ product_type: "Electronics > Audio > Headphones" }, "tech"],
     [{ product_type: "Sports & Fitness > Running" }, "sport"],
-    [{ product_type: "Toys & Games > Children" }, "kids"]
+    [{ product_type: "Toys & Games > Children" }, "kids"],
+    [{ product_type: "Cadeaux", title: "Shampoing hydratant cheveux 250 ml" }, "beauty"],
+    [{ product_type: "Cadeaux", title: "Chaussettes à paillettes pour filles — 2 paires" }, "fashion"],
+    [{ product_type: "Bougies", title: "Roses of the Pays de Grasse Scented Candle" }, "home"],
+    [{ google_product_category: "Health & Beauty > Personal Care > Cosmetics > Perfume & Cologne", title: "ANDALUSIAN GARDEN" }, "beauty"]
   ];
   for (const [row, expected] of categoryCases) {
     if (categoryFor(row) !== expected) {
       throw new Error("TEST ÉCHEC : catégorie attendue " + expected + " pour " + JSON.stringify(row));
     }
+  }
+  if (!isValidGtin("4006381333931") || isValidGtin("4006381333932")) {
+    throw new Error("TEST ÉCHEC : la validation du chiffre de contrôle GTIN est incorrecte.");
+  }
+  const gtinKeyA = groupKey({ gtin: "4006381333931", brand: "Marque A", mpn: "MODELE-A" }, "annonceur-1");
+  const gtinKeyB = groupKey({ gtin: "4006381333931", brand: "Marque B", mpn: "MODELE-B" }, "annonceur-2");
+  if (gtinKeyA !== gtinKeyB || !gtinKeyA.startsWith("gtin:")) {
+    throw new Error("TEST ÉCHEC : le GTIN valide doit primer sur l'annonceur et le MPN.");
+  }
+  const mpnKeyA = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Noir", size: "" }, "annonceur-1");
+  const mpnKeyB = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Noir", size: "" }, "annonceur-2");
+  const mpnKeyDifferentVariant = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Blanc", size: "" }, "annonceur-3");
+  if (mpnKeyA !== mpnKeyB || mpnKeyA === mpnKeyDifferentVariant ||
+      groupKey({ mpn: "AB-X1" }, "annonceur-1") === groupKey({ mpn: "AB-X1" }, "annonceur-2")) {
+    throw new Error("TEST ÉCHEC : le rapprochement MPN doit exiger une marque et respecter les variantes.");
+  }
+  const grouped = aggregateOffers([
+    { identity: mpnKeyA, advertiser_id: "1", id: "1", merchant: "Boutique A", name: "Casque Audio X", brand: "AudioBrand", category: "tech", color: "Noir", size: "", gtin: "", mpn: "AB-X1", images: ["https://cdn.example/a.jpg"], price_eur: 45, shipping_price_eur: null, availability: "unknown", merchant_updated_at: null, url: "https://example.com/a" },
+    { identity: mpnKeyA, advertiser_id: "2", id: "2", merchant: "Boutique B", name: "Casque Audio X", brand: "AudioBrand", category: "tech", color: "Noir", size: "", gtin: "", mpn: "AB-X1", images: ["https://cdn.example/b.jpg"], price_eur: 48, shipping_price_eur: 0, availability: "in_stock", merchant_updated_at: null, url: "https://example.com/b" }
+  ], "2026-11-05T06:00:00.000Z")[0];
+  if (!grouped || grouped.identityType !== "brand_mpn" || grouped.offers[0].merchant !== "Boutique B" ||
+      grouped.imageKind !== "merchant_feed" || grouped.imageSourceName !== "Boutique B") {
+    throw new Error("TEST ÉCHEC : comparaison MPN, priorité au total connu ou provenance image.");
   }
   if (parseDirectFeedRow({ ...rows[0], stock_status: "out_of_stock" }) !== null) {
     throw new Error("TEST ÉCHEC : une offre explicitement en rupture doit être rejetée.");
@@ -533,7 +617,7 @@ function runSelfTests() {
   let rejectsHttp = false;
   try { validateDirectFeedUrl("http://productdata.awin.com/feed.csv"); } catch { rejectsHttp = true; }
   if (!rejectsHttp) throw new Error("TEST ÉCHEC : une URL HTTP doit être rejetée.");
-  log("Autotests réussis : CSV, prix EUR, livraison, statut inconnu, rupture, devise et URL sécurisée.");
+  log("Autotests réussis : CSV, prix EUR, livraison, GTIN valide, MPN+marque, variantes, catégories par titre, total avec livraison, provenance image, rupture, devise et URL sécurisée.");
 }
 
 if (process.argv.includes("--self-test")) {
@@ -563,8 +647,9 @@ const output = {
     merchant_offers: rawOffers.length,
     merchants: new Set(rawOffers.map(offer => norm(offer.merchant)).filter(Boolean)).size,
     brands: new Set(products.map(product => norm(product.brand)).filter(Boolean)).size,
-    products_with_gtin: products.filter(product => /^(?:\\d{8}|\\d{12,14})$/.test(String(product.gtin || "").replace(/\\D/g, ""))).length,
+    products_with_gtin: products.filter(product => isValidGtin(product.gtin)).length,
     products_with_mpn: products.filter(product => Boolean(String(product.mpn || "").trim())).length,
+    products_with_brand_mpn: products.filter(product => Boolean(String(product.brand || "").trim() && String(product.mpn || "").trim())).length,
     multi_merchant_products: products.filter(product => new Set((product.offers || []).map(offer => norm(offer.merchant)).filter(Boolean)).size > 1).length,
     offers_with_shipping: rawOffers.filter(offer => Number.isFinite(offer.shipping_price_eur) && offer.shipping_price_eur >= 0).length,
     offers_with_availability: rawOffers.filter(offer => offer.availability && offer.availability !== "unknown").length,
