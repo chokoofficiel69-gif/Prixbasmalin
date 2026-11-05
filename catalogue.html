@@ -5715,7 +5715,7 @@ async function pmLoadAwinCatalogue(){
   const statusEl=document.getElementById("pmAwinFeedStatus");
   const setStatus=message=>{if(statusEl)statusEl.textContent=message;};
   try{
-    const response=await fetch("/data/awin-products.json",{cache:"no-cache"});
+    const response=await fetch("/data/awin-products-public.json",{cache:"no-cache"});
     if(!response.ok){setStatus("Flux Awin momentanément indisponible ; les prix marchands ne sont pas actualisés.");return;}
     const feed=await response.json();
     if(feed?.status!=="ok"||!Array.isArray(feed.products)){
@@ -6001,6 +6001,7 @@ function render(){
     const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(value));
     price.textContent=hasVerifiedPrice?money(p.priceValue):"Prix à consulter chez le marchand";
     const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl}]):[];
+    const distinctOfferMerchants=new Set(feedOffers.map(offer=>String(offer.merchant||p.merchant||"").trim().toLowerCase()).filter(Boolean)).size;
     const merchant=document.createElement("div");
     merchant.className="merchant";
     const updateValue=p.merchantUpdatedAt||p.fetchedAt;
@@ -6014,7 +6015,7 @@ function render(){
       :(p.merchant||"Lien marchand")+" • tarif non récupéré en direct";
     const heading=document.createElement("div");
     heading.className="discovery-compare-heading";
-    heading.textContent=hasVerifiedPrice?(feedOffers.length>1?"Offres marchandes à comparer":"Offre unique — pas de comparatif multi-marchands"):"Recherche chez le marchand";
+    heading.textContent=hasVerifiedPrice?(distinctOfferMerchants>1?"Offres marchandes à comparer":"Offre unique — pas de comparatif multi-marchands"):"Recherche chez le marchand";
     const list=document.createElement("div");
     list.className="discovery-compare pm-offers-horizontal";
     feedOffers.forEach(offer=>{
@@ -6033,7 +6034,7 @@ function render(){
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
     note.textContent=hasVerifiedPrice
-      ?(feedOffers.length>1?"Plusieurs offres sont reçues pour cette référence. ":"Une seule offre est reçue pour cette référence ; ce n’est pas une comparaison multi-marchands. ")+"Prix en EUR fourni par le flux ; TVA non explicitée. Vérifiez le prix final et la disponibilité chez le marchand."
+      ?(distinctOfferMerchants>1?"Plusieurs marchands proposent cette référence. ":"Une seule boutique propose cette référence dans le flux ; ce n’est pas une comparaison multi-marchands. ")+"Prix en EUR fourni par le flux ; TVA non explicitée. Vérifiez le prix final et la disponibilité chez le marchand."
       :"Référence de catalogue : le prix exact et la disponibilité sont à vérifier sur le site marchand.";
     card.append(photo);
     if(gallery.children.length>1)card.append(gallery);
