@@ -50,14 +50,16 @@ function imageList(row) {
   return [...new Set([row.image_link,row.merchant_image_url,row.large_image,row.aw_image_url,...values,...alternate].map(httpsUrl).filter(Boolean))].slice(0, 6);
 }
 function categoryFor(row) {
-  const text = norm([row.google_product_category, row.product_type, row.product_category].join(" "));
-  if (/apparel|clothing|shoes|footwear|accessories|mode|vetement|chaussure/.test(text)) return "fashion";
-  if (/electronics|computer|phone|mobile|audio|camera|television|informatique|electronique/.test(text)) return "tech";
-  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine/.test(text)) return "home";
-  if (/sport|fitness|outdoor|sports equipment/.test(text)) return "sport";
-  if (/beauty|cosmetic|personal care|health|beaute|soin/.test(text)) return "beauty";
-  if (/baby|toys|toys & games|children|bebe|enfant|jouet/.test(text)) return "kids";
-  if (/vehicle|automotive|auto|moto|car parts/.test(text)) return "auto";
+  const text = norm([row.google_product_category, row.product_type, row.product_category, row.product_name].join(" "));
+  // Les familles précises passent avant les mots génériques comme « accessories ».
+  if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t shirt|tshirt|polo|fashion/.test(text)) return "fashion";
+  if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur/.test(text)) return "tech";
+  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor/.test(text)) return "home";
+  if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette/.test(text)) return "beauty";
+  if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation/.test(text)) return "sport";
+  if (/baby|toys|toy|toys games|children|bebe|enfant|jouet|puericulture|nursery/.test(text)) return "kids";
+  if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile/.test(text)) return "auto";
+  if (/accessories|accessoire/.test(text)) return "fashion";
   return "other";
 }
 function parseJsonl(body) {
@@ -166,13 +168,13 @@ function parseDirectFeedRow(row) {
     id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.gtin || "",
     title: row.product_name || row.title || "",
     description: row.description || row.product_short_description || "",
-    brand: row.brand_name || row.brand || row.product_brand || "",
-    product_type: row.merchant_category || row.category_name || row.product_type || "",
-    google_product_category: row.category_name || row.merchant_category || "",
+    brand: row.brand_name || row.brand || row.product_brand || row.manufacturer_name || row.manufacturer || "",
+    product_type: row.merchant_category || row.category_name || row.google_product_category || row.product_type || "",
+    google_product_category: row.google_product_category || row.category_name || row.merchant_category || "",
     color: row.colour || row.color || "",
     size: row.size || "",
-    gtin: row.ean || row.product_ean || row.product_gtin || row.gtin || row.upc || "",
-    mpn: row.mpn || row.model_number || "",
+    gtin: row.gtin || row.ean || row.product_ean || row.product_gtin || row.upc || row.barcode || "",
+    mpn: row.mpn || row.model_number || row.manufacturer_part_number || row.product_mpn || row.manufacturer_sku || row.part_number || "",
     image_link: row.merchant_image_url || row.aw_image_url || row.image_link || row.aw_thumb_url || "",
     additional_image_link: [row.alternate_image, row.alternate_image_two, row.alternate_image_three].filter(Boolean),
     price: price.toFixed(2) + " EUR",
@@ -496,13 +498,27 @@ async function loadEnhancedAwinFeeds(rawOffers) {
 }
 
 function runSelfTests() {
-  const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated\n' +
-    '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z"';
+  const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
+    '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","3701234567890","AB-X1"';
   const rows = objectRowsFromCsv(sampleCsv);
   const offer = parseDirectFeedRow(rows[0]);
   if (!offer) throw new Error("TEST ÉCHEC : un flux direct valide doit produire une offre.");
-  if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" || offer.brand !== "") {
-    throw new Error("TEST ÉCHEC : prix, livraison, marque absente ou disponibilité inconnue mal traités.");
+  if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" ||
+      offer.brand !== "AudioBrand" || offer.gtin !== "3701234567890" || offer.mpn !== "AB-X1") {
+    throw new Error("TEST ÉCHEC : prix, livraison, marque, GTIN, MPN ou disponibilité mal traités.");
+  }
+  const categoryCases = [
+    [{ product_type: "Home & Garden, Bathroom Accessories, Soap & Lotion Dispensers" }, "home"],
+    [{ product_type: "Parfums > Parfums pour Femme > Eau de Parfum Femme" }, "beauty"],
+    [{ product_type: "Chaussettes de sport" }, "fashion"],
+    [{ product_type: "Electronics > Audio > Headphones" }, "tech"],
+    [{ product_type: "Sports & Fitness > Running" }, "sport"],
+    [{ product_type: "Toys & Games > Children" }, "kids"]
+  ];
+  for (const [row, expected] of categoryCases) {
+    if (categoryFor(row) !== expected) {
+      throw new Error("TEST ÉCHEC : catégorie attendue " + expected + " pour " + JSON.stringify(row));
+    }
   }
   if (parseDirectFeedRow({ ...rows[0], stock_status: "out_of_stock" }) !== null) {
     throw new Error("TEST ÉCHEC : une offre explicitement en rupture doit être rejetée.");
@@ -541,7 +557,14 @@ const output = {
     joined_advertisers_checked: joinedAdvertisersChecked,
     products: products.length,
     merchant_offers: rawOffers.length,
-    brands: new Set(products.map(product => norm(product.brand)).filter(Boolean)).size
+    merchants: new Set(rawOffers.map(offer => norm(offer.merchant)).filter(Boolean)).size,
+    brands: new Set(products.map(product => norm(product.brand)).filter(Boolean)).size,
+    products_with_gtin: products.filter(product => /^(?:\\d{8}|\\d{12,14})$/.test(String(product.gtin || "").replace(/\\D/g, ""))).length,
+    products_with_mpn: products.filter(product => Boolean(String(product.mpn || "").trim())).length,
+    multi_merchant_products: products.filter(product => new Set((product.offers || []).map(offer => norm(offer.merchant)).filter(Boolean)).size > 1).length,
+    offers_with_shipping: rawOffers.filter(offer => Number.isFinite(offer.shipping_price_eur) && offer.shipping_price_eur >= 0).length,
+    offers_with_availability: rawOffers.filter(offer => offer.availability && offer.availability !== "unknown").length,
+    products_other_category: products.filter(product => product.category === "other").length
   },
   products,
   attribution: "Données produits, prix, images et liens provenant des flux marchands Awin accessibles au compte éditeur Prix Malin. Prix et disponibilité à reconfirmer sur la fiche marchande."

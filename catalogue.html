@@ -603,9 +603,10 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 </section>
 <section id="verifiedShelf" class="verified-shelf" aria-live="polite">
   <div class="verified-shelf-head">
-    <div><h2>Prix directs — priorité Amazon</h2><p>Cette zone affichera les prix confirmés quand l’accès à une source Amazon autorisée sera disponible. En attendant, chaque fiche permet d’ouvrir la recherche Amazon correspondante.</p></div>
+    <div><h2>Comparaisons multi-marchands — modèles exacts</h2><p>Une comparaison n’apparaît que lorsque plusieurs marchands proposent le même modèle identifié. Les offres Awin individuelles sont visibles dans le catalogue ; aucun prix n’est fusionné sans correspondance produit fiable.</p></div>
   </div>
-  <div class="grid" id="verifiedProducts"><p class="comparison-empty">Aucun prix Amazon vérifié pour le moment. Explorez les références ci-dessous et vérifiez le prix directement sur Amazon.</p></div>
+  <div id="pmAwinFeedStatus" class="pm-awin-feed-status" role="status" aria-live="polite">Chargement du flux marchand Awin…</div>
+  <div class="grid" id="verifiedProducts"><p class="comparison-empty">Les comparaisons exactes apparaîtront ici dès que plusieurs offres récentes seront confirmées pour un même modèle.</p></div>
 </section>
 <section class="discovery-shelf" aria-labelledby="discoveryTitle">
  <div class="discovery-shelf-head"><div><span class="pm-catalogue-kicker">SÉLECTION PRIX MALIN</span><h2 id="discoveryTitle">Tous les produits</h2><p>Des fiches claires, des photos, les offres marchands et les accessoires associés.</p></div></div>
@@ -5711,14 +5712,44 @@ function pmHasRealProductImage(product){
   return /^https:\/\//i.test(image) && !/unsplash\.com/i.test(image);
 }
 async function pmLoadAwinCatalogue(){
+  const statusEl=document.getElementById("pmAwinFeedStatus");
+  const setStatus=message=>{if(statusEl)statusEl.textContent=message;};
   try{
-    const response=await fetch("/data/awin-products.json",{cache:"no-store"});
-    if(!response.ok)return;
+    const response=await fetch("/data/awin-products.json",{cache:"no-cache"});
+    if(!response.ok){setStatus("Flux Awin momentanément indisponible ; les prix marchands ne sont pas actualisés.");return;}
     const feed=await response.json();
-    if(feed?.status!=="ok"||!Array.isArray(feed.products))return;
+    if(feed?.status!=="ok"||!Array.isArray(feed.products)){
+      setStatus("Le flux Awin reçu n’a pas le format attendu ; aucun prix de ce flux n’est affiché.");
+      return;
+    }
+    const fetchedAt=Date.parse(feed.fetched_at||"");
+    const age=Date.now()-fetchedAt;
+    if(!Number.isFinite(fetchedAt)||age < -5*60*1000||age > 48*60*60*1000){
+      const date=Number.isFinite(fetchedAt)?new Date(fetchedAt).toLocaleString("fr-FR"):"date inconnue";
+      setStatus("Flux Awin trop ancien ou datation invalide (dernier import : "+date+"). Les prix de ce flux sont masqués jusqu’à une actualisation fiable.");
+      return;
+    }
+    const feedProducts=feed.products.filter(product=>
+      product&&product.id&&product.name&&pmHasRealProductImage(product)&&
+      Number.isFinite(Number(product.priceValue))&&Number(product.priceValue)>0&&
+      /^https:\/\//i.test(String(product.sourceUrl||""))&&String(product.merchant||"").trim()
+    );
+    const merchants=new Set(feedProducts.map(product=>product.merchant).filter(Boolean));
+    const multiMerchant=feedProducts.filter(product=>
+      new Set((product.offers||[]).map(offer=>String(offer.merchant||"").trim().toLowerCase()).filter(Boolean)).size>1
+    ).length;
+    const withGtin=feedProducts.filter(product=>String(product.gtin||"").trim()).length;
+    const withMpn=feedProducts.filter(product=>String(product.mpn||"").trim()).length;
+    const offerCount=feedProducts.reduce((total,product)=>total+(Array.isArray(product.offers)?product.offers.length:1),0);
+    const dateLabel=new Date(fetchedAt).toLocaleString("fr-FR");
+    let status="Flux Awin reçu le "+dateLabel+" : "+offerCount.toLocaleString("fr-FR")+" offres valides issues de "+merchants.size+" marchands ; "+multiMerchant.toLocaleString("fr-FR")+" comparaisons multi-marchands exactes.";
+    if(multiMerchant===0){
+      status+=" Aucun GTIN/MPN exploitable ("+withGtin+" GTIN, "+withMpn+" MPN) : les offres restent séparées pour éviter les faux rapprochements.";
+    }
+    status+=" Prix en EUR fournis par le flux ; TVA non explicitée. Livraison et disponibilité ne sont indiquées que si le flux les fournit.";
+    setStatus(status);
     const known=new Map(productData.map(product=>[product.id,product]));
-    feed.products.forEach(product=>{
-      if(!product||!product.id||!product.name||!pmHasRealProductImage(product))return;
+    feedProducts.forEach(product=>{
       const existing=known.get(product.id);
       if(existing){
         // Les visuels du flux affilié autorisé remplacent les photos génériques,
@@ -5739,16 +5770,17 @@ async function pmLoadAwinCatalogue(){
         }
         return;
       }
-      if(!Number.isFinite(Number(product.priceValue))||Number(product.priceValue)<=0||
-         !/^https:\/\//i.test(String(product.sourceUrl||"")))return;
       productData.push(product);
       known.set(product.id,product);
     });
   }catch(error){
+    setStatus("Flux Awin momentanément indisponible ; les dernières données fiables ne sont pas remplacées.");
     console.warn("Le flux de produits autorisés Awin est momentanément indisponible.");
   }
 }
 let selectedBrand="";
+let pmVisibleLimit=60;
+let pmLastQuery=null;
 const categoryParam=new URLSearchParams(location.search).get("cat")||"all";
 const categoryAliases={tech:["tech"],fashion:["fashion"],home:["home"],beauty:["beauty"],kids:["kids"],sport:["fashion","tech"],auto:"all",diy:"all",appliances:["home"],gifts:"all"};
 let category=categoryAliases[categoryParam]||"all";
@@ -5783,6 +5815,7 @@ const pmSearchSynonyms={
 function render(){
   const rawQuery=searchEl.value.trim();
   const q=pmSearchNorm(rawQuery);
+  if(q!==pmLastQuery){pmLastQuery=q;pmVisibleLimit=60;}
   const queryTerms=q.split(" ").filter(Boolean);
   const correctedQuery=queryTerms.map(term=>pmSpellCorrections[term]||term);
   const catalogueData=productData.filter(p=>p&&p.name&&/^https:\/\//i.test(String(p.sourceUrl||"")));
@@ -5839,13 +5872,14 @@ function render(){
   const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   filtersEl.innerHTML="";
   filtersEl.hidden=false;
-  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";render();});filtersEl.append(allBrand);
-  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;render();});filtersEl.append(button);});
+  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";pmVisibleLimit=60;render();});filtersEl.append(allBrand);
+  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;pmVisibleLimit=60;render();});filtersEl.append(button);});
   const brandsCount=new Set(found.map(p=>p.brand).filter(Boolean)).size;
   const verifiedPriceCount=found.filter(p=>Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0).length;
+  const visibleCount=Math.min(pmVisibleLimit,found.length);
   countEl.textContent=q
-    ?(exactMatchCount+" résultat(s) correspondant exactement"+(found.length>exactMatchCount?" • "+(found.length-exactMatchCount)+" suggestions proches":"")+" • "+verifiedPriceCount+" prix vérifié(s)")
-    :(found.length+" références catalogue • "+verifiedPriceCount+" prix vérifié(s)");
+    ?(exactMatchCount+" résultat(s) correspondant exactement"+(found.length>exactMatchCount?" • "+(found.length-exactMatchCount)+" suggestions proches":"")+" • "+verifiedPriceCount+" offre(s) avec prix du flux • "+visibleCount+" affiché(s)")
+    :(found.length+" références catalogue • "+verifiedPriceCount+" offre(s) avec prix du flux • "+visibleCount+" affiché(s)");
   if(!found.length){
     const query=searchEl.value.trim();
     const empty=document.createElement("div");empty.className="empty pm-catalogue-no-feed";
@@ -5882,7 +5916,8 @@ function render(){
     categoryRails.set(key,rail);
     return rail;
   };
-  found.forEach(p=>{
+  const visibleProducts=found.slice(0,pmVisibleLimit);
+  visibleProducts.forEach(p=>{
     const card=document.createElement("article");
     card.className="product";
     const photo=document.createElement("div");
@@ -5963,29 +5998,43 @@ function render(){
     const price=document.createElement("div");
     price.className="price";
     const hasVerifiedPrice=Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0;
-    price.textContent=hasVerifiedPrice?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(p.priceValue)):"Prix à consulter chez le marchand";
+    const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(value));
+    price.textContent=hasVerifiedPrice?money(p.priceValue):"Prix à consulter chez le marchand";
+    const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl}]):[];
     const merchant=document.createElement("div");
     merchant.className="merchant";
-    const fetchedDate=p.fetchedAt?new Date(p.fetchedAt):null;
+    const updateValue=p.merchantUpdatedAt||p.fetchedAt;
+    const updateDate=updateValue?new Date(updateValue):null;
+    const updateLabel=p.merchantUpdatedAt?"mise à jour marchand":"import du flux";
+    const shippingKnown=p.shippingPriceValue!==null&&p.shippingPriceValue!==undefined&&Number.isFinite(Number(p.shippingPriceValue))&&Number(p.shippingPriceValue)>=0;
+    const shippingText=shippingKnown?"livraison "+money(p.shippingPriceValue):"livraison à confirmer";
+    const availabilityText=p.availability==="in_stock"?"stock indiqué":p.availability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
     merchant.textContent=hasVerifiedPrice
-      ?(p.merchant||"Marchand")+" • prix issu d’un flux autorisé"+(fetchedDate&&!Number.isNaN(fetchedDate.getTime())?" • vérifié le "+fetchedDate.toLocaleDateString("fr-FR"):"")+" • livraison à confirmer"
+      ?(p.merchant||"Marchand")+" • prix du flux Awin en EUR"+(updateDate&&!Number.isNaN(updateDate.getTime())?" • "+updateLabel+" le "+updateDate.toLocaleDateString("fr-FR"):"")+" • "+shippingText+" • "+availabilityText
       :(p.merchant||"Lien marchand")+" • tarif non récupéré en direct";
     const heading=document.createElement("div");
     heading.className="discovery-compare-heading";
-    heading.textContent=hasVerifiedPrice?"Offre marchande vérifiée":"Recherche chez le marchand";
+    heading.textContent=hasVerifiedPrice?(feedOffers.length>1?"Offres marchandes à comparer":"Offre unique — pas de comparatif multi-marchands"):"Recherche chez le marchand";
     const list=document.createElement("div");
-    list.className="discovery-compare";
-    const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl}]):[];
+    list.className="discovery-compare pm-offers-horizontal";
     feedOffers.forEach(offer=>{
       const row=document.createElement("div");row.className="discovery-compare-row";
-      const store=document.createElement("span");store.textContent=offer.merchant||"Marchand";
+      const store=document.createElement("span");
+      const offerShipping=offer.shippingPriceValue??offer.shipping_price_eur??p.shippingPriceValue;
+      const offerShippingKnown=offerShipping!==null&&offerShipping!==undefined&&Number.isFinite(Number(offerShipping))&&Number(offerShipping)>=0;
+      const offerAvailability=offer.availability||p.availability||"unknown";
+      const offerShippingText=offerShippingKnown?"livraison "+money(offerShipping):"livraison à confirmer";
+      const offerAvailabilityText=offerAvailability==="in_stock"?"stock indiqué":offerAvailability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
+      store.textContent=(offer.merchant||p.merchant||"Marchand")+" • "+offerShippingText+" • "+offerAvailabilityText;
       const link=document.createElement("a");link.href=offer.url||p.sourceUrl;link.target="_blank";link.rel="noopener noreferrer sponsored";
-      link.textContent=offer.price||(Number.isFinite(Number(offer.priceValue))?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(offer.priceValue)):"Voir l’offre");
+      link.textContent=offer.price||(Number.isFinite(Number(offer.priceValue))?money(offer.priceValue):"Voir l’offre");
       row.append(store,link);list.append(row);
     });
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
-    note.textContent=hasVerifiedPrice?"Prix vérifié pour cette référence ; livraison à confirmer.":"Référence de catalogue : le prix exact et la disponibilité sont à vérifier sur le site marchand.";
+    note.textContent=hasVerifiedPrice
+      ?(feedOffers.length>1?"Plusieurs offres sont reçues pour cette référence. ":"Une seule offre est reçue pour cette référence ; ce n’est pas une comparaison multi-marchands. ")+"Prix en EUR fourni par le flux ; TVA non explicitée. Vérifiez le prix final et la disponibilité chez le marchand."
+      :"Référence de catalogue : le prix exact et la disponibilité sont à vérifier sur le site marchand.";
     card.append(photo);
     if(gallery.children.length>1)card.append(gallery);
     card.append(name,desc,brands,amazonButton);
@@ -6032,6 +6081,18 @@ function render(){
     makeRelatedSection("Produits similaires",related.similar);
     getCategoryRail(p).append(card);
   });
+  if(found.length>visibleProducts.length){
+    const wrapper=document.createElement("div");
+    wrapper.className="pm-load-more-wrap";
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="pm-load-more";
+    const remaining=found.length-visibleProducts.length;
+    button.textContent="Afficher "+Math.min(60,remaining).toLocaleString("fr-FR")+" autres produits ("+remaining.toLocaleString("fr-FR")+" restants)";
+    button.addEventListener("click",()=>{pmVisibleLimit=Math.min(found.length,pmVisibleLimit+60);render();});
+    wrapper.append(button);
+    productsEl.append(wrapper);
+  }
 }
 
 function verifiedComparablePrice(offer){
@@ -6073,20 +6134,24 @@ function renderVerifiedProducts(products){
     );
     return p.image||p.image_url||p.imageUrl||(match&&match.image)||"";
   };
-  const usable=products.filter(p=>p&&p.id&&p.name&&imageForProduct(p)&&Array.isArray(p.offers)&&p.offers.some(o=>
-    Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0
-  ));
+  const usable=products.filter(p=>{
+    if(!p||!p.id||!p.name||!imageForProduct(p)||!Array.isArray(p.offers))return false;
+    const currentOffers=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&o.merchant&&/^https:\/\//i.test(String(o.url||""))&&
+      Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
+    return new Set(currentOffers.map(o=>String(o.merchant).trim().toLowerCase()).filter(Boolean)).size>1;
+  });
   if(!usable.length){verifiedProductsEl.innerHTML='<p class="comparison-empty">Les comparatifs marchands apparaîtront ici dès que des prix vérifiés pour un même modèle seront disponibles. Aucun tarif n’est estimé ni inventé.</p>';return;}
   verifiedShelf.hidden=false;
   usable.forEach(p=>{
-    const rows=p.offers.filter(o=>Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
+    const rows=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&o.merchant&&/^https:\/\//i.test(String(o.url||""))&&
+      Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
     const byComparablePrice=(a,b)=>verifiedComparablePrice(a)-verifiedComparablePrice(b);
-    const fresh=rows.filter(isCurrentVerifiedOffer).sort(byComparablePrice);
-    const stale=rows.filter(o=>!isCurrentVerifiedOffer(o)).sort(byComparablePrice);
-    const ordered=[...fresh,...stale];
-    const best=fresh[0]||stale[0];
+    const fresh=rows.sort(byComparablePrice);
+    const stale=[];
+    const ordered=fresh;
+    const best=fresh[0];
     const bestComparablePrice=verifiedComparablePrice(best);
-    const isHistorical=!fresh.length&&!!stale.length;
+    const isHistorical=false;
     const card=document.createElement("article");
     card.className="product";
     const photo=document.createElement("div");
@@ -6337,7 +6402,7 @@ function openAmazonSearch(term){
  window.location.href=url;
 }
 amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();selectedBrand="";render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
-searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});pmLoadAwinCatalogue().finally(render);
+searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmVisibleLimit=60;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});pmLoadAwinCatalogue().finally(render);
 </script>  
 <script>
 
@@ -6545,6 +6610,14 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 .pm-awin-thumb{flex:0 0 42px;width:42px;height:42px;padding:2px;border:1px solid #45556a;border-radius:8px;background:#fff;overflow:hidden}
 .pm-awin-thumb.active{border:2px solid #ff650b}
 .pm-awin-thumb img{width:100%;height:100%;object-fit:contain}
+.pm-awin-feed-status{margin:0 0 14px;padding:12px 14px;border:1px solid #45556a;border-left:4px solid #ff650b;border-radius:12px;background:#111c2a;color:#e8edf4;font-size:12px;line-height:1.55}
+#products .pm-load-more-wrap{display:flex;justify-content:center;width:100%;padding:10px 0 20px}
+#products .pm-load-more{min-height:44px;padding:10px 18px;border:1px solid #ff650b;border-radius:11px;background:#ff650b;color:#fff;font-size:13px;font-weight:850;cursor:pointer}
+#products .pm-offers-horizontal{display:flex!important;flex-flow:row nowrap!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:5px 1px 8px!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;touch-action:pan-x}
+#products .pm-offers-horizontal .discovery-compare-row{flex:0 0 168px!important;min-width:168px!important;max-width:168px!important;scroll-snap-align:start!important}
+#products .pm-offers-horizontal .discovery-compare-row span{display:block;white-space:normal;overflow-wrap:anywhere;font-size:11px;line-height:1.35}
+#products .pm-offers-horizontal .discovery-compare-row a{display:block;margin-top:5px}
+@media(max-width:520px){#products .pm-offers-horizontal .discovery-compare-row{flex-basis:154px!important;min-width:154px!important;max-width:154px!important}}
 #products .pm-product-row-rail .discovery-compare-row a{flex:none;max-width:52%;color:#ffb184;font-size:12px;font-weight:850;white-space:nowrap}
 #products .pm-product-row-rail .discovery-compare-row span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 </style>

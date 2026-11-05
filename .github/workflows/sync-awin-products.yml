@@ -31,6 +31,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Vérifier la syntaxe et les tests hors ligne Awin
+        run: |
+          node --check price-engine/sync-awin-products.mjs
+          node price-engine/sync-awin-products.mjs --self-test
+      - name: Vérifier la présence d'un accès Awin sans afficher sa valeur
+        env:
+          AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
+          AWIN_PRODUCT_DATA_FEED_URL: ${{ secrets.AWIN_PRODUCT_DATA_FEED_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${AWIN_PRODUCT_DATA_FEED_URL:-}" ]]; then
+            echo "Flux direct Awin configuré (URL masquée)."
+          elif [[ -n "${AWIN_API_TOKEN:-}" ]]; then
+            echo "Jeton éditeur Awin configuré (valeur masquée)."
+          else
+            echo "::error::Aucun accès Awin configuré : ni flux direct ni jeton éditeur."
+            exit 1
+          fi
       - name: Télécharger les flux produits autorisés
         env:
           AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
