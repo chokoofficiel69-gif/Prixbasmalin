@@ -589,6 +589,16 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 <!-- End Cloudflare Web Analytics -->
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=4">
 <link rel="stylesheet" href="/css/catalogue-mobile-overflow-fix.css?v=1">
+<style id="pm-image-inspiration-layout">
+.pm-image-inspiration{margin-top:24px;padding-top:18px;border-top:1px dashed #d9dee7}
+.pm-image-inspiration .pm-product-row-head{align-items:flex-start;gap:12px}
+.pm-image-inspiration .pm-product-row-head span{max-width:48%;font-size:10px;line-height:1.35;text-align:right;color:#788397}
+.pm-image-inspiration .pm-product-row-rail{display:flex;flex-wrap:nowrap;gap:12px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.pm-inspiration-card{flex:0 0 min(72vw,230px);width:min(72vw,230px);scroll-snap-align:start;min-width:0}
+.pm-inspiration-card .photo{aspect-ratio:1/1}
+.pm-inspiration-card .photo img{width:100%;height:100%;object-fit:contain;background:#fff}
+.pm-inspiration-label{display:block;margin-top:8px;color:#8a4a20;font-size:10px;line-height:1.4;font-weight:700}
+</style>
 </head><body><a class="pm-skip-link" href="#main-content">Aller au contenu</a><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a><a href="historique-prix.html" style="margin-left:auto;font-size:13px;font-weight:800;color:#a8442d">Historique des prix</a></header><main id="main-content" tabindex="-1"><section class="pm-catalogue-heading">
  <div class="pm-catalogue-kicker">PRIX MALIN · CATALOGUE</div>
  <h1>Trouvez le bon produit au bon prix.</h1>
@@ -5901,6 +5911,8 @@ function render(){
       return {hasPrice,shippingKnown,total:hasPrice?base+(shippingKnown?Number(product.shippingPriceValue):0):Infinity};
     };
     found.sort((a,b)=>{
+      const imagePriority=Number(pmHasRealProductImage(b))-Number(pmHasRealProductImage(a));
+      if(imagePriority)return imagePriority;
       const relevance=score(b)-score(a);
       if(relevance)return relevance;
       const pa=offerRank(a),pb=offerRank(b);
@@ -5959,24 +5971,16 @@ function render(){
   };
   const visibleProducts=found.slice(0,pmVisibleLimit);
   visibleProducts.forEach(p=>{
+    if(!pmHasRealProductImage(p))return;
     const card=document.createElement("article");
     card.className="product";
     const photo=document.createElement("div");
     photo.className="photo";
-    const hasProductPhoto=pmHasRealProductImage(p);
-    const img=hasProductPhoto?document.createElement("img"):null;
-    if(img){
-      img.src=p.image;
-      img.alt=p.name;
-      img.loading="lazy";
-      img.dataset.fallbackTried="0";
-    }else{
-      photo.classList.add("photo-placeholder");
-      const placeholder=document.createElement("span");
-      placeholder.textContent=String(p.brand||p.category||"PM").slice(0,2).toUpperCase();
-      placeholder.setAttribute("aria-hidden","true");
-      photo.append(placeholder);
-    }
+    const img=document.createElement("img");
+    img.src=p.image;
+    img.alt=p.name;
+    img.loading="lazy";
+    img.dataset.fallbackTried="0";
     const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
     imageBadge.className="pm-photo-source"+(p.imageKind==="illustration"?" illustration":"");
     imageBadge.textContent=p.imageKind==="merchant_feed"?"Visuel marchand":(p.imageSource?"Photo constructeur":(p.imageKind==="illustration"?"Illustration":""));
@@ -5988,12 +5992,7 @@ function render(){
       img.dataset.pmFailedImages=failed.join("|");
       const alternatives=Array.isArray(p.images)?p.images.filter(url=>/^https:\/\//i.test(String(url||""))&&!failed.includes(url)):[];
       if(alternatives.length){img.src=alternatives[0];return;}
-      photo.innerHTML="";
-      photo.classList.add("photo-placeholder");
-      const fallback=document.createElement("span");
-      fallback.textContent=String(p.brand||p.category||"PM").slice(0,2).toUpperCase();
-      fallback.setAttribute("aria-label","Photo indisponible pour "+p.name);
-      photo.append(fallback);
+      card.remove();
     };
     photo.append(img);
     const gallery=document.createElement("div");gallery.className="pm-awin-gallery";
@@ -6121,6 +6120,57 @@ function render(){
     makeRelatedSection("Produits similaires",related.similar);
     getCategoryRail(p).append(card);
   });
+
+  // Les références sans photo exacte restent visibles tout en bas,
+  // avec un visuel de catégorie clairement signalé comme illustration.
+  const withoutExactPhoto=visibleProducts.filter(p=>!pmHasRealProductImage(p));
+  if(withoutExactPhoto.length){
+    const imagePool=productData.filter(item=>item&&/^https:\/\//i.test(String(item.image||"")));
+    const inspiration=document.createElement("section");
+    inspiration.className="pm-product-row pm-image-inspiration";
+    const inspirationHead=document.createElement("div");
+    inspirationHead.className="pm-product-row-head";
+    const inspirationTitle=document.createElement("h3");
+    inspirationTitle.textContent="À découvrir — visuels d’inspiration";
+    const inspirationHint=document.createElement("span");
+    inspirationHint.textContent="Visuels non associés à un modèle exact";
+    inspirationHead.append(inspirationTitle,inspirationHint);
+    const inspirationRail=document.createElement("div");
+    inspirationRail.className="pm-product-row-rail";
+    withoutExactPhoto.forEach(p=>{
+      const candidate=imagePool.find(item=>item.category===p.category&&item.id!==p.id)||
+        imagePool.find(item=>item.id!==p.id);
+      if(!candidate)return;
+      const tile=document.createElement("article");
+      tile.className="product pm-inspiration-card";
+      const visual=document.createElement("div");
+      visual.className="photo";
+      const image=document.createElement("img");
+      image.src=candidate.image;
+      image.alt="Illustration de catégorie pour "+p.name;
+      image.loading="lazy";
+      image.onerror=()=>tile.remove();
+      visual.append(image);
+      const label=document.createElement("small");
+      label.className="pm-inspiration-label";
+      label.textContent="Illustration de catégorie · photo du modèle à confirmer";
+      const title=document.createElement("strong");
+      title.className="name";
+      title.textContent=p.name;
+      const link=document.createElement("a");
+      link.className="offer";
+      link.href="https://www.amazon.fr/s?"+new URLSearchParams({k:p.query||p.name,tag:"prixbasmalin2-21"}).toString();
+      link.target="_blank";
+      link.rel="noopener noreferrer sponsored";
+      link.textContent="Découvrir les modèles ↗";
+      tile.append(visual,label,title,link);
+      inspirationRail.append(tile);
+    });
+    if(inspirationRail.children.length){
+      inspiration.append(inspirationHead,inspirationRail);
+      productsEl.append(inspiration);
+    }
+  }
   if(found.length>visibleProducts.length){
     const wrapper=document.createElement("div");
     wrapper.className="pm-load-more-wrap";
@@ -6396,22 +6446,18 @@ function pmRelations(name,query,cat){
  return {accessories:rel.a,similar:rel.s};
 }
 function pmDetailCard(item,index,section){
+ const visualInfo=item[3]||null;
+ if(!visualInfo||!/^https:\/\//i.test(String(visualInfo.image||"")))return null;
  const card=document.createElement("article");card.className="pm-detail-card pm-detail-visual-card";
  const visual=document.createElement("div");visual.className="pm-detail-visual";
- const visualInfo=item[3]||null;
- if(visualInfo?.image){
-  const img=document.createElement("img");img.src=visualInfo.image;img.alt="Photo du produit "+item[0];img.loading="lazy";
-  img.onerror=()=>{visual.classList.add("pm-detail-visual-fallback");img.remove();};
-  visual.append(img);
- }else{
-  visual.classList.add("pm-detail-visual-fallback");
-  const initial=document.createElement("span");initial.textContent=item[0].slice(0,1).toUpperCase();initial.setAttribute("aria-hidden","true");visual.append(initial);
- }
+ const img=document.createElement("img");img.src=visualInfo.image;img.alt="Photo du produit "+item[0];img.loading="lazy";img.decoding="async";
+ img.onerror=()=>card.remove();
+ visual.append(img);
  const title=document.createElement("strong");title.textContent=item[0];
  const desc=document.createElement("p");desc.textContent=item[1];
  const link=document.createElement("a");link.href="https://www.google.com/search?tbm=shop&q="+encodeURIComponent(item[2]);link.target="_blank";link.rel="noopener noreferrer";link.textContent="Voir les produits ↗";
  card.append(visual,title,desc,link);
- if(visualInfo?.source){const credit=document.createElement("a");credit.className="pm-detail-image-credit";credit.href=visualInfo.source;credit.target="_blank";credit.rel="noopener noreferrer";credit.textContent="Photo officielle · "+(visualInfo.sourceName||"fabricant");card.append(credit);}
+ if(visualInfo.source){const credit=document.createElement("a");credit.className="pm-detail-image-credit";credit.href=visualInfo.source;credit.target="_blank";credit.rel="noopener noreferrer";credit.textContent="Photo officielle · "+(visualInfo.sourceName||"fabricant");card.append(credit);}
  return card;
 }
 function pmOpenDetails(name,query,cat){
@@ -6423,7 +6469,8 @@ function pmOpenDetails(name,query,cat){
   const wrap=document.createElement("section");wrap.className="pm-detail-section";
   const h=document.createElement("h3");h.textContent=section[0];
   const grid=document.createElement("div");grid.className="pm-detail-cards";
-  section[1].forEach((item,index)=>grid.append(pmDetailCard(item,index,section[0]==="Accessoires associés"?"accessories":"similar")));
+  section[1].forEach((item,index)=>{const card=pmDetailCard(item,index,section[0]==="Accessoires associés"?"accessories":"similar");if(card)grid.append(card);});
+  if(!grid.children.length)return;
   wrap.append(h,grid);content.append(wrap);
  });
  pmDetailOverlay.classList.add("open");document.body.style.overflow="hidden";pmDetailOverlay.querySelector(".pm-detail-close").focus();
