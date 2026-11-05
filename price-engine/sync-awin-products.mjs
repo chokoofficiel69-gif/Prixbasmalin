@@ -105,6 +105,34 @@ async function request(url, label) {
   }
   throw new Error(label + " : " + (lastError?.name || "réseau"));
 }
+const GTIN_FIELDS = [
+  "gtin","ean","product_ean","product_gtin","upc","barcode","global_trade_item_number",
+  "ean_8","ean_12","ean_13","ean_14","gtin_8","gtin_12","gtin_13","gtin_14",
+  "product_ean_13","product_gtin_13","barcode_number"
+];
+const MPN_FIELDS = [
+  "mpn","model_number","manufacturer_part_number","product_mpn",
+  "manufacturer_sku","manufacturer_model_number","part_number",
+  "manufacturer_part_no","mpn_number","product_model_number"
+];
+const BRAND_FIELDS = [
+  "brand","brand_name","product_brand","product_brand_name",
+  "manufacturer_name","manufacturer","manufacturer_brand"
+];
+function firstField(row, fields) {
+  for (const field of fields) {
+    const value = row?.[field];
+    if (value != null && String(value).trim()) return String(value).trim();
+  }
+  return "";
+}
+function normalizedGtin(row) {
+  const value = firstField(row, GTIN_FIELDS).replace(/[^0-9]/g, "");
+  return isValidGtin(value) ? value : "";
+}
+function normalizedMpn(row) {
+  return firstField(row, MPN_FIELDS).replace(/\\s+/g, " ").trim();
+}
 function parseCsv(text) {
   const rows = [];
   let row = [], field = "", quoted = false;
@@ -175,13 +203,13 @@ function parseDirectFeedRow(row) {
     id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.gtin || "",
     title: row.product_name || row.title || "",
     description: row.description || row.product_short_description || "",
-    brand: row.brand_name || row.brand || row.product_brand || row.product_brand_name || row.manufacturer_name || row.manufacturer || "",
+    brand: firstField(row, BRAND_FIELDS),
     product_type: row.merchant_category || row.category_name || row.google_product_category || row.product_type || "",
     google_product_category: row.google_product_category || row.category_name || row.merchant_category || "",
     color: row.colour || row.color || "",
     size: row.size || "",
-    gtin: row.gtin || row.ean || row.product_ean || row.product_gtin || row.upc || row.barcode || row.global_trade_item_number || "",
-    mpn: row.mpn || row.model_number || row.manufacturer_part_number || row.product_mpn || "",
+    gtin: firstField(row, GTIN_FIELDS),
+    mpn: firstField(row, MPN_FIELDS),
     image_link: row.merchant_image_url || row.aw_image_url || row.image_link || row.aw_thumb_url || "",
     additional_image_link: [row.alternate_image, row.alternate_image_two, row.alternate_image_three].filter(Boolean),
     price: price.toFixed(2) + " EUR",
@@ -227,9 +255,9 @@ async function loadDirectAwinFeed(rawOffers) {
         throw new Error("Les colonnes produit/prix attendues sont absentes du flux Awin.");
       }
       const identityFields = {
-        marque: ["brand_name", "brand", "product_brand", "product_brand_name", "manufacturer_name", "manufacturer"],
-        gtin: ["gtin", "ean", "product_ean", "product_gtin", "upc", "barcode", "global_trade_item_number"],
-        mpn: ["mpn", "model_number", "manufacturer_part_number", "product_mpn"]
+        marque: BRAND_FIELDS,
+        gtin: GTIN_FIELDS,
+        mpn: MPN_FIELDS
       };
       const identityCoverage = Object.entries(identityFields).map(([label, fields]) => {
         const present = fields.filter(field => headers.has(field));
@@ -276,13 +304,13 @@ function parseFeedRow(row, program, advertiser) {
     id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.product_gtin,
     title: row.product_name || row.title,
     description: row.description || row.product_short_description,
-    brand: row.brand_name || row.brand,
+    brand: firstField(row, BRAND_FIELDS),
     product_type: row.merchant_category || row.category_name || row.product_type,
     google_product_category: row.category_name || row.merchant_category,
     color: row.colour || row.color,
     size: row.size,
-    gtin: row.ean || row.product_gtin || row.upc,
-    mpn: row.mpn || row.model_number,
+    gtin: firstField(row, GTIN_FIELDS),
+    mpn: firstField(row, MPN_FIELDS),
     image_link: row.merchant_image_url || row.large_image || row.aw_image_url || row.aw_thumb_url,
     additional_image_link: extra,
     price: price.toFixed(2) + " EUR",
@@ -367,10 +395,10 @@ function identityPart(value) {
 }
 
 function groupKey(row, advertiser) {
-  const gtin = String(row.gtin || row.product_gtin || row.product_GTIN || row.ean || "").replace(/[^0-9]/g, "");
+  const gtin = normalizedGtin(row);
   if (isValidGtin(gtin)) return "gtin:" + gtin;
-  const brand = identityPart(row.brand || row.brand_name || row.product_brand || row.product_brand_name || row.manufacturer_name || row.manufacturer || "");
-  const mpn = identityPart(row.mpn || row.model_number || row.manufacturer_part_number || row.product_mpn || "");
+  const brand = identityPart(firstField(row, BRAND_FIELDS));
+  const mpn = identityPart(normalizedMpn(row));
   if (brand && mpn) {
     const color = identityPart(row.color || row.colour || "");
     const size = identityPart(row.size || "");
@@ -381,10 +409,9 @@ function groupKey(row, advertiser) {
 
 function offerFromRow(row, program, advertiser, { allowUnknownAvailability = false } = {}) {
   const name = String(row.title || row.product_name || "").trim().replace(/\s+/g, " ");
-  const brand = String(row.brand || row.brand_name || row.product_brand || row.product_brand_name || row.manufacturer_name || row.manufacturer || "").trim();
-  const gtinCandidate = String(row.gtin || row.product_gtin || row.product_GTIN || row.ean || row.product_ean || row.upc || row.barcode || row.global_trade_item_number || "").replace(/[^0-9]/g, "");
-  const gtin = isValidGtin(gtinCandidate) ? gtinCandidate : "";
-  const mpn = String(row.mpn || row.model_number || row.manufacturer_part_number || row.product_mpn || "").trim();
+  const brand = firstField(row, BRAND_FIELDS);
+  const gtin = normalizedGtin(row);
+  const mpn = normalizedMpn(row);
   const images = imageList(row);
   const link = httpsUrl(row.aw_deep_link || row.link || row.mobile_link);
   const availability = stockState(row.availability || row.stock_status || "");
@@ -564,6 +591,30 @@ function runSelfTests() {
   if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" ||
       offer.brand !== "AudioBrand" || offer.gtin !== "4006381333931" || offer.mpn !== "AB-X1") {
     throw new Error("TEST ÉCHEC : prix, livraison, marque, GTIN, MPN ou disponibilité mal traités.");
+  }
+  const aliasRow = {
+    title: "Casque alias",
+    brand_name: "AudioBrand",
+    ean_13: "4006381333931",
+    manufacturer_part_no: "AB-X1",
+    image_link: "https://cdn.example/alias.jpg",
+    aw_deep_link: "https://shop.example/alias",
+    price: "49.90 EUR",
+    availability: "in stock"
+  };
+  const aliasOffer = offerFromRow(aliasRow, {name:"Boutique Alias"}, "999");
+  if (!aliasOffer || aliasOffer.gtin !== "4006381333931" || aliasOffer.mpn !== "AB-X1" ||
+      aliasOffer.identity !== "gtin:4006381333931") {
+    throw new Error("TEST ÉCHEC : les alias EAN-13/GTIN et manufacturer_part_no doivent être reconnus.");
+  }
+  const standardAlias = parseFeedRow({
+    product_name:"Casque alias",brand_name:"AudioBrand",ean_13:"4006381333931",
+    manufacturer_part_no:"AB-X1",image_link:"https://cdn.example/alias.jpg",
+    aw_deep_link:"https://shop.example/alias",search_price:"49.90",currency:"EUR",
+    availability:"in stock"
+  }, {name:"Boutique standard"}, "998");
+  if (!standardAlias || standardAlias.gtin !== "4006381333931" || standardAlias.mpn !== "AB-X1") {
+    throw new Error("TEST ÉCHEC : les alias GTIN/MPN doivent aussi être lus dans les flux CSV standards.");
   }
   const categoryCases = [
     [{ product_type: "Home & Garden, Bathroom Accessories, Soap & Lotion Dispensers" }, "home"],
