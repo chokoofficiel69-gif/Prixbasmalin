@@ -45,6 +45,18 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn("product.imageSource=product.image;", source)
         self.assertIn("imageSource:p.image", source)
 
+    def test_old_featured_observations_are_explicitly_marked_stale(self):
+        import json
+        from datetime import datetime, timezone, timedelta
+        featured = Path(__file__).resolve().parents[1] / "data" / "featured-prices.json"
+        data = json.loads(featured.read_text(encoding="utf-8"))
+        now = datetime.now(timezone.utc)
+        for product in data.get("products", []):
+            for offer in product.get("offers", []):
+                checked = datetime.fromisoformat(offer["checked_at"].replace("Z", "+00:00"))
+                if now - checked > timedelta(hours=48):
+                    self.assertTrue(offer.get("stale"), f"Offre ancienne non marquée stale: {product.get('id')}")
+
     def test_awin_prices_use_merchant_update_timestamp_not_feed_download_time(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn("function pmAwinPriceIsFresh(value,now=Date.now())", source)
