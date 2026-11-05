@@ -1,0 +1,141 @@
+import datetime as dt
+import gzip
+import importlib.util
+import tempfile
+import unittest
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "import-rakuten-catalogue.py"
+SPEC = importlib.util.spec_from_file_location("rakuten_import", SCRIPT)
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+UTC = dt.timezone.utc
+
+
+def write_feed(path, created_on="05/11/2026 0:13:11", trailer=True, trailer_count=1,
+               gtin="4006381333931", part_number="", image_url="https://images.example.test/item.jpg",
+               product_url="https://click.linksynergy.com/deeplink?id=example", price_currency="EUR",
+               shipping_currency="EUR", availability="in-stock"):
+    root = ET.Element("catalog")
+    header = ET.SubElement(root, "header")
+    ET.SubElement(header, "createdOn").text = created_on
+    product = ET.SubElement(root, "product", {
+        "product_id": "item-1", "sku_number": "sku-1", "name": "Chaussures de running test",
+        "manufacturer_name": "Marque Test", "part_number": part_number,
+    })
+    price = ET.SubElement(product, "price", {"currency": price_currency})
+    ET.SubElement(price, "retail").text = "19.99"
+    ET.SubElement(price, "sale").text = ""
+    shipping = ET.SubElement(product, "shipping")
+    ET.SubElement(shipping, "availability").text = availability
+    cost = ET.SubElement(shipping, "cost")
+    ET.SubElement(cost, "amount").text = "5.00"
+    ET.SubElement(cost, "currency").text = shipping_currency
+    category = ET.SubElement(product, "category")
+    ET.SubElement(category, "primary").text = "Chaussures"
+    ET.SubElement(category, "secondary").text = "Running"
+    description = ET.SubElement(product, "description")
+    ET.SubElement(description, "short").text = "Description test"
+    urls = ET.SubElement(product, "URL")
+    ET.SubElement(urls, "productImage").text = image_url
+    ET.SubElement(urls, "product").text = product_url
+    ET.SubElement(product, "brand").text = "Marque Test"
+    ET.SubElement(product, "upc").text = gtin
+    if trailer:
+        tail = ET.SubElement(root, "trailer")
+        ET.SubElement(tail, "numberOfProducts").text = str(trailer_count)
+    with gzip.open(path, "wb") as stream:
+        stream.write(ET.tostring(root, encoding="utf-8", xml_declaration=True))
+
+
+class RakutenImportValidationTests(unittest.TestCase):
+    def test_ambiguous_created_on_requires_explicit_date_format(self):
+        with self.assertRaises(ValueError):
+            MODULE.parse_source_timestamp("05/11/2026 0:13:11", "")
+
+    def test_created_on_parses_both_supported_formats_explicitly(self):
+        us = MODULE.parse_source_timestamp("05/11/2026 0:13:11", "MM/DD/YYYY")
+        fr = MODULE.parse_source_timestamp("05/11/2026 0:13:11", "DD/MM/YYYY")
+        self.assertEqual(us, dt.datetime(2026, 5, 11, 0, 13, 11, tzinfo=UTC))
+        self.assertEqual(fr, dt.datetime(2026, 11, 5, 0, 13, 11, tzinfo=UTC))
+
+    def test_gtin_check_digit_is_validated(self):
+        self.assertTrue(MODULE.is_valid_gtin("4006381333931"))
+        self.assertFalse(MODULE.is_valid_gtin("4006381333932"))
+        self.assertFalse(MODULE.is_valid_gtin("12345"))
+
+    def test_complete_fresh_feed_is_parsed_with_shipping_and_provenance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "feed.xml.gz"
+            write_feed(path)
+            now = dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC)
+            rows, source_created, stats = MODULE.parse_feed(
+                path, "Decathlon National", "decathlon", "DD/MM/YYYY",
+                now=now, max_age_hours=48, price_tax_status="unspecified"
+            )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["priceValue"], 19.99)
+        self.assertEqual(rows[0]["shippingPriceValue"], 5.0)
+        self.assertEqual(rows[0]["gtin"], "4006381333931")
+        self.assertEqual(rows[0]["priceTaxStatus"], "unspecified")
+        self.assertEqual(rows[0]["sourceCreatedAt"], "2026-11-05T00:13:11Z")
+        self.assertEqual(stats["raw_products"], 1)
+        self.assertEqual(source_created, dt.datetime(2026, 11, 5, 0, 13, 11, tzinfo=UTC))
+
+    def test_missing_trailer_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "incomplete.xml.gz"
+            write_feed(path, trailer=False)
+            with self.assertRaisesRegex(ValueError, "Trailer XML absent"):
+                MODULE.parse_feed(path, "Nicchia Luxury", "nicchia", "DD/MM/YYYY",
+                                  now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
+
+    def test_trailer_count_must_match_received_products(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "mismatch.xml.gz"
+            write_feed(path, trailer_count=2)
+            with self.assertRaisesRegex(ValueError, "Trailer incohérent"):
+                MODULE.parse_feed(path, "Decathlon National", "decathlon", "DD/MM/YYYY",
+                                  now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
+
+    def test_stale_feed_is_rejected_using_source_timestamp_not_download_time(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "stale.xml.gz"
+            write_feed(path)
+            with self.assertRaisesRegex(ValueError, "Flux périmé"):
+                MODULE.parse_feed(path, "Decathlon National", "decathlon", "MM/DD/YYYY",
+                                  now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
+
+    def test_product_without_gtin_or_brand_mpn_is_not_publishable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "no-identity.xml.gz"
+            write_feed(path, gtin="12345")
+            with self.assertRaisesRegex(ValueError, "Aucune fiche exploitable"):
+                MODULE.parse_feed(path, "Decathlon National", "decathlon", "DD/MM/YYYY",
+                                  now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
+
+    def test_brand_and_manufacturer_part_number_are_a_valid_exact_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "mpn.xml.gz"
+            write_feed(path, gtin="12345", part_number="MPN-EXACT-1")
+            rows, _, _ = MODULE.parse_feed(
+                path, "Nicchia Luxury", "nicchia", "DD/MM/YYYY",
+                now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC)
+            )
+        self.assertEqual(rows[0]["gtin"], "")
+        self.assertEqual(rows[0]["mpn"], "MPN-EXACT-1")
+
+    def test_non_eur_shipping_is_not_used_in_total_comparison(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "shipping.xml.gz"
+            write_feed(path, shipping_currency="USD")
+            rows, _, _ = MODULE.parse_feed(
+                path, "Decathlon National", "decathlon", "DD/MM/YYYY",
+                now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC)
+            )
+        self.assertIsNone(rows[0]["shippingPriceValue"])
+
+
+if __name__ == "__main__":
+    unittest.main()
