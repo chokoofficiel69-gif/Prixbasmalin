@@ -45,6 +45,16 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn("product.imageSource=product.image;", source)
         self.assertIn("imageSource:p.image", source)
 
+    def test_awin_prices_use_merchant_update_timestamp_not_feed_download_time(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn("function pmAwinPriceIsFresh(value,now=Date.now())", source)
+        self.assertIn("const priceFresh=pmAwinPriceIsFresh(merchantUpdatedAt);", source)
+        self.assertIn('priceStatus:"stale",priceValue:null', source)
+        self.assertIn('price.textContent=hasVerifiedPrice?money(p.priceValue):(p.priceStatus==="stale"?"Prix à vérifier chez le marchand"', source)
+        self.assertIn("checked_at:checkedAt,", source)
+        self.assertIn("stale:!pmAwinPriceIsFresh(checkedAt)", source)
+        self.assertNotIn("checked_at:product.fetchedAt||feed.fetched_at", source)
+
 
 if __name__ == "__main__":
     unittest.main()
