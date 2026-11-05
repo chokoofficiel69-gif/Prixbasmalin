@@ -137,5 +137,15 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIsNone(rows[0]["shippingPriceValue"])
 
 
+    def test_sftp_workflow_expands_secrets_and_shell_variables(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
+        self.assertNotIn(r"\${", workflow)
+        self.assertIn("RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}", workflow)
+        self.assertIn("RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}", workflow)
+        self.assertIn("RAKUTEN_SFTP_KNOWN_HOSTS: ${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}", workflow)
+        self.assertIn('if [[ -z "${RAKUTEN_SFTP_USER:-}"', workflow)
+        self.assertIn('if [[ "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY"', workflow)
+
+
 if __name__ == "__main__":
     unittest.main()
