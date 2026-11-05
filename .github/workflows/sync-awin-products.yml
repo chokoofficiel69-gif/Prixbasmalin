@@ -5,7 +5,7 @@ on:
   schedule:
     - cron: "27 4 * * *"
   push:
-    branches: [main, awin-direct-feed-fix-2026-11-04]
+    branches: [main, awin-direct-feed-fix-2026-11-04, fix/awin-gtin-mpn-aliases]
     paths:
       - "price-engine/sync-awin-products.mjs"
       - ".github/workflows/sync-awin-products.yml"
@@ -81,7 +81,7 @@ jobs:
           git commit -m "Refresh authorized Awin product catalogue"
           git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Vérifier que le nouveau flux Awin est visible sur le site public
-        if: steps.save.outputs.changed == 'true'
+        if: steps.save.outputs.changed == 'true' && github.ref == 'refs/heads/main'
         env:
           EXPECTED_FETCHED_AT: ${{ steps.save.outputs.expected_fetched_at }}
         shell: bash
