@@ -271,9 +271,9 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    if(!response.ok)throw new Error("Catalogue indisponible");
    const feed=await response.json();
    const products=Array.isArray(feed.products)?feed.products:[];
-   const chosen=products.filter(p=>p&&p.name&&safeUrl(p.image)&&safeUrl(p.sourceUrl)).slice(0,12);
+   const chosen=products.filter(p=>p&&p.name&&safeUrl(p.image)&&safeUrl(p.sourceUrl)&&!/^https:\/\/images\.unsplash\.com\//i.test(String(p.image))).slice(0,12);
    if(!chosen.length){
-    list.innerHTML='<p class="pm-history-empty">Les produits illustrés seront affichés dès que le catalogue sera disponible.</p>';
+    list.innerHTML='<p class="pm-history-empty">La sélection de produits est en cours de mise à jour.</p>';
     return;
    }
    const fragment=document.createDocumentFragment();
@@ -311,10 +311,10 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    .map(g=>({...g,offers:[...new Map(g.offers.map(o=>[o.merchant,o])).values()].sort((a,b)=>a.price-b.price)}))
    .sort((a,b)=>b.date.localeCompare(a.date)||a.product.localeCompare(b.product,"fr")).slice(0,12);
   if(!comparisons.length){
-   await showProducts("Aucune comparaison multi-marchands vérifiée n’est disponible pour l’instant. Voici des produits illustrés à consulter — aucun prix n’est inventé.");
+   await showProducts("Découvrez une sélection de produits et consultez les marchands pour vérifier le prix et la disponibilité.");
    return;
   }
-  status.textContent=comparisons.length+" comparaisons historiques chargées — classées par date de relevé.";
+  status.textContent="Historique des prix observés — les prix actuels sont à vérifier chez le marchand.";
   const fragment=document.createDocumentFragment();
   for(const group of comparisons){
    const card=document.createElement("article");card.className="pm-history-card";
@@ -334,7 +334,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   list.replaceChildren(fragment);
  }catch(error){
   console.warn("Comparaisons historiques Prix Malin :",error);
-  await showProducts("Les relevés de comparaison ne répondent pas. Voici les produits illustrés disponibles, avec vérification du prix chez le marchand.");
+  await showProducts("La sélection reste accessible ; les prix actuels sont à vérifier chez les marchands.");
  }
 })();
 </script>
