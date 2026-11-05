@@ -5765,7 +5765,7 @@ async function pmLoadAwinCatalogue(){
     const known=new Map(productData.map(product=>[product.id,product]));
     feedProducts.forEach(product=>{
       if(product.isAwinProduct&&!product.imageSource&&product.sourceUrl){
-        product.imageSource=product.sourceUrl;
+        product.imageSource=product.image;
         product.imageSourceName=product.merchant||"Marchand Awin";
         product.imageKind="merchant_feed";
         product.imageStatus="authorized_feed_image";
@@ -5781,7 +5781,7 @@ async function pmLoadAwinCatalogue(){
         if(isGeneric){
           existing.image=product.image;
           existing.images=Array.isArray(product.images)?product.images.filter(url=>/^https:\/\//i.test(String(url||""))).slice(0,5):[];
-          existing.imageSource=product.imageSource||product.sourceUrl||"";
+          existing.imageSource=product.imageSource||product.image||"";
           existing.imageSourceName=product.imageSourceName||product.merchant||"Flux partenaire";
           existing.imageKind="merchant_feed";
           existing.imageStatus="authorized_feed_image";
@@ -6738,46 +6738,48 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 </style>
 
 <script id="pm-rakuten-catalogue-loader">
+function pmRakutenIsValidGtin(value){
+  const digits=String(value||"").replace(/\D/g,"");
+  if(![8,12,13,14].includes(digits.length))return false;
+  const numbers=digits.split("").map(Number);
+  const check=numbers.pop();
+  let total=0,weight=3;
+  for(let i=numbers.length-1;i>=0;i--){total+=numbers[i]*weight;weight=weight===3?1:3;}
+  return (10-total%10)%10===check;
+}
 (async function pmLoadRakutenCatalogue(){
-  const shelf=document.querySelector(".discovery-shelf");
-  if(!shelf)return;
-  let status=document.getElementById("pmRakutenFeedStatus");
-  if(!status){
-    status=document.createElement("div");
-    status.id="pmRakutenFeedStatus";
-    status.setAttribute("role","status");
-    status.style.cssText="margin:0 0 14px;padding:12px 14px;border:1px solid #d7dee8;border-left:4px solid #ff650b;border-radius:12px;background:#fff;color:#344054;font-size:12px;line-height:1.55";
-    shelf.insertBefore(status,shelf.querySelector("#count"));
-  }
+  if(!document.querySelector(".discovery-shelf"))return;
   try{
     const response=await fetch("/data/rakuten-products.json",{cache:"no-store"});
-    if(!response.ok){status.textContent="Catalogues Decathlon et Nicchia : import initial en attente de la connexion SFTP sécurisée.";return;}
+    if(!response.ok)return;
     const feed=await response.json();
-    if(feed?.status!=="ok"||!Array.isArray(feed.products)){status.textContent="Le flux partenaire reçu n’a pas le format attendu ; aucun prix n’est affiché.";return;}
+    if(feed?.status!=="ok"||!Array.isArray(feed.products))return;
     const generated=Date.parse(feed.generated_at||"");
     const age=Date.now()-generated;
     const fresh=Number.isFinite(generated)&&age>=-5*60*1000&&age<=48*60*60*1000;
-    const products=feed.products.filter(p=>p&&p.id&&p.name&&/^https:\/\//i.test(String(p.image||""))&&/^https:\/\/click\.linksynergy\.com\//i.test(String(p.sourceUrl||""))&&Number(p.priceValue)>0);
+    const products=feed.products.filter(p=>p&&p.id&&p.name&&/^https:\/\//i.test(String(p.image||""))&&/^https:\/\/click\.linksynergy\.com\//i.test(String(p.sourceUrl||""))&&Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0);
     const known=new Set(productData.map(p=>p.id));
     products.forEach(p=>{
       if(known.has(p.id))return;
       const base=Number(p.priceValue);
       const shipping=p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue);
       const shippingLabel=shipping===null||!Number.isFinite(shipping)?"Livraison à confirmer":"Livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(shipping);
+      const priceTaxStatus=p.priceTaxStatus==="included"?"included":"unspecified";
+      const priceNote=priceTaxStatus==="included"?"Prix TTC communiqué par le marchand":"Prix communiqué par le marchand • TVA non précisée";
       productData.push({
-        id:p.id,name:p.name,desc:[p.desc,shippingLabel].filter(Boolean).join(" • "),
-        category:p.category||"sport",brand:p.brand||p.merchant,query:p.query||p.name,
+        id:p.id,name:p.name,desc:[p.desc,shippingLabel,priceNote].filter(Boolean).join(" • "),
+        category:p.category||"sport",brand:p.brand||p.merchant,mpn:p.mpn||"",query:p.query||p.name,
         image:p.image,images:[],merchant:p.merchant,
         price:fresh?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(base):"Prix à actualiser",
         priceValue:fresh?base:null,shippingPriceValue:shipping,
-        sourceUrl:p.sourceUrl,gtin:p.gtin||"",sku:p.sku||"",
-        imageSource:p.sourceUrl,imageSourceName:p.merchant,imageKind:"merchant_feed",
-        imageStatus:"authorized_feed_image",isRakutenProduct:true
+        sourceUrl:p.sourceUrl,gtin:p.gtin||"",sku:p.sku||"",availability:p.availability||"unknown",
+        imageSource:p.image,imageSourceName:p.merchant,imageKind:"merchant_feed",
+        imageStatus:"authorized_feed_image",priceTaxStatus,sourceCreatedAt:p.sourceCreatedAt||feed.generated_at,isRakutenProduct:true
       });
       known.add(p.id);
     });
     const byGtin=new Map();
-    products.filter(p=>fresh&&/^\d{8,14}$/.test(String(p.gtin||""))).forEach(p=>{
+    products.filter(p=>fresh&&p.priceTaxStatus==="included"&&pmRakutenIsValidGtin(p.gtin)).forEach(p=>{
       const key=String(p.gtin);
       if(!byGtin.has(key))byGtin.set(key,[]);
       byGtin.get(key).push(p);
@@ -6792,17 +6794,15 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
         offers:rows.map(p=>({
           merchant:p.merchant,price_eur:Number(p.priceValue),
           shipping_price_eur:p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue),
-          url:p.sourceUrl,checked_at:feed.generated_at,freshness_max_age_hours:48,stale:false
+          url:p.sourceUrl,checked_at:p.sourceCreatedAt||feed.generated_at,freshness_max_age_hours:48,stale:false
         }))
       });
     });
-    status.textContent="Flux Rakuten importé le "+new Date(generated).toLocaleString("fr-FR")+" : "+products.length.toLocaleString("fr-FR")+" fiches avec photo, prix et lien affilié ("+products.filter(p=>p.merchant==="Decathlon National").length.toLocaleString("fr-FR")+" Decathlon, "+products.filter(p=>p.merchant==="Nicchia Luxury").length.toLocaleString("fr-FR")+" Nicchia Luxury). "+products.filter(p=>p.shippingPriceValue!==null&&p.shippingPriceValue!==undefined).length.toLocaleString("fr-FR")+" frais de livraison renseignés. "+exactComparisons.length+" comparaisons inter-marchands exactes. "+(fresh?"Prix du flux récents.":"Flux de plus de 48 h : les tarifs sont masqués jusqu’au prochain import.");
     render();
     pmRakutenVerifiedProducts=exactComparisons;
     renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts]);
   }catch(error){
-    status.textContent="Import Rakuten temporairement indisponible ; les autres produits du catalogue restent accessibles.";
-    console.warn("Import Rakuten indisponible.");
+    console.warn("Import Rakuten indisponible ; le catalogue principal reste accessible.");
   }
 })();
 </script>

@@ -1,56 +1,70 @@
-# Rakuten — état des partenaires et du catalogue produits
+# État des sources partenaires Prix Malin — 05/11/2026
 
-Date de vérification : 5 novembre 2026.
+## Awin — flux direct accessible, comparaisons bloquées
 
-## Decathlon National
+Contrôles GitHub Actions du 05/11/2026 :
+- Le flux direct a été reçu et parsé : 17 005 lignes lues, 7 488 offres importées, 7 marchands.
+- 4 211 offres ont un coût de livraison renseigné.
+- Les colonnes marque, GTIN/EAN/UPC et MPN sont absentes du fichier source : aucune comparaison multi-marchand exacte ne peut être construite.
+- La vérification de l'API éditeur répond HTTP 200, mais la relation programmes reste à 0 rejoint et 6 en attente. Une demande en attente n'est pas une autorisation.
+- Les 7 marchands présents dans le flux ne doivent pas être présentés comme des partenariats approuvés ni comme commissionnables sans contrôle du statut de chaque programme.
 
-- L'acceptation du programme a été confirmée le 4 novembre 2026.
-- Le support Rakuten a répondu le 5 novembre 2026 à 09:02 UTC : le compte AFTP Product Catalog est déjà activé et les informations de connexion ont été transmises par e-mail.
-- Hôte confirmé par le support : `aftp.linksynergy.com`.
-- Protocole à utiliser : **SFTP**, pas FTP simple.
-- Les archives sont compressées ; le transfert doit être effectué en mode binaire.
-- Rakuten indique une limite de cinq connexions simultanées maximum.
-- Convention de nommage documentée : `MID_SID_mp.xml.gz` pour le catalogue complet et `MID_SID_mp_delta.xml.gz` pour le différentiel. Le chemin et les noms réellement présents restent à confirmer par un listing SFTP.
+Action utile : régénérer le flux direct existant depuis Awin avec les colonnes `brand_name`, `ean`, `upc`, `mpn`, `product_GTIN`, `model_number`, `merchant_product_id`, `merchant_id`, `merchant_name`, `search_price`, `delivery_cost`, `in_stock`, `last_updated` et les champs image. Remplacer ensuite la valeur du secret GitHub existant `AWIN_PRODUCT_DATA_FEED_URL` par le nouveau lien, sans publier le lien ni sa clé.
 
-**État réel : accès activé par Rakuten, mais aucun listing ni téléchargement SFTP n'a encore été exécuté par Prix Malin.** Aucun échantillon XML réel n'a été inspecté ; aucun produit Decathlon n'est donc importé ou présenté comme une offre de catalogue.
+La documentation Awin indique que la liste de flux peut exposer le statut d'adhésion et les colonnes disponibles ; la clé de téléchargement de cette liste est distincte du jeton API éditeur :
+- https://help.awin.com/developers/docs/product-feed-list-download
+- https://help.awin.com/developers/docs/hosting-feeds
 
-Les consignes Rakuten décrivent un fichier avec en-tête, enregistrements produits et pied de fichier. Les champs documentés comprennent notamment SKU, catégorie, URL produit, URL image, URL d'achat affiliée lorsqu'elle est fournie, descriptions, prix de vente et prix catalogue. La présence d'un EAN/GTIN, des frais de livraison ou de la disponibilité doit être vérifiée dans le fichier réel ; elle ne doit pas être supposée.
+## Rakuten / Decathlon — fichiers XML fournis et analysés, pas encore publiés
 
-Un lien affilié individuel est visible dans le tableau de bord Rakuten. Cela prouve que le compte peut produire des liens trackés, mais ne prouve ni que le produit est présent dans le flux XML, ni qu'une comparaison exacte est possible. Les détails du lien et les identifiants de suivi restent dans le compte Rakuten et ne sont pas recopiés dans le dépôt.
+Les deux archives ci-dessous ont été fournies dans les conversations de l'utilisateur et analysées localement. Elles n'ont pas été téléchargées par cet agent depuis le serveur SFTP.
 
-### Blocage avant import
+### Decathlon — `44806_4768926_mp.xml.gz`
+- 68 636 produits ; le trailer annonce 68 636 : intégrité structurelle cohérente.
+- 68 636 prix en EUR.
+- 65 352 frais de livraison en EUR ; les autres frais sont absents.
+- 68 636 états de disponibilité `in-stock` dans le fichier.
+- 68 636 URLs d'image HTTPS et 68 636 liens produits HTTPS LinkSynergy.
+- 68 634 lignes ont un UPC avec chiffre de contrôle GTIN valide ; 68 614 GTIN uniques.
+- Trois images Decathlon échantillonnées ont été ouvertes et correspondent aux produits. Cela ne constitue pas une vérification exhaustive des 68 636 images.
+- En-tête `createdOn` : `05/11/2026 0:13:11`.
 
-Le support a fourni les identifiants par e-mail. Ils ne doivent jamais être copiés dans le dépôt, les logs ou le site public. Les workflows consultés ne contiennent pas encore d'étape d'import SFTP ni de configuration Rakuten documentée. L'existence éventuelle de secrets dans les paramètres GitHub n'est pas vérifiable avec l'accès actuel ; aucune connexion SFTP n'a donc été tentée.
+### Nicchia Luxury — `54306_4768926_1_cmp.xml.gz`
+- 6 036 produits ; 6 036 prix en EUR, frais de livraison EUR et états `in-stock`.
+- 6 036 URLs image HTTPS et 6 036 liens produits HTTPS LinkSynergy.
+- 5 498 lignes ont un UPC avec chiffre de contrôle GTIN valide ; 6 035 références fabricant `part_number`.
+- Le fichier ne contient pas de trailer : le nombre de produits annoncé ne peut pas être contrôlé. Il s'agit d'un fichier de catégorie, pas d'un flux complet validé ; il n'est pas publié.
+- Aucun GTIN valide n'est commun entre les deux fichiers : zéro comparaison exacte Decathlon/Nicchia.
 
-Pour automatiser le téléchargement, le propriétaire devra, s'il le souhaite, ajouter les valeurs reçues du support dans les secrets GitHub Actions sous les noms :
-- `RAKUTEN_SFTP_HOST`
-- `RAKUTEN_SFTP_USER`
-- `RAKUTEN_SFTP_PASSWORD`
+### Blocages avant publication automatique
+1. La documentation technique Rakuten décrit par défaut le format de date `MM/DD/YYYY`, mais ce format peut être modifié dans le compte. `05/11/2026` signifie donc le 11 mai 2026 avec le format par défaut (flux périmé de plus de 48 h), ou le 5 novembre 2026 en `DD/MM/YYYY`. Le paramètre du compte n'est pas confirmé ; aucun import ne doit choisir arbitrairement.
+2. Le message support confirme l'activation du compte AFTP et l'envoi des identifiants, mais ne fournit pas d'empreinte de clé hôte SSH. Aucune connexion SFTP n'a été tentée. Le workflow doit vérifier la clé hôte avant tout téléchargement.
+3. La documentation XML décrit le prix retail et la livraison, mais ne confirme pas que le prix est TTC. Le site ne doit pas étiqueter ces montants TTC tant que le traitement de TVA n'est pas confirmé.
+4. Le fichier Nicchia fourni n'est pas complet et ne doit pas remplacer un snapshot valide.
 
-Les identifiants du marchand et de l'éditeur peuvent être conservés comme variables de configuration non secrètes. Après cette configuration seulement, l'intégration devra :
-1. lister le répertoire sans afficher d'identifiants ;
-2. télécharger un échantillon en mode binaire ;
-3. vérifier l'archive gzip et le XML ;
-4. identifier les champs réellement présents et leurs règles de mise à jour/suppression ;
-5. tester le parseur sur un échantillon avant tout import public ;
-6. vérifier les images, les prix EUR, les liens, la fraîcheur et les variantes exactes.
+Le workflow d'import a été durci pour ignorer les sources absentes, ambiguës, périmées ou sans trailer cohérent ; il ne doit pas écraser le dernier snapshot valide en cas d'échec. Il attend une clé hôte SFTP vérifiée (`RAKUTEN_SFTP_KNOWN_HOSTS`) et le format de date explicite (`RAKUTEN_DATE_FORMAT`). Les identifiants restent des secrets GitHub et ne sont jamais affichés. Le statut TVA reste `unspecified` par défaut ; les comparaisons Rakuten ne sont activées que si le statut est confirmé comme inclus.
 
-Aucun prix ne doit être publié sans source, date, devise, variante exacte et frais de livraison connus ou clairement signalés.
+Documentation Rakuten :
+- https://pubhelp.rakutenadvertising.com/hc/en-us/articles/360014647652-Product-Catalog-Technical-Specifications
 
-## Nicchia Luxury
+## Autres sources et données
 
-- L'acceptation du programme a été confirmée le 5 novembre 2026.
-- Le message d'acceptation renvoie vers les liens disponibles dans le tableau de bord.
-- Aucun flux catalogue, identifiant de catalogue ou accès Product Catalog n'est confirmé dans les e-mails examinés.
+- PrixTracker : 12 434 observations historiques, 86 produits, 63 marchands au dernier cycle vérifié. Ces données sont historiques ; elles ne sont pas utilisées comme prix actuels.
+- `data/prices.json`, `data/merchant-offers.json` et `data/catalogue-identities.json` ne contiennent actuellement aucune offre vérifiée publiable.
+- Le Worker d'attribution et la base D1 Prix Malin servent au suivi des clics/attributions, pas à l'import des prix. Aucun binding de flux Awin/Rakuten n'a été trouvé dans les Workers Prix Malin.
+- Le projet Supabase accessible dans le connecteur ne contient pas de tables de prix Prix Malin ; aucune modification n'y a été faite.
+- L'adaptateur eBay du PR #25 n'est pas fusionné et ne dispose pas d'une connexion/clé vérifiée : il n'est pas une source active.
+- Aucun prix historique, lien de recherche Amazon ou simple URL image n'est compté comme offre actuelle vérifiée.
 
-À ce stade, Nicchia Luxury peut fournir des liens affiliés individuels, mais aucun produit ni prix ne doit être importé sans fiche et source vérifiables.
+## État public et interface
 
-## Séparation des sources
+- Le catalogue public n'a pas de fichier `data/rakuten-products.json` validé ; aucune offre Rakuten n'est donc encore visible publiquement.
+- Le chargeur Rakuten ne doit plus afficher aux visiteurs des messages techniques d'import, de nombre de produits ou d'état SFTP.
+- La rotation des visuels d'accueil est déjà réglée sur 48 heures et le thème Noël est actif en novembre, tout en conservant le fond noir, l'orange et la structure Prix Malin.
+- L'ancienne image Apple Watch Series 11 renvoyait HTTP 404 ; elle a été remplacée par un visuel Apple Newsroom vérifié, avec provenance enregistrée.
 
-Le pipeline Awin existant reste séparé de Rakuten. Un flux Awin direct accessible n'est pas une preuve d'adhésion à chacun des programmes marchands présents dans le fichier. Les demandes en attente ne sont pas des partenariats approuvés.
+## Contrôle indépendant
 
-Les fichiers de prix directs du moteur Prix Malin sont actuellement vides. Les données PrixTracker restent des références historiques et ne doivent jamais être présentées comme des prix actuels. Aucun produit, prix, GTIN ou frais de livraison ne doit être inventé.
-
-## Règle de déploiement
-
-Aucun secret, identifiant de connexion, fichier brut ou mot de passe ne doit être publié dans le dépôt ou le site. Aucun déploiement d'offres Rakuten ne doit être effectué avant réception d'un vrai fichier, validation du parseur, tests de non-régression et vérification publique des données.
+- Rôle développeur : revue du parseur, du workflow SFTP et du rendu des fiches.
+- Rôle contrôleur : analyse indépendante des deux XML réels, validation des trailers, dates, GTIN, devises, frais de livraison et chevauchement exact des GTIN.
+- Claude/Anthropic n'a pas été consulté : aucune connexion Claude autorisée n'est disponible dans les outils de cette exécution.
