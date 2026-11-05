@@ -31,3 +31,15 @@ Le pipeline Awin existant doit rester séparé. Le moteur direct `price-engine/p
 L'import Rakuten devra normaliser les offres uniquement après inspection d'un véritable export, privilégier EAN/GTIN, conserver marchand, prix EUR, URL produit, image, disponibilité et date de collecte, et écarter les offres incomplètes ou trop anciennes.
 
 Les accès AFTP doivent être renouvelés puis stockés exclusivement dans les secrets GitHub Actions. Aucun catalogue brut ni identifiant privé ne doit être publié dans le site. Aucun déploiement ne doit être déclenché avant validation du parseur et des données réelles.
+
+
+## Premier lien affilié Decathlon récupéré depuis le tableau de bord
+
+- Produit affiché : kit durite de frein hydraulique Tektro M530, 1800 mm.
+- SKU affiché : `342967`.
+- Prix affiché dans l'interface Rakuten au moment de la capture : 11,99 € (prix à revalider avant publication).
+- Identifiant du lien Rakuten : `448063907004039373605027`.
+- URL affiliée fournie par le compte Prix Malin :
+  `https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2079203.448063907004039373605027&type=2&murl=https%3a%2f%2fwww.decathlon.fr%2fp%2fkit-durite-de-frein-hydraulique-tektro-m-530-1800mm-olive%2f342967%2fm8767652`
+
+Ce lien est une destination affiliée individuelle. Il ne prouve pas à lui seul que le produit existe déjà comme fiche dans le catalogue Prix Malin, ni qu'il est présent dans le flux XML. Ne pas créer une comparaison de prix ni publier le prix de 11,99 € sans date de collecte, frais de livraison et identité produit validée. Il peut servir de CTA « Acheter chez Decathlon » lorsqu'une fiche produit exacte et son image autorisée seront intégrées.
