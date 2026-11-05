@@ -5975,22 +5975,31 @@ function render(){
     const img=document.createElement("img");
     img.src=p.image;
     img.alt=p.name;
-    img.loading="lazy";
+    img.loading="eager";
+    img.decoding="async";
     img.dataset.fallbackTried="0";
+    photo.classList.add("pm-photo-loading");
     const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
     imageBadge.className="pm-photo-source"+(p.imageKind==="illustration"?" illustration":"");
     imageBadge.textContent=p.imageKind==="merchant_feed"?"Visuel marchand":(p.imageSource?"Photo constructeur":(p.imageKind==="illustration"?"Illustration":""));
     if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source du visuel : "+(p.imageSourceName||"source marchande"));}
     if(imageBadge.textContent)photo.append(imageBadge);
+    let imageFallbackTimer=null;
+    const finishImageLoad=()=>{photo.classList.remove("pm-photo-loading");if(imageFallbackTimer)clearTimeout(imageFallbackTimer);};
+    img.onload=finishImageLoad;
     img.onerror=()=>{
       const failed=img.dataset.pmFailedImages?img.dataset.pmFailedImages.split("|"):[];
       failed.push(img.src);
       img.dataset.pmFailedImages=failed.join("|");
       const alternatives=Array.isArray(p.images)?p.images.filter(url=>/^https:\/\//i.test(String(url||""))&&!failed.includes(url)):[];
       if(alternatives.length){img.src=alternatives[0];return;}
+      if(imageFallbackTimer)clearTimeout(imageFallbackTimer);
       card.remove();
+      const parentRail=card.parentElement;
+      if(parentRail&&!parentRail.querySelector(".product"))parentRail.closest(".pm-product-row")?.remove();
     };
     photo.append(img);
+    imageFallbackTimer=setTimeout(()=>{if(!img.complete||img.naturalWidth===0)img.onerror();},12000);
     const gallery=document.createElement("div");gallery.className="pm-awin-gallery";
     const galleryImages=Array.isArray(p.images)?p.images.filter((value,index,array)=>/^https:\/\//i.test(String(value||""))&&array.indexOf(value)===index).slice(0,5):[];
     galleryImages.forEach((url,index)=>{
@@ -6712,11 +6721,19 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 </style>
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
+/* Correctifs de lisibilité et de chargement des images sur mobile. */
+#products .pm-product-row-head h3{color:#17212b!important}
+#products .pm-product-row-rail .photo{background:#eef1f5!important;position:relative}
+#products .pm-product-row-rail .photo.pm-photo-loading{background:linear-gradient(110deg,#eef1f5 25%,#f8fafc 45%,#eef1f5 65%)!important;background-size:220% 100%!important;animation:pmPhotoPulse 1.4s ease-in-out infinite}
+#products .pm-product-row-rail .photo img{background:transparent!important}
+@keyframes pmPhotoPulse{to{background-position-x:-220%}}
+@media(prefers-reduced-motion:reduce){#products .pm-product-row-rail .photo.pm-photo-loading{animation:none}}
+
 /* Catalogue mobile-first : chaque famille de produits forme une rangée horizontale tactile. */
 #products.grid.pm-horizontal-catalogue{display:flex!important;flex-direction:column!important;gap:24px!important;min-width:0;overflow:visible!important}
 #products .pm-product-row{display:block!important;min-width:0;width:100%;margin:0;padding:0;border:0;background:transparent}
 #products .pm-product-row-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px}
-#products .pm-product-row-head h3{margin:0;color:#f5f7fb;font-size:clamp(16px,2vw,21px);font-weight:850;line-height:1.25}
+#products .pm-product-row-head h3{margin:0;color:#17212b;font-size:clamp(16px,2vw,21px);font-weight:850;line-height:1.25}
 #products .pm-product-row-head span{flex:none;color:#ff9a5c;font-size:11px;font-weight:750}
 #products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;align-items:stretch;gap:12px;width:100%;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 14px;scroll-snap-type:x mandatory;scroll-padding-inline:2px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x; scrollbar-width:thin;scrollbar-color:#ff650b #182334}
 #products .pm-product-row-rail>.product{flex:0 0 218px!important;width:218px!important;max-width:218px!important;min-width:218px!important;scroll-snap-align:start;align-self:stretch;background:#111c2a!important;border:1px solid #35465a!important;border-radius:15px!important;color:#f4f7fb!important;box-shadow:0 5px 18px #0003!important}
