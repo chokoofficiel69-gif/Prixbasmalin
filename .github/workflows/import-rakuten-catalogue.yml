@@ -37,13 +37,13 @@ jobs:
           RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
           RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
           RAKUTEN_SFTP_KNOWN_HOSTS: ${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}
-          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY' }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -z "${RAKUTEN_SFTP_USER:-}" || -z "${RAKUTEN_SFTP_PASSWORD:-}" || -z "${RAKUTEN_SFTP_KNOWN_HOSTS:-}" || -z "${RAKUTEN_DATE_FORMAT:-}" ]]; then
+          if [[ -z "${RAKUTEN_SFTP_USER:-}" || -z "${RAKUTEN_SFTP_PASSWORD:-}" || -z "${RAKUTEN_SFTP_KNOWN_HOSTS:-}"  ]]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Import Rakuten ignoré : identifiants, clé hôte SFTP vérifiée et format de date doivent être configurés."
+            echo "::notice::Import Rakuten ignoré : identifiants et clé hôte SFTP vérifiée doivent être configurés."
             exit 0
           fi
           if [[ "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY" && "$RAKUTEN_DATE_FORMAT" != "DD/MM/YYYY" ]]; then
@@ -79,7 +79,7 @@ jobs:
             echo "Flux complet Nicchia absent : source ignorée, aucun fichier catégorie partiel n'est utilisé."
           fi
           gzip -t /tmp/44806_4768926_mp.xml.gz
-          if [[ -f /tmp/54306_4768926_mp.xml.gz ]]; then gzip -t /tmp/54306_4768926_mp.xml.gz; fi
+          if [[ -f /tmp/54306_4768926_1_cmp.xml.gz ]]; then gzip -t /tmp/54306_4768926_1_cmp.xml.gz; fi
           rm -f "$HOME/.netrc-rakuten"
       - name: Convertir seulement les sources fraîches et complètes
         if: steps.config.outputs.ready == 'true'
