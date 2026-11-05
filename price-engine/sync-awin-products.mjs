@@ -311,7 +311,7 @@ function parseFeedRow(row, program, advertiser) {
     size: row.size,
     gtin: firstField(row, GTIN_FIELDS),
     mpn: firstField(row, MPN_FIELDS),
-    image_link: row.merchant_image_url || row.large_image || row.aw_image_url || row.aw_thumb_url,
+    image_link: row.merchant_image_url || row.image_link || row.large_image || row.aw_image_url || row.aw_thumb_url,
     additional_image_link: extra,
     price: price.toFixed(2) + " EUR",
     availability: "in_stock",
@@ -609,7 +609,7 @@ function runSelfTests() {
   }
   const standardAlias = parseFeedRow({
     product_name:"Casque alias",brand_name:"AudioBrand",ean_13:"4006381333931",
-    manufacturer_part_no:"AB-X1",image_link:"https://cdn.example/alias.jpg",
+    manufacturer_part_no:"AB-X1",merchant_image_url:"https://cdn.example/alias.jpg",
     aw_deep_link:"https://shop.example/alias",search_price:"49.90",currency:"EUR",
     availability:"in stock"
   }, {name:"Boutique standard"}, "998");
