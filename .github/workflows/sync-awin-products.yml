@@ -87,8 +87,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 24); do
-            if curl --fail --silent --show-error --location --max-time 20 \
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error --location --connect-timeout 3 --max-time 5 \
               https://prixbasmalin.fr/data/awin-products.json --output /tmp/awin-public.json; then
               ACTUAL_FETCHED_AT="$(node -e "const fs=require('fs');process.stdout.write(JSON.parse(fs.readFileSync('/tmp/awin-public.json','utf8')).fetched_at||'')")"
               if [[ "$ACTUAL_FETCHED_AT" == "$EXPECTED_FETCHED_AT" ]]; then
