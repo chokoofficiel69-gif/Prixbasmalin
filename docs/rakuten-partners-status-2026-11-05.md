@@ -6,12 +6,15 @@ Date de vérification : 5 novembre 2026.
 
 - Acceptation du programme confirmée le 4 novembre 2026.
 - Le support Rakuten confirme le 5 novembre que l'accès AFTP Product Catalog est activé.
+- MID Decathlon confirmé dans le tableau de bord : `44806`.
 - Hôte : `aftp.linksynergy.com`.
-- Identifiant éditeur AFTP : `rkp_4768926`.
+- SID éditeur affiché dans le tableau de bord : `4768926` (l'identifiant AFTP communiqué par e-mail est `rkp_4768926`).
 - Les fichiers sont compressés ; Rakuten demande un transfert en mode binaire.
 - Formats de nom annoncés : `MID_SID_mp.xml.gz` et `MID_SID_mp_delta.xml.gz`.
 
-À obtenir avant import : MID Decathlon exact, nom du fichier disponible sur le serveur, échantillon du format XML/TXT et champs réellement fournis (EAN, prix, image, URL, disponibilité, livraison).
+La capture du tableau de bord confirme également un lien affilié individuel Decathlon pour le produit « Trophée T511 argent/bleu 31 cm », avec son identifiant de lien affiché dans Rakuten. Cela prouve que des liens trackés peuvent être récupérés depuis le compte, mais ne remplace pas le flux catalogue complet.
+
+À obtenir avant import : nom exact du fichier disponible sur le serveur, échantillon du format XML/TXT et champs réellement fournis (EAN, prix, image, URL, disponibilité, livraison). Le MID est désormais connu : 44806.
 
 ## Nicchia Luxury
 
