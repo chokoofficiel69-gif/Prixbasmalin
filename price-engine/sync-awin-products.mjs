@@ -51,14 +51,15 @@ function imageList(row) {
 }
 function categoryFor(row) {
   const text = norm([row.google_product_category, row.product_type, row.product_category, row.product_name].join(" "));
-  // Les familles précises passent avant les mots génériques comme « accessories ».
+  // Éviter qu'un mot générique (« accessories », « clothing ») écrase la vraie famille.
+  if (/sport.*(sock|chaussette)|(sock|chaussette).*sport/.test(text)) return "sport";
+  if (/baby|toys|toy|toys games|children|bebe|enfant|jouet|puericulture|nursery|kids/.test(text)) return "kids";
+  if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile/.test(text)) return "auto";
   if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t shirt|tshirt|polo|fashion/.test(text)) return "fashion";
-  if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur/.test(text)) return "tech";
   if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor/.test(text)) return "home";
   if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette/.test(text)) return "beauty";
+  if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur/.test(text)) return "tech";
   if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation/.test(text)) return "sport";
-  if (/baby|toys|toy|toys games|children|bebe|enfant|jouet|puericulture|nursery/.test(text)) return "kids";
-  if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile/.test(text)) return "auto";
   if (/accessories|accessoire/.test(text)) return "fashion";
   return "other";
 }
@@ -510,7 +511,10 @@ function runSelfTests() {
   const categoryCases = [
     [{ product_type: "Home & Garden, Bathroom Accessories, Soap & Lotion Dispensers" }, "home"],
     [{ product_type: "Parfums > Parfums pour Femme > Eau de Parfum Femme" }, "beauty"],
-    [{ product_type: "Chaussettes de sport" }, "fashion"],
+    [{ product_type: "Chaussettes de sport" }, "sport"],
+    [{ product_type: "Chaussettes de maison" }, "fashion"],
+    [{ product_type: "Kids Clothing > Children" }, "kids"],
+    [{ product_type: "Home & Garden > Outdoor Furniture" }, "home"],
     [{ product_type: "Electronics > Audio > Headphones" }, "tech"],
     [{ product_type: "Sports & Fitness > Running" }, "sport"],
     [{ product_type: "Toys & Games > Children" }, "kids"]
