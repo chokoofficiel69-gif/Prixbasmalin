@@ -5,6 +5,7 @@ import {gunzipSync} from "node:zlib";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = path.join(ROOT, "data", "awin-products.json");
+const PUBLIC_OUTPUT = path.join(ROOT, "data", "awin-products-public.json");
 const TOKEN = process.env.AWIN_API_TOKEN || "";
 const PUBLISHER_ID = process.env.AWIN_PUBLISHER_ID || "3137386";
 const LOCALE = process.env.AWIN_FEED_LOCALE || "fr_FR";
@@ -498,6 +499,43 @@ async function loadEnhancedAwinFeeds(rawOffers) {
   return eligible.length;
 }
 
+function buildPublicCatalogue(output) {
+  const fields = [
+    "id", "name", "desc", "query", "category", "brand", "color", "size",
+    "availability", "shippingPriceValue", "merchantUpdatedAt", "gtin", "mpn",
+    "image", "merchant", "priceValue", "price", "regularPriceValue", "sourceUrl",
+    "isAwinProduct", "priceSource", "fetchedAt"
+  ];
+  const products = output.products.map(product => {
+    const compact = {};
+    for (const field of fields) {
+      if (product[field] !== undefined && product[field] !== null && product[field] !== "") {
+        compact[field] = product[field];
+      }
+    }
+    // Une seule image est déjà portée par product.image ; conserver seulement les galeries réelles.
+    if (Array.isArray(product.images) && product.images.length > 1) {
+      compact.images = [...new Set(product.images)].slice(0, 5);
+    }
+    // Une offre unique est reconstruite depuis les champs produit côté navigateur.
+    // Ne dupliquer le tableau que lorsqu'il contient réellement plusieurs offres.
+    if (Array.isArray(product.offers) && product.offers.length > 1) {
+      compact.offers = product.offers.slice(0, 12).map(offer => ({
+        merchant: offer.merchant,
+        priceValue: offer.priceValue,
+        price: offer.price,
+        url: offer.url,
+        shipping: offer.shipping,
+        shippingPriceValue: offer.shippingPriceValue,
+        availability: offer.availability,
+        merchantUpdatedAt: offer.merchantUpdatedAt
+      }));
+    }
+    return compact;
+  });
+  return { ...output, products };
+}
+
 function runSelfTests() {
   const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
     '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","3701234567890","AB-X1"';
@@ -533,7 +571,26 @@ function runSelfTests() {
   let rejectsHttp = false;
   try { validateDirectFeedUrl("http://productdata.awin.com/feed.csv"); } catch { rejectsHttp = true; }
   if (!rejectsHttp) throw new Error("TEST ÉCHEC : une URL HTTP doit être rejetée.");
-  log("Autotests réussis : CSV, prix EUR, livraison, statut inconnu, rupture, devise et URL sécurisée.");
+  const sampleProduct = {
+    id: "awin-test", name: "Produit test", image: "https://cdn.example/image.jpg",
+    images: ["https://cdn.example/image.jpg"], merchant: "Boutique A", priceValue: 10,
+    price: "10,00 €", sourceUrl: "https://merchant.example/product", availability: "unknown",
+    shippingPriceValue: 2, fetchedAt: "2026-11-05T06:00:00Z",
+    offers: [{ merchant: "Boutique A", priceValue: 10, price: "10,00 €", url: "https://merchant.example/product", shippingPriceValue: 2 }]
+  };
+  const compactSingle = buildPublicCatalogue({ status: "ok", fetched_at: sampleProduct.fetchedAt, products: [sampleProduct] });
+  if (compactSingle.products[0].offers !== undefined || compactSingle.products[0].images !== undefined) {
+    throw new Error("TEST ÉCHEC : les tableaux redondants d'une offre/image unique doivent être omis.");
+  }
+  const compactMulti = buildPublicCatalogue({ status: "ok", fetched_at: sampleProduct.fetchedAt, products: [{
+    ...sampleProduct,
+    images: ["https://cdn.example/image.jpg", "https://cdn.example/image-2.jpg"],
+    offers: [...sampleProduct.offers, { merchant: "Boutique B", priceValue: 11, price: "11,00 €", url: "https://merchant-b.example/product" }]
+  }] });
+  if (compactMulti.products[0].offers?.length !== 2 || compactMulti.products[0].images?.length !== 2) {
+    throw new Error("TEST ÉCHEC : les vraies comparaisons et galeries multiples doivent être conservées.");
+  }
+  log("Autotests réussis : CSV, identité, catégories, sécurité, compactage et conservation des offres multiples.");
 }
 
 if (process.argv.includes("--self-test")) {
@@ -576,6 +633,10 @@ const output = {
 
 await fs.mkdir(path.dirname(OUTPUT), { recursive: true });
 await fs.writeFile(OUTPUT, JSON.stringify(output) + "\n", "utf8");
+const publicOutput = buildPublicCatalogue(output);
+const publicJson = JSON.stringify(publicOutput) + "\n";
+await fs.writeFile(PUBLIC_OUTPUT, publicJson, "utf8");
 log(products.length + " fiche(s) produits, " + rawOffers.length + " offre(s), " + output.counts.brands + " marque(s).");
-log("Catalogue autorisé mis à jour : data/awin-products.json");
+log("Catalogue complet mis à jour : data/awin-products.json");
+log("Catalogue public compact : data/awin-products-public.json (" + Buffer.byteLength(publicJson, "utf8").toLocaleString("fr-FR") + " octets).");
 }
