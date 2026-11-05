@@ -1,9 +1,9 @@
-name: Importer les catalogues Rakuten (Decathlon + Nicchia)
+name: Importer les catalogues Rakuten autorisés
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '35 3 * * *'
+    - cron: "35 3 * * *"
 
 permissions:
   contents: write
@@ -13,52 +13,109 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Vérifier le parseur et les tests hors ligne
+        run: |
+          python3 -m py_compile scripts/import-rakuten-catalogue.py
+          python3 -m unittest tests.test_import_rakuten_catalogue -v
+
   import:
+    needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
-      - name: Vérifier les identifiants SFTP Rakuten
+      - name: Vérifier la configuration SFTP sécurisée sans afficher les valeurs
+        id: config
         env:
-          RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
-          RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
+          RAKUTEN_SFTP_USER: \${{ secrets.RAKUTEN_SFTP_USER }}
+          RAKUTEN_SFTP_PASSWORD: \${{ secrets.RAKUTEN_SFTP_PASSWORD }}
+          RAKUTEN_SFTP_KNOWN_HOSTS: \${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}
+          RAKUTEN_DATE_FORMAT: \${{ vars.RAKUTEN_DATE_FORMAT }}
+        shell: bash
         run: |
-          test -n "$RAKUTEN_SFTP_USER" || { echo "::error::Secret RAKUTEN_SFTP_USER manquant"; exit 1; }
-          test -n "$RAKUTEN_SFTP_PASSWORD" || { echo "::error::Secret RAKUTEN_SFTP_PASSWORD manquant"; exit 1; }
-          curl --version | grep -qi sftp || { echo "::error::curl de ce runner ne prend pas SFTP en charge"; exit 1; }
-      - name: Télécharger les deux flux officiels en SFTP
+          set -euo pipefail
+          if [[ -z "\${RAKUTEN_SFTP_USER:-}" || -z "\${RAKUTEN_SFTP_PASSWORD:-}" || -z "\${RAKUTEN_SFTP_KNOWN_HOSTS:-}" || -z "\${RAKUTEN_DATE_FORMAT:-}" ]]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Import Rakuten ignoré : identifiants, clé hôte SFTP vérifiée et format de date doivent être configurés."
+            exit 0
+          fi
+          if [[ "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY" && "$RAKUTEN_DATE_FORMAT" != "DD/MM/YYYY" ]]; then
+            echo "::error::RAKUTEN_DATE_FORMAT doit être MM/DD/YYYY ou DD/MM/YYYY."
+            exit 1
+          fi
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$RAKUTEN_SFTP_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          curl --version | grep -qi sftp || { echo "::error::curl ne prend pas SFTP en charge."; exit 1; }
+          curl --help all | grep -q -- '--knownhosts' || { echo "::error::curl ne permet pas de vérifier la clé hôte SFTP."; exit 1; }
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Télécharger uniquement les flux complets listés sur le serveur
+        if: steps.config.outputs.ready == 'true'
         env:
-          RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
-          RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
+          RAKUTEN_SFTP_USER: \${{ secrets.RAKUTEN_SFTP_USER }}
+          RAKUTEN_SFTP_PASSWORD: \${{ secrets.RAKUTEN_SFTP_PASSWORD }}
+        shell: bash
         run: |
+          set -euo pipefail
           umask 077
           printf 'machine aftp.linksynergy.com login %s password %s\n' "$RAKUTEN_SFTP_USER" "$RAKUTEN_SFTP_PASSWORD" > "$HOME/.netrc-rakuten"
-          curl --fail --show-error --silent --netrc-file "$HOME/.netrc-rakuten" "sftp://aftp.linksynergy.com/44806_4768926_mp.xml.gz" --output /tmp/44806_4768926_mp.xml.gz
-          curl --fail --show-error --silent --netrc-file "$HOME/.netrc-rakuten" "sftp://aftp.linksynergy.com/54306_4768926_1_cmp.xml.gz" --output /tmp/54306_4768926_1_cmp.xml.gz
-          rm -f "$HOME/.netrc-rakuten"
+          CURL=(curl --proto '=sftp' --fail --show-error --silent --ignore-content-length --knownhosts "$HOME/.ssh/known_hosts" --netrc-file "$HOME/.netrc-rakuten" --connect-timeout 15 --max-time 600)
+          "\${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/" > /tmp/rakuten-root-list.txt
+          if ! grep -Fxq "44806_4768926_mp.xml.gz" /tmp/rakuten-root-list.txt; then
+            echo "::error::Le flux complet Decathlon attendu est absent du répertoire SFTP."
+            exit 1
+          fi
+          "\${CURL[@]}" "sftp://aftp.linksynergy.com/44806_4768926_mp.xml.gz" --output /tmp/44806_4768926_mp.xml.gz
+          if grep -Fxq "54306_4768926_mp.xml.gz" /tmp/rakuten-root-list.txt; then
+            "\${CURL[@]}" "sftp://aftp.linksynergy.com/54306_4768926_mp.xml.gz" --output /tmp/54306_4768926_mp.xml.gz
+          else
+            echo "Flux complet Nicchia absent : source ignorée, aucun fichier catégorie partiel n'est utilisé."
+          fi
           gzip -t /tmp/44806_4768926_mp.xml.gz
-          gzip -t /tmp/54306_4768926_1_cmp.xml.gz
-      - name: Convertir et contrôler les fiches produits
+          if [[ -f /tmp/54306_4768926_mp.xml.gz ]]; then gzip -t /tmp/54306_4768926_mp.xml.gz; fi
+          rm -f "$HOME/.netrc-rakuten"
+      - name: Convertir seulement les sources fraîches et complètes
+        if: steps.config.outputs.ready == 'true'
+        env:
+          RAKUTEN_DATE_FORMAT: \${{ vars.RAKUTEN_DATE_FORMAT }}
+          RAKUTEN_PRICE_TAX_STATUS: \${{ vars.RAKUTEN_PRICE_TAX_STATUS }}
         run: |
-          python3 scripts/import-rakuten-catalogue.py --directory /tmp --output data/rakuten-products.json --decathlon-limit 5000
+          python3 scripts/import-rakuten-catalogue.py \
+            --directory /tmp \
+            --output data/rakuten-products.json \
+            --date-format "$RAKUTEN_DATE_FORMAT" \
+            --max-age-hours 48 \
+            --price-tax-status "\${RAKUTEN_PRICE_TAX_STATUS:-unspecified}" \
+            --decathlon-limit 1500 \
+            --nicchia-limit 1500
+      - name: Publier le snapshot validé sans écraser les données précédentes en cas d'échec
+        if: steps.config.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
           python3 - <<'PY'
-          import json,sys
-          d=json.load(open('data/rakuten-products.json',encoding='utf-8'))
-          p=d['products']
-          assert p and all(x.get('image','').startswith('https://') for x in p), 'Image manquante'
-          assert all(float(x.get('priceValue',0))>0 for x in p), 'Prix manquant'
-          assert all(x.get('sourceUrl','').startswith('https://click.linksynergy.com/') for x in p), 'Lien affilié manquant'
-          print('Contrôle OK:',len(p),'produits, photos/prix/liens HTTPS présents')
+          import datetime, json
+          from pathlib import Path
+          data=json.loads(Path("data/rakuten-products.json").read_text(encoding="utf-8"))
+          assert data.get("status") == "ok" and data.get("products"), "Snapshot vide ou invalide"
+          generated=datetime.datetime.fromisoformat(data["generated_at"].replace("Z","+00:00"))
+          age=datetime.datetime.now(datetime.timezone.utc)-generated
+          assert datetime.timedelta(0) <= age <= datetime.timedelta(hours=48), "Date source hors fenêtre de fraîcheur"
+          assert all(p.get("sourceCreatedAt") and p.get("gtin") or (p.get("brand") and p.get("mpn")) for p in data["products"]), "Identité exacte absente"
           PY
-      - name: Enregistrer le catalogue public
-        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/rakuten-products.json
           if git diff --cached --quiet; then
-            echo "Catalogue identique : aucun commit nécessaire."
+            echo "Le snapshot n'a pas changé ; aucun commit inutile."
           else
-            git commit -m "Refresh authorized Rakuten product catalogues"
+            git commit -m "Refresh fresh authorized Rakuten catalogues"
             git push
           fi
