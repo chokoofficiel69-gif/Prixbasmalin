@@ -32,7 +32,7 @@ class PriceFeedValidationTests(unittest.TestCase):
             "checked_at": self.now,
         }
 
-    def run_builder(self, offers, config=None):
+    def run_builder(self, offers, config=None, previous=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source = root / "merchant-offers.json"
@@ -43,6 +43,8 @@ class PriceFeedValidationTests(unittest.TestCase):
                 "schema_version": 1,
                 "offers": offers,
             }), encoding="utf-8")
+            if previous is not None:
+                output.write_text(json.dumps(previous), encoding="utf-8")
             freshness_config.write_text(json.dumps(config if config is not None else {
                 "schema_version": 1,
                 "default_max_age_hours": 48,
@@ -148,6 +150,30 @@ class PriceFeedValidationTests(unittest.TestCase):
         self.assertEqual(len(long_result["products"]), 1)
         self.assertEqual(long_result["products"][0]["offer_count"], 1)
         self.assertEqual(long_result["products"][0]["offers"][0]["freshness_max_age_hours"], 72)
+
+    def test_empty_source_preserves_previous_valid_feed(self):
+        previous = {
+            "version": 1,
+            "generated_at": "2026-11-04T10:00:00Z",
+            "products": [{"id": "t1", "offers": [{"offer_id": "old-valid"}]}],
+            "offers": [{"offer_id": "old-valid"}],
+        }
+        result = self.run_builder([], previous=previous)
+        self.assertEqual(result, previous)
+
+    def test_empty_source_does_not_rewrite_an_already_empty_feed(self):
+        previous = {
+            "version": 1,
+            "generated_at": "2026-11-04T10:00:00Z",
+            "products": [],
+            "offers": [],
+        }
+        result = self.run_builder([], previous=previous)
+        self.assertEqual(result, previous)
+
+    def test_invalid_previous_feed_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "Flux précédent invalide"):
+            self.run_builder([], previous={"version": 1, "products": "not-a-list", "offers": []})
 
     def test_invalid_source_freshness_config_fails_closed(self):
         invalid_config = {
