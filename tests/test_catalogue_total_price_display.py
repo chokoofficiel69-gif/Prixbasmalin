@@ -12,10 +12,13 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn("if(Number.isFinite(total)&&total>=0)return total;", source)
         self.assertIn("return Number.isFinite(base)&&base>=0?base:NaN;", source)
 
-    def test_verified_offers_are_sorted_and_displayed_by_comparable_price(self):
+    def test_verified_offers_prioritize_known_shipping_then_total_price(self):
         source = CATALOGUE.read_text(encoding="utf-8")
-        self.assertIn("const byComparablePrice=(a,b)=>verifiedComparablePrice(a)-verifiedComparablePrice(b);", source)
-        self.assertIn(".sort(byComparablePrice)", source)
+        self.assertIn("const byComparablePrice=(a,b)=>{", source)
+        self.assertIn("const aKnown=shippingKnown(a),bKnown=shippingKnown(b);", source)
+        self.assertIn("if(aKnown!==bKnown)return aKnown?-1:1;", source)
+        self.assertIn("return verifiedComparablePrice(a)-verifiedComparablePrice(b);", source)
+        self.assertIn("const fresh=rows.sort(byComparablePrice);", source)
         self.assertIn(".format(bestComparablePrice)", source)
         self.assertIn(".format(verifiedComparablePrice(offerData))", source)
 
@@ -30,6 +33,17 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn("offer.freshness_max_age_hours", source)
         self.assertIn("?configuredHours:48;", source)
         self.assertIn("age<=maxAgeHours*60*60*1000", source)
+
+    def test_rakuten_loader_does_not_expose_internal_import_metrics(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertNotIn("pmRakutenFeedStatus", source)
+        self.assertNotIn("import initial en attente de la connexion SFTP", source)
+        self.assertNotIn("Flux Rakuten importé le", source)
+
+    def test_feed_image_provenance_points_to_the_image_not_affiliate_url(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn("product.imageSource=product.image;", source)
+        self.assertIn("imageSource:p.image", source)
 
 
 if __name__ == "__main__":
