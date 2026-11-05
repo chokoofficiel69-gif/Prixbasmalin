@@ -230,6 +230,80 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   }
 }
 </script>
+
+<style id="pm-history-comparisons-style">
+.pm-history-comparisons{margin:18px 0 8px;padding:20px;border:1px solid #a77d31;border-radius:18px;background:linear-gradient(145deg,#171d27,#0b1018);box-shadow:0 10px 28px #0006}
+.pm-history-comparisons .section-head{align-items:center;margin-bottom:8px}
+.pm-history-comparisons .section-head h2{color:#fff}
+.pm-history-badge{display:inline-block;padding:7px 10px;border:1px solid #d5a64c;border-radius:999px;color:#ffd78b;background:#332713;font-size:9px;font-weight:950;letter-spacing:.04em;text-align:center}
+.pm-history-intro{max-width:850px;margin:0 0 14px;color:#c5ced9;font-size:12px;line-height:1.5}
+.pm-history-status{padding:14px;border:1px dashed #586474;border-radius:12px;color:#d8e0ea;font-size:13px}
+.pm-history-list{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;padding:2px 2px 12px;scrollbar-width:thin}
+.pm-history-card{flex:0 0 min(330px,85vw);min-width:0;padding:14px;border:1px solid #3e4a59;border-radius:14px;background:#101722;scroll-snap-align:start}
+.pm-history-card h3{margin:0 0 5px;color:#fff;font-size:15px;line-height:1.3}
+.pm-history-meta{margin:0 0 12px;color:#aeb9c7;font-size:10px}
+.pm-history-offer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #303b49}
+.pm-history-offer span{color:#dce3ec;font-size:12px;font-weight:750}
+.pm-history-offer strong{color:#ffb15d;font-size:16px;white-space:nowrap}
+.pm-history-lowest{color:#9ee0ad!important}
+.pm-history-source{margin:8px 0 0;color:#929eae;font-size:10px;line-height:1.45}
+@media(max-width:760px){.pm-history-comparisons{margin:12px 0;padding:13px;border-radius:15px}.pm-history-comparisons .section-head{display:block}.pm-history-badge{margin-top:8px;font-size:8px}.pm-history-card{flex-basis:84vw}}
+</style>
+<script id="pm-history-comparisons-loader">
+(async function(){
+ const status=document.getElementById("pm-history-status");
+ const list=document.getElementById("pm-history-list");
+ if(!status||!list)return;
+ try{
+  const response=await fetch("/data/prixtracker-prices.json",{cache:"no-store"});
+  if(!response.ok)throw new Error("Flux historique indisponible");
+  const data=await response.json();
+  const rows=Array.isArray(data.offers)?data.offers:[];
+  const groups=new Map();
+  for(const row of rows){
+   if(!row||!row.product_id||!row.merchant||!row.date)continue;
+   const key=String(row.product_id)+"|"+String(row.date);
+   if(!groups.has(key))groups.set(key,{product:row.product||"Produit",brand:row.brand||"",date:row.date,offers:[]});
+   const group=groups.get(key);
+   const price=Number(row.min_price_eur_ttc);
+   if(Number.isFinite(price)&&price>0)group.offers.push({merchant:String(row.merchant),price});
+  }
+  const comparisons=[...groups.values()]
+   .filter(g=>new Set(g.offers.map(o=>o.merchant)).size>=2)
+   .map(g=>({...g,offers:[...new Map(g.offers.map(o=>[o.merchant,o])).values()].sort((a,b)=>a.price-b.price)}))
+   .sort((a,b)=>b.date.localeCompare(a.date)||a.product.localeCompare(b.product,"fr"))
+   .slice(0,12);
+  if(!comparisons.length){
+   status.textContent="Aucune comparaison multi-marchands exploitable pour le moment. Les relevés isolés ne sont pas présentés comme des comparaisons.";
+   return;
+  }
+  status.textContent=comparisons.length+" comparaisons historiques chargées — classées par date de relevé.";
+  const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
+  const fragment=document.createDocumentFragment();
+  for(const group of comparisons){
+   const card=document.createElement("article");card.className="pm-history-card";
+   const title=document.createElement("h3");title.textContent=group.product;
+   const meta=document.createElement("p");meta.className="pm-history-meta";
+   meta.textContent=(group.brand?group.brand+" · ":"")+"Relevé du "+new Date(group.date+"T12:00:00").toLocaleDateString("fr-FR");
+   card.append(title,meta);
+   group.offers.forEach((offer,index)=>{
+    const line=document.createElement("div");line.className="pm-history-offer";
+    const merchant=document.createElement("span");merchant.textContent=offer.merchant;
+    const price=document.createElement("strong");price.textContent=euro.format(offer.price);
+    if(index===0)price.classList.add("pm-history-lowest");
+    line.append(merchant,price);card.append(line);
+   });
+   const note=document.createElement("p");note.className="pm-history-meta";note.textContent="Prix minimum observé ce jour-là · frais et stock non fournis.";
+   card.append(note);fragment.append(card);
+  }
+  list.replaceChildren(fragment);
+ }catch(error){
+  status.textContent="Les comparaisons historiques ne sont pas disponibles actuellement. Aucune donnée estimée n’est affichée.";
+  console.warn("Comparaisons historiques Prix Malin :",error);
+ }
+})();
+</script>
+
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
@@ -243,6 +317,16 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 <h1 class="sr-only">Prix Malin : comparateur de prix, produits et bonnes affaires</h1>
 <section class="hero hero-home hero-reference" aria-label="Bannière Prix Malin — Le moins cher, en un clic">
   <img id="pm-hero-exact" class="hero-reference-image" alt="Bannière Prix Malin avec la mascotte, le slogan Le moins cher en un clic, des écouteurs, un smartphone, une PlayStation, un écran, des chaussures et une remise jusqu’à 70 %." width="768" height="284" fetchpriority="high" decoding="async">
+</section>
+<section id="live-comparisons" class="pm-history-comparisons" aria-labelledby="pm-history-title">
+  <div class="section-head">
+    <div><h2 id="pm-history-title">💶 Comparaisons de prix</h2><small>Relevés par marchand · données historiques PrixTracker</small></div>
+    <span class="pm-history-badge">HISTORIQUE — PAS DES OFFRES EN DIRECT</span>
+  </div>
+  <p class="pm-history-intro">Comparez les prix observés pour un même produit chez plusieurs marchands. Chaque relevé affiche sa date : le tarif et la disponibilité doivent être revérifiés chez le vendeur.</p>
+  <div id="pm-history-status" class="pm-history-status" role="status" aria-live="polite">Chargement des comparaisons…</div>
+  <div id="pm-history-list" class="pm-history-list" aria-label="Comparaisons historiques par produit"></div>
+  <p class="pm-history-source">Source : PrixTracker · Licence Ouverte 2.0 · prix observés, sans lien d’achat ni vérification du stock.</p>
 </section><section class="pm-benefits-banner" aria-label="Les avantages Prix Malin">
   <div class="pm-benefit">
     <span class="pm-benefit-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 3 41 10v12c0 11-7 18-17 23C14 40 7 33 7 22V10L24 3Z" fill="none" stroke="white" stroke-width="4" stroke-linejoin="round"/><path d="m15 24 6 6 13-14" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
