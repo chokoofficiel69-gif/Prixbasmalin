@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 UTC = dt.timezone.utc
 FEEDS = [
     ("44806_4768926_mp.xml.gz", "Decathlon National", "decathlon"),
-    ("54306_4768926_mp.xml.gz", "Nicchia Luxury", "nicchia"),
+    ("54306_4768926_1_cmp.xml.gz", "Nicchia Luxury (flux catégorie)", "nicchia"),
 ]
 
 
@@ -106,7 +106,7 @@ def active_price(node, now):
     return sale
 
 
-def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, price_tax_status="unspecified"):
+def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, price_tax_status="unspecified", require_trailer=True):
     now = now or dt.datetime.now(UTC)
     if now.tzinfo is None:
         now = now.replace(tzinfo=UTC)
@@ -129,14 +129,15 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
 
     product_nodes = root.findall("./product")
     trailer = root.find("./trailer")
-    if trailer is None:
-        raise ValueError("Trailer XML absent : intégrité et exhaustivité du flux non vérifiables.")
-    try:
-        expected_count = int((trailer.findtext("numberOfProducts") or "").strip())
-    except ValueError:
-        raise ValueError("Nombre de produits du trailer absent ou invalide.")
-    if expected_count != len(product_nodes):
-        raise ValueError("Trailer incohérent : " + str(expected_count) + " annoncés, " + str(len(product_nodes)) + " reçus.")
+    if require_trailer:
+        if trailer is None:
+            raise ValueError("Trailer XML absent : intégrité et exhaustivité du flux non vérifiables.")
+        try:
+            expected_count = int((trailer.findtext("numberOfProducts") or "").strip())
+        except ValueError:
+            raise ValueError("Nombre de produits du trailer absent ou invalide.")
+        if expected_count != len(product_nodes):
+            raise ValueError("Trailer incohérent : " + str(expected_count) + " annoncés, " + str(len(product_nodes)) + " reçus.")
 
     rows = []
     skipped = collections.Counter()
@@ -283,7 +284,8 @@ def main():
             continue
         try:
             rows, source_created, stats = parse_feed(
-                path, merchant, slug, args.date_format, now, args.max_age_hours, args.price_tax_status
+                path, merchant, slug, args.date_format, now, args.max_age_hours, args.price_tax_status,
+                require_trailer=not filename.endswith("_cmp.xml.gz")
             )
         except (OSError, EOFError, ET.ParseError, ValueError) as error:
             print("Source ignorée (" + filename + ") : " + str(error))
