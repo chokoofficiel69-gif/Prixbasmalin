@@ -972,9 +972,12 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
     const response = await fetch("/data/home-products.json", { cache: "no-store" });
     if (!response.ok) throw new Error("Flux catalogue indisponible");
     const feed = await response.json();
+    // Les cartes « nouveautés » affichent des produits : exclure les visuels génériques.
     const products = (feed.products || []).filter(p =>
       p && typeof p.name === "string" &&
-      typeof p.image === "string" && /^https:\/\//i.test(p.image)
+      typeof p.image === "string" && /^https:\/\//i.test(p.image) &&
+      !/^https:\/\/images\.unsplash\.com\//i.test(p.image) &&
+      p.imageKind !== "illustration"
     );
     if (products.length < 3) return;
 
