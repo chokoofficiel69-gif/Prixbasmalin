@@ -627,10 +627,11 @@ const verifiedShelf=document.getElementById("verifiedShelf");
 const verifiedProductsEl=document.getElementById("verifiedProducts");
 let pmBaseVerifiedProducts=[];
 let pmAwinVerifiedProducts=[];
+let pmRakutenVerifiedProducts=[];
 Promise.all([fetch("/data/prices.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),fetch("/data/featured-prices.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null)])
   .then(([verified,featured])=>{
     pmBaseVerifiedProducts=[...(verified?.products||[]),...(featured?.products||[])];
-    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts]);
+    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts]);
   })
   .catch(()=>{});
 const productData=[
@@ -6795,7 +6796,8 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
     });
     status.textContent="Flux Rakuten importé le "+new Date(generated).toLocaleString("fr-FR")+" : "+products.length.toLocaleString("fr-FR")+" fiches avec photo, prix et lien affilié ("+products.filter(p=>p.merchant==="Decathlon National").length.toLocaleString("fr-FR")+" Decathlon, "+products.filter(p=>p.merchant==="Nicchia Luxury").length.toLocaleString("fr-FR")+" Nicchia Luxury). "+products.filter(p=>p.shippingPriceValue!==null&&p.shippingPriceValue!==undefined).length.toLocaleString("fr-FR")+" frais de livraison renseignés. "+exactComparisons.length+" comparaisons inter-marchands exactes. "+(fresh?"Prix du flux récents.":"Flux de plus de 48 h : les tarifs sont masqués jusqu’au prochain import.");
     render();
-    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...exactComparisons]);
+    pmRakutenVerifiedProducts=exactComparisons;
+    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts]);
   }catch(error){
     status.textContent="Import Rakuten temporairement indisponible ; les autres produits du catalogue restent accessibles.";
     console.warn("Import Rakuten indisponible.");
