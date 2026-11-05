@@ -6118,7 +6118,7 @@ function render(){
     const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl}]):[];
     const merchant=document.createElement("div");
     merchant.className="merchant";
-    const updateValue=p.merchantUpdatedAt||p.fetchedAt;
+    const updateValue=p.merchantUpdatedAt||null;
     const updateDate=updateValue?new Date(updateValue):null;
     const updateLabel=p.merchantUpdatedAt?"mise à jour marchand":"import du flux";
     const shippingKnown=p.shippingPriceValue!==null&&p.shippingPriceValue!==undefined&&Number.isFinite(Number(p.shippingPriceValue))&&Number(p.shippingPriceValue)>=0;
