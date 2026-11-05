@@ -22,7 +22,7 @@ jobs:
       - name: Vérifier le parseur et les tests hors ligne
         run: |
           python3 -m py_compile scripts/import-rakuten-catalogue.py
-          python3 -m unittest tests.test_import_rakuten_catalogue -v
+          python3 -m unittest discover -s tests -p 'test_import_rakuten_catalogue.py' -v
 
   import:
     needs: validate
@@ -108,7 +108,7 @@ jobs:
           generated=datetime.datetime.fromisoformat(data["generated_at"].replace("Z","+00:00"))
           age=datetime.datetime.now(datetime.timezone.utc)-generated
           assert datetime.timedelta(0) <= age <= datetime.timedelta(hours=48), "Date source hors fenêtre de fraîcheur"
-          assert all(p.get("sourceCreatedAt") and p.get("gtin") or (p.get("brand") and p.get("mpn")) for p in data["products"]), "Identité exacte absente"
+          assert all(p.get("sourceCreatedAt") and (p.get("gtin") or (p.get("brand") and p.get("mpn"))) for p in data["products"]), "Identité exacte absente"
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
