@@ -5886,41 +5886,52 @@ function render(){
       found.push({...product,_pmRelatedSuggestion:true});
     }
   }
-  if(q){
-    const score=(product)=>{
-      const name=pmSearchNorm(product.name);
-      const full=pmSearchNorm([product.name,product.brand,product.desc,product.product_type].join(" "));
-      let value=0;
-      if(name===q)value+=2000;
-      else if(name.startsWith(q))value+=1400;
-      else if(name.includes(q))value+=1000;
-      for(const term of correctedQuery){
-        if(name.split(" ").includes(term))value+=180;
-        else if(name.includes(term))value+=100;
-        else if(full.includes(term))value+=25;
-      }
-      if(product._pmRelatedSuggestion)value-=500;
-      if(Number(product.priceValue)>0)value+=2;
-      return value;
+  const score=(product)=>{
+    const name=pmSearchNorm(product.name);
+    const full=pmSearchNorm([product.name,product.brand,product.desc,product.product_type].join(" "));
+    let value=0;
+    if(name===q)value+=2000;
+    else if(name.startsWith(q))value+=1400;
+    else if(name.includes(q))value+=1000;
+    for(const term of correctedQuery){
+      if(name.split(" ").includes(term))value+=180;
+      else if(name.includes(term))value+=100;
+      else if(full.includes(term))value+=25;
+    }
+    if(product._pmRelatedSuggestion)value-=500;
+    return value;
+  };
+  const offerRank=product=>{
+    const base=Number(product.priceValue);
+    const hasPrice=Number.isFinite(base)&&base>0;
+    const shippingKnown=product.shippingPriceValue!==null&&product.shippingPriceValue!==undefined&&
+      Number.isFinite(Number(product.shippingPriceValue))&&Number(product.shippingPriceValue)>=0;
+    const merchantCount=new Set((Array.isArray(product.offers)?product.offers:[])
+      .map(offer=>String(offer.merchant||"").trim().toLowerCase()).filter(Boolean)).size;
+    return {
+      multiMerchant:merchantCount>1,
+      hasPrice,
+      shippingKnown,
+      total:hasPrice?base+(shippingKnown?Number(product.shippingPriceValue):0):Infinity,
+      hasImage:pmHasRealProductImage(product)
     };
-    const offerRank=product=>{
-      const base=Number(product.priceValue);
-      const hasPrice=Number.isFinite(base)&&base>0;
-      const shippingKnown=product.shippingPriceValue!==null&&product.shippingPriceValue!==undefined&&
-        Number.isFinite(Number(product.shippingPriceValue))&&Number(product.shippingPriceValue)>=0;
-      return {hasPrice,shippingKnown,total:hasPrice?base+(shippingKnown?Number(product.shippingPriceValue):0):Infinity};
-    };
-    found.sort((a,b)=>{
-      const imagePriority=Number(pmHasRealProductImage(b))-Number(pmHasRealProductImage(a));
-      if(imagePriority)return imagePriority;
+  };
+  // Le classement s'applique aussi à la navigation sans recherche :
+  // comparaisons exactes, offres fraîches avec prix, puis références illustrées.
+  // En recherche, la pertinence textuelle reste prioritaire sur les offres.
+  found.sort((a,b)=>{
+    if(q){
       const relevance=score(b)-score(a);
       if(relevance)return relevance;
-      const pa=offerRank(a),pb=offerRank(b);
-      if(pa.hasPrice!==pb.hasPrice)return pa.hasPrice?-1:1;
-      if(pa.shippingKnown!==pb.shippingKnown)return pa.shippingKnown?-1:1;
-      return pa.total-pb.total||a.name.localeCompare(b.name,"fr");
-    });
-  }
+    }
+    const pa=offerRank(a),pb=offerRank(b);
+    if(pa.multiMerchant!==pb.multiMerchant)return Number(pb.multiMerchant)-Number(pa.multiMerchant);
+    if(pa.hasPrice!==pb.hasPrice)return Number(pb.hasPrice)-Number(pa.hasPrice);
+    if(pa.shippingKnown!==pb.shippingKnown)return Number(pb.shippingKnown)-Number(pa.shippingKnown);
+    if(pa.total!==pb.total)return pa.total-pb.total;
+    if(pa.hasImage!==pb.hasImage)return Number(pb.hasImage)-Number(pa.hasImage);
+    return a.name.localeCompare(b.name,"fr");
+  });
   productsEl.innerHTML="";
   const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   filtersEl.innerHTML="";
@@ -5966,7 +5977,7 @@ function render(){
     return rail;
   };
   const visibleProducts=found.slice(0,pmVisibleLimit);
-  visibleProducts.forEach(p=>{
+  visibleProducts.forEach((p,index)=>{
     if(!pmHasRealProductImage(p))return;
     const card=document.createElement("article");
     card.className="product";
@@ -5975,7 +5986,7 @@ function render(){
     const img=document.createElement("img");
     img.src=p.image;
     img.alt=p.name;
-    img.loading="eager";
+    img.loading=index<8?"eager":"lazy";
     img.decoding="async";
     img.dataset.fallbackTried="0";
     photo.classList.add("pm-photo-loading");
@@ -5985,21 +5996,51 @@ function render(){
     if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source du visuel : "+(p.imageSourceName||"source marchande"));}
     if(imageBadge.textContent)photo.append(imageBadge);
     let imageFallbackTimer=null;
-    const finishImageLoad=()=>{photo.classList.remove("pm-photo-loading");if(imageFallbackTimer)clearTimeout(imageFallbackTimer);};
+    let imageObserver=null;
+    const startImageFallbackTimer=()=>{
+      if(imageFallbackTimer)clearTimeout(imageFallbackTimer);
+      imageFallbackTimer=setTimeout(()=>{if(!img.complete||img.naturalWidth===0)img.onerror();},12000);
+    };
+    const finishImageLoad=()=>{
+      photo.classList.remove("pm-photo-loading");
+      if(imageFallbackTimer)clearTimeout(imageFallbackTimer);
+      if(imageObserver){imageObserver.disconnect();imageObserver=null;}
+    };
     img.onload=finishImageLoad;
     img.onerror=()=>{
       const failed=img.dataset.pmFailedImages?img.dataset.pmFailedImages.split("|"):[];
       failed.push(img.src);
       img.dataset.pmFailedImages=failed.join("|");
       const alternatives=Array.isArray(p.images)?p.images.filter(url=>/^https:\/\//i.test(String(url||""))&&!failed.includes(url)):[];
-      if(alternatives.length){img.src=alternatives[0];return;}
+      if(alternatives.length){
+        img.src=alternatives[0];
+        startImageFallbackTimer();
+        return;
+      }
       if(imageFallbackTimer)clearTimeout(imageFallbackTimer);
-      card.remove();
-      const parentRail=card.parentElement;
-      if(parentRail&&!parentRail.querySelector(".product"))parentRail.closest(".pm-product-row")?.remove();
+      if(imageObserver){imageObserver.disconnect();imageObserver=null;}
+      photo.replaceChildren();
+      photo.classList.remove("pm-photo-loading");
+      const unavailable=document.createElement("div");
+      unavailable.className="pm-photo-unavailable";
+      unavailable.textContent="Photo indisponible";
+      photo.append(unavailable);
     };
     photo.append(img);
-    imageFallbackTimer=setTimeout(()=>{if(!img.complete||img.naturalWidth===0)img.onerror();},12000);
+    if(img.loading==="eager")startImageFallbackTimer();
+    else if("IntersectionObserver" in window){
+      imageObserver=new IntersectionObserver(entries=>{
+        if(entries.some(entry=>entry.isIntersecting)){
+          imageObserver.disconnect();
+          imageObserver=null;
+          startImageFallbackTimer();
+        }
+      },{rootMargin:"240px"});
+      imageObserver.observe(img);
+    }else{
+      img.loading="eager";
+      startImageFallbackTimer();
+    }
     const gallery=document.createElement("div");gallery.className="pm-awin-gallery";
     const galleryImages=Array.isArray(p.images)?p.images.filter((value,index,array)=>/^https:\/\//i.test(String(value||""))&&array.indexOf(value)===index).slice(0,5):[];
     galleryImages.forEach((url,index)=>{
@@ -6126,56 +6167,29 @@ function render(){
     getCategoryRail(p).append(card);
   });
 
-  // Les références sans photo exacte restent visibles tout en bas,
-  // avec un visuel de catégorie clairement signalé comme illustration.
+  // Les références sans photo exacte restent consultables, mais sans image empruntée à un autre produit.
   const withoutExactPhoto=visibleProducts.filter(p=>!pmHasRealProductImage(p));
-  if(withoutExactPhoto.length){
-    const imagePool=productData.filter(item=>item&&/^https:\/\//i.test(String(item.image||"")));
-    const inspiration=document.createElement("section");
-    inspiration.className="pm-product-row pm-image-inspiration";
-    const inspirationHead=document.createElement("div");
-    inspirationHead.className="pm-product-row-head";
-    const inspirationTitle=document.createElement("h3");
-    inspirationTitle.textContent="À découvrir — visuels d’inspiration";
-    const inspirationHint=document.createElement("span");
-    inspirationHint.textContent="Visuels non associés à un modèle exact";
-    inspirationHead.append(inspirationTitle,inspirationHint);
-    const inspirationRail=document.createElement("div");
-    inspirationRail.className="pm-product-row-rail";
-    withoutExactPhoto.forEach(p=>{
-      const candidate=imagePool.find(item=>item.category===p.category&&item.id!==p.id)||
-        imagePool.find(item=>item.id!==p.id);
-      if(!candidate)return;
-      const tile=document.createElement("article");
-      tile.className="product pm-inspiration-card";
-      const visual=document.createElement("div");
-      visual.className="photo";
-      const image=document.createElement("img");
-      image.src=candidate.image;
-      image.alt="Illustration de catégorie pour "+p.name;
-      image.loading="lazy";
-      image.onerror=()=>tile.remove();
-      visual.append(image);
-      const label=document.createElement("small");
-      label.className="pm-inspiration-label";
-      label.textContent="Illustration de catégorie · photo du modèle à confirmer";
-      const title=document.createElement("strong");
-      title.className="name";
-      title.textContent=p.name;
-      const link=document.createElement("a");
-      link.className="offer";
-      link.href="https://www.amazon.fr/s?"+new URLSearchParams({k:p.query||p.name,tag:"prixbasmalin2-21"}).toString();
-      link.target="_blank";
-      link.rel="noopener noreferrer sponsored";
-      link.textContent="Découvrir les modèles ↗";
-      tile.append(visual,label,title,link);
-      inspirationRail.append(tile);
-    });
-    if(inspirationRail.children.length){
-      inspiration.append(inspirationHead,inspirationRail);
-      productsEl.append(inspiration);
-    }
-  }
+  withoutExactPhoto.forEach(p=>{
+    const tile=document.createElement("article");
+    tile.className="product pm-no-photo-card";
+    const title=document.createElement("strong");
+    title.className="name";
+    title.textContent=p.name;
+    const description=document.createElement("p");
+    description.className="desc";
+    description.textContent=[p.brand,p.desc].filter(Boolean).join(" • ");
+    const note=document.createElement("small");
+    note.className="pm-no-photo-note";
+    note.textContent="Photo exacte indisponible pour le moment";
+    const link=document.createElement("a");
+    link.className="offer";
+    link.href=p.sourceUrl;
+    link.target="_blank";
+    link.rel="noopener noreferrer sponsored";
+    link.textContent="Voir chez le marchand ↗";
+    tile.append(title,description,note,link);
+    getCategoryRail(p).append(tile);
+  });
   if(found.length>visibleProducts.length){
     const wrapper=document.createElement("div");
     wrapper.className="pm-load-more-wrap";
@@ -6721,6 +6735,12 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 </style>
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
+#products .pm-photo-unavailable{width:100%;height:100%;min-height:132px;display:grid;place-items:center;padding:12px;box-sizing:border-box;background:#eef1f5;color:#667085;font-size:12px;font-weight:750;text-align:center}
+#products .pm-product-row-rail>.pm-no-photo-card{flex:0 0 218px!important;width:218px!important;max-width:218px!important;min-width:218px!important;min-height:180px;padding:12px;box-sizing:border-box;background:#111c2a!important;border:1px solid #35465a!important;border-radius:15px!important;color:#f4f7fb!important}
+#products .pm-no-photo-card .name{color:#fff!important}
+#products .pm-no-photo-card .desc{color:#c2ccda!important}
+#products .pm-no-photo-card .pm-no-photo-note{display:block;margin:8px 0 12px;color:#9eacbd;font-size:11px;line-height:1.35}
+
 /* Correctifs de lisibilité et de chargement des images sur mobile. */
 #products .pm-product-row-head h3{color:#17212b!important}
 #products .pm-product-row-rail .photo{background:#eef1f5!important;position:relative}
