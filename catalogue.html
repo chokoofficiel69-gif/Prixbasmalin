@@ -5959,24 +5959,16 @@ function render(){
   };
   const visibleProducts=found.slice(0,pmVisibleLimit);
   visibleProducts.forEach(p=>{
+    if(!pmHasRealProductImage(p))return;
     const card=document.createElement("article");
     card.className="product";
     const photo=document.createElement("div");
     photo.className="photo";
-    const hasProductPhoto=pmHasRealProductImage(p);
-    const img=hasProductPhoto?document.createElement("img"):null;
-    if(img){
-      img.src=p.image;
-      img.alt=p.name;
-      img.loading="lazy";
-      img.dataset.fallbackTried="0";
-    }else{
-      photo.classList.add("photo-placeholder");
-      const placeholder=document.createElement("span");
-      placeholder.textContent=String(p.brand||p.category||"PM").slice(0,2).toUpperCase();
-      placeholder.setAttribute("aria-hidden","true");
-      photo.append(placeholder);
-    }
+    const img=document.createElement("img");
+    img.src=p.image;
+    img.alt=p.name;
+    img.loading="lazy";
+    img.dataset.fallbackTried="0";
     const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
     imageBadge.className="pm-photo-source"+(p.imageKind==="illustration"?" illustration":"");
     imageBadge.textContent=p.imageKind==="merchant_feed"?"Visuel marchand":(p.imageSource?"Photo constructeur":(p.imageKind==="illustration"?"Illustration":""));
