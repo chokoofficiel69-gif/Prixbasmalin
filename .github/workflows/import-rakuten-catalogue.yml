@@ -34,14 +34,14 @@ jobs:
       - name: Vérifier la configuration SFTP sécurisée sans afficher les valeurs
         id: config
         env:
-          RAKUTEN_SFTP_USER: \${{ secrets.RAKUTEN_SFTP_USER }}
-          RAKUTEN_SFTP_PASSWORD: \${{ secrets.RAKUTEN_SFTP_PASSWORD }}
-          RAKUTEN_SFTP_KNOWN_HOSTS: \${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}
-          RAKUTEN_DATE_FORMAT: \${{ vars.RAKUTEN_DATE_FORMAT }}
+          RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
+          RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
+          RAKUTEN_SFTP_KNOWN_HOSTS: ${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -z "\${RAKUTEN_SFTP_USER:-}" || -z "\${RAKUTEN_SFTP_PASSWORD:-}" || -z "\${RAKUTEN_SFTP_KNOWN_HOSTS:-}" || -z "\${RAKUTEN_DATE_FORMAT:-}" ]]; then
+          if [[ -z "${RAKUTEN_SFTP_USER:-}" || -z "${RAKUTEN_SFTP_PASSWORD:-}" || -z "${RAKUTEN_SFTP_KNOWN_HOSTS:-}" || -z "${RAKUTEN_DATE_FORMAT:-}" ]]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Import Rakuten ignoré : identifiants, clé hôte SFTP vérifiée et format de date doivent être configurés."
             exit 0
@@ -59,22 +59,22 @@ jobs:
       - name: Télécharger uniquement les flux complets listés sur le serveur
         if: steps.config.outputs.ready == 'true'
         env:
-          RAKUTEN_SFTP_USER: \${{ secrets.RAKUTEN_SFTP_USER }}
-          RAKUTEN_SFTP_PASSWORD: \${{ secrets.RAKUTEN_SFTP_PASSWORD }}
+          RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
+          RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
         shell: bash
         run: |
           set -euo pipefail
           umask 077
           printf 'machine aftp.linksynergy.com login %s password %s\n' "$RAKUTEN_SFTP_USER" "$RAKUTEN_SFTP_PASSWORD" > "$HOME/.netrc-rakuten"
           CURL=(curl --proto '=sftp' --fail --show-error --silent --ignore-content-length --knownhosts "$HOME/.ssh/known_hosts" --netrc-file "$HOME/.netrc-rakuten" --connect-timeout 15 --max-time 600)
-          "\${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/" > /tmp/rakuten-root-list.txt
+          "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/" > /tmp/rakuten-root-list.txt
           if ! grep -Fxq "44806_4768926_mp.xml.gz" /tmp/rakuten-root-list.txt; then
             echo "::error::Le flux complet Decathlon attendu est absent du répertoire SFTP."
             exit 1
           fi
-          "\${CURL[@]}" "sftp://aftp.linksynergy.com/44806_4768926_mp.xml.gz" --output /tmp/44806_4768926_mp.xml.gz
+          "${CURL[@]}" "sftp://aftp.linksynergy.com/44806_4768926_mp.xml.gz" --output /tmp/44806_4768926_mp.xml.gz
           if grep -Fxq "54306_4768926_mp.xml.gz" /tmp/rakuten-root-list.txt; then
-            "\${CURL[@]}" "sftp://aftp.linksynergy.com/54306_4768926_mp.xml.gz" --output /tmp/54306_4768926_mp.xml.gz
+            "${CURL[@]}" "sftp://aftp.linksynergy.com/54306_4768926_mp.xml.gz" --output /tmp/54306_4768926_mp.xml.gz
           else
             echo "Flux complet Nicchia absent : source ignorée, aucun fichier catégorie partiel n'est utilisé."
           fi
@@ -84,15 +84,15 @@ jobs:
       - name: Convertir seulement les sources fraîches et complètes
         if: steps.config.outputs.ready == 'true'
         env:
-          RAKUTEN_DATE_FORMAT: \${{ vars.RAKUTEN_DATE_FORMAT }}
-          RAKUTEN_PRICE_TAX_STATUS: \${{ vars.RAKUTEN_PRICE_TAX_STATUS }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT }}
+          RAKUTEN_PRICE_TAX_STATUS: ${{ vars.RAKUTEN_PRICE_TAX_STATUS }}
         run: |
           python3 scripts/import-rakuten-catalogue.py \
             --directory /tmp \
             --output data/rakuten-products.json \
             --date-format "$RAKUTEN_DATE_FORMAT" \
             --max-age-hours 48 \
-            --price-tax-status "\${RAKUTEN_PRICE_TAX_STATUS:-unspecified}" \
+            --price-tax-status "${RAKUTEN_PRICE_TAX_STATUS:-unspecified}" \
             --decathlon-limit 1500 \
             --nicchia-limit 1500
       - name: Publier le snapshot validé sans écraser les données précédentes en cas d'échec
