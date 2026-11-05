@@ -27,6 +27,8 @@ on:
       - "CNAME"
       - "price-engine/**"
       - ".github/workflows/refresh-prices.yml"
+      - ".github/workflows/sync-awin-products.yml"
+      - "data/awin-products.json"
   push:
     branches:
       - main
@@ -44,6 +46,8 @@ on:
       - "CNAME"
       - "price-engine/**"
       - ".github/workflows/refresh-prices.yml"
+      - ".github/workflows/sync-awin-products.yml"
+      - "data/awin-products.json"
 
 permissions:
   contents: read
@@ -221,6 +225,47 @@ jobs:
             console.log("AVERTISSEMENT : aucun prix vérifié publié ; aucune valeur inventée.");
           }
           console.log("Flux JSON valide :", data.products.length, "produits,", data.offers.length, "offres.");
+          NODE
+      - name: Vérifier le flux Awin public, sa fraîcheur et ses champs marchands
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 60 \
+            https://prixbasmalin.fr/data/awin-products.json --output /tmp/awin-products.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/awin-products.json", "utf8"));
+          if (data.status !== "ok" || !Array.isArray(data.products) || data.products.length === 0) {
+            throw new Error("Le flux Awin public est vide ou invalide.");
+          }
+          const fetchedAt = Date.parse(data.fetched_at || "");
+          const age = Date.now() - fetchedAt;
+          if (!Number.isFinite(fetchedAt) || age < -5 * 60 * 1000 || age > 48 * 60 * 60 * 1000) {
+            throw new Error("Le flux Awin public est absent, futur ou trop ancien (>48 h).");
+          }
+          const valid = data.products.filter(product =>
+            product && product.id && product.name &&
+            Number.isFinite(Number(product.priceValue)) && Number(product.priceValue) > 0 &&
+            /^https:\/\//i.test(String(product.image || "")) &&
+            /^https:\/\//i.test(String(product.sourceUrl || "")) &&
+            String(product.merchant || "").trim()
+          );
+          if (valid.length !== data.products.length) {
+            throw new Error("Le flux Awin contient " + (data.products.length - valid.length) + " fiche(s) incomplète(s) ou sans source HTTPS.");
+          }
+          const merchants = new Set(valid.map(product => product.merchant).filter(Boolean));
+          const multiMerchant = valid.filter(product =>
+            new Set((product.offers || []).map(offer => String(offer.merchant || "").trim().toLowerCase()).filter(Boolean)).size > 1
+          ).length;
+          const withGtin = valid.filter(product => String(product.gtin || "").trim()).length;
+          const withMpn = valid.filter(product => String(product.mpn || "").trim()).length;
+          const shippingKnown = valid.filter(product => product.shippingPriceValue !== null && product.shippingPriceValue !== undefined && Number.isFinite(Number(product.shippingPriceValue))).length;
+          const availabilityKnown = valid.filter(product => product.availability && product.availability !== "unknown").length;
+          console.log("Flux Awin public valide :", valid.length, "offres /", merchants.size, "marchands.");
+          console.log("Identifiants partagés : GTIN", withGtin, "MPN", withMpn, "comparaisons multi-marchands exactes", multiMerchant + ".");
+          console.log("Livraison connue :", shippingKnown, "offres ; disponibilité connue :", availabilityKnown + ".");
+          console.log("Import du flux :", new Date(fetchedAt).toISOString(), "— âge", Math.round(age / 3600000), "h.");
+          if (multiMerchant === 0) {
+            console.log("AVERTISSEMENT : offres individuelles réelles, mais aucune comparaison multi-marchands exacte sans GTIN/MPN commun.");
+          }
           NODE
       - name: Vérifier le Worker d'attribution
         run: |
