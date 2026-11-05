@@ -426,7 +426,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 <section id="deals" class="pm-home-selection">
 <div class="section-head">
   <h2>🔥 Toute la sélection Prix Malin</h2>
-  <small id="home-products-meta">341 références du catalogue à parcourir · prix et stock à vérifier chez le marchand</small>
+  <small id="home-products-meta">Sélection de produits à découvrir · prix et disponibilité à confirmer chez le marchand</small>
 </div>
 <div class="pm-product-rail">
   <button class="pm-rail-button pm-rail-prev" type="button" data-pm-scroll="prev" aria-label="Produits précédents" aria-controls="products">‹</button>
@@ -805,13 +805,16 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
 
   const updateCount = () => {
     const count = rail.querySelectorAll(".product[data-pm-catalogue-product]").length;
-    if (count) meta.textContent = count + " produits illustrés du catalogue · prix et disponibilité à confirmer chez le marchand";
+    if (count) meta.textContent = "Sélection de produits à découvrir · prix et disponibilité à confirmer chez le marchand";
   };
 
   const makeCard = product => {
     const imageUrl = safeHttpUrl(product.image);
     const targetUrl = safeHttpUrl(product.sourceUrl);
-    if (!imageUrl || !targetUrl || !product.name) return null;
+    const isGenericImage = /unsplash\.com/i.test(imageUrl) ||
+      product.imageKind === "illustration" ||
+      product.imageStatus === "generic_category_visual";
+    if (!imageUrl || isGenericImage || !targetUrl || !product.name) return null;
 
     const card = document.createElement("article");
     card.className = "product";
@@ -825,6 +828,8 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
     image.alt = product.name;
     image.loading = "lazy";
     image.decoding = "async";
+    photo.classList.add("pm-photo-loading");
+    image.addEventListener("load", () => photo.classList.remove("pm-photo-loading"), {once:true});
     image.addEventListener("error", () => {
       card.remove();
       updateCount();
@@ -875,9 +880,15 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
     .then(feed => {
       if (!feed || !Array.isArray(feed.products) || !feed.products.length) return;
       const fragment = document.createDocumentFragment();
+      const usedImages = new Set();
       feed.products.forEach(product => {
+        const imageUrl = safeHttpUrl(product.image);
+        if (!imageUrl || usedImages.has(imageUrl)) return;
         const card = makeCard(product);
-        if (card) fragment.appendChild(card);
+        if (card) {
+          usedImages.add(imageUrl);
+          fragment.appendChild(card);
+        }
       });
       if (!fragment.childNodes.length) return;
       rail.replaceChildren(fragment);
@@ -890,6 +901,11 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
 </script>
 
 
+<style id="pm-home-exact-product-images">
+#products .photo.pm-photo-loading{background:linear-gradient(110deg,#eef1f5 25%,#f8fafc 45%,#eef1f5 65%)!important;background-size:220% 100%!important;animation:pmHomePhotoPulse 1.4s ease-in-out infinite}
+@keyframes pmHomePhotoPulse{to{background-position-x:-220%}}
+@media(prefers-reduced-motion:reduce){#products .photo.pm-photo-loading{animation:none}}
+</style>
 <style id="pm-final-carousel-layout">
 /* Priorité finale : carrousels en une seule rangée, y compris sur téléphone */
 .brand.brand-bag-logo img,.brand img.brand-bag-logo{
