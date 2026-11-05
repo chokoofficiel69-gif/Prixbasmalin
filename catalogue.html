@@ -601,11 +601,10 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
  </form>
  <div id="filters" class="pm-catalogue-brand-filters" aria-label="Filtrer par marque"></div>
 </section>
-<section id="verifiedShelf" class="verified-shelf" aria-live="polite">
+<section id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden>
   <div class="verified-shelf-head">
-    <div><h2>Comparaisons multi-marchands — modèles exacts</h2><p>Une comparaison n’apparaît que lorsque plusieurs marchands proposent le même modèle identifié. Les offres Awin individuelles sont visibles dans le catalogue ; aucun prix n’est fusionné sans correspondance produit fiable.</p></div>
+    <div><h2>Comparaisons multi-marchands — modèles exacts</h2><p>Les comparaisons affichées concernent uniquement un même modèle identifié chez plusieurs vendeurs.</p></div>
   </div>
-  <div id="pmAwinFeedStatus" class="pm-awin-feed-status" role="status" aria-live="polite">Chargement du flux marchand Awin…</div>
   <div class="grid" id="verifiedProducts"><p class="comparison-empty">Les comparaisons exactes apparaîtront ici dès que plusieurs offres récentes seront confirmées pour un même modèle.</p></div>
 </section>
 <section class="discovery-shelf" aria-labelledby="discoveryTitle">
@@ -6107,11 +6106,10 @@ function render(){
       items.forEach(item=>{
         const tile=document.createElement("article");tile.className="pm-related-tile";
         const visual=document.createElement("div");visual.className="pm-related-visual";
-        if(item[3]&&item[3].image){
-          const relatedImg=document.createElement("img");relatedImg.src=item[3].image;relatedImg.alt="Photo "+item[0];relatedImg.loading="lazy";
-          relatedImg.onerror=()=>{visual.classList.add("pm-related-no-image");relatedImg.remove();visual.textContent="PM";};
-          visual.append(relatedImg);
-        }else{visual.classList.add("pm-related-no-image");visual.textContent=(item[0]||"PM").slice(0,2).toUpperCase();}
+        if(!item[3]||!/^https:\/\//i.test(String(item[3].image||"")))return;
+        const relatedImg=document.createElement("img");relatedImg.src=item[3].image;relatedImg.alt="Photo "+item[0];relatedImg.loading="lazy";relatedImg.decoding="async";
+        relatedImg.onerror=()=>tile.remove();
+        visual.append(relatedImg);
         const titleText=document.createElement("strong");titleText.textContent=item[0];
         const noteText=document.createElement("small");noteText.textContent=item[1];
         const link=document.createElement("a");link.href="https://www.amazon.fr/s?"+new URLSearchParams({k:item[2],tag:"prixbasmalin2-21"}).toString();link.target="_blank";link.rel="noopener noreferrer sponsored";link.textContent="Découvrir ↗";
@@ -6182,7 +6180,7 @@ function renderVerifiedProducts(products){
       Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
     return new Set(currentOffers.map(o=>String(o.merchant).trim().toLowerCase()).filter(Boolean)).size>1;
   });
-  if(!usable.length){verifiedProductsEl.innerHTML='<p class="comparison-empty">Les comparatifs marchands apparaîtront ici dès que des prix vérifiés pour un même modèle seront disponibles. Aucun tarif n’est estimé ni inventé.</p>';return;}
+  if(!usable.length){verifiedShelf.hidden=true;return;}
   verifiedShelf.hidden=false;
   usable.forEach(p=>{
     const rows=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&o.merchant&&/^https:\/\//i.test(String(o.url||""))&&
