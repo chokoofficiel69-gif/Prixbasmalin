@@ -1,63 +1,56 @@
-# Rakuten — état des nouveaux partenaires
+# Rakuten — état des partenaires et du catalogue produits
 
 Date de vérification : 5 novembre 2026.
 
 ## Decathlon National
 
-- Acceptation du programme confirmée le 4 novembre 2026.
-- Le support Rakuten confirme le 5 novembre que l'accès AFTP Product Catalog est activé.
-- MID Decathlon confirmé dans le tableau de bord : `44806`.
-- Hôte : `aftp.linksynergy.com`.
-- Protocole recommandé : **SFTP** (la documentation technique Rakuten recommande SFTP ; FTP simple est seulement toléré et doit être évité).
-- Nom attendu du flux complet XML compressé avec MID 44806 et SID 4768926 : `44806_4768926_mp.xml.gz`.
-- Nom attendu du flux différentiel : `44806_4768926_mp_delta.xml.gz`.
-- SID éditeur affiché dans le tableau de bord : `4768926` (l'identifiant AFTP communiqué par e-mail est `rkp_4768926`).
-- Les fichiers sont compressés ; Rakuten demande un transfert en mode binaire.
-- Formats de nom annoncés : `MID_SID_mp.xml.gz` et `MID_SID_mp_delta.xml.gz`.
+- L'acceptation du programme a été confirmée le 4 novembre 2026.
+- Le support Rakuten a répondu le 5 novembre 2026 à 09:02 UTC : le compte AFTP Product Catalog est déjà activé et les informations de connexion ont été transmises par e-mail.
+- Hôte confirmé par le support : `aftp.linksynergy.com`.
+- Protocole à utiliser : **SFTP**, pas FTP simple.
+- Les archives sont compressées ; le transfert doit être effectué en mode binaire.
+- Rakuten indique une limite de cinq connexions simultanées maximum.
+- Convention de nommage documentée : `MID_SID_mp.xml.gz` pour le catalogue complet et `MID_SID_mp_delta.xml.gz` pour le différentiel. Le chemin et les noms réellement présents restent à confirmer par un listing SFTP.
 
-La capture du tableau de bord confirme également un lien affilié individuel Decathlon pour le produit « Trophée T511 argent/bleu 31 cm », avec son identifiant de lien affiché dans Rakuten. Cela prouve que des liens trackés peuvent être récupérés depuis le compte, mais ne remplace pas le flux catalogue complet.
+**État réel : accès activé par Rakuten, mais aucun listing ni téléchargement SFTP n'a encore été exécuté par Prix Malin.** Aucun échantillon XML réel n'a été inspecté ; aucun produit Decathlon n'est donc importé ou présenté comme une offre de catalogue.
 
-La documentation technique Rakuten confirme que le flux est récupéré par SFTP et que les fichiers produits comprennent un en-tête, des enregistrements produit et un pied de fichier. Les champs documentés incluent notamment SKU, catégorie, URL produit, URL image, URL affiliée d'achat (optionnelle), descriptions, prix de vente et prix catalogue. Le flux ne garantit pas un EAN ni des frais de livraison : ils devront être vérifiés dans le fichier réel. Le catalogue comporte un fichier complet et un fichier delta (ajouts, modifications et suppressions). Le MID est désormais connu : 44806.
+Les consignes Rakuten décrivent un fichier avec en-tête, enregistrements produits et pied de fichier. Les champs documentés comprennent notamment SKU, catégorie, URL produit, URL image, URL d'achat affiliée lorsqu'elle est fournie, descriptions, prix de vente et prix catalogue. La présence d'un EAN/GTIN, des frais de livraison ou de la disponibilité doit être vérifiée dans le fichier réel ; elle ne doit pas être supposée.
 
-À obtenir avant import : confirmer que le dossier/fichier Decathlon est effectivement visible dans le compte SFTP, télécharger un échantillon réel, puis valider le mapping XML et la présence des champs nécessaires.
+Un lien affilié individuel est visible dans le tableau de bord Rakuten. Cela prouve que le compte peut produire des liens trackés, mais ne prouve ni que le produit est présent dans le flux XML, ni qu'une comparaison exacte est possible. Les détails du lien et les identifiants de suivi restent dans le compte Rakuten et ne sont pas recopiés dans le dépôt.
+
+### Blocage avant import
+
+Le support a fourni les identifiants par e-mail. Ils ne doivent jamais être copiés dans le dépôt, les logs ou le site public. Les workflows consultés ne contiennent pas encore d'étape d'import SFTP ni de configuration Rakuten documentée. L'existence éventuelle de secrets dans les paramètres GitHub n'est pas vérifiable avec l'accès actuel ; aucune connexion SFTP n'a donc été tentée.
+
+Pour automatiser le téléchargement, le propriétaire devra, s'il le souhaite, ajouter les valeurs reçues du support dans les secrets GitHub Actions sous les noms :
+- `RAKUTEN_SFTP_HOST`
+- `RAKUTEN_SFTP_USER`
+- `RAKUTEN_SFTP_PASSWORD`
+
+Les identifiants du marchand et de l'éditeur peuvent être conservés comme variables de configuration non secrètes. Après cette configuration seulement, l'intégration devra :
+1. lister le répertoire sans afficher d'identifiants ;
+2. télécharger un échantillon en mode binaire ;
+3. vérifier l'archive gzip et le XML ;
+4. identifier les champs réellement présents et leurs règles de mise à jour/suppression ;
+5. tester le parseur sur un échantillon avant tout import public ;
+6. vérifier les images, les prix EUR, les liens, la fraîcheur et les variantes exactes.
+
+Aucun prix ne doit être publié sans source, date, devise, variante exacte et frais de livraison connus ou clairement signalés.
 
 ## Nicchia Luxury
 
-- Acceptation du programme confirmée le 5 novembre 2026.
-- Le message renvoie vers les liens disponibles dans le tableau de bord Rakuten.
-- Aucun flux catalogue, MID ou accès Product Catalog n'est confirmé dans les e-mails examinés.
+- L'acceptation du programme a été confirmée le 5 novembre 2026.
+- Le message d'acceptation renvoie vers les liens disponibles dans le tableau de bord.
+- Aucun flux catalogue, identifiant de catalogue ou accès Product Catalog n'est confirmé dans les e-mails examinés.
 
-À vérifier dans le tableau de bord : présence d'un catalogue produit ou disponibilité de simples liens de tracking.
+À ce stade, Nicchia Luxury peut fournir des liens affiliés individuels, mais aucun produit ni prix ne doit être importé sans fiche et source vérifiables.
 
-## Intégration Prix Malin
+## Séparation des sources
 
-Le pipeline Awin existant doit rester séparé. Le moteur direct `price-engine/products.json` et `data/merchant-offers.json` sont actuellement vides. Ne pas inventer de produits, de prix ou d'identifiants.
+Le pipeline Awin existant reste séparé de Rakuten. Un flux Awin direct accessible n'est pas une preuve d'adhésion à chacun des programmes marchands présents dans le fichier. Les demandes en attente ne sont pas des partenariats approuvés.
 
-L'import Rakuten devra normaliser les offres uniquement après inspection d'un véritable export, privilégier EAN/GTIN, conserver marchand, prix EUR, URL produit, image, disponibilité et date de collecte, et écarter les offres incomplètes ou trop anciennes.
+Les fichiers de prix directs du moteur Prix Malin sont actuellement vides. Les données PrixTracker restent des références historiques et ne doivent jamais être présentées comme des prix actuels. Aucun produit, prix, GTIN ou frais de livraison ne doit être inventé.
 
-Les accès AFTP doivent être renouvelés puis stockés exclusivement dans les secrets GitHub Actions. Aucun catalogue brut ni identifiant privé ne doit être publié dans le site. Aucun déploiement ne doit être déclenché avant validation du parseur et des données réelles.
+## Règle de déploiement
 
-
-## Premier lien affilié Decathlon récupéré depuis le tableau de bord
-
-- Produit affiché : kit durite de frein hydraulique Tektro M530, 1800 mm.
-- SKU affiché : `342967`.
-- Prix affiché dans l'interface Rakuten au moment de la capture : 11,99 € (prix à revalider avant publication).
-- Identifiant du lien Rakuten : `448063907004039373605027`.
-- URL affiliée fournie par le compte Prix Malin :
-  `https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2079203.448063907004039373605027&type=2&murl=https%3a%2f%2fwww.decathlon.fr%2fp%2fkit-durite-de-frein-hydraulique-tektro-m-530-1800mm-olive%2f342967%2fm8767652`
-
-Ce lien est une destination affiliée individuelle. Il ne prouve pas à lui seul que le produit existe déjà comme fiche dans le catalogue Prix Malin, ni qu'il est présent dans le flux XML. Ne pas créer une comparaison de prix ni publier le prix de 11,99 € sans date de collecte, frais de livraison et identité produit validée. Il peut servir de CTA « Acheter chez Decathlon » lorsqu'une fiche produit exacte et son image autorisée seront intégrées.
-
-
-## Précisions issues de la documentation technique officielle Rakuten
-
-- Le Product Catalog utilise un compte SFTP sur `aftp.linksynergy.com`. Le mode binaire est requis pour les archives compressées ; Rakuten recommande SFTP plutôt que FTP simple.
-- Les fichiers ont trois parties : en-tête, données produits, pied de fichier (nombre d'articles).
-- Le fichier XML complet attendu pour nos identifiants est `44806_4768926_mp.xml.gz`; le différentiel est `44806_4768926_mp_delta.xml.gz`. Les noms sont déduits de la convention documentée et restent à confirmer dans le répertoire réel.
-- Les données Rakuten comprennent notamment le SKU, nom, catégories, URL produit, URL image, URL d'achat affiliée (si fournie), descriptions, prix catalogue et prix soldé. Le GTIN/EAN et les frais de port ne sont pas garantis par la liste de champs documentée.
-- Les fichiers différentiels peuvent inclure des suppressions ; un import devra traiter explicitement les enregistrements supprimés et refaire régulièrement un téléchargement complet.
-- Les liens XML contenant `&amp;` doivent être décodés en `&` avant utilisation.
-- La documentation indique une limite de cinq connexions simultanées maximum au serveur.
-
-Source : documentation technique officielle « Product Catalog Data Feed — Implementation Guidelines for Publishers », liée à l'article Rakuten « Aperçu du catalogue de produits ».
+Aucun secret, identifiant de connexion, fichier brut ou mot de passe ne doit être publié dans le dépôt ou le site. Aucun déploiement d'offres Rakuten ne doit être effectué avant réception d'un vrai fichier, validation du parseur, tests de non-régression et vérification publique des données.
