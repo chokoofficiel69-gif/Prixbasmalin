@@ -254,6 +254,21 @@ def main():
             "offers": offers,
         })
 
+    previous = None
+    if OUTPUT.exists():
+        try:
+            previous = json.loads(OUTPUT.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            raise ValueError("Flux précédent illisible : conservation de la dernière version, aucune réécriture") from exc
+        if not isinstance(previous, dict) or not isinstance(previous.get("products"), list) or not isinstance(previous.get("offers"), list):
+            raise ValueError("Flux précédent invalide : conservation de la dernière version, aucune réécriture")
+        if not products:
+            if previous["products"] or previous["offers"]:
+                print("Aucune nouvelle offre admissible : le dernier flux vérifié est conservé.")
+            else:
+                print("Aucune nouvelle offre admissible et le flux précédent est déjà vide : aucune réécriture.")
+            return
+
     result = {
         "version": 1,
         "generated_at": now.isoformat().replace("+00:00", "Z"),
@@ -262,14 +277,8 @@ def main():
         "products": products,
         "offers": [offer for product in products for offer in product["offers"]],
         "errors": errors,
-        "previous_generated_at": None,
+        "previous_generated_at": previous.get("generated_at") if previous else None,
     }
-    if OUTPUT.exists():
-        try:
-            previous = json.loads(OUTPUT.read_text(encoding="utf-8"))
-            result["previous_generated_at"] = previous.get("generated_at")
-        except (json.JSONDecodeError, OSError):
-            pass
     OUTPUT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Flux généré : {len(products)} produit(s), {sum(len(p['offers']) for p in products)} offre(s) admissible(s), {len(errors)} avertissement(s).")
     if not products:
