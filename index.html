@@ -248,12 +248,51 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 .pm-history-lowest{color:#9ee0ad!important}
 .pm-history-source{margin:8px 0 0;color:#929eae;font-size:10px;line-height:1.45}
 @media(max-width:760px){.pm-history-comparisons{margin:12px 0;padding:13px;border-radius:15px}.pm-history-comparisons .section-head{display:block}.pm-history-badge{margin-top:8px;font-size:8px}.pm-history-card{flex-basis:84vw}}
+.pm-discovery-card{display:flex;flex-direction:column;gap:7px;padding:10px}
+.pm-discovery-image{display:block;width:100%;height:145px;object-fit:contain;background:#fff;border-radius:9px;padding:8px}
+.pm-discovery-brand{font-size:9px;color:#e7bd63;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.pm-discovery-card h3{margin:0;font-size:13px;line-height:1.3}
+.pm-discovery-card .pm-history-meta{margin:0;line-height:1.4}
+.pm-discovery-link{display:block;margin-top:auto;padding:10px 8px;border-radius:9px;background:linear-gradient(100deg,#ff9b21,#ff5b0b);color:#fff;text-align:center;font-size:11px;font-weight:900}
+.pm-history-empty{color:#dce3ec;font-size:13px;padding:12px}
+@media(max-width:760px){.pm-discovery-image{height:125px}.pm-discovery-card{flex-basis:72vw}}
 </style>
 <script id="pm-history-comparisons-loader">
 (async function(){
  const status=document.getElementById("pm-history-status");
  const list=document.getElementById("pm-history-list");
  if(!status||!list)return;
+ const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
+ const safeUrl=value=>{try{const u=new URL(value,location.origin);return /^https?:$/.test(u.protocol)?u.href:""}catch(_){return ""}};
+ async function showProducts(message){
+  status.textContent=message;
+  try{
+   const response=await fetch("/data/home-products.json",{cache:"no-store"});
+   if(!response.ok)throw new Error("Catalogue indisponible");
+   const feed=await response.json();
+   const products=Array.isArray(feed.products)?feed.products:[];
+   const chosen=products.filter(p=>p&&p.name&&safeUrl(p.image)&&safeUrl(p.sourceUrl)).slice(0,12);
+   if(!chosen.length){
+    list.innerHTML='<p class="pm-history-empty">Les produits illustrés seront affichés dès que le catalogue sera disponible.</p>';
+    return;
+   }
+   const fragment=document.createDocumentFragment();
+   chosen.forEach(product=>{
+    const card=document.createElement("article");card.className="pm-history-card pm-discovery-card";
+    const img=document.createElement("img");img.className="pm-discovery-image";img.src=safeUrl(product.image);img.alt=product.name;img.loading="lazy";img.decoding="async";
+    img.addEventListener("error",()=>card.remove(),{once:true});
+    const brand=document.createElement("span");brand.className="pm-discovery-brand";brand.textContent=product.brand||product.category||"Sélection Prix Malin";
+    const title=document.createElement("h3");title.textContent=product.name;
+    const note=document.createElement("p");note.className="pm-history-meta";note.textContent="Prix non vérifié en direct — consultez le marchand.";
+    const link=document.createElement("a");link.className="pm-discovery-link";link.href=safeUrl(product.sourceUrl);link.target="_blank";link.rel=link.href.includes("amazon.")?"sponsored nofollow noopener noreferrer":"noopener noreferrer";link.textContent="Voir le prix chez le marchand ↗";
+    card.append(img,brand,title,note,link);fragment.append(card);
+   });
+   list.replaceChildren(fragment);
+  }catch(error){
+   list.innerHTML='<p class="pm-history-empty">Le catalogue ne répond pas pour le moment. Réessayez dans quelques instants.</p>';
+   console.warn("Catalogue de secours Prix Malin :",error);
+  }
+ }
  try{
   const response=await fetch("/data/prixtracker-prices.json",{cache:"no-store"});
   if(!response.ok)throw new Error("Flux historique indisponible");
@@ -264,27 +303,23 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    if(!row||!row.product_id||!row.merchant||!row.date)continue;
    const key=String(row.product_id)+"|"+String(row.date);
    if(!groups.has(key))groups.set(key,{product:row.product||"Produit",brand:row.brand||"",date:row.date,offers:[]});
-   const group=groups.get(key);
-   const price=Number(row.min_price_eur_ttc);
+   const group=groups.get(key),price=Number(row.min_price_eur_ttc);
    if(Number.isFinite(price)&&price>0)group.offers.push({merchant:String(row.merchant),price});
   }
   const comparisons=[...groups.values()]
    .filter(g=>new Set(g.offers.map(o=>o.merchant)).size>=2)
    .map(g=>({...g,offers:[...new Map(g.offers.map(o=>[o.merchant,o])).values()].sort((a,b)=>a.price-b.price)}))
-   .sort((a,b)=>b.date.localeCompare(a.date)||a.product.localeCompare(b.product,"fr"))
-   .slice(0,12);
+   .sort((a,b)=>b.date.localeCompare(a.date)||a.product.localeCompare(b.product,"fr")).slice(0,12);
   if(!comparisons.length){
-   status.textContent="Aucune comparaison multi-marchands exploitable pour le moment. Les relevés isolés ne sont pas présentés comme des comparaisons.";
+   await showProducts("Aucune comparaison multi-marchands vérifiée n’est disponible pour l’instant. Voici des produits illustrés à consulter — aucun prix n’est inventé.");
    return;
   }
   status.textContent=comparisons.length+" comparaisons historiques chargées — classées par date de relevé.";
-  const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
   const fragment=document.createDocumentFragment();
   for(const group of comparisons){
    const card=document.createElement("article");card.className="pm-history-card";
    const title=document.createElement("h3");title.textContent=group.product;
-   const meta=document.createElement("p");meta.className="pm-history-meta";
-   meta.textContent=(group.brand?group.brand+" · ":"")+"Relevé du "+new Date(group.date+"T12:00:00").toLocaleDateString("fr-FR");
+   const meta=document.createElement("p");meta.className="pm-history-meta";meta.textContent=(group.brand?group.brand+" · ":"")+"Relevé du "+new Date(group.date+"T12:00:00").toLocaleDateString("fr-FR");
    card.append(title,meta);
    group.offers.forEach((offer,index)=>{
     const line=document.createElement("div");line.className="pm-history-offer";
@@ -298,8 +333,8 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   }
   list.replaceChildren(fragment);
  }catch(error){
-  status.textContent="Les comparaisons historiques ne sont pas disponibles actuellement. Aucune donnée estimée n’est affichée.";
   console.warn("Comparaisons historiques Prix Malin :",error);
+  await showProducts("Les relevés de comparaison ne répondent pas. Voici les produits illustrés disponibles, avec vérification du prix chez le marchand.");
  }
 })();
 </script>
