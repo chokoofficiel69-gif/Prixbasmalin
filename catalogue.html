@@ -5725,6 +5725,20 @@ function pmHasRealProductImage(product){
   const image=String(product&&product.image||"");
   return /^https:\/\//i.test(image) && !/unsplash\.com/i.test(image);
 }
+function pmAwinMerchantUpdatedAt(value){
+  const raw=String(value||"").trim();
+  if(!raw)return NaN;
+  // Awin last_updated may be timezone-naive; interpret it as UTC, not the visitor's local timezone.
+  const normalized=/^\d{4}-\d{2}-\d{2}(?: \d{2}:\d{2}:\d{2})?$/.test(raw)
+    ?raw.replace(" ","T")+"Z"
+    :raw;
+  return Date.parse(normalized);
+}
+function pmAwinPriceIsFresh(value,now=Date.now()){
+  const updatedAt=pmAwinMerchantUpdatedAt(value);
+  const age=now-updatedAt;
+  return Number.isFinite(updatedAt)&&age>=-5*60*1000&&age<=48*60*60*1000;
+}
 async function pmLoadAwinCatalogue(){
   const statusEl=document.getElementById("pmAwinFeedStatus");
   const setStatus=message=>{if(statusEl)statusEl.textContent=message;};
@@ -5748,6 +5762,14 @@ async function pmLoadAwinCatalogue(){
       Number.isFinite(Number(product.priceValue))&&Number(product.priceValue)>0&&
       /^https:\/\//i.test(String(product.sourceUrl||""))&&String(product.merchant||"").trim()
     );
+    const displayProducts=feedProducts.map(product=>{
+      const merchantUpdatedAt=product.merchantUpdatedAt||
+        (Array.isArray(product.offers)?product.offers.map(offer=>offer&&offer.merchantUpdatedAt).find(Boolean):"")||"";
+      const priceFresh=pmAwinPriceIsFresh(merchantUpdatedAt);
+      return priceFresh
+        ?{...product,merchantUpdatedAt,priceStatus:"fresh"}
+        :{...product,merchantUpdatedAt:merchantUpdatedAt||null,priceStatus:"stale",priceValue:null,price:"Prix à vérifier chez le marchand"};
+    });
     const merchants=new Set(feedProducts.map(product=>product.merchant).filter(Boolean));
     const multiMerchant=feedProducts.filter(product=>
       new Set((product.offers||[]).map(offer=>String(offer.merchant||"").trim().toLowerCase()).filter(Boolean)).size>1
@@ -5763,7 +5785,7 @@ async function pmLoadAwinCatalogue(){
     status+=" Prix en EUR fournis par le flux ; TVA non explicitée. Livraison et disponibilité ne sont indiquées que si le flux les fournit.";
     setStatus(status);
     const known=new Map(productData.map(product=>[product.id,product]));
-    feedProducts.forEach(product=>{
+    displayProducts.forEach(product=>{
       if(product.isAwinProduct&&!product.imageSource&&product.sourceUrl){
         product.imageSource=product.image;
         product.imageSourceName=product.merchant||"Marchand Awin";
@@ -5793,23 +5815,27 @@ async function pmLoadAwinCatalogue(){
       productData.push(product);
       known.set(product.id,product);
     });
-    pmAwinVerifiedProducts=feedProducts.map(product=>{
+    pmAwinVerifiedProducts=displayProducts.map(product=>{
       const sourceOffers=Array.isArray(product.offers)&&product.offers.length?product.offers:[{
-        merchant:product.merchant,priceValue:product.priceValue,shippingPriceValue:product.shippingPriceValue,url:product.sourceUrl
+        merchant:product.merchant,priceValue:product.priceValue,shippingPriceValue:product.shippingPriceValue,url:product.sourceUrl,
+        merchantUpdatedAt:product.merchantUpdatedAt
       }];
       return {
         id:product.id,
         name:product.name,
         image:product.image,
-        offers:sourceOffers.map(offer=>({
-          merchant:offer.merchant,
-          price_eur:Number(offer.priceValue),
-          shipping_price_eur:offer.shippingPriceValue===null||offer.shippingPriceValue===undefined?null:Number(offer.shippingPriceValue),
-          url:offer.url,
-          checked_at:product.fetchedAt||feed.fetched_at,
-          freshness_max_age_hours:48,
-          stale:false
-        }))
+        offers:sourceOffers.map(offer=>{
+          const checkedAt=offer.merchantUpdatedAt||product.merchantUpdatedAt;
+          return {
+            merchant:offer.merchant,
+            price_eur:Number(offer.priceValue),
+            shipping_price_eur:offer.shippingPriceValue===null||offer.shippingPriceValue===undefined?null:Number(offer.shippingPriceValue),
+            url:offer.url,
+            checked_at:checkedAt,
+            freshness_max_age_hours:48,
+            stale:!pmAwinPriceIsFresh(checkedAt)
+          };
+        })
       };
     });
     renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts]);
@@ -6088,7 +6114,7 @@ function render(){
     price.className="price";
     const hasVerifiedPrice=Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0;
     const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(value));
-    price.textContent=hasVerifiedPrice?money(p.priceValue):"Prix à consulter chez le marchand";
+    price.textContent=hasVerifiedPrice?money(p.priceValue):(p.priceStatus==="stale"?"Prix à vérifier chez le marchand":"Prix à consulter chez le marchand");
     const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl}]):[];
     const merchant=document.createElement("div");
     merchant.className="merchant";
@@ -6100,10 +6126,12 @@ function render(){
     const availabilityText=p.availability==="in_stock"?"stock indiqué":p.availability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
     merchant.textContent=hasVerifiedPrice
       ?(p.merchant||"Marchand")+" • prix du flux Awin en EUR"+(updateDate&&!Number.isNaN(updateDate.getTime())?" • "+updateLabel+" le "+updateDate.toLocaleDateString("fr-FR"):"")+" • "+shippingText+" • "+availabilityText
-      :(p.merchant||"Lien marchand")+" • tarif non récupéré en direct";
+      :p.priceStatus==="stale"
+        ?(p.merchant||"Marchand")+" • prix à confirmer chez le marchand"+(updateDate&&!Number.isNaN(updateDate.getTime())?" • dernière mise à jour connue le "+updateDate.toLocaleDateString("fr-FR"):" • date de mise à jour non fournie")
+        :(p.merchant||"Lien marchand")+" • tarif non récupéré en direct";
     const heading=document.createElement("div");
     heading.className="discovery-compare-heading";
-    heading.textContent=hasVerifiedPrice?(feedOffers.length>1?"Offres marchandes à comparer":"Offre unique — pas de comparatif multi-marchands"):"Recherche chez le marchand";
+    heading.textContent=hasVerifiedPrice?(feedOffers.length>1?"Offres marchandes à comparer":"Offre unique — pas de comparatif multi-marchands"):(p.priceStatus==="stale"?"Prix à confirmer chez le marchand":"Recherche chez le marchand");
     const list=document.createElement("div");
     list.className="discovery-compare pm-offers-horizontal";
     feedOffers.forEach(offer=>{
