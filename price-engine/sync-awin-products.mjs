@@ -131,7 +131,7 @@ function normalizedGtin(row) {
   return isValidGtin(value) ? value : "";
 }
 function normalizedMpn(row) {
-  return firstField(row, MPN_FIELDS).replace(/\\s+/g, " ").trim();
+  return firstField(row, MPN_FIELDS).replace(/\s+/g, " ").trim();
 }
 function parseCsv(text) {
   const rows = [];
@@ -636,6 +636,10 @@ function runSelfTests() {
       throw new Error("TEST ÉCHEC : catégorie attendue " + expected + " pour " + JSON.stringify(row));
     }
   }
+  const normalizedMpnValue = normalizedMpn({ manufacturer_part_number: "  AB-X1   Pro  " });
+  if (normalizedMpnValue !== "AB-X1 Pro") {
+    throw new Error("TEST ÉCHEC : les espaces du MPN doivent être normalisés.");
+  }
   if (!isValidGtin("4006381333931") || isValidGtin("4006381333932")) {
     throw new Error("TEST ÉCHEC : la validation du chiffre de contrôle GTIN est incorrecte.");
   }
@@ -713,5 +717,6 @@ const output = {
 await fs.mkdir(path.dirname(OUTPUT), { recursive: true });
 await fs.writeFile(OUTPUT, JSON.stringify(output) + "\n", "utf8");
 log(products.length + " fiche(s) produits, " + rawOffers.length + " offre(s), " + output.counts.brands + " marque(s).");
+log("Qualité du flux Awin : " + JSON.stringify(output.counts));
 log("Catalogue autorisé mis à jour : data/awin-products.json");
 }
