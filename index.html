@@ -267,15 +267,34 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
  async function showProducts(message){
   status.textContent=message;
   try{
-   const response=await fetch("/data/home-products.json",{cache:"no-store"});
-   if(!response.ok)throw new Error("Catalogue indisponible");
-   const feed=await response.json();
-   const products=Array.isArray(feed.products)?feed.products:[];
-   const chosen=products.filter(p=>p&&p.name&&safeUrl(p.image)&&safeUrl(p.sourceUrl)&&!/^https:\/\/images\.unsplash\.com\//i.test(String(p.image))).slice(0,12);
+   const [homeResponse,awinResponse,rakutenResponse]=await Promise.all([
+    fetch("/data/home-products.json",{cache:"no-store"}).catch(()=>null),
+    fetch("/data/awin-products.json",{cache:"no-store"}).catch(()=>null),
+    fetch("/data/rakuten-products.json",{cache:"no-store"}).catch(()=>null)
+   ]);
+   const home=homeResponse&&homeResponse.ok?await homeResponse.json().catch(()=>null):null;
+   const awin=awinResponse&&awinResponse.ok?await awinResponse.json().catch(()=>null):null;
+   const rakuten=rakutenResponse&&rakutenResponse.ok?await rakutenResponse.json().catch(()=>null):null;
+   const now=Date.now(),maxAge=48*60*60*1000;
+   const fresh=value=>{const t=Date.parse(value||"");const age=now-t;return Number.isFinite(t)&&age>=-5*60*1000&&age<=maxAge;};
+   const awinFresh=awin?.status==="ok"&&fresh(awin.fetched_at);
+   const rakutenFresh=rakuten?.status==="ok"&&fresh(rakuten.generated_at);
+   const liveAwin=awinFresh?(Array.isArray(awin.products)?awin.products:[]).filter(p=>
+    p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.merchantUpdatedAt)&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
+   ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.merchantUpdatedAt,liveSource:"Awin"})):[];
+   const liveRakuten=rakutenFresh?(Array.isArray(rakuten.products)?rakuten.products:[]).filter(p=>
+    p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.sourceCreatedAt||rakuten.generated_at)&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
+   ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.sourceCreatedAt||rakuten.generated_at,liveSource:"Rakuten"})):[];
+   const live=[...liveAwin,...liveRakuten].sort((a,b)=>a.livePrice-b.livePrice);
+   const fallback=Array.isArray(home?.products)?home.products:[];
+   const chosen=(live.length?live:fallback.filter(p=>p&&p.name&&safeUrl(p.image)&&safeUrl(p.sourceUrl)&&!/^https:\/\/images\.unsplash\.com\//i.test(String(p.image)))).slice(0,12);
    if(!chosen.length){
     list.innerHTML='<p class="pm-history-empty">La sélection de produits est en cours de mise à jour.</p>';
     return;
    }
+   status.textContent=live.length
+    ?"Offres marchandes réelles et datées — prix et disponibilité à reconfirmer chez le vendeur."
+    :message;
    const fragment=document.createDocumentFragment();
    chosen.forEach(product=>{
     const card=document.createElement("article");card.className="pm-history-card pm-discovery-card";
@@ -283,8 +302,13 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     img.addEventListener("error",()=>card.remove(),{once:true});
     const brand=document.createElement("span");brand.className="pm-discovery-brand";brand.textContent=product.brand||product.category||"Sélection Prix Malin";
     const title=document.createElement("h3");title.textContent=product.name;
-    const note=document.createElement("p");note.className="pm-history-meta";note.textContent="Prix non vérifié en direct — consultez le marchand.";
-    const link=document.createElement("a");link.className="pm-discovery-link";link.href=safeUrl(product.sourceUrl);link.target="_blank";link.rel=link.href.includes("amazon.")?"sponsored nofollow noopener noreferrer":"noopener noreferrer";link.textContent="Voir le prix chez le marchand ↗";
+    const note=document.createElement("p");note.className="pm-history-meta";
+    if(Number(product.livePrice)>0){
+     note.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(product.livePrice)+" chez "+product.liveMerchant+" · relevé "+new Date(product.liveCheckedAt).toLocaleDateString("fr-FR");
+    }else{
+     note.textContent="Prix non vérifié en direct — consultez le marchand.";
+    }
+    const link=document.createElement("a");link.className="pm-discovery-link";link.href=safeUrl(product.liveUrl||product.sourceUrl);link.target="_blank";link.rel="sponsored nofollow noopener noreferrer";link.textContent=Number(product.livePrice)>0?"Voir l’offre chez "+(product.liveMerchant||"le marchand")+" ↗":"Voir le prix chez le marchand ↗";
     card.append(img,brand,title,note,link);fragment.append(card);
    });
    list.replaceChildren(fragment);
