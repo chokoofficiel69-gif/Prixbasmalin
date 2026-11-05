@@ -1,0 +1,64 @@
+name: Importer les catalogues Rakuten (Decathlon + Nicchia)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 3 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rakuten-catalogue-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Vérifier les identifiants SFTP Rakuten
+        env:
+          RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
+          RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
+        run: |
+          test -n "$RAKUTEN_SFTP_USER" || { echo "::error::Secret RAKUTEN_SFTP_USER manquant"; exit 1; }
+          test -n "$RAKUTEN_SFTP_PASSWORD" || { echo "::error::Secret RAKUTEN_SFTP_PASSWORD manquant"; exit 1; }
+          curl --version | grep -qi sftp || { echo "::error::curl de ce runner ne prend pas SFTP en charge"; exit 1; }
+      - name: Télécharger les deux flux officiels en SFTP
+        env:
+          RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
+          RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
+        run: |
+          umask 077
+          printf 'machine aftp.linksynergy.com login %s password %s\n' "$RAKUTEN_SFTP_USER" "$RAKUTEN_SFTP_PASSWORD" > "$HOME/.netrc-rakuten"
+          curl --fail --show-error --silent --netrc-file "$HOME/.netrc-rakuten" "sftp://aftp.linksynergy.com/44806_4768926_mp.xml.gz" --output /tmp/44806_4768926_mp.xml.gz
+          curl --fail --show-error --silent --netrc-file "$HOME/.netrc-rakuten" "sftp://aftp.linksynergy.com/54306_4768926_1_cmp.xml.gz" --output /tmp/54306_4768926_1_cmp.xml.gz
+          rm -f "$HOME/.netrc-rakuten"
+          gzip -t /tmp/44806_4768926_mp.xml.gz
+          gzip -t /tmp/54306_4768926_1_cmp.xml.gz
+      - name: Convertir et contrôler les fiches produits
+        run: |
+          python3 scripts/import-rakuten-catalogue.py --directory /tmp --output data/rakuten-products.json --decathlon-limit 5000
+          python3 - <<'PY'
+          import json,sys
+          d=json.load(open('data/rakuten-products.json',encoding='utf-8'))
+          p=d['products']
+          assert p and all(x.get('image','').startswith('https://') for x in p), 'Image manquante'
+          assert all(float(x.get('priceValue',0))>0 for x in p), 'Prix manquant'
+          assert all(x.get('sourceUrl','').startswith('https://click.linksynergy.com/') for x in p), 'Lien affilié manquant'
+          print('Contrôle OK:',len(p),'produits, photos/prix/liens HTTPS présents')
+          PY
+      - name: Enregistrer le catalogue public
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/rakuten-products.json
+          if git diff --cached --quiet; then
+            echo "Catalogue identique : aucun commit nécessaire."
+          else
+            git commit -m "Refresh authorized Rakuten product catalogues"
+            git push
+          fi
