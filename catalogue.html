@@ -5958,8 +5958,15 @@ function render(){
     if(pa.multiMerchant!==pb.multiMerchant)return Number(pb.multiMerchant)-Number(pa.multiMerchant);
     if(pa.hasPrice!==pb.hasPrice)return Number(pb.hasPrice)-Number(pa.hasPrice);
     if(pa.shippingKnown!==pb.shippingKnown)return Number(pb.shippingKnown)-Number(pa.shippingKnown);
-    if(pa.total!==pb.total)return pa.total-pb.total;
+    // Recherche : le moins cher d'abord. Navigation : vitrine (photos, fiches les plus complètes) plutôt que les articles à 1 €.
+    if(q&&pa.total!==pb.total)return pa.total-pb.total;
     if(pa.hasImage!==pb.hasImage)return Number(pb.hasImage)-Number(pa.hasImage);
+    if(!q){
+      const richness=product=>(Array.isArray(product.images)?Math.min(product.images.length,5):0)+(product.brand?1:0)+(Number(product.priceValue)>=10?2:0);
+      const rich=richness(b)-richness(a);
+      if(rich)return rich;
+      if(pa.total!==pb.total)return pa.total-pb.total;
+    }
     return a.name.localeCompare(b.name,"fr");
   });
   productsEl.innerHTML="";
@@ -6105,119 +6112,119 @@ function render(){
       thumb.addEventListener("click",()=>{img.dataset.pmHandlingError="0";img.style.display="";const unavailable=photo.querySelector(".pm-photo-unavailable");if(unavailable)unavailable.remove();photo.classList.add("pm-photo-loading");if(imageObserver){imageObserver.disconnect();imageObserver=null;}img.src=url;startImageFallbackTimer();gallery.querySelectorAll(".pm-awin-thumb").forEach(button=>button.classList.toggle("active",button===thumb));});gallery.append(thumb);
     });
 
-    const name=document.createElement("div");
+    // Carte produit façon comparateur : photo, prix mis en avant, bouton marchand, tableau comparatif, détails.
+    card.classList.add("pm-card2");
+    const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(value));
+    const hasVerifiedPrice=Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0;
+    const updateValue=p.merchantUpdatedAt||null;
+    const priceDateValue=updateValue||p.feedFetchedAt||null;
+    const priceDateParsed=priceDateValue?new Date(String(priceDateValue).replace(" ","T")):null;
+    const priceDateText=priceDateParsed&&Number.isFinite(priceDateParsed.getTime())?priceDateParsed.toLocaleDateString("fr-FR"):"";
+    const shippingOf=value=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&Number(value)>=0?Number(value):null;
+    const shippingValue=shippingOf(p.shippingPriceValue);
+    const availabilityLabel=value=>{const v=String(value||"").toLowerCase().replace(/[\s_]+/g,"-");return v==="in-stock"||v==="available"?"En stock selon le marchand":v==="out-of-stock"?"Rupture indiquée":"À vérifier chez le marchand";};
+    const categoryNames={tech:"High-Tech",fashion:"Mode",home:"Maison",beauty:"Beauté & Santé",kids:"Bébé & Enfant",sport:"Sport & Loisirs",auto:"Auto & Moto",diy:"Bricolage",other:"Divers"};
+    const body=document.createElement("div");body.className="pm-c2-body";
+    const top=document.createElement("div");top.className="pm-c2-top";
+    const merchantBadge=document.createElement("span");merchantBadge.className="pm-c2-merchant";merchantBadge.textContent=p.merchant||p.brand||"Sélection Prix Malin";
+    const categoryBadge=document.createElement("span");categoryBadge.className="pm-c2-cat";categoryBadge.textContent=categoryNames[p.category]||"Divers";
+    top.append(merchantBadge,categoryBadge);
+    const name=document.createElement("h3");
     name.className="name";
     name.textContent=p.name+(p._pmRelatedSuggestion?" • suggestion proche":"");
-    const desc=document.createElement("div");
-    desc.className="desc";
-    desc.textContent=p.desc;
-    const brands=document.createElement("div");
-    brands.className="pm-brand-suggestions";
-    const brandsLabel=document.createElement("span");
-    brandsLabel.textContent="Marques à comparer";
-    const brandsList=document.createElement("div");
-    brandsList.className="pm-brand-links";
-    brandsFor(p).forEach(brand=>{
-      const link=document.createElement("a");
-      link.className="pm-brand-chip";
-      link.textContent=brand;
-      link.href="https://www.amazon.fr/s?k="+encodeURIComponent(brand+" "+p.query)+"&tag=prixbasmalin2-21";
-      link.target="_blank";
-      link.rel="noopener noreferrer sponsored";
-      link.setAttribute("aria-label","Voir les résultats Amazon pour "+brand+" "+p.name);
-      brandsList.append(link);
-    });
-    brands.append(brandsLabel,brandsList);
+    // Bloc prix
+    const priceBox=document.createElement("div");priceBox.className="pm-c2-pricebox";
+    const price=document.createElement("div");
+    price.className="price pm-c2-price";
+    price.textContent=hasVerifiedPrice?money(p.priceValue):"Prix chez le marchand";
+    const shippingLine=document.createElement("div");shippingLine.className="pm-c2-shipping";
+    shippingLine.textContent=hasVerifiedPrice?(shippingValue===null?"livraison à confirmer":shippingValue===0?"Livraison gratuite":"+ "+money(shippingValue)+" de livraison"):"Consultez l’offre pour le prix du jour";
+    priceBox.append(price,shippingLine);
+    const note=document.createElement("p");
+    note.className="discovery-disclaimer pm-c2-date";
+    note.textContent=!hasVerifiedPrice?"Prix non communiqué par le flux : il s’affiche chez le marchand.":
+      (p.priceStatus==="dated"&&priceDateText?(p.merchantUpdatedAt?"Prix indiqué par le marchand le "+priceDateText:"Prix du flux marchand récupéré le "+priceDateText)+" — à confirmer sur son site.":
+      "Prix indicatif : consultez le vendeur pour confirmer l’offre.");
     const amazonButton=document.createElement("a");
-    amazonButton.className="offer";
-    amazonButton.textContent="Voir chez "+(p.merchant||"le marchand")+" ↗";
+    amazonButton.className="offer pm-c2-cta";
+    amazonButton.textContent="Voir l’offre chez "+(p.merchant||"le marchand")+" ↗";
     amazonButton.href=p.sourceUrl;
     amazonButton.target="_blank";
     amazonButton.rel="noopener noreferrer sponsored";
     amazonButton.setAttribute("aria-label","Voir "+p.name+" chez "+(p.merchant||"le marchand"));
-    const historyLink=p.category==="tech"?document.createElement("a"):null;
-    if(historyLink){historyLink.className="pm-history-link";historyLink.href="/historique-prix.html?q="+encodeURIComponent(p.name);historyLink.textContent="Voir l’historique PrixTracker ↗";historyLink.setAttribute("aria-label","Consulter les relevés historiques PrixTracker pour "+p.name);}
-    const price=document.createElement("div");
-    price.className="price";
-    const hasVerifiedPrice=Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0;
-    const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(value));
-    price.textContent=hasVerifiedPrice?money(p.priceValue):(p.priceStatus==="stale"?"Prix à vérifier chez le marchand":"Prix à consulter chez le marchand");
-    const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl}]):[];
-    const merchant=document.createElement("div");
-    merchant.className="merchant";
-    const updateValue=p.merchantUpdatedAt||null;
-    const updateDate=updateValue?new Date(updateValue):null;
-    const updateLabel=p.merchantUpdatedAt?"mise à jour marchand":"import du flux";
-    const priceDateValue=p.merchantUpdatedAt||p.feedFetchedAt||null;
-    const priceDateParsed=priceDateValue?new Date(String(priceDateValue).replace(" ","T")):null;
-    const priceDateText=priceDateParsed&&Number.isFinite(priceDateParsed.getTime())?priceDateParsed.toLocaleDateString("fr-FR"):"";
-    const shippingKnown=p.shippingPriceValue!==null&&p.shippingPriceValue!==undefined&&Number.isFinite(Number(p.shippingPriceValue))&&Number(p.shippingPriceValue)>=0;
-    const shippingText=shippingKnown?"livraison "+money(p.shippingPriceValue):"livraison à confirmer";
-    const availabilityText=p.availability==="in_stock"?"stock indiqué":p.availability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
-    merchant.textContent=p.merchant||"Marchand";
-    const heading=document.createElement("div");
+    // Tableau comparatif : offres du flux classées par total, puis recherche Amazon (lien affilié, prix affiché chez Amazon).
+    const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl,shippingPriceValue:p.shippingPriceValue}]):[];
+    const rows=feedOffers.map(offer=>{
+      const base=Number(offer.priceValue??offer.price_eur);
+      const ship=shippingOf(offer.shippingPriceValue??offer.shipping_price_eur??p.shippingPriceValue);
+      return {merchant:offer.merchant||offer.merchant_name||p.merchant||"Marchand",price:Number.isFinite(base)&&base>0?base:null,shipping:ship,total:Number.isFinite(base)&&base>0?base+(ship||0):Infinity,url:offer.url||offer.product_url||p.sourceUrl};
+    }).sort((a,b)=>a.total-b.total);
+    if(!rows.length&&p.sourceUrl)rows.push({merchant:p.merchant||"Marchand partenaire",price:null,shipping:null,total:Infinity,url:p.sourceUrl});
+    const merchantsListed=new Set(rows.map(row=>String(row.merchant).toLowerCase()));
+    if(!merchantsListed.has("amazon"))rows.push({merchant:"Amazon",price:null,shipping:null,total:Infinity,amazon:true,url:"https://www.amazon.fr/s?"+new URLSearchParams({k:p.query||p.name,tag:"prixbasmalin2-21"}).toString()});
+    const compare=document.createElement("section");compare.className="pm-c2-compare";
+    const heading=document.createElement("h4");
     heading.className="discovery-compare-heading";
-    heading.textContent=hasVerifiedPrice?(feedOffers.length>1?"Offres marchandes à comparer":"Offre unique — pas de comparatif multi-marchands"):(p.priceStatus==="stale"?"Prix à confirmer chez le marchand":"Recherche chez le marchand");
-    const list=document.createElement("div");
-    list.className="discovery-compare pm-offers-horizontal";
-    feedOffers.forEach(offer=>{
-      const row=document.createElement("div");row.className="discovery-compare-row";
-      const store=document.createElement("span");
-      const offerShipping=offer.shippingPriceValue??offer.shipping_price_eur??p.shippingPriceValue;
-      const offerShippingKnown=offerShipping!==null&&offerShipping!==undefined&&Number.isFinite(Number(offerShipping))&&Number(offerShipping)>=0;
-      const offerAvailability=offer.availability||p.availability||"unknown";
-      const offerShippingText=offerShippingKnown?"livraison "+money(offerShipping):"livraison à confirmer";
-      const offerAvailabilityText=offerAvailability==="in_stock"?"stock indiqué":offerAvailability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
-      store.textContent=offer.merchant||p.merchant||"Marchand";
-      const link=document.createElement("a");link.href=offer.url||p.sourceUrl;link.target="_blank";link.rel="noopener noreferrer sponsored";
-      link.textContent=offer.price||(Number.isFinite(Number(offer.priceValue))?money(offer.priceValue):"Voir l’offre");
-      row.append(store,link);list.append(row);
+    heading.textContent="Comparer les prix ("+rows.length+" marchand"+(rows.length>1?"s":"")+")";
+    const table=document.createElement("table");table.className="pm-c2-table";
+    const thead=document.createElement("thead");thead.innerHTML="<tr><th scope=\"col\">Marchand</th><th scope=\"col\">Prix</th><th scope=\"col\">Livraison</th><th scope=\"col\" aria-label=\"Lien\"></th></tr>";
+    const tbody=document.createElement("tbody");
+    const pricedCount=rows.filter(row=>row.price!==null).length;
+    rows.forEach((row,rowIndex)=>{
+      const tr=document.createElement("tr");
+      if(rowIndex===0&&row.price!==null&&pricedCount>1)tr.className="pm-c2-best";
+      const cMerchant=document.createElement("td");cMerchant.textContent=row.merchant;
+      if(rowIndex===0&&row.price!==null&&pricedCount>1){const tag=document.createElement("small");tag.textContent="Le moins cher";cMerchant.append(tag);}
+      const cPrice=document.createElement("td");cPrice.className="pm-c2-cell-price";cPrice.textContent=row.price!==null?money(row.price):"Voir le prix";
+      const cShip=document.createElement("td");cShip.textContent=row.price===null?"—":row.shipping===null?"à confirmer":row.shipping===0?"Gratuite":money(row.shipping);
+      const cLink=document.createElement("td");
+      const link=document.createElement("a");link.href=row.url;link.target="_blank";link.rel="noopener noreferrer sponsored";link.textContent="Voir ↗";
+      link.setAttribute("aria-label","Voir l’offre "+row.merchant+(row.amazon?" (recherche Amazon, lien affilié)":""));
+      cLink.append(link);
+      tr.append(cMerchant,cPrice,cShip,cLink);tbody.append(tr);
     });
-    const note=document.createElement("p");
-    note.className="discovery-disclaimer";
-    note.textContent=!hasVerifiedPrice?"Consultez le vendeur pour découvrir le prix.":
-      (p.priceStatus==="dated"&&priceDateText?(p.merchantUpdatedAt?"Prix indiqué par le marchand le "+priceDateText:"Prix du flux marchand récupéré le "+priceDateText)+" — à confirmer sur son site.":
-      "Prix indicatif : consultez le vendeur pour confirmer l’offre.");
+    table.append(thead,tbody);
+    compare.append(heading,table);
+    // Fiche détails
+    const specs=document.createElement("dl");specs.className="pm-c2-specs";
+    [["Marque",p.brand||""],["Vendu par",p.merchant||""],["Catégorie",String(p.desc||"").split(/\s*[>,|]\s*/).filter(Boolean).slice(-2).join(" · ")||categoryNames[p.category]||""],["Disponibilité",availabilityLabel(p.availability)],["Référence",p.gtin?("EAN "+p.gtin):(p.mpn||"")]].forEach(([label,value])=>{
+      if(!value)return;
+      const dt=document.createElement("dt");dt.textContent=label;const dd=document.createElement("dd");dd.textContent=value;specs.append(dt,dd);
+    });
+    const historyLink=p.category==="tech"?document.createElement("a"):null;
+    if(historyLink){historyLink.className="pm-history-link";historyLink.href="/historique-prix.html?q="+encodeURIComponent(p.name);historyLink.textContent="Voir l’historique des prix ↗";historyLink.setAttribute("aria-label","Consulter les relevés historiques PrixTracker pour "+p.name);}
+    const desc=document.createElement("div");
+    desc.className="desc";
+    desc.textContent=p.desc;
     card.append(photo);
     if(gallery.children.length>1)card.append(gallery);
-    card.append(name,desc,brands,amazonButton);
-    if(historyLink)card.append(historyLink);
-    card.append(price,merchant,heading);
-    if(feedOffers.length)card.append(list);
-    card.append(note);
+    body.append(top,name,priceBox,note,amazonButton,compare,specs);
+    if(historyLink)body.append(historyLink);
+    card.append(body);
     card.dataset.pmProductName=p.name;
     card.dataset.pmProductQuery=p.query||p.name;
     card.dataset.pmProductCategory=p.category||"tech";
-    const descriptionToggle=document.createElement("button");
-    descriptionToggle.type="button";descriptionToggle.className="pm-description-toggle";
-    descriptionToggle.textContent="Voir le descriptif complet +";
-    desc.classList.add("pm-description-collapsed");
-    descriptionToggle.addEventListener("click",()=>{
-      const expanded=desc.classList.toggle("pm-description-expanded");
-      desc.classList.toggle("pm-description-collapsed",!expanded);
-      descriptionToggle.textContent=expanded?"Réduire le descriptif −":"Voir le descriptif complet +";
-      descriptionToggle.setAttribute("aria-expanded",String(expanded));
-    });
-    card.append(descriptionToggle);
     const related=pmRelations(p.name,p.query||p.name,p.category||"tech");
     const makeRelatedSection=(title,items)=>{
       if(!Array.isArray(items)||!items.length)return;
       const section=document.createElement("section");section.className="pm-related-section";
-      const heading=document.createElement("h4");heading.textContent=title;section.append(heading);
+      const relatedHeading=document.createElement("h4");relatedHeading.textContent=title;section.append(relatedHeading);
       const rail=document.createElement("div");rail.className="pm-related-rail";
       items.forEach(item=>{
+        if(!item[3]||!/^https:\/\//i.test(String(item[3].image||"")))return;
         const tile=document.createElement("article");tile.className="pm-related-tile";
         const visual=document.createElement("div");visual.className="pm-related-visual";
-        if(!item[3]||!/^https:\/\//i.test(String(item[3].image||"")))return;
         const relatedImg=document.createElement("img");relatedImg.src=item[3].image;relatedImg.alt="Photo "+item[0];relatedImg.loading="lazy";relatedImg.decoding="async";
-        relatedImg.onerror=()=>tile.remove();
+        relatedImg.onerror=()=>{tile.remove();if(!rail.children.length)section.remove();};
         visual.append(relatedImg);
         const titleText=document.createElement("strong");titleText.textContent=item[0];
         const noteText=document.createElement("small");noteText.textContent=item[1];
         const link=document.createElement("a");link.href="https://www.amazon.fr/s?"+new URLSearchParams({k:item[2],tag:"prixbasmalin2-21"}).toString();link.target="_blank";link.rel="noopener noreferrer sponsored";link.textContent="Découvrir ↗";
         tile.append(visual,titleText,noteText,link);rail.append(tile);
       });
-      section.append(rail);card.append(section);
+      // Pas de section vide : uniquement si au moins une suggestion a une photo.
+      if(!rail.children.length)return;
+      section.append(rail);body.append(section);
     };
     makeRelatedSection("Accessoires à associer",related.accessories);
     makeRelatedSection("Produits similaires",related.similar);
@@ -6918,6 +6925,50 @@ function pmRakutenIsValidGtin(value){
 #verifiedShelf,.comparison-empty{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;border:0!important}
 #products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x pan-y!important;-webkit-overflow-scrolling:touch!important}
 
+<style id="pm-card2-style">
+/* Carte produit comparateur (pm-card2) : prioritaire sur les anciennes règles du catalogue. */
+#products .pm-product-row-rail{gap:14px!important;scroll-snap-type:x mandatory}
+#products article.product.pm-card2{display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important;overflow:hidden!important;background:#111a27!important;border:1px solid #2b3a4f!important;border-radius:18px!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important;color:#e9eef5!important;scroll-snap-align:start;flex:0 0 min(340px,84vw)!important;width:min(340px,84vw)!important;max-width:none!important;min-width:0!important;grid-template-columns:none!important}
+#products .pm-card2 .photo{position:relative!important;width:100%!important;height:auto!important;aspect-ratio:1/1!important;margin:0!important;background:#fff!important;border-radius:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;grid-row:auto!important}
+#products .pm-card2 .photo,#products .pm-card2 .photo.pm-photo-loading{border:0!important;outline:0!important;box-shadow:none!important}
+#products .pm-card2 .pm-photo-unavailable{position:absolute!important;inset:0!important;display:flex!important;align-items:center;justify-content:center;background:#f3f5f8!important;color:#5b6676!important;font-size:13px;font-weight:700;width:auto!important;height:auto!important}
+#products .pm-card2 .photo img{width:100%!important;height:100%!important;object-fit:contain!important;padding:14px!important;background:#fff!important}
+#products .pm-card2 .pm-awin-gallery{display:flex;gap:6px;padding:8px 12px 0;overflow-x:auto;background:#111a27}
+#products .pm-card2 .pm-awin-thumb{flex:0 0 46px;height:46px;border-radius:8px;border:1px solid #2b3a4f;background:#fff;padding:2px}
+#products .pm-card2 .pm-awin-thumb.active{border-color:#ff7a1a}
+#products .pm-card2 .pm-awin-thumb img{width:100%;height:100%;object-fit:contain}
+.pm-c2-body{display:flex;flex-direction:column;gap:10px;padding:14px 14px 16px}
+.pm-c2-top{display:flex;flex-wrap:wrap;gap:6px}
+.pm-c2-merchant,.pm-c2-cat{font-size:11px;font-weight:800;letter-spacing:.02em;padding:4px 8px;border-radius:999px;line-height:1.1}
+.pm-c2-merchant{background:#ff7a1a22;color:#ffad66;border:1px solid #ff7a1a55}
+.pm-c2-cat{background:#ffffff0f;color:#b8c4d4;border:1px solid #ffffff1f}
+#products .pm-card2 .name{margin:0!important;font-size:16px!important;line-height:1.3!important;font-weight:800!important;color:#fff!important;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pm-c2-pricebox{display:flex;flex-direction:column;gap:2px}
+#products .pm-card2 .pm-c2-price{margin:0!important;font-size:28px!important;line-height:1.05!important;font-weight:900!important;color:#ff8a2a!important;letter-spacing:-.01em}
+.pm-c2-shipping{font-size:12.5px;color:#b8c4d4;font-weight:600}
+#products .pm-card2 .pm-c2-date{margin:0!important;font-size:11.5px!important;line-height:1.35!important;color:#8b9ab0!important}
+#products .pm-card2 .pm-c2-cta{display:flex!important;align-items:center;justify-content:center;width:100%!important;min-height:46px;margin:2px 0 0!important;padding:10px 14px!important;border-radius:12px!important;background:linear-gradient(100deg,#ff9b21,#ff5b0b)!important;color:#fff!important;font-size:15px!important;font-weight:900!important;text-align:center;text-decoration:none!important;box-shadow:0 6px 16px rgba(255,91,11,.3)}
+.pm-c2-compare{border:1px solid #2b3a4f;border-radius:12px;overflow:hidden;background:#0c131d}
+#products .pm-card2 .pm-c2-compare h4{margin:0!important;padding:9px 12px!important;font-size:13px!important;font-weight:850!important;color:#fff!important;background:#162235;border-bottom:1px solid #2b3a4f}
+.pm-c2-table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+.pm-c2-table th{padding:6px 8px;text-align:left;font-size:10.5px;font-weight:800;color:#8b9ab0;text-transform:uppercase;letter-spacing:.04em}
+.pm-c2-table th:nth-child(1){width:34%}.pm-c2-table th:nth-child(2){width:24%}.pm-c2-table th:nth-child(3){width:24%}.pm-c2-table th:nth-child(4){width:18%}
+.pm-c2-table td{padding:9px 8px;border-top:1px solid #1f2b3c;color:#dce3ec;vertical-align:middle;overflow-wrap:anywhere}
+.pm-c2-table td:first-child{font-weight:800;color:#fff}
+.pm-c2-table td small{display:block;margin-top:2px;font-size:10px;font-weight:800;color:#3ddc84}
+.pm-c2-table .pm-c2-cell-price{font-weight:900;color:#ffad66;white-space:nowrap}
+.pm-c2-table tr.pm-c2-best{background:#3ddc8414}
+.pm-c2-table td a{display:inline-block;padding:5px 8px;border-radius:8px;background:#ff7a1a;color:#fff;font-weight:850;font-size:11.5px;text-decoration:none;white-space:nowrap}
+.pm-c2-specs{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:0;font-size:12.5px}
+.pm-c2-specs dt{color:#8b9ab0;font-weight:700}
+.pm-c2-specs dd{margin:0;color:#e9eef5;font-weight:650;overflow-wrap:anywhere}
+#products .pm-card2 .pm-history-link{font-size:12.5px;font-weight:800;color:#ffad66}
+#products .pm-card2 .pm-alert-btn{display:flex!important;align-items:center;justify-content:center;gap:6px;width:calc(100% - 28px)!important;min-height:38px!important;margin:0 14px 14px!important;padding:8px 12px!important;border-radius:10px!important;background:transparent!important;border:1px solid #ff7a1a88!important;color:#ffad66!important;font-size:13px!important;font-weight:800!important;box-shadow:none!important}
+#products .pm-card2 .pm-alert-btn svg{width:16px!important;height:16px!important;stroke:currentColor;fill:none}
+#products .pm-card2 .pm-alert-btn span{font-size:13px!important}
+#products .pm-card2 .pm-related-section{border-top:1px solid #2b3a4f;padding-top:10px}
+@media(min-width:900px){#products article.product.pm-card2{flex-basis:300px!important;width:300px!important}}
+</style>
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
 #products .pm-photo-unavailable{width:100%;height:100%;min-height:132px;display:grid;place-items:center;padding:12px;box-sizing:border-box;background:#eef1f5;color:#667085;font-size:12px;font-weight:750;text-align:center}
