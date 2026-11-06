@@ -9,8 +9,8 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
-HEADER = "offer_id,catalog_product_id,product_name,merchant_name,source,identity_type,identity_value,brand,price,shipping_price,currency,price_tax_status,availability,product_url,tracking_url,checked_at\n"
-ROW = "offer-1,headphones-1,Headphones,Shop,authorized_csv,asin,B012345678,Brand,49.99,4.90,EUR,included,in_stock,https://shop.example/item,,2026-10-23T12:00:00+02:00\n"
+HEADER = "offer_id,catalog_product_id,product_name,merchant_name,source,identity_type,identity_value,brand,variant,price,shipping_price,currency,price_tax_status,availability,product_url,tracking_url,checked_at\n"
+ROW = "offer-1,headphones-1,Headphones,Shop,authorized_csv,asin,B012345678,Brand,Noir 128 Go,49.99,4.90,EUR,included,in_stock,https://shop.example/item,,2026-10-23T12:00:00+02:00\n"
 
 
 class ImportPartnerCsvTests(unittest.TestCase):
@@ -31,6 +31,7 @@ class ImportPartnerCsvTests(unittest.TestCase):
         self.assertEqual(result["offers"][0]["shipping_price"], 4.90)
         self.assertEqual(result["offers"][0]["price_tax_status"], "included")
         self.assertEqual(result["offers"][0]["availability"], "in_stock")
+        self.assertEqual(result["offers"][0]["variant"], "Noir 128 Go")
         self.assertNotIn("tracking_url", result["offers"][0])
 
     def test_rejects_missing_required_column(self):
@@ -44,9 +45,15 @@ class ImportPartnerCsvTests(unittest.TestCase):
             MODULE.convert_csv(path)
 
     def test_rejects_mpn_without_brand(self):
-        row = ROW.replace("asin,B012345678,Brand", "mpn,MODEL-123,")
+        row = ROW.replace("asin,B012345678,Brand,Noir 128 Go", "mpn,MODEL-123,,Noir 128 Go")
         path = self.write_csv(HEADER + row)
         with self.assertRaisesRegex(ValueError, "brand obligatoire"):
+            MODULE.convert_csv(path)
+
+    def test_rejects_mpn_without_variant(self):
+        row = ROW.replace("asin,B012345678,Brand,Noir 128 Go", "mpn,MODEL-123,Brand,")
+        path = self.write_csv(HEADER + row)
+        with self.assertRaisesRegex(ValueError, "variant obligatoire"):
             MODULE.convert_csv(path)
 
     def test_rejects_out_of_stock_offer(self):
