@@ -3,8 +3,8 @@
   "generated_from": "catalogue.html productData",
   "generated_at": "2026-11-06",
   "count": 341,
-  "verified_image_count": 13,
-  "unverified_image_count": 328,
+  "verified_image_count": 14,
+  "unverified_image_count": 327,
   "price_policy": "No price is displayed unless a verified merchant offer is available.",
   "image_policy": "Promotional product photos are displayed only when imageStatus confirms manufacturer, press, retailer or authorized-feed provenance. Unverified references remain searchable without a product photo.",
   "products": [
@@ -657,7 +657,7 @@
       "brand": "HP",
       "image": "https://www.hp.com/content/dam/sites/worldwide/laptops/home-laptops/omnistudio/omnibook/frame-1104223376%402x5.png",
       "sourceUrl": "https://www.amazon.fr/s?k=HP%20OmniBook%205&tag=prixbasmalin2-21",
-      "imageStatus": "manufacturer_image_to_add",
+      "imageStatus": "manufacturer_verified",
       "imageKind": "official",
       "imageSource": "https://www.hp.com/fr-fr/laptops-and-2-in-1s/omnibook-5.html",
       "imageSourceName": "HP"
