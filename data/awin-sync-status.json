@@ -1,14 +1,29 @@
 {
   "schema_version": 1,
-  "status": "not_yet_synced",
-  "fetched_at": null,
-  "source": null,
+  "status": "ok",
+  "fetched_at": "2026-11-06T13:31:06.235Z",
+  "source": "Awin Direct Product Data Feed",
   "publisher_id": "3137386",
   "locale": "fr_FR",
-  "programmes_check_status": "not_verified",
-  "joined_advertisers_checked": null,
-  "pending_advertisers_detected": null,
-  "additional_authorized_offers_imported": null,
-  "counts": null,
-  "note": "Résumé technique non contractuel. null signifie non vérifié, jamais zéro. Les secrets et identifiants d'accès ne sont jamais publiés."
+  "programmes_check_status": "verified",
+  "joined_advertisers_checked": 0,
+  "pending_advertisers_detected": 6,
+  "additional_authorized_offers_imported": 0,
+  "counts": {
+    "joined_advertisers_checked": 0,
+    "pending_advertisers_detected": 6,
+    "additional_authorized_offers_imported": 0,
+    "products": 7500,
+    "merchant_offers": 7500,
+    "merchants": 7,
+    "brands": 0,
+    "products_with_gtin": 0,
+    "products_with_mpn": 0,
+    "products_with_brand_mpn": 0,
+    "multi_merchant_products": 0,
+    "offers_with_shipping": 4223,
+    "offers_with_availability": 0,
+    "offers_with_tax_included": 0,
+    "products_other_category": 32
+  }
 }
