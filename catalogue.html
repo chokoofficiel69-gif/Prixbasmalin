@@ -6786,9 +6786,9 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 .pm-catalogue-toolbar .search::placeholder{color:#aeb9c8!important;opacity:1}
 .pm-catalogue-toolbar .pm-brand-filter{background:#1b2635!important;border:1px solid #3b4c62!important;color:#f4f7fb!important}
 .pm-catalogue-toolbar .pm-brand-filter.active{background:#ff650b!important;border-color:#ff650b!important;color:#fff!important}
-#products .pm-related-rail{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:10px!important;touch-action:pan-x!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important}
+#products .pm-related-rail{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:10px!important;touch-action:pan-x pan-y!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important}
 #products .pm-related-tile{flex:0 0 148px!important;width:148px!important;max-width:148px!important}
-#products .pm-inline-accessory-grid,#products .pm-detail-cards{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:10px!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important}
+#products .pm-inline-accessory-grid,#products .pm-detail-cards{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;gap:10px!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x pan-y!important}
 #products .pm-inline-accessory-grid>* ,#products .pm-detail-cards>*{flex:0 0 148px!important;width:148px!important;max-width:148px!important;scroll-snap-align:start!important}
 #products .pm-related-visual.pm-related-no-image{background:linear-gradient(145deg,#26384d,#111b29)!important;border:1px solid #60728a!important;color:#ff8a43!important}
 </style>
@@ -6900,7 +6900,7 @@ function pmRakutenIsValidGtin(value){
 /* Interface publique : aucun diagnostic technique ni bloc de comparaison vide. */
 #verifiedShelf[hidden],#verifiedShelf,.pm-feed-status,#pmAwinFeedStatus,.pm-awin-feed-status{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}
 #products .pm-photo-source{display:none!important}
-#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;-webkit-overflow-scrolling:touch!important}
+#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x pan-y!important;-webkit-overflow-scrolling:touch!important}
 </style>
 /* Vitrine publique : les prix et détails de collecte restent masqués pendant la phase photo/catalogue. */
 #products .price,#products .merchant,#products .discovery-compare-heading,
@@ -6908,7 +6908,7 @@ function pmRakutenIsValidGtin(value){
 .pm-feed-status,.pm-awin-feed-status,#pmAwinFeedStatus,
 [data-feed-status],.feed-status,.awin-status,.pm-import-status,
 #verifiedShelf,.comparison-empty{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;border:0!important}
-#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;-webkit-overflow-scrolling:touch!important}
+#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x pan-y!important;-webkit-overflow-scrolling:touch!important}
 
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
@@ -6932,7 +6932,7 @@ function pmRakutenIsValidGtin(value){
 #products .pm-product-row-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px}
 #products .pm-product-row-head h3{margin:0;color:#17212b;font-size:clamp(16px,2vw,21px);font-weight:850;line-height:1.25}
 #products .pm-product-row-head span{flex:none;color:#ff9a5c;font-size:11px;font-weight:750}
-#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;align-items:stretch;gap:12px;width:100%;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 14px;scroll-snap-type:x mandatory;scroll-padding-inline:2px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x; scrollbar-width:thin;scrollbar-color:#ff650b #182334}
+#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;align-items:stretch;gap:12px;width:100%;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 14px;scroll-snap-type:x mandatory;scroll-padding-inline:2px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x pan-y; scrollbar-width:thin;scrollbar-color:#ff650b #182334}
 #products .pm-product-row-rail>.product{flex:0 0 218px!important;width:218px!important;max-width:218px!important;min-width:218px!important;scroll-snap-align:start;align-self:stretch;background:#111c2a!important;border:1px solid #35465a!important;border-radius:15px!important;color:#f4f7fb!important;box-shadow:0 5px 18px #0003!important}
 #products .pm-product-row-rail .photo{height:132px!important;min-height:132px!important;aspect-ratio:auto!important;background:#fff!important}
 #products .pm-product-row-rail .name{color:#fff!important;font-size:14px!important;line-height:1.3!important}
@@ -6968,7 +6968,7 @@ function pmRakutenIsValidGtin(value){
 
 <style id="pm-comparison-visibility">
 .pm-feed-status{margin:12px 0 16px;padding:10px 12px;border:1px solid #d9e0e8;border-left:4px solid #ff650b;border-radius:10px;background:#f7f9fc;color:#334155;font-size:12px;line-height:1.55;overflow-wrap:anywhere}
-#verifiedProducts .verified-offers{display:flex!important;flex-flow:row nowrap!important;gap:9px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:4px 2px 10px!important;scroll-snap-type:x mandatory!important;scroll-padding-inline:2px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+#verifiedProducts .verified-offers{display:flex!important;flex-flow:row nowrap!important;gap:9px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:4px 2px 10px!important;scroll-snap-type:x mandatory!important;scroll-padding-inline:2px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x pan-y;}
 #verifiedProducts .verified-offer-row{flex:0 0 190px!important;width:190px!important;min-width:190px!important;max-width:190px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;scroll-snap-align:start!important;background:#f8fafc!important;border-color:#dbe3ed!important}
 #verifiedProducts .verified-offer-store strong{font-size:13px!important;color:#17212b!important}
 #verifiedProducts .verified-offer-store span{font-size:10px!important;color:#667085!important}
@@ -6985,7 +6985,7 @@ function pmRakutenIsValidGtin(value){
 #products .pm-product-row-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin:0 0 12px!important}
 #products .pm-product-row-head h3{font-size:clamp(18px,2.4vw,22px)!important;font-weight:850!important;letter-spacing:-.035em!important}
 #products .pm-product-row-head span{font-size:11px!important;color:#788397!important;white-space:nowrap!important}
-#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;gap:14px!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important;padding:3px 3px 15px!important;scroll-snap-type:x mandatory!important;scrollbar-width:thin!important;scrollbar-color:#ff8a43 #e9edf2!important}
+#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;gap:14px!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x pan-y!important;overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important;padding:3px 3px 15px!important;scroll-snap-type:x mandatory!important;scrollbar-width:thin!important;scrollbar-color:#ff8a43 #e9edf2!important}
 #products .pm-product-row-rail>.product,#products .pm-product-row-rail>.pm-no-photo-card{box-sizing:border-box!important;flex:0 0 clamp(205px,24vw,250px)!important;width:clamp(205px,24vw,250px)!important;min-width:clamp(205px,24vw,250px)!important;max-width:clamp(205px,24vw,250px)!important;scroll-snap-align:start!important}
 #products .pm-product-row-rail .photo{height:205px!important;min-height:205px!important;overflow:hidden!important;border-radius:12px!important;background:#fff!important}
 #products .pm-product-row-rail .photo img{width:100%!important;height:100%!important;object-fit:contain!important;padding:10px!important;transition:transform .25s ease!important}
