@@ -6141,7 +6141,6 @@ function render(){
     const listedPrice=!hasVerifiedPrice&&Number.isFinite(Number(p.listedPriceValue))&&Number(p.listedPriceValue)>0?Number(p.listedPriceValue):null;
     const sheet=!hasVerifiedPrice&&listedPrice===null&&p.pmSheet&&Array.isArray(p.pmSheet.offers)&&p.pmSheet.offers.length?p.pmSheet:null;
     const sheetUrl=sheet?"/produit.html?id="+encodeURIComponent(sheet.id):"";
-    if(sheet)merchantBadge.textContent=sheet.brand||p.brand||"Comparateur";
     const sheetDate=sheet?new Date(String(sheet.last_date)+"T12:00:00").toLocaleDateString("fr-FR"):"";
     const feedDateParsed=p.feedFetchedAt?new Date(p.feedFetchedAt):null;
     const feedDateText=feedDateParsed&&Number.isFinite(feedDateParsed.getTime())?feedDateParsed.toLocaleDateString("fr-FR"):"";
@@ -6154,6 +6153,7 @@ function render(){
     const top=document.createElement("div");top.className="pm-c2-top";
     const merchantBadge=document.createElement("span");merchantBadge.className="pm-c2-merchant";merchantBadge.textContent=p.merchant||p.brand||"Sélection Prix Malin";
     const categoryBadge=document.createElement("span");categoryBadge.className="pm-c2-cat";categoryBadge.textContent=categoryNames[p.category]||"Divers";
+    if(sheet)merchantBadge.textContent=sheet.brand||p.brand||"Comparateur";
     top.append(merchantBadge,categoryBadge);
     const name=document.createElement("h3");
     name.className="name";

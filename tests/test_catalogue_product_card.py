@@ -62,6 +62,11 @@ class CatalogueProductCardTests(unittest.TestCase):
         self.assertIn('<script id="pm-product-sheets-link">', self.source)
         self.assertIn("index.get(norm(product.name))||index.get(norm((product.brand||\"\")+\" \"+product.name))", self.source)
         self.assertIn('amazonButton.textContent="Comparer les "+sheet.offer_count+" offres →";', self.source)
+        created = self.source.index('const merchantBadge=document.createElement("span")')
+        overridden = self.source.index('if(sheet)merchantBadge.textContent=')
+        sheet_defined = self.source.index("const sheet=!hasVerifiedPrice&&listedPrice===null")
+        self.assertLess(created, overridden)
+        self.assertLess(sheet_defined, overridden)
 
 
 if __name__ == "__main__":
