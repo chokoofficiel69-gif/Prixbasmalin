@@ -411,7 +411,14 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   </div>
   <p class="pm-gallery-intro">Une sélection renouvelée de produits, avec leurs photos et leurs caractéristiques. Consultez le marchand pour connaître le prix et la disponibilité.</p>
   <div id="pm-visual-gallery-grid" class="pm-visual-gallery-grid" aria-live="polite">
-    <p class="pm-gallery-loading">Chargement des photos produits…</p>
+    <article class="pm-visual-card pm-visual-skeleton" aria-hidden="true"><div class="pm-visual-media"></div><div class="pm-visual-copy"><span class="pm-skeleton-line"></span><span class="pm-skeleton-line short"></span><span class="pm-skeleton-button"></span></div></article>
+    <article class="pm-visual-card pm-visual-skeleton" aria-hidden="true"><div class="pm-visual-media"></div><div class="pm-visual-copy"><span class="pm-skeleton-line"></span><span class="pm-skeleton-line short"></span><span class="pm-skeleton-button"></span></div></article>
+    <article class="pm-visual-card pm-visual-skeleton" aria-hidden="true"><div class="pm-visual-media"></div><div class="pm-visual-copy"><span class="pm-skeleton-line"></span><span class="pm-skeleton-line short"></span><span class="pm-skeleton-button"></span></div></article>
+    <article class="pm-visual-card pm-visual-skeleton" aria-hidden="true"><div class="pm-visual-media"></div><div class="pm-visual-copy"><span class="pm-skeleton-line"></span><span class="pm-skeleton-line short"></span><span class="pm-skeleton-button"></span></div></article>
+    <article class="pm-visual-card pm-visual-skeleton" aria-hidden="true"><div class="pm-visual-media"></div><div class="pm-visual-copy"><span class="pm-skeleton-line"></span><span class="pm-skeleton-line short"></span><span class="pm-skeleton-button"></span></div></article>
+    <article class="pm-visual-card pm-visual-skeleton" aria-hidden="true"><div class="pm-visual-media"></div><div class="pm-visual-copy"><span class="pm-skeleton-line"></span><span class="pm-skeleton-line short"></span><span class="pm-skeleton-button"></span></div></article>
+    <article class="pm-visual-card pm-visual-skeleton" aria-hidden="true"><div class="pm-visual-media"></div><div class="pm-visual-copy"><span class="pm-skeleton-line"></span><span class="pm-skeleton-line short"></span><span class="pm-skeleton-button"></span></div></article>
+    <article class="pm-visual-card pm-visual-skeleton" aria-hidden="true"><div class="pm-visual-media"></div><div class="pm-visual-copy"><span class="pm-skeleton-line"></span><span class="pm-skeleton-line short"></span><span class="pm-skeleton-button"></span></div></article>
   </div>
 </section><section id="live-comparisons" class="pm-history-comparisons" aria-labelledby="pm-history-title">
   <div class="section-head">
@@ -1246,11 +1253,11 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
    }
    if(!products.length)throw new Error("Aucune photo vérifiée disponible");
    const fragment=document.createDocumentFragment();
-   products.slice(0,18).forEach(p=>{
+   products.slice(0,8).forEach(p=>{
      const card=document.createElement("article");card.className="pm-visual-card";
      const media=document.createElement("div");media.className="pm-visual-media";
      const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.decoding="async";
-     img.onerror=()=>{card.remove();};
+     img.onerror=()=>{img.removeAttribute("src");img.alt="Visuel momentanément indisponible";img.style.opacity=".35";};
      media.appendChild(img);
      const copy=document.createElement("div");copy.className="pm-visual-copy";
      const meta=document.createElement("span");meta.className="pm-visual-meta";
@@ -1282,4 +1289,30 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 @media(min-width:761px){.pm-old-bottom{max-width:720px;left:50%;right:auto;width:calc(100% - 32px);transform:translateX(-50%);bottom:14px;border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:8px 12px;box-shadow:0 10px 35px rgba(0,0,0,.32)}}
 @media(prefers-reduced-motion:reduce){.pm-old-bottom a{transition:none}}
 </style>
+
+<style id="pm-cls-stability-2026">
+/* Réserver la place des contenus asynchrones pour éviter les sauts au chargement. */
+#pm-visual-gallery-grid{grid-auto-rows:minmax(290px,auto);align-items:stretch}
+#pm-visual-gallery-grid .pm-visual-card{min-height:290px;box-sizing:border-box}
+#pm-visual-gallery-grid .pm-visual-media{height:145px;min-height:145px;flex:none}
+#pm-visual-gallery-grid .pm-visual-copy{min-height:145px;box-sizing:border-box}
+.pm-visual-skeleton{pointer-events:none}
+.pm-visual-skeleton .pm-visual-media{background:linear-gradient(110deg,#202a39 25%,#2b3748 45%,#202a39 65%);background-size:220% 100%;animation:pmSkeletonPulse 1.5s ease-in-out infinite}
+.pm-skeleton-line{display:block;width:82%;height:10px;margin:8px 0;border-radius:8px;background:#354253}
+.pm-skeleton-line.short{width:55%}
+.pm-skeleton-button{display:block;width:100%;height:34px;margin-top:auto;border-radius:9px;background:#354253}
+@keyframes pmSkeletonPulse{to{background-position-x:-220%}}
+.pm-history-status{min-height:48px;box-sizing:border-box;display:flex;align-items:center}
+.pm-history-list{min-height:278px;align-items:stretch}
+.pm-history-list>.pm-history-card{min-height:260px;box-sizing:border-box}
+.pm-history-list .pm-discovery-image{width:100%;height:125px;min-height:125px;object-fit:contain}
+@media(min-width:601px){
+ #pm-visual-gallery-grid{grid-auto-rows:minmax(310px,auto)}
+ #pm-visual-gallery-grid .pm-visual-card{min-height:310px}
+ #pm-visual-gallery-grid .pm-visual-media{height:175px;min-height:175px}
+ #pm-visual-gallery-grid .pm-visual-copy{min-height:135px}
+}
+@media(prefers-reduced-motion:reduce){.pm-visual-skeleton .pm-visual-media{animation:none}}
+</style>
+
 </body></html>
