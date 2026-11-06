@@ -134,9 +134,9 @@ function normalizedMpn(row) {
   return firstField(row, MPN_FIELDS).replace(/\s+/g, " ").trim();
 }
 function explicitPriceTaxStatus(row) {
-  const status = norm(row?.price_tax_status || row?.tax_status || row?.vat_status || "");
+  const status = norm(row?.price_tax_status || row?.priceTaxStatus || row?.tax_status || row?.taxStatus || row?.vat_status || row?.vatStatus || "");
   if (["included", "inclusive", "tax included", "vat included", "ttc"].includes(status)) return "included";
-  const flag = row?.price_includes_tax ?? row?.vat_included ?? row?.tax_included;
+  const flag = row?.price_includes_tax ?? row?.priceIncludesTax ?? row?.vat_included ?? row?.vatIncluded ?? row?.tax_included ?? row?.taxIncluded;
   if (flag === true || /^(yes|true)$/i.test(String(flag ?? "").trim())) return "included";
   return "unspecified";
 }
@@ -779,6 +779,22 @@ async function runSelfTests() {
     const denied = await loadEnhancedAwinFeeds(preserved, { optional: true, token: "test-token" });
     if (denied.joinedCount !== null || denied.pendingCount !== 0 || preserved.length !== 1) {
       throw new Error("TEST ÉCHEC : un 403 API ne doit pas effacer le flux direct.");
+    }
+
+    process.env.AWIN_PRODUCT_DATA_API_KEY = "test-standard-key";
+    let standardListRequested = false;
+    globalThis.fetch = async (url, options = {}) => {
+      const value = String(url);
+      if (value.includes("datafeed/list/apikey/test-standard-key")) {
+        standardListRequested = true;
+        return new Response("advertiser_id,program_name,membership_status,language\\n", { status: 200 });
+      }
+      throw new Error("URL inattendue dans le test du flux standard : " + value);
+    };
+    const standardOnly = [{ id: "direct-feed-standard-fallback" }];
+    const standardStatus = await loadEnhancedAwinFeeds(standardOnly, { optional: true, token: "" });
+    if (!standardListRequested || standardStatus.joinedCount !== null || standardStatus.importedOffers !== 0 || standardOnly.length !== 1) {
+      throw new Error("TEST ÉCHEC : le flux standard autorisé doit être interrogé même sans jeton Publisher API.");
     }
   } finally {
     globalThis.fetch = originalFetch;
