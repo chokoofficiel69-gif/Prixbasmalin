@@ -1140,6 +1140,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 </style>
 <script id="pm-seasonal-campaign">
 (function(){
+ const verifiedImageStatuses=new Set(["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"]);
  const now=new Date(), month=now.getMonth()+1, day=now.getDate();
  let season="standard", label="Sélection Prix Malin", kicker="SÉLECTION RENOUVELÉE";
  if((month===11)||(month===12&&day<=26)){
