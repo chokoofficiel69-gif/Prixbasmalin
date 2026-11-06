@@ -5842,7 +5842,7 @@ async function pmLoadAwinCatalogue(){
   }
 }
 let selectedBrand="";
-let pmCurrentPage=1;
+let pmVisibleLimit=60;
 const pmPageSize=60;
 let pmLastQuery=null;
 const categoryParam=new URLSearchParams(location.search).get("cat")||"all";
@@ -5879,7 +5879,7 @@ const pmSearchSynonyms={
 function render(){
   const rawQuery=searchEl.value.trim();
   const q=pmSearchNorm(rawQuery);
-  if(q!==pmLastQuery){pmLastQuery=q;pmCurrentPage=1;}
+  if(q!==pmLastQuery){pmLastQuery=q;pmVisibleLimit=60;}
   const queryTerms=q.split(" ").filter(Boolean);
   const correctedQuery=queryTerms.map(term=>pmSpellCorrections[term]||term);
   const catalogueData=productData.filter(p=>p&&p.name&&/^https:\/\//i.test(String(p.sourceUrl||"")));
@@ -5963,12 +5963,11 @@ function render(){
   const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   filtersEl.innerHTML="";
   filtersEl.hidden=false;
-  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";pmCurrentPage=1;render();});filtersEl.append(allBrand);
-  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;pmCurrentPage=1;render();});filtersEl.append(button);});
+  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";pmVisibleLimit=60;render();});filtersEl.append(allBrand);
+  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;pmVisibleLimit=60;render();});filtersEl.append(button);});
   // Les statistiques techniques du catalogue restent internes et ne sont pas affichées aux visiteurs.
-  const totalPages=Math.max(1,Math.ceil(found.length/pmPageSize));
-  pmCurrentPage=Math.min(Math.max(1,pmCurrentPage),totalPages);
-  countEl.textContent=found.length.toLocaleString("fr-FR")+" produits • Page "+pmCurrentPage.toLocaleString("fr-FR")+" sur "+totalPages.toLocaleString("fr-FR");
+  pmVisibleLimit=Math.min(Math.max(pmPageSize,pmVisibleLimit),Math.max(pmPageSize,found.length));
+  countEl.textContent=found.length?Math.min(pmVisibleLimit,found.length).toLocaleString("fr-FR")+" produits affichés sur "+found.length.toLocaleString("fr-FR")+" disponibles":"0 produit disponible";
   if(!found.length){
     const query=searchEl.value.trim();
     const empty=document.createElement("div");empty.className="empty pm-catalogue-no-feed";
@@ -5980,33 +5979,9 @@ function render(){
     links.append(shopping,amazon);empty.append(title,message,links);productsEl.append(empty);
     return;
   }
-  // Regrouper les produits par famille : chaque famille devient un rail horizontal indépendant.
-  const categoryLabels={tech:"High-Tech & Multimédia",fashion:"Mode & Accessoires",home:"Maison & Électroménager",beauty:"Beauté & Santé",kids:"Bébé & Enfant",sport:"Sport & Loisirs",auto:"Auto & Moto",diy:"Bricolage & Jardin"};
+  // Grille unique : les produits se parcourent verticalement sur mobile et ordinateur.
   productsEl.classList.add("pm-horizontal-catalogue");
-  const categoryRails=new Map();
-  const getCategoryRail=(product)=>{
-    const key=q?"search":(product.category||"other");
-    if(categoryRails.has(key))return categoryRails.get(key);
-    const section=document.createElement("section");
-    section.className="pm-product-row";
-    const head=document.createElement("div");
-    head.className="pm-product-row-head";
-    const title=document.createElement("h3");
-    title.textContent=key==="search"?"Résultats les plus pertinents":(categoryLabels[key]||"Autres produits");
-    const hint=document.createElement("span");
-    hint.textContent="Faire défiler  ← →";
-    head.append(title,hint);
-    const rail=document.createElement("div");
-    rail.className="pm-product-row-rail";
-    rail.setAttribute("role","region");
-    rail.setAttribute("aria-label","Produits : "+title.textContent);
-    section.append(head,rail);
-    productsEl.append(section);
-    categoryRails.set(key,rail);
-    return rail;
-  };
-  const pageStart=(pmCurrentPage-1)*pmPageSize;
-  const visibleProducts=found.slice(pageStart,pageStart+pmPageSize);
+  const visibleProducts=found.slice(0,pmVisibleLimit);
   visibleProducts.forEach((p,index)=>{
     const hasVerifiedImage=pmHasRealProductImage(p);
     const card=document.createElement("article");
@@ -6213,52 +6188,23 @@ function render(){
     };
     makeRelatedSection("Accessoires à associer",related.accessories);
     makeRelatedSection("Produits similaires",related.similar);
-    getCategoryRail(p).append(card);
+    productsEl.append(card);
   });
 
-  // Les références sans photo exacte restent consultables, mais sans image empruntée à un autre produit.
-  const withoutExactPhoto=visibleProducts.filter(p=>!pmHasRealProductImage(p));
-  withoutExactPhoto.forEach(p=>{
-    const tile=document.createElement("article");
-    tile.className="product pm-no-photo-card";
-    const title=document.createElement("strong");
-    title.className="name";
-    title.textContent=p.name;
-    const description=document.createElement("p");
-    description.className="desc";
-    description.textContent=[p.brand,p.desc].filter(Boolean).join(" • ");
-    const note=document.createElement("small");
-    note.className="pm-no-photo-note";
-    note.textContent="Photo exacte indisponible pour le moment";
-    const link=document.createElement("a");
-    link.className="offer";
-    link.href=p.sourceUrl;
-    link.target="_blank";
-    link.rel="noopener noreferrer sponsored";
-    link.textContent="Voir chez le marchand ↗";
-    tile.append(title,description,note,link);
-    getCategoryRail(p).append(tile);
-  });
-  if(totalPages>1){
-    const nav=document.createElement("nav");
-    nav.className="pm-load-more-wrap pm-pagination";
-    nav.setAttribute("aria-label","Navigation des pages du catalogue");
-    const makePageButton=(label,page,active=false,disabled=false)=>{
-      const button=document.createElement("button");
-      button.type="button";button.className="pm-load-more pm-page-button"+(active?" active":"");
-      button.textContent=label;button.disabled=disabled;
-      if(active)button.setAttribute("aria-current","page");
-      button.addEventListener("click",()=>{pmCurrentPage=page;render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
-      nav.append(button);
-    };
-    makePageButton("← Précédent",Math.max(1,pmCurrentPage-1),false,pmCurrentPage===1);
-    const first=Math.max(1,Math.min(pmCurrentPage-2,totalPages-4));
-    const last=Math.min(totalPages,first+4);
-    if(first>1){makePageButton("1",1);if(first>2){const dots=document.createElement("span");dots.className="pm-page-dots";dots.textContent="…";nav.append(dots);}}
-    for(let page=first;page<=last;page++)makePageButton(String(page),page,page===pmCurrentPage);
-    if(last<totalPages){if(last<totalPages-1){const dots=document.createElement("span");dots.className="pm-page-dots";dots.textContent="…";nav.append(dots);}makePageButton(String(totalPages),totalPages);}
-    makePageButton("Suivant →",Math.min(totalPages,pmCurrentPage+1),false,pmCurrentPage===totalPages);
-    productsEl.append(nav);
+  if(visibleProducts.length<found.length){
+    const wrapper=document.createElement("div");
+    wrapper.className="pm-load-more-wrap";
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="pm-load-more";
+    const remaining=found.length-visibleProducts.length;
+    button.textContent="Afficher "+Math.min(pmPageSize,remaining).toLocaleString("fr-FR")+" autres produits ("+remaining.toLocaleString("fr-FR")+" restants)";
+    button.addEventListener("click",()=>{
+      pmVisibleLimit=Math.min(found.length,pmVisibleLimit+pmPageSize);
+      render();
+    });
+    wrapper.append(button);
+    productsEl.append(wrapper);
   }
 }
 
@@ -7008,4 +6954,40 @@ function pmRakutenIsValidGtin(value){
  .pm-catalogue-toolbar{top:0!important}
 }
 @media(prefers-reduced-motion:reduce){#products .pm-product-row-rail .photo img{transition:none!important}}
+</style>
+
+<style id="pm-catalogue-v2-grid">
+/* V2 : une seule grille verticale, sans carrousels horizontaux par catégorie. */
+#products.pm-horizontal-catalogue{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:14px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow:visible!important;
+}
+#products.pm-horizontal-catalogue>.product{
+  display:flex!important;
+  flex-direction:column!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+}
+#products.pm-horizontal-catalogue>.pm-load-more-wrap{
+  grid-column:1/-1!important;
+  width:100%!important;
+}
+#products.pm-horizontal-catalogue>.product .photo{width:100%;min-width:0}
+#products.pm-horizontal-catalogue>.product .name{overflow-wrap:anywhere}
+#products.pm-horizontal-catalogue>.product .desc{overflow-wrap:anywhere}
+@media(min-width:760px){
+  #products.pm-horizontal-catalogue{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:18px!important}
+}
+@media(min-width:1100px){
+  #products.pm-horizontal-catalogue{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:20px!important}
+}
 </style>
