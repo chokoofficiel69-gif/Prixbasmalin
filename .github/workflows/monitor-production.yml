@@ -208,6 +208,35 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             "https://prixbasmalin.fr/js/track-outbound.js" --output /tmp/track-outbound.js
           grep -q "refHost !== ownHost" /tmp/track-outbound.js
+      - name: Vérifier les garde-fous prix et le rail mobile après publication
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            cache_bust="$(date +%s)"
+            if curl --fail --silent --show-error --location --connect-timeout 3 --max-time 15 \
+              -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
+              "https://prixbasmalin.fr/?pm-deploy-check=${cache_bust}" --output /tmp/home-after.html &&
+              curl --fail --silent --show-error --location --connect-timeout 3 --max-time 15 \
+              -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
+              "https://prixbasmalin.fr/catalogue.html?pm-deploy-check=${cache_bust}" --output /tmp/catalogue-after.html &&
+              grep -Fq "pm-mobile-new-arrivals-rail" /tmp/home-after.html &&
+              grep -Fq "fresh(p.merchantUpdatedAt)" /tmp/home-after.html &&
+              grep -Fq "Prix TTC vérifié indisponible" /tmp/catalogue-after.html &&
+              grep -Fq "#verifiedShelf[hidden]" /tmp/catalogue-after.html &&
+              ! grep -Fq "#verifiedShelf," /tmp/catalogue-after.html &&
+              ! grep -Fq 'rows.push({merchant:"Amazon",price:null,' /tmp/catalogue-after.html &&
+              ! grep -Fq "liveCheckedAt:p.merchantUpdatedAt||awin.fetched_at" /tmp/home-after.html &&
+              ! grep -Fq "p.sourceCreatedAt||rakuten.generated_at" /tmp/home-after.html; then
+              echo "Les garde-fous prix et le rail mobile sont visibles sur le site public."
+              exit 0
+            fi
+            echo "Publication GitHub Pages encore en propagation (tentative ${attempt}/12)."
+            sleep 10
+          done
+          echo "::error::Le site public ne reflète pas les garde-fous prix et le rail mobile après publication."
+          exit 1
       - name: Vérifier que le catalogue est publié
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
