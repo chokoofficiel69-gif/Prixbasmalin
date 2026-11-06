@@ -27,7 +27,7 @@ def is_number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
-def contract_problems(product):
+def contract_problems(product, require_ttc=True):
     """Liste ce qui empêcherait la page d'afficher correctement ce produit."""
     if not isinstance(product, dict):
         return ["produit: objet attendu"]
@@ -49,6 +49,14 @@ def contract_problems(product):
             continue
         if not isinstance(offer.get("retailer"), str) or not offer["retailer"].strip():
             problems.append(f"{tag}: retailer manquant")
+        if require_ttc and (not isinstance(offer.get("merchant"), str) or not offer["merchant"].strip()):
+            problems.append(f"{tag}: merchant manquant")
+        if require_ttc and (not isinstance(offer.get("url"), str) or not offer["url"].startswith("https://")):
+            problems.append(f"{tag}: url marchand HTTPS manquant")
+        if require_ttc and offer.get("currency") != "EUR":
+            problems.append(f"{tag}: currency EUR manquant")
+        if require_ttc and offer.get("price_tax_status") != "included":
+            problems.append(f"{tag}: prix TTC non confirmé")
         price = offer.get("price_eur")
         if not is_number(price) or price <= 0:
             problems.append(f"{tag}: price_eur doit être un nombre positif")
@@ -85,6 +93,7 @@ class FeedSiteContractTests(unittest.TestCase):
             "price": 12.50,
             "shipping_price": 1.50,
             "currency": "EUR",
+            "price_tax_status": "included",
             "checked_at": datetime.now(timezone.utc).isoformat(),
         }
         with tempfile.TemporaryDirectory() as directory:
@@ -121,7 +130,7 @@ class FeedSiteContractTests(unittest.TestCase):
         for expected in ("name manquant", "offer_count", "retailer manquant", "sans fuseau", "product_url HTTPS", "best_price_eur"):
             self.assertIn(expected, problems)
 
-    def assert_file_matches_contract(self, filename, allow_empty):
+    def assert_file_matches_contract(self, filename, allow_empty, require_ttc=True):
         path = ROOT / "data" / filename
         if not path.exists():
             self.skipTest(f"{filename} absent")
@@ -131,13 +140,13 @@ class FeedSiteContractTests(unittest.TestCase):
         ids = [product.get("id") for product in products]
         self.assertEqual(len(ids), len(set(ids)), f"{filename}: identifiants produits dupliqués")
         for product in products:
-            self.assertEqual(contract_problems(product), [], filename)
+            self.assertEqual(contract_problems(product, require_ttc=require_ttc), [], filename)
 
     def test_published_prices_file_matches_site_contract(self):
         self.assert_file_matches_contract("prices.json", allow_empty=True)
 
     def test_featured_prices_file_matches_site_contract(self):
-        self.assert_file_matches_contract("featured-prices.json", allow_empty=False)
+        self.assert_file_matches_contract("featured-prices.json", allow_empty=False, require_ttc=False)
 
 
 if __name__ == "__main__":

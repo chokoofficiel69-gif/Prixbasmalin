@@ -15,9 +15,9 @@ from pathlib import Path
 REQUIRED_COLUMNS = {
     "offer_id", "catalog_product_id", "product_name", "merchant_name", "source",
     "identity_type", "identity_value", "price", "shipping_price", "currency",
-    "product_url", "checked_at",
+    "price_tax_status", "product_url", "checked_at",
 }
-OPTIONAL_COLUMNS = {"brand", "tracking_url"}
+OPTIONAL_COLUMNS = {"brand", "variant", "tracking_url", "availability"}
 ALLOWED_IDENTITIES = {"gtin", "asin", "mpn"}
 
 
@@ -43,11 +43,21 @@ def normalize_row(row, line_number):
     if result["identity_type"].lower() not in ALLOWED_IDENTITIES:
         raise ValueError(f"{label}: identity_type doit être gtin, asin ou mpn")
     result["identity_type"] = result["identity_type"].lower()
-    if result["identity_type"] == "mpn" and not result["brand"]:
-        raise ValueError(f"{label}: brand obligatoire pour une identité MPN")
+    if result["identity_type"] == "mpn":
+        if not result["brand"]:
+            raise ValueError(f"{label}: brand obligatoire pour une identité MPN")
+        if not result["variant"]:
+            raise ValueError(f"{label}: variant obligatoire pour une identité MPN")
+        result["variant"] = " ".join(result["variant"].split())
     if result["currency"].upper() != "EUR":
         raise ValueError(f"{label}: seules les offres en EUR sont acceptées")
     result["currency"] = "EUR"
+    if result["price_tax_status"].lower() != "included":
+        raise ValueError(f"{label}: prix TTC non confirmé par la source (price_tax_status doit être included)")
+    result["price_tax_status"] = "included"
+    result["availability"] = result["availability"].lower() or "unknown"
+    if result["availability"] not in {"in_stock", "unknown"}:
+        raise ValueError(f"{label}: disponibilité non achetable ou valeur inconnue")
     if not re.match(r"^https://[^\s/]+(?:/|$)", result["product_url"], re.I):
         raise ValueError(f"{label}: product_url doit être une URL HTTPS")
     if result["tracking_url"] and not re.match(r"^https://[^\s/]+(?:/|$)", result["tracking_url"], re.I):

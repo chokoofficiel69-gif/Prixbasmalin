@@ -83,12 +83,12 @@ function parseJsonl(body) {
   }
   return rows;
 }
-async function request(url, label) {
+async function request(url, label, token = TOKEN) {
   let lastError;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const response = await fetch(url, {
-        headers: { Authorization: "Bearer " + TOKEN, Accept: "application/json, application/x-ndjson" },
+        headers: { Authorization: "Bearer " + token, Accept: "application/json, application/x-ndjson" },
         signal: AbortSignal.timeout(TIMEOUT_MS)
       });
       if (response.status === 429 || response.status >= 500) {
@@ -132,6 +132,13 @@ function normalizedGtin(row) {
 }
 function normalizedMpn(row) {
   return firstField(row, MPN_FIELDS).replace(/\s+/g, " ").trim();
+}
+function explicitPriceTaxStatus(row) {
+  const status = norm(row?.price_tax_status || row?.priceTaxStatus || row?.tax_status || row?.taxStatus || row?.vat_status || row?.vatStatus || "");
+  if (["included", "inclusive", "tax included", "vat included", "ttc"].includes(status)) return "included";
+  const flag = row?.price_includes_tax ?? row?.priceIncludesTax ?? row?.vat_included ?? row?.vatIncluded ?? row?.tax_included ?? row?.taxIncluded;
+  if (flag === true || /^(yes|true)$/i.test(String(flag ?? "").trim())) return "included";
+  return "unspecified";
 }
 function parseCsv(text) {
   const rows = [];
@@ -181,10 +188,17 @@ function parseFeedMoney(value, currency = "EUR", allowZero = false) {
   return amount !== null && (allowZero || amount > 0) ? amount : null;
 }
 
+function stockValues(values) {
+  return values
+    .filter(value => value !== null && value !== undefined && String(value).trim() !== "")
+    .map(value => String(value))
+    .join(" ");
+}
+
 function stockState(value) {
-  const stock = norm(value).replace(/[_-]+/g, " ");
-  if (/out of stock|outofstock|rupture|discontinued|sold out|indisponible|false|\bno\b/.test(stock)) return "out_of_stock";
-  if (/in stock|instock|available|disponible|for sale|\byes\b|\btrue\b/.test(stock)) return "in_stock";
+  const stock = norm(value).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  if (/\b(?:out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|pas en stock|epuise|false|no)\b/.test(stock)) return "out_of_stock";
+  if (/\b(?:in stock|instock|available|disponible|for sale|yes|true)\b/.test(stock)) return "in_stock";
   return "unknown";
 }
 
@@ -192,7 +206,7 @@ function parseDirectFeedRow(row) {
   const currency = String(row.currency || "EUR").trim().toUpperCase();
   const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
   const shippingPrice = parseFeedMoney(row.delivery_cost || row.shipping_cost || row.shipping || "", currency, true);
-  const stock = stockState([row.stock_status, row.availability, row.is_for_sale, row.in_stock].filter(Boolean).join(" "));
+  const stock = stockState(stockValues([row.stock_status, row.availability, row.is_for_sale, row.in_stock]));
   const adultFlag = norm([row.adult, row.adult_content, row.is_adult].filter(Boolean).join(" "));
   const categoryText = norm([row.merchant_category, row.category_name, row.product_type, row.product_name, row.title, row.name].filter(Boolean).join(" "));
   if (/^(1|yes|true|adult)$/.test(adultFlag) || /adult products?|sex toys?|erotic|erotique/.test(categoryText)) return null;
@@ -216,6 +230,7 @@ function parseDirectFeedRow(row) {
     availability: stock,
     aw_deep_link: row.aw_deep_link || "",
     shipping_price_eur: shippingPrice,
+    price_tax_status: explicitPriceTaxStatus(row),
     last_updated: row.last_updated || ""
   };
   return offerFromRow(normalized, program, advertiser, { allowUnknownAvailability: true });
@@ -314,7 +329,7 @@ async function loadDirectAwinFeed(rawOffers) {
 function parseFeedRow(row, program, advertiser) {
   const currency = row.currency || "EUR";
   const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
-  const stock = stockState([row.stock_status,row.availability,row.is_for_sale,row.in_stock].filter(Boolean).join(" "));
+  const stock = stockState(stockValues([row.stock_status,row.availability,row.is_for_sale,row.in_stock]));
   if (!price || String(currency).toUpperCase() !== "EUR" || stock !== "in_stock") return null;
   const extra = [row.alternate_image,row.alternate_image_two,row.alternate_image_three].filter(Boolean);
   const normalized = {
@@ -334,6 +349,7 @@ function parseFeedRow(row, program, advertiser) {
     availability: "in_stock",
     aw_deep_link: row.aw_deep_link || row.merchant_deep_link || row.purl,
     shipping_price_eur: parseFeedMoney(row.delivery_cost || row.shipping, currency, true),
+    price_tax_status: explicitPriceTaxStatus(row),
     last_updated: row.last_updated || ""
   };
   return offerFromRow(normalized,program,advertiser);
@@ -342,7 +358,7 @@ function parseFeedRow(row, program, advertiser) {
 async function loadStandardAwinFeeds(rawOffers) {
   const key = process.env.AWIN_PRODUCT_DATA_API_KEY || "";
   if (!key) {
-    log("Clé de flux Awin standard absente : seuls les flux Enhanced accessibles par l'API éditeur seront lus.");
+    log("Clé de flux Awin standard absente : aucun flux standard ne sera interrogé.");
     return 0;
   }
   const listUrl = "https://productdata.awin.com/datafeed/list/apikey/" + encodeURIComponent(key);
@@ -419,7 +435,8 @@ function groupKey(row, advertiser) {
   if (brand && mpn) {
     const color = identityPart(row.color || row.colour || "");
     const size = identityPart(row.size || "");
-    return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size;
+    const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
+    if (color || size || variant) return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size + ":" + variant;
   }
   return "awin:" + advertiser + ":" + String(row.id || row.product_id || "");
 }
@@ -431,11 +448,12 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
   const mpn = normalizedMpn(row);
   const images = imageList(row);
   const link = httpsUrl(row.aw_deep_link || row.link || row.mobile_link);
-  const availability = stockState(row.availability || row.stock_status || "");
+  const availability = stockState(stockValues([row.availability,row.stock_status,row.in_stock,row.is_for_sale]));
+  const currency = String(row.currency || "EUR").trim().toUpperCase();
   const regular = parseMoney(row.price || row.search_price);
   const sale = currentSalePrice(row, Date.now());
   const price = sale || regular;
-  if (!name || !images.length || !link || !price || availability === "out_of_stock" ||
+  if (!name || !images.length || !link || !price || currency !== "EUR" || availability === "out_of_stock" ||
       (availability !== "in_stock" && !allowUnknownAvailability)) return null;
   if (/^(yes|true|1|adult)$/i.test(String(row.adult || row.adult_content || ""))) return null;
   const merchant = String(program?.name || program?.displayName || program?.advertiserName || ("Annonceur Awin " + advertiser)).trim();
@@ -459,6 +477,7 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
     availability,
     shipping: row.shipping || row.delivery_cost || null,
     shipping_price_eur: Number.isFinite(row.shipping_price_eur) ? row.shipping_price_eur : null,
+    price_tax_status: explicitPriceTaxStatus(row),
     merchant_updated_at: row.last_updated || null,
     url: link
   };
@@ -500,6 +519,7 @@ function aggregateOffers(rawOffers, fetchedAt) {
       color: first.color,
       size: first.size,
       availability: best.availability,
+      priceTaxStatus: best.price_tax_status || "unspecified",
       shippingPriceValue: best.shipping_price_eur,
       merchantUpdatedAt: best.merchant_updated_at,
       gtin: first.gtin,
@@ -525,6 +545,7 @@ function aggregateOffers(rawOffers, fetchedAt) {
         shipping: item.shipping,
         shippingPriceValue: item.shipping_price_eur,
         availability: item.availability,
+        priceTaxStatus: item.price_tax_status || "unspecified",
         merchantUpdatedAt: item.merchant_updated_at
       })),
       isAwinProduct: true,
@@ -536,78 +557,136 @@ function aggregateOffers(rawOffers, fetchedAt) {
 }
 
 
-async function loadEnhancedAwinFeeds(rawOffers) {
-  if (!TOKEN) {
-    throw new Error("Configurer AWIN_PRODUCT_DATA_FEED_URL (flux direct) ou AWIN_API_TOKEN (API éditeur Awin).");
-  }
-  const programmesResponse = await request(
-    "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) + "/programmes?relationship=joined",
-    "Liste des partenariats"
+async function fetchProgrammes(relationship, token) {
+  const response = await request(
+    "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) +
+      "/programmes?relationship=" + encodeURIComponent(relationship),
+    "Programmes " + relationship,
+    token
   );
-  if (!programmesResponse.ok) {
-    if ([401,403].includes(programmesResponse.status)) {
-      log("Accès Awin Publisher refusé (HTTP " + programmesResponse.status + "). Le jeton éditeur n'est pas accepté ; aucune donnée produit n'a été modifiée.");
-      throw new Error("Authentification Awin Publisher refusée (HTTP " + programmesResponse.status + "). Vérifier AWIN_API_TOKEN et les droits éditeur.");
-    }
-    throw new Error("API Awin programmes HTTP " + programmesResponse.status + " (aucune donnée catalogue écrite).");
+  if (!response.ok) {
+    const error = new Error("API Awin programmes " + relationship + " HTTP " + response.status);
+    error.status = response.status;
+    throw error;
   }
-  const programmePayload = await programmesResponse.json();
-  const programmes = Array.isArray(programmePayload)
-    ? programmePayload
-    : (programmePayload.programmes || programmePayload.programs || programmePayload.data || []);
-  const eligible = programmes
-    .map(program => ({ program, id: advertiserId(program) }))
-    .filter(item => /^\d+$/.test(item.id))
-    .slice(0, MAX_PROGRAMMES);
-  log(eligible.length + " partenariat(s) rejoint(s) à examiner.");
-  if (!eligible.length) {
-    throw new Error("Aucun partenariat Awin rejoint : ajouter AWIN_PRODUCT_DATA_FEED_URL ou obtenir l'approbation d'un programme marchand.");
-  }
-  const statusCounts = {};
-  let cursor = 0;
-  async function worker() {
-    while (cursor < eligible.length && rawOffers.length < MAX_PRODUCTS) {
-      const item = eligible[cursor++];
-      const url = "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) +
-        "/awinfeeds/download/" + encodeURIComponent(item.id + "-retail-" + LOCALE + ".jsonl");
-      try {
-        const response = await request(url, "Flux annonceur " + item.id);
-        statusCounts[response.status] = (statusCounts[response.status] || 0) + 1;
-        if (!response.ok) continue;
-        const rows = parseJsonl(await response.text());
-        let accepted = 0;
-        for (const row of rows) {
-          const offer = offerFromRow(row, item.program, item.id);
-          if (!offer) continue;
-          rawOffers.push(offer);
-          accepted++;
-          if (accepted >= MAX_PER_ADVERTISER || rawOffers.length >= MAX_PRODUCTS) break;
-        }
-        if (accepted) log((item.program?.name || "Annonceur " + item.id) + " : " + accepted + " offre(s) avec image, prix EUR, stock et lien.");
-      } catch (error) {
-        log("Flux " + item.id + " ignoré (" + String(error.message || "erreur").slice(0, 120) + ").");
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, eligible.length) }, worker));
-  const standardImported = await loadStandardAwinFeeds(rawOffers);
-  if (standardImported) log(standardImported + " offre(s) supplémentaire(s) depuis les flux standards.");
-  if (!rawOffers.length) {
-    log("Aucune offre Awin exploitable. Codes HTTP : " + JSON.stringify(statusCounts));
-    throw new Error("Aucune offre Awin exploitable : vérifier les partenariats, flux Enhanced et flux standards autorisés.");
-  }
-  return eligible.length;
+  const payload = await response.json();
+  const programmes = Array.isArray(payload)
+    ? payload
+    : (payload.programmes || payload.programs || payload.data || []);
+  return Array.isArray(programmes) ? programmes : [];
 }
 
-function runSelfTests() {
+async function loadEnhancedAwinFeeds(rawOffers, { optional = false, token = TOKEN } = {}) {
+  const initialCount = rawOffers.length;
+  let joinedCount = null;
+  let pendingCount = null;
+  let joinedError = null;
+
+  if (token) {
+    const [joinedResult, pendingResult] = await Promise.allSettled([
+      fetchProgrammes("joined", token),
+      fetchProgrammes("pending", token)
+    ]);
+
+    if (pendingResult.status === "fulfilled") {
+      pendingCount = pendingResult.value.length;
+      log(pendingCount + " demande(s) de partenariat en attente selon l’API Awin.");
+    } else {
+      log("Statut des demandes Awin en attente non vérifié (" + String(pendingResult.reason?.message || "erreur API").slice(0, 100) + ").");
+    }
+
+    if (joinedResult.status === "fulfilled") {
+      const eligible = joinedResult.value
+        .map(program => ({ program, id: advertiserId(program) }))
+        .filter(item => /^\d+$/.test(item.id))
+        .slice(0, MAX_PROGRAMMES);
+      joinedCount = eligible.length;
+      log(joinedCount + " partenariat(s) Awin rejoint(s) à examiner.");
+
+      const statusCounts = {};
+      let cursor = 0;
+      async function worker() {
+        while (cursor < eligible.length && rawOffers.length < MAX_PRODUCTS) {
+          const item = eligible[cursor++];
+          const url = "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) +
+            "/awinfeeds/download/" + encodeURIComponent(item.id + "-retail-" + LOCALE + ".jsonl");
+          try {
+            const response = await request(url, "Flux annonceur " + item.id, token);
+            statusCounts[response.status] = (statusCounts[response.status] || 0) + 1;
+            if (!response.ok) continue;
+            const rows = parseJsonl(await response.text());
+            let accepted = 0;
+            for (const row of rows) {
+              const offer = offerFromRow(row, item.program, item.id);
+              if (!offer) continue;
+              rawOffers.push(offer);
+              accepted++;
+              if (accepted >= MAX_PER_ADVERTISER || rawOffers.length >= MAX_PRODUCTS) break;
+            }
+            if (accepted) log((item.program?.name || "Annonceur " + item.id) + " : " + accepted + " offre(s) avec image, prix EUR, stock et lien.");
+          } catch (error) {
+            log("Flux " + item.id + " ignoré (" + String(error.message || "erreur").slice(0, 120) + ").");
+          }
+        }
+      }
+      await Promise.all(Array.from({ length: Math.min(CONCURRENCY, eligible.length) }, worker));
+      if (Object.keys(statusCounts).length) log("Codes HTTP des flux Enhanced Awin : " + JSON.stringify(statusCounts));
+      if (!eligible.length) log("Aucun programme rejoint : les demandes en attente ne sont pas utilisées comme autorisation.");
+    } else {
+      joinedError = joinedResult.reason;
+      log("Statut des partenariats Awin rejoints non vérifié (" + String(joinedError?.message || "erreur API").slice(0, 120) + ").");
+      if ([401, 403].includes(joinedError?.status)) {
+        log("Authentification Awin refusée (HTTP " + joinedError.status + "). Le flux direct existant n’est pas modifié par cet échec.");
+      }
+    }
+  } else {
+    log("AWIN_API_TOKEN absent : les relations joined/pending ne peuvent pas être vérifiées ce cycle.");
+  }
+
+  let standardImported = 0;
+  let standardError = null;
+  try {
+    standardImported = await loadStandardAwinFeeds(rawOffers);
+    if (standardImported) log(standardImported + " offre(s) supplémentaire(s) depuis les flux standards autorisés (joined/soft member/auto-join). ");
+  } catch (error) {
+    standardError = error;
+    log("Liste des flux standards Awin indisponible (" + String(error.message || "erreur").slice(0, 120) + ").");
+  }
+
+  const importedOffers = rawOffers.length - initialCount;
+  if (!importedOffers && !optional) {
+    if (joinedError && !standardError) throw joinedError;
+    if (standardError) throw standardError;
+    throw new Error("Aucune offre Awin exploitable dans les programmes rejoints ou les flux standards autorisés.");
+  }
+  if (!importedOffers && optional) {
+    log("Aucune offre Enhanced/standard supplémentaire ; les offres du flux direct sont conservées sans remplacement.");
+  }
+  return { joinedCount, pendingCount, importedOffers };
+}
+
+async function runSelfTests() {
   const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
     '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","4006381333931","AB-X1"';
   const rows = objectRowsFromCsv(sampleCsv);
+  for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock","pas en stock","epuise"]) {
+    if (stockState(value) !== "out_of_stock") throw new Error("TEST ÉCHEC : statut indisponible mal reconnu : " + value);
+  }
+  for (const value of ["in stock","instock","available","disponible","in_stock","yes","true"]) {
+    if (stockState(value) !== "in_stock") throw new Error("TEST ÉCHEC : statut disponible mal reconnu : " + value);
+  }
   const offer = parseDirectFeedRow(rows[0]);
   if (!offer) throw new Error("TEST ÉCHEC : un flux direct valide doit produire une offre.");
   if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" ||
-      offer.brand !== "AudioBrand" || offer.gtin !== "4006381333931" || offer.mpn !== "AB-X1") {
+      offer.brand !== "AudioBrand" || offer.gtin !== "4006381333931" || offer.mpn !== "AB-X1" ||
+      offer.price_tax_status !== "unspecified") {
     throw new Error("TEST ÉCHEC : prix, livraison, marque, GTIN, MPN ou disponibilité mal traités.");
+  }
+  const explicitOutOfStock = parseDirectFeedRow({ ...rows[0], is_for_sale: false });
+  if (explicitOutOfStock) throw new Error("TEST ÉCHEC : un booléen is_for_sale=false ne doit jamais devenir une disponibilité inconnue.");
+  const ttcOffer = parseDirectFeedRow({ ...rows[0], price_tax_status: "included" });
+  if (!ttcOffer || ttcOffer.price_tax_status !== "included") {
+    throw new Error("TEST ÉCHEC : seul un statut TVA explicitement inclus peut être reconnu.");
   }
   const aliasRow = {
     title: "Casque alias",
@@ -624,6 +703,10 @@ function runSelfTests() {
       aliasOffer.identity !== "gtin:4006381333931") {
     throw new Error("TEST ÉCHEC : les alias EAN-13/GTIN et manufacturer_part_no doivent être reconnus.");
   }
+  const booleanOutOfStock = offerFromRow({...aliasRow,availability:false,stock_status:""}, {name:"Boutique Alias"}, "999", {allowUnknownAvailability:true});
+  if (booleanOutOfStock) throw new Error("TEST ÉCHEC : availability=false ne doit pas être accepté comme stock inconnu.");
+  const wrongCurrency = offerFromRow({...aliasRow,currency:"USD"}, {name:"Boutique Alias"}, "999", {allowUnknownAvailability:true});
+  if (wrongCurrency) throw new Error("TEST ÉCHEC : une devise USD ne doit pas être convertie en offre EUR.");
   const standardAlias = parseFeedRow({
     product_name:"Casque alias",brand_name:"AudioBrand",ean_13:"4006381333931",
     manufacturer_part_no:"AB-X1",merchant_image_url:"https://cdn.example/alias.jpg",
@@ -668,9 +751,16 @@ function runSelfTests() {
   const mpnKeyA = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Noir", size: "" }, "annonceur-1");
   const mpnKeyB = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Noir", size: "" }, "annonceur-2");
   const mpnKeyDifferentVariant = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Blanc", size: "" }, "annonceur-3");
+  const mpnKeyVariantA = groupKey({ brand: "AudioBrand", mpn: "AB-X1", variant: "Noir 128 Go" }, "annonceur-1");
+  const mpnKeyVariantB = groupKey({ brand: "AudioBrand", mpn: "AB-X1", variant: "Noir 128 Go" }, "annonceur-2");
+  const mpnKeyVariantDifferent = groupKey({ brand: "AudioBrand", mpn: "AB-X1", variant: "Blanc 128 Go" }, "annonceur-3");
+  const mpnKeyMissingVariantA = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-1");
+  const mpnKeyMissingVariantB = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-2");
   if (mpnKeyA !== mpnKeyB || mpnKeyA === mpnKeyDifferentVariant ||
+      mpnKeyVariantA !== mpnKeyVariantB || mpnKeyVariantA === mpnKeyVariantDifferent ||
+      mpnKeyMissingVariantA === mpnKeyMissingVariantB ||
       groupKey({ mpn: "AB-X1" }, "annonceur-1") === groupKey({ mpn: "AB-X1" }, "annonceur-2")) {
-    throw new Error("TEST ÉCHEC : le rapprochement MPN doit exiger une marque et respecter les variantes.");
+    throw new Error("TEST ÉCHEC : le rapprochement MPN doit exiger une marque et une variante exacte.");
   }
   const grouped = aggregateOffers([
     { identity: mpnKeyA, advertiser_id: "1", id: "1", merchant: "Boutique A", name: "Casque Audio X", brand: "AudioBrand", category: "tech", color: "Noir", size: "", gtin: "", mpn: "AB-X1", images: ["https://cdn.example/a.jpg"], price_eur: 45, shipping_price_eur: null, availability: "unknown", merchant_updated_at: null, url: "https://example.com/a" },
@@ -689,26 +779,87 @@ function runSelfTests() {
   let rejectsHttp = false;
   try { validateDirectFeedUrl("http://productdata.awin.com/feed.csv"); } catch { rejectsHttp = true; }
   if (!rejectsHttp) throw new Error("TEST ÉCHEC : une URL HTTP doit être rejetée.");
-  log("Autotests réussis : CSV, prix EUR, livraison, GTIN valide, MPN+marque, variantes, catégories par titre, total avec livraison, provenance image, rupture, devise et URL sécurisée.");
+
+  const originalFetch = globalThis.fetch;
+  const originalStandardKey = process.env.AWIN_PRODUCT_DATA_API_KEY;
+  try {
+    delete process.env.AWIN_PRODUCT_DATA_API_KEY;
+    const requested = [];
+    globalThis.fetch = async (url, options = {}) => {
+      requested.push({ url: String(url), authorization: options.headers?.Authorization });
+      if (String(url).includes("relationship=joined")) return new Response("[]", { status: 200 });
+      if (String(url).includes("relationship=pending")) return new Response('[{"id":123,"name":"Pending test"}]', { status: 200 });
+      throw new Error("URL inattendue dans le test Awin : " + url);
+    };
+    const directOnly = [{ id: "direct-feed-offer" }];
+    const status = await loadEnhancedAwinFeeds(directOnly, { optional: true, token: "test-token" });
+    if (status.joinedCount !== 0 || status.pendingCount !== 1 || status.importedOffers !== 0 ||
+        directOnly.length !== 1 || requested.length !== 2 || requested.some(item => item.authorization !== "Bearer test-token")) {
+      throw new Error("TEST ÉCHEC : le contrôle joined/pending doit conserver le flux direct sans fusionner les demandes en attente.");
+    }
+
+    globalThis.fetch = async (url, options = {}) => {
+      if (String(url).includes("relationship=joined")) return new Response("refusé", { status: 403 });
+      if (String(url).includes("relationship=pending")) return new Response("[]", { status: 200 });
+      throw new Error("URL inattendue dans le test Awin 403 : " + url);
+    };
+    const preserved = [{ id: "direct-feed-preserved" }];
+    const denied = await loadEnhancedAwinFeeds(preserved, { optional: true, token: "test-token" });
+    if (denied.joinedCount !== null || denied.pendingCount !== 0 || preserved.length !== 1) {
+      throw new Error("TEST ÉCHEC : un 403 API ne doit pas effacer le flux direct.");
+    }
+
+    process.env.AWIN_PRODUCT_DATA_API_KEY = "test-standard-key";
+    let standardListRequested = false;
+    globalThis.fetch = async (url, options = {}) => {
+      const value = String(url);
+      if (value.includes("datafeed/list/apikey/test-standard-key")) {
+        standardListRequested = true;
+        return new Response("advertiser_id,program_name,membership_status,language\\n", { status: 200 });
+      }
+      throw new Error("URL inattendue dans le test du flux standard : " + value);
+    };
+    const standardOnly = [{ id: "direct-feed-standard-fallback" }];
+    const standardStatus = await loadEnhancedAwinFeeds(standardOnly, { optional: true, token: "" });
+    if (!standardListRequested || standardStatus.joinedCount !== null || standardStatus.importedOffers !== 0 || standardOnly.length !== 1) {
+      throw new Error("TEST ÉCHEC : le flux standard autorisé doit être interrogé même sans jeton Publisher API.");
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalStandardKey === undefined) delete process.env.AWIN_PRODUCT_DATA_API_KEY;
+    else process.env.AWIN_PRODUCT_DATA_API_KEY = originalStandardKey;
+  }
+  log("Autotests réussis : CSV, prix EUR, TVA explicite, livraison, GTIN valide, MPN+marque, variantes, catégories, liens, rupture, API joined/pending, conservation du flux direct après 403 et URL sécurisée.");
 }
 
 if (process.argv.includes("--self-test")) {
-  runSelfTests();
+  await runSelfTests();
 } else {
   const rawOffers = [];
   const directFeedConfigured = Boolean(process.env.AWIN_PRODUCT_DATA_FEED_URL);
-  let joinedAdvertisersChecked = 0;
+  let joinedAdvertisersChecked = null;
+  let pendingAdvertisersDetected = null;
+  let additionalAwinOffers = 0;
   if (directFeedConfigured) {
     await loadDirectAwinFeed(rawOffers);
+    const programmeStatus = await loadEnhancedAwinFeeds(rawOffers, { optional: true });
+    joinedAdvertisersChecked = programmeStatus.joinedCount;
+    pendingAdvertisersDetected = programmeStatus.pendingCount;
+    additionalAwinOffers = programmeStatus.importedOffers;
   } else {
-    joinedAdvertisersChecked = await loadEnhancedAwinFeeds(rawOffers);
+    const programmeStatus = await loadEnhancedAwinFeeds(rawOffers);
+    joinedAdvertisersChecked = programmeStatus.joinedCount;
+    pendingAdvertisersDetected = programmeStatus.pendingCount;
+    additionalAwinOffers = programmeStatus.importedOffers;
   }
   if (!rawOffers.length) throw new Error("Aucune offre Awin exploitable : le catalogue précédent est conservé.");
 const fetchedAt = new Date().toISOString();
 const products = aggregateOffers(rawOffers, fetchedAt).slice(0, MAX_PRODUCTS);
 const output = {
   schema_version: 1,
-  source: directFeedConfigured ? "Awin Direct Product Data Feed" : "Awin Publisher Enhanced Retail Feeds",
+  source: directFeedConfigured
+    ? (additionalAwinOffers ? "Awin Direct + flux programmes/standards autorisés" : "Awin Direct Product Data Feed")
+    : "Awin Publisher Enhanced/standard feeds autorisés",
   publisher_id: PUBLISHER_ID,
   locale: LOCALE,
   fetched_at: fetchedAt,
@@ -725,6 +876,7 @@ const output = {
     multi_merchant_products: products.filter(product => new Set((product.offers || []).map(offer => norm(offer.merchant)).filter(Boolean)).size > 1).length,
     offers_with_shipping: rawOffers.filter(offer => Number.isFinite(offer.shipping_price_eur) && offer.shipping_price_eur >= 0).length,
     offers_with_availability: rawOffers.filter(offer => offer.availability && offer.availability !== "unknown").length,
+    offers_with_tax_included: rawOffers.filter(offer => offer.price_tax_status === "included").length,
     products_other_category: products.filter(product => product.category === "other").length
   },
   products,
@@ -735,5 +887,7 @@ await fs.mkdir(path.dirname(OUTPUT), { recursive: true });
 await fs.writeFile(OUTPUT, JSON.stringify(output) + "\n", "utf8");
 log(products.length + " fiche(s) produits, " + rawOffers.length + " offre(s), " + output.counts.brands + " marque(s).");
 log("Qualité du flux Awin : " + JSON.stringify(output.counts));
+log("Statut partenariats Awin : joined=" + (joinedAdvertisersChecked === null ? "non vérifié" : joinedAdvertisersChecked) +
+  " ; pending=" + (pendingAdvertisersDetected === null ? "non vérifié" : pendingAdvertisersDetected) + ".");
 log("Catalogue autorisé mis à jour : data/awin-products.json");
 }

@@ -610,10 +610,11 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
   <button class="pm-amazon-search-submit" type="submit">Rechercher ↗</button>
  </form>
  <div id="filters" class="pm-catalogue-brand-filters" aria-label="Filtrer par marque"></div>
+ <p id="pmAwinFeedStatus" class="pm-feed-status" role="status" aria-live="polite">Vérification des flux marchands…</p>
 </section>
-<section id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden>
+<section id="verifiedShelf" class="verified-shelf" aria-live="polite">
   <div class="verified-shelf-head">
-    <div><h2>Comparaisons multi-marchands — modèles exacts</h2><p>Les comparaisons affichées concernent uniquement un même modèle identifié chez plusieurs vendeurs.</p></div>
+    <div><h2>Comparaisons multi-marchands — modèles exacts (prix TTC)</h2><p>Un même modèle doit être identifié chez plusieurs vendeurs, avec prix TTC confirmé et relevé marchand récent ; les frais de livraison et la disponibilité sont affichés lorsqu’ils sont fournis.</p></div>
   </div>
   <div class="grid" id="verifiedProducts"><p class="comparison-empty">Les comparaisons exactes apparaîtront ici dès que plusieurs offres récentes seront confirmées pour un même modèle.</p></div>
 </section>
@@ -4728,7 +4729,7 @@ const productData=[
     "category": "beauty",
     "brand": "Dior",
     "query": "Dior Sauvage Eau de Parfum",
-    "image": "https://www.dior.com/dw/image/v2/BGXS_PRD/on/demandware.static/-/Sites-master_dior/default/dwbda8eb98/Y0785220/Y0785220_F078522009_E01_RHC.jpg?sw=800",
+    "image": "",
     "merchant": "Recherche catalogue • offre à vérifier",
     "price": "Voir les offres",
     "old": "",
@@ -4737,7 +4738,7 @@ const productData=[
     "imageSource": "https://www.dior.com/fr_fr/beauty/products/sauvage-eau-de-parfum-F078522009.html",
     "imageSourceName": "Dior",
     "imageKind": "official",
-    "imageStatus": "manufacturer_verified"
+    "imageStatus": "image_unavailable"
   },
   {
     "id": "dior-j-adore-eau-de-parfum",
@@ -5778,13 +5779,19 @@ async function pmLoadAwinCatalogue(){
     ).length;
     const withGtin=feedProducts.filter(product=>String(product.gtin||"").trim()).length;
     const withMpn=feedProducts.filter(product=>String(product.mpn||"").trim()).length;
-    const offerCount=feedProducts.reduce((total,product)=>total+(Array.isArray(product.offers)?product.offers.length:1),0);
+    const allOffers=feedProducts.flatMap(product=>Array.isArray(product.offers)&&product.offers.length?product.offers:[product]);
+    const offerCount=allOffers.length;
+    const freshDates=allOffers.filter(offer=>pmAwinPriceIsFresh(offer.merchantUpdatedAt||offer.last_updated)).length;
+    const missingDates=allOffers.filter(offer=>!(offer.merchantUpdatedAt||offer.last_updated)).length;
+    const staleDates=offerCount-freshDates-missingDates;
+    const shippingKnown=allOffers.filter(offer=>offer.shippingPriceValue!==null&&offer.shippingPriceValue!==undefined&&Number.isFinite(Number(offer.shippingPriceValue))).length;
+    const availabilityKnown=allOffers.filter(offer=>offer.availability&&offer.availability!=="unknown").length;
+    const ttcKnown=allOffers.filter(offer=>offer.priceTaxStatus==="included"||offer.price_tax_status==="included").length;
     const dateLabel=new Date(fetchedAt).toLocaleString("fr-FR");
-    let status="Flux Awin reçu le "+dateLabel+" : "+offerCount.toLocaleString("fr-FR")+" offres valides issues de "+merchants.size+" marchands ; "+multiMerchant.toLocaleString("fr-FR")+" comparaisons multi-marchands exactes.";
-    if(multiMerchant===0){
-      status+=" Aucun GTIN/MPN exploitable ("+withGtin+" GTIN, "+withMpn+" MPN) : les offres restent séparées pour éviter les faux rapprochements.";
+    let status="Flux Awin téléchargé le "+dateLabel+" : "+offerCount.toLocaleString("fr-FR")+" offres valides / "+merchants.size+" marchands. Dates marchandes : "+freshDates.toLocaleString("fr-FR")+" récentes, "+missingDates.toLocaleString("fr-FR")+" absentes, "+staleDates.toLocaleString("fr-FR")+" périmées. Identifiants : "+withGtin+" GTIN, "+withMpn+" MPN ; "+multiMerchant+" fiches multi-marchands exactes. Livraison connue : "+shippingKnown+" ; disponibilité renseignée : "+availabilityKnown+" ; prix explicitement TTC : "+ttcKnown+".";
+    if(multiMerchant===0||freshDates===0||ttcKnown===0){
+      status+=" Aucune comparaison multi-marchands TTC et récente ne peut être affichée sans identité exacte, date marchande récente et confirmation TVA.";
     }
-    status+=" Prix en EUR fournis par le flux ; TVA non explicitée. Livraison et disponibilité ne sont indiquées que si le flux les fournit.";
     setStatus(status);
     const known=new Map(productData.map(product=>[product.id,product]));
     displayProducts.forEach(product=>{
@@ -5820,7 +5827,7 @@ async function pmLoadAwinCatalogue(){
     pmAwinVerifiedProducts=displayProducts.map(product=>{
       const sourceOffers=Array.isArray(product.offers)&&product.offers.length?product.offers:[{
         merchant:product.merchant,priceValue:product.priceValue,shippingPriceValue:product.shippingPriceValue,url:product.sourceUrl,
-        merchantUpdatedAt:product.merchantUpdatedAt
+        merchantUpdatedAt:product.merchantUpdatedAt,priceTaxStatus:product.priceTaxStatus,availability:product.availability
       }];
       return {
         id:product.id,
@@ -5834,6 +5841,9 @@ async function pmLoadAwinCatalogue(){
             shipping_price_eur:offer.shippingPriceValue===null||offer.shippingPriceValue===undefined?null:Number(offer.shippingPriceValue),
             url:offer.url,
             checked_at:checkedAt,
+            currency:"EUR",
+            price_tax_status:offer.priceTaxStatus==="included"||offer.price_tax_status==="included"?"included":"unspecified",
+            availability:offer.availability||product.availability||"unknown",
             freshness_max_age_hours:48,
             stale:!pmAwinPriceIsFresh(checkedAt)
           };
@@ -6267,26 +6277,33 @@ function render(){
 
 function verifiedComparablePrice(offer){
   if(!offer)return NaN;
-  const total=Number(offer.total_price_eur);
+  const totalValue=offer.total_price_eur;
+  const total=totalValue===null||totalValue===undefined?NaN:Number(totalValue);
   if(Number.isFinite(total)&&total>=0)return total;
   const base=Number(offer.price_eur);
-  const shipping=Number(offer.shipping_price_eur);
-  if(Number.isFinite(base)&&base>=0&&Number.isFinite(shipping)&&shipping>=0)return base+shipping;
+  const shippingValue=offer.shipping_price_eur;
+  const shippingKnown=shippingValue!==null&&shippingValue!==undefined;
+  const shipping=shippingKnown?Number(shippingValue):NaN;
+  if(Number.isFinite(base)&&base>=0&&shippingKnown&&Number.isFinite(shipping)&&shipping>=0)return base+shipping;
   return Number.isFinite(base)&&base>=0?base:NaN;
 }
 
 function verifiedPriceBreakdown(offer){
   const base=Number(offer&&offer.price_eur);
-  const shipping=Number(offer&&offer.shipping_price_eur);
-  if(Number.isFinite(base)&&base>=0&&Number.isFinite(shipping)&&shipping>=0){
-    const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(value);
-    return "Produit "+money(base)+" + livraison "+money(shipping);
+  const shippingValue=offer&&offer.shipping_price_eur;
+  const shippingKnown=shippingValue!==null&&shippingValue!==undefined;
+  const shipping=shippingKnown?Number(shippingValue):NaN;
+  const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(value);
+  if(Number.isFinite(base)&&base>=0&&shippingKnown&&Number.isFinite(shipping)&&shipping>=0){
+    return "Produit TTC "+money(base)+" + livraison "+money(shipping);
   }
-  return "Livraison à confirmer chez le marchand";
+  return "Produit TTC "+(Number.isFinite(base)?money(base):"à vérifier")+" • livraison à confirmer";
 }
 
 function isCurrentVerifiedOffer(offer){
-  if(!offer||offer.stale)return false;
+  if(!offer||offer.stale||offer.currency!=="EUR"||offer.price_tax_status!=="included")return false;
+  const base=Number(offer.price_eur);
+  if(!Number.isFinite(base)||base<=0)return false;
   const checkedAt=Date.parse(offer.checked_at||"");
   const age=Date.now()-checkedAt;
   const configuredHours=Number(offer.freshness_max_age_hours);
@@ -6306,14 +6323,21 @@ function renderVerifiedProducts(products){
   };
   const usable=products.filter(p=>{
     if(!p||!p.id||!p.name||!Array.isArray(p.offers))return false;
-    const currentOffers=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&o.merchant&&/^https:\/\//i.test(String(o.url||""))&&
+    const currentOffers=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&(o.merchant||o.merchant_name||o.retailer)&&/^https:\/\//i.test(String(o.url||o.product_url||""))&&
       Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
-    return new Set(currentOffers.map(o=>String(o.merchant).trim().toLowerCase()).filter(Boolean)).size>1;
+    return new Set(currentOffers.map(o=>String(o.merchant||o.merchant_name||o.retailer).trim().toLowerCase()).filter(Boolean)).size>1;
   });
-  if(!usable.length){verifiedShelf.hidden=true;return;}
+  if(!usable.length){
+    verifiedShelf.hidden=false;
+    const empty=document.createElement("p");
+    empty.className="comparison-empty";
+    empty.textContent="Aucune comparaison multi-marchands exacte avec prix TTC confirmé et relevé récent n’est disponible actuellement. Les offres individuelles restent consultables plus bas ; aucune correspondance approximative ni aucun prix non vérifié n’est fusionné ici.";
+    verifiedProductsEl.append(empty);
+    return;
+  }
   verifiedShelf.hidden=false;
   usable.forEach(p=>{
-    const rows=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&o.merchant&&/^https:\/\//i.test(String(o.url||""))&&
+    const rows=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&(o.merchant||o.merchant_name||o.retailer)&&/^https:\/\//i.test(String(o.url||o.product_url||""))&&
       Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
     const shippingKnown=offer=>offer.shipping_price_eur!==null&&offer.shipping_price_eur!==undefined&&
       Number.isFinite(Number(offer.shipping_price_eur))&&Number(offer.shipping_price_eur)>=0;
@@ -6368,7 +6392,9 @@ function renderVerifiedProducts(products){
     name.textContent=p.name;
     const price=document.createElement("div");
     price.className="price";
-    price.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice);
+    price.textContent=shippingKnown(best)
+      ?"Total TTC avec livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice)
+      :"Prix TTC du produit : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice)+" • livraison à confirmer";
     const original=Number(p.original_price_eur||p.regular_price_eur||0);
     if(original>bestComparablePrice){
       const old=document.createElement("div");old.className="verified-original";
@@ -6394,10 +6420,12 @@ function renderVerifiedProducts(products){
       const store=document.createElement("div");
       store.className="verified-offer-store";
       const storeName=document.createElement("strong");
-      storeName.textContent=offerData.retailer||"Marchand";
+      storeName.textContent=offerData.merchant||offerData.merchant_name||offerData.retailer||"Marchand";
       const storeState=document.createElement("span");
+      const availability=offerData.availability||"unknown";
+      const availabilityLabel=availability==="in_stock"?"stock indiqué":availability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
       storeState.textContent=offerIsCurrent
-        ?"Relevé "+new Date(offerData.checked_at).toLocaleString("fr-FR")
+        ?"Relevé "+new Date(offerData.checked_at).toLocaleString("fr-FR")+" • "+availabilityLabel
         :"Dernier prix connu — à confirmer";
       const priceBox=document.createElement("div");
       priceBox.className="verified-offer-price";
@@ -6406,8 +6434,13 @@ function renderVerifiedProducts(products){
       const breakdown=document.createElement("span");
       breakdown.textContent=verifiedPriceBreakdown(offerData);
       breakdown.style.cssText="display:block;margin-top:3px;font-size:10px;line-height:1.3;color:#777;text-align:right";
+      const merchantLink=document.createElement("a");
+      merchantLink.href=offerData.url||offerData.product_url;
+      merchantLink.target="_blank";
+      merchantLink.rel="sponsored noopener noreferrer";
+      merchantLink.textContent="Voir chez le marchand ↗";
       store.append(storeName,storeState);
-      priceBox.append(offerPrice,breakdown);
+      priceBox.append(offerPrice,breakdown,merchantLink);
       row.append(store,priceBox);
       list.append(row);
     });
@@ -6852,7 +6885,9 @@ function pmRakutenIsValidGtin(value){
         offers:rows.map(p=>({
           merchant:p.merchant,price_eur:Number(p.priceValue),
           shipping_price_eur:p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue),
-          url:p.sourceUrl,checked_at:p.sourceCreatedAt||feed.generated_at,freshness_max_age_hours:48,stale:false
+          url:p.sourceUrl,checked_at:p.sourceCreatedAt||feed.generated_at,currency:"EUR",
+          price_tax_status:p.priceTaxStatus==="included"?"included":"unspecified",availability:p.availability||"unknown",
+          freshness_max_age_hours:48,stale:false
         }))
       });
     });
@@ -6918,4 +6953,15 @@ function pmRakutenIsValidGtin(value){
 #products .pm-catalogue-no-feed .pm-catalogue-external-searches a+a{color:#fff!important;background:#26364b!important;border-color:#52647b!important}
 #products .price{color:#b8422b!important;font-size:16px!important}
 #products .merchant,#products .discovery-disclaimer{color:#475467!important}
+</style>
+
+<style id="pm-comparison-visibility">
+.pm-feed-status{margin:12px 0 16px;padding:10px 12px;border:1px solid #d9e0e8;border-left:4px solid #ff650b;border-radius:10px;background:#f7f9fc;color:#334155;font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+#verifiedProducts .verified-offers{display:flex!important;flex-flow:row nowrap!important;gap:9px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:4px 2px 10px!important;scroll-snap-type:x mandatory!important;scroll-padding-inline:2px;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+#verifiedProducts .verified-offer-row{flex:0 0 190px!important;width:190px!important;min-width:190px!important;max-width:190px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;scroll-snap-align:start!important;background:#f8fafc!important;border-color:#dbe3ed!important}
+#verifiedProducts .verified-offer-store strong{font-size:13px!important;color:#17212b!important}
+#verifiedProducts .verified-offer-store span{font-size:10px!important;color:#667085!important}
+#verifiedProducts .verified-offer-price{align-items:flex-start!important;text-align:left!important}
+#verifiedProducts .verified-offer-price strong{font-size:16px!important;color:#e64b00!important}
+#verifiedProducts .verified-offer-price a{display:inline-flex!important;align-items:center;justify-content:center;margin-top:3px;padding:8px 10px;border-radius:8px;background:#ff650b;color:#fff!important;text-decoration:none!important;font-size:11px;font-weight:800;white-space:nowrap}
 </style>

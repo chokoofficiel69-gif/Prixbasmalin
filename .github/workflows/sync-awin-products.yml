@@ -39,16 +39,26 @@ jobs:
         env:
           AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
           AWIN_PRODUCT_DATA_FEED_URL: ${{ secrets.AWIN_PRODUCT_DATA_FEED_URL }}
+          AWIN_PRODUCT_DATA_API_KEY: ${{ secrets.AWIN_PRODUCT_DATA_API_KEY }}
         shell: bash
         run: |
           set -euo pipefail
+          if [[ -z "${AWIN_PRODUCT_DATA_FEED_URL:-}" && -z "${AWIN_API_TOKEN:-}" && -z "${AWIN_PRODUCT_DATA_API_KEY:-}" ]]; then
+            echo "::error::Aucun accès Awin configuré : flux direct, jeton éditeur et clé de flux standard absents."
+            exit 1
+          fi
           if [[ -n "${AWIN_PRODUCT_DATA_FEED_URL:-}" ]]; then
             echo "Flux direct Awin configuré (URL masquée)."
-          elif [[ -n "${AWIN_API_TOKEN:-}" ]]; then
-            echo "Jeton éditeur Awin configuré (valeur masquée)."
+          fi
+          if [[ -n "${AWIN_API_TOKEN:-}" ]]; then
+            echo "Jeton Publisher API Awin configuré ; contrôle joined/pending activé (valeur masquée)."
           else
-            echo "::error::Aucun accès Awin configuré : ni flux direct ni jeton éditeur."
-            exit 1
+            echo "Jeton Publisher API Awin absent ; relations joined/pending non vérifiables."
+          fi
+          if [[ -n "${AWIN_PRODUCT_DATA_API_KEY:-}" ]]; then
+            echo "Clé de flux standard Awin configurée (valeur masquée)."
+          else
+            echo "Clé de flux standard Awin absente."
           fi
       - name: Télécharger les flux produits autorisés
         env:
@@ -114,6 +124,8 @@ jobs:
             throw new Error("Le flux Awin publié contient des fiches incomplètes.");
           }
           const merchants = new Set(valid.map(product => product.merchant).filter(Boolean));
+          const allOffers = valid.flatMap(product => Array.isArray(product.offers) && product.offers.length ? product.offers : [product]);
+          const taxIncluded = allOffers.filter(offer => offer.priceTaxStatus === "included" || offer.price_tax_status === "included").length;
           const multiMerchant = valid.filter(product =>
             new Set((product.offers || []).map(offer => String(offer.merchant || "").trim().toLowerCase()).filter(Boolean)).size > 1
           ).length;
@@ -123,12 +135,18 @@ jobs:
             return map;
           }, new Map()));
           console.log("Publication Awin vérifiée :", valid.length, "offres /", merchants.size, "marchands.");
-          console.log("Comparaisons multi-marchands exactes :", multiMerchant, "— catégories :", JSON.stringify(categories));
+          console.log("Comparaisons multi-marchands exactes :", multiMerchant, "— prix TTC explicitement confirmés :", taxIncluded, "— catégories :", JSON.stringify(categories));
           console.log("Flux public à jour :", data.fetched_at);
           if (multiMerchant === 0) {
             console.log("AVERTISSEMENT : les offres restent individuelles faute de GTIN/MPN commun.");
           }
           NODE
+                curl --fail --silent --show-error --location --connect-timeout 3 --max-time 10 \
+                  -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
+                  "https://prixbasmalin.fr/catalogue.html?v=${EXPECTED_FETCHED_AT}" --output /tmp/catalogue-public.html
+                grep -q 'id="pmAwinFeedStatus"' /tmp/catalogue-public.html
+                grep -q 'Aucune comparaison multi-marchands exacte avec prix TTC confirmé' /tmp/catalogue-public.html
+                echo "Interface publique du comparateur : statut de flux et état vide vérifiés."
                 exit 0
               fi
             fi

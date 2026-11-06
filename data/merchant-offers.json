@@ -10,6 +10,8 @@
     "Toutes les offres associées à une même fiche catalogue doivent partager la même identité exacte, sinon toute la fiche est écartée.",
     "checked_at doit être l'heure réelle du relevé au format ISO 8601 avec fuseau horaire.",
     "shipping_price doit être connu pour calculer le coût total comparable ; mettre 0 si la livraison est gratuite.",
-    "Ne jamais ajouter de clé API, cookie, mot de passe ou flux privé."
+    "Ne jamais ajouter de clé API, cookie, mot de passe ou flux privé.",
+    "price_tax_status doit valoir 'included' uniquement si la source confirme explicitement que le prix comprend la TVA ; sinon l'offre ne peut pas entrer dans une comparaison TTC.",
+    "availability peut être in_stock ou unknown ; une offre explicitement out_of_stock n'est pas publiée comme offre achetable."
   ]
 }

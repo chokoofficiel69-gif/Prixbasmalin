@@ -29,6 +29,7 @@ class PriceFeedValidationTests(unittest.TestCase):
             "price": 12.50,
             "shipping_price": 0,
             "currency": "EUR",
+            "price_tax_status": "included",
             "checked_at": self.now,
         }
 
@@ -61,6 +62,27 @@ class PriceFeedValidationTests(unittest.TestCase):
                  contextlib.redirect_stdout(io.StringIO()):
                 BUILDER.main()
             return json.loads(output.read_text(encoding="utf-8"))
+
+    def test_rejects_out_of_stock_offer(self):
+        out_of_stock = dict(self.base_offer, availability="out_of_stock")
+        result = self.run_builder([out_of_stock])
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("disponibilité non achetable" in error for error in result["errors"]))
+
+    def test_rejects_prices_without_explicit_ttc_confirmation(self):
+        unknown = dict(self.base_offer, price_tax_status="unspecified")
+        result = self.run_builder([unknown])
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("prix TTC non confirmé" in error for error in result["errors"]))
+
+    def test_publishes_explicit_eur_and_ttc_metadata(self):
+        result = self.run_builder([self.base_offer])
+        offer = result["offers"][0]
+        self.assertEqual(offer["currency"], "EUR")
+        self.assertEqual(offer["price_tax_status"], "included")
+        self.assertEqual(offer["merchant"], "Marchand test")
+        self.assertEqual(offer["url"], "https://merchant.example/product/1")
+        self.assertEqual(offer["availability"], "unknown")
 
     def test_rejects_unknown_catalogue_ids_and_duplicate_offer_ids(self):
         duplicate = dict(self.base_offer, price=10.00)
@@ -119,6 +141,39 @@ class PriceFeedValidationTests(unittest.TestCase):
 
         self.assertEqual(result["products"], [])
         self.assertTrue(any("brand obligatoire" in error for error in result["errors"]))
+
+    def test_requires_variant_for_mpn_identity(self):
+        mpn_offer = dict(self.base_offer, identity_type="mpn", identity_value="MODEL-123", brand="Brand")
+        result = self.run_builder([mpn_offer])
+
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("variant obligatoire" in error for error in result["errors"]))
+
+    def test_same_mpn_and_variant_can_be_compared(self):
+        first = dict(self.base_offer, identity_type="mpn", identity_value="MODEL-123", brand="Brand", variant="Noir 128 Go")
+        second = dict(first, offer_id="merchant-offer-2", merchant_name="Autre marchand",
+                      product_url="https://other.example/product/1", price=10.00, shipping_price=1.50)
+        result = self.run_builder([first, second])
+
+        self.assertEqual(len(result["products"]), 1)
+        self.assertEqual(result["products"][0]["offer_count"], 2)
+        self.assertEqual(result["products"][0]["identity"]["variant"], "Noir 128 Go")
+
+    def test_rejects_mixed_mpn_variants_for_one_catalogue_card(self):
+        first = dict(self.base_offer, identity_type="mpn", identity_value="MODEL-123", brand="Brand", variant="Noir 128 Go")
+        second = dict(first, offer_id="merchant-offer-2", merchant_name="Autre marchand",
+                      product_url="https://other.example/product/2", variant="Blanc 128 Go")
+        result = self.run_builder([first, second])
+
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("identité produit différente" in error for error in result["errors"]))
+
+    def test_rejects_false_boolean_availability(self):
+        unavailable = dict(self.base_offer, availability=False)
+        result = self.run_builder([unavailable])
+
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("disponibilité non achetable" in error for error in result["errors"]))
 
 
     def test_default_freshness_window_remains_48_hours(self):

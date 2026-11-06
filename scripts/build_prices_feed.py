@@ -111,9 +111,18 @@ def normalize_identity(offer, label):
 
     if not normalized_brand:
         raise ValueError(f"{label}: brand obligatoire pour une identité MPN")
+    variant = offer.get("variant")
+    if not isinstance(variant, str) or not variant.strip():
+        raise ValueError(f"{label}: variant obligatoire pour une identité MPN")
+    normalized_variant = " ".join(variant.strip().casefold().split())
     if len(value) > 100 or not re.fullmatch(r"[A-Z0-9][A-Z0-9._/-]*", value):
         raise ValueError(f"{label}: référence MPN invalide")
-    return {"type": "mpn", "value": value, "brand": brand.strip()}, ("mpn", normalized_brand, value)
+    return {
+        "type": "mpn",
+        "value": value,
+        "brand": brand.strip(),
+        "variant": " ".join(variant.split()),
+    }, ("mpn", normalized_brand, value, normalized_variant)
 
 
 def main():
@@ -180,6 +189,14 @@ def main():
         if offer.get("currency") != "EUR":
             errors.append(f"{label}: devise EUR obligatoire")
             continue
+        if offer.get("price_tax_status") != "included":
+            errors.append(f"{label}: prix TTC non confirmé par la source (price_tax_status='included' obligatoire)")
+            continue
+        availability_value = offer.get("availability")
+        availability = "unknown" if availability_value is None or (isinstance(availability_value, str) and not availability_value.strip()) else str(availability_value).strip().lower()
+        if availability not in {"in_stock", "unknown"}:
+            errors.append(f"{label}: disponibilité non achetable ou valeur inconnue")
+            continue
         if not https_url(product_url):
             errors.append(f"{label}: URL produit HTTPS obligatoire")
             continue
@@ -226,14 +243,19 @@ def main():
         normalized = {
             "offer_id": offer_id,
             "merchant_name": offer["merchant_name"].strip(),
+            "merchant": offer["merchant_name"].strip(),
             "retailer": offer["merchant_name"].strip(),
             "source": offer["source"].strip(),
             "identity": identity,
+            "currency": "EUR",
+            "price_tax_status": "included",
             "price_eur": round(float(price), 2),
             "shipping_price_eur": round(float(shipping), 2),
             "total_price_eur": round(float(price) + float(shipping), 2),
             "freshness_max_age_hours": max_age_hours,
             "product_url": product_url,
+            "url": product_url,
+            "availability": availability,
             "checked_at": checked_at.isoformat().replace("+00:00", "Z"),
         }
         if offer.get("tracking_url"):
