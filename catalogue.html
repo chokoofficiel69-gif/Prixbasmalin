@@ -6013,11 +6013,13 @@ function render(){
     const photo=document.createElement("div");
     photo.className="photo";
     const img=document.createElement("img");
-    img.src=p.image;
+    const primaryImageUrl=String(p.image||"");
     img.alt=p.name;
     img.loading=index<8?"eager":"lazy";
     img.decoding="async";
     img.dataset.fallbackTried="0";
+    img.dataset.pmImageStarted="0";
+    img.dataset.pmHandlingError="0";
     photo.classList.add("pm-photo-loading");
     const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
     imageBadge.className="pm-photo-source"+(p.imageKind==="illustration"?" illustration":"");
@@ -6026,56 +6028,74 @@ function render(){
     if(imageBadge.textContent)photo.append(imageBadge);
     let imageFallbackTimer=null;
     let imageObserver=null;
-    const startImageFallbackTimer=()=>{
-      if(imageFallbackTimer)clearTimeout(imageFallbackTimer);
-      imageFallbackTimer=setTimeout(()=>{if(!img.complete||img.naturalWidth===0)img.onerror();},12000);
-    };
     const finishImageLoad=()=>{
       photo.classList.remove("pm-photo-loading");
-      if(imageFallbackTimer)clearTimeout(imageFallbackTimer);
+      img.dataset.pmHandlingError="0";
+      if(imageFallbackTimer){clearTimeout(imageFallbackTimer);imageFallbackTimer=null;}
       if(imageObserver){imageObserver.disconnect();imageObserver=null;}
+    };
+    const startImageFallbackTimer=()=>{
+      if(imageFallbackTimer){clearTimeout(imageFallbackTimer);imageFallbackTimer=null;}
+      if(img.complete){
+        if(img.naturalWidth>0){finishImageLoad();return;}
+        img.onerror();
+        return;
+      }
+      imageFallbackTimer=setTimeout(()=>{if(!img.complete||img.naturalWidth===0)img.onerror();},8000);
+    };
+    const loadPrimaryImage=()=>{
+      if(img.dataset.pmImageStarted==="1"||!primaryImageUrl)return;
+      img.dataset.pmImageStarted="1";
+      img.src=primaryImageUrl;
+      startImageFallbackTimer();
     };
     img.onload=finishImageLoad;
     img.onerror=()=>{
+      if(img.dataset.pmHandlingError==="1")return;
+      img.dataset.pmHandlingError="1";
       const failed=img.dataset.pmFailedImages?img.dataset.pmFailedImages.split("|"):[];
       failed.push(img.src);
       img.dataset.pmFailedImages=failed.join("|");
       const alternatives=Array.isArray(p.images)?p.images.filter(url=>/^https:\/\//i.test(String(url||""))&&!failed.includes(url)):[];
       if(alternatives.length){
+        img.dataset.pmHandlingError="0";
         img.src=alternatives[0];
         startImageFallbackTimer();
         return;
       }
-      if(imageFallbackTimer)clearTimeout(imageFallbackTimer);
+      if(imageFallbackTimer){clearTimeout(imageFallbackTimer);imageFallbackTimer=null;}
       if(imageObserver){imageObserver.disconnect();imageObserver=null;}
-      photo.replaceChildren();
+      img.style.display="none";
       photo.classList.remove("pm-photo-loading");
-      const unavailable=document.createElement("div");
-      unavailable.className="pm-photo-unavailable";
-      unavailable.textContent="Photo indisponible";
-      photo.append(unavailable);
+      let unavailable=photo.querySelector(".pm-photo-unavailable");
+      if(!unavailable){
+        unavailable=document.createElement("div");
+        unavailable.className="pm-photo-unavailable";
+        unavailable.textContent="Photo indisponible";
+        photo.append(unavailable);
+      }
     };
     photo.append(img);
-    if(img.loading==="eager")startImageFallbackTimer();
+    if(img.loading==="eager")loadPrimaryImage();
     else if("IntersectionObserver" in window){
       imageObserver=new IntersectionObserver(entries=>{
         if(entries.some(entry=>entry.isIntersecting)){
           imageObserver.disconnect();
           imageObserver=null;
-          startImageFallbackTimer();
+          loadPrimaryImage();
         }
       },{rootMargin:"240px"});
-      imageObserver.observe(img);
+      imageObserver.observe(photo);
     }else{
       img.loading="eager";
-      startImageFallbackTimer();
+      loadPrimaryImage();
     }
     const gallery=document.createElement("div");gallery.className="pm-awin-gallery";
     const galleryImages=Array.isArray(p.images)?p.images.filter((value,index,array)=>/^https:\/\//i.test(String(value||""))&&array.indexOf(value)===index).slice(0,5):[];
     galleryImages.forEach((url,index)=>{
       const thumb=document.createElement("button");thumb.type="button";thumb.className="pm-awin-thumb"+(index===0?" active":"");thumb.setAttribute("aria-label","Afficher la vue "+(index+1)+" de "+p.name);
-      const thumbImage=document.createElement("img");thumbImage.src=url;thumbImage.alt="";thumbImage.loading="lazy";thumbImage.onerror=()=>thumb.remove();thumb.append(thumbImage);
-      thumb.addEventListener("click",()=>{img.src=url;gallery.querySelectorAll(".pm-awin-thumb").forEach(button=>button.classList.toggle("active",button===thumb));});gallery.append(thumb);
+      const thumbImage=document.createElement("img");thumbImage.alt="";thumbImage.loading="lazy";thumbImage.onerror=()=>thumb.remove();thumbImage.src=url;thumb.append(thumbImage);
+      thumb.addEventListener("click",()=>{img.dataset.pmHandlingError="0";img.style.display="";const unavailable=photo.querySelector(".pm-photo-unavailable");if(unavailable)unavailable.remove();photo.classList.add("pm-photo-loading");if(imageObserver){imageObserver.disconnect();imageObserver=null;}img.src=url;startImageFallbackTimer();gallery.querySelectorAll(".pm-awin-thumb").forEach(button=>button.classList.toggle("active",button===thumb));});gallery.append(thumb);
     });
 
     const name=document.createElement("div");
@@ -6835,6 +6855,9 @@ function pmRakutenIsValidGtin(value){
 })();
 </script>
 </body></html>
+<style id="pm-catalogue-mobile-image-repair">
+#products .pm-product-row-rail .photo .pm-photo-unavailable{display:grid;place-items:center;min-height:100%;width:100%;padding:12px;box-sizing:border-box;background:#eef1f5;color:#657184;font-size:13px;font-weight:750;text-align:center}
+</style>
 <style id="pm-catalogue-horizontal-product-rails">
 #products .pm-photo-unavailable{width:100%;height:100%;min-height:132px;display:grid;place-items:center;padding:12px;box-sizing:border-box;background:#eef1f5;color:#667085;font-size:12px;font-weight:750;text-align:center}
 #products .pm-product-row-rail>.pm-no-photo-card{flex:0 0 218px!important;width:218px!important;max-width:218px!important;min-width:218px!important;min-height:180px;padding:12px;box-sizing:border-box;background:#111c2a!important;border:1px solid #35465a!important;border-radius:15px!important;color:#f4f7fb!important}
