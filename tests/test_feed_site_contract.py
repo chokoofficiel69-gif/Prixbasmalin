@@ -148,6 +148,20 @@ class FeedSiteContractTests(unittest.TestCase):
     def test_featured_prices_file_matches_site_contract(self):
         self.assert_file_matches_contract("featured-prices.json", allow_empty=False, require_ttc=False)
 
+    def test_awin_sync_status_is_explicit_and_secret_free(self):
+        path = ROOT / "data" / "awin-sync-status.json"
+        self.assertTrue(path.exists(), "Le résumé compact Awin doit être versionné.")
+        status = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(status.get("schema_version"), 1)
+        self.assertIn(status.get("status"), {"not_yet_synced", "ok"})
+        self.assertIn(status.get("programmes_check_status"), {"verified", "partial", "not_verified"})
+        for key in ("fetched_at", "joined_advertisers_checked", "pending_advertisers_detected",
+                    "additional_authorized_offers_imported", "counts"):
+            self.assertIn(key, status)
+        serialized = json.dumps(status).lower()
+        for forbidden in ("api_token", "password", "secret_value", "authorization"):
+            self.assertNotIn(forbidden, serialized)
+
 
 if __name__ == "__main__":
     unittest.main()
