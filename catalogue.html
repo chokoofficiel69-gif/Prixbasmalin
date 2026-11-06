@@ -599,7 +599,8 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 .pm-inspiration-card .photo img{width:100%;height:100%;object-fit:contain;background:#fff}
 .pm-inspiration-label{display:block;margin-top:8px;color:#8a4a20;font-size:10px;line-height:1.4;font-weight:700}
 </style>
-<script src="/js/performance-images.js" defer></script>\n</head><body><a class="pm-skip-link" href="#main-content">Aller au contenu</a><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a><a href="historique-prix.html" style="margin-left:auto;font-size:13px;font-weight:800;color:#a8442d">Historique des prix</a></header><main id="main-content" tabindex="-1"><section class="pm-catalogue-heading">
+<script src="/js/performance-images.js" defer></script>
+</head><body><a class="pm-skip-link" href="#main-content">Aller au contenu</a><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a><a href="historique-prix.html" style="margin-left:auto;font-size:13px;font-weight:800;color:#a8442d">Historique des prix</a></header><main id="main-content" tabindex="-1"><section class="pm-catalogue-heading">
  <div class="pm-catalogue-kicker">PRIX MALIN · CATALOGUE</div>
  <h1>Les produits qui valent le détour.</h1>
  <p>Les incontournables du moment, de belles découvertes et des offres à retrouver chez les vendeurs.</p>
@@ -5773,9 +5774,11 @@ async function pmLoadAwinCatalogue(){
       return {
         ...product,
         merchantUpdatedAt:merchantUpdatedAt||null,
-        priceStatus:priceFresh?"fresh":"unavailable",
-        priceValue:priceFresh?Number(product.priceValue):null,
-        price:priceFresh?product.price:""
+        // Prix du flux affiché avec sa date : "fresh" (< 48 h) ou "dated" (plus ancien, à confirmer chez le marchand).
+        priceStatus:priceFresh?"fresh":(hasPrice?"dated":"unavailable"),
+        priceValue:hasPrice?Number(product.priceValue):null,
+        price:hasPrice?product.price:"",
+        feedFetchedAt:feed.fetched_at||null
       };
     });
     const known=new Map(productData.map(product=>[product.id,product]));
@@ -6145,6 +6148,9 @@ function render(){
     const updateValue=p.merchantUpdatedAt||null;
     const updateDate=updateValue?new Date(updateValue):null;
     const updateLabel=p.merchantUpdatedAt?"mise à jour marchand":"import du flux";
+    const priceDateValue=p.merchantUpdatedAt||p.feedFetchedAt||null;
+    const priceDateParsed=priceDateValue?new Date(String(priceDateValue).replace(" ","T")):null;
+    const priceDateText=priceDateParsed&&Number.isFinite(priceDateParsed.getTime())?priceDateParsed.toLocaleDateString("fr-FR"):"";
     const shippingKnown=p.shippingPriceValue!==null&&p.shippingPriceValue!==undefined&&Number.isFinite(Number(p.shippingPriceValue))&&Number(p.shippingPriceValue)>=0;
     const shippingText=shippingKnown?"livraison "+money(p.shippingPriceValue):"livraison à confirmer";
     const availabilityText=p.availability==="in_stock"?"stock indiqué":p.availability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
@@ -6169,7 +6175,9 @@ function render(){
     });
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
-    note.textContent=hasVerifiedPrice?"Prix indicatif : consultez le vendeur pour confirmer l’offre.":"Consultez le vendeur pour découvrir le prix.";
+    note.textContent=!hasVerifiedPrice?"Consultez le vendeur pour découvrir le prix.":
+      (p.priceStatus==="dated"&&priceDateText?(p.merchantUpdatedAt?"Prix indiqué par le marchand le "+priceDateText:"Prix du flux marchand récupéré le "+priceDateText)+" — à confirmer sur son site.":
+      "Prix indicatif : consultez le vendeur pour confirmer l’offre.");
     card.append(photo);
     if(gallery.children.length>1)card.append(gallery);
     card.append(name,desc,brands,amazonButton);

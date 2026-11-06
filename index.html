@@ -253,16 +253,23 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 .pm-discovery-brand{font-size:9px;color:#e7bd63;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .pm-discovery-card h3{margin:0;font-size:13px;line-height:1.3}
 .pm-discovery-card .pm-history-meta{margin:0;line-height:1.4}
+.pm-history-card .pm-discovery-link{margin-top:12px}
+.pm-history-more{display:block;margin-top:8px;text-align:center;color:#ffb15d;font-size:12px;font-weight:800;text-decoration:underline}
 .pm-discovery-link{display:block;margin-top:auto;padding:10px 8px;border-radius:9px;background:linear-gradient(100deg,#ff9b21,#ff5b0b);color:#fff;text-align:center;font-size:11px;font-weight:900}
 .pm-history-empty{color:#dce3ec;font-size:13px;padding:12px}
 @media(max-width:760px){.pm-discovery-image{height:125px}.pm-discovery-card{flex-basis:72vw}}
 </style>
 <script id="pm-history-comparisons-loader">
 (async function(){
+ // Ce script est chargé dans <head> : attendre que la liste de produits existe dans la page.
+ if(document.readyState==="loading")await new Promise(resolve=>document.addEventListener("DOMContentLoaded",resolve,{once:true}));
  const status=document.getElementById("pm-history-status");
  const list=document.getElementById("pm-history-list");
  if(!status||!list)return;
  const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
+ // Noms lisibles des marchands relevés par PrixTracker (identifiants bruts du type "kauflandfr").
+ const pmMerchantNames={amazon:"Amazon",cdiscount:"Cdiscount",fnac:"Fnac",darty:"Darty",boulanger:"Boulanger",ebay:"eBay",aliexpress:"AliExpress",pixmaniafr:"Pixmania",galaxusfr:"Galaxus",kauflandfr:"Kaufland",onbuycomfr:"OnBuy",joybuyfr:"Joybuy",alternatefr:"Alternate",manomanofr:"ManoMano",eleclerchightechfr:"E.Leclerc High-Tech",eleclercfrmarketplac:"E.Leclerc Marketplace",pccomponentesfr:"PcComponentes",carrefourfr:"Carrefour",helloedgefr:"Hello Edge",sonvideocom:"Son-Vidéo.com",getgoodscomfr:"GetGoods",inmacwstorecom:"Inmac wstore",grouponfr:"Groupon",topbizfr:"Topbiz",xtremeinnfr:"Xtremeinn",asgoodasnewfr:"asgoodasnew",bixotocomfr:"Bixoto",rueducommercefrmarke:"Rue du Commerce",reicheltcomfr:"Reichelt",maxiburofr:"Maxiburo",cstechstorefr:"CS Tech Store",photospecialistfr:"Photo Specialist",mondofficefr:"Mondoffice"};
+ const pmMerchantLabel=value=>{const key=String(value||"").toLowerCase();return pmMerchantNames[key]||String(value||"Marchand").replace(/(comfr|fr)$/i,"").replace(/^./,c=>c.toUpperCase());};
  const verifiedImageStatuses=new Set(["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"]);
  const safeUrl=value=>{try{const u=new URL(value,location.origin);return /^https?:$/.test(u.protocol)?u.href:""}catch(_){return ""}};
  async function showProducts(message){
@@ -281,14 +288,18 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    const awinFresh=awin?.status==="ok"&&fresh(awin.fetched_at);
    const rakutenFresh=rakuten?.status==="ok"&&fresh(rakuten.generated_at);
    const liveAwin=awinFresh?(Array.isArray(awin.products)?awin.products:[]).filter(p=>
-    p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.merchantUpdatedAt)&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
-   ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.merchantUpdatedAt,liveSource:"Awin"})):[];
+    p&&p.name&&Number(p.priceValue)>0&&p.merchant&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
+   ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.merchantUpdatedAt||awin.fetched_at,liveDateFromFeed:!p.merchantUpdatedAt,liveSource:"Awin"})):[];
    const liveRakuten=rakutenFresh?(Array.isArray(rakuten.products)?rakuten.products:[]).filter(p=>
     p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.sourceCreatedAt||rakuten.generated_at)&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
    ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.sourceCreatedAt||rakuten.generated_at,liveSource:"Rakuten"})):[];
    const live=[...liveAwin,...liveRakuten].sort((a,b)=>String(b.liveCheckedAt||"").localeCompare(String(a.liveCheckedAt||""))||String(a.name||"").localeCompare(String(b.name||""),"fr"));
    const fallback=Array.isArray(home?.products)?home.products:[];
-   const chosen=(live.length?live:fallback.filter(p=>p&&p.name&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)&&!/^https:\/\/images\.unsplash\.com\//i.test(String(p.image)))).slice(0,12);
+   // Alterne les marchands pour une vitrine variée (sinon un seul flux occupe toute la sélection).
+   const byMerchant=new Map();live.forEach(p=>{const k=p.liveMerchant||"";if(!byMerchant.has(k))byMerchant.set(k,[]);byMerchant.get(k).push(p);});
+   const mixed=[];const queues=[...byMerchant.values()];
+   while(mixed.length<12&&queues.some(q=>q.length))queues.forEach(q=>{if(q.length&&mixed.length<12)mixed.push(q.shift());});
+   const chosen=(live.length?mixed:fallback.filter(p=>p&&p.name&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)&&!/^https:\/\/images\.unsplash\.com\//i.test(String(p.image)))).slice(0,12);
    if(!chosen.length){
     list.innerHTML='<p class="pm-history-empty">La sélection de produits est en cours de mise à jour.</p>';
     return;
@@ -312,8 +323,9 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
      const shippingLabel=shippingKnown?"Livraison "+euroFormat.format(Number(product.shippingPriceValue)):"Livraison non renseignée";
      const availability=String(product.availability||"").toLowerCase().replace(/[\s_]+/g,"-");
      const stockLabel=availability==="in-stock"||availability==="available"?"Stock indiqué : disponible":availability==="out-of-stock"?"Stock indiqué : indisponible":"Stock non renseigné";
-     const checked=product.liveCheckedAt?new Date(product.liveCheckedAt).toLocaleDateString("fr-FR"):"date non précisée";
-     note.textContent=euroFormat.format(product.livePrice)+" chez "+product.liveMerchant+" · "+taxLabel+" · "+shippingLabel+" · "+stockLabel+" · relevé "+checked;
+     const checkedDate=product.liveCheckedAt?new Date(String(product.liveCheckedAt).replace(" ","T")):null;
+     const checked=checkedDate&&Number.isFinite(checkedDate.getTime())?checkedDate.toLocaleDateString("fr-FR"):"date non précisée";
+     note.textContent=euroFormat.format(product.livePrice)+" chez "+product.liveMerchant+" · "+taxLabel+" · "+shippingLabel+" · "+stockLabel+" · "+(product.liveDateFromFeed?"flux du ":"prix indiqué le ")+checked+", à confirmer chez le marchand";
     }else{
      note.textContent="Prix non vérifié en direct — consultez le marchand.";
     }
@@ -356,13 +368,19 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    card.append(title,meta);
    group.offers.forEach((offer,index)=>{
     const line=document.createElement("div");line.className="pm-history-offer";
-    const merchant=document.createElement("span");merchant.textContent=offer.merchant;
+    const merchant=document.createElement("span");merchant.textContent=pmMerchantLabel(offer.merchant);
     const price=document.createElement("strong");price.textContent=euro.format(offer.price);
     if(index===0)price.classList.add("pm-history-lowest");
     line.append(merchant,price);card.append(line);
    });
    const note=document.createElement("p");note.className="pm-history-meta";note.textContent="Prix minimum observé ce jour-là · frais et stock non fournis.";
-   card.append(note);fragment.append(card);
+   card.append(note);
+   const buy=document.createElement("a");buy.className="pm-discovery-link";
+   buy.href="https://www.amazon.fr/s?k="+encodeURIComponent((group.brand&&!group.product.toLowerCase().includes(group.brand.toLowerCase())?group.brand+" ":"")+group.product)+"&tag=prixbasmalin2-21";
+   buy.target="_blank";buy.rel="sponsored nofollow noopener noreferrer";buy.textContent="Voir les offres sur Amazon ↗";
+   buy.setAttribute("aria-label","Voir les offres "+group.product+" sur Amazon (lien affilié)");
+   const more=document.createElement("a");more.className="pm-history-more";more.href="/historique-prix.html?q="+encodeURIComponent(group.product);more.textContent="Historique des prix";
+   card.append(buy,more);fragment.append(card);
   }
   list.replaceChildren(fragment);
  }catch(error){
@@ -372,7 +390,8 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 })();
 </script>
 
-<script src="/js/performance-images.js" defer></script>\n</head>
+<script src="/js/performance-images.js" defer></script>
+</head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
 <div class="wrap pm-head-top">
@@ -569,6 +588,10 @@ section{padding-top:24px!important}
  .pm-old-bottom a{font-size:8px!important}
  .pm-old-bottom span{font-size:17px!important}
 }
+/* Barre du bas : 5 liens, libellés lisibles sans chevauchement sur mobile. */
+.pm-old-bottom{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+.pm-old-bottom span{font-size:clamp(11px,1.2vw,14px)!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
+@media(max-width:360px){.pm-old-bottom span{font-size:10px!important}}
 </style>
 <section class="legacy-tools" id="services">
 <div class="section-head"><h2>Tout l’univers Prix Malin</h2><small>Retrouvez les outils du site initial</small></div>
