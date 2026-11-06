@@ -1,0 +1,71 @@
+name: Refresh verified homepage product images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "catalogue.html"
+      - "scripts/build_home_products.py"
+      - "scripts/check_home_product_images.py"
+      - "tests/test_build_home_products.py"
+      - ".github/workflows/build-home-products.yml"
+  pull_request:
+    paths:
+      - "catalogue.html"
+      - "data/home-products.json"
+      - "scripts/build_home_products.py"
+      - "scripts/check_home_product_images.py"
+      - "tests/test_build_home_products.py"
+      - ".github/workflows/build-home-products.yml"
+  schedule:
+    - cron: "0 4 */2 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test homepage feed generator
+        run: python -m unittest discover -s tests -p 'test_build_home_products.py' -v
+      - name: Verify homepage feed matches catalogue
+        run: python scripts/build_home_products.py --check
+      - name: Verify verified product image URLs
+        run: python scripts/check_home_product_images.py
+
+  publish:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'schedule'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Refresh homepage product snapshot
+        run: python scripts/build_home_products.py --write
+      - name: Commit snapshot only when changed
+        run: |
+          if [ -z "$(git status --porcelain -- data/home-products.json)" ]; then
+            echo "Aucune modification du catalogue homepage."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/home-products.json
+          git commit -m "data: refresh verified homepage product snapshot"
+          git push origin HEAD:main
