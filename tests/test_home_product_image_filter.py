@@ -29,6 +29,18 @@ class HomeProductImageTests(unittest.TestCase):
         self.assertIn("const verifiedImageStatuses=new Set(", seasonal)
         self.assertIn("verifiedImageStatuses.has(p.imageStatus)", seasonal)
 
+    def test_new_arrivals_are_a_horizontal_mobile_rail(self):
+        source = INDEX.read_text(encoding="utf-8")
+        marker = '<style id="pm-mobile-new-arrivals-rail">'
+        self.assertIn(marker, source)
+        style = source.split(marker, 1)[1].split("</style>", 1)[0]
+        self.assertIn("display:flex!important", style)
+        self.assertIn("flex-flow:row nowrap!important", style)
+        self.assertIn("overflow-x:auto!important", style)
+        self.assertIn("scroll-snap-type:x mandatory!important", style)
+        self.assertIn("grid-template-columns:38% minmax(0,1fr)!important", style)
+        self.assertGreater(source.index(marker), source.rfind(".new-arrivals-grid{grid-template-columns:1fr!important"))
+
 
 if __name__ == "__main__":
     unittest.main()
