@@ -288,8 +288,8 @@ jobs:
             "- Correspondances multi-marchands exactes : " + multiMerchant + " ; GTIN : " + withGtin + " ; MPN : " + withMpn + ".",
             "- Livraison connue : " + shippingKnown + " ; disponibilité connue : " + availabilityKnown + ".",
             "- fetched_at : " + new Date(fetchedAt).toISOString() + " (âge " + Math.round(age / 3600000) + " h)."
-          ].join("\\n");
-          if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + "\\n");
+          ].join("\n");
+          if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + "\n");
           if (multiMerchant === 0) {
             console.log("AVERTISSEMENT : offres individuelles réelles, mais aucune comparaison multi-marchands exacte sans GTIN/MPN commun.");
           }
