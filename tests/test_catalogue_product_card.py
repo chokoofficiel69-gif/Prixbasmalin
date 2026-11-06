@@ -54,5 +54,20 @@ class CatalogueProductCardTests(unittest.TestCase):
         self.assertNotIn("4 étoiles et plus", self.source)
 
 
+    def test_browsing_only_shows_products_with_photo_and_price(self):
+        self.assertIn("if(!q)return pmHasRealProductImage(p)&&pmProductHasAnyPrice(p);", self.source)
+        self.assertIn("function pmProductHasAnyPrice(product){", self.source)
+
+    def test_catalogue_products_reuse_comparison_sheets_by_exact_name(self):
+        self.assertIn('<script id="pm-product-sheets-link">', self.source)
+        self.assertIn("index.get(norm(product.name))||index.get(norm((product.brand||\"\")+\" \"+product.name))", self.source)
+        self.assertIn('amazonButton.textContent="Comparer les "+sheet.offer_count+" offres →";', self.source)
+        created = self.source.index('const merchantBadge=document.createElement("span")')
+        overridden = self.source.index('if(sheet)merchantBadge.textContent=')
+        sheet_defined = self.source.index("const sheet=!hasVerifiedPrice&&listedPrice===null")
+        self.assertLess(created, overridden)
+        self.assertLess(sheet_defined, overridden)
+
+
 if __name__ == "__main__":
     unittest.main()

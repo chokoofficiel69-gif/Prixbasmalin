@@ -10306,122 +10306,6 @@
    ]
   },
   {
-   "id": "dreame-l40s-pro-ultra",
-   "name": "Dreame L40s Pro Ultra",
-   "brand": "Dreame",
-   "category": "aspirateur",
-   "category_label": "Aspirateurs",
-   "image": "",
-   "offer_count": 8,
-   "min_price_eur": 459.0,
-   "max_price_eur": 1113.11,
-   "last_date": "2026-11-02",
-   "offers": [
-    {
-     "merchant": "amazon",
-     "price_eur": 459.0,
-     "date": "2026-11-02"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 459.0,
-     "date": "2026-11-02"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 459.0,
-     "date": "2026-11-02"
-    },
-    {
-     "merchant": "fnac",
-     "price_eur": 459.0,
-     "date": "2026-11-02"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 540.05,
-     "date": "2026-11-02"
-    },
-    {
-     "merchant": "kauflandfr",
-     "price_eur": 706.8,
-     "date": "2026-11-02"
-    },
-    {
-     "merchant": "manomanofr",
-     "price_eur": 999.0,
-     "date": "2026-11-02"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 1113.11,
-     "date": "2026-10-31"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-09",
-     "min_price_eur": 559.93
-    },
-    {
-     "date": "2026-10-11",
-     "min_price_eur": 559.4
-    },
-    {
-     "date": "2026-10-12",
-     "min_price_eur": 560.31
-    },
-    {
-     "date": "2026-10-13",
-     "min_price_eur": 559.31
-    },
-    {
-     "date": "2026-10-15",
-     "min_price_eur": 565.34
-    },
-    {
-     "date": "2026-10-16",
-     "min_price_eur": 564.5
-    },
-    {
-     "date": "2026-10-18",
-     "min_price_eur": 564.5
-    },
-    {
-     "date": "2026-10-19",
-     "min_price_eur": 563.71
-    },
-    {
-     "date": "2026-10-21",
-     "min_price_eur": 438.18
-    },
-    {
-     "date": "2026-10-22",
-     "min_price_eur": 438.18
-    },
-    {
-     "date": "2026-10-23",
-     "min_price_eur": 438.18
-    },
-    {
-     "date": "2026-10-25",
-     "min_price_eur": 438.18
-    },
-    {
-     "date": "2026-10-29",
-     "min_price_eur": 693.28
-    },
-    {
-     "date": "2026-10-31",
-     "min_price_eur": 459.0
-    },
-    {
-     "date": "2026-11-02",
-     "min_price_eur": 459.0
-    }
-   ]
-  },
-  {
    "id": "jbl-boombox-3",
    "name": "JBL Boombox 3",
    "brand": "JBL",
@@ -10786,6 +10670,117 @@
    ]
   },
   {
+   "id": "dreame-l40s-pro-ultra",
+   "name": "Dreame L40s Pro Ultra",
+   "brand": "Dreame",
+   "category": "aspirateur",
+   "category_label": "Aspirateurs",
+   "image": "",
+   "offer_count": 7,
+   "min_price_eur": 459.0,
+   "max_price_eur": 999.0,
+   "last_date": "2026-11-02",
+   "offers": [
+    {
+     "merchant": "amazon",
+     "price_eur": 459.0,
+     "date": "2026-11-02"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 459.0,
+     "date": "2026-11-02"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 459.0,
+     "date": "2026-11-02"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 459.0,
+     "date": "2026-11-02"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 540.05,
+     "date": "2026-11-02"
+    },
+    {
+     "merchant": "kauflandfr",
+     "price_eur": 706.8,
+     "date": "2026-11-02"
+    },
+    {
+     "merchant": "manomanofr",
+     "price_eur": 999.0,
+     "date": "2026-11-02"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-09",
+     "min_price_eur": 559.93
+    },
+    {
+     "date": "2026-10-11",
+     "min_price_eur": 559.4
+    },
+    {
+     "date": "2026-10-12",
+     "min_price_eur": 560.31
+    },
+    {
+     "date": "2026-10-13",
+     "min_price_eur": 559.31
+    },
+    {
+     "date": "2026-10-15",
+     "min_price_eur": 565.34
+    },
+    {
+     "date": "2026-10-16",
+     "min_price_eur": 564.5
+    },
+    {
+     "date": "2026-10-18",
+     "min_price_eur": 564.5
+    },
+    {
+     "date": "2026-10-19",
+     "min_price_eur": 563.71
+    },
+    {
+     "date": "2026-10-21",
+     "min_price_eur": 438.18
+    },
+    {
+     "date": "2026-10-22",
+     "min_price_eur": 438.18
+    },
+    {
+     "date": "2026-10-23",
+     "min_price_eur": 438.18
+    },
+    {
+     "date": "2026-10-25",
+     "min_price_eur": 438.18
+    },
+    {
+     "date": "2026-10-29",
+     "min_price_eur": 693.28
+    },
+    {
+     "date": "2026-10-31",
+     "min_price_eur": 459.0
+    },
+    {
+     "date": "2026-11-02",
+     "min_price_eur": 459.0
+    }
+   ]
+  },
+  {
    "id": "roborock-qrevo-curv",
    "name": "Roborock Qrevo Curv",
    "brand": "Roborock",
@@ -11032,125 +11027,6 @@
    ]
   },
   {
-   "id": "iphone-16-pro-max",
-   "name": "iPhone 16 Pro Max",
-   "brand": "Apple",
-   "category": "smartphone",
-   "category_label": "Smartphones",
-   "image": "",
-   "offer_count": 7,
-   "min_price_eur": 1210.0,
-   "max_price_eur": 4841.4,
-   "last_date": "2026-11-03",
-   "offers": [
-    {
-     "merchant": "onbuycomfr",
-     "price_eur": 1210.0,
-     "date": "2026-10-14"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 1262.0,
-     "date": "2026-11-03"
-    },
-    {
-     "merchant": "ebay",
-     "price_eur": 1349.9,
-     "date": "2026-11-03"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 1399.99,
-     "date": "2026-10-22"
-    },
-    {
-     "merchant": "fnac",
-     "price_eur": 1399.99,
-     "date": "2026-10-27"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 1549.0,
-     "date": "2026-11-03"
-    },
-    {
-     "merchant": "kauflandfr",
-     "price_eur": 4841.4,
-     "date": "2026-11-01"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-09",
-     "min_price_eur": 1170.0
-    },
-    {
-     "date": "2026-10-11",
-     "min_price_eur": 1170.0
-    },
-    {
-     "date": "2026-10-12",
-     "min_price_eur": 1170.0
-    },
-    {
-     "date": "2026-10-14",
-     "min_price_eur": 1170.0
-    },
-    {
-     "date": "2026-10-15",
-     "min_price_eur": 1160.0
-    },
-    {
-     "date": "2026-10-17",
-     "min_price_eur": 1150.0
-    },
-    {
-     "date": "2026-10-18",
-     "min_price_eur": 1150.0
-    },
-    {
-     "date": "2026-10-20",
-     "min_price_eur": 1306.0
-    },
-    {
-     "date": "2026-10-21",
-     "min_price_eur": 1295.0
-    },
-    {
-     "date": "2026-10-22",
-     "min_price_eur": 1284.0
-    },
-    {
-     "date": "2026-10-25",
-     "min_price_eur": 1262.0
-    },
-    {
-     "date": "2026-10-27",
-     "min_price_eur": 1262.0
-    },
-    {
-     "date": "2026-10-28",
-     "min_price_eur": 1262.0
-    },
-    {
-     "date": "2026-10-30",
-     "min_price_eur": 1262.0
-    },
-    {
-     "date": "2026-10-31",
-     "min_price_eur": 1262.0
-    },
-    {
-     "date": "2026-11-01",
-     "min_price_eur": 1262.0
-    },
-    {
-     "date": "2026-11-03",
-     "min_price_eur": 1262.0
-    }
-   ]
-  },
-  {
    "id": "apple-watch-series-12",
    "name": "Apple Watch Series 12",
    "brand": "Apple",
@@ -11379,6 +11255,120 @@
     {
      "date": "2026-11-04",
      "min_price_eur": 859.0
+    }
+   ]
+  },
+  {
+   "id": "iphone-16-pro-max",
+   "name": "iPhone 16 Pro Max",
+   "brand": "Apple",
+   "category": "smartphone",
+   "category_label": "Smartphones",
+   "image": "",
+   "offer_count": 6,
+   "min_price_eur": 1210.0,
+   "max_price_eur": 1549.0,
+   "last_date": "2026-11-03",
+   "offers": [
+    {
+     "merchant": "onbuycomfr",
+     "price_eur": 1210.0,
+     "date": "2026-10-14"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 1262.0,
+     "date": "2026-11-03"
+    },
+    {
+     "merchant": "ebay",
+     "price_eur": 1349.9,
+     "date": "2026-11-03"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 1399.99,
+     "date": "2026-10-22"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 1399.99,
+     "date": "2026-10-27"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 1549.0,
+     "date": "2026-11-03"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-09",
+     "min_price_eur": 1170.0
+    },
+    {
+     "date": "2026-10-11",
+     "min_price_eur": 1170.0
+    },
+    {
+     "date": "2026-10-12",
+     "min_price_eur": 1170.0
+    },
+    {
+     "date": "2026-10-14",
+     "min_price_eur": 1170.0
+    },
+    {
+     "date": "2026-10-15",
+     "min_price_eur": 1160.0
+    },
+    {
+     "date": "2026-10-17",
+     "min_price_eur": 1150.0
+    },
+    {
+     "date": "2026-10-18",
+     "min_price_eur": 1150.0
+    },
+    {
+     "date": "2026-10-20",
+     "min_price_eur": 1306.0
+    },
+    {
+     "date": "2026-10-21",
+     "min_price_eur": 1295.0
+    },
+    {
+     "date": "2026-10-22",
+     "min_price_eur": 1284.0
+    },
+    {
+     "date": "2026-10-25",
+     "min_price_eur": 1262.0
+    },
+    {
+     "date": "2026-10-27",
+     "min_price_eur": 1262.0
+    },
+    {
+     "date": "2026-10-28",
+     "min_price_eur": 1262.0
+    },
+    {
+     "date": "2026-10-30",
+     "min_price_eur": 1262.0
+    },
+    {
+     "date": "2026-10-31",
+     "min_price_eur": 1262.0
+    },
+    {
+     "date": "2026-11-01",
+     "min_price_eur": 1262.0
+    },
+    {
+     "date": "2026-11-03",
+     "min_price_eur": 1262.0
     }
    ]
   },

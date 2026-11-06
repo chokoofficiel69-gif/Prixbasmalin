@@ -358,49 +358,61 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   }
  }
  try{
-  const response=await fetch("/data/prixtracker-prices.json",{cache:"no-store"});
-  if(!response.ok)throw new Error("Flux historique indisponible");
-  const data=await response.json();
-  const rows=Array.isArray(data.offers)?data.offers:[];
-  const groups=new Map();
-  for(const row of rows){
-   if(!row||!row.product_id||!row.merchant||!row.date)continue;
-   const key=String(row.product_id)+"|"+String(row.date);
-   if(!groups.has(key))groups.set(key,{id:String(row.product_id),product:row.product||"Produit",brand:row.brand||"",date:row.date,offers:[]});
-   const group=groups.get(key),price=Number(row.min_price_eur_ttc);
-   if(Number.isFinite(price)&&price>0)group.offers.push({merchant:String(row.merchant),price});
-  }
-  const comparisons=[...groups.values()]
-   .filter(g=>new Set(g.offers.map(o=>o.merchant)).size>=2)
-   .map(g=>({...g,offers:[...new Map(g.offers.map(o=>[o.merchant,o])).values()].sort((a,b)=>a.price-b.price)}))
-   .sort((a,b)=>b.date.localeCompare(a.date)||a.product.localeCompare(b.product,"fr")).slice(0,12);
+  // Comparaisons visuelles à partir des fiches produits (dernier prix par marchand, relevés aberrants écartés).
+  const [sheetsResponse,dealsResponse]=await Promise.all([
+   fetch("/data/fiches-produits.json",{cache:"no-cache"}),
+   fetch("/data/home-deals.json",{cache:"no-cache"}).catch(()=>null)
+  ]);
+  if(!sheetsResponse.ok)throw new Error("Fiches produits indisponibles");
+  const sheetsData=await sheetsResponse.json();
+  const deals=dealsResponse&&dealsResponse.ok?await dealsResponse.json().catch(()=>null):null;
+  const alreadyShown=new Set(((deals&&deals.top)||[]).map(t=>t.id));
+  const comparisons=(Array.isArray(sheetsData.products)?sheetsData.products:[])
+   .filter(s=>s.offer_count>=5&&!alreadyShown.has(s.id))
+   .sort((a,b)=>(!a.image)-(!b.image)||b.offer_count-a.offer_count||a.name.localeCompare(b.name,"fr")).slice(0,10);
   if(!comparisons.length){
    await showProducts("Découvrez une sélection de produits et consultez les marchands pour vérifier le prix et la disponibilité.");
    return;
   }
-  status.textContent="Historique des prix observés — les prix actuels sont à vérifier chez le marchand.";
+  status.hidden=true;
+  const artMap={smartphone:["📱","#1e3a8a","#3b82f6"],tablette:["📲","#164e63","#06b6d4"],laptop:["💻","#312e81","#6366f1"],audio:["🎧","#7c2d12","#f97316"],enceinte:["🔊","#701a75","#d946ef"],montre:["⌚","#14532d","#22c55e"],console:["🎮","#1f2937","#ef4444"],"accessoire-ps5":["🎮","#1e3a8a","#60a5fa"],"accessoire-switch":["🕹️","#7f1d1d","#ef4444"],aspirateur:["🧹","#3f3f46","#a1a1aa"]};
+  const dateFr=d=>new Date(String(d)+"T12:00:00").toLocaleDateString("fr-FR");
   const fragment=document.createDocumentFragment();
-  for(const group of comparisons){
-   const card=document.createElement("article");card.className="pm-history-card";
-   const title=document.createElement("h3");const titleLink=document.createElement("a");titleLink.href="/produit.html?id="+encodeURIComponent(group.id);titleLink.textContent=group.product;titleLink.style.color="inherit";titleLink.style.textDecoration="none";title.append(titleLink);
-   const meta=document.createElement("p");meta.className="pm-history-meta";meta.textContent=(group.brand?group.brand+" · ":"")+"Relevé du "+new Date(group.date+"T12:00:00").toLocaleDateString("fr-FR");
-   card.append(title,meta);
-   group.offers.forEach((offer,index)=>{
-    const line=document.createElement("div");line.className="pm-history-offer";
-    const merchant=document.createElement("span");merchant.textContent=pmMerchantLabel(offer.merchant);
-    const price=document.createElement("strong");price.textContent=euro.format(offer.price);
-    if(index===0)price.classList.add("pm-history-lowest");
-    line.append(merchant,price);card.append(line);
+  for(const sheet of comparisons){
+   const url="/produit.html?id="+encodeURIComponent(sheet.id);
+   const card=document.createElement("article");card.className="pm-history-card pm-cmp-card";
+   const media=document.createElement("a");media.className="pm-cmp-media";media.href=url;media.setAttribute("aria-label","Comparer les prix "+sheet.name);
+   if(sheet.image){const img=document.createElement("img");img.src=sheet.image;img.alt=sheet.name;img.loading="lazy";img.decoding="async";media.append(img);}
+   else{const a=artMap[sheet.category]||["🛒","#7c2d12","#f97316"];const art=document.createElement("div");art.className="pm-cmp-art";art.style.background="linear-gradient(140deg,"+a[1]+","+a[2]+")";const i=document.createElement("i");i.textContent=a[0];const b=document.createElement("b");b.textContent=sheet.brand;art.append(i,b);media.append(art);}
+   const badge=document.createElement("span");badge.className="pm-cmp-badge";badge.textContent=sheet.offer_count+" marchands";media.append(badge);
+   const body=document.createElement("div");body.className="pm-cmp-body";
+   const cat=document.createElement("span");cat.className="pm-cmp-cat";cat.textContent=sheet.brand+" · "+sheet.category_label;
+   const title=document.createElement("h3");const titleLink=document.createElement("a");titleLink.href=url;titleLink.textContent=sheet.name;title.append(titleLink);
+   const best=sheet.offers[0];
+   const bestBox=document.createElement("div");bestBox.className="pm-cmp-best";
+   bestBox.innerHTML='<small>Meilleur prix relevé</small>';
+   const bestPrice=document.createElement("strong");bestPrice.textContent=euro.format(best.price_eur);
+   const bestShop=document.createElement("span");bestShop.textContent="chez "+pmMerchantLabel(best.merchant);
+   bestBox.append(bestPrice,bestShop);
+   const podium=document.createElement("ol");podium.className="pm-cmp-podium";
+   sheet.offers.slice(0,3).forEach((offer,index)=>{
+    const li=document.createElement("li");
+    const shop=document.createElement("span");shop.className="pm-cmp-shop";shop.textContent=pmMerchantLabel(offer.merchant);
+    const bar=document.createElement("span");bar.className="pm-cmp-bar";const fill=document.createElement("i");fill.style.width=Math.max(18,Math.round(100*best.price_eur/offer.price_eur))+"%";bar.append(fill);
+    const price=document.createElement("strong");price.textContent=euro.format(offer.price_eur);
+    if(index===0)li.className="pm-history-lowest-row";
+    li.append(shop,bar,price);podium.append(li);
    });
-   const note=document.createElement("p");note.className="pm-history-meta";note.textContent="Prix minimum observé ce jour-là · frais et stock non fournis.";
-   card.append(note);
-   const buy=document.createElement("a");buy.className="pm-discovery-link";
-   buy.href="https://www.amazon.fr/s?k="+encodeURIComponent((group.brand&&!group.product.toLowerCase().includes(group.brand.toLowerCase())?group.brand+" ":"")+group.product)+"&tag=prixbasmalin2-21";
-   buy.target="_blank";buy.rel="sponsored nofollow noopener noreferrer";buy.textContent="Voir les offres sur Amazon ↗";
-   buy.setAttribute("aria-label","Voir les offres "+group.product+" sur Amazon (lien affilié)");
-   // Fiche produit complète : toutes les offres relevées, évolution du prix, alerte.
-   const more=document.createElement("a");more.className="pm-history-more";more.href="/produit.html?id="+encodeURIComponent(group.id);more.textContent="Comparer tous les prix →";
-   card.append(buy,more);fragment.append(card);
+   const rest=document.createElement("p");rest.className="pm-cmp-rest";
+   rest.textContent=sheet.offer_count>3?"+ "+(sheet.offer_count-3)+" autres marchands, jusqu’à "+euro.format(sheet.max_price_eur):"Relevé du "+dateFr(sheet.last_date);
+   const more=document.createElement("a");more.className="pm-cmp-cta pm-history-more";more.href=url;more.textContent="Comparer les "+sheet.offer_count+" prix →";
+   const buy=document.createElement("a");buy.className="pm-cmp-amazon";
+   buy.href="https://www.amazon.fr/s?k="+encodeURIComponent((sheet.brand&&!sheet.name.toLowerCase().includes(sheet.brand.toLowerCase())?sheet.brand+" ":"")+sheet.name)+"&tag=prixbasmalin2-21";
+   buy.target="_blank";buy.rel="sponsored nofollow noopener noreferrer";buy.textContent="Voir sur Amazon ↗";
+   buy.setAttribute("aria-label","Voir "+sheet.name+" sur Amazon (lien affilié)");
+   const stamp=document.createElement("small");stamp.className="pm-cmp-stamp";stamp.textContent="Prix relevés jusqu’au "+dateFr(sheet.last_date)+" · à confirmer chez le marchand";
+   body.append(cat,title,bestBox,podium,rest,more,buy,stamp);
+   card.append(media,body);fragment.append(card);
   }
   list.replaceChildren(fragment);
  }catch(error){
@@ -443,6 +455,41 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <span>Sur mobile et ordinateur</span>
   </div>
 </section>
+<section id="pm-partners" class="pm-hp-section pm-partners" aria-labelledby="pm-partners-title">
+  <h2 id="pm-partners-title" class="pm-partners-title">⚡ Accès direct <span>à nos partenaires</span></h2>
+  <div class="pm-partners-grid">
+    <!-- Liens d'affiliation : un bouton n'apparaît que si son lien data-href est renseigné. -->
+    <a class="pm-partner pm-partner-amazon" data-partner="amazon" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener"><b>Amazon</b><span>Offres du jour ↗</span></a>
+    <a class="pm-partner pm-partner-amazon-gift" data-partner="amazon-gifts" href="https://www.amazon.fr/gp/bestsellers?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener"><b>Amazon</b><span>Meilleures ventes ↗</span></a>
+    <a class="pm-partner pm-partner-decathlon" data-partner="decathlon" data-href="" target="_blank" rel="sponsored nofollow noopener" hidden><b>Decathlon</b><span>Sport &amp; loisirs ↗</span></a>
+    <a class="pm-partner pm-partner-luxury" data-partner="nicchia-luxury" data-href="" target="_blank" rel="sponsored nofollow noopener" hidden><b>Nicchia Luxury</b><span>Mode &amp; luxe ↗</span></a>
+  </div>
+  <p class="pm-hp-note">Liens partenaires affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
+</section>
+<section id="pm-top-prices" class="pm-hp-section" aria-labelledby="pm-top-prices-title">
+  <div class="pm-hp-head">
+    <div><h2 id="pm-top-prices-title">🔥 Les meilleurs prix <span>du moment</span></h2><small>Les produits high-tech les plus comparés · prix relevés chez 8 à 24 marchands</small></div>
+    <a class="pm-hp-all" href="/produit.html">Tout le comparateur →</a>
+  </div>
+  <div id="pm-top-prices-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
+</section>
+<section id="pm-gifts" class="pm-hp-section pm-hp-gifts" aria-labelledby="pm-gifts-title">
+  <div class="pm-hp-head">
+    <div><h2 id="pm-gifts-title">🎁 Idées cadeaux <span>de Noël</span></h2><small>Parfums, bougies, maison, high-tech… avec photo et prix du marchand</small></div>
+    <a class="pm-hp-all" href="/catalogue.html">Voir plus d’idées →</a>
+  </div>
+  <div class="pm-hp-tabs" role="tablist" aria-label="Idées cadeaux par budget">
+    <button type="button" role="tab" aria-selected="true" data-gift="all">Tout</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="parfum">Parfums</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="moins-30">Moins de 30 €</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="30-60">30 à 60 €</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="60-100">60 à 100 €</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="plus-100">100 € et +</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="tech">High-tech</button>
+  </div>
+  <div id="pm-gifts-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
+  <p class="pm-hp-note">Prix indiqués par les marchands (flux partenaires) ou relevés datés, à confirmer sur leur site. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
+</section>
 <section id="pm-visual-gallery" class="pm-visual-gallery" aria-labelledby="pm-visual-gallery-title">
   <div class="section-head">
     <div><h2 id="pm-visual-gallery-title">✨ Les produits à découvrir <span>en images</span></h2><small>Photos de fabricants et de sources marchandes vérifiées · sans prix inventé</small></div>
@@ -461,10 +508,10 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   </div>
 </section><section id="live-comparisons" class="pm-history-comparisons" aria-labelledby="pm-history-title">
   <div class="section-head">
-    <div><h2 id="pm-history-title">💶 Comparaisons de prix</h2><small>Relevés par marchand · données historiques PrixTracker</small></div>
+    <div><h2 id="pm-history-title">💶 Qui est le moins cher ?</h2><small>Comparaisons de prix chez 5 à 24 marchands · relevés PrixTracker</small></div>
     <a class="pm-history-badge" href="/produit.html" style="text-decoration:none">Voir tous les produits comparés →</a>
   </div>
-  <p class="pm-history-intro">Comparez les prix observés pour un même produit chez plusieurs marchands. Chaque relevé affiche sa date : le tarif et la disponibilité doivent être revérifiés chez le vendeur.</p>
+  <p class="pm-history-intro">Le même produit, des prix très différents : voyez d’un coup d’œil qui est le moins cher. Prix relevés et datés, à confirmer chez le marchand.</p>
   <div id="pm-history-status" class="pm-history-status" role="status" aria-live="polite">Chargement des comparaisons…</div>
   <div id="pm-history-list" class="pm-history-list" aria-label="Produits et comparaisons"><article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://cdn8.web4s.vn/media/products/3605/tai-nghe-airpods-pro-3-2025-chinh-hang-05.jpg" alt="Apple AirPods Pro 3" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple AirPods Pro 3</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+AirPods+Pro+3&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
 <article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&amp;imwidth=700" alt="Polo Lacoste L.12.12 Original" loading="lazy" decoding="async"><span class="pm-discovery-brand">Lacoste</span><h3>Polo Lacoste L.12.12 Original</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=polo+Lacoste+L.12.12+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
@@ -1375,4 +1422,153 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 }
 @media(max-width:380px){#new-arrivals .new-arrival{flex-basis:88vw!important}}
 </style>
+<style id="pm-home-prices-style">
+/* Vitrines de l'accueil : meilleurs prix et idées cadeaux (cartes claires, comme le comparateur). */
+#categories{overflow-x:clip}
+#pm-history-status[hidden]{display:none!important}
+.skip-link{position:absolute;left:8px;top:-60px;z-index:10000;background:#ff7a1a;color:#fff;padding:10px 14px;border-radius:8px;font-weight:800;text-decoration:none}
+.skip-link:focus{top:8px}
+#live-comparisons .pm-history-card.pm-cmp-card{display:flex;flex-direction:column;flex:0 0 min(300px,82vw);padding:0;overflow:hidden;background:#fff;border:0;border-radius:16px;color:#111827;box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.pm-cmp-media{position:relative;display:block;aspect-ratio:16/10;background:#f3f4f6}
+.pm-cmp-media img{width:100%;height:100%;object-fit:contain;padding:10px;mix-blend-mode:multiply}
+.pm-cmp-art{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff}
+.pm-cmp-art i{font-style:normal;font-size:56px;line-height:1;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
+.pm-cmp-art b{font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.pm-cmp-badge{position:absolute;left:10px;top:10px;background:#0b63ce;color:#fff;font-size:12px;font-weight:800;padding:4px 9px;border-radius:7px}
+.pm-cmp-body{display:flex;flex-direction:column;gap:8px;padding:12px 14px 14px;flex:1}
+.pm-cmp-cat{font-size:12px;color:#6b7280}
+#live-comparisons .pm-cmp-body h3{margin:0;font-size:17px;line-height:1.25;color:#111827}
+#live-comparisons .pm-cmp-body h3 a{color:#111827;text-decoration:none}
+.pm-cmp-best{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 8px;padding:8px 10px;border:2px solid #f05a00;border-radius:10px;background:#fff7f0}
+.pm-cmp-best small{flex-basis:100%;font-size:11.5px;font-weight:800;color:#f05a00;text-transform:uppercase;letter-spacing:.04em}
+.pm-cmp-best strong{font-size:26px;font-weight:900;color:#f05a00;line-height:1}
+.pm-cmp-best span{font-size:13px;color:#374151;font-weight:700}
+.pm-cmp-podium{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.pm-cmp-podium li{display:grid;grid-template-columns:minmax(0,92px) 1fr auto;align-items:center;gap:8px;font-size:13px}
+.pm-cmp-shop{font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm-cmp-bar{height:8px;border-radius:99px;background:#eef1f5;overflow:hidden}
+.pm-cmp-bar i{display:block;height:100%;border-radius:99px;background:#94a3b8}
+.pm-history-lowest-row .pm-cmp-bar i{background:#22a861}
+.pm-cmp-podium strong{font-weight:900;color:#111827;white-space:nowrap}
+.pm-history-lowest-row strong{color:#15803d}
+.pm-cmp-rest{margin:0;font-size:12px;color:#6b7280}
+#live-comparisons .pm-cmp-cta{display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:auto;border-radius:9px;background:#0b63ce;color:#fff;font-size:15px;font-weight:800;text-decoration:none}
+.pm-cmp-amazon{display:flex;align-items:center;justify-content:center;min-height:40px;border-radius:9px;border:2px solid #ff9900;color:#232f3e;font-size:14px;font-weight:800;text-decoration:none;background:#fff}
+.pm-cmp-stamp{font-size:11px;color:#6b7280;text-align:center}
+.pm-hp-section{max-width:1240px;margin:26px auto 0;padding:0 16px}
+.pm-hp-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:12px}
+.pm-hp-head h2{margin:0;font-size:clamp(22px,5.4vw,30px);line-height:1.15;color:#fff}
+.pm-hp-head h2 span{color:#ff7a1a}
+.pm-hp-head small{display:block;margin-top:4px;color:#c9d3e0;font-size:13px}
+.pm-hp-all{flex:0 0 auto;color:#ffad66;font-weight:800;font-size:14px;text-decoration:none;white-space:nowrap}
+.pm-hp-rail{display:grid;grid-auto-flow:column;grid-auto-columns:min(46%,230px);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;scrollbar-width:thin}
+.pm-hp-card{position:relative;display:flex;flex-direction:column;min-height:330px;background:#fff;border-radius:14px;overflow:hidden;text-decoration:none;color:#111827;scroll-snap-align:start;box-shadow:0 6px 18px rgba(0,0,0,.25);transition:transform .15s ease}
+.pm-hp-card:hover,.pm-hp-card:focus-visible{transform:translateY(-3px)}
+.pm-hp-skel{background:linear-gradient(90deg,#1a2433 0%,#243145 50%,#1a2433 100%);background-size:200% 100%;animation:pmHpPulse 1.2s infinite linear;box-shadow:none}
+@keyframes pmHpPulse{to{background-position:-200% 0}}
+.pm-hp-media{position:relative;aspect-ratio:1/1;background:#f3f4f6;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pm-hp-media img{width:100%;height:100%;object-fit:contain;padding:12px;mix-blend-mode:multiply}
+.pm-hp-art{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff}
+.pm-hp-art i{font-style:normal;font-size:58px;line-height:1;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
+.pm-hp-art b{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.95}
+.pm-hp-badge{position:absolute;left:8px;top:8px;background:#0b63ce;color:#fff;font-size:11.5px;font-weight:800;padding:4px 8px;border-radius:6px}
+.pm-hp-badge.free{background:#16a34a}
+.pm-hp-body{display:flex;flex-direction:column;gap:3px;padding:10px 12px 12px;flex:1}
+.pm-hp-cat{font-size:12px;color:#6b7280}
+.pm-hp-name{margin:0;font-size:15px;line-height:1.3;font-weight:800;color:#111827;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pm-hp-from{margin-top:auto;padding-top:6px;font-size:12.5px;color:#0b63ce;font-weight:700}
+.pm-hp-price{font-size:24px;font-weight:900;color:#f05a00;line-height:1.1}
+.pm-hp-meta{font-size:11.5px;color:#6b7280}
+.pm-hp-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.pm-hp-tabs::-webkit-scrollbar{display:none}
+.pm-hp-tabs button{flex:0 0 auto;border:1px solid #3a4a60;background:#121b28;color:#e9eef5;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer}
+.pm-hp-tabs button[aria-selected="true"]{background:#ff7a1a;border-color:#ff7a1a;color:#fff}
+.pm-hp-note{margin:4px 0 0;color:#9aa6b8;font-size:12px;line-height:1.45}
+.pm-hp-price-tag{display:flex;flex-direction:column;gap:1px;margin:6px 0 8px}
+.pm-hp-price-tag small{font-size:12px;color:#ffad66;font-weight:700}
+.pm-hp-price-tag strong{font-size:22px;font-weight:900;color:#ff7a1a;line-height:1.1}
+.pm-partners-title{margin:0 0 10px;font-size:clamp(20px,5vw,26px);color:#fff}
+.pm-partners-title span{color:#ff7a1a}
+.pm-partners-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pm-partner{display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:70px;padding:12px 14px;border-radius:14px;text-decoration:none;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.28);transition:transform .15s ease}
+.pm-partner[hidden]{display:none!important}
+.pm-partner:hover,.pm-partner:focus-visible{transform:translateY(-2px)}
+.pm-partner b{font-size:18px;font-weight:900;letter-spacing:-.01em}
+.pm-partner span{font-size:13px;font-weight:700;opacity:.95}
+.pm-partner-amazon{background:linear-gradient(120deg,#232f3e,#37475a);border:2px solid #ff9900}
+.pm-partner-amazon b{color:#ff9900}
+.pm-partner-amazon-gift{background:linear-gradient(120deg,#ff9900,#f08804);color:#111}
+.pm-partner-decathlon{background:linear-gradient(120deg,#0055a0,#3643ba)}
+.pm-partner-luxury{background:linear-gradient(120deg,#111,#3a2f1d);border:2px solid #c9a24b}
+.pm-partner-luxury b{color:#e6c477}
+@media(min-width:760px){.pm-partners-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:760px){.pm-hp-rail{grid-auto-columns:230px}}
+@media(prefers-reduced-motion:reduce){.pm-hp-skel{animation:none}.pm-hp-card{transition:none}}
+</style>
+<script id="pm-home-prices">
+(function(){
+  "use strict";
+  const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
+  const day=v=>{const t=new Date(String(v||"").length===10?v+"T12:00:00":String(v||"").replace(" ","T"));return Number.isFinite(t.getTime())?t.toLocaleDateString("fr-FR"):"";};
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const art={smartphone:["📱","#1e3a8a","#3b82f6"],tablette:["📲","#164e63","#06b6d4"],laptop:["💻","#312e81","#6366f1"],audio:["🎧","#7c2d12","#f97316"],enceinte:["🔊","#701a75","#d946ef"],montre:["⌚","#14532d","#22c55e"],console:["🎮","#1f2937","#ef4444"],"accessoire-ps5":["🎮","#1e3a8a","#60a5fa"],"accessoire-switch":["🕹️","#7f1d1d","#ef4444"],aspirateur:["🧹","#3f3f46","#a1a1aa"]};
+  const visual=(image,category,brand,alt)=>{
+    if(image)return '<div class="pm-hp-media"><img src="'+esc(image)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>';
+    const a=art[category]||["🛒","#7c2d12","#f97316"];
+    return '<div class="pm-hp-media"><div class="pm-hp-art" style="background:linear-gradient(140deg,'+a[1]+','+a[2]+')"><i>'+a[0]+'</i><b>'+esc(brand)+'</b></div></div>';
+  };
+  const topCard=p=>'<a class="pm-hp-card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p.image,p.category,p.brand,p.name)
+    +'<span class="pm-hp-badge">'+p.offer_count+' marchands</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
+    +'<span class="pm-hp-from">'+p.offer_count+' offres à partir de</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Relevé du '+day(p.last_date)+'</span></div></a>';
+  const giftCard=g=>'<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(g.image,"",g.merchant,g.name)
+    +(g.shipping_eur===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
+    +'<span class="pm-hp-from">Prix du marchand</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">'+(g.price_date_kind==="merchant"?"Indiqué le ":"Flux du ")+day(g.price_date)+' · à confirmer</span></div></a>';
+  document.querySelectorAll(".pm-partner[data-href]").forEach(a=>{
+    const href=a.getAttribute("data-href");
+    if(/^https:\/\//i.test(href||"")){a.href=href;a.hidden=false;}
+  });
+  const fail=rail=>{if(rail)rail.innerHTML='<p class="pm-hp-note">La sélection se recharge, réessayez dans un instant.</p>';};
+  const sheetsReady=fetch("/data/fiches-produits.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
+  fetch("/data/home-deals.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(data=>{
+    const topRail=document.getElementById("pm-top-prices-rail"),giftRail=document.getElementById("pm-gifts-rail");
+    if(topRail)topRail.innerHTML=(data.top||[]).map(topCard).join("")||'<p class="pm-hp-note">Comparaisons en cours de mise à jour.</p>';
+    const gifts=Array.isArray(data.gifts)?data.gifts:[];
+    const showGifts=key=>{
+      if(!giftRail)return;
+      const priority={parfum:0,bougie:1,tech:2,mode:3,maison:4};
+      const list=key==="all"?gifts.map((g,i)=>[g,i]).sort((a,b)=>((priority[a[0].family]??9)-(priority[b[0].family]??9))||a[1]-b[1]).map(x=>x[0]):gifts.filter(g=>g.band===key||g.family===key);
+      giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")||'<p class="pm-hp-note">Pas encore d’idée dans cette gamme : essayez une autre.</p>';
+      giftRail.scrollLeft=0;
+    };
+    document.querySelectorAll("#pm-gifts [data-gift]").forEach(tab=>tab.addEventListener("click",()=>{
+      document.querySelectorAll("#pm-gifts [data-gift]").forEach(t=>t.setAttribute("aria-selected",String(t===tab)));
+      showGifts(tab.dataset.gift);
+    }));
+    showGifts("all");
+  }).catch(()=>{fail(document.getElementById("pm-top-prices-rail"));fail(document.getElementById("pm-gifts-rail"));});
+  // Ajoute le prix comparé aux cartes de l'accueil dont le nom correspond exactement à une fiche produit.
+  sheetsReady.then(data=>{
+    if(!data||!Array.isArray(data.products))return;
+    const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
+    const index=new Map();
+    data.products.forEach(s=>[norm(s.name),norm(s.brand+" "+s.name)].forEach(k=>{if(k&&!index.has(k))index.set(k,s);}));
+    const enhance=()=>{
+      document.querySelectorAll(".pm-visual-card,.new-arrival,#products .product,.pm-discovery-card").forEach(card=>{
+        if(card.dataset.pmPriced)return;
+        const titleEl=card.querySelector("h3,.pname,.name");
+        const sheet=index.get(norm(card.dataset.name||""))||index.get(norm(titleEl&&titleEl.textContent));
+        if(!sheet)return;
+        card.dataset.pmPriced="1";
+        const tag=document.createElement("div");tag.className="pm-hp-price-tag";
+        tag.innerHTML='<small>'+sheet.offer_count+' offres à partir de</small><strong>'+euro.format(sheet.min_price_eur)+'</strong>';
+        const cta=[...card.querySelectorAll("a")].pop();
+        if(cta){cta.href="/produit.html?id="+encodeURIComponent(sheet.id);cta.removeAttribute("target");cta.textContent="Comparer les "+sheet.offer_count+" prix →";cta.parentNode.insertBefore(tag,cta);}
+        else{(titleEl||card).after(tag);}
+      });
+    };
+    enhance();
+    ["pm-visual-gallery-grid","pm-history-list","products"].forEach(id=>{const el=document.getElementById(id);if(el)new MutationObserver(enhance).observe(el,{childList:true});});
+  });
+})();
+</script>
 </body></html>

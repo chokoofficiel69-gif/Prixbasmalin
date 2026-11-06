@@ -89,6 +89,9 @@ def build(source, home):
             ({"merchant": m, "price_eur": round(p, 2), "date": d} for m, (d, p) in merchants.items()),
             key=lambda o: (o["price_eur"], o["merchant"]),
         )
+        # Écarter les relevés aberrants (plus de deux fois le prix médian : lot, erreur de saisie…).
+        median = offers[len(offers) // 2]["price_eur"] if len(offers) % 2 else (offers[len(offers) // 2 - 1]["price_eur"] + offers[len(offers) // 2]["price_eur"]) / 2
+        offers = [o for o in offers if o["price_eur"] <= 2 * median]
         if len(offers) < 2:
             continue
         info = meta.get(pid, {})
