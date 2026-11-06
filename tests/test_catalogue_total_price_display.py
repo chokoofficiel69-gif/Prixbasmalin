@@ -28,6 +28,14 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn('"Produit TTC "+money(base)+" + livraison "+money(shipping)', source)
         self.assertIn("Comparaison frais de livraison inclus lorsqu’ils sont connus.", source)
 
+    def test_unknown_shipping_keeps_ttc_price_formatter_in_scope(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        start = source.index("function verifiedPriceBreakdown(offer)")
+        end = source.index("\n}", start)
+        function = source[start:end]
+        self.assertLess(function.index("const money=value=>"), function.index("if(Number.isFinite(base)"))
+        self.assertIn('return "Produit TTC "+(Number.isFinite(base)?money(base):"à vérifier")', function)
+
     def test_catalogue_uses_source_freshness_window_with_48_hour_fallback(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn("offer.freshness_max_age_hours", source)
