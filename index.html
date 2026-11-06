@@ -346,9 +346,11 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
      const checked=checkedDate&&Number.isFinite(checkedDate.getTime())?checkedDate.toLocaleDateString("fr-FR"):"date non précisée";
      note.textContent=euroFormat.format(product.livePrice)+" chez "+product.liveMerchant+" · "+taxLabel+" · "+shippingLabel+" · "+stockLabel+" · prix marchand daté du "+checked;
     }else{
-     note.textContent="Prix non vérifié en direct — consultez le marchand.";
+     note.textContent=product.imageKind==="merchant_feed"&&(product.merchant||product.imageSourceName)
+      ?"Visuel marchand · "+(product.merchant||product.imageSourceName)+" · prix non vérifié en direct."
+      :"Prix non vérifié en direct — consultez le marchand.";
     }
-    const link=document.createElement("a");link.className="pm-discovery-link";link.href=safeUrl(product.liveUrl||product.sourceUrl);link.target="_blank";link.rel="sponsored nofollow noopener noreferrer";link.textContent=Number(product.livePrice)>0?"Voir l’offre chez "+(product.liveMerchant||"le marchand")+" ↗":"Voir le prix chez le marchand ↗";
+    const link=document.createElement("a");link.className="pm-discovery-link";link.href=safeUrl(product.liveUrl||product.sourceUrl);link.target="_blank";link.rel="sponsored nofollow noopener noreferrer";link.textContent=Number(product.livePrice)>0?"Voir l’offre chez "+(product.liveMerchant||"le marchand")+" ↗":"Consulter chez "+(product.merchant||product.imageSourceName||"le marchand")+" ↗";
     card.append(img,brand,title,note,link);fragment.append(card);
    });
    list.replaceChildren(fragment);
