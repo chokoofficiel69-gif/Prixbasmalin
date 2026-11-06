@@ -8,6 +8,9 @@ on:
     paths:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
+      - "workers/prixbasmalin-attribution.js"
+      - "migrations/**"
+      - "confidentialite.html"
       - "js/prix-malin-auth.js"
       - "catalogue.html"
       - "index.html"
