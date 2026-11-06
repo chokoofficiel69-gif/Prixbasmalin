@@ -47,13 +47,14 @@ Pour une référence EAN/GTIN :
 }
 ```
 
-Pour une référence fabricant, fournir également la marque :
+Pour une référence fabricant, fournir également la marque et la variante exacte :
 
 ```json
 {
   "identity_type": "mpn",
   "identity_value": "MODEL-123",
-  "brand": "Marque fabricant"
+  "brand": "Marque fabricant",
+  "variant": "Noir 128 Go"
 }
 ```
 
