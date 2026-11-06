@@ -309,7 +309,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
      const taxLabel=taxStatus==="included"?"TTC indiqué par le flux":taxStatus==="excluded"?"TVA non incluse selon le flux":"TVA non précisée";
      const shippingKnown=product.shippingPriceValue!==null&&product.shippingPriceValue!==undefined&&Number.isFinite(Number(product.shippingPriceValue));
      const shippingLabel=shippingKnown?"Livraison "+euroFormat.format(Number(product.shippingPriceValue)):"Livraison non renseignée";
-     const availability=String(product.availability||"").toLowerCase().replace(/[\\s_]+/g,"-");
+     const availability=String(product.availability||"").toLowerCase().replace(/[\s_]+/g,"-");
      const stockLabel=availability==="in-stock"||availability==="available"?"Stock indiqué : disponible":availability==="out-of-stock"?"Stock indiqué : indisponible":"Stock non renseigné";
      const checked=product.liveCheckedAt?new Date(product.liveCheckedAt).toLocaleDateString("fr-FR"):"date non précisée";
      note.textContent=euroFormat.format(product.livePrice)+" chez "+product.liveMerchant+" · "+taxLabel+" · "+shippingLabel+" · "+stockLabel+" · relevé "+checked;
