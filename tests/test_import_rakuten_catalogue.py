@@ -137,6 +137,24 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIsNone(rows[0]["shippingPriceValue"])
 
 
+    def test_partial_category_feed_without_trailer_is_accepted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "54306_4768926_1_cmp.xml.gz"
+            write_feed(path, trailer=False)
+            rows, source_created, stats = MODULE.parse_feed(
+                path, "Nicchia Luxury (flux catégorie)", "nicchia", "DD/MM/YYYY",
+                now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC), require_trailer=False
+            )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(stats["raw_products"], 1)
+        self.assertEqual(source_created, dt.datetime(2026, 11, 5, 0, 13, 11, tzinfo=UTC))
+
+    def test_workflow_downloads_category_feed_and_uses_one_explicit_french_date_default(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
+        self.assertIn('54306_4768926_1_cmp.xml.gz', workflow)
+        self.assertEqual(workflow.count("vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY'"), 2)
+        self.assertIn("if: github.event_name != 'pull_request'", workflow)
+
     def test_sftp_workflow_expands_secrets_and_shell_variables(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
         self.assertNotIn(r"\${", workflow)
