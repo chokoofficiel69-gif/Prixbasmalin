@@ -216,15 +216,20 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   draw();
  }
  function renderList(){
-  const q=norm(params.get("q")),cat=params.get("cat")||"";
+  // Mots sans valeur pour la recherche (« casque sony pas cher » → « casque sony »).
+  const stop=new Set(["pas","cher","chere","prix","meilleur","meilleure","promo","promotion","moins","le","la","les","de","des","du","un","une","pour","en","a","au","aux","et","acheter","achat","comparer","comparatif","comparateur","bon","plan","solde","soldes","neuf"]);
+  const q=norm(params.get("q")).split(" ").filter(t=>t&&!stop.has(t)).join(" "),cat=params.get("cat")||"";
+  // Synonymes simples vers les catégories.
+  const catWords={casque:"audio",ecouteurs:"audio",ecouteur:"audio",enceinte:"enceinte",telephone:"smartphone",smartphone:"smartphone",portable:"smartphone",tablette:"tablette",ordinateur:"laptop",pc:"laptop",montre:"montre",console:"console",manette:"accessoire",aspirateur:"aspirateur"};
   const cats=[...new Map(data.products.map(p=>[p.category,p.category_label]))];
-  const found=data.products.filter(p=>(!cat||p.category===cat)&&(!q||q.split(" ").every(t=>norm(p.name+" "+p.brand+" "+p.category_label).includes(t))));
+  const matchTerm=(p,t)=>norm(p.name+" "+p.brand+" "+p.category_label).includes(t)||(catWords[t]&&String(p.category).startsWith(catWords[t]));
+  const found=data.products.filter(p=>(!cat||p.category===cat)&&(!q||q.split(" ").every(t=>matchTerm(p,t))));
   setMeta(q?"Prix "+params.get("q")+" — comparateur Prix Malin":"Comparateur de prix high-tech — Prix Malin",document.querySelector('meta[name="description"]').content,"https://prixbasmalin.fr/produit.html"+(cat?"?cat="+encodeURIComponent(cat):""));
   const deals=data.products.filter(p=>p.offer_count>=5).map(p=>({p,gap:(p.max_price_eur-p.min_price_eur)/p.max_price_eur})).sort((a,b)=>b.gap-a.gap).slice(0,10).map(x=>x.p);
   app.innerHTML=(!q&&!cat?'<section class="section"><div class="title-row"><h2>Les plus gros écarts de prix</h2><span>même produit, prix différents</span></div><div class="rail">'+deals.map(card).join("")+'</div></section>':"")
    +'<section class="section"><div class="title-row"><h1>'+(q?"Résultats pour « "+esc(params.get("q"))+" »":cat?esc((cats.find(c=>c[0]===cat)||[])[1]||"Produits"):"Tous les produits comparés")+'</h1><span>'+found.length+' produits</span></div>'
    +'<div class="chips"><button type="button" data-cat=""'+(!cat?' class="on"':'')+'>Tout</button>'+cats.map(([k,l])=>'<button type="button" data-cat="'+esc(k)+'"'+(cat===k?' class="on"':'')+'>'+esc(l)+'</button>').join("")+'</div>'
-   +(found.length?'<div class="grid">'+found.map(card).join("")+'</div>':'<p class="empty">Aucun produit comparé ne correspond. Essayez « iPhone », « PS5 » ou « AirPods », ou cherchez dans le <a href="/catalogue.html" style="color:#ffad66">catalogue</a>.</p>')
+   +(found.length?'<div class="grid">'+found.map(card).join("")+'</div>':'<div class="empty"><p>Pas encore de comparatif pour « '+esc(params.get("q")||"")+' ».</p><p><a class="cta" style="max-width:420px;margin:10px auto" href="/catalogue.html?q='+encodeURIComponent(params.get("q")||"")+'">Chercher dans le catalogue →</a><a class="cta" style="max-width:420px;margin:10px auto;background:#232f3e;border:2px solid #ff9900" href="https://www.amazon.fr/s?'+new URLSearchParams({k:params.get("q")||"",tag:AMAZON_TAG})+'" target="_blank" rel="sponsored nofollow noopener">Voir sur Amazon ↗</a></p></div>')
    +'</section>'+sourceNote();
   app.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{const v=b.dataset.cat;location.href="/produit.html"+(v?"?cat="+encodeURIComponent(v):"");}));
  }
