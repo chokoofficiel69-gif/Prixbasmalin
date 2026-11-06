@@ -13,7 +13,7 @@ SPEC.loader.exec_module(MODULE)
 UTC = dt.timezone.utc
 
 
-def write_feed(path, created_on="05/11/2026 0:13:11", trailer=True, trailer_count=1,
+def write_feed(path, created_on="11/05/2026 0:13:11", trailer=True, trailer_count=1,
                gtin="4006381333931", part_number="", image_url="https://images.example.test/item.jpg",
                product_url="https://click.linksynergy.com/deeplink?id=example", price_currency="EUR",
                shipping_currency="EUR", availability="in-stock"):
@@ -71,7 +71,7 @@ class RakutenImportValidationTests(unittest.TestCase):
             write_feed(path)
             now = dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC)
             rows, source_created, stats = MODULE.parse_feed(
-                path, "Decathlon National", "decathlon", "DD/MM/YYYY",
+                path, "Decathlon National", "decathlon", "MM/DD/YYYY",
                 now=now, max_age_hours=48, price_tax_status="unspecified"
             )
         self.assertEqual(len(rows), 1)
@@ -88,7 +88,7 @@ class RakutenImportValidationTests(unittest.TestCase):
             path = Path(directory) / "incomplete.xml.gz"
             write_feed(path, trailer=False)
             with self.assertRaisesRegex(ValueError, "Trailer XML absent"):
-                MODULE.parse_feed(path, "Nicchia Luxury", "nicchia", "DD/MM/YYYY",
+                MODULE.parse_feed(path, "Nicchia Luxury", "nicchia", "MM/DD/YYYY",
                                   now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
 
     def test_trailer_count_must_match_received_products(self):
@@ -96,13 +96,13 @@ class RakutenImportValidationTests(unittest.TestCase):
             path = Path(directory) / "mismatch.xml.gz"
             write_feed(path, trailer_count=2)
             with self.assertRaisesRegex(ValueError, "Trailer incohérent"):
-                MODULE.parse_feed(path, "Decathlon National", "decathlon", "DD/MM/YYYY",
+                MODULE.parse_feed(path, "Decathlon National", "decathlon", "MM/DD/YYYY",
                                   now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
 
     def test_stale_feed_is_rejected_using_source_timestamp_not_download_time(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "stale.xml.gz"
-            write_feed(path)
+            write_feed(path, created_on="10/01/2026 0:13:11")
             with self.assertRaisesRegex(ValueError, "Flux périmé"):
                 MODULE.parse_feed(path, "Decathlon National", "decathlon", "MM/DD/YYYY",
                                   now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
@@ -112,7 +112,7 @@ class RakutenImportValidationTests(unittest.TestCase):
             path = Path(directory) / "no-identity.xml.gz"
             write_feed(path, gtin="12345")
             with self.assertRaisesRegex(ValueError, "Aucune fiche exploitable"):
-                MODULE.parse_feed(path, "Decathlon National", "decathlon", "DD/MM/YYYY",
+                MODULE.parse_feed(path, "Decathlon National", "decathlon", "MM/DD/YYYY",
                                   now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
 
     def test_brand_and_manufacturer_part_number_are_a_valid_exact_identity(self):
@@ -120,7 +120,7 @@ class RakutenImportValidationTests(unittest.TestCase):
             path = Path(directory) / "mpn.xml.gz"
             write_feed(path, gtin="12345", part_number="MPN-EXACT-1")
             rows, _, _ = MODULE.parse_feed(
-                path, "Nicchia Luxury", "nicchia", "DD/MM/YYYY",
+                path, "Nicchia Luxury", "nicchia", "MM/DD/YYYY",
                 now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC)
             )
         self.assertEqual(rows[0]["gtin"], "")
@@ -131,7 +131,7 @@ class RakutenImportValidationTests(unittest.TestCase):
             path = Path(directory) / "shipping.xml.gz"
             write_feed(path, shipping_currency="USD")
             rows, _, _ = MODULE.parse_feed(
-                path, "Decathlon National", "decathlon", "DD/MM/YYYY",
+                path, "Decathlon National", "decathlon", "MM/DD/YYYY",
                 now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC)
             )
         self.assertIsNone(rows[0]["shippingPriceValue"])
@@ -142,7 +142,7 @@ class RakutenImportValidationTests(unittest.TestCase):
             path = Path(directory) / "54306_4768926_1_cmp.xml.gz"
             write_feed(path, trailer=False)
             rows, source_created, stats = MODULE.parse_feed(
-                path, "Nicchia Luxury (flux catégorie)", "nicchia", "DD/MM/YYYY",
+                path, "Nicchia Luxury (flux catégorie)", "nicchia", "MM/DD/YYYY",
                 now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC), require_trailer=False
             )
         self.assertEqual(len(rows), 1)
@@ -152,7 +152,7 @@ class RakutenImportValidationTests(unittest.TestCase):
     def test_workflow_downloads_category_feed_and_uses_one_explicit_french_date_default(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
         self.assertIn('54306_4768926_1_cmp.xml.gz', workflow)
-        self.assertEqual(workflow.count("vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY'"), 2)
+        self.assertEqual(workflow.count("vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY'"), 2)
         self.assertIn("if: github.event_name != 'pull_request'", workflow)
 
     def test_sftp_workflow_expands_secrets_and_shell_variables(self):
