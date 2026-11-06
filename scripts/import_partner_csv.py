@@ -15,9 +15,9 @@ from pathlib import Path
 REQUIRED_COLUMNS = {
     "offer_id", "catalog_product_id", "product_name", "merchant_name", "source",
     "identity_type", "identity_value", "price", "shipping_price", "currency",
-    "product_url", "checked_at",
+    "price_tax_status", "product_url", "checked_at",
 }
-OPTIONAL_COLUMNS = {"brand", "tracking_url"}
+OPTIONAL_COLUMNS = {"brand", "tracking_url", "availability"}
 ALLOWED_IDENTITIES = {"gtin", "asin", "mpn"}
 
 
@@ -48,6 +48,12 @@ def normalize_row(row, line_number):
     if result["currency"].upper() != "EUR":
         raise ValueError(f"{label}: seules les offres en EUR sont acceptées")
     result["currency"] = "EUR"
+    if result["price_tax_status"].lower() != "included":
+        raise ValueError(f"{label}: prix TTC non confirmé par la source (price_tax_status doit être included)")
+    result["price_tax_status"] = "included"
+    result["availability"] = result["availability"].lower() or "unknown"
+    if result["availability"] not in {"in_stock", "unknown"}:
+        raise ValueError(f"{label}: disponibilité non achetable ou valeur inconnue")
     if not re.match(r"^https://[^\s/]+(?:/|$)", result["product_url"], re.I):
         raise ValueError(f"{label}: product_url doit être une URL HTTPS")
     if result["tracking_url"] and not re.match(r"^https://[^\s/]+(?:/|$)", result["tracking_url"], re.I):
