@@ -259,10 +259,37 @@ jobs:
           const withMpn = valid.filter(product => String(product.mpn || "").trim()).length;
           const shippingKnown = valid.filter(product => product.shippingPriceValue !== null && product.shippingPriceValue !== undefined && Number.isFinite(Number(product.shippingPriceValue))).length;
           const availabilityKnown = valid.filter(product => product.availability && product.availability !== "unknown").length;
+          const freshness = values => {
+            const result = { fresh: 0, missing: 0, stale: 0, invalidOrFuture: 0 };
+            for (const value of values) {
+              if (value == null || String(value).trim() === "") { result.missing++; continue; }
+              const timestamp = Date.parse(value);
+              if (!Number.isFinite(timestamp) || timestamp > Date.now() + 5 * 60 * 1000) { result.invalidOrFuture++; continue; }
+              if (Date.now() - timestamp <= 48 * 60 * 60 * 1000) result.fresh++;
+              else result.stale++;
+            }
+            return result;
+          };
+          const productDates = freshness(valid.map(product => product.merchantUpdatedAt));
+          const offerDates = freshness(valid.flatMap(product => Array.isArray(product.offers) && product.offers.length
+            ? product.offers.map(offer => offer.merchantUpdatedAt)
+            : [product.merchantUpdatedAt]));
           console.log("Flux Awin public valide :", valid.length, "offres /", merchants.size, "marchands.");
           console.log("Identifiants partagés : GTIN", withGtin, "MPN", withMpn, "comparaisons multi-marchands exactes", multiMerchant + ".");
           console.log("Livraison connue :", shippingKnown, "offres ; disponibilité connue :", availabilityKnown + ".");
+          console.log("Fraîcheur merchantUpdatedAt — fiches :", JSON.stringify(productDates), "; offres :", JSON.stringify(offerDates), "(fraîches = moins de 48 h).");
           console.log("Import du flux :", new Date(fetchedAt).toISOString(), "— âge", Math.round(age / 3600000), "h.");
+          const summary = [
+            "### Diagnostic Awin — fraîcheur des prix",
+            "",
+            "- Flux reçu : " + valid.length + " fiches/offres ; " + merchants.size + " marchands.",
+            "- merchantUpdatedAt sur les fiches : " + productDates.fresh + " fraîches, " + productDates.missing + " sans date, " + productDates.stale + " périmées, " + productDates.invalidOrFuture + " invalides/futures.",
+            "- merchantUpdatedAt sur les offres imbriquées : " + offerDates.fresh + " fraîches, " + offerDates.missing + " sans date, " + offerDates.stale + " périmées, " + offerDates.invalidOrFuture + " invalides/futures.",
+            "- Correspondances multi-marchands exactes : " + multiMerchant + " ; GTIN : " + withGtin + " ; MPN : " + withMpn + ".",
+            "- Livraison connue : " + shippingKnown + " ; disponibilité connue : " + availabilityKnown + ".",
+            "- fetched_at : " + new Date(fetchedAt).toISOString() + " (âge " + Math.round(age / 3600000) + " h)."
+          ].join("\\n");
+          if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + "\\n");
           if (multiMerchant === 0) {
             console.log("AVERTISSEMENT : offres individuelles réelles, mais aucune comparaison multi-marchands exacte sans GTIN/MPN commun.");
           }
