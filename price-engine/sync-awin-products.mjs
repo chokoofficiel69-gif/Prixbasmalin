@@ -188,10 +188,17 @@ function parseFeedMoney(value, currency = "EUR", allowZero = false) {
   return amount !== null && (allowZero || amount > 0) ? amount : null;
 }
 
+function stockValues(values) {
+  return values
+    .filter(value => value !== null && value !== undefined && String(value).trim() !== "")
+    .map(value => String(value))
+    .join(" ");
+}
+
 function stockState(value) {
-  const stock = norm(value).replace(/[_-]+/g, " ");
-  if (/out of stock|outofstock|rupture|discontinued|sold out|indisponible|false|\bno\b/.test(stock)) return "out_of_stock";
-  if (/in stock|instock|available|disponible|for sale|\byes\b|\btrue\b/.test(stock)) return "in_stock";
+  const stock = norm(value).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  if (/\b(?:out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|false|no)\b/.test(stock)) return "out_of_stock";
+  if (/\b(?:in stock|instock|available|disponible|for sale|yes|true)\b/.test(stock)) return "in_stock";
   return "unknown";
 }
 
@@ -199,7 +206,7 @@ function parseDirectFeedRow(row) {
   const currency = String(row.currency || "EUR").trim().toUpperCase();
   const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
   const shippingPrice = parseFeedMoney(row.delivery_cost || row.shipping_cost || row.shipping || "", currency, true);
-  const stock = stockState([row.stock_status, row.availability, row.is_for_sale, row.in_stock].filter(Boolean).join(" "));
+  const stock = stockState(stockValues([row.stock_status, row.availability, row.is_for_sale, row.in_stock]));
   const adultFlag = norm([row.adult, row.adult_content, row.is_adult].filter(Boolean).join(" "));
   const categoryText = norm([row.merchant_category, row.category_name, row.product_type, row.product_name, row.title, row.name].filter(Boolean).join(" "));
   if (/^(1|yes|true|adult)$/.test(adultFlag) || /adult products?|sex toys?|erotic|erotique/.test(categoryText)) return null;
@@ -322,7 +329,7 @@ async function loadDirectAwinFeed(rawOffers) {
 function parseFeedRow(row, program, advertiser) {
   const currency = row.currency || "EUR";
   const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
-  const stock = stockState([row.stock_status,row.availability,row.is_for_sale,row.in_stock].filter(Boolean).join(" "));
+  const stock = stockState(stockValues([row.stock_status,row.availability,row.is_for_sale,row.in_stock]));
   if (!price || String(currency).toUpperCase() !== "EUR" || stock !== "in_stock") return null;
   const extra = [row.alternate_image,row.alternate_image_two,row.alternate_image_three].filter(Boolean);
   const normalized = {
@@ -440,11 +447,12 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
   const mpn = normalizedMpn(row);
   const images = imageList(row);
   const link = httpsUrl(row.aw_deep_link || row.link || row.mobile_link);
-  const availability = stockState(row.availability || row.stock_status || "");
+  const availability = stockState(stockValues([row.availability,row.stock_status,row.in_stock,row.is_for_sale]));
+  const currency = String(row.currency || "EUR").trim().toUpperCase();
   const regular = parseMoney(row.price || row.search_price);
   const sale = currentSalePrice(row, Date.now());
   const price = sale || regular;
-  if (!name || !images.length || !link || !price || availability === "out_of_stock" ||
+  if (!name || !images.length || !link || !price || currency !== "EUR" || availability === "out_of_stock" ||
       (availability !== "in_stock" && !allowUnknownAvailability)) return null;
   if (/^(yes|true|1|adult)$/i.test(String(row.adult || row.adult_content || ""))) return null;
   const merchant = String(program?.name || program?.displayName || program?.advertiserName || ("Annonceur Awin " + advertiser)).trim();
@@ -660,6 +668,12 @@ async function runSelfTests() {
   const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
     '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","4006381333931","AB-X1"';
   const rows = objectRowsFromCsv(sampleCsv);
+  for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock"]) {
+    if (stockState(value) !== "out_of_stock") throw new Error("TEST ÉCHEC : statut indisponible mal reconnu : " + value);
+  }
+  for (const value of ["in stock","instock","available","disponible","in_stock","yes","true"]) {
+    if (stockState(value) !== "in_stock") throw new Error("TEST ÉCHEC : statut disponible mal reconnu : " + value);
+  }
   const offer = parseDirectFeedRow(rows[0]);
   if (!offer) throw new Error("TEST ÉCHEC : un flux direct valide doit produire une offre.");
   if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" ||
@@ -667,6 +681,8 @@ async function runSelfTests() {
       offer.price_tax_status !== "unspecified") {
     throw new Error("TEST ÉCHEC : prix, livraison, marque, GTIN, MPN ou disponibilité mal traités.");
   }
+  const explicitOutOfStock = parseDirectFeedRow({ ...rows[0], is_for_sale: false });
+  if (explicitOutOfStock) throw new Error("TEST ÉCHEC : un booléen is_for_sale=false ne doit jamais devenir une disponibilité inconnue.");
   const ttcOffer = parseDirectFeedRow({ ...rows[0], price_tax_status: "included" });
   if (!ttcOffer || ttcOffer.price_tax_status !== "included") {
     throw new Error("TEST ÉCHEC : seul un statut TVA explicitement inclus peut être reconnu.");
@@ -686,6 +702,10 @@ async function runSelfTests() {
       aliasOffer.identity !== "gtin:4006381333931") {
     throw new Error("TEST ÉCHEC : les alias EAN-13/GTIN et manufacturer_part_no doivent être reconnus.");
   }
+  const booleanOutOfStock = offerFromRow({...aliasRow,availability:false,stock_status:""}, {name:"Boutique Alias"}, "999", {allowUnknownAvailability:true});
+  if (booleanOutOfStock) throw new Error("TEST ÉCHEC : availability=false ne doit pas être accepté comme stock inconnu.");
+  const wrongCurrency = offerFromRow({...aliasRow,currency:"USD"}, {name:"Boutique Alias"}, "999", {allowUnknownAvailability:true});
+  if (wrongCurrency) throw new Error("TEST ÉCHEC : une devise USD ne doit pas être convertie en offre EUR.");
   const standardAlias = parseFeedRow({
     product_name:"Casque alias",brand_name:"AudioBrand",ean_13:"4006381333931",
     manufacturer_part_no:"AB-X1",merchant_image_url:"https://cdn.example/alias.jpg",
