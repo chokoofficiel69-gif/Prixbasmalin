@@ -612,18 +612,18 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
  <div id="filters" class="pm-catalogue-brand-filters" aria-label="Filtrer par marque"></div>
  
 </section>
-<section id="verifiedShelf" class="verified-shelf" aria-live="polite">
+<section id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden>
   <div class="verified-shelf-head">
-    <div><h2>Comparaisons multi-marchands — modèles exacts (prix TTC)</h2><p>Un même modèle doit être identifié chez plusieurs vendeurs, avec prix TTC confirmé et relevé marchand récent ; les frais de livraison et la disponibilité sont affichés lorsqu’ils sont fournis.</p></div>
+    <div><h2>Les meilleures offres</h2><p>Découvrez les produits sélectionnés et consultez les offres des vendeurs.</p></div>
   </div>
-  <div class="grid" id="verifiedProducts"><p class="comparison-empty">Les comparaisons exactes apparaîtront ici dès que plusieurs offres récentes seront confirmées pour un même modèle.</p></div>
+  <div class="grid" id="verifiedProducts"></div>
 </section>
 <section class="discovery-shelf" aria-labelledby="discoveryTitle">
  <div class="discovery-shelf-head"><div><span class="pm-catalogue-kicker">SÉLECTION PRIX MALIN</span><h2 id="discoveryTitle">Tous les produits</h2><p>Découvrez les produits et leurs photos, puis consultez les marchands pour en savoir plus.</p></div></div>
  <div class="count" id="count" aria-live="polite"></div>
  <section class="grid" id="products" aria-live="polite"></section>
 </section>
-<p class="note">Les prix et la disponibilité sont à vérifier directement auprès du marchand.</p></main><script>
+</main><script>
 const verifiedShelf=document.getElementById("verifiedShelf");
 const verifiedProductsEl=document.getElementById("verifiedProducts");
 let pmBaseVerifiedProducts=[];
@@ -5743,8 +5743,7 @@ function pmAwinPriceIsFresh(value,now=Date.now()){
   return Number.isFinite(updatedAt)&&age>=-5*60*1000&&age<=48*60*60*1000;
 }
 async function pmLoadAwinCatalogue(){
-  const statusEl=document.getElementById("pmAwinFeedStatus");
-  const setStatus=message=>{if(statusEl)statusEl.textContent=message;};
+  const setStatus=()=>{};
   try{
     const response=await fetch("/data/awin-products.json",{cache:"no-cache"});
     if(!response.ok){setStatus("Flux Awin momentanément indisponible ; les prix marchands ne sont pas actualisés.");return;}
@@ -5773,26 +5772,6 @@ async function pmLoadAwinCatalogue(){
         ?{...product,merchantUpdatedAt,priceStatus:"fresh"}
         :{...product,merchantUpdatedAt:merchantUpdatedAt||null,priceStatus:"stale",priceValue:null,price:"Prix à vérifier chez le marchand"};
     });
-    const merchants=new Set(feedProducts.map(product=>product.merchant).filter(Boolean));
-    const multiMerchant=feedProducts.filter(product=>
-      new Set((product.offers||[]).map(offer=>String(offer.merchant||"").trim().toLowerCase()).filter(Boolean)).size>1
-    ).length;
-    const withGtin=feedProducts.filter(product=>String(product.gtin||"").trim()).length;
-    const withMpn=feedProducts.filter(product=>String(product.mpn||"").trim()).length;
-    const allOffers=feedProducts.flatMap(product=>Array.isArray(product.offers)&&product.offers.length?product.offers:[product]);
-    const offerCount=allOffers.length;
-    const freshDates=allOffers.filter(offer=>pmAwinPriceIsFresh(offer.merchantUpdatedAt||offer.last_updated)).length;
-    const missingDates=allOffers.filter(offer=>!(offer.merchantUpdatedAt||offer.last_updated)).length;
-    const staleDates=offerCount-freshDates-missingDates;
-    const shippingKnown=allOffers.filter(offer=>offer.shippingPriceValue!==null&&offer.shippingPriceValue!==undefined&&Number.isFinite(Number(offer.shippingPriceValue))).length;
-    const availabilityKnown=allOffers.filter(offer=>offer.availability&&offer.availability!=="unknown").length;
-    const ttcKnown=allOffers.filter(offer=>offer.priceTaxStatus==="included"||offer.price_tax_status==="included").length;
-    const dateLabel=new Date(fetchedAt).toLocaleString("fr-FR");
-    let status="Flux Awin téléchargé le "+dateLabel+" : "+offerCount.toLocaleString("fr-FR")+" offres valides / "+merchants.size+" marchands. Dates marchandes : "+freshDates.toLocaleString("fr-FR")+" récentes, "+missingDates.toLocaleString("fr-FR")+" absentes, "+staleDates.toLocaleString("fr-FR")+" périmées. Identifiants : "+withGtin+" GTIN, "+withMpn+" MPN ; "+multiMerchant+" fiches multi-marchands exactes. Livraison connue : "+shippingKnown+" ; disponibilité renseignée : "+availabilityKnown+" ; prix explicitement TTC : "+ttcKnown+".";
-    if(multiMerchant===0||freshDates===0||ttcKnown===0){
-      status+=" Aucune comparaison multi-marchands TTC et récente ne peut être affichée sans identité exacte, date marchande récente et confirmation TVA.";
-    }
-    setStatus(status);
     const known=new Map(productData.map(product=>[product.id,product]));
     displayProducts.forEach(product=>{
       if(product.isAwinProduct&&!product.imageSource&&product.sourceUrl){
@@ -5988,7 +5967,7 @@ function render(){
     const query=searchEl.value.trim();
     const empty=document.createElement("div");empty.className="empty pm-catalogue-no-feed";
     const title=document.createElement("strong");title.textContent="Aucune fiche complète et vérifiée pour cette recherche pour le moment.";
-    const message=document.createElement("p");message.textContent="Prix Malin n’affiche pas de photo générique ni de prix inventé. Les fiches produits avec images et tarifs marchands arrivent depuis les flux autorisés.";
+    const message=document.createElement("p");message.textContent="Essayez une autre recherche ou explorez les produits disponibles dans nos catégories.";
     const links=document.createElement("div");links.className="pm-catalogue-external-searches";
     const shopping=document.createElement("a");shopping.href="https://www.google.com/search?"+new URLSearchParams({tbm:"shop",q:query||"produits populaires"}).toString();shopping.target="_blank";shopping.rel="noopener noreferrer";shopping.textContent="Explorer Google Shopping ↗";
     const amazon=document.createElement("a");amazon.href="https://www.amazon.fr/s?"+new URLSearchParams({k:query||"produits populaires",tag:"prixbasmalin2-21"}).toString();amazon.target="_blank";amazon.rel="noopener noreferrer sponsored";amazon.textContent="Voir Amazon ↗";
@@ -6168,11 +6147,7 @@ function render(){
     const shippingKnown=p.shippingPriceValue!==null&&p.shippingPriceValue!==undefined&&Number.isFinite(Number(p.shippingPriceValue))&&Number(p.shippingPriceValue)>=0;
     const shippingText=shippingKnown?"livraison "+money(p.shippingPriceValue):"livraison à confirmer";
     const availabilityText=p.availability==="in_stock"?"stock indiqué":p.availability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
-    merchant.textContent=hasVerifiedPrice
-      ?(p.merchant||"Marchand")+" • prix du flux Awin en EUR"+(updateDate&&!Number.isNaN(updateDate.getTime())?" • "+updateLabel+" le "+updateDate.toLocaleDateString("fr-FR"):"")+" • "+shippingText+" • "+availabilityText
-      :p.priceStatus==="stale"
-        ?(p.merchant||"Marchand")+" • prix à confirmer chez le marchand"+(updateDate&&!Number.isNaN(updateDate.getTime())?" • dernière mise à jour connue le "+updateDate.toLocaleDateString("fr-FR"):" • date de mise à jour non fournie")
-        :(p.merchant||"Lien marchand")+" • tarif non récupéré en direct";
+    merchant.textContent=p.merchant||"Marchand";
     const heading=document.createElement("div");
     heading.className="discovery-compare-heading";
     heading.textContent=hasVerifiedPrice?(feedOffers.length>1?"Offres marchandes à comparer":"Offre unique — pas de comparatif multi-marchands"):(p.priceStatus==="stale"?"Prix à confirmer chez le marchand":"Recherche chez le marchand");
@@ -6186,16 +6161,14 @@ function render(){
       const offerAvailability=offer.availability||p.availability||"unknown";
       const offerShippingText=offerShippingKnown?"livraison "+money(offerShipping):"livraison à confirmer";
       const offerAvailabilityText=offerAvailability==="in_stock"?"stock indiqué":offerAvailability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
-      store.textContent=(offer.merchant||p.merchant||"Marchand")+" • "+offerShippingText+" • "+offerAvailabilityText;
+      store.textContent=offer.merchant||p.merchant||"Marchand";
       const link=document.createElement("a");link.href=offer.url||p.sourceUrl;link.target="_blank";link.rel="noopener noreferrer sponsored";
       link.textContent=offer.price||(Number.isFinite(Number(offer.priceValue))?money(offer.priceValue):"Voir l’offre");
       row.append(store,link);list.append(row);
     });
     const note=document.createElement("p");
     note.className="discovery-disclaimer";
-    note.textContent=hasVerifiedPrice
-      ?(feedOffers.length>1?"Plusieurs offres sont reçues pour cette référence. ":"Une seule offre est reçue pour cette référence ; ce n’est pas une comparaison multi-marchands. ")+"Prix en EUR fourni par le flux ; TVA non explicitée. Vérifiez le prix final et la disponibilité chez le marchand."
-      :"Référence de catalogue : le prix exact et la disponibilité sont à vérifier sur le site marchand.";
+    note.textContent=hasVerifiedPrice?"Prix indicatif : consultez le vendeur pour confirmer l’offre.":"Consultez le vendeur pour découvrir le prix.";
     card.append(photo);
     if(gallery.children.length>1)card.append(gallery);
     card.append(name,desc,brands,amazonButton);
@@ -6344,7 +6317,7 @@ function renderVerifiedProducts(products){
     verifiedShelf.hidden=false;
     const empty=document.createElement("p");
     empty.className="comparison-empty";
-    empty.textContent="Aucune comparaison multi-marchands exacte avec prix TTC confirmé et relevé récent n’est disponible actuellement. Les offres individuelles restent consultables plus bas ; aucune correspondance approximative ni aucun prix non vérifié n’est fusionné ici.";
+    empty.textContent="Découvrez les offres disponibles dans le catalogue.";
     verifiedProductsEl.append(empty);
     return;
   }
@@ -6820,6 +6793,9 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 </style>
 
 <style id="pm-awin-catalogue-ui">
+/* Masquer les diagnostics internes et les blocs de comparaison non exploitables. */
+#verifiedShelf,.pm-feed-status,.pm-awin-feed-status{display:none!important}
+
 #products .pm-pagination{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;padding:18px 0 28px}
 #products .pm-pagination .pm-page-button{min-width:42px;padding:9px 12px;background:#fff;color:#172342;border:1px solid #d9e0ea}
 #products .pm-pagination .pm-page-button.active{background:#ff6848;color:#21182a;border-color:#ff6848}
