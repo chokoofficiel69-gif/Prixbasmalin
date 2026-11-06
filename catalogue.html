@@ -6277,19 +6277,24 @@ function render(){
 
 function verifiedComparablePrice(offer){
   if(!offer)return NaN;
-  const total=Number(offer.total_price_eur);
+  const totalValue=offer.total_price_eur;
+  const total=totalValue===null||totalValue===undefined?NaN:Number(totalValue);
   if(Number.isFinite(total)&&total>=0)return total;
   const base=Number(offer.price_eur);
-  const shipping=Number(offer.shipping_price_eur);
-  if(Number.isFinite(base)&&base>=0&&Number.isFinite(shipping)&&shipping>=0)return base+shipping;
+  const shippingValue=offer.shipping_price_eur;
+  const shippingKnown=shippingValue!==null&&shippingValue!==undefined;
+  const shipping=shippingKnown?Number(shippingValue):NaN;
+  if(Number.isFinite(base)&&base>=0&&shippingKnown&&Number.isFinite(shipping)&&shipping>=0)return base+shipping;
   return Number.isFinite(base)&&base>=0?base:NaN;
 }
 
 function verifiedPriceBreakdown(offer){
   const base=Number(offer&&offer.price_eur);
-  const shipping=Number(offer&&offer.shipping_price_eur);
+  const shippingValue=offer&&offer.shipping_price_eur;
+  const shippingKnown=shippingValue!==null&&shippingValue!==undefined;
+  const shipping=shippingKnown?Number(shippingValue):NaN;
   const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(value);
-  if(Number.isFinite(base)&&base>=0&&Number.isFinite(shipping)&&shipping>=0){
+  if(Number.isFinite(base)&&base>=0&&shippingKnown&&Number.isFinite(shipping)&&shipping>=0){
     return "Produit TTC "+money(base)+" + livraison "+money(shipping);
   }
   return "Produit TTC "+(Number.isFinite(base)?money(base):"à vérifier")+" • livraison à confirmer";
