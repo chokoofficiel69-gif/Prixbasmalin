@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 
 INDEX = Path(__file__).resolve().parents[1] / "index.html"
+WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml"
 
 
 class HomepageOffersTests(unittest.TestCase):
@@ -42,6 +43,14 @@ class HomepageOffersTests(unittest.TestCase):
 
     def test_no_literal_backslash_n_is_rendered_in_the_page(self):
         self.assertNotIn("</script>\\n</head>", self.source)
+
+    def test_post_publish_monitor_checks_new_home_and_catalogue_safeguards(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("Vérifier les garde-fous prix et le rail mobile après publication", workflow)
+        self.assertIn("if: github.event_name != 'pull_request'", workflow)
+        self.assertIn("pm-mobile-new-arrivals-rail", workflow)
+        self.assertIn("Prix TTC vérifié indisponible", workflow)
+        self.assertIn("Publication GitHub Pages encore en propagation", workflow)
 
 
 if __name__ == "__main__":
