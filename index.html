@@ -293,7 +293,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     return;
    }
    status.textContent=live.length
-    ?"Offres marchandes récentes — TVA, livraison et disponibilité indiquées uniquement lorsque la source les renseigne. Aucun total TTC n'est calculé si un élément manque."
+    ?"Offres marchandes récentes — TVA, livraison et disponibilité indiquées uniquement lorsque la source les renseigne. Aucun total livré TTC n'est calculé sans confirmation du traitement TVA des frais de port."
     :message;
    const fragment=document.createDocumentFragment();
    chosen.forEach(product=>{
