@@ -6,6 +6,7 @@ on:
     paths:
       - "price-engine/import-prixtracker*.mjs"
       - "price-engine/sync-prixtracker.mjs"
+      - "scripts/build_product_sheets.py"
       - ".github/workflows/import-prixtracker.yml"
   pull_request:
     paths:
@@ -32,10 +33,12 @@ jobs:
       - name: Valider les relevés importés
         run: |
           node --input-type=module -e "import fs from 'node:fs'; for (const f of ['data/prixtracker-prices.json','data/prixtracker-best-daily.json']) { const d=JSON.parse(fs.readFileSync(f,'utf8')); if (!d.counts?.rows || !d.products?.length) throw new Error('Dataset vide: '+f); if (d.status !== 'historical_reference') throw new Error('Statut historique manquant: '+f); console.log(f, d.counts); }"
+      - name: Construire les fiches produits comparatives
+        run: python3 scripts/build_product_sheets.py
       - name: Publier uniquement si les fichiers ont changé
         if: github.event_name != 'pull_request'
         run: |
-          git add data/prixtracker-prices.json data/prixtracker-best-daily.json
+          git add data/prixtracker-prices.json data/prixtracker-best-daily.json data/fiches-produits.json
           if git diff --cached --quiet; then
             echo "Aucune évolution des données."
             exit 0

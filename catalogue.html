@@ -5780,6 +5780,9 @@ async function pmLoadAwinCatalogue(){
         priceStatus,
         priceValue:priceStatus==="fresh"?Number(product.priceValue):null,
         price:priceStatus==="fresh"?product.price:"",
+        // Prix public indiqué par le marchand dans son flux : affiché avec sa date et « à confirmer »,
+        // jamais utilisé pour « Meilleur prix total » ni pour les comparaisons vérifiées.
+        listedPriceValue:hasPrice?Number(product.priceValue):null,
         priceTaxStatus:priceTaxIncluded?"included":"unspecified",
         feedFetchedAt:feed.fetched_at||null
       };
@@ -6130,6 +6133,10 @@ function render(){
       pmAwinPriceIsFresh(updateValue);
     const priceDateParsed=priceDateValue?new Date(String(priceDateValue).replace(" ","T")):null;
     const priceDateText=priceDateParsed&&Number.isFinite(priceDateParsed.getTime())?priceDateParsed.toLocaleDateString("fr-FR"):"";
+    const listedPrice=!hasVerifiedPrice&&Number.isFinite(Number(p.listedPriceValue))&&Number(p.listedPriceValue)>0?Number(p.listedPriceValue):null;
+    const feedDateParsed=p.feedFetchedAt?new Date(p.feedFetchedAt):null;
+    const feedDateText=feedDateParsed&&Number.isFinite(feedDateParsed.getTime())?feedDateParsed.toLocaleDateString("fr-FR"):"";
+    const listedSourceText=priceDateText?"Prix indiqué par le marchand le "+priceDateText:(feedDateText?"Prix du flux marchand récupéré le "+feedDateText:"Prix indiqué par le marchand");
     const shippingOf=value=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&Number(value)>=0?Number(value):null;
     const shippingValue=shippingOf(p.shippingPriceValue);
     const availabilityLabel=value=>{const v=String(value||"").toLowerCase().replace(/[\s_]+/g,"-");return v==="in-stock"||v==="available"?"En stock selon le marchand":v==="out-of-stock"?"Rupture indiquée":"À vérifier chez le marchand";};
@@ -6146,13 +6153,16 @@ function render(){
     const priceBox=document.createElement("div");priceBox.className="pm-c2-pricebox";
     const price=document.createElement("div");
     price.className="price pm-c2-price";
-    price.textContent=hasVerifiedPrice?money(p.priceValue):"Prix TTC vérifié indisponible";
+    price.textContent=hasVerifiedPrice?money(p.priceValue):listedPrice!==null?money(listedPrice):"Prix chez le marchand";
+    if(listedPrice!==null)priceBox.classList.add("pm-c2-listed");
     const shippingLine=document.createElement("div");shippingLine.className="pm-c2-shipping";
-    shippingLine.textContent=hasVerifiedPrice?(shippingValue===null?"livraison à confirmer":shippingValue===0?"Livraison gratuite":"+ "+money(shippingValue)+" de livraison"):"Prix et livraison à vérifier chez le marchand";
+    shippingLine.textContent=(hasVerifiedPrice||listedPrice!==null)?(shippingValue===null?"livraison à confirmer":shippingValue===0?"Livraison gratuite":"+ "+money(shippingValue)+" de livraison"):"Prix et livraison à vérifier chez le marchand";
     priceBox.append(price,shippingLine);
     const note=document.createElement("p");
     note.className="discovery-disclaimer pm-c2-date";
-    note.textContent=!hasVerifiedPrice
+    note.textContent=!hasVerifiedPrice&&listedPrice!==null
+      ?listedSourceText+" — à confirmer sur son site."
+      :!hasVerifiedPrice
       ?(p.priceStatus==="dated"&&priceDateText
         ?"Dernier relevé marchand du "+priceDateText+" — trop ancien ou incomplet pour être comparé."
         :p.priceStatus==="tax_unconfirmed"
@@ -6161,7 +6171,7 @@ function render(){
       :"Prix TTC confirmé par le marchand le "+priceDateText+".";
     const amazonButton=document.createElement("a");
     amazonButton.className="offer pm-c2-cta";
-    amazonButton.textContent=(hasVerifiedPrice?"Voir l’offre chez ":"Vérifier le prix chez ")+(p.merchant||"le marchand")+" ↗";
+    amazonButton.textContent=(hasVerifiedPrice||listedPrice!==null?"Voir l’offre chez ":"Vérifier le prix chez ")+(p.merchant||"le marchand")+" ↗";
     amazonButton.href=p.sourceUrl;
     amazonButton.target="_blank";
     amazonButton.rel="noopener noreferrer sponsored";
@@ -6188,9 +6198,23 @@ function render(){
     const compare=document.createElement("section");compare.className="pm-c2-compare";
     const heading=document.createElement("h4");
     heading.className="discovery-compare-heading";
-    heading.textContent=rows.length>1?"Offres TTC vérifiées ("+rows.length+")":rows.length===1?"Offre TTC vérifiée":"Offres marchandes";
+    heading.textContent=rows.length>1?"Offres TTC vérifiées ("+rows.length+")":rows.length===1?"Offre TTC vérifiée":listedPrice!==null?"Offre du marchand":"Offres marchandes";
     const offerList=document.createElement("div");offerList.className="pm-c2-offers";
-    if(!rows.length){
+    if(!rows.length&&listedPrice!==null&&/^https:\/\//i.test(String(p.sourceUrl||""))){
+      // Offre indicative : prix public du flux, jamais classée « Meilleur prix total ».
+      const offer=document.createElement("div");offer.className="pm-c2-offer pm-c2-offer-listed";
+      const left=document.createElement("div");left.className="pm-c2-offer-price";
+      const big=document.createElement("strong");big.textContent=money(listedPrice);
+      const total=document.createElement("span");total.className="pm-c2-offer-total";
+      total.textContent=shippingValue===null?"Prix à confirmer · livraison à confirmer":money(listedPrice+shippingValue)+" livraison incl. · à confirmer";
+      left.append(big,total);
+      const mid=document.createElement("div");mid.className="pm-c2-offer-merchant";
+      const shop=document.createElement("b");shop.textContent=p.merchant||"Marchand";mid.append(shop);
+      if(shippingValue===0){const free=document.createElement("small");free.textContent="🚚 Livraison gratuite";mid.append(free);}
+      const link=document.createElement("a");link.className="pm-c2-offer-cta";link.href=p.sourceUrl;link.target="_blank";link.rel="noopener noreferrer sponsored";link.textContent="Voir l’offre";
+      link.setAttribute("aria-label","Voir l’offre "+(p.merchant||"du marchand"));
+      offer.append(left,mid,link);offerList.append(offer);
+    }else if(!rows.length){
       const empty=document.createElement("p");
       empty.className="pm-c2-empty";
       empty.textContent="Aucune offre TTC récente et confirmée pour ce produit.";
@@ -6214,7 +6238,7 @@ function render(){
       offer.append(left,mid,link);offerList.append(offer);
     });
     const stamp=document.createElement("p");stamp.className="pm-c2-stamp";
-    stamp.textContent=hasVerifiedPrice&&priceDateText?"Relevé marchand : "+priceDateText:"Aucun prix TTC frais et confirmé.";
+    stamp.textContent=hasVerifiedPrice&&priceDateText?"Relevé marchand : "+priceDateText:listedPrice!==null?listedSourceText+" · non classé « meilleur prix »":"Aucun prix TTC frais et confirmé.";
     compare.append(heading,offerList,stamp);
     const amazonSearchButton=document.createElement("a");
     amazonSearchButton.className="pm-c2-amazon-search";
@@ -6975,7 +6999,7 @@ function pmRakutenIsValidGtin(value){
   const catNames={tech:"High-Tech",fashion:"Mode",home:"Maison",beauty:"Beauté & Santé",kids:"Bébé & Enfant",sport:"Sport & Loisirs",auto:"Auto & Moto",diy:"Bricolage",other:"Divers"};
   const F={min:null,max:null,freeShip:false,merchants:new Set(),cats:new Set(),sort:"pertinence"};
   window.pmFilters=F;
-  const priceOf=p=>{const v=Number(p&&p.priceValue);return Number.isFinite(v)&&v>0?v:null;};
+  const priceOf=p=>{const v=Number(p&&(p.priceValue??p.listedPriceValue));return Number.isFinite(v)&&v>0?v:null;};
   window.pmFilterPasses=p=>{
     const price=priceOf(p);
     if((F.min!==null||F.max!==null)&&price===null)return false;

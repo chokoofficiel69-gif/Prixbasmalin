@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d14">
+<title>Comparateur de prix high-tech — Prix Malin</title>
+<meta name="description" content="Comparez les prix des smartphones, consoles, écouteurs, tablettes et aspirateurs chez plus de 60 marchands : Amazon, Fnac, Darty, Cdiscount, Boulanger… Prix relevés et datés.">
+<link rel="canonical" href="https://prixbasmalin.fr/produit.html">
+<link rel="icon" href="/assets/logo-sac-prix-malin.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Prix Malin">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Comparateur de prix high-tech — Prix Malin">
+<meta property="og:image" content="https://prixbasmalin.fr/assets/prixmalin-publicite.webp">
+<style>
+:root{--bg:#080d14;--panel:#ffffff;--soft:#f3f5f8;--line:#e3e7ee;--ink:#111827;--muted:#5b6474;--orange:#f05a00;--blue:#0b63ce;--green:#22a861}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+a{color:inherit}
+.top{position:sticky;top:0;z-index:20;background:#080d14;border-bottom:1px solid #1f2a3a;padding:10px 16px 12px}
+.top-in{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:#fff}
+.logo img{width:38px;height:38px}
+.logo b{font-size:23px;font-weight:900;letter-spacing:-.02em}.logo b span{color:#ff7a1a}
+.top-links{display:flex;gap:14px;font-size:14px;font-weight:700}
+.top-links a{color:#dbe3ee;text-decoration:none}
+.search{display:flex;background:#fff;border-radius:12px;overflow:hidden;border:2px solid #ff7a1a}
+.search input{flex:1;min-width:0;border:0;padding:12px 14px;font-size:16px;color:var(--ink);background:#fff;outline:none}
+.search button{border:0;background:linear-gradient(100deg,#ff9b21,#ff5b0b);color:#fff;font-weight:800;padding:0 18px;font-size:15px;cursor:pointer}
+main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
+.crumbs{font-size:13px;color:#c9d3e0;margin:4px 0 12px}
+.crumbs a{color:#fff;font-weight:700}
+.panel{background:var(--panel);border-radius:16px;padding:16px}
+.notice{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#fff7ec;border:1px solid #ffd7ad;color:#7a4510;font-size:12.5px;line-height:1.45}
+/* Fiche produit */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center}
+.hero h1{margin:0 0 6px;font-size:clamp(24px,5.5vw,34px);line-height:1.15;color:var(--ink)}
+.brand-line{font-size:14px;color:var(--muted);font-weight:700}
+.from{margin-top:14px;font-size:15px;color:var(--muted)}
+.from strong{display:block;font-size:clamp(30px,8vw,40px);color:var(--orange);font-weight:900;line-height:1.1}
+.range{font-size:13px;color:var(--muted);margin-top:2px}
+.visual{aspect-ratio:1/1;border-radius:14px;background:var(--soft);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.visual img{width:100%;height:100%;object-fit:contain;padding:12px;mix-blend-mode:multiply}
+.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;height:100%;background:linear-gradient(140deg,#fff 0%,#eef2f7 100%);color:#334155;text-align:center;padding:10px}
+.ph i{font-style:normal;font-size:clamp(44px,12vw,70px);line-height:1}
+.ph b{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#64748b}
+.cta{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;margin-top:14px;border:0;border-radius:10px;background:var(--blue);color:#fff;font-size:17px;font-weight:800;text-decoration:none;cursor:pointer}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);margin-top:14px;border-top:1px solid var(--line)}
+.tabs a{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px 4px;text-decoration:none;font-size:13.5px;color:var(--ink);text-align:center}
+.tabs a+a{border-left:1px solid var(--line)}
+.tabs svg{width:24px;height:24px;stroke:var(--ink);fill:none;stroke-width:1.8}
+.section{margin-top:14px}
+.section h2{margin:0 0 10px;font-size:21px;color:var(--ink)}
+.sortbar{display:flex;gap:8px;margin-bottom:10px}
+.sortbar button{border:1px solid #c7ced8;background:#fff;border-radius:8px;padding:8px 14px;font-size:14px;color:var(--ink);cursor:pointer}
+.sortbar button.on{border:2px solid var(--ink);font-weight:800}
+.offers{display:flex;flex-direction:column;gap:10px}
+.offer{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.offer .p strong{display:block;font-size:24px;font-weight:900;color:var(--ink);white-space:nowrap}
+.offer .p small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.offer .p em{display:inline-block;margin-top:6px;font-style:normal;font-size:12px;font-weight:800;color:var(--orange);border:1.5px solid var(--orange);border-radius:6px;padding:3px 6px}
+.offer .m b{display:block;font-size:16px;color:var(--ink)}
+.offer .m small{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+.offer .go{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 14px;border-radius:8px;background:var(--green);color:#fff;font-weight:800;font-size:15px;text-decoration:none;white-space:nowrap}
+.offer.best{border:2px solid var(--orange)}
+.more{display:block;width:100%;margin-top:10px;border:1px solid #c7ced8;background:#fff;border-radius:10px;padding:12px;font-size:15px;font-weight:700;color:var(--blue);cursor:pointer}
+.stamp{margin:12px 0 0;text-align:center;font-size:12.5px;color:var(--muted)}
+.chart svg{width:100%;height:auto;display:block}
+.chart .legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.specs{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0;font-size:14px}
+.specs dt{color:var(--muted);font-weight:700}.specs dd{margin:0;color:var(--ink);font-weight:600}
+.alert-box{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.alert-box a{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--blue);color:var(--blue);font-weight:800;text-decoration:none}
+/* Grille de produits */
+.title-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;color:#fff;margin:8px 0 10px}
+.title-row h1,.title-row h2{margin:0;font-size:clamp(22px,5vw,30px);color:#fff}
+.title-row span{font-size:13px;color:#c9d3e0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:0 0 auto;border:1px solid #3a4a60;background:#121b28;color:#e9eef5;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer}
+.chips button.on{background:#ff7a1a;border-color:#ff7a1a;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:min(46%,220px);gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}
+.card{display:flex;flex-direction:column;background:#fff;border-radius:12px;overflow:hidden;text-decoration:none;color:var(--ink);scroll-snap-align:start;border:1px solid var(--line)}
+.card .visual{border-radius:0;aspect-ratio:4/3}
+.card .ph i{font-size:44px}.card .ph b{font-size:11px}
+.card .c{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px;flex:1}
+.card .cat{font-size:12px;color:var(--muted)}
+.card h3{margin:0;font-size:15px;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .n{margin-top:auto;padding-top:6px;font-size:12.5px;color:var(--blue);font-weight:700}
+.card .pr{font-size:22px;font-weight:900;color:var(--orange)}
+.empty{color:#c9d3e0;text-align:center;padding:30px 10px}
+.source{margin-top:18px;font-size:12px;color:#9aa6b8;line-height:1.5}
+.source a{color:#ffad66}
+@media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{grid-template-columns:1.2fr 1fr}.rail{grid-auto-columns:220px}}
+@media(max-width:420px){.offer{grid-template-columns:1fr auto;}.offer .m{grid-column:1/2}.offer .go{grid-row:1/3;grid-column:2}}
+</style>
+<script src="/js/cookie-consent.js" defer></script>
+</head>
+<body>
+<header class="top">
+ <div class="top-in">
+  <div class="top-row">
+   <a class="logo" href="/"><img src="/assets/logo-sac-prix-malin.svg" alt="" width="38" height="38"><b>Prix <span>Malin</span></b></a>
+   <nav class="top-links" aria-label="Navigation"><a href="/produit.html">Comparateur</a><a href="/catalogue.html">Catalogue</a></nav>
+  </div>
+  <form class="search" role="search" id="searchForm">
+   <input id="q" type="search" placeholder="Rechercher un produit : iPhone, PS5, AirPods…" autocomplete="off" aria-label="Rechercher un produit">
+   <button type="submit">Rechercher</button>
+  </form>
+ </div>
+</header>
+<main id="app" aria-live="polite"><p class="empty">Chargement des prix…</p></main>
+<script>
+(function(){
+ "use strict";
+ const AMAZON_TAG="prixbasmalin2-21";
+ const app=document.getElementById("app");
+ const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
+ const fmtDate=d=>{const t=new Date(String(d)+"T12:00:00");return Number.isFinite(t.getTime())?t.toLocaleDateString("fr-FR"):"";};
+ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const icons={smartphone:"📱",tablette:"📲",laptop:"💻",audio:"🎧",enceinte:"🔊",montre:"⌚",console:"🎮","accessoire-ps5":"🎮","accessoire-switch":"🕹️",aspirateur:"🧹"};
+ // Noms lisibles et pages de recherche des marchands relevés par PrixTracker.
+ const merchants={
+  amazon:["Amazon",q=>"https://www.amazon.fr/s?"+new URLSearchParams({k:q,tag:AMAZON_TAG})],
+  cdiscount:["Cdiscount",q=>"https://www.cdiscount.com/search/10/"+encodeURIComponent(q)+".html"],
+  fnac:["Fnac",q=>"https://www.fnac.com/SearchResult/ResultList.aspx?"+new URLSearchParams({Search:q})],
+  darty:["Darty",q=>"https://www.darty.com/nav/recherche?"+new URLSearchParams({text:q})],
+  boulanger:["Boulanger",q=>"https://www.boulanger.com/resultats?"+new URLSearchParams({tr:q})],
+  ebay:["eBay",q=>"https://www.ebay.fr/sch/i.html?"+new URLSearchParams({_nkw:q})],
+  aliexpress:["AliExpress",q=>"https://fr.aliexpress.com/wholesale?"+new URLSearchParams({SearchText:q})],
+  galaxusfr:["Galaxus",q=>"https://www.galaxus.fr/fr/search?"+new URLSearchParams({q})],
+  kauflandfr:["Kaufland",q=>"https://www.kaufland.fr/s/?"+new URLSearchParams({search_value:q})],
+  manomanofr:["ManoMano",q=>"https://www.manomano.fr/recherche/"+encodeURIComponent(q)],
+  carrefourfr:["Carrefour",q=>"https://www.carrefour.fr/s?"+new URLSearchParams({q})],
+  eleclerchightechfr:["E.Leclerc High-Tech",q=>"https://www.e.leclerc/recherche?"+new URLSearchParams({q})],
+  eleclercfrmarketplac:["E.Leclerc Marketplace",q=>"https://www.e.leclerc/recherche?"+new URLSearchParams({q})],
+  pixmaniafr:["Pixmania"],onbuycomfr:["OnBuy"],joybuyfr:["Joybuy"],alternatefr:["Alternate"],pccomponentesfr:["PcComponentes"],
+  helloedgefr:["Hello Edge"],sonvideocom:["Son-Vidéo.com"],getgoodscomfr:["GetGoods"],inmacwstorecom:["Inmac wstore"],grouponfr:["Groupon"],
+  topbizfr:["Topbiz"],xtremeinnfr:["Xtremeinn"],asgoodasnewfr:["asgoodasnew"],bixotocomfr:["Bixoto"],rueducommercefrmarke:["Rue du Commerce"],
+  reicheltcomfr:["Reichelt"],maxiburofr:["Maxiburo"],cstechstorefr:["CS Tech Store"],photospecialistfr:["Photo Specialist"],mondofficefr:["Mondoffice"],
+  ubaldimarketplace:["Ubaldi"],fibresetcablescomfr:["Fibres et Câbles"],cartouche24eu:["Cartouche24"],prindofr:["Prindo"],toner24fr:["Toner24"],hellorsefr:["Hellorse"],easyloungecom:["Easylounge"]
+ };
+ const merchantName=id=>(merchants[id]&&merchants[id][0])||String(id||"Marchand").replace(/(comfr|fr|com|eu)$/i,"").replace(/^./,c=>c.toUpperCase());
+ const merchantLink=(id,product)=>{
+  const q=[product.brand&&!product.name.toLowerCase().includes(product.brand.toLowerCase())?product.brand:"",product.name].filter(Boolean).join(" ");
+  const m=merchants[id];
+  if(m&&m[1])return {url:m[1](q),label:"Voir l’offre",affiliate:id==="amazon"};
+  return {url:"https://www.google.com/search?"+new URLSearchParams({q:merchantName(id)+" "+q}),label:"Rechercher",affiliate:false};
+ };
+ const visual=(p,eager)=>p.image
+  ?'<div class="visual"><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" '+(eager?'':'loading="lazy" ')+'decoding="async" onerror="this.parentNode.innerHTML=\'<div class=ph><i>'+(icons[p.category]||"🛒")+'</i><b>'+esc(p.brand)+'</b></div>\'"></div>'
+  :'<div class="visual"><div class="ph"><i>'+(icons[p.category]||"🛒")+'</i><b>'+esc(p.brand||p.category_label)+'</b></div></div>';
+ const card=p=>'<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p,false)+'<div class="c"><span class="cat">'+esc(p.category_label)+'</span><h3>'+esc(p.name)+'</h3><span class="n">'+p.offer_count+' offres à partir de</span><span class="pr">'+euro.format(p.min_price_eur)+'</span></div></a>';
+ const params=new URLSearchParams(location.search);
+ const qInput=document.getElementById("q");
+ qInput.value=params.get("q")||"";
+ document.getElementById("searchForm").addEventListener("submit",e=>{e.preventDefault();const v=qInput.value.trim();location.href="/produit.html"+(v?"?q="+encodeURIComponent(v):"");});
+ const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g," ").trim();
+ let data;
+ function setMeta(title,description,canonical){
+  document.title=title;
+  const d=document.querySelector('meta[name="description"]');if(d)d.setAttribute("content",description);
+  const c=document.querySelector('link[rel="canonical"]');if(c)c.setAttribute("href",canonical);
+  const o=document.querySelector('meta[property="og:title"]');if(o)o.setAttribute("content",title);
+ }
+ function sourceNote(){
+  const per=data.dataset_period||{};
+  return '<p class="source">Prix relevés par PrixTracker'+(per.from?" entre le "+fmtDate(per.from)+" et le "+fmtDate(per.to):"")+'. Ce sont des relevés datés : le prix du jour peut différer, vérifiez-le chez le marchand avant d’acheter. Source : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener" target="_blank">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Liens Amazon affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>';
+ }
+ function chart(history){
+  if(!history||history.length<2)return '<p class="stamp">Pas assez de relevés pour tracer l’évolution.</p>';
+  const W=640,H=200,P=28;const ys=history.map(h=>h.min_price_eur);const min=Math.min(...ys),max=Math.max(...ys);const span=max-min||1;
+  const pts=history.map((h,i)=>[P+i*(W-2*P)/(history.length-1),H-P-(h.min_price_eur-min)*(H-2*P)/span]);
+  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const area=line+" L"+pts[pts.length-1][0].toFixed(1)+" "+(H-P)+" L"+pts[0][0].toFixed(1)+" "+(H-P)+" Z";
+  const last=pts[pts.length-1];
+  return '<div class="chart"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Évolution du prix le plus bas relevé, de '+euro.format(history[0].min_price_eur)+' à '+euro.format(history[history.length-1].min_price_eur)+'"><line x1="'+P+'" y1="'+(H-P)+'" x2="'+(W-P)+'" y2="'+(H-P)+'" stroke="#e3e7ee"/><text x="'+P+'" y="16" font-size="13" fill="#5b6474">'+euro.format(max)+'</text><text x="'+P+'" y="'+(H-8)+'" font-size="13" fill="#5b6474">'+euro.format(min)+'</text><path d="'+area+'" fill="#f05a00" fill-opacity=".10"/><path d="'+line+'" fill="none" stroke="#f05a00" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="5" fill="#f05a00"/></svg><div class="legend"><span>'+fmtDate(history[0].date)+'</span><span>Prix le plus bas relevé chaque jour</span><span>'+fmtDate(history[history.length-1].date)+'</span></div></div>';
+ }
+ function renderProduct(p){
+  setMeta(p.name+" au meilleur prix : comparez "+p.offer_count+" offres — Prix Malin",
+   p.name+" à partir de "+euro.format(p.min_price_eur)+" : comparez les prix relevés chez "+p.offer_count+" marchands (Amazon, Fnac, Darty, Cdiscount…). Historique et alerte prix.",
+   "https://prixbasmalin.fr/produit.html?id="+encodeURIComponent(p.id));
+  let sort="price",shown=8;
+  const similar=data.products.filter(x=>x.category===p.category&&x.id!==p.id).slice(0,10);
+  app.innerHTML='<nav class="crumbs" aria-label="Fil d’Ariane"><a href="/produit.html">Comparateur</a> › <a href="/produit.html?cat='+encodeURIComponent(p.category)+'">'+esc(p.category_label)+'</a></nav>'
+   +'<article class="panel"><div class="hero"><div><h1>'+esc(p.name)+'</h1><div class="brand-line">'+esc(p.brand)+' · '+esc(p.category_label)+'</div>'
+   +'<div class="from">à partir de<strong>'+euro.format(p.min_price_eur)+'</strong></div><div class="range">Jusqu’à '+euro.format(p.max_price_eur)+' selon le marchand · écart de '+euro.format(p.max_price_eur-p.min_price_eur)+'</div></div>'+visual(p,true)+'</div>'
+   +'<a class="cta" href="#offres">Comparez '+p.offer_count+' offres</a>'
+   +'<nav class="tabs"><a href="#details"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Détails du produit</a><a href="#evolution"><svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3"/></svg>Évolution du prix</a><a href="#alerte"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2 2M5 4 2 7M19 4l3 3"/></svg>Alerte prix</a></nav>'
+   +'<p class="notice">Prix relevés chez chaque marchand entre octobre et novembre 2026 : ils peuvent avoir changé. Le prix final s’affiche chez le marchand.</p></article>'
+   +'<section class="panel section" id="offres"><h2>Comparer les prix</h2><div class="sortbar"><button type="button" data-sort="price" class="on">Prix</button><button type="button" data-sort="date">Plus récents</button></div><div class="offers" id="offerList"></div><button type="button" class="more" id="moreBtn"></button><p class="stamp">Données datant du '+fmtDate(p.last_date)+' · source PrixTracker</p></section>'
+   +'<section class="panel section" id="evolution"><h2>Évolution du prix</h2>'+chart(p.history)+'</section>'
+   +'<section class="panel section" id="details"><h2>Détails du produit</h2><dl class="specs"><dt>Marque</dt><dd>'+esc(p.brand)+'</dd><dt>Catégorie</dt><dd>'+esc(p.category_label)+'</dd><dt>Marchands comparés</dt><dd>'+p.offer_count+'</dd><dt>Prix le plus bas</dt><dd>'+euro.format(p.min_price_eur)+'</dd><dt>Prix le plus haut</dt><dd>'+euro.format(p.max_price_eur)+'</dd><dt>Dernier relevé</dt><dd>'+fmtDate(p.last_date)+'</dd></dl></section>'
+   +'<section class="panel section" id="alerte"><div class="alert-box"><div><h2>Alerte prix</h2><span class="brand-line">Recevez un e-mail quand le prix baisse.</span></div><a href="/catalogue.html?alerte=1">Créer une alerte gratuite</a></div></section>'
+   +(similar.length?'<section class="section"><div class="title-row"><h2>Produits similaires</h2></div><div class="rail">'+similar.map(card).join("")+'</div></section>':"")
+   +sourceNote();
+  const list=document.getElementById("offerList"),more=document.getElementById("moreBtn");
+  const draw=()=>{
+   const offers=[...p.offers].sort(sort==="price"?(a,b)=>a.price_eur-b.price_eur:(a,b)=>b.date.localeCompare(a.date)||a.price_eur-b.price_eur);
+   const best=Math.min(...p.offers.map(o=>o.price_eur));
+   list.innerHTML=offers.slice(0,shown).map(o=>{
+    const link=merchantLink(o.merchant,p);const isBest=o.price_eur===best;
+    return '<div class="offer'+(isBest?' best':'')+'"><div class="p"><strong>'+euro.format(o.price_eur)+'</strong><small>Relevé du '+fmtDate(o.date)+'</small>'+(isBest?'<em>Meilleur prix relevé</em>':'')+'</div><div class="m"><b>'+esc(merchantName(o.merchant))+'</b><small>Livraison : voir chez le marchand</small></div><a class="go" href="'+esc(link.url)+'" target="_blank" rel="'+(link.affiliate?"sponsored nofollow noopener":"nofollow noopener")+'" aria-label="'+esc(link.label+" "+p.name+" chez "+merchantName(o.merchant))+'">'+link.label+'</a></div>';
+   }).join("");
+   more.hidden=shown>=offers.length;more.textContent="Voir les "+(offers.length-shown)+" autres offres";
+  };
+  more.addEventListener("click",()=>{shown=p.offers.length;draw();});
+  app.querySelectorAll("[data-sort]").forEach(b=>b.addEventListener("click",()=>{sort=b.dataset.sort;app.querySelectorAll("[data-sort]").forEach(x=>x.classList.toggle("on",x===b));draw();}));
+  draw();
+ }
+ function renderList(){
+  const q=norm(params.get("q")),cat=params.get("cat")||"";
+  const cats=[...new Map(data.products.map(p=>[p.category,p.category_label]))];
+  const found=data.products.filter(p=>(!cat||p.category===cat)&&(!q||q.split(" ").every(t=>norm(p.name+" "+p.brand+" "+p.category_label).includes(t))));
+  setMeta(q?"Prix "+params.get("q")+" — comparateur Prix Malin":"Comparateur de prix high-tech — Prix Malin",document.querySelector('meta[name="description"]').content,"https://prixbasmalin.fr/produit.html"+(cat?"?cat="+encodeURIComponent(cat):""));
+  const deals=data.products.filter(p=>p.offer_count>=5).map(p=>({p,gap:(p.max_price_eur-p.min_price_eur)/p.max_price_eur})).sort((a,b)=>b.gap-a.gap).slice(0,10).map(x=>x.p);
+  app.innerHTML=(!q&&!cat?'<section class="section"><div class="title-row"><h2>Les plus gros écarts de prix</h2><span>même produit, prix différents</span></div><div class="rail">'+deals.map(card).join("")+'</div></section>':"")
+   +'<section class="section"><div class="title-row"><h1>'+(q?"Résultats pour « "+esc(params.get("q"))+" »":cat?esc((cats.find(c=>c[0]===cat)||[])[1]||"Produits"):"Tous les produits comparés")+'</h1><span>'+found.length+' produits</span></div>'
+   +'<div class="chips"><button type="button" data-cat=""'+(!cat?' class="on"':'')+'>Tout</button>'+cats.map(([k,l])=>'<button type="button" data-cat="'+esc(k)+'"'+(cat===k?' class="on"':'')+'>'+esc(l)+'</button>').join("")+'</div>'
+   +(found.length?'<div class="grid">'+found.map(card).join("")+'</div>':'<p class="empty">Aucun produit comparé ne correspond. Essayez « iPhone », « PS5 » ou « AirPods », ou cherchez dans le <a href="/catalogue.html" style="color:#ffad66">catalogue</a>.</p>')
+   +'</section>'+sourceNote();
+  app.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{const v=b.dataset.cat;location.href="/produit.html"+(v?"?cat="+encodeURIComponent(v):"");}));
+ }
+ fetch("/data/fiches-produits.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(json=>{
+  data=json;
+  const id=params.get("id");
+  const product=id&&data.products.find(p=>p.id===id);
+  if(product)renderProduct(product);else renderList();
+ }).catch(err=>{
+  console.warn("Fiches produits Prix Malin :",err);
+  app.innerHTML='<p class="empty">Le comparateur ne répond pas pour le moment. Réessayez dans un instant ou consultez le <a href="/catalogue.html" style="color:#ffad66">catalogue</a>.</p>';
+ });
+})();
+</script>
+</body>
+</html>

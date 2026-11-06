@@ -30,7 +30,15 @@ class CatalogueProductCardTests(unittest.TestCase):
         self.assertIn('p.priceStatus==="fresh"', self.source)
         self.assertIn('p.priceTaxStatus==="included"', self.source)
         self.assertIn("pmAwinPriceIsFresh(updateValue)", self.source)
-        self.assertIn('"Prix TTC vérifié indisponible"', self.source)
+
+    def test_listed_feed_price_is_shown_dated_but_never_ranked_best(self):
+        # Compromis validé par le propriétaire : le prix public du flux reste visible avec sa date,
+        # mais seules les offres TTC fraîches entrent dans les comparaisons et « Meilleur prix total ».
+        self.assertIn("listedPriceValue:hasPrice?Number(product.priceValue):null", self.source)
+        self.assertIn("priceValue:priceStatus===\"fresh\"?Number(product.priceValue):null", self.source)
+        self.assertIn('listedSourceText+" — à confirmer sur son site."', self.source)
+        self.assertIn('offer.className="pm-c2-offer pm-c2-offer-listed";', self.source)
+        self.assertIn("const isBest=canRankByTotal&&rowIndex===0;", self.source)
 
     def test_irrelevant_brand_chips_and_empty_sections_are_gone(self):
         self.assertNotIn('brandsLabel.textContent="Marques à comparer";', self.source)
