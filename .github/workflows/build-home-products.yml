@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "catalogue.html"
+      - "data/awin-products.json"
       - "scripts/build_home_products.py"
       - "scripts/check_home_product_images.py"
       - "tests/test_build_home_products.py"
@@ -13,6 +14,7 @@ on:
     paths:
       - "catalogue.html"
       - "data/home-products.json"
+      - "data/awin-products.json"
       - "scripts/build_home_products.py"
       - "scripts/check_home_product_images.py"
       - "tests/test_build_home_products.py"
