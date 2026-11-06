@@ -5,6 +5,7 @@ import json
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOGUE = ROOT / "catalogue.html"
@@ -79,7 +80,10 @@ def parse_aware_timestamp(value):
 
 
 def is_https_url(value):
-    return isinstance(value, str) and value.startswith("https://") and len(value) > 8
+    if not isinstance(value, str):
+        return False
+    parsed = urlparse(value)
+    return parsed.scheme == "https" and bool(parsed.netloc)
 
 
 def select_awin_home_products(feed, existing_products=None, now=None):
@@ -170,7 +174,7 @@ def select_awin_home_products(feed, existing_products=None, now=None):
     return selected if len(selected) >= MIN_AWIN_HOME_PRODUCTS else None
 
 
-def build_feed(html, generated_at=None, awin_products=None, previous=None):
+def build_feed(html, generated_at=None, awin_products=None, awin_fetched_at=None, previous=None):
     catalogue_products = extract_products(html)
     previous_products = previous.get("products", []) if isinstance(previous, dict) else []
     if awin_products is None:
@@ -178,6 +182,7 @@ def build_feed(html, generated_at=None, awin_products=None, previous=None):
             product for product in previous_products
             if isinstance(product, dict) and str(product.get("id", "")).startswith("awin-home-")
         ]
+        awin_fetched_at = previous.get("awin_image_feed_fetched_at") if isinstance(previous, dict) else None
 
     merged = list(catalogue_products)
     seen_ids = {str(product.get("id")) for product in merged}
@@ -199,7 +204,8 @@ def build_feed(html, generated_at=None, awin_products=None, previous=None):
         seen_images.add(image)
 
     verified_count = sum(has_verified_image(product) for product in merged)
-    has_awin_images = any(str(product.get("id", "")).startswith("awin-home-") for product in merged)
+    awin_image_count = sum(str(product.get("id", "")).startswith("awin-home-") for product in merged)
+    has_awin_images = awin_image_count > 0
     return {
         "version": 1,
         "generated_from": (
@@ -207,6 +213,8 @@ def build_feed(html, generated_at=None, awin_products=None, previous=None):
             if has_awin_images else "catalogue.html productData"
         ),
         "generated_at": generated_at or datetime.now(timezone.utc).date().isoformat(),
+        "awin_image_feed_fetched_at": awin_fetched_at if has_awin_images else None,
+        "awin_image_product_count": awin_image_count,
         "count": len(merged),
         "verified_image_count": verified_count,
         "unverified_image_count": len(merged) - verified_count,
@@ -256,6 +264,7 @@ def main():
     generated = build_feed(
         CATALOGUE.read_text(encoding="utf-8"),
         awin_products=awin_products,
+        awin_fetched_at=awin_feed.get("fetched_at") if awin_products is not None and isinstance(awin_feed, dict) else None,
         previous=existing,
     )
     if args.check:
@@ -278,11 +287,12 @@ def main():
         json.dumps(generated, ensure_ascii=False, indent=2) + "\\n",
         encoding="utf-8",
     )
-    awin_count = sum(str(product.get("id", "")).startswith("awin-home-") for product in generated["products"])
+    awin_count = generated["awin_image_product_count"]
     print(
         f"Flux homepage actualisé : {generated['count']} fiches, "
         f"{generated['verified_image_count']} visuels vérifiés, "
-        f"{awin_count} références Awin en visuel uniquement. Aucun prix ajouté."
+        f"{awin_count} références Awin en visuel uniquement "
+        f"(flux du {generated['awin_image_feed_fetched_at'] or 'dernier lot conservé'}). Aucun prix ajouté."
     )
 
 
