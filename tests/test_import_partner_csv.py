@@ -9,8 +9,8 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
-HEADER = "offer_id,catalog_product_id,product_name,merchant_name,source,identity_type,identity_value,brand,price,shipping_price,currency,product_url,tracking_url,checked_at\n"
-ROW = "offer-1,headphones-1,Headphones,Shop,authorized_csv,asin,B012345678,Brand,49.99,4.90,EUR,https://shop.example/item,,2026-10-23T12:00:00+02:00\n"
+HEADER = "offer_id,catalog_product_id,product_name,merchant_name,source,identity_type,identity_value,brand,price,shipping_price,currency,price_tax_status,availability,product_url,tracking_url,checked_at\n"
+ROW = "offer-1,headphones-1,Headphones,Shop,authorized_csv,asin,B012345678,Brand,49.99,4.90,EUR,included,in_stock,https://shop.example/item,,2026-10-23T12:00:00+02:00\n"
 
 
 class ImportPartnerCsvTests(unittest.TestCase):
@@ -29,6 +29,8 @@ class ImportPartnerCsvTests(unittest.TestCase):
         self.assertEqual(len(result["offers"]), 1)
         self.assertEqual(result["offers"][0]["price"], 49.99)
         self.assertEqual(result["offers"][0]["shipping_price"], 4.90)
+        self.assertEqual(result["offers"][0]["price_tax_status"], "included")
+        self.assertEqual(result["offers"][0]["availability"], "in_stock")
         self.assertNotIn("tracking_url", result["offers"][0])
 
     def test_rejects_missing_required_column(self):
@@ -45,6 +47,16 @@ class ImportPartnerCsvTests(unittest.TestCase):
         row = ROW.replace("asin,B012345678,Brand", "mpn,MODEL-123,")
         path = self.write_csv(HEADER + row)
         with self.assertRaisesRegex(ValueError, "brand obligatoire"):
+            MODULE.convert_csv(path)
+
+    def test_rejects_out_of_stock_offer(self):
+        path = self.write_csv(HEADER + ROW.replace(",in_stock,https://", ",out_of_stock,https://"))
+        with self.assertRaisesRegex(ValueError, "disponibilité non achetable"):
+            MODULE.convert_csv(path)
+
+    def test_rejects_unconfirmed_tax_status(self):
+        path = self.write_csv(HEADER + ROW.replace(",included,in_stock,https://", ",unspecified,in_stock,https://"))
+        with self.assertRaisesRegex(ValueError, "prix TTC non confirmé"):
             MODULE.convert_csv(path)
 
     def test_rejects_non_https_url(self):
