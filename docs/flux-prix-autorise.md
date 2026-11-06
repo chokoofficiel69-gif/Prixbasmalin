@@ -15,10 +15,12 @@ Chaque entrée de `offers` doit contenir :
 - `product_url` : URL produit HTTPS officielle
 - `price`, `shipping_price` : nombres en euros, livraison connue (0 si gratuite)
 - `currency` : `EUR`
+- `price_tax_status` : `included` uniquement si la source marchande confirme explicitement que le prix comprend la TVA ; toute autre valeur est refusée
+- `availability` : facultatif, `in_stock` ou `unknown` ; une rupture explicite est exclue
 - `checked_at` : heure réelle du relevé, ISO 8601 avec fuseau
 - `tracking_url` : facultatif, uniquement si fourni par le programme d'affiliation autorisé
 
-Ne jamais utiliser un prix estimé, un prix promotionnel non vérifié, ni un lien d'affiliation fabriqué. Les relevés âgés de plus de 48 heures, futurs, incomplets ou sans frais de livraison connus sont écartés.
+Ne jamais utiliser un prix estimé, un prix promotionnel non vérifié, ni un lien d'affiliation fabriqué. `price_tax_status` doit être explicitement `included` dans la source pour confirmer un prix TTC ; sinon l'offre est refusée pour comparaison. Les relevés âgés de plus de 48 heures, futurs, incomplets ou sans frais de livraison connus sont écartés.
 
 ## Génération
 
