@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "status": "not_yet_synced",
+  "fetched_at": null,
+  "source": null,
+  "publisher_id": "3137386",
+  "locale": "fr_FR",
+  "programmes_check_status": "not_verified",
+  "joined_advertisers_checked": null,
+  "pending_advertisers_detected": null,
+  "additional_authorized_offers_imported": null,
+  "counts": null,
+  "note": "Résumé technique non contractuel. null signifie non vérifié, jamais zéro. Les secrets et identifiants d'accès ne sont jamais publiés."
+}
