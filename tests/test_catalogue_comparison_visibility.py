@@ -5,15 +5,15 @@ CATALOGUE = Path(__file__).resolve().parents[1] / "catalogue.html"
 
 
 class CatalogueComparisonVisibilityTests(unittest.TestCase):
-    def test_feed_status_is_visible_to_visitors(self):
+    def test_technical_feed_status_is_not_shown_to_visitors(self):
+        # Décision produit : les diagnostics techniques du flux ne sont plus affichés au public.
         source = CATALOGUE.read_text(encoding="utf-8")
-        self.assertIn('id="pmAwinFeedStatus"', source)
-        self.assertIn('role="status" aria-live="polite"', source)
+        self.assertNotIn('id="pmAwinFeedStatus"', source)
+        self.assertIn('#pmAwinFeedStatus,', source)
 
-    def test_empty_comparison_state_is_visible_and_explains_the_blocker(self):
+    def test_verified_comparison_shelf_stays_hidden_until_it_has_offers(self):
         source = CATALOGUE.read_text(encoding="utf-8")
-        self.assertIn('<section id="verifiedShelf" class="verified-shelf" aria-live="polite">', source)
-        self.assertIn('Aucune comparaison multi-marchands exacte avec prix TTC confirmé', source)
+        self.assertIn('<section id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden>', source)
         self.assertIn('verifiedShelf.hidden=false;', source)
 
     def test_comparison_requires_eur_ttc_and_recent_merchant_date(self):

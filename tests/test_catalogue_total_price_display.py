@@ -82,14 +82,20 @@ class CatalogueComparablePriceTests(unittest.TestCase):
     def test_awin_prices_use_merchant_update_timestamp_not_feed_download_time(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn("function pmAwinPriceIsFresh(value,now=Date.now())", source)
-        self.assertIn("const priceFresh=pmAwinPriceIsFresh(merchantUpdatedAt);", source)
-        self.assertIn('priceStatus:"stale",priceValue:null', source)
-        self.assertIn('price.textContent=hasVerifiedPrice?money(p.priceValue):(p.priceStatus==="stale"?"Prix à vérifier chez le marchand"', source)
+        self.assertIn("const priceFresh=hasPrice&&pmAwinPriceIsFresh(merchantUpdatedAt);", source)
         self.assertIn("checked_at:checkedAt,", source)
         self.assertIn("stale:!pmAwinPriceIsFresh(checkedAt)", source)
         self.assertNotIn("checked_at:product.fetchedAt||feed.fetched_at", source)
         self.assertIn("const updateValue=p.merchantUpdatedAt||null;", source)
         self.assertNotIn("const updateValue=p.merchantUpdatedAt||p.fetchedAt;", source)
+
+    def test_older_awin_prices_are_shown_with_their_date_and_a_confirmation_note(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('priceStatus:priceFresh?"fresh":(hasPrice?"dated":"unavailable")', source)
+        self.assertIn("priceValue:hasPrice?Number(product.priceValue):null", source)
+        self.assertIn('"Prix indiqué par le marchand le "+priceDateText', source)
+        self.assertIn('"Prix du flux marchand récupéré le "+priceDateText', source)
+        self.assertIn("— à confirmer sur son site.", source)
 
 
 if __name__ == "__main__":
