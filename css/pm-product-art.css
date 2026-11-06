@@ -1,0 +1,6 @@
+/* Illustrations produit (sans photo libre) : fond clair, icône au trait, marque. */
+.pm-art{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(circle at 50% 35%,#ffffff 0%,#eef2f7 70%,#e4e9f1 100%);color:#334155}
+.pm-art svg{width:38%;max-width:96px;height:auto;color:#475569}
+.pm-art b{font:800 12px/1 Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#64748b}
+.pm-photo-credit{display:block;margin-top:6px;font-size:11px;line-height:1.35;color:#6b7280}
+.pm-photo-credit a{color:inherit;text-decoration:underline}

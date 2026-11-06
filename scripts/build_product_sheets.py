@@ -17,6 +17,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data" / "prixtracker-prices.json"
 HOME = ROOT / "data" / "home-products.json"
+LICENSED = ROOT / "data" / "product-images.json"
+ALLOWED_LICENSES = ("cc0", "public domain", "domaine public", "cc by", "partenaire")
 OUTPUT = ROOT / "data" / "fiches-produits.json"
 
 VERIFIED_IMAGE_STATUSES = {
@@ -61,10 +63,29 @@ def verified_images(home):
     return images
 
 
-def build(source, home):
+def licensed_images(data):
+    """Photos sous licence libre (ou fournies par un partenaire) avec leur crédit obligatoire."""
+    out = {}
+    for pid, entry in ((data or {}).get("images") or {}).items():
+        url = str(entry.get("thumb") or entry.get("url") or "")
+        license_name = str(entry.get("license") or "")
+        if not url.startswith("https://") or not license_name:
+            continue
+        words = re.sub(r"[^a-z0-9.]+", " ", license_name.lower()).split()
+        # Usage commercial et modifications autorisés : jamais NC (non commercial) ni ND (pas de modification).
+        if not " ".join(words).startswith(ALLOWED_LICENSES) or "nc" in words or "nd" in words:
+            continue
+        out[pid] = {"image": url, "image_credit": {
+            "author": entry.get("author") or "", "license": license_name,
+            "file_page": entry.get("file_page") or "", "match": entry.get("match") or "exact"}}
+    return out
+
+
+def build(source, home, licensed=None):
     rows = source.get("offers", [])
     meta = {p["id"]: p for p in source.get("products", []) if p.get("id")}
     images = verified_images(home)
+    licensed = licensed_images(licensed)
     latest = defaultdict(dict)  # product -> merchant -> (date, price)
     daily_min = defaultdict(dict)  # product -> date -> min price
     for row in rows:
@@ -99,6 +120,9 @@ def build(source, home):
         brand = info.get("brand") or ""
         history = [{"date": d, "min_price_eur": round(p, 2)} for d, p in sorted(daily_min[pid].items())]
         image = images.get(norm(name)) or images.get(norm(f"{brand} {name}")) or ""
+        credit = None
+        if pid in licensed:
+            image, credit = licensed[pid]["image"], licensed[pid]["image_credit"]
         sheets.append({
             "id": pid,
             "name": name,
@@ -106,6 +130,7 @@ def build(source, home):
             "category": info.get("category") or "",
             "category_label": CATEGORY_LABELS.get(info.get("category"), "High-Tech"),
             "image": image,
+            "image_credit": credit,
             "offer_count": len(offers),
             "min_price_eur": offers[0]["price_eur"],
             "max_price_eur": offers[-1]["price_eur"],
@@ -131,7 +156,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="échoue si le fichier publié n'est pas à jour")
     args = parser.parse_args()
-    data = build(json.loads(SOURCE.read_text(encoding="utf-8")), json.loads(HOME.read_text(encoding="utf-8")))
+    licensed = json.loads(LICENSED.read_text(encoding="utf-8")) if LICENSED.exists() else None
+    data = build(json.loads(SOURCE.read_text(encoding="utf-8")), json.loads(HOME.read_text(encoding="utf-8")), licensed)
     text = json.dumps(data, ensure_ascii=False, indent=1) + "\n"
     if args.check:
         if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != text:

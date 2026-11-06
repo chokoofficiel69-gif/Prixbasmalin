@@ -259,6 +259,8 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 .pm-history-empty{color:#dce3ec;font-size:13px;padding:12px}
 @media(max-width:760px){.pm-discovery-image{height:125px}.pm-discovery-card{flex-basis:72vw}}
 </style>
+<link rel="stylesheet" href="/css/pm-product-art.css">
+<script src="/js/pm-product-art.js"></script>
 <script id="pm-history-comparisons-loader">
 (async function(){
  // Ce script est chargé dans <head> : attendre que la liste de produits existe dans la page.
@@ -375,15 +377,14 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    return;
   }
   status.hidden=true;
-  const artMap={smartphone:["📱","#1e3a8a","#3b82f6"],tablette:["📲","#164e63","#06b6d4"],laptop:["💻","#312e81","#6366f1"],audio:["🎧","#7c2d12","#f97316"],enceinte:["🔊","#701a75","#d946ef"],montre:["⌚","#14532d","#22c55e"],console:["🎮","#1f2937","#ef4444"],"accessoire-ps5":["🎮","#1e3a8a","#60a5fa"],"accessoire-switch":["🕹️","#7f1d1d","#ef4444"],aspirateur:["🧹","#3f3f46","#a1a1aa"]};
   const dateFr=d=>new Date(String(d)+"T12:00:00").toLocaleDateString("fr-FR");
   const fragment=document.createDocumentFragment();
   for(const sheet of comparisons){
    const url="/produit.html?id="+encodeURIComponent(sheet.id);
    const card=document.createElement("article");card.className="pm-history-card pm-cmp-card";
    const media=document.createElement("a");media.className="pm-cmp-media";media.href=url;media.setAttribute("aria-label","Comparer les prix "+sheet.name);
-   if(sheet.image){const img=document.createElement("img");img.src=sheet.image;img.alt=sheet.name;img.loading="lazy";img.decoding="async";media.append(img);}
-   else{const a=artMap[sheet.category]||["🛒","#7c2d12","#f97316"];const art=document.createElement("div");art.className="pm-cmp-art";art.style.background="linear-gradient(140deg,"+a[1]+","+a[2]+")";const i=document.createElement("i");i.textContent=a[0];const b=document.createElement("b");b.textContent=sheet.brand;art.append(i,b);media.append(art);}
+   if(sheet.image){const img=document.createElement("img");img.setAttribute("data-pm-art","");img.dataset.category=sheet.category;img.dataset.brand=sheet.brand;img.alt=sheet.name;img.loading="lazy";img.decoding="async";img.src=sheet.image;media.append(img);}
+   else{media.insertAdjacentHTML("beforeend",pmProductArt(sheet.category,sheet.brand));}
    const badge=document.createElement("span");badge.className="pm-cmp-badge";badge.textContent=sheet.offer_count+" marchands";media.append(badge);
    const body=document.createElement("div");body.className="pm-cmp-body";
    const cat=document.createElement("span");cat.className="pm-cmp-cat";cat.textContent=sheet.brand+" · "+sheet.category_label;
@@ -488,7 +489,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <button type="button" role="tab" aria-selected="false" data-gift="tech">High-tech</button>
   </div>
   <div id="pm-gifts-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
-  <p class="pm-hp-note">Prix indiqués par les marchands (flux partenaires) ou relevés datés, à confirmer sur leur site. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
+  <p class="pm-hp-note">Prix indiqués par les marchands (flux partenaires) ou relevés datés, à confirmer sur leur site. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html" style="color:#ffad66">Crédits photos</a>.</p>
 </section>
 <section id="pm-visual-gallery" class="pm-visual-gallery" aria-labelledby="pm-visual-gallery-title">
   <div class="section-head">
@@ -1511,11 +1512,9 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
   const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
   const day=v=>{const t=new Date(String(v||"").length===10?v+"T12:00:00":String(v||"").replace(" ","T"));return Number.isFinite(t.getTime())?t.toLocaleDateString("fr-FR"):"";};
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const art={smartphone:["📱","#1e3a8a","#3b82f6"],tablette:["📲","#164e63","#06b6d4"],laptop:["💻","#312e81","#6366f1"],audio:["🎧","#7c2d12","#f97316"],enceinte:["🔊","#701a75","#d946ef"],montre:["⌚","#14532d","#22c55e"],console:["🎮","#1f2937","#ef4444"],"accessoire-ps5":["🎮","#1e3a8a","#60a5fa"],"accessoire-switch":["🕹️","#7f1d1d","#ef4444"],aspirateur:["🧹","#3f3f46","#a1a1aa"]};
   const visual=(image,category,brand,alt)=>{
-    if(image)return '<div class="pm-hp-media"><img src="'+esc(image)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>';
-    const a=art[category]||["🛒","#7c2d12","#f97316"];
-    return '<div class="pm-hp-media"><div class="pm-hp-art" style="background:linear-gradient(140deg,'+a[1]+','+a[2]+')"><i>'+a[0]+'</i><b>'+esc(brand)+'</b></div></div>';
+    if(image)return '<div class="pm-hp-media"><img src="'+esc(image)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-pm-art data-category="'+esc(category)+'" data-brand="'+esc(brand)+'"></div>';
+    return '<div class="pm-hp-media">'+pmProductArt(category,brand)+'</div>';
   };
   const topCard=p=>'<a class="pm-hp-card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p.image,p.category,p.brand,p.name)
     +'<span class="pm-hp-badge">'+p.offer_count+' marchands</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
