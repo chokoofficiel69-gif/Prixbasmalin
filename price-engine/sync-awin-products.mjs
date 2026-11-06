@@ -265,6 +265,23 @@ async function loadDirectAwinFeed(rawOffers) {
         return label + " " + populated + "/" + rows.length + " (colonnes : " + (present.join(", ") || "absentes") + ")";
       });
       log("Couverture des identifiants du flux Awin : " + identityCoverage.join(" ; ") + ".");
+      const temporalHeaders = [...headers].filter(field => /(date|time|updated|modified|last)/i.test(field)).sort();
+      const timestampNow = Date.now();
+      const timestampCoverage = { fresh: 0, missing: 0, stale: 0, invalidOrFuture: 0 };
+      for (const row of rows) {
+        const value = String(row.last_updated || "").trim();
+        if (!value) { timestampCoverage.missing++; continue; }
+        const timestamp = Date.parse(value);
+        if (!Number.isFinite(timestamp) || timestamp > timestampNow + 5 * 60 * 1000) {
+          timestampCoverage.invalidOrFuture++;
+        } else if (timestampNow - timestamp <= 48 * 60 * 60 * 1000) {
+          timestampCoverage.fresh++;
+        } else {
+          timestampCoverage.stale++;
+        }
+      }
+      log("Colonnes temporelles présentes dans le CSV Awin : " + (temporalHeaders.join(", ") || "aucune") + ".");
+      log("last_updated : colonne " + (headers.has("last_updated") ? "présente" : "absente") + " ; couverture des lignes source : " + JSON.stringify(timestampCoverage) + " (fraîches = moins de 48 h).");
       const perAdvertiser = new Map();
       let imported = 0;
       for (const row of rows) {
