@@ -581,7 +581,13 @@ section{padding-top:24px!important}
 </div>
 <form class="pm-old-quick" id="pmQuickCompare"><input id="pmQuickQuery" placeholder="Comparer un produit (ex. aspirateur, téléphone…)" aria-label="Produit à comparer"><button type="submit">Comparer</button></form>
 </section>
-<nav class="pm-old-bottom" aria-label="Navigation mobile"><a class="active" href="index.html"><span>⌂</span>Accueil</a><a href="catalogue.html"><span>▦</span>Catalogue</a><a href="#deals"><span>％</span>Promos</a><a href="catalogue.html?favoris=1"><span>♡</span>Favoris</a><a href="#alerts" data-nav="alerts"><span>♧</span>Alertes</a><a href="guide-cadeaux.html"><span>🎁</span>Guides & Conseils</a><a href="publicite.html"><span>✉</span>Contact</a></nav>
+<nav class="pm-old-bottom" aria-label="Navigation principale">
+<a class="active" href="index.html" aria-label="Accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Accueil</span></a>
+<a href="catalogue.html" aria-label="Catalogue et catégories"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg><span>Catégories</span></a>
+<a href="#deals" aria-label="Promotions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13.5 13 21l-10-10V3h8z"/><circle cx="7.5" cy="7.5" r="1.2"/><path d="m10 14 4-4m-3.5-.5h.01m3 5h.01"/></svg><span>Promos</span></a>
+<a href="catalogue.html?favoris=1" aria-label="Favoris"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11S3.2 14 3.2 8.8A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.5Z"/></svg><span>Favoris</span></a>
+<a href="#services" aria-label="Menu et services"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Menu</span></a>
+</nav>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script>
 <script src="/js/personalisation.js"></script><script src="/js/cookie-consent.js"></script><script type="module" src="/js/prix-malin-auth.js"></script>
 <script>
@@ -1266,4 +1272,14 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 })();
 </script>
 
+<style id="pm-bottom-nav-professional">
+.pm-old-bottom{position:fixed;z-index:250;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;padding:8px 8px max(9px,env(safe-area-inset-bottom));background:rgba(12,20,39,.97);border-top:1px solid rgba(255,255,255,.12);box-shadow:0 -8px 28px rgba(5,12,25,.2);backdrop-filter:blur(16px)}
+.pm-old-bottom a{min-width:0;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:12px;color:#c5cede;font-size:10px;line-height:1.1;font-weight:750;text-align:center;white-space:nowrap;transition:color .18s ease,background .18s ease}
+.pm-old-bottom a svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.pm-old-bottom a.active,.pm-old-bottom a[aria-current="page"]{color:#fff;background:rgba(255,104,72,.17)}
+.pm-old-bottom a.active svg,.pm-old-bottom a[aria-current="page"] svg{color:#ff8066}
+.pm-old-bottom a:focus-visible{outline:3px solid #d9f56a;outline-offset:-2px}
+@media(min-width:761px){.pm-old-bottom{max-width:720px;left:50%;right:auto;width:calc(100% - 32px);transform:translateX(-50%);bottom:14px;border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:8px 12px;box-shadow:0 10px 35px rgba(0,0,0,.32)}}
+@media(prefers-reduced-motion:reduce){.pm-old-bottom a{transition:none}}
+</style>
 </body></html>
