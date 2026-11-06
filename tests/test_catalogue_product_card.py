@@ -19,6 +19,8 @@ class CatalogueProductCardTests(unittest.TestCase):
         self.assertIn('tag:"prixbasmalin2-21"', self.source)
         self.assertIn('const rawFeedOffers=Array.isArray(p.offers)', self.source)
         self.assertIn('taxStatus==="included"', self.source)
+        self.assertIn('const taxStatus=offer.priceTaxStatus||offer.price_tax_status;', self.source)
+        self.assertNotIn('offer.priceTaxStatus||offer.price_tax_status||p.priceTaxStatus', self.source)
 
     def test_cheapest_label_requires_multiple_offers_with_known_shipping(self):
         self.assertIn("const canRankByTotal=rows.length>1&&rows.every(row=>row.shipping!==null);", self.source)
