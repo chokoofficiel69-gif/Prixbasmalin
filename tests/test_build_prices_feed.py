@@ -142,6 +142,39 @@ class PriceFeedValidationTests(unittest.TestCase):
         self.assertEqual(result["products"], [])
         self.assertTrue(any("brand obligatoire" in error for error in result["errors"]))
 
+    def test_requires_variant_for_mpn_identity(self):
+        mpn_offer = dict(self.base_offer, identity_type="mpn", identity_value="MODEL-123", brand="Brand")
+        result = self.run_builder([mpn_offer])
+
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("variant obligatoire" in error for error in result["errors"]))
+
+    def test_same_mpn_and_variant_can_be_compared(self):
+        first = dict(self.base_offer, identity_type="mpn", identity_value="MODEL-123", brand="Brand", variant="Noir 128 Go")
+        second = dict(first, offer_id="merchant-offer-2", merchant_name="Autre marchand",
+                      product_url="https://other.example/product/1", price=10.00, shipping_price=1.50)
+        result = self.run_builder([first, second])
+
+        self.assertEqual(len(result["products"]), 1)
+        self.assertEqual(result["products"][0]["offer_count"], 2)
+        self.assertEqual(result["products"][0]["identity"]["variant"], "Noir 128 Go")
+
+    def test_rejects_mixed_mpn_variants_for_one_catalogue_card(self):
+        first = dict(self.base_offer, identity_type="mpn", identity_value="MODEL-123", brand="Brand", variant="Noir 128 Go")
+        second = dict(first, offer_id="merchant-offer-2", merchant_name="Autre marchand",
+                      product_url="https://other.example/product/2", variant="Blanc 128 Go")
+        result = self.run_builder([first, second])
+
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("identité produit différente" in error for error in result["errors"]))
+
+    def test_rejects_false_boolean_availability(self):
+        unavailable = dict(self.base_offer, availability=False)
+        result = self.run_builder([unavailable])
+
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("disponibilité non achetable" in error for error in result["errors"]))
+
 
     def test_default_freshness_window_remains_48_hours(self):
         old_date = (datetime.now(timezone.utc) - timedelta(hours=49)).isoformat()
