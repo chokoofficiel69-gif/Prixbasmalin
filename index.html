@@ -469,7 +469,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 </section>
 <section id="pm-top-prices" class="pm-hp-section" aria-labelledby="pm-top-prices-title">
   <div class="pm-hp-head">
-    <div><h2 id="pm-top-prices-title">🔥 Les meilleurs prix <span>du moment</span></h2><small>Les produits high-tech les plus comparés · prix relevés chez 8 à 24 marchands</small></div>
+    <div><h2 id="pm-top-prices-title">🔥 Meilleurs prix <span>du moment</span></h2><small>Les produits high-tech les plus comparés · prix relevés chez 8 à 24 marchands</small></div>
     <a class="pm-hp-all" href="/produit.html">Tout le comparateur →</a>
   </div>
   <div id="pm-top-prices-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
@@ -1504,6 +1504,14 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 .pm-partner-luxury b{color:#e6c477}
 @media(min-width:760px){.pm-partners-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:760px){.pm-hp-rail{grid-auto-columns:230px}}
+/* Mobile : titre sur toute la largeur, lien en dessous (évite le titre sur 3 lignes). */
+@media(max-width:640px){
+ .pm-hp-head{flex-direction:column;align-items:flex-start;gap:6px}
+ .pm-hp-head h2{font-size:24px}
+ .pm-hp-all{font-size:13px}
+ .pm-partner b{font-size:17px}
+ .pm-partner span{font-size:12.5px;white-space:nowrap}
+}
 @media(prefers-reduced-motion:reduce){.pm-hp-skel{animation:none}.pm-hp-card{transition:none}}
 </style>
 <script id="pm-home-prices">
