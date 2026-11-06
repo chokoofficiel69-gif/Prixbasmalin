@@ -116,13 +116,15 @@ jobs:
           const tracker = fs.readFileSync("js/track-outbound.js", "utf8");
           const worker = fs.readFileSync("workers/prixbasmalin-attribution.js", "utf8");
           const privacy = fs.readFileSync("confidentialite.html", "utf8");
+          const migration = fs.readFileSync("migrations/2026-11-06-traffic-attribution-country.sql", "utf8");
           const checks = [
             ["le suivi sortant est chargé après consentement", consent.includes("/js/track-outbound.js")],
             ["le suivi utilise l’attribution de première source", tracker.includes("pm_traffic_attribution")],
-            ["les auto-références internes sont exclues", tracker.includes("host === ownHost")],
+            ["les auto-références internes sont exclues", tracker.includes("refHost !== ownHost") && tracker.includes("!refHost.endsWith")],
             ["Google est classé en trafic organique", tracker.includes('"organic"')],
             ["le pays vient du contexte Cloudflare, sans adresse IP", worker.includes("request.cf?.country") && !worker.includes("CF-Connecting-IP")],
             ["le pays est validé comme code ISO alpha-2", worker.includes("/^[A-Z]{2}$/")],
+            ["la migration D1 ajoute la colonne pays", migration.includes("ALTER TABLE traffic_attribution ADD COLUMN country TEXT")],
             ["la confidentialité explique la mesure par pays", /pays.*code|code.*pays/i.test(privacy)]
           ];
           const failures = checks.filter(([, ok]) => !ok);
