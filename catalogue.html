@@ -6017,11 +6017,6 @@ function render(){
     img.dataset.pmHandlingError="0";
     if(hasVerifiedImage){
       photo.classList.add("pm-photo-loading");
-      const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
-      imageBadge.className="pm-photo-source";
-      imageBadge.textContent=p.imageStatus==="authorized_feed_image"?"Visuel marchand":p.imageStatus==="retailer_product_image"?"Photo revendeur":p.imageStatus==="official_press_image"?"Photo de presse officielle":"Photo constructeur";
-      if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source du visuel : "+(p.imageSourceName||"source vérifiée"));}
-      if(imageBadge.textContent)photo.append(imageBadge);
     }
     let imageFallbackTimer=null;
     let imageObserver=null;
@@ -6894,6 +6889,13 @@ function pmRakutenIsValidGtin(value){
   }
 })();
 </script>
+
+<style id="pm-public-catalogue-cleanup">
+/* Interface publique : aucun diagnostic technique ni bloc de comparaison vide. */
+#verifiedShelf[hidden],#verifiedShelf,.pm-feed-status,#pmAwinFeedStatus,.pm-awin-feed-status{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}
+#products .pm-photo-source{display:none!important}
+#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;-webkit-overflow-scrolling:touch!important}
+</style>
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
 #products .pm-photo-unavailable{width:100%;height:100%;min-height:132px;display:grid;place-items:center;padding:12px;box-sizing:border-box;background:#eef1f5;color:#667085;font-size:12px;font-weight:750;text-align:center}
