@@ -198,6 +198,16 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/ --output /tmp/home.html
           grep -qi "Prix Malin" /tmp/home.html
+      - name: Vérifier que la politique de confidentialité publiée mentionne la mesure par pays
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin.fr/confidentialite.html --output /tmp/confidentialite.html
+          grep -qi "pays estimé" /tmp/confidentialite.html
+      - name: Vérifier que le script de suivi publié exclut les auto-références
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            "https://prixbasmalin.fr/js/track-outbound.js" --output /tmp/track-outbound.js
+          grep -q "refHost !== ownHost" /tmp/track-outbound.js
       - name: Vérifier que le catalogue est publié
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
@@ -330,7 +340,7 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from "node:fs";
           const data = JSON.parse(fs.readFileSync("/tmp/worker-health.json", "utf8"));
-          if (data.ok !== true || data.service !== "prixbasmalin-attribution") {
+          if (data.ok !== true || data.service !== "prixbasmalin-attribution" || data.country_measurement !== true) {
             throw new Error("Le Worker attribution n'a pas renvoyé le statut attendu");
           }
           console.log("Worker attribution joignable et sain.");
