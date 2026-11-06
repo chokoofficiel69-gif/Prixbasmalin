@@ -15,6 +15,7 @@ main{max-width:900px;margin:0 auto;padding:18px 16px 60px}h1{margin:0 0 8px;font
 ul{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}li{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center;background:#fff;color:#111827;border-radius:12px;padding:10px}
 li img{width:72px;height:72px;object-fit:contain;background:#f3f4f6;border-radius:8px}li b{display:block}li small{color:#4b5563}li a{color:#0b63ce}
 </style>
+<link rel="stylesheet" href="/css/pm-site-footer.css">
 </head>
 <body>
 <header><a href="/">Prix <span>Malin</span></a></header>
@@ -31,5 +32,17 @@ fetch("/data/fiches-produits.json",{cache:"no-cache"}).then(r=>r.json()).then(d=
   document.getElementById("list").innerHTML=items.length?items.map(p=>'<li><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy"><span><b><a href="/produit.html?id='+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></b><small>'+pmImageCredit(p.image_credit)+'</small></span></li>').join(""):'<li><span></span><span>Aucune photo sous licence libre n’est utilisée pour le moment.</span></li>';
 }).catch(()=>{});
 </script>
+<footer class="pm-site-footer" id="pm-site-footer">
+ <nav aria-label="Informations">
+  <a href="/a-propos.html">À propos</a>
+  <a href="/confidentialite.html">Confidentialité et cookies</a>
+  <a href="/produit.html">Comparateur</a>
+  <a href="/catalogue.html">Catalogue</a>
+  <a href="/partenaires.html">Partenaires</a>
+  <a href="/credits-photos.html">Crédits photos</a>
+ </nav>
+ <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix relevés et datés, à confirmer chez le marchand.</p>
+ <p>Certains liens sont des liens d’affiliation : Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+</footer>
 </body>
 </html>
