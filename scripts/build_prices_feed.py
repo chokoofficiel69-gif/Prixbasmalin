@@ -180,6 +180,13 @@ def main():
         if offer.get("currency") != "EUR":
             errors.append(f"{label}: devise EUR obligatoire")
             continue
+        if offer.get("price_tax_status") != "included":
+            errors.append(f"{label}: prix TTC non confirmé par la source (price_tax_status='included' obligatoire)")
+            continue
+        availability = str(offer.get("availability") or "unknown").strip().lower()
+        if availability not in {"in_stock", "unknown"}:
+            errors.append(f"{label}: disponibilité non achetable ou valeur inconnue")
+            continue
         if not https_url(product_url):
             errors.append(f"{label}: URL produit HTTPS obligatoire")
             continue
@@ -226,14 +233,19 @@ def main():
         normalized = {
             "offer_id": offer_id,
             "merchant_name": offer["merchant_name"].strip(),
+            "merchant": offer["merchant_name"].strip(),
             "retailer": offer["merchant_name"].strip(),
             "source": offer["source"].strip(),
             "identity": identity,
+            "currency": "EUR",
+            "price_tax_status": "included",
             "price_eur": round(float(price), 2),
             "shipping_price_eur": round(float(shipping), 2),
             "total_price_eur": round(float(price) + float(shipping), 2),
             "freshness_max_age_hours": max_age_hours,
             "product_url": product_url,
+            "url": product_url,
+            "availability": availability,
             "checked_at": checked_at.isoformat().replace("+00:00", "Z"),
         }
         if offer.get("tracking_url"):
