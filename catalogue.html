@@ -6541,7 +6541,7 @@ function openAmazonSearch(term){
  window.location.href=url;
 }
 amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();selectedBrand="";render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
-searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmCurrentPage=1;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();pmLoadAwinCatalogue().then(render);
+searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmVisibleLimit=60;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();pmLoadAwinCatalogue().then(render);
 </script>  
 <script>
 
