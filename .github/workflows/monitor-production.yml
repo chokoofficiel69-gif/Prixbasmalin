@@ -8,6 +8,9 @@ on:
     paths:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
+      - "workers/prixbasmalin-attribution.js"
+      - "migrations/**"
+      - "confidentialite.html"
       - "js/prix-malin-auth.js"
       - "catalogue.html"
       - "index.html"
@@ -74,6 +77,8 @@ jobs:
         run: node --check price-engine/sync-awin-products.mjs
       - name: Tester le parseur et l'import direct Awin sans accès réseau
         run: node price-engine/sync-awin-products.mjs --self-test
+      - name: Vérifier la syntaxe du Worker attribution
+        run: node --check workers/prixbasmalin-attribution.js
       - name: Vérifier la syntaxe du module compte et alertes
         run: node --check js/prix-malin-auth.js
 
@@ -108,6 +113,30 @@ jobs:
           for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
           if (failures.length) process.exit(1);
           NODE
+      - name: Vérifier l’attribution consentie et la collecte pays minimale
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const consent = fs.readFileSync("js/cookie-consent.js", "utf8");
+          const tracker = fs.readFileSync("js/track-outbound.js", "utf8");
+          const worker = fs.readFileSync("workers/prixbasmalin-attribution.js", "utf8");
+          const privacy = fs.readFileSync("confidentialite.html", "utf8");
+          const migration = fs.readFileSync("migrations/2026-11-06-traffic-attribution-country.sql", "utf8");
+          const checks = [
+            ["le suivi sortant est chargé après consentement", consent.includes("/js/track-outbound.js")],
+            ["le suivi utilise l’attribution de première source", tracker.includes("pm_traffic_attribution")],
+            ["les auto-références internes sont exclues", tracker.includes("refHost !== ownHost") && tracker.includes("!refHost.endsWith")],
+            ["Google est classé en trafic organique", tracker.includes('"organic"')],
+            ["le pays vient du contexte Cloudflare, sans adresse IP", worker.includes("request.cf?.country") && !worker.includes("CF-Connecting-IP")],
+            ["le pays est validé comme code ISO alpha-2", worker.includes("/^[A-Z]{2}$/")],
+            ["la migration D1 ajoute la colonne pays", migration.includes("ALTER TABLE traffic_attribution ADD COLUMN country TEXT")],
+            ["la confidentialité explique la mesure par pays", /pays.*code|code.*pays/i.test(privacy)]
+          ];
+          const failures = checks.filter(([, ok]) => !ok);
+          for (const [name, ok] of checks) console.log((ok ? "OK : " : "ÉCHEC : ") + name);
+          if (failures.length) process.exit(1);
+          NODE
+
       - name: Vérifier la syntaxe du validateur de configuration
         run: node --check price-engine/validate-config.mjs
       - name: Valider la configuration des produits et marchands

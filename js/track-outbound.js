@@ -51,9 +51,15 @@
       var medium = params.get("utm_medium") || "";
       var campaign = params.get("utm_campaign") || "";
       if (!source && document.referrer) {
-        try { source = new URL(document.referrer).hostname.replace(/^www\./, ""); medium = "referral"; } catch (_) {}
+        try {
+          const refHost = new URL(document.referrer).hostname.toLowerCase().replace(/^www\\./, "");
+          if (refHost && refHost !== ownHost && !refHost.endsWith("." + ownHost)) {
+            source = refHost;
+            medium = /(^|\\.)google\\.|(^|\\.)bing\\.|(^|\\.)duckduckgo\\.|(^|\\.)yahoo\\.|(^|\\.)ecosia\\./.test(refHost) ? "organic" : "referral";
+          }
+        } catch (_) {}
       }
-      attribution = { source: source || "direct", medium: medium || (source ? "unspecified" : "direct"), campaign: campaign || "none" };
+      attribution = { source: source || "direct", medium: medium || (source ? "referral" : "direct"), campaign: campaign || "none" };
       sessionStorage.setItem(attributionKey, JSON.stringify(attribution));
     }
     fetch("https://prixbasmalin-attribution.chokoofficiel69.workers.dev/view", {
