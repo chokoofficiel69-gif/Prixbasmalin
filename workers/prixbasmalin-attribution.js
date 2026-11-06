@@ -13,6 +13,8 @@ export default {
     const visitorId=typeof body.visitor_id==="string"?body.visitor_id.slice(0,80):"";
     const clean=(v,max)=>typeof v==="string"?v.toLowerCase().replace(/[^a-z0-9._-]/g,"").slice(0,max):"";
     const source=clean(body.source,80)||"direct",medium=clean(body.medium,80),campaign=clean(body.campaign,100);
+    const rawCountry=request.cf?.country;
+    const country=typeof rawCountry==="string"&&/^[A-Z]{2}$/.test(rawCountry)?rawCountry:null;
     if(!pagePath.startsWith("/")||pagePath.includes("..")||!/^[a-zA-Z0-9-]{12,80}$/.test(visitorId)) return Response.json({error:"Invalid data"},{status:400,headers:cors});
     await env.CLICKS.prepare("INSERT INTO traffic_attribution (page_path, visitor_id, source, medium, campaign, country) VALUES (?, ?, ?, ?, ?, ?)").bind(pagePath,visitorId,source,medium,campaign,country).run();
     return new Response(null,{status:204,headers:{...cors,"Cache-Control":"no-store"}});
