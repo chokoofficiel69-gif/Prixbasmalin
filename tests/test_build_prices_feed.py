@@ -29,6 +29,7 @@ class PriceFeedValidationTests(unittest.TestCase):
             "price": 12.50,
             "shipping_price": 0,
             "currency": "EUR",
+            "price_tax_status": "included",
             "checked_at": self.now,
         }
 
@@ -61,6 +62,27 @@ class PriceFeedValidationTests(unittest.TestCase):
                  contextlib.redirect_stdout(io.StringIO()):
                 BUILDER.main()
             return json.loads(output.read_text(encoding="utf-8"))
+
+    def test_rejects_out_of_stock_offer(self):
+        out_of_stock = dict(self.base_offer, availability="out_of_stock")
+        result = self.run_builder([out_of_stock])
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("disponibilité non achetable" in error for error in result["errors"]))
+
+    def test_rejects_prices_without_explicit_ttc_confirmation(self):
+        unknown = dict(self.base_offer, price_tax_status="unspecified")
+        result = self.run_builder([unknown])
+        self.assertEqual(result["products"], [])
+        self.assertTrue(any("prix TTC non confirmé" in error for error in result["errors"]))
+
+    def test_publishes_explicit_eur_and_ttc_metadata(self):
+        result = self.run_builder([self.base_offer])
+        offer = result["offers"][0]
+        self.assertEqual(offer["currency"], "EUR")
+        self.assertEqual(offer["price_tax_status"], "included")
+        self.assertEqual(offer["merchant"], "Marchand test")
+        self.assertEqual(offer["url"], "https://merchant.example/product/1")
+        self.assertEqual(offer["availability"], "unknown")
 
     def test_rejects_unknown_catalogue_ids_and_duplicate_offer_ids(self):
         duplicate = dict(self.base_offer, price=10.00)
