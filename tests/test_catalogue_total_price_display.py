@@ -25,7 +25,7 @@ class CatalogueComparablePriceTests(unittest.TestCase):
     def test_known_shipping_cost_is_explained_to_the_user(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn("function verifiedPriceBreakdown(offer)", source)
-        self.assertIn('"Produit "+money(base)+" + livraison "+money(shipping)', source)
+        self.assertIn('"Produit TTC "+money(base)+" + livraison "+money(shipping)', source)
         self.assertIn("Comparaison frais de livraison inclus lorsqu’ils sont connus.", source)
 
     def test_catalogue_uses_source_freshness_window_with_48_hour_fallback(self):
