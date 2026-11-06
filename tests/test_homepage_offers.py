@@ -22,8 +22,23 @@ class HomepageOffersTests(unittest.TestCase):
     def test_merchant_ids_are_shown_with_readable_names(self):
         self.assertIn('merchant.textContent=pmMerchantLabel(offer.merchant);', self.source)
 
-    def test_older_feed_prices_are_dated_and_marked_to_confirm(self):
-        self.assertIn("à confirmer chez le marchand", self.source)
+    def test_homepage_live_prices_require_fresh_merchant_dates_and_explicit_ttc(self):
+        self.assertIn("fresh(p.merchantUpdatedAt)", self.source)
+        self.assertIn('p.priceTaxStatus==="included"||p.price_tax_status==="included"', self.source)
+        self.assertIn("fresh(p.sourceCreatedAt)", self.source)
+        self.assertIn('p.priceTaxStatus==="included"', self.source)
+        self.assertIn("liveCheckedAt:p.merchantUpdatedAt", self.source)
+        self.assertNotIn("liveCheckedAt:p.merchantUpdatedAt||awin.fetched_at", self.source)
+        self.assertNotIn("p.sourceCreatedAt||rakuten.generated_at", self.source)
+        self.assertNotIn("liveDateFromFeed", self.source)
+        self.assertIn("Aucun prix TTC frais et confirmé n'est actuellement disponible", self.source)
+
+    def test_homepage_fallback_rotation_uses_only_unique_verified_photos(self):
+        self.assertIn("const seenFallbackImages=new Set();", self.source)
+        self.assertIn("!seenFallbackImages.has(p.image)", self.source)
+        self.assertIn("const rotationSlot=Math.floor(now/maxAge);", self.source)
+        self.assertIn("const fallbackBatchSize=Math.min(6,fallbackPool.length);", self.source)
+        self.assertIn('list.dataset.pmRotationProductIds=chosen.map(p=>p.id).join(",");', self.source)
 
     def test_no_literal_backslash_n_is_rendered_in_the_page(self):
         self.assertNotIn("</script>\\n</head>", self.source)
