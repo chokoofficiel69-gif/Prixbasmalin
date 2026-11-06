@@ -5857,7 +5857,8 @@ async function pmLoadAwinCatalogue(){
   }
 }
 let selectedBrand="";
-let pmVisibleLimit=60;
+let pmCurrentPage=1;
+const pmPageSize=60;
 let pmLastQuery=null;
 const categoryParam=new URLSearchParams(location.search).get("cat")||"all";
 const categoryAliases={tech:["tech"],fashion:["fashion"],home:["home"],beauty:["beauty"],kids:["kids"],sport:["fashion","tech","sport"],auto:"all",diy:"all",appliances:["home"],gifts:"all"};
@@ -5893,7 +5894,7 @@ const pmSearchSynonyms={
 function render(){
   const rawQuery=searchEl.value.trim();
   const q=pmSearchNorm(rawQuery);
-  if(q!==pmLastQuery){pmLastQuery=q;pmVisibleLimit=60;}
+  if(q!==pmLastQuery){pmLastQuery=q;pmCurrentPage=1;}
   const queryTerms=q.split(" ").filter(Boolean);
   const correctedQuery=queryTerms.map(term=>pmSpellCorrections[term]||term);
   const catalogueData=productData.filter(p=>p&&p.name&&/^https:\/\//i.test(String(p.sourceUrl||"")));
@@ -5977,10 +5978,12 @@ function render(){
   const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   filtersEl.innerHTML="";
   filtersEl.hidden=false;
-  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";pmVisibleLimit=60;render();});filtersEl.append(allBrand);
-  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;pmVisibleLimit=60;render();});filtersEl.append(button);});
+  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";pmCurrentPage=1;render();});filtersEl.append(allBrand);
+  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;pmCurrentPage=1;render();});filtersEl.append(button);});
   // Les statistiques techniques du catalogue restent internes et ne sont pas affichées aux visiteurs.
-  countEl.textContent="";
+  const totalPages=Math.max(1,Math.ceil(found.length/pmPageSize));
+  pmCurrentPage=Math.min(Math.max(1,pmCurrentPage),totalPages);
+  countEl.textContent=found.length.toLocaleString("fr-FR")+" produits • Page "+pmCurrentPage.toLocaleString("fr-FR")+" sur "+totalPages.toLocaleString("fr-FR");
   if(!found.length){
     const query=searchEl.value.trim();
     const empty=document.createElement("div");empty.className="empty pm-catalogue-no-feed";
@@ -6017,7 +6020,8 @@ function render(){
     categoryRails.set(key,rail);
     return rail;
   };
-  const visibleProducts=found.slice(0,pmVisibleLimit);
+  const pageStart=(pmCurrentPage-1)*pmPageSize;
+  const visibleProducts=found.slice(pageStart,pageStart+pmPageSize);
   visibleProducts.forEach((p,index)=>{
     const hasVerifiedImage=pmHasRealProductImage(p);
     const card=document.createElement("article");
@@ -6261,17 +6265,26 @@ function render(){
     tile.append(title,description,note,link);
     getCategoryRail(p).append(tile);
   });
-  if(found.length>visibleProducts.length){
-    const wrapper=document.createElement("div");
-    wrapper.className="pm-load-more-wrap";
-    const button=document.createElement("button");
-    button.type="button";
-    button.className="pm-load-more";
-    const remaining=found.length-visibleProducts.length;
-    button.textContent="Afficher "+Math.min(60,remaining).toLocaleString("fr-FR")+" autres produits ("+remaining.toLocaleString("fr-FR")+" restants)";
-    button.addEventListener("click",()=>{pmVisibleLimit=Math.min(found.length,pmVisibleLimit+60);render();});
-    wrapper.append(button);
-    productsEl.append(wrapper);
+  if(totalPages>1){
+    const nav=document.createElement("nav");
+    nav.className="pm-load-more-wrap pm-pagination";
+    nav.setAttribute("aria-label","Navigation des pages du catalogue");
+    const makePageButton=(label,page,active=false,disabled=false)=>{
+      const button=document.createElement("button");
+      button.type="button";button.className="pm-load-more pm-page-button"+(active?" active":"");
+      button.textContent=label;button.disabled=disabled;
+      if(active)button.setAttribute("aria-current","page");
+      button.addEventListener("click",()=>{pmCurrentPage=page;render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
+      nav.append(button);
+    };
+    makePageButton("← Précédent",Math.max(1,pmCurrentPage-1),false,pmCurrentPage===1);
+    const first=Math.max(1,Math.min(pmCurrentPage-2,totalPages-4));
+    const last=Math.min(totalPages,first+4);
+    if(first>1){makePageButton("1",1);if(first>2){const dots=document.createElement("span");dots.className="pm-page-dots";dots.textContent="…";nav.append(dots);}}
+    for(let page=first;page<=last;page++)makePageButton(String(page),page,page===pmCurrentPage);
+    if(last<totalPages){if(last<totalPages-1){const dots=document.createElement("span");dots.className="pm-page-dots";dots.textContent="…";nav.append(dots);}makePageButton(String(totalPages),totalPages);}
+    makePageButton("Suivant →",Math.min(totalPages,pmCurrentPage+1),false,pmCurrentPage===totalPages);
+    productsEl.append(nav);
   }
 }
 
@@ -6608,7 +6621,7 @@ function openAmazonSearch(term){
  window.location.href=url;
 }
 amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();selectedBrand="";render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
-searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmVisibleLimit=60;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();pmLoadAwinCatalogue().then(render);
+searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmCurrentPage=1;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();pmLoadAwinCatalogue().then(render);
 </script>  
 <script>
 
@@ -6807,6 +6820,12 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 </style>
 
 <style id="pm-awin-catalogue-ui">
+#products .pm-pagination{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;padding:18px 0 28px}
+#products .pm-pagination .pm-page-button{min-width:42px;padding:9px 12px;background:#fff;color:#172342;border:1px solid #d9e0ea}
+#products .pm-pagination .pm-page-button.active{background:#ff6848;color:#21182a;border-color:#ff6848}
+#products .pm-pagination .pm-page-button:disabled{opacity:.4;cursor:not-allowed}
+#products .pm-pagination .pm-page-dots{padding:0 3px;color:#657087}
+
 .pm-catalogue-no-feed{display:grid;gap:10px;text-align:left;padding:22px;border:1px solid #35465a;border-radius:16px;background:#111c2a;color:#eef3f8}
 .pm-catalogue-no-feed p{margin:0;color:#c2ccda;line-height:1.5}
 .pm-catalogue-external-searches{display:flex;flex-wrap:wrap;gap:9px;margin-top:4px}
