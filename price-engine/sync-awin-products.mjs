@@ -197,7 +197,7 @@ function stockValues(values) {
 
 function stockState(value) {
   const stock = norm(value).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
-  if (/\b(?:out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|false|no)\b/.test(stock)) return "out_of_stock";
+  if (/\b(?:out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|pas en stock|epuise|false|no)\b/.test(stock)) return "out_of_stock";
   if (/\b(?:in stock|instock|available|disponible|for sale|yes|true)\b/.test(stock)) return "in_stock";
   return "unknown";
 }
@@ -435,7 +435,8 @@ function groupKey(row, advertiser) {
   if (brand && mpn) {
     const color = identityPart(row.color || row.colour || "");
     const size = identityPart(row.size || "");
-    return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size;
+    const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
+    if (color || size || variant) return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size + ":" + variant;
   }
   return "awin:" + advertiser + ":" + String(row.id || row.product_id || "");
 }
@@ -668,7 +669,7 @@ async function runSelfTests() {
   const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
     '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","4006381333931","AB-X1"';
   const rows = objectRowsFromCsv(sampleCsv);
-  for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock"]) {
+  for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock","pas en stock","epuise"]) {
     if (stockState(value) !== "out_of_stock") throw new Error("TEST ÉCHEC : statut indisponible mal reconnu : " + value);
   }
   for (const value of ["in stock","instock","available","disponible","in_stock","yes","true"]) {
@@ -750,9 +751,16 @@ async function runSelfTests() {
   const mpnKeyA = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Noir", size: "" }, "annonceur-1");
   const mpnKeyB = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Noir", size: "" }, "annonceur-2");
   const mpnKeyDifferentVariant = groupKey({ brand: "AudioBrand", mpn: "AB-X1", color: "Blanc", size: "" }, "annonceur-3");
+  const mpnKeyVariantA = groupKey({ brand: "AudioBrand", mpn: "AB-X1", variant: "Noir 128 Go" }, "annonceur-1");
+  const mpnKeyVariantB = groupKey({ brand: "AudioBrand", mpn: "AB-X1", variant: "Noir 128 Go" }, "annonceur-2");
+  const mpnKeyVariantDifferent = groupKey({ brand: "AudioBrand", mpn: "AB-X1", variant: "Blanc 128 Go" }, "annonceur-3");
+  const mpnKeyMissingVariantA = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-1");
+  const mpnKeyMissingVariantB = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-2");
   if (mpnKeyA !== mpnKeyB || mpnKeyA === mpnKeyDifferentVariant ||
+      mpnKeyVariantA !== mpnKeyVariantB || mpnKeyVariantA === mpnKeyVariantDifferent ||
+      mpnKeyMissingVariantA === mpnKeyMissingVariantB ||
       groupKey({ mpn: "AB-X1" }, "annonceur-1") === groupKey({ mpn: "AB-X1" }, "annonceur-2")) {
-    throw new Error("TEST ÉCHEC : le rapprochement MPN doit exiger une marque et respecter les variantes.");
+    throw new Error("TEST ÉCHEC : le rapprochement MPN doit exiger une marque et une variante exacte.");
   }
   const grouped = aggregateOffers([
     { identity: mpnKeyA, advertiser_id: "1", id: "1", merchant: "Boutique A", name: "Casque Audio X", brand: "AudioBrand", category: "tech", color: "Noir", size: "", gtin: "", mpn: "AB-X1", images: ["https://cdn.example/a.jpg"], price_eur: 45, shipping_price_eur: null, availability: "unknown", merchant_updated_at: null, url: "https://example.com/a" },
