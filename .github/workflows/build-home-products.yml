@@ -35,6 +35,8 @@ jobs:
           python-version: "3.12"
       - name: Test homepage feed generator
         run: python -m unittest discover -s tests -p 'test_build_home_products.py' -v
+      - name: Build homepage snapshot from the catalogue
+        run: python scripts/build_home_products.py --write
       - name: Verify homepage feed matches catalogue
         run: python scripts/build_home_products.py --check
       - name: Verify verified product image URLs
