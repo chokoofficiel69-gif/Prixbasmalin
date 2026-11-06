@@ -5771,13 +5771,16 @@ async function pmLoadAwinCatalogue(){
         (Array.isArray(product.offers)?product.offers.map(offer=>offer&&offer.merchantUpdatedAt).find(Boolean):"")||"";
       const hasPrice=Number.isFinite(Number(product.priceValue))&&Number(product.priceValue)>0;
       const priceFresh=hasPrice&&pmAwinPriceIsFresh(merchantUpdatedAt);
+      const priceTaxIncluded=product.priceTaxStatus==="included"||product.price_tax_status==="included";
+      const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";
       return {
         ...product,
         merchantUpdatedAt:merchantUpdatedAt||null,
-        // Prix du flux affiché avec sa date : "fresh" (< 48 h) ou "dated" (plus ancien, à confirmer chez le marchand).
-        priceStatus:priceFresh?"fresh":(hasPrice?"dated":"unavailable"),
-        priceValue:hasPrice?Number(product.priceValue):null,
-        price:hasPrice?product.price:"",
+        // Seul un prix TTC confirmé et daté par le marchand est exploitable comme offre actuelle.
+        priceStatus,
+        priceValue:priceStatus==="fresh"?Number(product.priceValue):null,
+        price:priceStatus==="fresh"?product.price:"",
+        priceTaxStatus:priceTaxIncluded?"included":"unspecified",
         feedFetchedAt:feed.fetched_at||null
       };
     });
@@ -6119,9 +6122,12 @@ function render(){
     // Carte produit façon comparateur : photo, prix mis en avant, bouton marchand, tableau comparatif, détails.
     card.classList.add("pm-card2");
     const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(value));
-    const hasVerifiedPrice=Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0;
-    const updateValue=p.merchantUpdatedAt||null;
-    const priceDateValue=updateValue||p.feedFetchedAt||null;
+    const updateValue=p.merchantUpdatedAt||p.sourceCreatedAt||null;
+    const priceDateValue=updateValue;
+    const hasVerifiedPrice=p.priceStatus==="fresh"&&
+      (p.priceTaxStatus==="included"||p.price_tax_status==="included")&&
+      Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0&&
+      pmAwinPriceIsFresh(updateValue);
     const priceDateParsed=priceDateValue?new Date(String(priceDateValue).replace(" ","T")):null;
     const priceDateText=priceDateParsed&&Number.isFinite(priceDateParsed.getTime())?priceDateParsed.toLocaleDateString("fr-FR"):"";
     const shippingOf=value=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&Number(value)>=0?Number(value):null;
@@ -6140,60 +6146,83 @@ function render(){
     const priceBox=document.createElement("div");priceBox.className="pm-c2-pricebox";
     const price=document.createElement("div");
     price.className="price pm-c2-price";
-    price.textContent=hasVerifiedPrice?money(p.priceValue):"Prix chez le marchand";
+    price.textContent=hasVerifiedPrice?money(p.priceValue):"Prix TTC vérifié indisponible";
     const shippingLine=document.createElement("div");shippingLine.className="pm-c2-shipping";
-    shippingLine.textContent=hasVerifiedPrice?(shippingValue===null?"livraison à confirmer":shippingValue===0?"Livraison gratuite":"+ "+money(shippingValue)+" de livraison"):"Consultez l’offre pour le prix du jour";
+    shippingLine.textContent=hasVerifiedPrice?(shippingValue===null?"livraison à confirmer":shippingValue===0?"Livraison gratuite":"+ "+money(shippingValue)+" de livraison"):"Prix et livraison à vérifier chez le marchand";
     priceBox.append(price,shippingLine);
     const note=document.createElement("p");
     note.className="discovery-disclaimer pm-c2-date";
-    note.textContent=!hasVerifiedPrice?"Prix non communiqué par le flux : il s’affiche chez le marchand.":
-      (p.priceStatus==="dated"&&priceDateText?(p.merchantUpdatedAt?"Prix indiqué par le marchand le "+priceDateText:"Prix du flux marchand récupéré le "+priceDateText)+" — à confirmer sur son site.":
-      "Prix indicatif : consultez le vendeur pour confirmer l’offre.");
+    note.textContent=!hasVerifiedPrice
+      ?(p.priceStatus==="dated"&&priceDateText
+        ?"Dernier relevé marchand du "+priceDateText+" — trop ancien ou incomplet pour être comparé."
+        :p.priceStatus==="tax_unconfirmed"
+          ?"TVA non confirmée par la source : prix exclu des comparaisons."
+          :"Aucun prix TTC récent et confirmé dans le flux.")
+      :"Prix TTC confirmé par le marchand le "+priceDateText+".";
     const amazonButton=document.createElement("a");
     amazonButton.className="offer pm-c2-cta";
-    amazonButton.textContent="Voir l’offre chez "+(p.merchant||"le marchand")+" ↗";
+    amazonButton.textContent=(hasVerifiedPrice?"Voir l’offre chez ":"Vérifier le prix chez ")+(p.merchant||"le marchand")+" ↗";
     amazonButton.href=p.sourceUrl;
     amazonButton.target="_blank";
     amazonButton.rel="noopener noreferrer sponsored";
     amazonButton.setAttribute("aria-label","Voir "+p.name+" chez "+(p.merchant||"le marchand"));
-    // Tableau comparatif : offres du flux classées par total, puis recherche Amazon (lien affilié, prix affiché chez Amazon).
-    const feedOffers=hasVerifiedPrice?(Array.isArray(p.offers)&&p.offers.length?p.offers:[{merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl,shippingPriceValue:p.shippingPriceValue}]):[];
+    // Seules les offres marchandes fraîches, explicitement TTC et liées à une fiche directe entrent dans le tableau.
+    const rawFeedOffers=Array.isArray(p.offers)&&p.offers.length?p.offers:[{
+      merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl,shippingPriceValue:p.shippingPriceValue,
+      merchantUpdatedAt:p.merchantUpdatedAt||p.sourceCreatedAt,priceTaxStatus:p.priceTaxStatus||p.price_tax_status
+    }];
+    const feedOffers=hasVerifiedPrice?rawFeedOffers.filter(offer=>{
+      const base=Number(offer.priceValue??offer.price_eur);
+      const taxStatus=offer.priceTaxStatus||offer.price_tax_status;
+      const checkedAt=offer.merchantUpdatedAt||offer.checked_at||p.merchantUpdatedAt||p.sourceCreatedAt;
+      const url=offer.url||offer.product_url||p.sourceUrl;
+      return Number.isFinite(base)&&base>0&&taxStatus==="included"&&pmAwinPriceIsFresh(checkedAt)&&/^https:\/\//i.test(String(url||""));
+    }):[];
     const rows=feedOffers.map(offer=>{
       const base=Number(offer.priceValue??offer.price_eur);
       const ship=shippingOf(offer.shippingPriceValue??offer.shipping_price_eur??p.shippingPriceValue);
-      return {merchant:offer.merchant||offer.merchant_name||p.merchant||"Marchand",price:Number.isFinite(base)&&base>0?base:null,shipping:ship,total:Number.isFinite(base)&&base>0?base+(ship||0):Infinity,url:offer.url||offer.product_url||p.sourceUrl};
-    }).sort((a,b)=>a.total-b.total);
-    if(!rows.length&&p.sourceUrl)rows.push({merchant:p.merchant||"Marchand partenaire",price:null,shipping:null,total:Infinity,url:p.sourceUrl});
-    const merchantsListed=new Set(rows.map(row=>String(row.merchant).toLowerCase()));
-    if(!merchantsListed.has("amazon"))rows.push({merchant:"Amazon",price:null,shipping:null,total:Infinity,amazon:true,url:"https://www.amazon.fr/s?"+new URLSearchParams({k:p.query||p.name,tag:"prixbasmalin2-21"}).toString()});
+      return {merchant:offer.merchant||offer.merchant_name||p.merchant||"Marchand",price:base,shipping:ship,total:ship===null?null:base+ship,url:offer.url||offer.product_url||p.sourceUrl};
+    });
+    const canRankByTotal=rows.length>1&&rows.every(row=>row.shipping!==null);
+    rows.sort((a,b)=>canRankByTotal?a.total-b.total:a.price-b.price);
     const compare=document.createElement("section");compare.className="pm-c2-compare";
     const heading=document.createElement("h4");
     heading.className="discovery-compare-heading";
-    const pricedCount=rows.filter(row=>row.price!==null).length;
-    heading.textContent=pricedCount>1?"Comparez "+pricedCount+" offres":"Comparer les prix";
+    heading.textContent=rows.length>1?"Offres TTC vérifiées ("+rows.length+")":rows.length===1?"Offre TTC vérifiée":"Offres marchandes";
     const offerList=document.createElement("div");offerList.className="pm-c2-offers";
+    if(!rows.length){
+      const empty=document.createElement("p");
+      empty.className="pm-c2-empty";
+      empty.textContent="Aucune offre TTC récente et confirmée pour ce produit.";
+      offerList.append(empty);
+    }
     rows.forEach((row,rowIndex)=>{
-      const isBest=rowIndex===0&&row.price!==null&&pricedCount>1;
+      const isBest=canRankByTotal&&rowIndex===0;
       const offer=document.createElement("div");offer.className="pm-c2-offer"+(isBest?" pm-c2-best":"");
       const left=document.createElement("div");left.className="pm-c2-offer-price";
-      const big=document.createElement("strong");big.textContent=row.price!==null?money(row.price):"Prix sur le site";if(row.price===null)big.className="pm-c2-noprice";
+      const big=document.createElement("strong");big.textContent=money(row.price);
       left.append(big);
       const total=document.createElement("span");total.className="pm-c2-offer-total";
-      if(row.price===null)total.textContent=row.amazon?"Recherche Amazon":"Prix affiché chez le marchand";
-      else if(row.shipping===null)total.textContent="+ livraison à confirmer";
-      else total.textContent=money(row.price+row.shipping)+" livraison incl.";
+      total.textContent=row.shipping===null?"Livraison à confirmer":money(row.total)+" livraison incl.";
       if(isBest){const best=document.createElement("em");best.textContent="Meilleur prix total";left.append(best);}
       left.append(total);
       const mid=document.createElement("div");mid.className="pm-c2-offer-merchant";
       const shop=document.createElement("b");shop.textContent=row.merchant;mid.append(shop);
-      if(row.price!==null&&row.shipping===0){const free=document.createElement("small");free.textContent="🚚 Livraison gratuite";mid.append(free);}
+      if(row.shipping===0){const free=document.createElement("small");free.textContent="🚚 Livraison gratuite";mid.append(free);}
       const link=document.createElement("a");link.className="pm-c2-offer-cta";link.href=row.url;link.target="_blank";link.rel="noopener noreferrer sponsored";link.textContent="Voir l’offre";
-      link.setAttribute("aria-label","Voir l’offre "+row.merchant+(row.amazon?" (recherche Amazon, lien affilié)":""));
+      link.setAttribute("aria-label","Voir l’offre "+row.merchant);
       offer.append(left,mid,link);offerList.append(offer);
     });
     const stamp=document.createElement("p");stamp.className="pm-c2-stamp";
-    stamp.textContent=priceDateText?"Données datant du "+priceDateText:"Prix à confirmer chez le marchand";
+    stamp.textContent=hasVerifiedPrice&&priceDateText?"Relevé marchand : "+priceDateText:"Aucun prix TTC frais et confirmé.";
     compare.append(heading,offerList,stamp);
+    const amazonSearchButton=document.createElement("a");
+    amazonSearchButton.className="pm-c2-amazon-search";
+    amazonSearchButton.textContent="Rechercher aussi sur Amazon (prix à confirmer) ↗";
+    amazonSearchButton.href="https://www.amazon.fr/s?"+new URLSearchParams({k:p.query||p.name,tag:"prixbasmalin2-21"}).toString();
+    amazonSearchButton.target="_blank";
+    amazonSearchButton.rel="noopener noreferrer sponsored";
+    amazonSearchButton.style.cssText="display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 12px;border:1px solid #d4dbe5;border-radius:8px;background:#fff;color:#334155;font-size:12px;font-weight:750;text-decoration:none";
     // Fiche détails
     const specs=document.createElement("dl");specs.className="pm-c2-specs";
     [["Marque",p.brand||""],["Vendu par",p.merchant||""],["Catégorie",String(p.desc||"").split(/\s*[>,|]\s*/).filter(Boolean).slice(-2).join(" · ")||categoryNames[p.category]||""],["Disponibilité",availabilityLabel(p.availability)],["Référence",p.gtin?("EAN "+p.gtin):(p.mpn||"")]].forEach(([label,value])=>{
@@ -6207,7 +6236,7 @@ function render(){
     desc.textContent=p.desc;
     card.append(photo);
     if(gallery.children.length>1)card.append(gallery);
-    body.append(top,name,priceBox,note,amazonButton,compare,specs);
+    body.append(top,name,priceBox,note,amazonButton,compare,amazonSearchButton,specs);
     if(historyLink)body.append(historyLink);
     card.append(body);
     card.dataset.pmProductName=p.name;
@@ -6339,11 +6368,8 @@ function renderVerifiedProducts(products){
     return new Set(currentOffers.map(o=>String(o.merchant||o.merchant_name||o.retailer).trim().toLowerCase()).filter(Boolean)).size>1;
   });
   if(!usable.length){
-    verifiedShelf.hidden=false;
-    const empty=document.createElement("p");
-    empty.className="comparison-empty";
-    empty.textContent="Découvrez les offres disponibles dans le catalogue.";
-    verifiedProductsEl.append(empty);
+    verifiedShelf.hidden=true;
+    verifiedProductsEl.innerHTML="";
     return;
   }
   verifiedShelf.hidden=false;
@@ -6819,7 +6845,7 @@ searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.get
 
 <style id="pm-awin-catalogue-ui">
 /* Masquer les diagnostics internes et les blocs de comparaison non exploitables. */
-#verifiedShelf,.pm-feed-status,.pm-awin-feed-status{display:none!important}
+#verifiedShelf[hidden],.pm-feed-status,.pm-awin-feed-status{display:none!important}
 
 #products .pm-pagination{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;padding:18px 0 28px}
 #products .pm-pagination .pm-page-button{min-width:42px;padding:9px 12px;background:#fff;color:#172342;border:1px solid #d9e0ea}
@@ -6876,21 +6902,25 @@ function pmRakutenIsValidGtin(value){
       const shipping=p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue);
       const shippingLabel=shipping===null||!Number.isFinite(shipping)?"Livraison à confirmer":"Livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(shipping);
       const priceTaxStatus=p.priceTaxStatus==="included"?"included":"unspecified";
-      const priceNote=priceTaxStatus==="included"?"Prix TTC communiqué par le marchand":"Prix communiqué par le marchand • TVA non précisée";
+      const sourceUpdatedAt=p.sourceCreatedAt||null;
+      const sourceFresh=fresh&&Boolean(sourceUpdatedAt)&&pmAwinPriceIsFresh(sourceUpdatedAt);
+      const hasVerifiedPrice=sourceFresh&&priceTaxStatus==="included";
+      const priceStatus=!sourceFresh?"dated":hasVerifiedPrice?"fresh":"tax_unconfirmed";
+      const priceNote=hasVerifiedPrice?"Prix TTC confirmé par le marchand":"Prix exclu des comparaisons : date ou TVA non confirmée";
       productData.push({
         id:p.id,name:p.name,desc:[p.desc,shippingLabel,priceNote].filter(Boolean).join(" • "),
         category:p.category||"sport",brand:p.brand||p.merchant,mpn:p.mpn||"",query:p.query||p.name,
         image:p.image,images:[],merchant:p.merchant,
-        price:fresh?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(base):"Prix à actualiser",
-        priceValue:fresh?base:null,shippingPriceValue:shipping,
+        price:hasVerifiedPrice?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(base):"Prix à vérifier",
+        priceValue:hasVerifiedPrice?base:null,shippingPriceValue:shipping,
         sourceUrl:p.sourceUrl,gtin:p.gtin||"",sku:p.sku||"",availability:p.availability||"unknown",
         imageSource:p.image,imageSourceName:p.merchant,imageKind:"merchant_feed",
-        imageStatus:"authorized_feed_image",priceTaxStatus,sourceCreatedAt:p.sourceCreatedAt||feed.generated_at,isRakutenProduct:true
+        imageStatus:"authorized_feed_image",priceTaxStatus,priceStatus,sourceCreatedAt:sourceUpdatedAt,merchantUpdatedAt:sourceUpdatedAt,isRakutenProduct:true
       });
       known.add(p.id);
     });
     const byGtin=new Map();
-    products.filter(p=>fresh&&p.priceTaxStatus==="included"&&pmRakutenIsValidGtin(p.gtin)).forEach(p=>{
+    products.filter(p=>fresh&&pmAwinPriceIsFresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"&&pmRakutenIsValidGtin(p.gtin)).forEach(p=>{
       const key=String(p.gtin);
       if(!byGtin.has(key))byGtin.set(key,[]);
       byGtin.get(key).push(p);
@@ -6905,7 +6935,7 @@ function pmRakutenIsValidGtin(value){
         offers:rows.map(p=>({
           merchant:p.merchant,price_eur:Number(p.priceValue),
           shipping_price_eur:p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue),
-          url:p.sourceUrl,checked_at:p.sourceCreatedAt||feed.generated_at,currency:"EUR",
+          url:p.sourceUrl,checked_at:p.sourceCreatedAt,currency:"EUR",
           price_tax_status:p.priceTaxStatus==="included"?"included":"unspecified",availability:p.availability||"unknown",
           freshness_max_age_hours:48,stale:false
         }))
@@ -6922,7 +6952,7 @@ function pmRakutenIsValidGtin(value){
 
 <style id="pm-public-catalogue-cleanup">
 /* Interface publique : aucun diagnostic technique ni bloc de comparaison vide. */
-#verifiedShelf[hidden],#verifiedShelf,.pm-feed-status,#pmAwinFeedStatus,.pm-awin-feed-status{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}
+#verifiedShelf[hidden],.pm-feed-status,#pmAwinFeedStatus,.pm-awin-feed-status{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}
 #products .pm-photo-source{display:none!important}
 #products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x pan-y!important;-webkit-overflow-scrolling:touch!important}
 </style>
@@ -6931,7 +6961,7 @@ function pmRakutenIsValidGtin(value){
 #products .discovery-compare,#products .discovery-disclaimer{display:none!important}
 .pm-feed-status,.pm-awin-feed-status,#pmAwinFeedStatus,
 [data-feed-status],.feed-status,.awin-status,.pm-import-status,
-#verifiedShelf,.comparison-empty{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;border:0!important}
+.comparison-empty{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;border:0!important}
 #products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x pan-y!important;-webkit-overflow-scrolling:touch!important}
 
 <style id="pm-card2-style">html body /* Carte produit comparateur (pm-card2),html body style « comparateur » clair,html body prioritaire sur les anciennes règles. */

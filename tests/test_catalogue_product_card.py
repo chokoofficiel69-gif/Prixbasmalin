@@ -9,17 +9,28 @@ class CatalogueProductCardTests(unittest.TestCase):
         self.source = CATALOGUE.read_text(encoding="utf-8")
 
     def test_card_shows_price_first_then_cta_then_comparison_table(self):
-        self.assertIn("body.append(top,name,priceBox,note,amazonButton,compare,specs);", self.source)
+        self.assertIn("body.append(top,name,priceBox,note,amazonButton,compare,amazonSearchButton,specs);", self.source)
         self.assertIn('offerList.className="pm-c2-offers";', self.source)
         self.assertIn('best.textContent="Meilleur prix total";', self.source)
 
-    def test_comparison_table_adds_amazon_affiliate_search_without_inventing_a_price(self):
-        self.assertIn('rows.push({merchant:"Amazon",price:null,', self.source)
+    def test_amazon_search_is_separate_from_real_merchant_offers(self):
+        self.assertNotIn('rows.push({merchant:"Amazon",price:null,', self.source)
+        self.assertIn('amazonSearchButton.textContent="Rechercher aussi sur Amazon (prix à confirmer) ↗";', self.source)
         self.assertIn('tag:"prixbasmalin2-21"', self.source)
-        self.assertIn('row.price!==null?money(row.price):"Prix sur le site"', self.source)
+        self.assertIn('const rawFeedOffers=Array.isArray(p.offers)', self.source)
+        self.assertIn('taxStatus==="included"', self.source)
+        self.assertIn('const taxStatus=offer.priceTaxStatus||offer.price_tax_status;', self.source)
+        self.assertNotIn('offer.priceTaxStatus||offer.price_tax_status||p.priceTaxStatus', self.source)
 
-    def test_cheapest_label_only_when_several_priced_offers(self):
-        self.assertIn("const isBest=rowIndex===0&&row.price!==null&&pricedCount>1;", self.source)
+    def test_cheapest_label_requires_multiple_offers_with_known_shipping(self):
+        self.assertIn("const canRankByTotal=rows.length>1&&rows.every(row=>row.shipping!==null);", self.source)
+        self.assertIn("const isBest=canRankByTotal&&rowIndex===0;", self.source)
+
+    def test_card_prices_require_fresh_merchant_date_and_explicit_ttc(self):
+        self.assertIn('p.priceStatus==="fresh"', self.source)
+        self.assertIn('p.priceTaxStatus==="included"', self.source)
+        self.assertIn("pmAwinPriceIsFresh(updateValue)", self.source)
+        self.assertIn('"Prix TTC vérifié indisponible"', self.source)
 
     def test_irrelevant_brand_chips_and_empty_sections_are_gone(self):
         self.assertNotIn('brandsLabel.textContent="Marques à comparer";', self.source)

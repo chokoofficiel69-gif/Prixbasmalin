@@ -14,7 +14,14 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
     def test_verified_comparison_shelf_stays_hidden_until_it_has_offers(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn('<section id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden>', source)
+        self.assertIn('if(!usable.length){\n    verifiedShelf.hidden=true;\n    verifiedProductsEl.innerHTML="";\n    return;\n  }', source)
         self.assertIn('verifiedShelf.hidden=false;', source)
+
+    def test_verified_comparison_shelf_is_not_unconditionally_hidden_by_css(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('#verifiedShelf[hidden]', source)
+        self.assertNotIn('#verifiedShelf,.pm-feed-status', source)
+        self.assertNotIn('#verifiedShelf,', source)
 
     def test_comparison_requires_eur_ttc_and_recent_merchant_date(self):
         source = CATALOGUE.read_text(encoding="utf-8")

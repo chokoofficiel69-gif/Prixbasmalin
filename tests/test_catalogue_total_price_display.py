@@ -86,16 +86,25 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn("checked_at:checkedAt,", source)
         self.assertIn("stale:!pmAwinPriceIsFresh(checkedAt)", source)
         self.assertNotIn("checked_at:product.fetchedAt||feed.fetched_at", source)
-        self.assertIn("const updateValue=p.merchantUpdatedAt||null;", source)
+        self.assertIn("const updateValue=p.merchantUpdatedAt||p.sourceCreatedAt||null;", source)
+        self.assertNotIn("const priceDateValue=updateValue||p.feedFetchedAt||null;", source)
         self.assertNotIn("const updateValue=p.merchantUpdatedAt||p.fetchedAt;", source)
 
-    def test_older_awin_prices_are_shown_with_their_date_and_a_confirmation_note(self):
+    def test_old_or_tax_unconfirmed_awin_prices_are_excluded_from_current_offers(self):
         source = CATALOGUE.read_text(encoding="utf-8")
-        self.assertIn('priceStatus:priceFresh?"fresh":(hasPrice?"dated":"unavailable")', source)
-        self.assertIn("priceValue:hasPrice?Number(product.priceValue):null", source)
-        self.assertIn('"Prix indiqué par le marchand le "+priceDateText', source)
-        self.assertIn('"Prix du flux marchand récupéré le "+priceDateText', source)
-        self.assertIn("— à confirmer sur son site.", source)
+        self.assertIn('const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";', source)
+        self.assertIn('priceValue:priceStatus==="fresh"?Number(product.priceValue):null', source)
+        self.assertIn('priceTaxStatus:priceTaxIncluded?"included":"unspecified"', source)
+        self.assertIn('p.priceStatus==="fresh"', source)
+        self.assertIn('taxStatus==="included"', source)
+        self.assertIn("Dernier relevé marchand du ", source)
+        self.assertIn("TVA non confirmée par la source : prix exclu des comparaisons.", source)
+
+    def test_rakuten_comparison_uses_each_merchants_source_timestamp(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn("const sourceFresh=fresh&&Boolean(sourceUpdatedAt)&&pmAwinPriceIsFresh(sourceUpdatedAt);", source)
+        self.assertIn('products.filter(p=>fresh&&pmAwinPriceIsFresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"', source)
+        self.assertIn("checked_at:p.sourceCreatedAt,currency:", source)
 
 
 if __name__ == "__main__":
