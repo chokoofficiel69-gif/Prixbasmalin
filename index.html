@@ -403,6 +403,16 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <span class="pm-benefit-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="13" y="4" width="22" height="40" rx="4" fill="none" stroke="white" stroke-width="4"/><path d="M20 9h8M21 38h6" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></span>
     <span>Sur mobile et ordinateur</span>
   </div>
+</section>
+<section id="pm-visual-gallery" class="pm-visual-gallery" aria-labelledby="pm-visual-gallery-title">
+  <div class="section-head">
+    <div><h2 id="pm-visual-gallery-title">✨ Les produits à découvrir <span>en images</span></h2><small>Photos de fabricants et de sources marchandes vérifiées · sans prix inventé</small></div>
+    <a class="all-categories-link" href="catalogue.html">Tout le catalogue →</a>
+  </div>
+  <p class="pm-gallery-intro">Une sélection renouvelée de produits, avec leurs photos et leurs caractéristiques. Consultez le marchand pour connaître le prix et la disponibilité.</p>
+  <div id="pm-visual-gallery-grid" class="pm-visual-gallery-grid" aria-live="polite">
+    <p class="pm-gallery-loading">Chargement des photos produits…</p>
+  </div>
 </section><section id="live-comparisons" class="pm-history-comparisons" aria-labelledby="pm-history-title">
   <div class="section-head">
     <div><h2 id="pm-history-title">💶 Comparaisons de prix</h2><small>Relevés par marchand · données historiques PrixTracker</small></div>
@@ -1180,6 +1190,79 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
      img.alt=(tile.querySelector("div")?.textContent||candidate.name).trim();
    });
  }).catch(()=>{/* Les visuels déjà présents restent le secours. */});
+})();
+</script>
+
+ 
+<style id="pm-home-gallery-style">
+/* Une seule ligne orange sous le visuel principal : la bande d'avantages reste sobre. */
+.pm-benefits-banner{
+  border:0!important;border-bottom:2px solid #ff7a1a!important;
+  border-radius:0!important;box-shadow:none!important;
+  margin:12px 0 22px!important;padding:10px 4px!important;
+  background:linear-gradient(90deg,#101722,#0b1018 50%,#15121a)!important;
+}
+.pm-benefits-banner>.pm-benefit:first-child{border-left:0!important}
+.pm-visual-gallery{padding:24px 0 10px;margin:8px 0 14px}
+.pm-gallery-intro{max-width:850px;margin:-5px 0 16px;color:#c2cbd6;font-size:14px;line-height:1.55}
+.pm-visual-gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.pm-visual-card{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid #354253;border-radius:16px;background:#111923;box-shadow:0 8px 20px #0004;transition:transform .18s ease,border-color .18s ease}
+.pm-visual-card:hover{transform:translateY(-3px);border-color:#ff8a35}
+.pm-visual-media{height:205px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(145deg,#fff,#edf0f4)}
+.pm-visual-media img{display:block;width:100%;height:100%;object-fit:contain;padding:14px}
+.pm-visual-copy{display:flex;flex:1;flex-direction:column;align-items:flex-start;padding:13px}
+.pm-visual-meta{color:#ff9a55;font-size:10px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+.pm-visual-copy h3{margin:6px 0 5px;color:#fff;font-size:16px;line-height:1.25}
+.pm-visual-copy p{margin:0;color:#c2cbd6;font-size:12px;line-height:1.45}
+.pm-visual-link{display:inline-flex;align-items:center;justify-content:center;margin-top:auto;padding:10px 13px;border-radius:9px;background:linear-gradient(135deg,#ff9821,#ff5b0b);color:#fff;font-size:12px;font-weight:900}
+.pm-gallery-loading{grid-column:1/-1;padding:18px;border:1px dashed #485668;border-radius:12px;color:#c2cbd6}
+@media(max-width:900px){.pm-visual-gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.pm-visual-media{height:175px}}
+@media(max-width:600px){.pm-visual-gallery{padding:16px 0 8px}.pm-gallery-intro{font-size:12px}.pm-visual-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.pm-visual-media{height:145px}.pm-visual-media img{padding:9px}.pm-visual-copy{padding:10px}.pm-visual-copy h3{font-size:13px}.pm-visual-copy p{font-size:11px}.pm-visual-link{font-size:11px;padding:9px 10px;width:100%;text-align:center}}
+</style>
+<script id="pm-home-visual-gallery">
+(async function(){
+ const grid=document.getElementById("pm-visual-gallery-grid");
+ if(!grid)return;
+ const trusted=new Set(["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"]);
+ const safeHttps=value=>{try{const u=new URL(value,location.origin);return u.protocol==="https:"?u.href:""}catch(_){return ""}};
+ try{
+   const response=await fetch("/data/home-products.json",{cache:"no-store"});
+   if(!response.ok)throw new Error("Catalogue visuel indisponible");
+   const feed=await response.json();
+   const source=Array.isArray(feed.products)?feed.products:[];
+   const seenImages=new Set(),seenNames=new Set(),products=[];
+   for(const p of source){
+     const image=safeHttps(p&&p.image),name=String(p&&p.name||"").trim();
+     if(!name||!image||!trusted.has(p.imageStatus)||p.imageKind==="illustration")continue;
+     const key=name.toLocaleLowerCase("fr");
+     if(seenImages.has(image)||seenNames.has(key))continue;
+     seenImages.add(image);seenNames.add(key);products.push({...p,image});
+   }
+   if(!products.length)throw new Error("Aucune photo vérifiée disponible");
+   const fragment=document.createDocumentFragment();
+   products.slice(0,18).forEach(p=>{
+     const card=document.createElement("article");card.className="pm-visual-card";
+     const media=document.createElement("div");media.className="pm-visual-media";
+     const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.decoding="async";
+     img.onerror=()=>{card.remove();};
+     media.appendChild(img);
+     const copy=document.createElement("div");copy.className="pm-visual-copy";
+     const meta=document.createElement("span");meta.className="pm-visual-meta";
+     meta.textContent=[p.brand,p.category].filter(Boolean).join(" · ")||"Sélection Prix Malin";
+     const title=document.createElement("h3");title.textContent=p.name;
+     const desc=document.createElement("p");desc.textContent=p.desc||"Photo produit issue d’une source fabricant ou marchande vérifiée.";
+     const link=document.createElement("a");link.className="pm-visual-link";
+     link.href=safeHttps(p.sourceUrl)||("catalogue.html?q="+encodeURIComponent(p.name));
+     link.textContent="Voir le produit →";
+     if(/^https:\/\//i.test(link.href)){link.target="_blank";link.rel="sponsored nofollow noopener noreferrer";}
+     copy.append(meta,title,desc,link);card.append(media,copy);fragment.appendChild(card);
+   });
+   grid.replaceChildren(fragment);
+   grid.dataset.productCount=String(products.length);
+ }catch(error){
+   grid.innerHTML='<p class="pm-gallery-loading">Les photos du catalogue seront affichées dès que le flux produits sera disponible. Aucun prix n’est affiché sans vérification.</p>';
+   console.warn("Galerie Prix Malin :",error);
+ }
 })();
 </script>
 
