@@ -366,7 +366,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   for(const row of rows){
    if(!row||!row.product_id||!row.merchant||!row.date)continue;
    const key=String(row.product_id)+"|"+String(row.date);
-   if(!groups.has(key))groups.set(key,{product:row.product||"Produit",brand:row.brand||"",date:row.date,offers:[]});
+   if(!groups.has(key))groups.set(key,{id:String(row.product_id),product:row.product||"Produit",brand:row.brand||"",date:row.date,offers:[]});
    const group=groups.get(key),price=Number(row.min_price_eur_ttc);
    if(Number.isFinite(price)&&price>0)group.offers.push({merchant:String(row.merchant),price});
   }
@@ -382,7 +382,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   const fragment=document.createDocumentFragment();
   for(const group of comparisons){
    const card=document.createElement("article");card.className="pm-history-card";
-   const title=document.createElement("h3");title.textContent=group.product;
+   const title=document.createElement("h3");const titleLink=document.createElement("a");titleLink.href="/produit.html?id="+encodeURIComponent(group.id);titleLink.textContent=group.product;titleLink.style.color="inherit";titleLink.style.textDecoration="none";title.append(titleLink);
    const meta=document.createElement("p");meta.className="pm-history-meta";meta.textContent=(group.brand?group.brand+" · ":"")+"Relevé du "+new Date(group.date+"T12:00:00").toLocaleDateString("fr-FR");
    card.append(title,meta);
    group.offers.forEach((offer,index)=>{
@@ -398,7 +398,8 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    buy.href="https://www.amazon.fr/s?k="+encodeURIComponent((group.brand&&!group.product.toLowerCase().includes(group.brand.toLowerCase())?group.brand+" ":"")+group.product)+"&tag=prixbasmalin2-21";
    buy.target="_blank";buy.rel="sponsored nofollow noopener noreferrer";buy.textContent="Voir les offres sur Amazon ↗";
    buy.setAttribute("aria-label","Voir les offres "+group.product+" sur Amazon (lien affilié)");
-   const more=document.createElement("a");more.className="pm-history-more";more.href="/historique-prix.html?q="+encodeURIComponent(group.product);more.textContent="Historique des prix";
+   // Fiche produit complète : toutes les offres relevées, évolution du prix, alerte.
+   const more=document.createElement("a");more.className="pm-history-more";more.href="/produit.html?id="+encodeURIComponent(group.id);more.textContent="Comparer tous les prix →";
    card.append(buy,more);fragment.append(card);
   }
   list.replaceChildren(fragment);
@@ -461,7 +462,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 </section><section id="live-comparisons" class="pm-history-comparisons" aria-labelledby="pm-history-title">
   <div class="section-head">
     <div><h2 id="pm-history-title">💶 Comparaisons de prix</h2><small>Relevés par marchand · données historiques PrixTracker</small></div>
-    <span class="pm-history-badge">HISTORIQUE — PAS DES OFFRES EN DIRECT</span>
+    <a class="pm-history-badge" href="/produit.html" style="text-decoration:none">Voir tous les produits comparés →</a>
   </div>
   <p class="pm-history-intro">Comparez les prix observés pour un même produit chez plusieurs marchands. Chaque relevé affiche sa date : le tarif et la disponibilité doivent être revérifiés chez le vendeur.</p>
   <div id="pm-history-status" class="pm-history-status" role="status" aria-live="polite">Chargement des comparaisons…</div>
