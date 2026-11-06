@@ -24,6 +24,8 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
     def test_each_comparison_has_a_direct_merchant_link_and_availability(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn('merchantLink.href=offerData.url||offerData.product_url;', source)
+        self.assertIn('price_tax_status:offer.priceTaxStatus==="included"||offer.price_tax_status==="included"?', source)
+        self.assertNotIn('||product.priceTaxStatus==="included"', source)
         self.assertIn('merchantLink.textContent="Voir chez le marchand ↗";', source)
         self.assertIn('const availability=offerData.availability||"unknown";', source)
         self.assertIn('o.merchant||o.merchant_name||o.retailer', source)
