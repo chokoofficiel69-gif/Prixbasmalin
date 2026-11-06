@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d14">
+<title>Crédits photos — Prix Malin</title>
+<meta name="description" content="Auteurs et licences des photos de produits utilisées sur Prix Malin.">
+<link rel="canonical" href="https://prixbasmalin.fr/credits-photos.html">
+<link rel="icon" href="/assets/logo-sac-prix-malin.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#080d14;color:#e9eef5;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:12px 16px;border-bottom:1px solid #1f2a3a}header a{color:#fff;text-decoration:none;font-weight:900;font-size:22px}header span{color:#ff7a1a}
+main{max-width:900px;margin:0 auto;padding:18px 16px 60px}h1{margin:0 0 8px;font-size:28px}p{color:#c9d3e0;line-height:1.55}
+ul{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}li{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center;background:#fff;color:#111827;border-radius:12px;padding:10px}
+li img{width:72px;height:72px;object-fit:contain;background:#f3f4f6;border-radius:8px}li b{display:block}li small{color:#4b5563}li a{color:#0b63ce}
+</style>
+</head>
+<body>
+<header><a href="/">Prix <span>Malin</span></a></header>
+<main>
+<h1>Crédits photos</h1>
+<p>Les photos de produits proviennent des flux de nos marchands partenaires, des dossiers de presse des fabricants ou de banques d’images sous licence libre (Wikimedia Commons). Pour ces dernières, l’auteur et la licence sont indiqués ci-dessous, conformément aux conditions de réutilisation.</p>
+<ul id="list"><li><span></span><span>Chargement…</span></li></ul>
+</main>
+<script src="/js/pm-product-art.js"></script>
+<script>
+fetch("/data/fiches-produits.json",{cache:"no-cache"}).then(r=>r.json()).then(d=>{
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const items=(d.products||[]).filter(p=>p.image&&p.image_credit);
+  document.getElementById("list").innerHTML=items.length?items.map(p=>'<li><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy"><span><b><a href="/produit.html?id='+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></b><small>'+pmImageCredit(p.image_credit)+'</small></span></li>').join(""):'<li><span></span><span>Aucune photo sous licence libre n’est utilisée pour le moment.</span></li>';
+}).catch(()=>{});
+</script>
+</body>
+</html>

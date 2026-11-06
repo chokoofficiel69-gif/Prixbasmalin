@@ -118,7 +118,7 @@ def build_top(sheets, limit=12):
     for s in ordered:
         top.append({
             "id": s["id"], "name": s["name"], "brand": s["brand"], "category": s["category"],
-            "category_label": s["category_label"], "image": s.get("image") or "",
+            "category_label": s["category_label"], "image": s.get("image") or "", "image_credit": s.get("image_credit"),
             "min_price_eur": s["min_price_eur"], "max_price_eur": s["max_price_eur"],
             "offer_count": s["offer_count"], "last_date": s["last_date"],
         })

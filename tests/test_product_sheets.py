@@ -39,9 +39,24 @@ class ProductSheetsTests(unittest.TestCase):
     def test_published_file_is_up_to_date(self):
         source = json.loads((ROOT / "data" / "prixtracker-prices.json").read_text(encoding="utf-8"))
         home = json.loads((ROOT / "data" / "home-products.json").read_text(encoding="utf-8"))
-        expected = builder.build(source, home)
+        licensed = json.loads((ROOT / "data" / "product-images.json").read_text(encoding="utf-8"))
+        expected = builder.build(source, home, licensed)
         published = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         self.assertEqual(published, expected)
+
+    def test_licensed_photos_need_free_license_and_keep_credit(self):
+        source = {"offers": [
+            {"product_id": "x", "product": "X", "merchant": m, "date": "2026-10-01", "min_price_eur_ttc": 5}
+            for m in ("fnac", "darty")
+        ]}
+        ok = {"images": {"x": {"thumb": "https://upload.wikimedia.org/x.jpg", "license": "CC BY-SA 4.0",
+                                "author": "Jane", "file_page": "https://commons.wikimedia.org/wiki/File:X.jpg"}}}
+        sheet = builder.build(source, {"products": []}, ok)["products"][0]
+        self.assertEqual(sheet["image"], "https://upload.wikimedia.org/x.jpg")
+        self.assertEqual(sheet["image_credit"]["author"], "Jane")
+        for bad in ("CC BY-NC 4.0", "CC BY-ND 4.0", "Fair use", ""):
+            refused = {"images": {"x": dict(ok["images"]["x"], license=bad)}}
+            self.assertEqual(builder.build(source, {"products": []}, refused)["products"][0]["image"], "", bad)
 
     def test_product_page_dates_prices_and_credits_source(self):
         page = (ROOT / "produit.html").read_text(encoding="utf-8")

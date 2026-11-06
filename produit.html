@@ -97,6 +97,8 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
 @media(min-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{grid-template-columns:1.2fr 1fr}.rail{grid-auto-columns:220px}}
 @media(max-width:420px){.offer{grid-template-columns:1fr auto;}.offer .m{grid-column:1/2}.offer .go{grid-row:1/3;grid-column:2}}
 </style>
+<link rel="stylesheet" href="/css/pm-product-art.css">
+<script src="/js/pm-product-art.js"></script>
 <script src="/js/cookie-consent.js" defer></script>
 </head>
 <body>
@@ -121,7 +123,6 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
  const fmtDate=d=>{const t=new Date(String(d)+"T12:00:00");return Number.isFinite(t.getTime())?t.toLocaleDateString("fr-FR"):"";};
  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
- const icons={smartphone:"📱",tablette:"📲",laptop:"💻",audio:"🎧",enceinte:"🔊",montre:"⌚",console:"🎮","accessoire-ps5":"🎮","accessoire-switch":"🕹️",aspirateur:"🧹"};
  // Noms lisibles et pages de recherche des marchands relevés par PrixTracker.
  const merchants={
   amazon:["Amazon",q=>"https://www.amazon.fr/s?"+new URLSearchParams({k:q,tag:AMAZON_TAG})],
@@ -151,8 +152,10 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   return {url:"https://www.google.com/search?"+new URLSearchParams({q:merchantName(id)+" "+q}),label:"Rechercher",affiliate:false};
  };
  const visual=(p,eager)=>p.image
-  ?'<div class="visual"><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" '+(eager?'':'loading="lazy" ')+'decoding="async" onerror="this.parentNode.innerHTML=\'<div class=ph><i>'+(icons[p.category]||"🛒")+'</i><b>'+esc(p.brand)+'</b></div>\'"></div>'
-  :'<div class="visual"><div class="ph"><i>'+(icons[p.category]||"🛒")+'</i><b>'+esc(p.brand||p.category_label)+'</b></div></div>';
+  ?'<div class="visual"><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" '+(eager?'':'loading="lazy" ')+'decoding="async" data-category="'+esc(p.category)+'" data-brand="'+esc(p.brand)+'"></div>'
+  :'<div class="visual">'+pmProductArt(p.category,p.brand||p.category_label)+'</div>';
+ // Photo indisponible : remplacer par l'illustration vectorielle.
+ document.addEventListener("error",e=>{const img=e.target;if(img&&img.tagName==="IMG"&&img.closest(".visual")){img.parentNode.innerHTML=pmProductArt(img.dataset.category,img.dataset.brand);}},true);
  const card=p=>'<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p,false)+'<div class="c"><span class="cat">'+esc(p.category_label)+'</span><h3>'+esc(p.name)+'</h3><span class="n">'+p.offer_count+' offres à partir de</span><span class="pr">'+euro.format(p.min_price_eur)+'</span></div></a>';
  const params=new URLSearchParams(location.search);
  const qInput=document.getElementById("q");
@@ -168,7 +171,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  }
  function sourceNote(){
   const per=data.dataset_period||{};
-  return '<p class="source">Prix relevés par PrixTracker'+(per.from?" entre le "+fmtDate(per.from)+" et le "+fmtDate(per.to):"")+'. Ce sont des relevés datés : le prix du jour peut différer, vérifiez-le chez le marchand avant d’acheter. Source : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener" target="_blank">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Liens Amazon affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>';
+  return '<p class="source">Prix relevés par PrixTracker'+(per.from?" entre le "+fmtDate(per.from)+" et le "+fmtDate(per.to):"")+'. Ce sont des relevés datés : le prix du jour peut différer, vérifiez-le chez le marchand avant d’acheter. Source : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener" target="_blank">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Liens Amazon affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html">Crédits photos</a>.</p>';
  }
  function chart(history){
   if(!history||history.length<2)return '<p class="stamp">Pas assez de relevés pour tracer l’évolution.</p>';
@@ -188,6 +191,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   app.innerHTML='<nav class="crumbs" aria-label="Fil d’Ariane"><a href="/produit.html">Comparateur</a> › <a href="/produit.html?cat='+encodeURIComponent(p.category)+'">'+esc(p.category_label)+'</a></nav>'
    +'<article class="panel"><div class="hero"><div><h1>'+esc(p.name)+'</h1><div class="brand-line">'+esc(p.brand)+' · '+esc(p.category_label)+'</div>'
    +'<div class="from">à partir de<strong>'+euro.format(p.min_price_eur)+'</strong></div><div class="range">Jusqu’à '+euro.format(p.max_price_eur)+' selon le marchand · écart de '+euro.format(p.max_price_eur-p.min_price_eur)+'</div></div>'+visual(p,true)+'</div>'
+   +(p.image_credit?'<small class="pm-photo-credit">'+pmImageCredit(p.image_credit)+'</small>':'')
    +'<a class="cta" href="#offres">Comparez '+p.offer_count+' offres</a>'
    +'<nav class="tabs"><a href="#details"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Détails du produit</a><a href="#evolution"><svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3"/></svg>Évolution du prix</a><a href="#alerte"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2 2M5 4 2 7M19 4l3 3"/></svg>Alerte prix</a></nav>'
    +'<p class="notice">Prix relevés chez chaque marchand entre octobre et novembre 2026 : ils peuvent avoir changé. Le prix final s’affiche chez le marchand.</p></article>'
