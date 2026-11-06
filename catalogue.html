@@ -5759,18 +5759,24 @@ async function pmLoadAwinCatalogue(){
       setStatus("Flux Awin trop ancien ou datation invalide (dernier import : "+date+"). Les prix de ce flux sont masqués jusqu’à une actualisation fiable.");
       return;
     }
+    // Le catalogue public présente les fiches illustrées même lorsqu'aucun prix fiable n'est disponible.
+    // Le prix ne doit jamais conditionner l'apparition d'un produit dans la vitrine.
     const feedProducts=feed.products.filter(product=>
       product&&product.id&&product.name&&pmHasRealProductImage(product)&&
-      Number.isFinite(Number(product.priceValue))&&Number(product.priceValue)>0&&
       /^https:\/\//i.test(String(product.sourceUrl||""))&&String(product.merchant||"").trim()
     );
     const displayProducts=feedProducts.map(product=>{
       const merchantUpdatedAt=product.merchantUpdatedAt||
         (Array.isArray(product.offers)?product.offers.map(offer=>offer&&offer.merchantUpdatedAt).find(Boolean):"")||"";
-      const priceFresh=pmAwinPriceIsFresh(merchantUpdatedAt);
-      return priceFresh
-        ?{...product,merchantUpdatedAt,priceStatus:"fresh"}
-        :{...product,merchantUpdatedAt:merchantUpdatedAt||null,priceStatus:"stale",priceValue:null,price:"Prix à vérifier chez le marchand"};
+      const hasPrice=Number.isFinite(Number(product.priceValue))&&Number(product.priceValue)>0;
+      const priceFresh=hasPrice&&pmAwinPriceIsFresh(merchantUpdatedAt);
+      return {
+        ...product,
+        merchantUpdatedAt:merchantUpdatedAt||null,
+        priceStatus:priceFresh?"fresh":"unavailable",
+        priceValue:priceFresh?Number(product.priceValue):null,
+        price:priceFresh?product.price:""
+      };
     });
     const known=new Map(productData.map(product=>[product.id,product]));
     displayProducts.forEach(product=>{
@@ -6896,6 +6902,14 @@ function pmRakutenIsValidGtin(value){
 #products .pm-photo-source{display:none!important}
 #products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;-webkit-overflow-scrolling:touch!important}
 </style>
+/* Vitrine publique : les prix et détails de collecte restent masqués pendant la phase photo/catalogue. */
+#products .price,#products .merchant,#products .discovery-compare-heading,
+#products .discovery-compare,#products .discovery-disclaimer{display:none!important}
+.pm-feed-status,.pm-awin-feed-status,#pmAwinFeedStatus,
+[data-feed-status],.feed-status,.awin-status,.pm-import-status,
+#verifiedShelf,.comparison-empty{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;border:0!important}
+#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;-webkit-overflow-scrolling:touch!important}
+
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
 #products .pm-photo-unavailable{width:100%;height:100%;min-height:132px;display:grid;place-items:center;padding:12px;box-sizing:border-box;background:#eef1f5;color:#667085;font-size:12px;font-weight:750;text-align:center}
