@@ -6288,8 +6288,8 @@ function verifiedComparablePrice(offer){
 function verifiedPriceBreakdown(offer){
   const base=Number(offer&&offer.price_eur);
   const shipping=Number(offer&&offer.shipping_price_eur);
+  const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(value);
   if(Number.isFinite(base)&&base>=0&&Number.isFinite(shipping)&&shipping>=0){
-    const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(value);
     return "Produit TTC "+money(base)+" + livraison "+money(shipping);
   }
   return "Produit TTC "+(Number.isFinite(base)?money(base):"à vérifier")+" • livraison à confirmer";
