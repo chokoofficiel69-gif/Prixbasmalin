@@ -10,7 +10,7 @@
     if (img.closest(".pm-discovery-card")) return [480, 480];
     if (img.closest(".cat")) return [400, 300];
     if (img.closest(".hero")) return [768, 284];
-    return [600, 450];
+    return null;
   };
 
   const optimizeUrl = (raw) => {
@@ -43,8 +43,9 @@
 
   const prepareImage = (img) => {
     if (!(img instanceof HTMLImageElement)) return;
-    if (!img.hasAttribute("width") || !img.hasAttribute("height")) {
-      const [width, height] = dimensionsFor(img);
+    const reservedSize = dimensionsFor(img);
+    if (reservedSize && (!img.hasAttribute("width") || !img.hasAttribute("height"))) {
+      const [width, height] = reservedSize;
       if (!img.hasAttribute("width")) img.setAttribute("width", String(width));
       if (!img.hasAttribute("height")) img.setAttribute("height", String(height));
     }
