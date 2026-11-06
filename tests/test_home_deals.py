@@ -1,0 +1,72 @@
+import importlib.util
+import json
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location("build_home_deals", ROOT / "scripts" / "build_home_deals.py")
+deals = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(deals)
+
+
+def product(name, merchant, price, desc="Parfums", **extra):
+    base = {"id": name, "name": name, "merchant": merchant, "priceValue": price, "desc": desc,
+            "image": "https://img.example/" + name, "sourceUrl": "https://www.awin1.com/pclick.php?p=1"}
+    base.update(extra)
+    return base
+
+
+class HomeDealsTests(unittest.TestCase):
+    def test_gifts_need_image_price_link_and_exclude_medical_items(self):
+        awin = {"fetched_at": "2026-11-06T13:00:00Z", "products": [
+            product("Eau de parfum", "A", 59.9),
+            product("Bandelettes de glycémie", "B", 30, desc="Bandelettes réactives"),
+            product("Sans image", "A", 40, image=""),
+            product("Trop bon marché", "A", 3),
+            product("Sans lien", "A", 40, sourceUrl="http://insecure"),
+        ]}
+        gifts = deals.build_gifts(awin)
+        self.assertEqual([g["name"] for g in gifts], ["Eau de parfum"])
+        self.assertEqual(gifts[0]["price_date_kind"], "feed")
+        self.assertEqual(gifts[0]["band"], "30-60")
+
+    def test_gifts_alternate_merchants(self):
+        awin = {"products": [product(f"Parfum {i}", m, 20 + i) for m in ("A", "B") for i in range(3)]}
+        merchants = [g["merchant"] for g in deals.build_gifts(awin)]
+        self.assertEqual(merchants[:4], ["A", "B", "A", "B"])
+
+    def test_top_has_no_misleading_gap_percent(self):
+        data = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
+        self.assertTrue(data["top"])
+        self.assertTrue(all("gap_percent" not in t and t["offer_count"] >= 8 for t in data["top"]))
+
+    def test_published_file_is_up_to_date(self):
+        awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
+        sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
+        published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
+        self.assertEqual(published, deals.build(awin, sheets))
+
+    def test_homepage_sections_partners_and_affiliate_rel(self):
+        page = (ROOT / "index.html").read_text(encoding="utf-8")
+        for marker in ('id="pm-partners"', 'id="pm-top-prices"', 'id="pm-gifts"', 'fetch("/data/home-deals.json"'):
+            self.assertIn(marker, page)
+        self.assertIn('href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21"', page)
+        # Les partenaires sans lien d'affiliation restent masqués.
+        self.assertIn('data-partner="decathlon" data-href="" target="_blank" rel="sponsored nofollow noopener" hidden', page)
+        self.assertIn(".pm-partner[hidden]{display:none!important}", page)
+        self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(g.image', page)
+
+
+class ProductSheetOutlierTests(unittest.TestCase):
+    def test_absurd_high_prices_are_dropped(self):
+        spec2 = importlib.util.spec_from_file_location("bps", ROOT / "scripts" / "build_product_sheets.py")
+        bps = importlib.util.module_from_spec(spec2)
+        spec2.loader.exec_module(bps)
+        rows = [{"product_id": "p", "product": "P", "merchant": m, "date": "2026-11-01", "min_price_eur_ttc": v}
+                for m, v in (("a", 100), ("b", 110), ("c", 120), ("d", 4800))]
+        offers = bps.build({"offers": rows}, {"products": []})["products"][0]["offers"]
+        self.assertEqual([o["merchant"] for o in offers], ["a", "b", "c"])
+
+
+if __name__ == "__main__":
+    unittest.main()

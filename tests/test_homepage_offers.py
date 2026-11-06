@@ -16,12 +16,14 @@ class HomepageOffersTests(unittest.TestCase):
         self.assertLess(wait, lookup)
 
     def test_each_price_comparison_has_an_affiliate_link(self):
-        self.assertIn('buy.textContent="Voir les offres sur Amazon ↗";', self.source)
+        self.assertIn('buy.textContent="Voir sur Amazon ↗";', self.source)
+        self.assertIn('more.textContent="Comparer les "+sheet.offer_count+" prix →";', self.source)
         self.assertIn('"&tag=prixbasmalin2-21"', self.source)
         self.assertIn('buy.rel="sponsored nofollow noopener noreferrer";', self.source)
 
     def test_merchant_ids_are_shown_with_readable_names(self):
-        self.assertIn('merchant.textContent=pmMerchantLabel(offer.merchant);', self.source)
+        self.assertIn('shop.textContent=pmMerchantLabel(offer.merchant);', self.source)
+        self.assertIn('bestShop.textContent="chez "+pmMerchantLabel(best.merchant);', self.source)
 
     def test_homepage_live_prices_require_fresh_merchant_dates_and_explicit_ttc(self):
         self.assertIn("fresh(p.merchantUpdatedAt)", self.source)
