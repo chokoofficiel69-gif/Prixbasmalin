@@ -4,6 +4,16 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "35 3 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/import-rakuten-catalogue.yml"
+      - "scripts/import-rakuten-catalogue.py"
+      - "tests/test_import_rakuten_catalogue.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/import-rakuten-catalogue.yml"
+      - "scripts/import-rakuten-catalogue.py"
 
 permissions:
   contents: write
@@ -25,6 +35,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_import_rakuten_catalogue.py' -v
 
   import:
+    if: github.event_name != 'pull_request'
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -37,7 +48,7 @@ jobs:
           RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
           RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
           RAKUTEN_SFTP_KNOWN_HOSTS: ${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}
-          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY' }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -73,10 +84,10 @@ jobs:
             exit 1
           fi
           "${CURL[@]}" "sftp://aftp.linksynergy.com/44806_4768926_mp.xml.gz" --output /tmp/44806_4768926_mp.xml.gz
-          if grep -Fxq "54306_4768926_mp.xml.gz" /tmp/rakuten-root-list.txt; then
-            "${CURL[@]}" "sftp://aftp.linksynergy.com/54306_4768926_mp.xml.gz" --output /tmp/54306_4768926_mp.xml.gz
+          if grep -Fxq "54306_4768926_1_cmp.xml.gz" /tmp/rakuten-root-list.txt; then
+            "${CURL[@]}" "sftp://aftp.linksynergy.com/54306_4768926_1_cmp.xml.gz" --output /tmp/54306_4768926_1_cmp.xml.gz
           else
-            echo "Flux complet Nicchia absent : source ignorée, aucun fichier catégorie partiel n'est utilisé."
+            echo "Flux catégorie Nicchia absent : source ignorée."
           fi
           gzip -t /tmp/44806_4768926_mp.xml.gz
           if [[ -f /tmp/54306_4768926_1_cmp.xml.gz ]]; then gzip -t /tmp/54306_4768926_1_cmp.xml.gz; fi
@@ -84,7 +95,7 @@ jobs:
       - name: Convertir seulement les sources fraîches et complètes
         if: steps.config.outputs.ready == 'true'
         env:
-          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY' }}
           RAKUTEN_PRICE_TAX_STATUS: ${{ vars.RAKUTEN_PRICE_TAX_STATUS }}
         run: |
           python3 scripts/import-rakuten-catalogue.py \
