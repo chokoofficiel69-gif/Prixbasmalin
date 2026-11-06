@@ -36,6 +36,20 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertLess(function.index("const money=value=>"), function.index("if(Number.isFinite(base)"))
         self.assertIn('return "Produit TTC "+(Number.isFinite(base)?money(base):"à vérifier")', function)
 
+    def test_null_shipping_is_not_misread_as_free_delivery(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        start = source.index("function verifiedComparablePrice(offer)")
+        end = source.index("\n}", start)
+        comparable = source[start:end]
+        self.assertIn("totalValue===null||totalValue===undefined?NaN", comparable)
+        self.assertIn("shippingValue!==null&&shippingValue!==undefined", comparable)
+
+        start = source.index("function verifiedPriceBreakdown(offer)")
+        end = source.index("\n}", start)
+        breakdown = source[start:end]
+        self.assertIn("shippingValue!==null&&shippingValue!==undefined", breakdown)
+        self.assertIn("livraison à confirmer", breakdown)
+
     def test_catalogue_uses_source_freshness_window_with_48_hour_fallback(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn("offer.freshness_max_age_hours", source)
