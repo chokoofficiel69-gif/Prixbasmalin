@@ -5827,7 +5827,7 @@ async function pmLoadAwinCatalogue(){
     pmAwinVerifiedProducts=displayProducts.map(product=>{
       const sourceOffers=Array.isArray(product.offers)&&product.offers.length?product.offers:[{
         merchant:product.merchant,priceValue:product.priceValue,shippingPriceValue:product.shippingPriceValue,url:product.sourceUrl,
-        merchantUpdatedAt:product.merchantUpdatedAt
+        merchantUpdatedAt:product.merchantUpdatedAt,priceTaxStatus:product.priceTaxStatus,availability:product.availability
       }];
       return {
         id:product.id,
@@ -5842,7 +5842,7 @@ async function pmLoadAwinCatalogue(){
             url:offer.url,
             checked_at:checkedAt,
             currency:"EUR",
-            price_tax_status:offer.priceTaxStatus==="included"||product.priceTaxStatus==="included"?"included":"unspecified",
+            price_tax_status:offer.priceTaxStatus==="included"||offer.price_tax_status==="included"?"included":"unspecified",
             availability:offer.availability||product.availability||"unknown",
             freshness_max_age_hours:48,
             stale:!pmAwinPriceIsFresh(checkedAt)
