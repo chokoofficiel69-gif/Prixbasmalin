@@ -263,6 +263,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
  const list=document.getElementById("pm-history-list");
  if(!status||!list)return;
  const euro=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
+ const verifiedImageStatuses=new Set(["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"]);
  const safeUrl=value=>{try{const u=new URL(value,location.origin);return /^https?:$/.test(u.protocol)?u.href:""}catch(_){return ""}};
  async function showProducts(message){
   status.textContent=message;
@@ -280,14 +281,14 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    const awinFresh=awin?.status==="ok"&&fresh(awin.fetched_at);
    const rakutenFresh=rakuten?.status==="ok"&&fresh(rakuten.generated_at);
    const liveAwin=awinFresh?(Array.isArray(awin.products)?awin.products:[]).filter(p=>
-    p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.merchantUpdatedAt)&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
+    p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.merchantUpdatedAt)&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
    ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.merchantUpdatedAt,liveSource:"Awin"})):[];
    const liveRakuten=rakutenFresh?(Array.isArray(rakuten.products)?rakuten.products:[]).filter(p=>
-    p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.sourceCreatedAt||rakuten.generated_at)&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
+    p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.sourceCreatedAt||rakuten.generated_at)&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
    ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.sourceCreatedAt||rakuten.generated_at,liveSource:"Rakuten"})):[];
    const live=[...liveAwin,...liveRakuten].sort((a,b)=>String(b.liveCheckedAt||"").localeCompare(String(a.liveCheckedAt||""))||String(a.name||"").localeCompare(String(b.name||""),"fr"));
    const fallback=Array.isArray(home?.products)?home.products:[];
-   const chosen=(live.length?live:fallback.filter(p=>p&&p.name&&safeUrl(p.image)&&safeUrl(p.sourceUrl)&&!/^https:\/\/images\.unsplash\.com\//i.test(String(p.image)))).slice(0,12);
+   const chosen=(live.length?live:fallback.filter(p=>p&&p.name&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)&&!/^https:\/\/images\.unsplash\.com\//i.test(String(p.image)))).slice(0,12);
    if(!chosen.length){
     list.innerHTML='<p class="pm-history-empty">La sélection de produits est en cours de mise à jour.</p>';
     return;
@@ -835,17 +836,19 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
     } catch (_) { return ""; }
   };
 
+  const verifiedImageStatuses = new Set(["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"]);
+
   const updateCount = () => {
     const count = rail.querySelectorAll(".product[data-pm-catalogue-product]").length;
-    if (count) meta.textContent = "Sélection de produits à découvrir · prix et disponibilité à confirmer chez le marchand";
+    if (count) meta.textContent = count + " références avec visuel vérifié · prix et disponibilité à confirmer chez le marchand";
   };
 
   const makeCard = product => {
     const imageUrl = safeHttpUrl(product.image);
     const targetUrl = safeHttpUrl(product.sourceUrl);
-    const isGenericImage = /unsplash\.com/i.test(imageUrl) ||
-      product.imageKind === "illustration" ||
-      product.imageStatus === "generic_category_visual";
+    const isGenericImage = !verifiedImageStatuses.has(product.imageStatus) ||
+      /unsplash\.com/i.test(imageUrl) ||
+      product.imageKind === "illustration";
     if (!imageUrl || isGenericImage || !targetUrl || !product.name) return null;
 
     const card = document.createElement("article");
@@ -876,6 +879,11 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
       brand.textContent = product.brand || product.category;
       body.appendChild(brand);
     }
+    const provenance = document.createElement("span");
+    provenance.className = "pm-product-image-source";
+    provenance.style.cssText = "display:block;margin:3px 0 5px;color:#9aa6b5;font-size:10px;font-weight:750";
+    provenance.textContent = product.imageSourceName || (product.imageStatus === "authorized_feed_image" ? "Visuel marchand" : product.imageStatus === "retailer_product_image" ? "Visuel revendeur" : product.imageStatus === "official_press_image" ? "Photo de presse officielle" : "Photo constructeur");
+    body.appendChild(provenance);
     const name = document.createElement("div");
     name.className = "pname";
     name.textContent = product.name;
@@ -1015,6 +1023,7 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
 (async function () {
   const grid = document.querySelector(".new-arrivals-grid");
   const categoryImages = [...document.querySelectorAll(".categories .cat")];
+  const verifiedImageStatuses = new Set(["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"]);
   if (!grid && !categoryImages.length) return;
   try {
     const response = await fetch("/data/home-products.json", { cache: "no-store" });
@@ -1023,6 +1032,7 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
     // Les cartes « nouveautés » affichent des produits : exclure les visuels génériques.
     const products = (feed.products || []).filter(p =>
       p && typeof p.name === "string" &&
+      verifiedImageStatuses.has(p.imageStatus) &&
       typeof p.image === "string" && /^https:\/\//i.test(p.image) &&
       !/^https:\/\/images\.unsplash\.com\//i.test(p.image) &&
       p.imageKind !== "illustration"
@@ -1035,11 +1045,13 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
     const categoryPool = category => products.filter(p => p.category === category);
     const selected = [];
     const used = new Set();
+    const usedImages = new Set();
     for (let step = 0; selected.length < 3 && step < products.length * 2; step++) {
       const index = (period * 17 + step * 29) % products.length;
       const p = products[index];
-      if (!used.has(p.id || p.name) && p.image) {
+      if (!used.has(p.id || p.name) && p.image && !usedImages.has(p.image)) {
         used.add(p.id || p.name);
+        usedImages.add(p.image);
         selected.push(p);
       }
     }
@@ -1128,6 +1140,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 </style>
 <script id="pm-seasonal-campaign">
 (function(){
+ const verifiedImageStatuses=new Set(["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"]);
  const now=new Date(), month=now.getMonth()+1, day=now.getDate();
  let season="standard", label="Sélection Prix Malin", kicker="SÉLECTION RENOUVELÉE";
  if((month===11)||(month===12&&day<=26)){
@@ -1173,7 +1186,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
      const href=tile.getAttribute("href")||"";
      const mapping=categoryMap.find(x=>x.match.test(href));
      if(!mapping||!mapping.category)return;
-     const pool=products.filter(p=>p&&p.category===mapping.category&&typeof p.image==="string"&&/^https:\/\//i.test(p.image));
+     const pool=products.filter(p=>p&&p.category===mapping.category&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&typeof p.image==="string"&&/^https:\/\//i.test(p.image)&&!/^https:\/\/images\.unsplash\.com\//i.test(p.image));
      if(!pool.length)return;
      const img=tile.querySelector("img");
      if(!img)return;

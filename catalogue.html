@@ -752,7 +752,7 @@ const productData=[
     "save": "",
     "sourceUrl": "https://www.amazon.fr/s?k=Samsung+Galaxy+S26+FE+5G&tag=prixbasmalin2-21",
     "dataStatus": "manufacturer_verified",
-    "imageStatus": "retailer_product_image",
+    "imageStatus": "image_unavailable",
     "specificationSource": "https://www.samsungmobilepress.com/articles/galaxy-s26-fe-latest-flagship-experience-what-matters-most",
     "specifications": {
       "Écran": "6,7 pouces FHD+ Dynamic AMOLED 2X, 120 Hz",
@@ -5723,7 +5723,9 @@ function brandsFor(p){return suggestedBrands[p.id]||categoryBrands[p.category]||
 const productsEl=document.getElementById("products"),searchEl=document.getElementById("search"),countEl=document.getElementById("count"),filtersEl=document.getElementById("filters");
 function pmHasRealProductImage(product){
   const image=String(product&&product.image||"");
-  return /^https:\/\//i.test(image) && !/unsplash\.com/i.test(image);
+  const status=String(product&&product.imageStatus||"");
+  const verifiedStatuses=["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"];
+  return /^https:\/\//i.test(image)&&!/unsplash\.com/i.test(image)&&verifiedStatuses.includes(status)&&product.imageKind!=="illustration";
 }
 function pmAwinMerchantUpdatedAt(value){
   const raw=String(value||"").trim();
@@ -6007,25 +6009,27 @@ function render(){
   };
   const visibleProducts=found.slice(0,pmVisibleLimit);
   visibleProducts.forEach((p,index)=>{
-    if(!pmHasRealProductImage(p))return;
+    const hasVerifiedImage=pmHasRealProductImage(p);
     const card=document.createElement("article");
     card.className="product";
     const photo=document.createElement("div");
     photo.className="photo";
     const img=document.createElement("img");
-    const primaryImageUrl=String(p.image||"");
+    const primaryImageUrl=hasVerifiedImage?String(p.image||""):"";
     img.alt=p.name;
     img.loading=index<8?"eager":"lazy";
     img.decoding="async";
     img.dataset.fallbackTried="0";
     img.dataset.pmImageStarted="0";
     img.dataset.pmHandlingError="0";
-    photo.classList.add("pm-photo-loading");
-    const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
-    imageBadge.className="pm-photo-source"+(p.imageKind==="illustration"?" illustration":"");
-    imageBadge.textContent=p.imageKind==="merchant_feed"?"Visuel marchand":(p.imageSource?"Photo constructeur":(p.imageKind==="illustration"?"Illustration":""));
-    if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source du visuel : "+(p.imageSourceName||"source marchande"));}
-    if(imageBadge.textContent)photo.append(imageBadge);
+    if(hasVerifiedImage){
+      photo.classList.add("pm-photo-loading");
+      const imageBadge=p.imageSource?document.createElement("a"):document.createElement("span");
+      imageBadge.className="pm-photo-source";
+      imageBadge.textContent=p.imageStatus==="authorized_feed_image"?"Visuel marchand":p.imageStatus==="retailer_product_image"?"Photo revendeur":p.imageStatus==="official_press_image"?"Photo de presse officielle":"Photo constructeur";
+      if(p.imageSource){imageBadge.href=p.imageSource;imageBadge.target="_blank";imageBadge.rel="noopener noreferrer";imageBadge.setAttribute("aria-label","Source du visuel : "+(p.imageSourceName||"source vérifiée"));}
+      if(imageBadge.textContent)photo.append(imageBadge);
+    }
     let imageFallbackTimer=null;
     let imageObserver=null;
     const finishImageLoad=()=>{
@@ -6073,23 +6077,31 @@ function render(){
         photo.append(unavailable);
       }
     };
-    photo.append(img);
-    if(img.loading==="eager")loadPrimaryImage();
-    else if("IntersectionObserver" in window){
-      imageObserver=new IntersectionObserver(entries=>{
-        if(entries.some(entry=>entry.isIntersecting)){
-          imageObserver.disconnect();
-          imageObserver=null;
-          loadPrimaryImage();
-        }
-      },{rootMargin:"240px"});
-      imageObserver.observe(photo);
+    if(hasVerifiedImage){
+      photo.append(img);
+      if(img.loading==="eager")loadPrimaryImage();
+      else if("IntersectionObserver" in window){
+        imageObserver=new IntersectionObserver(entries=>{
+          if(entries.some(entry=>entry.isIntersecting)){
+            imageObserver.disconnect();
+            imageObserver=null;
+            loadPrimaryImage();
+          }
+        },{rootMargin:"240px"});
+        imageObserver.observe(photo);
+      }else{
+        img.loading="eager";
+        loadPrimaryImage();
+      }
     }else{
-      img.loading="eager";
-      loadPrimaryImage();
+      photo.classList.add("pm-photo-unverified");
+      const unavailable=document.createElement("div");
+      unavailable.className="pm-photo-unavailable";
+      unavailable.textContent="Photo non vérifiée";
+      photo.append(unavailable);
     }
     const gallery=document.createElement("div");gallery.className="pm-awin-gallery";
-    const galleryImages=Array.isArray(p.images)?p.images.filter((value,index,array)=>/^https:\/\//i.test(String(value||""))&&array.indexOf(value)===index).slice(0,5):[];
+    const galleryImages=hasVerifiedImage&&Array.isArray(p.images)?p.images.filter((value,index,array)=>/^https:\/\//i.test(String(value||""))&&array.indexOf(value)===index).slice(0,5):[];
     galleryImages.forEach((url,index)=>{
       const thumb=document.createElement("button");thumb.type="button";thumb.className="pm-awin-thumb"+(index===0?" active":"");thumb.setAttribute("aria-label","Afficher la vue "+(index+1)+" de "+p.name);
       const thumbImage=document.createElement("img");thumbImage.alt="";thumbImage.loading="lazy";thumbImage.onerror=()=>thumb.remove();thumbImage.src=url;thumb.append(thumbImage);
@@ -6287,13 +6299,13 @@ function renderVerifiedProducts(products){
   verifiedProductsEl.innerHTML="";
   const catalogueItems=typeof productData!=="undefined"?productData:[];
   const imageForProduct=p=>{
-    const match=catalogueItems.find(item=>
-      pmNorm(item.name)===pmNorm(p.name)||pmNorm(p.name).includes(pmNorm(item.name))||pmNorm(item.name).includes(pmNorm(p.name))
-    );
-    return p.image||p.image_url||p.imageUrl||(match&&match.image)||"";
+    const direct=p.image||p.image_url||p.imageUrl||"";
+    if(direct&&pmHasRealProductImage({...p,image:direct}))return direct;
+    const match=catalogueItems.find(item=>pmNorm(item.name)===pmNorm(p.name)&&pmHasRealProductImage(item));
+    return match?match.image:"";
   };
   const usable=products.filter(p=>{
-    if(!p||!p.id||!p.name||!imageForProduct(p)||!Array.isArray(p.offers))return false;
+    if(!p||!p.id||!p.name||!Array.isArray(p.offers))return false;
     const currentOffers=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&o.merchant&&/^https:\/\//i.test(String(o.url||""))&&
       Number.isFinite(verifiedComparablePrice(o))&&verifiedComparablePrice(o)>0);
     return new Set(currentOffers.map(o=>String(o.merchant).trim().toLowerCase()).filter(Boolean)).size>1;
@@ -6336,7 +6348,7 @@ function renderVerifiedProducts(products){
       label.textContent=p.name;
       label.style.cssText="font-size:13px;line-height:1.35;color:#334155";
       const hint=document.createElement("small");
-      hint.textContent="Visuel momentanément indisponible";
+      hint.textContent=productImage?"Visuel indisponible":"Photo non vérifiée";
       hint.style.cssText="font-size:11px;color:#64748b";
       fallback.append(symbol,label,hint);
       photo.append(fallback);
