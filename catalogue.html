@@ -601,8 +601,8 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 </style>
 </head><body><a class="pm-skip-link" href="#main-content">Aller au contenu</a><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a><a href="historique-prix.html" style="margin-left:auto;font-size:13px;font-weight:800;color:#a8442d">Historique des prix</a></header><main id="main-content" tabindex="-1"><section class="pm-catalogue-heading">
  <div class="pm-catalogue-kicker">PRIX MALIN · CATALOGUE</div>
- <h1>Trouvez le bon produit au bon prix.</h1>
- <p>Parcourez les références, comparez les marchands et découvrez les accessoires utiles.</p>
+ <h1>Les produits qui valent le détour.</h1>
+ <p>Les incontournables du moment, de belles découvertes et des offres à retrouver chez les vendeurs.</p>
 </section>
 <section class="pm-catalogue-toolbar" aria-label="Recherche et catégories">
  <form id="pmAmazonSearchForm" class="pm-amazon-search-form" role="search">
@@ -619,7 +619,7 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
   <div class="grid" id="verifiedProducts"></div>
 </section>
 <section class="discovery-shelf" aria-labelledby="discoveryTitle">
- <div class="discovery-shelf-head"><div><span class="pm-catalogue-kicker">SÉLECTION PRIX MALIN</span><h2 id="discoveryTitle">Tous les produits</h2><p>Découvrez les produits et leurs photos, puis consultez les marchands pour en savoir plus.</p></div></div>
+ <div class="discovery-shelf-head"><div><span class="pm-catalogue-kicker">SÉLECTION PRIX MALIN</span><h2 id="discoveryTitle">À découvrir maintenant</h2><p>Faites défiler les sélections horizontalement, explorez chaque univers et trouvez votre prochain bon plan.</p></div></div>
  <div class="count" id="count" aria-live="polite"></div>
  <section class="grid" id="products" aria-live="polite"></section>
 </section>
@@ -6963,15 +6963,33 @@ function pmRakutenIsValidGtin(value){
 
 
 <style id="pm-catalogue-full-grid-fix">
-/* Affichage catalogue : toutes les fiches chargées sont visibles en grille verticale. */
-#products.grid.pm-horizontal-catalogue{display:flex!important;flex-direction:column!important;gap:22px!important;overflow:visible!important}
-#products .pm-product-row{width:100%!important;min-width:0!important}
-#products .pm-product-row-head span{font-size:0!important}
-#products .pm-product-row-head span:after{content:"";display:none!important}
-#products .pm-product-row-rail{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;overflow:visible!important;touch-action:pan-y!important;padding:2px 0 8px!important;scroll-snap-type:none!important}
-#products .pm-product-row-rail>.product,#products .pm-product-row-rail>.pm-no-photo-card{box-sizing:border-box!important;min-width:0!important;width:100%!important;max-width:none!important;flex:none!important;scroll-snap-align:none!important}
-#products .pm-product-row-rail .photo{height:clamp(118px,34vw,190px)!important;min-height:118px!important}
-#products .pm-load-more-wrap{grid-column:1/-1!important}
-@media(min-width:760px){#products .pm-product-row-rail{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important}}
-@media(min-width:1100px){#products .pm-product-row-rail{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+/* Catalogue éditorial : rails horizontaux tactiles, sans débordement de la page. */
+#products.grid.pm-horizontal-catalogue{display:flex!important;flex-direction:column!important;gap:26px!important;overflow:visible!important}
+#products .pm-product-row{width:100%!important;min-width:0!important;overflow:hidden!important}
+#products .pm-product-row-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin:0 0 12px!important}
+#products .pm-product-row-head h3{font-size:clamp(18px,2.4vw,22px)!important;font-weight:850!important;letter-spacing:-.035em!important}
+#products .pm-product-row-head span{font-size:11px!important;color:#788397!important;white-space:nowrap!important}
+#products .pm-product-row-rail{display:flex!important;flex-flow:row nowrap!important;gap:14px!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important;padding:3px 3px 15px!important;scroll-snap-type:x mandatory!important;scrollbar-width:thin!important;scrollbar-color:#ff8a43 #e9edf2!important}
+#products .pm-product-row-rail>.product,#products .pm-product-row-rail>.pm-no-photo-card{box-sizing:border-box!important;flex:0 0 clamp(205px,24vw,250px)!important;width:clamp(205px,24vw,250px)!important;min-width:clamp(205px,24vw,250px)!important;max-width:clamp(205px,24vw,250px)!important;scroll-snap-align:start!important}
+#products .pm-product-row-rail .photo{height:205px!important;min-height:205px!important;overflow:hidden!important;border-radius:12px!important;background:#fff!important}
+#products .pm-product-row-rail .photo img{width:100%!important;height:100%!important;object-fit:contain!important;padding:10px!important;transition:transform .25s ease!important}
+#products .pm-product-row-rail>.product{border:1px solid #e4e8ee!important;border-radius:17px!important;overflow:hidden!important;box-shadow:0 5px 18px rgba(20,32,50,.07)!important}
+#products .pm-product-row-rail>.product:active{transform:scale(.99)}
+#products .pm-load-more-wrap{flex:0 0 100%!important}
+.pm-catalogue-heading{padding:18px 18px 20px!important;margin:8px 0 18px!important;border-radius:20px!important;background:linear-gradient(120deg,#101a2a,#1c2a3c 62%,#382317)!important;color:#fff!important}
+.pm-catalogue-heading h1,.pm-catalogue-heading p{color:#fff!important}
+.pm-catalogue-heading h1{font-size:clamp(25px,5vw,38px)!important;letter-spacing:-.04em!important}
+.pm-catalogue-heading p{opacity:.88!important;max-width:650px!important}
+.discovery-shelf{padding:8px 0 20px!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.discovery-shelf-head{padding:0 2px!important;margin-bottom:14px!important}
+.discovery-shelf-head h2{font-size:clamp(23px,4vw,29px)!important}
+#count.count{padding:0 2px!important;font-weight:700!important}
+@media(max-width:600px){
+ #products .pm-product-row-rail{gap:11px!important;padding-bottom:13px!important}
+ #products .pm-product-row-rail>.product,#products .pm-product-row-rail>.pm-no-photo-card{flex-basis:min(76vw,260px)!important;width:min(76vw,260px)!important;min-width:min(76vw,260px)!important;max-width:min(76vw,260px)!important}
+ #products .pm-product-row-rail .photo{height:190px!important;min-height:190px!important}
+ .pm-catalogue-heading{margin:5px 0 14px!important;padding:17px 15px!important}
+ .pm-catalogue-toolbar{top:0!important}
+}
+@media(prefers-reduced-motion:reduce){#products .pm-product-row-rail .photo img{transition:none!important}}
 </style>
