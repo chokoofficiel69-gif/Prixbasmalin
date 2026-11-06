@@ -5,6 +5,7 @@ import {gunzipSync} from "node:zlib";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUTPUT = path.join(ROOT, "data", "awin-products.json");
+const STATUS_OUTPUT = path.join(ROOT, "data", "awin-sync-status.json");
 const TOKEN = process.env.AWIN_API_TOKEN || "";
 const PUBLISHER_ID = process.env.AWIN_PUBLISHER_ID || "3137386";
 const LOCALE = process.env.AWIN_FEED_LOCALE || "fr_FR";
@@ -665,7 +666,53 @@ async function loadEnhancedAwinFeeds(rawOffers, { optional = false, token = TOKE
   return { joinedCount, pendingCount, importedOffers };
 }
 
+function buildSyncStatus({ fetchedAt, source, joinedCount, pendingCount, additionalOffers, counts }) {
+  const programmesCheckStatus = joinedCount === null && pendingCount === null
+    ? "not_verified"
+    : joinedCount === null || pendingCount === null
+      ? "partial"
+      : "verified";
+  return {
+    schema_version: 1,
+    status: "ok",
+    fetched_at: fetchedAt,
+    source,
+    publisher_id: PUBLISHER_ID,
+    locale: LOCALE,
+    programmes_check_status: programmesCheckStatus,
+    joined_advertisers_checked: joinedCount,
+    pending_advertisers_detected: pendingCount,
+    additional_authorized_offers_imported: additionalOffers,
+    counts
+  };
+}
+
 async function runSelfTests() {
+  const sampleStatus = buildSyncStatus({
+    fetchedAt: "2026-11-06T00:00:00.000Z",
+    source: "Awin Direct Product Data Feed",
+    joinedCount: 0,
+    pendingCount: 6,
+    additionalOffers: 0,
+    counts: { products: 7, merchant_offers: 7 }
+  });
+  if (sampleStatus.programmes_check_status !== "verified" ||
+      sampleStatus.joined_advertisers_checked !== 0 ||
+      sampleStatus.pending_advertisers_detected !== 6 ||
+      sampleStatus.additional_authorized_offers_imported !== 0) {
+    throw new Error("TEST ÉCHEC : le rapport Awin doit distinguer joined, pending et offres supplémentaires.");
+  }
+  const unavailableStatus = buildSyncStatus({
+    fetchedAt: "2026-11-06T00:00:00.000Z",
+    source: "Awin Direct Product Data Feed",
+    joinedCount: null,
+    pendingCount: null,
+    additionalOffers: 0,
+    counts: {}
+  });
+  if (unavailableStatus.programmes_check_status !== "not_verified") {
+    throw new Error("TEST ÉCHEC : un statut Awin non vérifié ne doit pas être présenté comme zéro programme.");
+  }
   const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
     '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","4006381333931","AB-X1"';
   const rows = objectRowsFromCsv(sampleCsv);
@@ -866,6 +913,8 @@ const output = {
   status: "ok",
   counts: {
     joined_advertisers_checked: joinedAdvertisersChecked,
+    pending_advertisers_detected: pendingAdvertisersDetected,
+    additional_authorized_offers_imported: additionalAwinOffers,
     products: products.length,
     merchant_offers: rawOffers.length,
     merchants: new Set(rawOffers.map(offer => norm(offer.merchant)).filter(Boolean)).size,
@@ -884,7 +933,16 @@ const output = {
 };
 
 await fs.mkdir(path.dirname(OUTPUT), { recursive: true });
+const statusReport = buildSyncStatus({
+  fetchedAt,
+  source: output.source,
+  joinedCount: joinedAdvertisersChecked,
+  pendingCount: pendingAdvertisersDetected,
+  additionalOffers: additionalAwinOffers,
+  counts: output.counts
+});
 await fs.writeFile(OUTPUT, JSON.stringify(output) + "\n", "utf8");
+await fs.writeFile(STATUS_OUTPUT, JSON.stringify(statusReport, null, 2) + "\n", "utf8");
 log(products.length + " fiche(s) produits, " + rawOffers.length + " offre(s), " + output.counts.brands + " marque(s).");
 log("Qualité du flux Awin : " + JSON.stringify(output.counts));
 log("Statut partenariats Awin : joined=" + (joinedAdvertisersChecked === null ? "non vérifié" : joinedAdvertisersChecked) +
