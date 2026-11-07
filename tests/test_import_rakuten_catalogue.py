@@ -152,6 +152,9 @@ class RakutenImportValidationTests(unittest.TestCase):
     def test_workflow_downloads_category_feed_and_uses_one_explicit_french_date_default(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
         self.assertIn('54306_4768926_1_cmp.xml.gz', workflow)
+        self.assertIn('sftp://aftp.linksynergy.com/${mid}/', workflow)
+        self.assertIn('44806_4768926_mp.xml.gz', workflow)
+        self.assertIn('racine et dossier MID vérifiés', workflow)
         self.assertEqual(workflow.count("vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY'"), 2)
         self.assertIn("if: github.event_name != 'pull_request'", workflow)
 

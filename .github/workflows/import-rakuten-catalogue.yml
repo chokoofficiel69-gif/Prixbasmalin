@@ -79,16 +79,38 @@ jobs:
           printf 'machine aftp.linksynergy.com login %s password %s\n' "$RAKUTEN_SFTP_USER" "$RAKUTEN_SFTP_PASSWORD" > "$HOME/.netrc-rakuten"
           CURL=(curl --proto '=sftp' --fail --show-error --silent --ignore-content-length --knownhosts "$HOME/.ssh/known_hosts" --netrc-file "$HOME/.netrc-rakuten" --connect-timeout 15 --max-time 600)
           "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/" > /tmp/rakuten-root-list.txt
-          if ! grep -Fxq "44806_4768926_mp.xml.gz" /tmp/rakuten-root-list.txt; then
-            echo "::error::Le flux complet Decathlon attendu est absent du répertoire SFTP."
-            exit 1
-          fi
-          "${CURL[@]}" "sftp://aftp.linksynergy.com/44806_4768926_mp.xml.gz" --output /tmp/44806_4768926_mp.xml.gz
-          if grep -Fxq "54306_4768926_1_cmp.xml.gz" /tmp/rakuten-root-list.txt; then
-            "${CURL[@]}" "sftp://aftp.linksynergy.com/54306_4768926_1_cmp.xml.gz" --output /tmp/54306_4768926_1_cmp.xml.gz
-          else
-            echo "Flux catégorie Nicchia absent : source ignorée."
-          fi
+
+          # Rakuten confirme que chaque annonceur dispose d'un dossier nommé par son MID.
+          # Le fichier peut aussi être à la racine selon le compte : on détecte les deux cas,
+          # sans supposer un chemin ni désactiver la vérification de clé hôte.
+          download_feed() {
+            local mid="$1" filename="$2" output="$3" required="$4" remote_path=""
+            if grep -Fxq "$filename" /tmp/rakuten-root-list.txt; then
+              remote_path="$filename"
+            elif grep -Fxq "$mid" /tmp/rakuten-root-list.txt; then
+              local listing="/tmp/rakuten-${mid}-list.txt"
+              "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/${mid}/" > "$listing"
+              if grep -Fxq "$filename" "$listing"; then
+                remote_path="${mid}/${filename}"
+              fi
+            fi
+
+            if [[ -z "$remote_path" ]]; then
+              if [[ "$required" == "true" ]]; then
+                echo "::error::Flux requis absent : MID $mid / $filename (racine et dossier MID vérifiés)."
+                return 1
+              fi
+              echo "Flux facultatif absent : MID $mid / $filename."
+              return 0
+            fi
+
+            echo "Flux trouvé pour MID $mid : $filename."
+            "${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "$output"
+          }
+
+          download_feed "44806" "44806_4768926_mp.xml.gz" /tmp/44806_4768926_mp.xml.gz true
+          download_feed "54306" "54306_4768926_1_cmp.xml.gz" /tmp/54306_4768926_1_cmp.xml.gz false
+
           gzip -t /tmp/44806_4768926_mp.xml.gz
           if [[ -f /tmp/54306_4768926_1_cmp.xml.gz ]]; then gzip -t /tmp/54306_4768926_1_cmp.xml.gz; fi
           rm -f "$HOME/.netrc-rakuten"
