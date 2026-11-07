@@ -6958,6 +6958,7 @@ function pmRakutenIsValidGtin(value){
     const generated=Date.parse(feed.generated_at||"");
     const age=Date.now()-generated;
     const fresh=Number.isFinite(generated)&&age>=-5*60*1000&&age<=48*60*60*1000;
+    const taxStatusVerified=feed.priceTaxStatusVerified===true;
     const products=feed.products.filter(p=>p&&p.id&&p.name&&/^https:\/\//i.test(String(p.image||""))&&/^https:\/\/click\.linksynergy\.com\//i.test(String(p.sourceUrl||""))&&Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0);
     const known=new Set(productData.map(p=>p.id));
     products.forEach(p=>{
@@ -6965,7 +6966,7 @@ function pmRakutenIsValidGtin(value){
       const base=Number(p.priceValue);
       const shipping=p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue);
       const shippingLabel=shipping===null||!Number.isFinite(shipping)?"Livraison à confirmer":"Livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(shipping);
-      const priceTaxStatus=p.priceTaxStatus==="included"?"included":"unspecified";
+      const priceTaxStatus=taxStatusVerified&&p.priceTaxStatus==="included"?"included":"unspecified";
       const sourceUpdatedAt=p.sourceCreatedAt||null;
       const sourceFresh=fresh&&Boolean(sourceUpdatedAt)&&pmAwinPriceIsFresh(sourceUpdatedAt);
       const hasVerifiedPrice=sourceFresh&&priceTaxStatus==="included";
@@ -6984,7 +6985,7 @@ function pmRakutenIsValidGtin(value){
       known.add(p.id);
     });
     const byGtin=new Map();
-    products.filter(p=>fresh&&pmAwinPriceIsFresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"&&pmRakutenIsValidGtin(p.gtin)).forEach(p=>{
+    products.filter(p=>fresh&&taxStatusVerified&&pmAwinPriceIsFresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"&&pmRakutenIsValidGtin(p.gtin)).forEach(p=>{
       const key=String(p.gtin);
       if(!byGtin.has(key))byGtin.set(key,[]);
       byGtin.get(key).push(p);

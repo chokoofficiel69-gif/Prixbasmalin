@@ -143,6 +143,8 @@ jobs:
         env:
           RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY' }}
           RAKUTEN_PRICE_TAX_STATUS: ${{ vars.RAKUTEN_PRICE_TAX_STATUS || 'unspecified' }}
+          # À passer à true uniquement après confirmation écrite de la TVA par la source marchande.
+          RAKUTEN_PRICE_TAX_STATUS_VERIFIED: ${{ vars.RAKUTEN_PRICE_TAX_STATUS_VERIFIED || 'false' }}
         run: |
           python3 scripts/import-rakuten-catalogue.py \
             --directory /tmp \
@@ -150,6 +152,7 @@ jobs:
             --date-format "$RAKUTEN_DATE_FORMAT" \
             --max-age-hours 48 \
             --price-tax-status "${RAKUTEN_PRICE_TAX_STATUS:-unspecified}" \
+            --price-tax-status-verified "${RAKUTEN_PRICE_TAX_STATUS_VERIFIED:-false}" \
             --decathlon-limit 1500 \
             --nicchia-limit 1500
       - name: Publier le snapshot validé sans écraser les données précédentes en cas d'échec

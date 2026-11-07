@@ -103,7 +103,7 @@ class CatalogueComparablePriceTests(unittest.TestCase):
     def test_rakuten_comparison_uses_each_merchants_source_timestamp(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn("const sourceFresh=fresh&&Boolean(sourceUpdatedAt)&&pmAwinPriceIsFresh(sourceUpdatedAt);", source)
-        self.assertIn('products.filter(p=>fresh&&pmAwinPriceIsFresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"', source)
+        self.assertIn('products.filter(p=>fresh&&taxStatusVerified&&pmAwinPriceIsFresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"', source)
         self.assertIn("checked_at:p.sourceCreatedAt,currency:", source)
 
 
