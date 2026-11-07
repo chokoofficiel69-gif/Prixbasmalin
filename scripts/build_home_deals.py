@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Construit data/home-deals.json : la vitrine légère de la page d'accueil.
 
-- « top » : les produits high-tech comparés (fiches PrixTracker) avec le plus d'offres
-  et le plus grand écart de prix entre marchands.
-- « gifts » : des idées cadeaux issues des flux Awin autorisés (photo du flux, prix
-  public indiqué par le marchand, lien affilié), variées entre marchands et gammes de prix.
+- « top » : les produits high-tech avec le plus de relevés historiques PrixTracker.
+  Ces montants restent des observations passées, jamais des offres en direct.
+- « gifts » : des idées cadeaux issues des flux Awin autorisés. Le prix numérique n'est
+  conservé que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé ;
+  sinon la fiche reste visible sans prix, avec son lien marchand.
 
-Aucun prix n'est inventé : chaque prix garde sa source et sa date.
+Aucun prix n'est inventé : chaque prix affiché garde sa source, sa date et son statut TTC.
 """
 import argparse
 import json
