@@ -92,8 +92,8 @@ h2{margin:22px 0 10px;font-size:21px;color:#fff}h2 span{color:#ff7a1a}
   fetch("/data/home-deals.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():null;}).then(function(d){
     if(!d||!Array.isArray(d.top))return;
     document.getElementById("rail").innerHTML=d.top.slice(0,10).map(function(p){
-      var media=p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy" data-pm-art data-category="'+esc(p.category)+'" data-brand="'+esc(p.brand)+'">':pmProductArt(p.category,p.brand);
-      return '<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'"><div class="media">'+media+'</div><div class="body"><small>'+esc(p.category_label)+'</small><h3>'+esc(p.name)+'</h3><em>'+p.offer_count+' marchands relevés · prix minimum observé</em><strong>'+euro.format(p.min_price_eur)+'</strong></div></a>';
+      var media=p.image?'<div class="media"><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy" data-pm-art data-category="'+esc(p.category)+'" data-brand="'+esc(p.brand)+'"></div>':'';
+      return '<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+media+'<div class="body"><small>'+esc(p.category_label)+'</small><h3>'+esc(p.name)+'</h3><em>'+p.offer_count+' marchands relevés · prix minimum observé</em><strong>'+euro.format(p.min_price_eur)+'</strong></div></a>';
     }).join("");
   }).catch(function(){});
 })();
