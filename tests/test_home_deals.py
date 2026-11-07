@@ -82,9 +82,7 @@ class HomeDealsTests(unittest.TestCase):
         awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
-        build_time = deals.parse_merchant_date(published.get("generated_at"))
-        self.assertIsNotNone(build_time)
-        self.assertEqual(published, deals.build(awin, sheets, now=build_time))
+        self.assertEqual(published, deals.build(awin, sheets))
 
     def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
         awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
