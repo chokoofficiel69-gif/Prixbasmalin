@@ -315,57 +315,105 @@ def index_page(groups, total):
                   "/prix/", body, [("Accueil", "/"), ("Historique des prix", "/prix/")])
 
 
-def gift_items(awin, lo, hi, limit=36):
+def parse_utc(value):
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def gift_items(deals, lo, hi, limit=36, now=None):
+    reference_time = now or datetime.now(timezone.utc)
     seen, by_merchant = set(), {}
-    for p in awin.get("products", []):
-        price = p.get("priceValue")
-        if not isinstance(price, (int, float)) or not (lo <= price < hi) or price < 10:
+    for p in deals.get("gifts", []):
+        if p.get("price_verified") is not True or p.get("price_tax_status") != "included" or p.get("price_date_kind") != "merchant":
             continue
-        if not str(p.get("image") or "").startswith("https://") or not str(p.get("sourceUrl") or "").startswith("https://"):
+        price = p.get("price_eur")
+        if isinstance(price, bool) or not isinstance(price, (int, float)) or not (lo <= price < hi) or price < 10:
             continue
-        if GIFT_EXCLUDED.search(f"{p.get('name')} {p.get('desc')}"):
+        updated_at = parse_utc(p.get("price_date"))
+        if updated_at is None:
             continue
-        key = (p.get("merchant"), re.sub(r"\s+[–-]\s+.*$", "", str(p.get("name"))).lower())
+        age = reference_time - updated_at
+        if age < timedelta(minutes=-5) or age > timedelta(hours=48):
+            continue
+        image = str(p.get("image") or "")
+        url = str(p.get("url") or "")
+        if not image.startswith("https://") or not url.startswith("https://"):
+            continue
+        if GIFT_EXCLUDED.search(f"{p.get('name')} {p.get('family_label')}"):
+            continue
+        merchant = str(p.get("merchant") or "").strip()
+        if not merchant:
+            continue
+        key = (merchant, re.sub(r"\\s+[–-]\\s+.*$", "", str(p.get("name"))).lower())
         if key in seen:
             continue
         seen.add(key)
-        by_merchant.setdefault(p.get("merchant"), []).append(p)
-    out, queues = [], [sorted(v, key=lambda x: (x.get("shippingPriceValue") is None, x.get("name"))) for _, v in sorted(by_merchant.items())]
+        by_merchant.setdefault(merchant, []).append(p)
+    out, queues = [], [
+        sorted(v, key=lambda x: (
+            x.get("shipping_eur") is None,
+            x.get("price_eur") if x.get("price_eur") is not None else float("inf"),
+            x.get("name") or "",
+        ))
+        for _, v in sorted(by_merchant.items())
+    ]
     while len(out) < limit and any(queues):
-        for qq in queues:
-            if qq and len(out) < limit:
-                out.append(qq.pop(0))
+        for queue in queues:
+            if queue and len(out) < limit:
+                out.append(queue.pop(0))
     return out
 
 
 def gift_card(p):
-    ship = '<small style="color:#15803d;font-weight:700">Livraison gratuite</small>' if p.get("shippingPriceValue") == 0 else ""
-    return (f'<a class="card" href="{e(p["sourceUrl"])}" target="_blank" rel="sponsored nofollow noopener"><div class="visual"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy"></div>'
-            f'<div class="c"><small>{e(p.get("merchant") or "")}</small><b>{e(p["name"])}</b><strong>{euro(float(p["priceValue"]))}</strong>{ship}</div></a>')
+    shipping = p.get("shipping_eur")
+    shipping_label = "Livraison gratuite" if shipping == 0 else (
+        f"Livraison {euro(shipping)}" if isinstance(shipping, (int, float)) and not isinstance(shipping, bool) else "Livraison à confirmer"
+    )
+    return (f'<a class="card" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener"><div class="visual"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy"></div>'
+            f'<div class="c"><small>{e(p.get("merchant") or "")}</small><b>{e(p["name"])}</b><strong>Prix TTC confirmé : {euro(p["price_eur"])}</strong><small>Relevé marchand du {date_fr(p["price_date"])} · {e(shipping_label)}</small></div></a>')
 
 
-def gift_page(slug, label, items, fetched_at, all_budgets):
-    links = " · ".join(f'<a href="/idees-cadeaux/{s}.html">{e(l.replace("Idées cadeaux ", ""))}</a>' for s, l, _, _ in all_budgets if s != slug)
+def gift_page(slug, label, items, all_budgets):
+    links = " · ".join(
+        f'<a href="/idees-cadeaux/{s}.html">{e(l.replace("Idées cadeaux ", ""))}</a>'
+        for s, l, _, _, other_items in all_budgets if s != slug and other_items
+    )
+    dates = [parse_utc(item.get("price_date")) for item in items]
+    dates = [d for d in dates if d is not None]
+    latest = max(dates).date().isoformat() if dates else ""
     body = f"""<section class="panel"><h1>{e(label)}</h1>
-<p>{len(items)} idées de cadeaux de Noël sélectionnées chez nos marchands partenaires : parfums, bougies parfumées, maison, high-tech, accessoires… Chaque prix est celui indiqué par le marchand dans son catalogue{(' au ' + date_fr(fetched_at)) if fetched_at else ''}, à confirmer sur son site.</p>
+<p>{len(items)} produits avec prix TTC explicitement confirmé et date marchande de moins de 48 h. Dernière date marchande de la sélection : {date_fr(latest) if latest else 'non disponible'}. Les prix peuvent évoluer et la livraison doit être vérifiée chez le marchand.</p>
 <p>Autres budgets : {links}</p>
 <div class="grid">{''.join(gift_card(p) for p in items)}</div></section>
-<p class="source">Liens partenaires affiliés (Awin) : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>"""
-    return layout(fit_title(f"{label} : {len(items)} idées | Prix Malin", f"{label} | Prix Malin", label),
-                  fit_description(f"{label} : {len(items)} cadeaux de Noël avec photo et prix du marchand — parfums, bougies, maison, high-tech."),
+<p class="source">Offres issues des flux marchands autorisés ; chaque prix affiché est daté et déclaré TTC. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>"""
+    return layout(fit_title(f"{label} : prix TTC vérifiés | Prix Malin", f"{label} | Prix Malin", label),
+                  fit_description(f"{label} : {len(items)} produits avec prix TTC confirmé et date marchande de moins de 48 h. À vérifier chez le marchand."),
                   f"/idees-cadeaux/{slug}.html", body, [("Accueil", "/"), ("Idées cadeaux", "/idees-cadeaux/"), (label, f"/idees-cadeaux/{slug}.html")])
 
 
-def gift_index(budgets_with_items, fetched_at):
+def gift_index(budgets_with_items):
     sections = "".join(
         f'<section class="panel"><h2><a style="color:inherit" href="/idees-cadeaux/{s}.html">{e(l)}</a></h2><div class="grid">{"".join(gift_card(p) for p in items[:6])}</div>'
         f'<p><a href="/idees-cadeaux/{s}.html">Voir les {len(items)} idées →</a></p></section>'
-        for s, l, items in budgets_with_items if items)
+        for s, l, _, _, items in budgets_with_items if items
+    )
+    empty = "" if sections else (
+        '<p class="notice">Aucune offre avec prix TTC confirmé et date marchande de moins de 48 h n’est disponible actuellement. '
+        'Les prix incomplets ou périmés sont masqués. Consultez le catalogue pour découvrir les produits sans prix affiché.</p>'
+    )
     body = f"""<section class="panel"><h1>Idées cadeaux de Noël par budget</h1>
-<p>Trouvez le bon cadeau selon votre budget : moins de 30 €, 30 à 60 €, 60 à 100 € ou plus de 100 €. Toutes les idées ont une photo et le prix du marchand.</p></section>{sections}"""
-    return layout("Idées cadeaux de Noël par budget | Prix Malin",
-                  "Idées cadeaux de Noël à moins de 30 €, de 30 à 60 €, de 60 à 100 € et plus : parfums, bougies, maison, high-tech, avec photo et prix.",
+<p>Les prix ne sont affichés que lorsque le flux marchand confirme le TTC et fournit une date marchande récente. Les montants peuvent évoluer ; vérifiez le prix final et la livraison avant achat.</p>{empty}</section>{sections}"""
+    return layout("Idées cadeaux de Noël | Prix Malin",
+                  "Sélection de cadeaux issue de flux marchands autorisés. Les prix sont masqués si la date marchande récente ou le statut TTC ne sont pas confirmés.",
                   "/idees-cadeaux/", body, [("Accueil", "/"), ("Idées cadeaux", "/idees-cadeaux/")])
+
 
 
 def build():
