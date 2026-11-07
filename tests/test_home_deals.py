@@ -91,8 +91,13 @@ class HomeDealsTests(unittest.TestCase):
         for marker in ('id="pm-partners"', 'id="pm-top-prices"', 'id="pm-gifts"', 'fetch("/data/home-deals.json"'):
             self.assertIn(marker, page)
         self.assertIn('href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21"', page)
-        # Les partenaires sans lien d'affiliation restent masqués.
-        self.assertIn('data-partner="decathlon" data-href="" target="_blank" rel="sponsored nofollow noopener" hidden', page)
+        # Les boutons partenaires restent masqués tant que le script n'a pas validé un lien https.
+        self.assertIn('data-partner="decathlon" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=44806&amp;murl=https%3A%2F%2Fwww.decathlon.fr%2F" target="_blank" rel="sponsored nofollow noopener" hidden', page)
+        self.assertIn('data-partner="nicchia-luxury" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=54306', page)
+        # Promos partenaires : uniquement prix TTC frais, prix barré fourni par le marchand, liens affiliés.
+        self.assertIn('id="pm-partner-deals"', page)
+        self.assertIn('p.priceTaxStatus==="included"', page)
+        self.assertIn('Number(p.regularPriceValue)>Number(p.priceValue)', page)
         self.assertIn(".pm-partner[hidden]{display:none!important}", page)
         self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(g.image', page)
         self.assertIn("const giftPriceIsCurrent=g=>", page)
