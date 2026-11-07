@@ -1,5 +1,5 @@
 <!doctype html><html lang="fr"><head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff"><title>Catalogue produits et marques — Prix Malin</title><meta name="description" content="Catalogue Prix Malin : smartphones, audio, mode et accessoires. Amazon est la priorité ; les prix directs apparaîtront quand une source autorisée sera disponible.">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff"><title>Catalogue produits et marques — Prix Malin</title><meta name="description" content="Catalogue Prix Malin : smartphones, audio, maison, beauté et mode. Des milliers de produits avec photo et prix du marchand, à confirmer avant achat.">
 <link rel="canonical" href="https://prixbasmalin.fr/catalogue.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Prix Malin">
@@ -600,6 +600,8 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 .pm-inspiration-label{display:block;margin-top:8px;color:#8a4a20;font-size:10px;line-height:1.4;font-weight:700}
 </style>
 <script src="/js/performance-images.js" defer></script>
+<link rel="stylesheet" href="/css/pm-site-footer.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://prixbasmalin.fr/"}, {"@type": "ListItem", "position": 2, "name": "Catalogue", "item": "https://prixbasmalin.fr/catalogue.html"}]}</script>
 </head><body><a class="pm-skip-link" href="#main-content">Aller au contenu</a><header><a class="back" href="index.html" aria-label="Retour à l'accueil">‹</a><a class="brand" href="index.html">Prix <span>Malin</span></a><a href="historique-prix.html" style="margin-left:auto;font-size:13px;font-weight:800;color:#a8442d">Historique des prix</a></header><main id="main-content" tabindex="-1"><section class="pm-catalogue-heading">
  <div class="pm-catalogue-kicker">PRIX MALIN · CATALOGUE</div>
  <h1>Les produits qui valent le détour.</h1>
@@ -6140,7 +6142,7 @@ function render(){
     const priceDateText=priceDateParsed&&Number.isFinite(priceDateParsed.getTime())?priceDateParsed.toLocaleDateString("fr-FR"):"";
     const listedPrice=!hasVerifiedPrice&&Number.isFinite(Number(p.listedPriceValue))&&Number(p.listedPriceValue)>0?Number(p.listedPriceValue):null;
     const sheet=!hasVerifiedPrice&&listedPrice===null&&p.pmSheet&&Array.isArray(p.pmSheet.offers)&&p.pmSheet.offers.length?p.pmSheet:null;
-    const sheetUrl=sheet?"/produit.html?id="+encodeURIComponent(sheet.id):"";
+    const sheetUrl=sheet?"/prix/"+encodeURIComponent(sheet.id)+".html":"";
     const sheetDate=sheet?new Date(String(sheet.last_date)+"T12:00:00").toLocaleDateString("fr-FR"):"";
     const feedDateParsed=p.feedFetchedAt?new Date(p.feedFetchedAt):null;
     const feedDateText=feedDateParsed&&Number.isFinite(feedDateParsed.getTime())?feedDateParsed.toLocaleDateString("fr-FR"):"";
@@ -7136,6 +7138,21 @@ function pmSheetMerchantName(id){return pmSheetMerchantNames[id]||String(id||"Ma
   refresh();
 })();
 </script>
+<nav class="pm-related-links" aria-label="Guides et comparateur"><h2>Guides et comparateur</h2><ul><li><a href="/prix/">Comparateur de prix high-tech</a></li><li><a href="/idees-cadeaux/">Idées cadeaux par budget</a></li><li><a href="/guide-black-friday-2026.html">Black Friday 2026 : vrais bons plans</a></li><li><a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a></li><li><a href="/guides.html">Tous les guides d’achat</a></li></ul></nav>
+<footer class="pm-site-footer" id="pm-site-footer">
+ <nav aria-label="Informations">
+  <a href="/a-propos.html">À propos</a>
+  <a href="/confidentialite.html">Confidentialité et cookies</a>
+  <a href="/prix/">Comparateur de prix</a>
+  <a href="/idees-cadeaux/">Idées cadeaux</a>
+  <a href="/guides.html">Guides d’achat</a>
+  <a href="/catalogue.html">Catalogue</a>
+  <a href="/partenaires.html">Partenaires</a>
+  <a href="/credits-photos.html">Crédits photos</a>
+ </nav>
+ <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix relevés et datés, à confirmer chez le marchand.</p>
+ <p>Certains liens sont des liens d’affiliation : Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+</footer>
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
 #products .pm-photo-unavailable{width:100%;height:100%;min-height:132px;display:grid;place-items:center;padding:12px;box-sizing:border-box;background:#eef1f5;color:#667085;font-size:12px;font-weight:750;text-align:center}

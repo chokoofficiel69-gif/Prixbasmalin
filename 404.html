@@ -45,6 +45,7 @@ h2{margin:22px 0 10px;font-size:21px;color:#fff}h2 span{color:#ff7a1a}
 .note{margin-top:18px;font-size:12.5px;color:#9aa6b8;line-height:1.5}
 @media(min-width:760px){.quick{grid-template-columns:repeat(4,minmax(0,1fr))}.rail{grid-auto-columns:210px}.hero{grid-template-columns:150px 1fr}.hero img{width:150px}}
 </style>
+<link rel="stylesheet" href="/css/pm-site-footer.css">
 </head>
 <body>
 <header class="top">
@@ -82,7 +83,7 @@ h2{margin:22px 0 10px;font-size:21px;color:#fff}h2 span{color:#ff7a1a}
   var redirects={"/index":"/","/accueil":"/","/home":"/","/catalogue":"/catalogue.html","/comparateur":"/produit.html","/produits":"/produit.html","/produit":"/produit.html","/cadeaux":"/guide-cadeaux.html","/idees-cadeaux":"/guide-cadeaux.html","/offres":"/offres.html","/high-tech":"/high-tech.html","/mode":"/mode.html","/partenaires":"/partenaires.html","/confidentialite":"/confidentialite.html"};
   if(redirects[path]){location.replace(redirects[path]+location.search+location.hash);return;}
   var m=path.match(/^\/produits?\/([a-z0-9-]+)(?:\.html)?$/);
-  if(m){location.replace("/produit.html?id="+encodeURIComponent(m[1]));return;}
+  if(m){location.replace("/prix/"+encodeURIComponent(m[1])+".html");return;}
   // Préremplir la recherche avec les mots de l'adresse demandée.
   var words=decodeURIComponent(path.split("/").pop()||"").replace(/\.(html?|php|aspx?)$/,"").replace(/[-_+]+/g," ").replace(/[^\p{L}\p{N} ]/gu,"").trim();
   var q=document.getElementById("q");
@@ -98,5 +99,19 @@ h2{margin:22px 0 10px;font-size:21px;color:#fff}h2 span{color:#ff7a1a}
   }).catch(function(){});
 })();
 </script>
+<footer class="pm-site-footer" id="pm-site-footer">
+ <nav aria-label="Informations">
+  <a href="/a-propos.html">À propos</a>
+  <a href="/confidentialite.html">Confidentialité et cookies</a>
+  <a href="/prix/">Comparateur de prix</a>
+  <a href="/idees-cadeaux/">Idées cadeaux</a>
+  <a href="/guides.html">Guides d’achat</a>
+  <a href="/catalogue.html">Catalogue</a>
+  <a href="/partenaires.html">Partenaires</a>
+  <a href="/credits-photos.html">Crédits photos</a>
+ </nav>
+ <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix relevés et datés, à confirmer chez le marchand.</p>
+ <p>Certains liens sont des liens d’affiliation : Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+</footer>
 </body>
 </html>
