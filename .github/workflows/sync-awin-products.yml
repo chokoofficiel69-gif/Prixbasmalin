@@ -178,9 +178,15 @@ jobs:
                 curl --fail --silent --show-error --location --connect-timeout 3 --max-time 10 \
                   -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
                   "https://prixbasmalin.fr/catalogue.html?v=${EXPECTED_FETCHED_AT}" --output /tmp/catalogue-public.html
-                grep -q 'id="pmAwinFeedStatus"' /tmp/catalogue-public.html
-                grep -q 'Aucune comparaison multi-marchands exacte avec prix TTC confirmé' /tmp/catalogue-public.html
-                echo "Interface publique du comparateur : statut de flux et état vide vérifiés."
+                if grep -Fq 'id="pmAwinFeedStatus"' /tmp/catalogue-public.html; then
+                  echo "::error::Un diagnostic technique Awin ne doit pas être exposé aux visiteurs."
+                  exit 1
+                fi
+                grep -Fq 'id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden' /tmp/catalogue-public.html
+                grep -Fq 'verifiedShelf.hidden=true;' /tmp/catalogue-public.html
+                grep -Fq 'offer.currency!=="EUR"||offer.price_tax_status!=="included"' /tmp/catalogue-public.html
+                grep -Fq 'age<=maxAgeHours*60*60*1000' /tmp/catalogue-public.html
+                echo "Interface publique vérifiée : comparaisons masquées sans offre exacte, fraîche et TTC ; aucun diagnostic technique exposé."
                 exit 0
               fi
             fi
