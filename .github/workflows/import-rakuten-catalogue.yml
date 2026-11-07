@@ -54,7 +54,8 @@ jobs:
           set -euo pipefail
           if [[ -z "${RAKUTEN_SFTP_USER:-}" || -z "${RAKUTEN_SFTP_PASSWORD:-}" ]]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Import Rakuten ignoré : ajouter les secrets RAKUTEN_SFTP_USER et RAKUTEN_SFTP_PASSWORD."
+            echo "::notice::Import Rakuten bloqué : identifiants SFTP manquants ; snapshot précédent conservé."
+            echo "- Import Rakuten bloqué : identifiants SFTP manquants ; snapshot précédent conservé." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [[ "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY" && "$RAKUTEN_DATE_FORMAT" != "DD/MM/YYYY" ]]; then
