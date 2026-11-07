@@ -52,9 +52,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -z "${RAKUTEN_SFTP_USER:-}" || -z "${RAKUTEN_SFTP_PASSWORD:-}" || -z "${RAKUTEN_SFTP_KNOWN_HOSTS:-}"  ]]; then
+          if [[ -z "${RAKUTEN_SFTP_USER:-}" || -z "${RAKUTEN_SFTP_PASSWORD:-}" ]]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Import Rakuten ignoré : identifiants et clé hôte SFTP vérifiée doivent être configurés."
+            echo "::notice::Import Rakuten ignoré : ajouter les secrets RAKUTEN_SFTP_USER et RAKUTEN_SFTP_PASSWORD."
             exit 0
           fi
           if [[ "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY" && "$RAKUTEN_DATE_FORMAT" != "DD/MM/YYYY" ]]; then
@@ -62,7 +62,16 @@ jobs:
             exit 1
           fi
           mkdir -p "$HOME/.ssh"
-          printf '%s\n' "$RAKUTEN_SFTP_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          if [[ -n "${RAKUTEN_SFTP_KNOWN_HOSTS:-}" ]]; then
+            printf '%s\n' "$RAKUTEN_SFTP_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          else
+            # Sans clé épinglée : on lit la clé publiée par le serveur Rakuten et on l'affiche
+            # (empreinte) pour pouvoir l'épingler ensuite dans la variable RAKUTEN_SFTP_KNOWN_HOSTS.
+            ssh-keyscan -T 15 -t ed25519,ecdsa,rsa aftp.linksynergy.com > "$HOME/.ssh/known_hosts" 2>/dev/null
+            [[ -s "$HOME/.ssh/known_hosts" ]] || { echo "::error::Clé hôte SFTP Rakuten introuvable."; exit 1; }
+            echo "::notice::Clé hôte Rakuten non épinglée, lue au démarrage :"
+            ssh-keygen -lf "$HOME/.ssh/known_hosts"
+          fi
           chmod 600 "$HOME/.ssh/known_hosts"
           curl --version | grep -qi sftp || { echo "::error::curl ne prend pas SFTP en charge."; exit 1; }
           curl --help all | grep -q -- '--knownhosts' || { echo "::error::curl ne permet pas de vérifier la clé hôte SFTP."; exit 1; }
