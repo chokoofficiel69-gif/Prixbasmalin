@@ -8,14 +8,18 @@ on:
       - "price-engine/sync-prixtracker.mjs"
       - "scripts/build_product_sheets.py"
       - "scripts/build_home_deals.py"
+      - "scripts/build_seo_pages.py"
       - "tests/test_home_deals.py"
+      - "tests/test_seo_pages.py"
       - ".github/workflows/import-prixtracker.yml"
   pull_request:
     paths:
       - "price-engine/import-prixtracker*.mjs"
       - "price-engine/sync-prixtracker.mjs"
       - "scripts/build_home_deals.py"
+      - "scripts/build_seo_pages.py"
       - "tests/test_home_deals.py"
+      - "tests/test_seo_pages.py"
       - ".github/workflows/import-prixtracker.yml"
   schedule:
     - cron: "35 5 * * *"
@@ -44,9 +48,12 @@ jobs:
         run: |
           python3 scripts/build_product_sheets.py
           python3 scripts/build_home_deals.py
-          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
           python3 scripts/build_seo_pages.py
           python3 scripts/build_sitemap.py
+      - name: Tester la vitrine et les pages SEO avec prix vérifiés
+        run: |
+          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+          python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
       - name: Publier uniquement si les fichiers ont changé
         if: github.event_name != 'pull_request'
         run: |
