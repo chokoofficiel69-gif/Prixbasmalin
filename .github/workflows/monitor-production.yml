@@ -223,7 +223,10 @@ jobs:
               "https://prixbasmalin.fr/catalogue.html?pm-deploy-check=${cache_bust}" --output /tmp/catalogue-after.html &&
               grep -Fq "pm-mobile-new-arrivals-rail" /tmp/home-after.html &&
               grep -Fq "fresh(p.merchantUpdatedAt)" /tmp/home-after.html &&
-              grep -Fq "Prix TTC vérifié indisponible" /tmp/catalogue-after.html &&
+              grep -Fq 'const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";' /tmp/catalogue-after.html &&
+              grep -Fq 'priceValue:priceStatus==="fresh"?Number(product.priceValue):null' /tmp/catalogue-after.html &&
+              grep -Fq 'offer.currency!=="EUR"||offer.price_tax_status!=="included"' /tmp/catalogue-after.html &&
+              grep -Fq 'age<=maxAgeHours*60*60*1000' /tmp/catalogue-after.html &&
               grep -Fq "#verifiedShelf[hidden]" /tmp/catalogue-after.html &&
               ! grep -Fq "#verifiedShelf," /tmp/catalogue-after.html &&
               ! grep -Fq 'rows.push({merchant:"Amazon",price:null,' /tmp/catalogue-after.html &&
