@@ -18,13 +18,16 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: prixtracker-history
+  # Partagé avec Awin : les deux workflows reconstruisent data/home-deals.json.
+  group: prix-malin-price-data-refresh
   cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -48,4 +51,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "data: actualiser les historiques PrixTracker"
-          git push
+          for attempt in 1 2 3; do
+            git fetch origin "${GITHUB_REF_NAME}"
+            if ! git rebase "origin/${GITHUB_REF_NAME}"; then
+              git rebase --abort || true
+              echo "::error::La branche a changé sur les mêmes données pendant l'import PrixTracker ; aucune donnée précédente n'est écrasée."
+              exit 1
+            fi
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "La branche a avancé pendant la publication PrixTracker (tentative ${attempt}/3)."
+          done
+          echo "::error::Impossible de publier le snapshot PrixTracker après trois tentatives."
+          exit 1

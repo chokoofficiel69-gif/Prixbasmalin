@@ -14,7 +14,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: awin-product-catalogue
+  # Awin et PrixTracker publient tous deux data/home-deals.json.
+  group: prix-malin-price-data-refresh
   cancel-in-progress: false
 
 jobs:
@@ -91,7 +92,20 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/awin-products.json data/awin-sync-status.json data/home-deals.json
           git commit -m "Refresh authorized Awin product catalogue"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          for attempt in 1 2 3; do
+            git fetch origin "${GITHUB_REF_NAME}"
+            if ! git rebase "origin/${GITHUB_REF_NAME}"; then
+              git rebase --abort || true
+              echo "::error::La branche a changé sur les mêmes données pendant la synchronisation Awin ; aucune donnée précédente n'est écrasée."
+              exit 1
+            fi
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "La branche a avancé pendant la publication Awin (tentative ${attempt}/3)."
+          done
+          echo "::error::Impossible de publier le snapshot Awin après trois tentatives."
+          exit 1
       - name: Vérifier que le nouveau flux Awin est visible sur le site public
         if: steps.save.outputs.changed == 'true' && github.ref == 'refs/heads/main'
         env:
