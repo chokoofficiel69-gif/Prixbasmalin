@@ -148,7 +148,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  const merchantLink=(id,product)=>{
   const q=[product.brand&&!product.name.toLowerCase().includes(product.brand.toLowerCase())?product.brand:"",product.name].filter(Boolean).join(" ");
   const m=merchants[id];
-  if(m&&m[1])return {url:m[1](q),label:"Voir l’offre",affiliate:id==="amazon"};
+  if(m&&m[1])return {url:m[1](q),label:"Rechercher",affiliate:id==="amazon"};
   return {url:"https://www.google.com/search?"+new URLSearchParams({q:merchantName(id)+" "+q}),label:"Rechercher",affiliate:false};
  };
  const visual=(p,eager)=>p.image
@@ -156,7 +156,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   :'<div class="visual">'+pmProductArt(p.category,p.brand||p.category_label)+'</div>';
  // Photo indisponible : remplacer par l'illustration vectorielle.
  document.addEventListener("error",e=>{const img=e.target;if(img&&img.tagName==="IMG"&&img.closest(".visual")){img.parentNode.innerHTML=pmProductArt(img.dataset.category,img.dataset.brand);}},true);
- const card=p=>'<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p,false)+'<div class="c"><span class="cat">'+esc(p.category_label)+'</span><h3>'+esc(p.name)+'</h3><span class="n">'+p.offer_count+' offres à partir de</span><span class="pr">'+euro.format(p.min_price_eur)+'</span></div></a>';
+ const card=p=>'<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p,false)+'<div class="c"><span class="cat">'+esc(p.category_label)+'</span><h3>'+esc(p.name)+'</h3><span class="n">'+p.offer_count+' relevés historiques · plus bas relevé</span><span class="pr">'+euro.format(p.min_price_eur)+'</span></div></a>';
  const params=new URLSearchParams(location.search);
  const qInput=document.getElementById("q");
  qInput.value=params.get("q")||"";
@@ -171,7 +171,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  }
  function sourceNote(){
   const per=data.dataset_period||{};
-  return '<p class="source">Prix relevés par PrixTracker'+(per.from?" entre le "+fmtDate(per.from)+" et le "+fmtDate(per.to):"")+'. Ce sont des relevés datés : le prix du jour peut différer, vérifiez-le chez le marchand avant d’acheter. Source : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener" target="_blank">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Liens Amazon affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html">Crédits photos</a>.</p>';
+  return '<p class="source">Historique PrixTracker'+(per.from?" entre le "+fmtDate(per.from)+" et le "+fmtDate(per.to):"")+'. Ces montants sont des relevés passés, pas des offres actuelles ni des prix en temps réel. Les liens ouvrent une recherche chez le marchand : vérifiez la référence exacte, le prix final, le stock et la livraison avant achat. Source : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener" target="_blank">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Liens Amazon affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html">Crédits photos</a>.</p>';
  }
  function chart(history){
   if(!history||history.length<2)return '<p class="stamp">Pas assez de relevés pour tracer l’évolution.</p>';
@@ -183,21 +183,21 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   return '<div class="chart"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Évolution du prix le plus bas relevé, de '+euro.format(history[0].min_price_eur)+' à '+euro.format(history[history.length-1].min_price_eur)+'"><line x1="'+P+'" y1="'+(H-P)+'" x2="'+(W-P)+'" y2="'+(H-P)+'" stroke="#e3e7ee"/><text x="'+P+'" y="16" font-size="13" fill="#5b6474">'+euro.format(max)+'</text><text x="'+P+'" y="'+(H-8)+'" font-size="13" fill="#5b6474">'+euro.format(min)+'</text><path d="'+area+'" fill="#f05a00" fill-opacity=".10"/><path d="'+line+'" fill="none" stroke="#f05a00" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="5" fill="#f05a00"/></svg><div class="legend"><span>'+fmtDate(history[0].date)+'</span><span>Prix le plus bas relevé chaque jour</span><span>'+fmtDate(history[history.length-1].date)+'</span></div></div>';
  }
  function renderProduct(p){
-  setMeta(p.name+" au meilleur prix : comparez "+p.offer_count+" offres — Prix Malin",
-   p.name+" à partir de "+euro.format(p.min_price_eur)+" : comparez les prix relevés chez "+p.offer_count+" marchands (Amazon, Fnac, Darty, Cdiscount…). Historique et alerte prix.",
+  setMeta("Historique des prix de "+p.name+" — Prix Malin",
+   "Relevés historiques chez "+p.offer_count+" marchands jusqu’au "+fmtDate(p.last_date)+". Ce ne sont pas des offres actuelles : vérifiez le prix du jour chez le marchand.",
    "https://prixbasmalin.fr/produit.html?id="+encodeURIComponent(p.id));
   let sort="price",shown=8;
   const similar=data.products.filter(x=>x.category===p.category&&x.id!==p.id).slice(0,10);
   app.innerHTML='<nav class="crumbs" aria-label="Fil d’Ariane"><a href="/produit.html">Comparateur</a> › <a href="/produit.html?cat='+encodeURIComponent(p.category)+'">'+esc(p.category_label)+'</a></nav>'
    +'<article class="panel"><div class="hero"><div><h1>'+esc(p.name)+'</h1><div class="brand-line">'+esc(p.brand)+' · '+esc(p.category_label)+'</div>'
-   +'<div class="from">à partir de<strong>'+euro.format(p.min_price_eur)+'</strong></div><div class="range">Jusqu’à '+euro.format(p.max_price_eur)+' selon le marchand · écart de '+euro.format(p.max_price_eur-p.min_price_eur)+'</div></div>'+visual(p,true)+'</div>'
+   +'<div class="from">Plus bas relevé historique<strong>'+euro.format(p.min_price_eur)+'</strong></div><div class="range">Plus haut relevé : '+euro.format(p.max_price_eur)+' · écart observé : '+euro.format(p.max_price_eur-p.min_price_eur)+'</div></div>'+visual(p,true)+'</div>'
    +(p.image_credit?'<small class="pm-photo-credit">'+pmImageCredit(p.image_credit)+'</small>':'')
-   +'<a class="cta" href="#offres">Comparez '+p.offer_count+' offres</a>'
+   +'<a class="cta" href="#offres">Voir les relevés historiques</a>'
    +'<nav class="tabs"><a href="#details"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Détails du produit</a><a href="#evolution"><svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3"/></svg>Évolution du prix</a><a href="#alerte"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2 2M5 4 2 7M19 4l3 3"/></svg>Alerte prix</a></nav>'
-   +'<p class="notice">Prix relevés chez chaque marchand entre octobre et novembre 2026 : ils peuvent avoir changé. Le prix final s’affiche chez le marchand.</p></article>'
-   +'<section class="panel section" id="offres"><h2>Comparer les prix</h2><div class="sortbar"><button type="button" data-sort="price" class="on">Prix</button><button type="button" data-sort="date">Plus récents</button></div><div class="offers" id="offerList"></div><button type="button" class="more" id="moreBtn"></button><p class="stamp">Données datant du '+fmtDate(p.last_date)+' · source PrixTracker</p></section>'
+   +'<p class="notice">Historique PrixTracker : les montants ci-dessous sont des observations passées, pas des offres actuelles. Les liens ouvrent une recherche chez le marchand ; vérifiez la référence exacte, le prix final, la disponibilité et la livraison.</p></article>'
+   +'<section class="panel section" id="offres"><h2>Relevés historiques par marchand</h2><div class="sortbar"><button type="button" data-sort="price" class="on">Prix observé</button><button type="button" data-sort="date">Date du relevé</button></div><div class="offers" id="offerList"></div><button type="button" class="more" id="moreBtn"></button><p class="stamp">Données datant du '+fmtDate(p.last_date)+' · source PrixTracker</p></section>'
    +'<section class="panel section" id="evolution"><h2>Évolution du prix</h2>'+chart(p.history)+'</section>'
-   +'<section class="panel section" id="details"><h2>Détails du produit</h2><dl class="specs"><dt>Marque</dt><dd>'+esc(p.brand)+'</dd><dt>Catégorie</dt><dd>'+esc(p.category_label)+'</dd><dt>Marchands comparés</dt><dd>'+p.offer_count+'</dd><dt>Prix le plus bas</dt><dd>'+euro.format(p.min_price_eur)+'</dd><dt>Prix le plus haut</dt><dd>'+euro.format(p.max_price_eur)+'</dd><dt>Dernier relevé</dt><dd>'+fmtDate(p.last_date)+'</dd></dl></section>'
+   +'<section class="panel section" id="details"><h2>Détails du produit</h2><dl class="specs"><dt>Marque</dt><dd>'+esc(p.brand)+'</dd><dt>Catégorie</dt><dd>'+esc(p.category_label)+'</dd><dt>Marchands dans l’historique</dt><dd>'+p.offer_count+'</dd><dt>Plus bas relevé</dt><dd>'+euro.format(p.min_price_eur)+'</dd><dt>Plus haut relevé</dt><dd>'+euro.format(p.max_price_eur)+'</dd><dt>Dernier relevé</dt><dd>'+fmtDate(p.last_date)+'</dd></dl></section>'
    +'<section class="panel section" id="alerte"><div class="alert-box"><div><h2>Alerte prix</h2><span class="brand-line">Recevez un e-mail quand le prix baisse.</span></div><a href="/catalogue.html?alerte=1">Créer une alerte gratuite</a></div></section>'
    +(similar.length?'<section class="section"><div class="title-row"><h2>Produits similaires</h2></div><div class="rail">'+similar.map(card).join("")+'</div></section>':"")
    +sourceNote();
@@ -207,7 +207,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
    const best=Math.min(...p.offers.map(o=>o.price_eur));
    list.innerHTML=offers.slice(0,shown).map(o=>{
     const link=merchantLink(o.merchant,p);const isBest=o.price_eur===best;
-    return '<div class="offer'+(isBest?' best':'')+'"><div class="p"><strong>'+euro.format(o.price_eur)+'</strong><small>Relevé du '+fmtDate(o.date)+'</small>'+(isBest?'<em>Meilleur prix relevé</em>':'')+'</div><div class="m"><b>'+esc(merchantName(o.merchant))+'</b><small>Livraison : voir chez le marchand</small></div><a class="go" href="'+esc(link.url)+'" target="_blank" rel="'+(link.affiliate?"sponsored nofollow noopener":"nofollow noopener")+'" aria-label="'+esc(link.label+" "+p.name+" chez "+merchantName(o.merchant))+'">'+link.label+'</a></div>';
+    return '<div class="offer'+(isBest?' best':'')+'"><div class="p"><strong>'+euro.format(o.price_eur)+'</strong><small>Relevé du '+fmtDate(o.date)+'</small>'+(isBest?'<em>Plus bas relevé</em>':'')+'</div><div class="m"><b>'+esc(merchantName(o.merchant))+'</b><small>Livraison : voir chez le marchand</small></div><a class="go" href="'+esc(link.url)+'" target="_blank" rel="'+(link.affiliate?"sponsored nofollow noopener":"nofollow noopener")+'" aria-label="'+esc(link.label+" "+p.name+" chez "+merchantName(o.merchant))+'">'+link.label+'</a></div>';
    }).join("");
    more.hidden=shown>=offers.length;more.textContent="Voir les "+(offers.length-shown)+" autres offres";
   };
@@ -224,10 +224,10 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   const cats=[...new Map(data.products.map(p=>[p.category,p.category_label]))];
   const matchTerm=(p,t)=>norm(p.name+" "+p.brand+" "+p.category_label).includes(t)||(catWords[t]&&String(p.category).startsWith(catWords[t]));
   const found=data.products.filter(p=>(!cat||p.category===cat)&&(!q||q.split(" ").every(t=>matchTerm(p,t))));
-  setMeta(q?"Prix "+params.get("q")+" — comparateur Prix Malin":"Comparateur de prix high-tech — Prix Malin",document.querySelector('meta[name="description"]').content,"https://prixbasmalin.fr/produit.html"+(cat?"?cat="+encodeURIComponent(cat):""));
+  setMeta(q?"Historique des prix pour "+params.get("q")+" — Prix Malin":"Historique des prix high-tech — Prix Malin","Relevés historiques PrixTracker par marchand ; les prix affichés ne sont pas des offres en direct. Vérifiez le prix actuel chez le marchand.","https://prixbasmalin.fr/produit.html"+(cat?"?cat="+encodeURIComponent(cat):""));
   const deals=data.products.filter(p=>p.offer_count>=5).map(p=>({p,gap:(p.max_price_eur-p.min_price_eur)/p.max_price_eur})).sort((a,b)=>b.gap-a.gap).slice(0,10).map(x=>x.p);
-  app.innerHTML=(!q&&!cat?'<section class="section"><div class="title-row"><h2>Les plus gros écarts de prix</h2><span>même produit, prix différents</span></div><div class="rail">'+deals.map(card).join("")+'</div></section>':"")
-   +'<section class="section"><div class="title-row"><h1>'+(q?"Résultats pour « "+esc(params.get("q"))+" »":cat?esc((cats.find(c=>c[0]===cat)||[])[1]||"Produits"):"Tous les produits comparés")+'</h1><span>'+found.length+' produits</span></div>'
+  app.innerHTML=(!q&&!cat?'<section class="section"><div class="title-row"><h2>Les plus grands écarts historiques</h2><span>écarts observés dans les relevés PrixTracker</span></div><div class="rail">'+deals.map(card).join("")+'</div></section>':"")
+   +'<section class="section"><div class="title-row"><h1>'+(q?"Résultats pour « "+esc(params.get("q"))+" »":cat?esc((cats.find(c=>c[0]===cat)||[])[1]||"Produits"):"Produits avec historique de prix")+'</h1><span>'+found.length+' produits</span></div>'
    +'<div class="chips"><button type="button" data-cat=""'+(!cat?' class="on"':'')+'>Tout</button>'+cats.map(([k,l])=>'<button type="button" data-cat="'+esc(k)+'"'+(cat===k?' class="on"':'')+'>'+esc(l)+'</button>').join("")+'</div>'
    +(found.length?'<div class="grid">'+found.map(card).join("")+'</div>':'<div class="empty"><p>Pas encore de comparatif pour « '+esc(params.get("q")||"")+' ».</p><p><a class="cta" style="max-width:420px;margin:10px auto" href="/catalogue.html?q='+encodeURIComponent(params.get("q")||"")+'">Chercher dans le catalogue →</a><a class="cta" style="max-width:420px;margin:10px auto;background:#232f3e;border:2px solid #ff9900" href="https://www.amazon.fr/s?'+new URLSearchParams({k:params.get("q")||"",tag:AMAZON_TAG})+'" target="_blank" rel="sponsored nofollow noopener">Voir sur Amazon ↗</a></p></div>')
    +'</section>'+sourceNote();
