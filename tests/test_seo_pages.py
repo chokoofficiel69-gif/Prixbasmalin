@@ -23,6 +23,10 @@ class SeoPagesTests(unittest.TestCase):
         self.assertIn('"@type": "BreadcrumbList"', page)
         self.assertIn("tag=prixbasmalin2-21", page)
         self.assertIn('rel="sponsored nofollow noopener"', page)
+        # Bouton Amazon affilié bien visible, et liens de recherche honnêtement libellés.
+        self.assertIn("Voir le prix du jour sur Amazon ↗", page)
+        self.assertIn(">Rechercher</a>", page)
+        self.assertNotIn(">Voir l’offre</a>", page)
 
     def test_sitemap_and_robots_list_seo_pages(self):
         sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
