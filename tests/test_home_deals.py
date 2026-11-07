@@ -87,6 +87,8 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn("Prix TTC actuel indisponible", page)
         self.assertIn("tab.hidden=!hasVerifiedGiftPrice", page)
         self.assertIn("Prix TTC vérifié", page)
+        self.assertIn("Livraison non renseignée", page)
+        self.assertIn("Livraison "+'"+euro.format(g.shipping_eur)+"'+ "", page)
 
     def test_404_historical_cards_do_not_use_art_placeholders(self):
         page = (ROOT / "404.html").read_text(encoding="utf-8")
