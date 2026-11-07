@@ -77,13 +77,13 @@ class HomeDealsTests(unittest.TestCase):
     def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
         awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
         tracker = (ROOT / ".github" / "workflows" / "import-prixtracker.yml").read_text(encoding="utf-8")
-        shared_group = "group: prix-malin-price-data-refresh"
-        self.assertIn(shared_group, awin)
-        self.assertIn(shared_group, tracker)
-        self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', awin)
-        self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', tracker)
-        self.assertIn("trois tentatives", awin)
-        self.assertIn("trois tentatives", tracker)
+        for workflow in (awin, tracker):
+            self.assertIn("prix-malin-price-data-refresh", workflow)
+            self.assertIn("github.event_name == 'pull_request'", workflow)
+            self.assertIn("github.event.pull_request.number", workflow)
+            self.assertIn("cancel-in-progress: false", workflow)
+            self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', workflow)
+            self.assertIn("trois tentatives", workflow)
         self.assertIn("github.event.pull_request.head.sha || github.ref", tracker)
 
     def test_homepage_sections_partners_and_affiliate_rel(self):

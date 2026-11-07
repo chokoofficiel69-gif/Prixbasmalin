@@ -8,16 +8,18 @@ on:
     branches: [main, awin-direct-feed-fix-2026-11-04, fix/awin-gtin-mpn-aliases]
     paths:
       - "price-engine/sync-awin-products.mjs"
-      - ".github/workflows/sync-awin-products.yml"
       - "scripts/build_home_deals.py"
+      - "scripts/build_seo_pages.py"
       - "tests/test_home_deals.py"
+      - "tests/test_seo_pages.py"
+      - ".github/workflows/sync-awin-products.yml"
 
 permissions:
   contents: write
 
 concurrency:
   # Awin et PrixTracker publient tous deux data/home-deals.json.
-  group: prix-malin-price-data-refresh
+  group: ${{ github.event_name == 'pull_request' && format('prix-malin-pr-{0}-{1}', github.event.pull_request.number, github.workflow) || 'prix-malin-price-data-refresh' }}
   cancel-in-progress: false
 
 jobs:
@@ -76,8 +78,10 @@ jobs:
           python3 scripts/build_home_deals.py
           python3 scripts/build_seo_pages.py
           python3 scripts/build_sitemap.py
-      - name: Tester les règles d'affichage des prix de la vitrine
-        run: python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+      - name: Tester les pages cadeaux et historiques publiées
+        run: |
+          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+          python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
       - name: Enregistrer le catalogue s'il a changé
         id: save
         shell: bash

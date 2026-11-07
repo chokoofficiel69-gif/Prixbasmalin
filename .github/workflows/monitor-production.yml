@@ -33,6 +33,12 @@ on:
       - ".github/workflows/refresh-prices.yml"
       - ".github/workflows/sync-awin-products.yml"
       - "data/awin-products.json"
+      - "data/home-deals.json"
+      - "data/fiches-produits.json"
+      - "scripts/build_seo_pages.py"
+      - "prix/**"
+      - "idees-cadeaux/**"
+      - "sitemap.xml"
   push:
     branches:
       - main
@@ -53,6 +59,12 @@ on:
       - ".github/workflows/refresh-prices.yml"
       - ".github/workflows/sync-awin-products.yml"
       - "data/awin-products.json"
+      - "data/home-deals.json"
+      - "data/fiches-produits.json"
+      - "scripts/build_seo_pages.py"
+      - "prix/**"
+      - "idees-cadeaux/**"
+      - "sitemap.xml"
 
 permissions:
   contents: read
@@ -228,7 +240,7 @@ jobs:
             "https://prixbasmalin.fr/js/track-outbound.js" --output /tmp/track-outbound.js
           grep -q "refHost !== ownHost" /tmp/track-outbound.js
       - name: Vérifier les garde-fous prix et le rail mobile après publication
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && (github.event_name != 'push' || !contains(github.event.head_commit.message, 'Merge pull request'))
         shell: bash
         run: |
           set -euo pipefail
@@ -269,6 +281,23 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/historique-prix.html --output /tmp/historique-prix.html
           grep -q "Les prix dans le temps" /tmp/historique-prix.html
+      - name: Vérifier les pages SEO historiques publiques
+        if: github.event_name != 'pull_request'
+        run: |
+          set -e
+          cache_bust="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          curl --fail --silent --show-error --location --retry 12 --retry-all-errors --retry-delay 5 --max-time 25 \
+            "https://prixbasmalin.fr/prix/index.html?pm-deploy-check=${cache_bust}" --output /tmp/prix-index.html
+          curl --fail --silent --show-error --location --retry 12 --retry-all-errors --retry-delay 5 --max-time 25 \
+            "https://prixbasmalin.fr/prix/airpods-4.html?pm-deploy-check=${cache_bust}" --output /tmp/prix-airpods.html
+          curl --fail --silent --show-error --location --retry 12 --retry-all-errors --retry-delay 5 --max-time 25 \
+            "https://prixbasmalin.fr/idees-cadeaux/index.html?pm-deploy-check=${cache_bust}" --output /tmp/idees-cadeaux.html
+          grep -Fq "Historique des prix high-tech" /tmp/prix-index.html
+          grep -Fq "pas des offres en direct" /tmp/prix-index.html
+          grep -Fq "Historique des prix de AirPods 4" /tmp/prix-airpods.html
+          grep -Fq "pas des offres actuelles" /tmp/prix-airpods.html
+          grep -Fq "date marchande récente" /tmp/idees-cadeaux.html
+          echo "Pages SEO historiques et garde-fous de prix visibles publiquement."
       - name: Vérifier les relevés historiques publiés
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
