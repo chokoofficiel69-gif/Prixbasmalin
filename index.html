@@ -382,16 +382,16 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   for(const sheet of comparisons){
    const url="/produit.html?id="+encodeURIComponent(sheet.id);
    const card=document.createElement("article");card.className="pm-history-card pm-cmp-card";
-   const media=document.createElement("a");media.className="pm-cmp-media";media.href=url;media.setAttribute("aria-label","Comparer les prix "+sheet.name);
+   const media=document.createElement("a");media.className="pm-cmp-media";media.href=url;media.setAttribute("aria-label","Voir les relevés historiques "+sheet.name);
    if(sheet.image){const img=document.createElement("img");img.setAttribute("data-pm-art","");img.dataset.category=sheet.category;img.dataset.brand=sheet.brand;img.alt=sheet.name;img.loading="lazy";img.decoding="async";img.src=sheet.image;media.append(img);}
    else{media.insertAdjacentHTML("beforeend",pmProductArt(sheet.category,sheet.brand));}
-   const badge=document.createElement("span");badge.className="pm-cmp-badge";badge.textContent=sheet.offer_count+" marchands";media.append(badge);
+   const badge=document.createElement("span");badge.className="pm-cmp-badge";badge.textContent=sheet.offer_count+" marchands relevés";media.append(badge);
    const body=document.createElement("div");body.className="pm-cmp-body";
    const cat=document.createElement("span");cat.className="pm-cmp-cat";cat.textContent=sheet.brand+" · "+sheet.category_label;
    const title=document.createElement("h3");const titleLink=document.createElement("a");titleLink.href=url;titleLink.textContent=sheet.name;title.append(titleLink);
    const best=sheet.offers[0];
    const bestBox=document.createElement("div");bestBox.className="pm-cmp-best";
-   bestBox.innerHTML='<small>Meilleur prix relevé</small>';
+   bestBox.innerHTML='<small>Prix le plus bas observé</small>';
    const bestPrice=document.createElement("strong");bestPrice.textContent=euro.format(best.price_eur);
    const bestShop=document.createElement("span");bestShop.textContent="chez "+pmMerchantLabel(best.merchant);
    bestBox.append(bestPrice,bestShop);
@@ -405,13 +405,13 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     li.append(shop,bar,price);podium.append(li);
    });
    const rest=document.createElement("p");rest.className="pm-cmp-rest";
-   rest.textContent=sheet.offer_count>3?"+ "+(sheet.offer_count-3)+" autres marchands, jusqu’à "+euro.format(sheet.max_price_eur):"Relevé du "+dateFr(sheet.last_date);
-   const more=document.createElement("a");more.className="pm-cmp-cta pm-history-more";more.href=url;more.textContent="Comparer les "+sheet.offer_count+" prix →";
+   rest.textContent=sheet.offer_count>3?"+ "+(sheet.offer_count-3)+" autres relevés marchands, jusqu’à "+euro.format(sheet.max_price_eur):"Dernier relevé : "+dateFr(sheet.last_date);
+   const more=document.createElement("a");more.className="pm-cmp-cta pm-history-more";more.href=url;more.textContent="Voir les "+sheet.offer_count+" relevés →";
    const buy=document.createElement("a");buy.className="pm-cmp-amazon";
    buy.href="https://www.amazon.fr/s?k="+encodeURIComponent((sheet.brand&&!sheet.name.toLowerCase().includes(sheet.brand.toLowerCase())?sheet.brand+" ":"")+sheet.name)+"&tag=prixbasmalin2-21";
    buy.target="_blank";buy.rel="sponsored nofollow noopener noreferrer";buy.textContent="Voir sur Amazon ↗";
    buy.setAttribute("aria-label","Voir "+sheet.name+" sur Amazon (lien affilié)");
-   const stamp=document.createElement("small");stamp.className="pm-cmp-stamp";stamp.textContent="Prix relevés jusqu’au "+dateFr(sheet.last_date)+" · à confirmer chez le marchand";
+   const stamp=document.createElement("small");stamp.className="pm-cmp-stamp";stamp.textContent="Relevés historiques jusqu’au "+dateFr(sheet.last_date)+" · prix actuel à vérifier chez le marchand";
    body.append(cat,title,bestBox,podium,rest,more,buy,stamp);
    card.append(media,body);fragment.append(card);
   }
@@ -469,14 +469,14 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 </section>
 <section id="pm-top-prices" class="pm-hp-section" aria-labelledby="pm-top-prices-title">
   <div class="pm-hp-head">
-    <div><h2 id="pm-top-prices-title">🔥 Meilleurs prix <span>du moment</span></h2><small>Les produits high-tech les plus comparés · prix relevés chez 8 à 24 marchands</small></div>
+    <div><h2 id="pm-top-prices-title">Prix observés <span>(historique)</span></h2><small>Relevés PrixTracker datés · pas des offres en direct</small></div>
     <a class="pm-hp-all" href="/produit.html">Tout le comparateur →</a>
   </div>
   <div id="pm-top-prices-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
 </section>
 <section id="pm-gifts" class="pm-hp-section pm-hp-gifts" aria-labelledby="pm-gifts-title">
   <div class="pm-hp-head">
-    <div><h2 id="pm-gifts-title">🎁 Idées cadeaux <span>de Noël</span></h2><small>Parfums, bougies, maison, high-tech… avec photo et prix du marchand</small></div>
+    <div><h2 id="pm-gifts-title">🎁 Idées cadeaux <span>de Noël</span></h2><small>Parfums, bougies, maison, high-tech… prix TTC affichés seulement si date marchande <48 h et TVA confirmée</small></div>
     <a class="pm-hp-all" href="/catalogue.html">Voir plus d’idées →</a>
   </div>
   <div class="pm-hp-tabs" role="tablist" aria-label="Idées cadeaux par budget">
@@ -489,7 +489,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <button type="button" role="tab" aria-selected="false" data-gift="tech">High-tech</button>
   </div>
   <div id="pm-gifts-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
-  <p class="pm-hp-note">Prix indiqués par les marchands (flux partenaires) ou relevés datés, à confirmer sur leur site. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html" style="color:#ffad66">Crédits photos</a>.</p>
+  <p class="pm-hp-note">Prix TTC affichés uniquement si la date marchande est de moins de 48 h et si la TVA incluse est confirmée. Sinon, le prix est masqué. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html" style="color:#ffad66">Crédits photos</a>.</p>
 </section>
 <section id="pm-visual-gallery" class="pm-visual-gallery" aria-labelledby="pm-visual-gallery-title">
   <div class="section-head">
@@ -509,20 +509,13 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   </div>
 </section><section id="live-comparisons" class="pm-history-comparisons" aria-labelledby="pm-history-title">
   <div class="section-head">
-    <div><h2 id="pm-history-title">💶 Qui est le moins cher ?</h2><small>Comparaisons de prix chez 5 à 24 marchands · relevés PrixTracker</small></div>
+    <div><h2 id="pm-history-title">💶 Prix observés par marchand</h2><small>Relevés historiques PrixTracker chez 5 à 24 marchands · pas d’offres en direct</small></div>
     <a class="pm-history-badge" href="/produit.html" style="text-decoration:none">Voir tous les produits comparés →</a>
   </div>
   <p class="pm-history-intro">Le même produit, des prix très différents : voyez d’un coup d’œil qui est le moins cher. Prix relevés et datés, à confirmer chez le marchand.</p>
-  <div id="pm-history-status" class="pm-history-status" role="status" aria-live="polite">Chargement des comparaisons…</div>
-  <div id="pm-history-list" class="pm-history-list" aria-label="Produits et comparaisons"><article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://cdn8.web4s.vn/media/products/3605/tai-nghe-airpods-pro-3-2025-chinh-hang-05.jpg" alt="Apple AirPods Pro 3" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple AirPods Pro 3</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+AirPods+Pro+3&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&amp;imwidth=700" alt="Polo Lacoste L.12.12 Original" loading="lazy" decoding="async"><span class="pm-discovery-brand">Lacoste</span><h3>Polo Lacoste L.12.12 Original</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=polo+Lacoste+L.12.12+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://lsco.scene7.com/is/image/lsco/005013220-front-pdp?fit=crop%2C1&amp;fmt=jpeg&amp;hei=700&amp;op_usm=0.6%2C0.6%2C8&amp;qlt=85&amp;resMode=sharp2&amp;wid=700" alt="Jean Levi’s 501 Original" loading="lazy" decoding="async"><span class="pm-discovery-brand">Levi’s</span><h3>Jean Levi’s 501 Original</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Levi%27s+501+Original+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://contents.mediadecathlon.com/p2782988/k%2432c148ca8d95625f2f9b9308de024676/picture.jpg?f=700x0&amp;format=auto" alt="Pantalon de jogging PUMA Active" loading="lazy" decoding="async"><span class="pm-discovery-brand">PUMA</span><h3>Pantalon de jogging PUMA Active</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=PUMA+pantalon+jogging+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://lsco.scene7.com/is/image/lsco/005014021-front-pdp?fit=crop%2C1&amp;fmt=jpeg&amp;hei=700&amp;op_usm=0.6%2C0.6%2C8&amp;qlt=85&amp;resMode=sharp2&amp;wid=700" alt="Levi’s 501 Original noir" loading="lazy" decoding="async"><span class="pm-discovery-brand">Levi’s</span><h3>Levi’s 501 Original noir</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Levi%27s+501+noir+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple iPhone 18 Pro</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+iPhone+18+Pro&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.apple.com/newsroom/images/2025/09/apple-debuts-apple-watch-series-11-featuring-groundbreaking-health-insights/article/Apple-Watch-Series-11-aluminum-space-gray-250909_inline.jpg.large.jpg" alt="Apple Watch Series 11" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple Watch Series 11</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+Watch+Series+11&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.samsungmobile.co.il/pub/media/catalog/product/cache/07c27feb0b57ff821c444b41a5827060/e/0/E000001194_0-17884961561746791.jpg" alt="Samsung Galaxy S26 FE" loading="lazy" decoding="async"><span class="pm-discovery-brand">Samsung</span><h3>Samsung Galaxy S26 FE</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Samsung+Galaxy+S26+FE+5G&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article></div>
-  <p class="pm-history-source">Source : PrixTracker · Licence Ouverte 2.0 · prix observés, sans lien d’achat ni vérification du stock.</p>
+  <div id="pm-history-status" class="pm-history-status" role="status" aria-live="polite">Chargement des relevés historiques…</div>
+  <div id="pm-history-list" class="pm-history-list" aria-label="Relevés historiques"></div>
+  <p class="pm-history-source">Source : PrixTracker · Licence Ouverte 2.0. Prix historiques ; liens marchands directs et stock non fournis. Les liens Amazon ouvrent une recherche affiliée.</p>
 </section>
 <section id="categories"><div class="section-head"><h2>🔥 Nos grandes catégories</h2><a class="all-categories-link" href="catalogue.html">Voir tout le catalogue →</a></div><div class="categories">
 <a class="cat" href="guide-cadeaux.html"><img src="https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&q=80" alt=""><div>Idées cadeaux</div></a>
@@ -1533,25 +1526,38 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     return '<div class="pm-hp-media">'+pmProductArt(category,brand)+'</div>';
   };
   const topCard=p=>'<a class="pm-hp-card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p.image,p.category,p.brand,p.name)
-    +'<span class="pm-hp-badge">'+p.offer_count+' marchands</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
-    +'<span class="pm-hp-from">'+p.offer_count+' offres à partir de</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Relevé du '+day(p.last_date)+'</span></div></a>';
-  const giftCard=g=>'<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(g.image,"",g.merchant,g.name)
-    +(g.shipping_eur===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
-    +'<span class="pm-hp-from">Prix du marchand</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">'+(g.price_date_kind==="merchant"?"Indiqué le ":"Flux du ")+day(g.price_date)+' · à confirmer</span></div></a>';
+    +'<span class="pm-hp-badge">'+p.offer_count+' marchands relevés</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
+    +'<span class="pm-hp-from">Prix minimum observé</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Dernier relevé : '+day(p.last_date)+'</span></div></a>';
+  const giftCard=g=>{
+    const priceOk=g.price_status==="verified_current"&&Number.isFinite(Number(g.price_eur));
+    const reasons={missing_merchant_date:"Date de mise à jour marchand absente",invalid_merchant_date:"Date marchand invalide",stale:"Dernier relevé marchand trop ancien",tax_unconfirmed:"TVA incluse non confirmée",invalid_price:"Prix non valide"};
+    const reason=reasons[g.price_status_reason]||"Prix actuel non vérifié";
+    const dateLabel=g.price_date_kind==="merchant"?(priceOk?"Mise à jour marchande le ":"Dernier relevé marchand le "):"Flux importé le ";
+    const priceBlock=priceOk
+      ?'<span class="pm-hp-from">Prix TTC vérifié</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">'+dateLabel+day(g.price_date)+'</span>'
+      :'<span class="pm-hp-from">Prix TTC actuel indisponible</span><span class="pm-hp-meta">'+esc(reason)+(g.price_date?' · '+dateLabel+day(g.price_date):'')+'</span>';
+    return '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(g.image,"",g.merchant,g.name)
+      +(priceOk&&g.shipping_eur===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
+      +priceBlock+'</div></a>';
+  };
   document.querySelectorAll(".pm-partner[data-href]").forEach(a=>{
     const href=a.getAttribute("data-href");
     if(/^https:\/\//i.test(href||"")){a.href=href;a.hidden=false;}
   });
   const fail=rail=>{if(rail)rail.innerHTML='<p class="pm-hp-note">La sélection se recharge, réessayez dans un instant.</p>';};
-  const sheetsReady=fetch("/data/fiches-produits.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
   fetch("/data/home-deals.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(data=>{
     const topRail=document.getElementById("pm-top-prices-rail"),giftRail=document.getElementById("pm-gifts-rail");
     if(topRail)topRail.innerHTML=(data.top||[]).map(topCard).join("")||'<p class="pm-hp-note">Comparaisons en cours de mise à jour.</p>';
     const gifts=Array.isArray(data.gifts)?data.gifts:[];
+    const hasVerifiedGiftPrice=gifts.some(g=>g.price_status==="verified_current"&&Number.isFinite(Number(g.price_eur)));
+    const budgetKeys=new Set(["moins-30","30-60","60-100","plus-100"]);
+    document.querySelectorAll("#pm-gifts [data-gift]").forEach(tab=>{
+      if(budgetKeys.has(tab.dataset.gift))tab.hidden=!hasVerifiedGiftPrice;
+    });
     const showGifts=key=>{
       if(!giftRail)return;
       const priority={parfum:0,bougie:1,tech:2,mode:3,maison:4};
-      const list=key==="all"?gifts.map((g,i)=>[g,i]).sort((a,b)=>((priority[a[0].family]??9)-(priority[b[0].family]??9))||a[1]-b[1]).map(x=>x[0]):gifts.filter(g=>g.band===key||g.family===key);
+      const list=key==="all"?gifts.map((g,i)=>[g,i]).sort((a,b)=>((priority[a[0].family]??9)-(priority[b[0].family]??9))||a[1]-b[1]).map(x=>x[0]):gifts.filter(g=>g.family===key||(g.price_status==="verified_current"&&g.band===key));
       giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")||'<p class="pm-hp-note">Pas encore d’idée dans cette gamme : essayez une autre.</p>';
       giftRail.scrollLeft=0;
     };
@@ -1561,29 +1567,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     }));
     showGifts("all");
   }).catch(()=>{fail(document.getElementById("pm-top-prices-rail"));fail(document.getElementById("pm-gifts-rail"));});
-  // Ajoute le prix comparé aux cartes de l'accueil dont le nom correspond exactement à une fiche produit.
-  sheetsReady.then(data=>{
-    if(!data||!Array.isArray(data.products))return;
-    const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
-    const index=new Map();
-    data.products.forEach(s=>[norm(s.name),norm(s.brand+" "+s.name)].forEach(k=>{if(k&&!index.has(k))index.set(k,s);}));
-    const enhance=()=>{
-      document.querySelectorAll(".pm-visual-card,.new-arrival,#products .product,.pm-discovery-card").forEach(card=>{
-        if(card.dataset.pmPriced)return;
-        const titleEl=card.querySelector("h3,.pname,.name");
-        const sheet=index.get(norm(card.dataset.name||""))||index.get(norm(titleEl&&titleEl.textContent));
-        if(!sheet)return;
-        card.dataset.pmPriced="1";
-        const tag=document.createElement("div");tag.className="pm-hp-price-tag";
-        tag.innerHTML='<small>'+sheet.offer_count+' offres à partir de</small><strong>'+euro.format(sheet.min_price_eur)+'</strong>';
-        const cta=[...card.querySelectorAll("a")].pop();
-        if(cta){cta.href="/produit.html?id="+encodeURIComponent(sheet.id);cta.removeAttribute("target");cta.textContent="Comparer les "+sheet.offer_count+" prix →";cta.parentNode.insertBefore(tag,cta);}
-        else{(titleEl||card).after(tag);}
-      });
-    };
-    enhance();
-    ["pm-visual-gallery-grid","pm-history-list","products"].forEach(id=>{const el=document.getElementById(id);if(el)new MutationObserver(enhance).observe(el,{childList:true});});
-  });
+
 })();
 </script>
 </body></html>
