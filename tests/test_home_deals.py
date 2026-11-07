@@ -42,6 +42,7 @@ class HomeDealsTests(unittest.TestCase):
             product("Fresh TTC", "A", 59.9, merchantUpdatedAt=fresh_date, priceTaxStatus="included", shippingPriceValue=0),
             product("Stale TTC", "B", 49.9, merchantUpdatedAt=stale_date, priceTaxStatus="included", shippingPriceValue=0),
             product("Tax unclear", "C", 39.9, merchantUpdatedAt=fresh_date, priceTaxStatus="unspecified", shippingPriceValue=0),
+            product("Fresh no shipping", "D", 29.9, merchantUpdatedAt=fresh_date, priceTaxStatus="included"),
         ]}
         gifts = {g["name"]: g for g in deals.build_gifts(awin, now=now)}
         self.assertEqual(gifts["Fresh TTC"]["price_status"], "verified_current")
@@ -52,6 +53,8 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIsNone(gifts["Stale TTC"]["price_eur"])
         self.assertEqual(gifts["Tax unclear"]["price_status_reason"], "tax_unconfirmed")
         self.assertIsNone(gifts["Tax unclear"]["price_eur"])
+        self.assertEqual(gifts["Fresh no shipping"]["price_status"], "verified_current")
+        self.assertIsNone(gifts["Fresh no shipping"]["shipping_eur"])
 
     def test_gifts_alternate_merchants(self):
         awin = {"products": [product(f"Parfum {i}", m, 20 + i) for m in ("A", "B") for i in range(3)]}
@@ -87,6 +90,8 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn("Prix TTC actuel indisponible", page)
         self.assertIn("tab.hidden=!hasVerifiedGiftPrice", page)
         self.assertIn("Prix TTC vérifié", page)
+        self.assertIn("g.price_eur!==null&&g.price_eur!==undefined", page)
+        self.assertIn("g.shipping_eur!==null&&g.shipping_eur!==undefined", page)
         self.assertIn("Livraison non renseignée", page)
         self.assertIn("euro.format(g.shipping_eur)", page)
         self.assertIn("g.shipping_eur!==null&&g.shipping_eur!==undefined", page)
