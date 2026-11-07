@@ -265,6 +265,7 @@ def product_page(p, sheets, period):
 <div class="hero"><div><h1>Historique des prix de {e(p['name'])}</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
 <div class="from">Dernier prix observé le {date_fr(best['date'])}<strong>{euro(p['min_price_eur'])}</strong>chez {e(cheapest_names)} · relevé historique</div></div>{visual(p)}</div>
 {credit}<a class="cta" href="#prix">Voir les relevés historiques</a>
+<a class="cta" style="background:#ff9900;color:#111" href="{e(MERCHANTS['amazon'][1](q))}" target="_blank" rel="sponsored nofollow noopener">Rechercher sur Amazon ↗</a>
 <p class="notice">Historique PrixTracker : les montants ci-dessous sont des observations passées, pas des offres actuelles. Les liens ouvrent une recherche chez le marchand ; vérifiez la référence exacte, le prix final, la disponibilité et la livraison.</p>
 </article>
 <section class="panel" id="prix"><h2>Relevés historiques par marchand pour {e(p['name'])}</h2>
