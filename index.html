@@ -469,24 +469,24 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 </section>
 <section id="pm-top-prices" class="pm-hp-section" aria-labelledby="pm-top-prices-title">
   <div class="pm-hp-head">
-    <div><h2 id="pm-top-prices-title">🔥 Meilleurs prix <span>du moment</span></h2><small>Les produits high-tech les plus comparés · prix relevés chez 8 à 24 marchands</small></div>
+    <div><h2 id="pm-top-prices-title">Prix observés <span>dans l’historique</span></h2><small>Produits high-tech les plus suivis · relevés PrixTracker, pas des offres en direct</small></div>
     <a class="pm-hp-all" href="/produit.html">Tout le comparateur →</a>
   </div>
   <div id="pm-top-prices-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
 </section>
 <section id="pm-gifts" class="pm-hp-section pm-hp-gifts" aria-labelledby="pm-gifts-title">
   <div class="pm-hp-head">
-    <div><h2 id="pm-gifts-title">🎁 Idées cadeaux <span>de Noël</span></h2><small>Parfums, bougies, maison, high-tech… avec photo et prix du marchand</small></div>
+    <div><h2 id="pm-gifts-title">🎁 Idées cadeaux <span>de Noël</span></h2><small>Sélection issue des flux marchands autorisés ; prix affichés seulement si date marchande récente et TTC confirmé</small></div>
     <a class="pm-hp-all" href="/catalogue.html">Voir plus d’idées →</a>
   </div>
   <div class="pm-hp-tabs" role="tablist" aria-label="Idées cadeaux par budget">
     <button type="button" role="tab" aria-selected="true" data-gift="all">Tout</button>
     <button type="button" role="tab" aria-selected="false" data-gift="parfum">Parfums</button>
-    <button type="button" role="tab" aria-selected="false" data-gift="moins-30">Moins de 30 €</button>
-    <button type="button" role="tab" aria-selected="false" data-gift="30-60">30 à 60 €</button>
-    <button type="button" role="tab" aria-selected="false" data-gift="60-100">60 à 100 €</button>
-    <button type="button" role="tab" aria-selected="false" data-gift="plus-100">100 € et +</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="bougie">Bougies &amp; bien-être</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="maison">Maison</button>
     <button type="button" role="tab" aria-selected="false" data-gift="tech">High-tech</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="mode">Mode</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="a-confirmer">Prix à confirmer</button>
   </div>
   <div id="pm-gifts-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
   <p class="pm-hp-note">Prix indiqués par les marchands (flux partenaires) ou relevés datés, à confirmer sur leur site. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html" style="color:#ffad66">Crédits photos</a>.</p>
@@ -1532,12 +1532,28 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     if(image)return '<div class="pm-hp-media"><img src="'+esc(image)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-pm-art data-category="'+esc(category)+'" data-brand="'+esc(brand)+'"></div>';
     return '<div class="pm-hp-media">'+pmProductArt(category,brand)+'</div>';
   };
+  const giftPriceIsCurrent=g=>{
+    const raw=String(g.price_date||"").trim();
+    const normalized=/^\d{4}-\d{2}-\d{2}(?: \d{2}:\d{2}:\d{2})?$/.test(raw)?raw.replace(" ","T")+"Z":raw;
+    const checkedAt=Date.parse(normalized),age=Date.now()-checkedAt;
+    return g.price_verified===true&&g.price_date_kind==="merchant"&&g.price_tax_status==="included"&&
+      Number.isFinite(Number(g.price_eur))&&Number(g.price_eur)>0&&Number.isFinite(checkedAt)&&
+      age>=-5*60*1000&&age<=48*60*60*1000;
+  };
   const topCard=p=>'<a class="pm-hp-card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p.image,p.category,p.brand,p.name)
-    +'<span class="pm-hp-badge">'+p.offer_count+' marchands</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
-    +'<span class="pm-hp-from">'+p.offer_count+' offres à partir de</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Relevé du '+day(p.last_date)+'</span></div></a>';
-  const giftCard=g=>'<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(g.image,"",g.merchant,g.name)
-    +(g.shipping_eur===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
-    +'<span class="pm-hp-from">Prix du marchand</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">'+(g.price_date_kind==="merchant"?"Indiqué le ":"Flux du ")+day(g.price_date)+' · à confirmer</span></div></a>';
+    +'<span class="pm-hp-badge">'+p.offer_count+' marchands suivis</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
+    +'<span class="pm-hp-from">Plus bas relevé historique</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Dernier relevé : '+day(p.last_date)+'</span></div></a>';
+  const giftCard=g=>{
+    const verified=giftPriceIsCurrent(g);
+    const dateLabel=g.price_date_kind==="merchant"&&g.price_date?"Dernière date marchande : "+day(g.price_date):"Date marchande absente";
+    const shippingKnown=g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur))&&Number(g.shipping_eur)>=0;
+    const shippingLabel=shippingKnown?"Livraison "+euro.format(Number(g.shipping_eur)):"Livraison à confirmer";
+    return '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(g.image,"",g.merchant,g.name)
+      +(verified&&g.shipping_eur===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
+      +(verified?'<span class="pm-hp-from">Prix TTC confirmé par le flux</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">Indiqué le '+day(g.price_date)+' · '+shippingLabel+' · à confirmer chez le marchand</span>'
+        :'<span class="pm-hp-from">Prix non vérifié</span><span class="pm-hp-price">À confirmer chez le marchand</span><span class="pm-hp-meta">'+dateLabel+' · date hors 48 h ou TVA TTC non confirmée</span>')
+      +'</div></a>';
+  };
   document.querySelectorAll(".pm-partner[data-href]").forEach(a=>{
     const href=a.getAttribute("data-href");
     if(/^https:\/\//i.test(href||"")){a.href=href;a.hidden=false;}
@@ -1551,7 +1567,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     const showGifts=key=>{
       if(!giftRail)return;
       const priority={parfum:0,bougie:1,tech:2,mode:3,maison:4};
-      const list=key==="all"?gifts.map((g,i)=>[g,i]).sort((a,b)=>((priority[a[0].family]??9)-(priority[b[0].family]??9))||a[1]-b[1]).map(x=>x[0]):gifts.filter(g=>g.band===key||g.family===key);
+      const list=key==="all"?gifts.map((g,i)=>[g,i]).sort((a,b)=>((priority[a[0].family]??9)-(priority[b[0].family]??9))||a[1]-b[1]).map(x=>x[0]):key==="a-confirmer"?gifts.filter(g=>!giftPriceIsCurrent(g)):gifts.filter(g=>g.family===key||g.band===key);
       giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")||'<p class="pm-hp-note">Pas encore d’idée dans cette gamme : essayez une autre.</p>';
       giftRail.scrollLeft=0;
     };
