@@ -181,6 +181,10 @@ jobs:
             ["liste par marchand", html.includes('list.setAttribute("aria-label","Prix par marchand")')],
             ["catalogue générique sans raccordement direct aux prix exacts", !html.includes("verifiedPriceIndex.get(p.id)")],
             ["liens par marchand stylés", html.includes(".discovery-compare-row") && html.includes(".discovery-disclaimer")],
+            ["prix Awin refusé si date absente/périmée ou TVA non confirmée", html.includes('const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";') && html.includes('priceValue:priceStatus==="fresh"?Number(product.priceValue):null')],
+            ["offres comparées limitées à EUR et TTC confirmé", html.includes('offer.currency!=="EUR"||offer.price_tax_status!=="included"')],
+            ["fraîcheur vérifiée selon la fenêtre configurée", html.includes("age<=maxAgeHours*60*60*1000")],
+            ["prix exacts masqués lorsque la sélection est vide", html.includes("verifiedShelf.hidden=true;")],
             ["six destinations de recherche", ["Amazon","Google Shopping","eBay France","Fnac","Cdiscount","Darty"].every(name => html.includes('name:"' + name + '"'))],
           ];
           const failures = checks.filter(([, ok]) => !ok);
