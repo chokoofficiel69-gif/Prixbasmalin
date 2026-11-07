@@ -88,7 +88,8 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn("tab.hidden=!hasVerifiedGiftPrice", page)
         self.assertIn("Prix TTC vérifié", page)
         self.assertIn("Livraison non renseignée", page)
-        self.assertIn("Livraison "+'"+euro.format(g.shipping_eur)+"'+ "", page)
+        self.assertIn("euro.format(g.shipping_eur)", page)
+        self.assertIn("g.shipping_eur!==null&&g.shipping_eur!==undefined", page)
 
     def test_404_historical_cards_do_not_use_art_placeholders(self):
         page = (ROOT / "404.html").read_text(encoding="utf-8")
