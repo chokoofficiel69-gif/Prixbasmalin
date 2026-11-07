@@ -44,7 +44,7 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn("Aucune comparaison multi-marchands exacte avec prix TTC confirmé", workflow)
         self.assertIn("grep -Fq 'id=\"verifiedShelf\" class=\"verified-shelf\" aria-live=\"polite\" hidden'", workflow)
         self.assertIn("grep -Fq 'verifiedShelf.hidden=true;'", workflow)
-        self.assertIn('grep -Fq \'offer.currency!=="EUR"||offer.price_tax_status!=="included\'', workflow)
+        self.assertIn('grep -Fq \'offer.currency!=="EUR"||offer.price_tax_status!=="included"\'', workflow)
         self.assertIn("grep -Fq 'age<=maxAgeHours*60*60*1000'", workflow)
 
     def test_merchant_offers_are_horizontal_and_scrollable(self):
