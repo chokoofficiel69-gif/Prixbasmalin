@@ -6086,17 +6086,11 @@ function render(){
       }
       if(imageFallbackTimer){clearTimeout(imageFallbackTimer);imageFallbackTimer=null;}
       if(imageObserver){imageObserver.disconnect();imageObserver=null;}
-      img.style.display="none";
+      img.remove();
+      photo.hidden=true;
       photo.classList.remove("pm-photo-loading");
-      let unavailable=photo.querySelector(".pm-photo-unavailable");
-      if(!unavailable){
-        unavailable=document.createElement("div");
-        unavailable.className="pm-photo-unavailable";
-        unavailable.textContent="Photo indisponible";
-        photo.append(unavailable);
-      }
     };
-    if(hasVerifiedImage){
+    if(hasVerifiedImage&&primaryImageUrl){
       photo.append(img);
       if(img.loading==="eager")loadPrimaryImage();
       else if("IntersectionObserver" in window){
@@ -6113,18 +6107,14 @@ function render(){
         loadPrimaryImage();
       }
     }else{
-      photo.classList.add("pm-photo-unverified");
-      const unavailable=document.createElement("div");
-      unavailable.className="pm-photo-unavailable";
-      unavailable.textContent="Photo non vérifiée";
-      photo.append(unavailable);
+      photo.hidden=true;
     }
     const gallery=document.createElement("div");gallery.className="pm-awin-gallery";
     const galleryImages=hasVerifiedImage&&Array.isArray(p.images)?p.images.filter((value,index,array)=>/^https:\/\//i.test(String(value||""))&&array.indexOf(value)===index).slice(0,5):[];
     galleryImages.forEach((url,index)=>{
       const thumb=document.createElement("button");thumb.type="button";thumb.className="pm-awin-thumb"+(index===0?" active":"");thumb.setAttribute("aria-label","Afficher la vue "+(index+1)+" de "+p.name);
       const thumbImage=document.createElement("img");thumbImage.alt="";thumbImage.loading="lazy";thumbImage.onerror=()=>thumb.remove();thumbImage.src=url;thumb.append(thumbImage);
-      thumb.addEventListener("click",()=>{img.dataset.pmHandlingError="0";img.style.display="";const unavailable=photo.querySelector(".pm-photo-unavailable");if(unavailable)unavailable.remove();photo.classList.add("pm-photo-loading");if(imageObserver){imageObserver.disconnect();imageObserver=null;}img.src=url;startImageFallbackTimer();gallery.querySelectorAll(".pm-awin-thumb").forEach(button=>button.classList.toggle("active",button===thumb));});gallery.append(thumb);
+      thumb.addEventListener("click",()=>{img.dataset.pmHandlingError="0";photo.hidden=false;img.style.display="";photo.classList.add("pm-photo-loading");if(imageObserver){imageObserver.disconnect();imageObserver=null;}img.src=url;startImageFallbackTimer();gallery.querySelectorAll(".pm-awin-thumb").forEach(button=>button.classList.toggle("active",button===thumb));});gallery.append(thumb);
     });
 
     // Carte produit façon comparateur : photo, prix mis en avant, bouton marchand, tableau comparatif, détails.
@@ -6443,33 +6433,14 @@ function renderVerifiedProducts(products){
     const photo=document.createElement("div");
     photo.className="verified-image";
     const productImage=imageForProduct(p);
-    const showVerifiedImageFallback=()=>{
-      photo.classList.add("verified-image-fallback");
-      photo.innerHTML="";
-      const fallback=document.createElement("div");
-      fallback.setAttribute("role","img");
-      fallback.setAttribute("aria-label","Visuel indisponible pour "+p.name);
-      fallback.style.cssText="width:100%;height:100%;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:18px;box-sizing:border-box;text-align:center;color:#64748b;background:linear-gradient(145deg,#f8fafc,#e9eef5);border:1px solid #dbe3ed;border-radius:12px";
-      const symbol=document.createElement("span");
-      symbol.setAttribute("aria-hidden","true");
-      symbol.textContent="▧";
-      symbol.style.cssText="font-size:38px;line-height:1;color:#94a3b8";
-      const label=document.createElement("strong");
-      label.textContent=p.name;
-      label.style.cssText="font-size:13px;line-height:1.35;color:#334155";
-      const hint=document.createElement("small");
-      hint.textContent=productImage?"Visuel indisponible":"Photo non vérifiée";
-      hint.style.cssText="font-size:11px;color:#64748b";
-      fallback.append(symbol,label,hint);
-      photo.append(fallback);
-    };
+    const hideVerifiedImage=()=>{photo.hidden=true;photo.innerHTML="";};
     if(productImage){
       const image=document.createElement("img");
       image.src=productImage;image.alt=p.name;image.loading="lazy";image.decoding="async";
       image.style.cssText="width:100%;height:100%;object-fit:contain;padding:8px";
-      image.onerror=()=>{image.remove();showVerifiedImageFallback();};
+      image.onerror=()=>{image.remove();hideVerifiedImage();};
       photo.append(image);
-    }else{showVerifiedImageFallback();}
+    }else{hideVerifiedImage();}
     const model=document.createElement("div");
     model.className="verified-model";
     model.textContent="Modèle exact suivi";
