@@ -175,13 +175,15 @@ def build_top(sheets, limit=12):
 
 
 def build(awin, sheets):
+    # Utiliser l'heure de collecte du flux rend le snapshot reproductible et cohérent.
+    now = parse_merchant_date(awin.get("fetched_at")) or datetime.now(timezone.utc)
     return {
         "version": 2,
         "awin_fetched_at": awin.get("fetched_at"),
         "sheets_period": sheets.get("dataset_period"),
         "price_policy": "Les prix cadeaux ne sont affichés que si la date marchande est de moins de 48 h et si la TVA incluse est explicitement confirmée. Les fiches PrixTracker sont des relevés historiques, jamais des prix en direct.",
         "top": build_top(sheets),
-        "gifts": build_gifts(awin),
+        "gifts": build_gifts(awin, now=now),
     }
 
 
