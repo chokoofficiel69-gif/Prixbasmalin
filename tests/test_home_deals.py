@@ -95,7 +95,7 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn('data-partner="decathlon" data-href="" target="_blank" rel="sponsored nofollow noopener" hidden', page)
         self.assertIn(".pm-partner[hidden]{display:none!important}", page)
         self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(g.image', page)
-        self.assertIn("function giftPriceIsCurrent(g)", page)
+        self.assertIn("const giftPriceIsCurrent=g=>", page)
         self.assertIn("Prix observés", page)
         self.assertIn("prix affichés seulement si date marchande récente et TTC confirmé", page)
         product_page = (ROOT / "produit.html").read_text(encoding="utf-8")
