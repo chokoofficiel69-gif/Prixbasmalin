@@ -177,11 +177,11 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from "node:fs";
           const html = fs.readFileSync("produit.html", "utf8");
-          const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-            .filter(([, attrs, body]) => !/\\bsrc\\s*=/i.test(attrs) && !/\\btype\\s*=\\s*["\\']application\\/ld\\+json["\\']/i.test(attrs) && body.trim())
+          const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+            .filter(([, attrs, body]) => !/\bsrc\s*=/i.test(attrs) && !/\btype\s*=\s*["\']application\/ld\+json["\']/i.test(attrs) && body.trim())
             .map(([, , body]) => body);
           if (scripts.length === 0) throw new Error("Aucun script inline trouvé dans produit.html");
-          fs.writeFileSync("/tmp/produit-inline.js", scripts.join("\\n;\\n"));
+          fs.writeFileSync("/tmp/produit-inline.js", scripts.join("\n;\n"));
           NODE
       - name: Vérifier la syntaxe JavaScript de la page historique produit
         run: node --check /tmp/produit-inline.js
