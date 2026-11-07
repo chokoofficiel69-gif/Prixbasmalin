@@ -11,8 +11,11 @@ spec.loader.exec_module(seo)
 class SeoPagesTests(unittest.TestCase):
     def test_published_pages_are_up_to_date(self):
         files = seo.build()
-        stale = [rel for rel, text in files.items() if (ROOT / rel).read_text(encoding="utf-8") != text]
+        stale = [rel for rel, text in files.items() if not (ROOT / rel).is_file() or (ROOT / rel).read_text(encoding="utf-8") != text]
         self.assertEqual(stale, [], "lancez python3 scripts/build_seo_pages.py")
+        for path in (ROOT / "idees-cadeaux").glob("*.html"):
+            if path.name != "index.html":
+                self.assertIn(str(path.relative_to(ROOT)), files, str(path))
 
     def test_product_page_is_crawlable_and_dated(self):
         page = (ROOT / "prix" / "airpods-4.html").read_text(encoding="utf-8")
