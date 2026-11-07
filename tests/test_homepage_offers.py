@@ -26,6 +26,8 @@ class HomepageOffersTests(unittest.TestCase):
         self.assertNotIn("pmPriced", self.source)
         self.assertNotIn("norm(s.name)", self.source)
         self.assertNotIn("cdn8.web4s.vn", self.source)
+        self.assertNotIn("pmProductArt(", self.source)
+        self.assertNotIn("pm-product-art.js", self.source)
 
     def test_history_section_is_labelled_as_historical(self):
         self.assertIn("Relevés historiques PrixTracker chez 5 à 24 marchands", self.source)
