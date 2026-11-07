@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +29,29 @@ class HomeDealsTests(unittest.TestCase):
         gifts = deals.build_gifts(awin)
         self.assertEqual([g["name"] for g in gifts], ["Eau de parfum"])
         self.assertEqual(gifts[0]["price_date_kind"], "feed")
-        self.assertEqual(gifts[0]["band"], "30-60")
+        self.assertEqual(gifts[0]["price_status"], "unverified")
+        self.assertEqual(gifts[0]["price_status_reason"], "missing_merchant_date")
+        self.assertIsNone(gifts[0]["price_eur"])
+        self.assertEqual(gifts[0]["band"], "unverified")
+
+    def test_gift_prices_require_fresh_merchant_date_and_explicit_ttc(self):
+        now = datetime(2026, 11, 7, 9, 0, tzinfo=timezone.utc)
+        fresh_date = (now - timedelta(hours=1)).isoformat()
+        stale_date = (now - timedelta(hours=49)).isoformat()
+        awin = {"fetched_at": now.isoformat(), "products": [
+            product("Fresh TTC", "A", 59.9, merchantUpdatedAt=fresh_date, priceTaxStatus="included", shippingPriceValue=0),
+            product("Stale TTC", "B", 49.9, merchantUpdatedAt=stale_date, priceTaxStatus="included", shippingPriceValue=0),
+            product("Tax unclear", "C", 39.9, merchantUpdatedAt=fresh_date, priceTaxStatus="unspecified", shippingPriceValue=0),
+        ]}
+        gifts = {g["name"]: g for g in deals.build_gifts(awin, now=now)}
+        self.assertEqual(gifts["Fresh TTC"]["price_status"], "verified_current")
+        self.assertEqual(gifts["Fresh TTC"]["price_eur"], 59.9)
+        self.assertEqual(gifts["Fresh TTC"]["shipping_eur"], 0)
+        self.assertEqual(gifts["Fresh TTC"]["band"], "30-60")
+        self.assertEqual(gifts["Stale TTC"]["price_status_reason"], "stale")
+        self.assertIsNone(gifts["Stale TTC"]["price_eur"])
+        self.assertEqual(gifts["Tax unclear"]["price_status_reason"], "tax_unconfirmed")
+        self.assertIsNone(gifts["Tax unclear"]["price_eur"])
 
     def test_gifts_alternate_merchants(self):
         awin = {"products": [product(f"Parfum {i}", m, 20 + i) for m in ("A", "B") for i in range(3)]}
@@ -57,6 +80,19 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn("trois tentatives", awin)
         self.assertIn("trois tentatives", tracker)
         self.assertIn("github.event.pull_request.head.sha || github.ref", tracker)
+
+    def test_homepage_hides_unverified_gift_prices_and_budget_filters(self):
+        page = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn('g.price_status==="verified_current"', page)
+        self.assertIn("Prix TTC actuel indisponible", page)
+        self.assertIn("tab.hidden=!hasVerifiedGiftPrice", page)
+        self.assertIn("Prix TTC vérifié", page)
+
+    def test_homepage_top_deals_are_explicitly_historical(self):
+        page = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn("Prix observés <span>(historique)</span>", page)
+        self.assertIn("Relevés PrixTracker datés · pas des offres en direct", page)
+        self.assertNotIn("Meilleurs prix <span>du moment</span>", page)
 
     def test_homepage_sections_partners_and_affiliate_rel(self):
         page = (ROOT / "index.html").read_text(encoding="utf-8")
