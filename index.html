@@ -1531,8 +1531,9 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     const reasons={missing_merchant_date:"Date de mise à jour marchand absente",invalid_merchant_date:"Date marchand invalide",stale:"Dernier relevé marchand trop ancien",tax_unconfirmed:"TVA incluse non confirmée",invalid_price:"Prix non valide"};
     const reason=reasons[g.price_status_reason]||"Prix actuel non vérifié";
     const dateLabel=g.price_date_kind==="merchant"?(priceOk?"Mise à jour marchande le ":"Dernier relevé marchand le "):"Flux importé le ";
+    const shippingLabel=priceOk?(Number.isFinite(Number(g.shipping_eur))?(Number(g.shipping_eur)===0?"Livraison gratuite":"Livraison "+euro.format(g.shipping_eur)):"Livraison non renseignée"):"";
     const priceBlock=priceOk
-      ?'<span class="pm-hp-from">Prix TTC vérifié</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">'+dateLabel+day(g.price_date)+'</span>'
+      ?'<span class="pm-hp-from">Prix TTC vérifié</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">'+dateLabel+day(g.price_date)+' · '+shippingLabel+'</span>'
       :'<span class="pm-hp-from">Prix TTC actuel indisponible</span><span class="pm-hp-meta">'+esc(reason)+(g.price_date?' · '+dateLabel+day(g.price_date):'')+'</span>';
     return '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(g.image,"",g.merchant,g.name)
       +(priceOk&&g.shipping_eur===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
