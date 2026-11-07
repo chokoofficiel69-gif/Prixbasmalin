@@ -294,7 +294,8 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     (p.priceTaxStatus==="included"||p.price_tax_status==="included")&&
     verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
    ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.merchantUpdatedAt,liveSource:"Awin"})):[];
-   const liveRakuten=rakutenFresh?(Array.isArray(rakuten.products)?rakuten.products:[]).filter(p=>
+   const rakutenTaxVerified=rakuten?.priceTaxStatusVerified===true;
+   const liveRakuten=rakutenFresh&&rakutenTaxVerified?(Array.isArray(rakuten.products)?rakuten.products:[]).filter(p=>
     p&&p.name&&Number(p.priceValue)>0&&p.merchant&&fresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"&&
     verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)
    ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.sourceCreatedAt,liveSource:"Rakuten"})):[];
