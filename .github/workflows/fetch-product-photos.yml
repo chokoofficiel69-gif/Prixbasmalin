@@ -1,0 +1,49 @@
+name: Chercher des photos produits libres (Wikimedia Commons)
+
+# Propose des photos sous licence libre pour les produits comparés.
+# Les propositions sont écrites sur la branche qui a lancé le workflow, jamais sur main :
+# elles sont vérifiées visuellement (planches contact) avant d'être publiées.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "photos/**"
+      - "claude/**"
+    paths:
+      - "scripts/fetch_commons_photos.py"
+      - ".github/workflows/fetch-product-photos.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-product-photos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fetch:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installer Pillow
+        run: python -m pip install --quiet pillow
+      - name: Chercher les photos libres
+        run: python scripts/fetch_commons_photos.py
+      - name: Enregistrer les propositions sur cette branche
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add data/product-images-proposals.json assets/produits docs/photo-review || true
+          if git diff --cached --quiet; then
+            echo "Aucune proposition nouvelle."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Photos libres proposées (à vérifier avant publication)"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

@@ -69,7 +69,9 @@ def licensed_images(data):
     for pid, entry in ((data or {}).get("images") or {}).items():
         url = str(entry.get("thumb") or entry.get("url") or "")
         license_name = str(entry.get("license") or "")
-        if not url.startswith("https://") or not license_name:
+        # Photo hébergée sur le site (assets/produits/) ou adresse HTTPS.
+        local_ok = url.startswith("/assets/produits/") and (ROOT / url.lstrip("/")).is_file()
+        if not (url.startswith("https://") or local_ok) or not license_name:
             continue
         words = re.sub(r"[^a-z0-9.]+", " ", license_name.lower()).split()
         # Usage commercial et modifications autorisés : jamais NC (non commercial) ni ND (pas de modification).

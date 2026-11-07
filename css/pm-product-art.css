@@ -4,3 +4,5 @@
 .pm-art b{font:800 12px/1 Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#64748b}
 .pm-photo-credit{display:block;margin-top:6px;font-size:11px;line-height:1.35;color:#6b7280}
 .pm-photo-credit a{color:inherit;text-decoration:underline}
+/* Photos libres hébergées (assets/produits/) : vraies photos avec fond, elles remplissent le cadre. */
+img[src^="/assets/produits/"]{object-fit:cover!important;object-position:50% 20%!important;padding:0!important;mix-blend-mode:normal!important}
