@@ -160,8 +160,19 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertEqual(workflow.count("vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY'"), 2)
         self.assertNotIn("vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY'", workflow)
         self.assertIn('54306_4768926_mp.xml.gz', workflow)
-        self.assertIn("vars.RAKUTEN_PRICE_TAX_STATUS || 'included'", workflow)
+        self.assertIn("vars.RAKUTEN_PRICE_TAX_STATUS || 'unspecified'", workflow)
+        self.assertIn('${RAKUTEN_PRICE_TAX_STATUS:-unspecified}', workflow)
+        self.assertNotIn("'included'", workflow)
         self.assertIn("if: github.event_name != 'pull_request'", workflow)
+
+    def test_workflow_requires_pinned_host_key_and_retries_atomic_downloads(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
+        self.assertIn('if [[ -z "${RAKUTEN_SFTP_KNOWN_HOSTS:-}" ]]', workflow)
+        self.assertIn('ssh-keygen -F "aftp.linksynergy.com"', workflow)
+        self.assertNotIn("ssh-keyscan", workflow)
+        self.assertIn("--retry-all-errors", workflow)
+        self.assertIn('temporary="${output}.part"', workflow)
+        self.assertIn('gzip -t "$temporary"', workflow)
 
     def test_sftp_workflow_expands_secrets_and_shell_variables(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
