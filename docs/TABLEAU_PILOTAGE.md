@@ -97,3 +97,11 @@ Les cases ne doivent être cochées qu'après preuve. Ajouter un commentaire à 
 - **Impact visiteur :** ce qui change réellement sur prixbasmalin.fr.
 - **Impact commercial :** clics/conversions mesurés, ou « pas encore mesuré ».
 - **Reste à faire :** prochaine action prioritaire.
+
+## Contributions ouvertes à tous les intervenants (mise à jour 07/11/2026)
+
+- Mission indépendante #226 : analyse Awin (6 annonceurs en attente, couverture GTIN/MPN nulle) et audit Rakuten (SFTP, intégrité des snapshots). Toute personne ayant accès au dépôt peut contribuer, y compris Claude, ChatGPT et d'autres agents : https://github.com/chokoofficiel69-gif/Prixbasmalin/issues/226
+- Aucun rôle de chef ni dépendance à un agent unique. Les décisions et preuves restent dans GitHub ; chacun peut reprendre le travail en lisant ce tableau et les issues ouvertes.
+- État de départ vérifié : `price-engine/products.json` contient `products: []`; le moteur ne collecte donc aucun prix. `data/prices.json` reste vide. Ne pas remplir artificiellement ce fichier.
+- Awin : le flux direct est bien importé (7 508 lignes / 7 marchands), mais les 6 annonceurs sont en attente, aucun programme joined n'a été contrôlé, et aucune identité GTIN/MPN n'est présente dans le snapshot actuel.
+- Prochaine preuve attendue : un premier produit avec identité exacte et au moins deux offres marchandes autorisées, fraîches, TTC confirmées et livraison connue. Tant que ce cas n'existe pas, aucune comparaison ni « meilleur prix » ne doit être annoncée.
