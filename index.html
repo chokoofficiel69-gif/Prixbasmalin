@@ -1532,7 +1532,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     const reason=reasons[g.price_status_reason]||"Prix actuel non vérifié";
     const dateLabel=g.price_date_kind==="merchant"?(priceOk?"Mise à jour marchande le ":"Dernier relevé marchand le "):"Flux importé le ";
     const shippingKnown=g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur));
-    const shippingLabel=priceOk?(shippingKnown?(Number(g.shipping_eur)===0?"Livraison gratuite":"Livraison "+euro.format(g.shipping_eur)):"Livraison non renseignée"):"";
+    const shippingLabel=priceOk?(shippingKnown?(Number(g.shipping_eur)===0?"":"Livraison "+euro.format(g.shipping_eur)):"Livraison non renseignée"):"";
     const priceBlock=priceOk
       ?'<span class="pm-hp-from">Prix TTC vérifié</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">'+dateLabel+day(g.price_date)+' · '+shippingLabel+'</span>'
       :'<span class="pm-hp-from">Prix TTC actuel indisponible</span><span class="pm-hp-meta">'+esc(reason)+(g.price_date?' · '+dateLabel+day(g.price_date):'')+'</span>';
