@@ -13,6 +13,9 @@ from html import escape as e
 from pathlib import Path
 from urllib.parse import urlencode
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from site_chrome import CSS_LINK, header_html  # noqa: E402  (en-tête commun)
+
 ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://prixbasmalin.fr"
 TAG = "prixbasmalin2-21"
@@ -257,9 +260,10 @@ def render(g, style, footer):
 {ld_html}
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=3">
 <link rel="stylesheet" href="/css/pm-site-footer.css">
+{CSS_LINK}
 </head>
 <body>
-<header><nav class="nav" aria-label="Navigation principale"><a class="brand" href="/">Prix <span>Malin</span></a><div class="navlinks"><a href="/guides.html">Guides</a><a href="/prix/">Comparateur</a><a href="/idees-cadeaux/">Cadeaux</a><a href="/catalogue.html">Catalogue</a></div></nav></header>
+{header_html("guide")}
 <main>
   <div class="crumb"><a href="/">Accueil</a> › <a href="/guides.html">Guides d’achat</a> › <a href="{g['crumb'][1]}">{e(g['crumb'][0])}</a></div>
   <article>
@@ -307,9 +311,10 @@ def render_index(style, footer):
 <script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=3">
 <link rel="stylesheet" href="/css/pm-site-footer.css">
+{CSS_LINK}
 </head>
 <body>
-<header><nav class="nav" aria-label="Navigation principale"><a class="brand" href="/">Prix <span>Malin</span></a><div class="navlinks"><a href="/prix/">Comparateur</a><a href="/idees-cadeaux/">Cadeaux</a><a href="/catalogue.html">Catalogue</a></div></nav></header>
+{header_html("guide")}
 <main>
   <div class="crumb"><a href="/">Accueil</a> › Guides d’achat</div>
   <section class="hero"><div class="eyebrow">Guides d’achat</div><h1>Bien choisir et payer moins cher</h1>

@@ -19,6 +19,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote, urlencode
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from site_chrome import CSS_LINK, header_html  # noqa: E402  (en-tête commun)
+
 ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://prixbasmalin.fr"
 AMAZON_TAG = "prixbasmalin2-21"
@@ -154,11 +157,12 @@ def layout(title, description, canonical, body, breadcrumbs, extra_head=""):
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/css/pm-product-art.css"><link rel="stylesheet" href="/css/pm-site-footer.css">
 <style>{HEAD_CSS}</style>
+{CSS_LINK}
 <script type="application/ld+json">{json.dumps(crumbs_ld, ensure_ascii=False)}</script>
 {extra_head}<script src="/js/pm-product-art.js"></script>
 </head>
 <body>
-<header class="top"><a class="logo" href="/"><img src="/assets/logo-sac-prix-malin.svg" alt="" width="34" height="34">Prix <span>Malin</span></a><nav><a href="/prix/">Historique des prix</a><a href="/idees-cadeaux/">Cadeaux</a></nav></header>
+{header_html("gift" if canonical.startswith("/idees-cadeaux/") else "compare")}
 <main>
 <nav class="crumbs" aria-label="Fil d’Ariane">{crumbs_html}</nav>
 {body}
@@ -183,7 +187,7 @@ ART_SCRIPT = """<script>document.querySelectorAll("[data-art-category]").forEach
 
 
 def product_card(p):
-    return (f'<a class="card" href="/prix/{e(p["id"])}.html">{visual(p)}<div class="c"><small>{e(p["category_label"])} · {p["offer_count"]} marchands suivis</small>'
+    return (f'<a class="card pm-card" href="/prix/{e(p["id"])}.html">{visual(p)}<div class="c"><small>{e(p["category_label"])} · {p["offer_count"]} marchands suivis</small>'
             f'<b>{e(p["name"])}</b><small>Plus bas relevé historique</small><strong>{euro(p["min_price_eur"])}</strong><small>Dernier relevé : {date_fr(p["last_date"])}</small></div></a>')
 
 
@@ -264,8 +268,8 @@ def product_page(p, sheets, period):
     body = f"""<article class="panel">
 <div class="hero"><div><h1>Historique des prix de {e(p['name'])}</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
 <div class="from">Dernier prix observé le {date_fr(best['date'])}<strong>{euro(p['min_price_eur'])}</strong>chez {e(cheapest_names)} · relevé historique</div></div>{visual(p)}</div>
-{credit}<a class="cta" href="#prix">Voir les relevés historiques</a>
-<a class="cta" style="background:#ff9900;color:#111" href="{e(MERCHANTS['amazon'][1](q))}" target="_blank" rel="sponsored nofollow noopener">Rechercher sur Amazon ↗</a>
+{credit}<a class="cta pm-btn pm-btn-compare pm-btn-block" href="#prix">Voir les relevés historiques</a>
+<a class="cta pm-btn pm-btn-amazon pm-btn-block" href="{e(MERCHANTS['amazon'][1](q))}" target="_blank" rel="sponsored nofollow noopener">Rechercher sur Amazon ↗</a>
 <p class="notice">Historique PrixTracker : les montants ci-dessous sont des observations passées, pas des offres actuelles. Les liens ouvrent une recherche chez le marchand ; vérifiez la référence exacte, le prix final, la disponibilité et la livraison.</p>
 </article>
 <section class="panel" id="prix"><h2>Relevés historiques par marchand pour {e(p['name'])}</h2>
@@ -274,9 +278,9 @@ def product_page(p, sheets, period):
 <p class="source" style="color:#6b7280">Les liens ouvrent une recherche du produit chez le marchand, pas une offre produit garantie.</p>
 </section>
 <section class="panel"><h2>Évolution des prix relevés</h2>{chart_svg(p)}<p>{e(trend_sentence(p))}</p>
-<a class="cta" style="background:#fff;color:#0b63ce;border:2px solid #0b63ce" href="/produit.html?id={e(p['id'])}#alerte">Créer une alerte prix gratuite</a></section>
+<a class="cta pm-btn pm-btn-ghost pm-btn-block" href="/produit.html?id={e(p['id'])}#alerte">Créer une alerte prix gratuite</a></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
-{f'<section class="panel"><h2>Autres {e(p["category_label"].lower())} comparés</h2><div class="grid">{"".join(product_card(s) for s in similar)}</div><p><a href="/prix/{cat_slug}.html">Tous les {e(p["category_label"].lower())} →</a></p></section>' if similar else ''}
+{f'<section class="panel"><h2>Autres {e(p["category_label"].lower())} comparés</h2><div class="grid pm-cards">{"".join(product_card(s) for s in similar)}</div><p><a href="/prix/{cat_slug}.html">Tous les {e(p["category_label"].lower())} →</a></p></section>' if similar else ''}
 <p class="source">À lire : <a href="/guide-black-friday-2026.html">repérer les vraies bonnes affaires</a> · <a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a> · <a href="/guides.html">tous nos guides</a></p>
 <p class="source">Source : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Ces montants ne sont pas des prix en direct. Prix Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
 {ART_SCRIPT}"""
@@ -298,7 +302,7 @@ def category_page(cat, label, items):
              "aspirateur": ("/guide-choisir-aspirateur-robot.html", "Comment choisir un aspirateur robot")}.get(cat, ("/guide-black-friday-2026.html", "Black Friday 2026 : repérer les vraies bonnes affaires"))
     body = f"""<section class="panel"><p style="margin:0 0 10px">📘 Notre guide : <a href="{guide[0]}">{e(guide[1])}</a> · <a href="/guides.html">tous les guides</a></p><h1>Historique des prix : {e(label)}</h1>
 <p>{len(items)} produits avec relevés historiques PrixTracker. Les montants affichés sont des observations passées, pas des offres actuelles ni des prix en temps réel.</p>
-<div class="grid">{''.join(product_card(s) for s in items)}</div></section>
+<div class="grid pm-cards">{''.join(product_card(s) for s in items)}</div></section>
 <p class="source">Source : PrixTracker via data.gouv.fr, Licence Ouverte 2.0. Relevés historiques à vérifier chez le marchand ; aucune disponibilité ou livraison actuelle n’est garantie.</p>{ART_SCRIPT}"""
     return slug, layout(title, description, f"/prix/{slug}.html", body, [("Accueil", "/"), ("Historique des prix", "/prix/"), (label, f"/prix/{slug}.html")])
 
@@ -306,7 +310,7 @@ def category_page(cat, label, items):
 def index_page(groups, total):
     sections = "".join(
         f'<section class="panel"><h2><a href="/prix/{CATEGORY_SLUGS.get(cat, cat)}.html" style="color:inherit">{e(label)}</a></h2>'
-        f'<div class="grid">{"".join(product_card(s) for s in items[:8])}</div>'
+        f'<div class="grid pm-cards">{"".join(product_card(s) for s in items[:8])}</div>'
         f'<p><a href="/prix/{CATEGORY_SLUGS.get(cat, cat)}.html">Voir les {len(items)} {e(label.lower())} →</a></p></section>'
         for cat, label, items in groups)
     body = f"""<section class="panel"><h1>Historique des prix high-tech</h1>
@@ -377,7 +381,7 @@ def gift_card(p):
     shipping_label = "Livraison gratuite" if shipping == 0 else (
         f"Livraison {euro(shipping)}" if isinstance(shipping, (int, float)) and not isinstance(shipping, bool) else "Livraison à confirmer"
     )
-    return (f'<a class="card" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener"><div class="visual"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy"></div>'
+    return (f'<a class="card pm-card" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener"><div class="visual"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy"></div>'
             f'<div class="c"><small>{e(p.get("merchant") or "")}</small><b>{e(p["name"])}</b><strong>Prix TTC confirmé : {euro(p["price_eur"])}</strong><small>Relevé marchand du {date_fr(p["price_date"])} · {e(shipping_label)}</small></div></a>')
 
 
@@ -392,7 +396,7 @@ def gift_page(slug, label, items, all_budgets):
     body = f"""<section class="panel"><h1>{e(label)}</h1>
 <p>{len(items)} produits avec prix TTC explicitement confirmé et date marchande de moins de 48 h. Dernière date marchande de la sélection : {date_fr(latest) if latest else 'non disponible'}. Les prix peuvent évoluer et la livraison doit être vérifiée chez le marchand.</p>
 <p>Autres budgets : {links}</p>
-<div class="grid">{''.join(gift_card(p) for p in items)}</div></section>
+<div class="grid pm-cards">{''.join(gift_card(p) for p in items)}</div></section>
 <p class="source">Offres issues des flux marchands autorisés ; chaque prix affiché est daté et déclaré TTC. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>"""
     return layout(fit_title(f"{label} : prix TTC vérifiés | Prix Malin", f"{label} | Prix Malin", label),
                   fit_description(f"{label} : {len(items)} produits avec prix TTC confirmé et date marchande de moins de 48 h. À vérifier chez le marchand."),
@@ -401,7 +405,7 @@ def gift_page(slug, label, items, all_budgets):
 
 def gift_index(budgets_with_items):
     sections = "".join(
-        f'<section class="panel"><h2><a style="color:inherit" href="/idees-cadeaux/{s}.html">{e(l)}</a></h2><div class="grid">{"".join(gift_card(p) for p in items[:6])}</div>'
+        f'<section class="panel"><h2><a style="color:inherit" href="/idees-cadeaux/{s}.html">{e(l)}</a></h2><div class="grid pm-cards">{"".join(gift_card(p) for p in items[:6])}</div>'
         f'<p><a href="/idees-cadeaux/{s}.html">Voir les {len(items)} idées →</a></p></section>'
         for s, l, _, _, items in budgets_with_items if items
     )
