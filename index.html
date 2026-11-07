@@ -384,7 +384,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    const card=document.createElement("article");card.className="pm-history-card pm-cmp-card";
    const media=document.createElement("a");media.className="pm-cmp-media";media.href=url;media.setAttribute("aria-label","Voir les relevés historiques "+sheet.name);
    if(sheet.image){const img=document.createElement("img");img.setAttribute("data-pm-art","");img.dataset.category=sheet.category;img.dataset.brand=sheet.brand;img.alt=sheet.name;img.loading="lazy";img.decoding="async";img.src=sheet.image;media.append(img);}
-   else{media.insertAdjacentHTML("beforeend",pmProductArt(sheet.category,sheet.brand));}
+   else{media.hidden=true;}
    const badge=document.createElement("span");badge.className="pm-cmp-badge";badge.textContent=sheet.offer_count+" marchands relevés";media.append(badge);
    const body=document.createElement("div");body.className="pm-cmp-body";
    const cat=document.createElement("span");cat.className="pm-cmp-cat";cat.textContent=sheet.brand+" · "+sheet.category_label;
@@ -510,9 +510,9 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 </section><section id="live-comparisons" class="pm-history-comparisons" aria-labelledby="pm-history-title">
   <div class="section-head">
     <div><h2 id="pm-history-title">💶 Prix observés par marchand</h2><small>Relevés historiques PrixTracker chez 5 à 24 marchands · pas d’offres en direct</small></div>
-    <a class="pm-history-badge" href="/produit.html" style="text-decoration:none">Voir tous les produits comparés →</a>
+    <a class="pm-history-badge" href="/produit.html" style="text-decoration:none">Voir toutes les fiches historiques →</a>
   </div>
-  <p class="pm-history-intro">Le même produit, des prix très différents : voyez d’un coup d’œil qui est le moins cher. Prix relevés et datés, à confirmer chez le marchand.</p>
+  <p class="pm-history-intro">Les montants ci-dessous sont des relevés historiques datés, pas des offres en direct. Consultez la fiche pour voir les marchands observés et vérifiez le prix actuel directement chez le vendeur.</p>
   <div id="pm-history-status" class="pm-history-status" role="status" aria-live="polite">Chargement des relevés historiques…</div>
   <div id="pm-history-list" class="pm-history-list" aria-label="Relevés historiques"></div>
   <p class="pm-history-source">Source : PrixTracker · Licence Ouverte 2.0. Prix historiques ; liens marchands directs et stock non fournis. Les liens Amazon ouvrent une recherche affiliée.</p>
@@ -1523,7 +1523,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const visual=(image,category,brand,alt)=>{
     if(image)return '<div class="pm-hp-media"><img src="'+esc(image)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-pm-art data-category="'+esc(category)+'" data-brand="'+esc(brand)+'"></div>';
-    return '<div class="pm-hp-media">'+pmProductArt(category,brand)+'</div>';
+    return "";
   };
   const topCard=p=>'<a class="pm-hp-card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p.image,p.category,p.brand,p.name)
     +'<span class="pm-hp-badge">'+p.offer_count+' marchands relevés</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
