@@ -102,8 +102,11 @@ def merchant_name(mid):
 
 
 def merchant_link(mid, query):
+    # Liens de recherche chez le marchand : libellé « Rechercher » (ce ne sont pas des offres vérifiées).
+    if mid == "amazon":
+        return MERCHANTS[mid][1](query), "Voir sur Amazon", True
     if mid in MERCHANTS:
-        return MERCHANTS[mid][1](query), "Voir l’offre", mid == "amazon"
+        return MERCHANTS[mid][1](query), "Rechercher", False
     return "https://www.google.com/search?" + urlencode({"q": merchant_name(mid) + " " + query}), "Rechercher", False
 
 
@@ -267,6 +270,7 @@ def product_page(p, sheets, period):
 <div class="hero"><div><h1>{e(p['name'])} au meilleur prix</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
 <div class="from">à partir de<strong>{euro(p['min_price_eur'])}</strong>chez {e(cheapest_names)} · jusqu’à {euro(p['max_price_eur'])} ailleurs</div></div>{visual(p)}</div>
 {credit}<a class="cta" href="#prix">Comparer les {p['offer_count']} prix</a>
+<a class="cta" style="background:#ff9900;color:#111" href="{e(MERCHANTS['amazon'][1](q))}" target="_blank" rel="sponsored nofollow noopener">{'Voir le prix du jour sur Amazon' if any(o['merchant'] == 'amazon' for o in p['offers']) else 'Chercher sur Amazon'} ↗</a>
 <p class="notice">Prix relevés chez chaque marchand entre le {date_fr(period['from'])} et le {date_fr(period['to'])} : ils peuvent avoir changé. Le prix final s’affiche chez le marchand.</p>
 </article>
 <section class="panel" id="prix"><h2>Comparatif des prix de {e(p['name'])}</h2>
