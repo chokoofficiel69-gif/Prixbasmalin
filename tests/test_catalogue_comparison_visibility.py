@@ -47,6 +47,8 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn("Photo non vérifiée", page)
         self.assertNotIn("Photo indisponible", page)
         self.assertNotIn("pm-image-fallback", page)
+        self.assertIn("verifiedStatuses.includes(status)", page)
+        self.assertIn("!/unsplash\\.com/i.test(image)", page)
 
     def test_awin_publication_check_matches_the_current_public_shelf(self):
         workflow = (CATALOGUE.parent / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
