@@ -11,3 +11,4 @@ User-agent: PerplexityBot
 Allow: /
 
 Sitemap: https://prixbasmalin.fr/sitemap.xml
+Sitemap: https://prixbasmalin.fr/sitemap-prix.xml

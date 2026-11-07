@@ -69,13 +69,15 @@ jobs:
           AWIN_FEED_LOCALE: "fr_FR"
         run: node price-engine/sync-awin-products.mjs
       - name: Mettre à jour la vitrine d'accueil (idées cadeaux)
-        run: python3 scripts/build_home_deals.py
+        run: |
+          python3 scripts/build_home_deals.py
+          python3 scripts/build_seo_pages.py
       - name: Enregistrer le catalogue s'il a changé
         id: save
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- data/awin-products.json data/awin-sync-status.json data/home-deals.json; then
+          if git diff --quiet -- data/awin-products.json data/awin-sync-status.json data/home-deals.json idees-cadeaux prix sitemap-prix.xml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Aucune nouvelle donnée catalogue ; aucun commit inutile."
             exit 0
@@ -89,7 +91,7 @@ jobs:
           echo "expected_fetched_at=$EXPECTED_FETCHED_AT" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/awin-products.json data/awin-sync-status.json data/home-deals.json
+          git add data/awin-products.json data/awin-sync-status.json data/home-deals.json idees-cadeaux prix sitemap-prix.xml
           git commit -m "Refresh authorized Awin product catalogue"
           git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Vérifier que le nouveau flux Awin est visible sur le site public
