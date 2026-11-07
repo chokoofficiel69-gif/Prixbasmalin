@@ -351,7 +351,7 @@ def gift_items(deals, lo, hi, limit=36, now=None):
         merchant = str(p.get("merchant") or "").strip()
         if not merchant:
             continue
-        key = (merchant, re.sub(r"\\s+[–-]\\s+.*$", "", str(p.get("name"))).lower())
+        key = (merchant, re.sub(r"\s+[–-]\s+.*$", "", str(p.get("name"))).lower())
         if key in seen:
             continue
         seen.add(key)
