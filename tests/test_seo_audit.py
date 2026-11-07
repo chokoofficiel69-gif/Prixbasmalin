@@ -49,6 +49,16 @@ class SeoAuditTests(unittest.TestCase):
         self.assertEqual(len(listed), len(sitemap.public_pages()))
         self.assertEqual(listed[0], "https://prixbasmalin.fr/")
 
+    def test_homepage_meta_description_does_not_claim_unverified_merchant_coverage(self):
+        page = (ROOT / "index.html").read_text(encoding="utf-8")
+        match = re.search(r'<meta name="description" content="([^"]*)"', page)
+        self.assertIsNotNone(match)
+        description = html.unescape(match.group(1)).lower()
+        self.assertNotIn("60 marchands", description)
+        self.assertNotIn("comparez les prix chez", description)
+        self.assertIn("historique des prix high-tech", description)
+        self.assertIn("produits, prix et dates vérifiés", description)
+
     def test_homepage_structured_data(self):
         page = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn('"@type": "WebSite"', page)
