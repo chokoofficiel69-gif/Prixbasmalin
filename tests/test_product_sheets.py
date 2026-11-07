@@ -61,11 +61,15 @@ class ProductSheetsTests(unittest.TestCase):
     def test_product_page_dates_prices_and_credits_source(self):
         page = (ROOT / "produit.html").read_text(encoding="utf-8")
         self.assertIn('fetch("/data/fiches-produits.json"', page)
-        self.assertIn("Relevé du ", page)
+        self.assertIn("Relevé historique du ", page)
         self.assertIn("Licence Ouverte 2.0", page)
         self.assertIn('const AMAZON_TAG="prixbasmalin2-21";', page)
         self.assertIn('link.affiliate?"sponsored nofollow noopener":"nofollow noopener"', page)
-        self.assertIn("Meilleur prix relevé", page)
+        self.assertIn("Historique PrixTracker", page)
+        self.assertIn("Rechercher le produit", page)
+        self.assertNotIn("Voir l’offre", page)
+        self.assertNotIn("offres à partir de", page)
+        self.assertIn("Prix le plus bas observé", page)
 
 
 if __name__ == "__main__":
