@@ -61,11 +61,13 @@ def parse_merchant_date(value):
     return parsed.astimezone(timezone.utc)
 
 
-def merchant_price_status(product, now=None):
+def merchant_price_status(product, now=None, feed_is_fresh=True):
     """Un prix cadeau n'est publiable que si date marchand <48 h et TVA explicitement incluse."""
     price = product.get("priceValue")
     if not isinstance(price, (int, float)) or isinstance(price, bool) or not math.isfinite(price) or price <= 0:
         return "unverified", "invalid_price"
+    if not feed_is_fresh:
+        return "unverified", "stale_feed"
 
     merchant_date = product.get("merchantUpdatedAt") or product.get("merchant_updated_at")
     if not merchant_date:
@@ -87,6 +89,10 @@ def merchant_price_status(product, now=None):
 
 def build_gifts(awin, limit=48, now=None):
     fetched_at = awin.get("fetched_at")
+    now = now or datetime.now(timezone.utc)
+    feed_date = parse_merchant_date(fetched_at)
+    feed_age = now.astimezone(timezone.utc) - feed_date if feed_date else None
+    feed_is_fresh = feed_age is not None and timedelta(0) <= feed_age <= timedelta(hours=48)
     by_merchant = {}
     seen = set()
     for p in awin.get("products", []):
@@ -104,7 +110,7 @@ def build_gifts(awin, limit=48, now=None):
             continue
         seen.add(key)
         family, family_label = gift_family(p)
-        price_status, price_status_reason = merchant_price_status(p, now=now)
+        price_status, price_status_reason = merchant_price_status(p, now=now, feed_is_fresh=feed_is_fresh)
         merchant_date = p.get("merchantUpdatedAt") or p.get("merchant_updated_at")
         shipping = p.get("shippingPriceValue")
         verified = price_status == "verified_current"
@@ -173,11 +179,12 @@ def build_top(sheets, limit=12):
     return top
 
 
-def build(awin, sheets):
-    # Utiliser l'heure de collecte du flux rend le snapshot reproductible et cohérent.
-    now = parse_merchant_date(awin.get("fetched_at")) or datetime.now(timezone.utc)
+def build(awin, sheets, now=None):
+    now = now or datetime.now(timezone.utc)
+    generated_at = now.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
     return {
         "version": 2,
+        "generated_at": generated_at,
         "awin_fetched_at": awin.get("fetched_at"),
         "sheets_period": sheets.get("dataset_period"),
         "price_policy": "Les prix cadeaux ne sont affichés que si la date marchande est de moins de 48 h et si la TVA incluse est explicitement confirmée. Les fiches PrixTracker sont des relevés historiques, jamais des prix en direct.",
