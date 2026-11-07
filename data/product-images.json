@@ -1,5 +1,270 @@
 {
  "version": 1,
  "policy": "Photos sous licence libre autorisant l'usage commercial (CC0, domaine public, CC BY, CC BY-SA) ou fournies par un partenaire autorisé. Chaque entrée garde l'auteur, la licence et la page source ; le crédit est affiché sur la fiche et sur /credits-photos.html.",
- "images": {}
+ "images": {
+  "airpods-3": {
+   "thumb": "/assets/produits/airpods-3.jpg",
+   "license": "CC0",
+   "author": "Yovt",
+   "file_page": "https://commons.wikimedia.org/wiki/File:AirPods_3.jpg",
+   "commons_title": "File:AirPods 3.jpg",
+   "match": "verifie_visuellement"
+  },
+  "airpods-4": {
+   "thumb": "/assets/produits/airpods-4.jpg",
+   "license": "CC0",
+   "author": "AppleFans 1",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_4.jpg",
+   "commons_title": "File:Airpods 4.jpg",
+   "match": "verifie_visuellement"
+  },
+  "airpods-pro-2": {
+   "thumb": "/assets/produits/airpods-pro-2.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "— aconcagua ( talk )",
+   "file_page": "https://commons.wikimedia.org/wiki/File:AirPods_Pro_2.jpg",
+   "commons_title": "File:AirPods Pro 2.jpg",
+   "match": "verifie_visuellement"
+  },
+  "airpods-pro-3": {
+   "thumb": "/assets/produits/airpods-pro-3.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Burkhard Mücke",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
+   "commons_title": "File:Airpods Modell Pro 3.jpg",
+   "match": "verifie_visuellement"
+  },
+  "apple-watch-series-11": {
+   "thumb": "/assets/produits/apple-watch-series-11.jpg",
+   "license": "CC BY 3.0",
+   "author": "极客湾Geekerwan",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
+   "commons_title": "File:Two Apple Watch Series 11 (cropped).png",
+   "match": "verifie_visuellement"
+  },
+  "dualsense": {
+   "thumb": "/assets/produits/dualsense.jpg",
+   "license": "CC BY-SA 2.0",
+   "author": "Sergey Galyonkin",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Playstation_Dualsense_controller.jpg",
+   "commons_title": "File:Playstation Dualsense controller.jpg",
+   "match": "verifie_visuellement"
+  },
+  "galaxy-s26": {
+   "thumb": "/assets/produits/galaxy-s26.jpg",
+   "license": "CC BY 4.0",
+   "author": "SUMAKICHI",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Samsung_Galaxy_S26%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA.jpg",
+   "commons_title": "File:Samsung Galaxy S26シリーズ.jpg",
+   "match": "verifie_visuellement"
+  },
+  "galaxy-s26-plus": {
+   "thumb": "/assets/produits/galaxy-s26-plus.jpg",
+   "license": "CC BY 4.0",
+   "author": "SUMAKICHI",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Samsung_Galaxy_S26%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA.jpg",
+   "commons_title": "File:Samsung Galaxy S26シリーズ.jpg",
+   "match": "verifie_visuellement"
+  },
+  "galaxy-s26-ultra": {
+   "thumb": "/assets/produits/galaxy-s26-ultra.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Dinkun Chen",
+   "file_page": "https://commons.wikimedia.org/wiki/File:SAMSUNG_Galaxy_S26_Ultra_%26_SAMSUNG_Galaxy_Buds4_Pro.jpg",
+   "commons_title": "File:SAMSUNG Galaxy S26 Ultra & SAMSUNG Galaxy Buds4 Pro.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-15": {
+   "thumb": "/assets/produits/iphone-15.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "IPHONE 15",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_15.jpg",
+   "commons_title": "File:Apple iPhone 15.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-15-pro": {
+   "thumb": "/assets/produits/iphone-15-pro.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "IPHONE 15",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_15_Pro.jpg",
+   "commons_title": "File:Apple iPhone 15 Pro.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-15-pro-max": {
+   "thumb": "/assets/produits/iphone-15-pro-max.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "IPHONE 15",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_15_Pro_%26_iPhone_15_Pro_Max.jpg",
+   "commons_title": "File:IPhone 15 Pro & iPhone 15 Pro Max.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-16": {
+   "thumb": "/assets/produits/iphone-16.jpg",
+   "license": "CC BY-SA 2.0",
+   "author": "メイド理世",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_16_(54251031797).jpg",
+   "commons_title": "File:IPhone 16 (54251031797).jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-16-pro": {
+   "thumb": "/assets/produits/iphone-16-pro.jpg",
+   "license": "CC BY 4.0",
+   "author": "Jakub CA",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_16_Pro_series.jpg",
+   "commons_title": "File:IPhone 16 Pro series.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-16-pro-max": {
+   "thumb": "/assets/produits/iphone-16-pro-max.jpg",
+   "license": "CC BY-SA 2.0",
+   "author": "メイド理世",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_16_Pro_Max_(54252176424).jpg",
+   "commons_title": "File:IPhone 16 Pro Max (54252176424).jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-17": {
+   "thumb": "/assets/produits/iphone-17.jpg",
+   "license": "CC0",
+   "author": "Ahmad Ali Karim",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Black_iPhone_17.jpg",
+   "commons_title": "File:Black iPhone 17.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-17-pro": {
+   "thumb": "/assets/produits/iphone-17-pro.jpg",
+   "license": "CC BY 4.0",
+   "author": "Eugen Prostakov",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_17_Pro.png",
+   "commons_title": "File:IPhone 17 Pro.png",
+   "match": "verifie_visuellement"
+  },
+  "iphone-17-pro-max": {
+   "thumb": "/assets/produits/iphone-17-pro-max.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "茅野ふたば",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_17_Pro_Max.jpg",
+   "commons_title": "File:IPhone 17 Pro Max.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-18-pro": {
+   "thumb": "/assets/produits/iphone-18-pro.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "茅野ふたば",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_18_Pro_rear.jpg",
+   "commons_title": "File:IPhone 18 Pro rear.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-18-pro-max": {
+   "thumb": "/assets/produits/iphone-18-pro-max.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Kyu3a",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_18_Pro_and_Pro_Max.jpg",
+   "commons_title": "File:IPhone 18 Pro and Pro Max.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-air": {
+   "thumb": "/assets/produits/iphone-air.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "茅野ふたば",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_Air_backside.jpg",
+   "commons_title": "File:IPhone Air backside.jpg",
+   "match": "verifie_visuellement"
+  },
+  "iphone-fold": {
+   "thumb": "/assets/produits/iphone-fold.jpg",
+   "license": "CC BY 4.0",
+   "author": "SimonWaldherr",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_Duo.jpg",
+   "commons_title": "File:Apple iPhone Duo.jpg",
+   "match": "verifie_visuellement"
+  },
+  "jbl-clip-5": {
+   "thumb": "/assets/produits/jbl-clip-5.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Kyu3a",
+   "file_page": "https://commons.wikimedia.org/wiki/File:JBL_Clip_5.jpg",
+   "commons_title": "File:JBL Clip 5.jpg",
+   "match": "verifie_visuellement"
+  },
+  "macbook-air-13-m4": {
+   "thumb": "/assets/produits/macbook-air-13-m4.jpg",
+   "license": "CC0",
+   "author": "AzureSaturn",
+   "file_page": "https://commons.wikimedia.org/wiki/File:MacBook_Air_(13-inch,_M4,_Silver).jpg",
+   "commons_title": "File:MacBook Air (13-inch, M4, Silver).jpg",
+   "match": "verifie_visuellement"
+  },
+  "macbook-air-13-m5": {
+   "thumb": "/assets/produits/macbook-air-13-m5.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Kyu3a",
+   "file_page": "https://commons.wikimedia.org/wiki/File:M5_Macbook_Air_13_Sky_Blue_model.jpg",
+   "commons_title": "File:M5 Macbook Air 13 Sky Blue model.jpg",
+   "match": "verifie_visuellement"
+  },
+  "macbook-air-15-m4": {
+   "thumb": "/assets/produits/macbook-air-15-m4.jpg",
+   "license": "CC0",
+   "author": "AzureSaturn",
+   "file_page": "https://commons.wikimedia.org/wiki/File:MacBook_Air_(15-inch,_M4,_Silver).jpg",
+   "commons_title": "File:MacBook Air (15-inch, M4, Silver).jpg",
+   "match": "verifie_visuellement"
+  },
+  "macbook-pro-14-m5": {
+   "thumb": "/assets/produits/macbook-pro-14-m5.jpg",
+   "license": "CC0",
+   "author": "AzureSaturn",
+   "file_page": "https://commons.wikimedia.org/wiki/File:MacBook_Pro_(14-inch,_M5,_Space_Black).jpg",
+   "commons_title": "File:MacBook Pro (14-inch, M5, Space Black).jpg",
+   "match": "verifie_visuellement"
+  },
+  "macbook-pro-16-m4": {
+   "thumb": "/assets/produits/macbook-pro-16-m4.jpg",
+   "license": "CC0",
+   "author": "AzureSaturn",
+   "file_page": "https://commons.wikimedia.org/wiki/File:MacBook_Pro_(16-inch,_M4_Pro,_Silver).jpg",
+   "commons_title": "File:MacBook Pro (16-inch, M4 Pro, Silver).jpg",
+   "match": "verifie_visuellement"
+  },
+  "manette-switch-pro": {
+   "thumb": "/assets/produits/manette-switch-pro.jpg",
+   "license": "Public domain",
+   "author": "Evan-Amos",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo-Switch-Pro-Controller-BR.jpg",
+   "commons_title": "File:Nintendo-Switch-Pro-Controller-BR.jpg",
+   "match": "verifie_visuellement"
+  },
+  "playstation-portal": {
+   "thumb": "/assets/produits/playstation-portal.jpg",
+   "license": "CC BY 4.0",
+   "author": "ArlindoPereira",
+   "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_Portal.jpg",
+   "commons_title": "File:PlayStation Portal.jpg",
+   "match": "verifie_visuellement"
+  },
+  "playstation-vr2": {
+   "thumb": "/assets/produits/playstation-vr2.jpg",
+   "license": "CC BY 4.0",
+   "author": "ArlindoPereira",
+   "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_VR2.jpg",
+   "commons_title": "File:PlayStation VR2.jpg",
+   "match": "verifie_visuellement"
+  },
+  "switch": {
+   "thumb": "/assets/produits/switch.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "KK IN HK",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_-_Red.jpg",
+   "commons_title": "File:Nintendo Switch - Red.jpg",
+   "match": "verifie_visuellement"
+  },
+  "switch-lite": {
+   "thumb": "/assets/produits/switch-lite.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "GerdeeX",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_switch_lite_blue.jpg",
+   "commons_title": "File:Nintendo switch lite blue.jpg",
+   "match": "verifie_visuellement"
+  }
+ }
 }
