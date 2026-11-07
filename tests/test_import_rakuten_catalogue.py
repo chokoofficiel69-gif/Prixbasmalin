@@ -161,9 +161,24 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertNotIn("vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY'", workflow)
         self.assertIn('54306_4768926_mp.xml.gz', workflow)
         self.assertIn("vars.RAKUTEN_PRICE_TAX_STATUS || 'unspecified'", workflow)
+        self.assertIn("vars.RAKUTEN_PRICE_TAX_STATUS_VERIFIED || 'false'", workflow)
+        self.assertIn('--price-tax-status-verified "${RAKUTEN_PRICE_TAX_STATUS_VERIFIED:-false}"', workflow)
         self.assertIn('${RAKUTEN_PRICE_TAX_STATUS:-unspecified}', workflow)
         self.assertNotIn("'included'", workflow)
         self.assertIn("if: github.event_name != 'pull_request'", workflow)
+
+    def test_ttc_requires_explicit_confirmation(self):
+        self.assertEqual(MODULE.resolve_price_tax_status("included", False), "unspecified")
+        self.assertEqual(MODULE.resolve_price_tax_status("included", True), "included")
+        self.assertEqual(MODULE.resolve_price_tax_status("unspecified", True), "unspecified")
+
+    def test_public_pages_require_verified_rakuten_tax_status(self):
+        root = Path(__file__).resolve().parents[1]
+        homepage = (root / "index.html").read_text(encoding="utf-8")
+        catalogue = (root / "catalogue.html").read_text(encoding="utf-8")
+        self.assertIn("rakuten?.priceTaxStatusVerified===true", homepage)
+        self.assertIn("feed.priceTaxStatusVerified===true", catalogue)
+        self.assertIn("taxStatusVerified&&pmAwinPriceIsFresh", catalogue)
 
     def test_workflow_requires_pinned_host_key_and_retries_atomic_downloads(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
