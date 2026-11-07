@@ -1,0 +1,84 @@
+/* Prix Malin — design commun (étape 1 de l'harmonisation).
+   Référence visuelle : l'en-tête et les cartes de la page d'accueil (noir + orange, cartes blanches).
+   Tout est préfixé « pm- » et protégé par !important là où les anciennes pages stylent
+   « header », « nav » ou « a » de façon générique. */
+
+:root{
+  --pm-bg:#080d14;
+  --pm-bg-2:#101722;
+  --pm-line:#243246;
+  --pm-text:#f5f7fa;
+  --pm-muted:#b8c4d4;
+  --pm-orange:#ff6508;
+  --pm-orange-2:#ff9b21;
+  --pm-orange-text:#ffad66;
+  --pm-price:#f05a00;
+  --pm-blue:#0b63ce;
+  --pm-amazon:#ff9900;
+  --pm-card:#ffffff;
+  --pm-card-soft:#f3f4f6;
+  --pm-ink:#111827;
+  --pm-ink-muted:#6b7280;
+  --pm-radius:14px;
+  --pm-font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+
+/* ---------- En-tête commun ---------- */
+.pm-site-header{display:block!important;position:sticky!important;top:0!important;z-index:900!important;margin:0!important;padding:10px 16px 0!important;background:var(--pm-bg)!important;border:0!important;border-bottom:1px solid var(--pm-line)!important;box-shadow:0 6px 18px rgba(0,0,0,.35)!important;color:var(--pm-text)!important;font-family:var(--pm-font)!important;backdrop-filter:none!important;text-align:left!important}
+.pm-site-header *{box-sizing:border-box}
+.pm-sh-inner{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:9px}
+.pm-sh-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pm-site-header a.pm-sh-brand{display:flex!important;align-items:center;gap:9px;color:#fff!important;text-decoration:none!important;background:none!important;padding:0!important;border:0!important}
+.pm-sh-brand img{width:44px;height:38px;object-fit:contain;flex:0 0 auto}
+.pm-sh-brand b{display:block;font-size:24px;line-height:1;font-weight:900;letter-spacing:-.03em;color:#fff}
+.pm-sh-brand b span{color:var(--pm-orange-2)}
+.pm-sh-brand small{display:block;margin-top:3px;font-size:10.5px;font-weight:700;color:var(--pm-muted);letter-spacing:.02em}
+.pm-site-header a.pm-sh-deals{display:inline-flex!important;align-items:center;gap:6px;min-height:36px;padding:7px 12px!important;border-radius:999px;background:linear-gradient(100deg,var(--pm-orange-2),var(--pm-orange))!important;color:#fff!important;font-size:13px;font-weight:850;text-decoration:none!important;white-space:nowrap;border:0!important}
+.pm-sh-search{display:flex!important;margin:0!important;padding:0!important;background:#fff!important;border:2px solid var(--pm-orange-2)!important;border-radius:12px!important;overflow:hidden;box-shadow:none!important}
+.pm-site-header .pm-sh-search input{flex:1;min-width:0;height:44px;margin:0!important;border:0!important;border-radius:0!important;padding:0 14px!important;font:16px var(--pm-font)!important;color:var(--pm-ink)!important;background:#fff!important;outline:none;box-shadow:none!important}
+.pm-site-header .pm-sh-search input::placeholder{color:#6b7280!important}
+.pm-site-header .pm-sh-search button{flex:0 0 56px;display:flex;align-items:center;justify-content:center;margin:0!important;border:0!important;border-radius:0!important;padding:0!important;background:linear-gradient(100deg,var(--pm-orange-2),var(--pm-orange))!important;color:#fff!important;cursor:pointer;min-height:44px}
+.pm-sh-search button svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2.6}
+.pm-site-header nav.pm-sh-nav{display:flex!important;gap:6px;overflow-x:auto;margin:0!important;padding:0 0 10px!important;background:none!important;border:0!important;scrollbar-width:none;flex-wrap:nowrap!important}
+.pm-sh-nav::-webkit-scrollbar{display:none}
+.pm-site-header .pm-sh-nav a{flex:0 0 auto;display:inline-flex!important;align-items:center;gap:6px;min-height:36px;padding:7px 12px!important;border-radius:999px!important;border:1px solid #33435a!important;background:#121b28!important;color:#e9eef5!important;font:700 13.5px/1 var(--pm-font)!important;text-decoration:none!important;white-space:nowrap;margin:0!important}
+.pm-site-header .pm-sh-nav a[aria-current="page"]{background:var(--pm-orange)!important;border-color:var(--pm-orange)!important;color:#fff!important}
+.pm-sh-nav svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;flex:0 0 auto}
+.pm-sr{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}
+@media(min-width:760px){
+  .pm-sh-inner{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand search deals" "nav nav nav";align-items:center;column-gap:18px}
+  .pm-sh-top{display:contents}
+  .pm-sh-brand{grid-area:brand}.pm-sh-deals{grid-area:deals}.pm-sh-search{grid-area:search}.pm-sh-nav{grid-area:nav}
+}
+
+.pm-site-header.pm-sh-compact{position:relative!important;box-shadow:none!important}
+
+/* Lien d'évitement : invisible, apparaît seulement au clavier. */
+.pm-skip-link,.skip-link{position:absolute!important;left:8px;top:-80px!important;z-index:10000;background:var(--pm-orange);color:#fff!important;padding:10px 14px;border-radius:8px;font-weight:800;text-decoration:none}
+.pm-skip-link:focus,.skip-link:focus{top:8px!important}
+
+/* Typographie commune des pages qui chargent cette feuille (anciennes pages comprises). */
+body,h1,h2,h3,h4{font-family:var(--pm-font)}
+
+/* ---------- Boutons ---------- */
+.pm-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:10px 16px!important;border-radius:10px!important;border:0!important;font:800 15px/1.2 var(--pm-font)!important;text-decoration:none!important;text-align:center;cursor:pointer}
+.pm-btn-primary{background:linear-gradient(100deg,var(--pm-orange-2),var(--pm-orange))!important;color:#fff!important}
+.pm-btn-compare{background:var(--pm-blue)!important;color:#fff!important}
+.pm-btn-amazon{background:var(--pm-amazon)!important;color:#111!important}
+.pm-btn-ghost{background:#fff!important;color:var(--pm-blue)!important;border:2px solid var(--pm-blue)!important}
+.pm-btn-block{display:flex!important;width:100%}
+
+/* ---------- Carte produit commune (même rendu que les cartes de l'accueil) ---------- */
+a.pm-card{position:relative;display:flex!important;flex-direction:column;min-width:0;background:var(--pm-card)!important;border:0!important;border-radius:var(--pm-radius)!important;overflow:hidden;text-decoration:none!important;color:var(--pm-ink)!important;box-shadow:0 6px 18px rgba(0,0,0,.22)!important;transition:transform .15s ease}
+a.pm-card:hover,a.pm-card:focus-visible{transform:translateY(-3px)}
+.pm-card .visual,.pm-card .media{position:relative;aspect-ratio:1/1!important;border-radius:0!important;background:var(--pm-card-soft)!important;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pm-card .visual img,.pm-card .media img{width:100%;height:100%;object-fit:contain;padding:12px;mix-blend-mode:multiply}
+.pm-card .c,.pm-card .body{display:flex;flex-direction:column;gap:3px;padding:10px 12px 12px!important;flex:1}
+.pm-card small{color:var(--pm-ink-muted)!important;font-size:12px!important;line-height:1.35}
+.pm-card b,.pm-card h3{margin:0;font-size:15px!important;line-height:1.3!important;font-weight:800!important;color:var(--pm-ink)!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pm-card strong{margin-top:auto;padding-top:4px;font-size:22px!important;line-height:1.1;font-weight:900!important;color:var(--pm-price)!important}
+.pm-card em{font-style:normal;font-size:12.5px;font-weight:700;color:var(--pm-blue)}
+.pm-card .pm-card-badge{position:absolute;left:8px;top:8px;z-index:1;background:var(--pm-blue);color:#fff;font-size:11.5px;font-weight:800;padding:4px 8px;border-radius:6px}
+.pm-cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+@media(min-width:760px){.pm-cards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))!important}}
+@media(prefers-reduced-motion:reduce){a.pm-card{transition:none}}
