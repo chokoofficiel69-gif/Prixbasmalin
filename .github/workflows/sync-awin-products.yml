@@ -9,6 +9,8 @@ on:
     paths:
       - "price-engine/sync-awin-products.mjs"
       - ".github/workflows/sync-awin-products.yml"
+      - "scripts/build_home_deals.py"
+      - "tests/test_home_deals.py"
 
 permissions:
   contents: write
@@ -71,6 +73,8 @@ jobs:
         run: node price-engine/sync-awin-products.mjs
       - name: Mettre à jour la vitrine d'accueil (idées cadeaux)
         run: python3 scripts/build_home_deals.py
+      - name: Tester les règles d'affichage des prix de la vitrine
+        run: python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
       - name: Enregistrer le catalogue s'il a changé
         id: save
         shell: bash
