@@ -46,6 +46,18 @@ class HomeDealsTests(unittest.TestCase):
         published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
         self.assertEqual(published, deals.build(awin, sheets))
 
+    def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
+        awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
+        tracker = (ROOT / ".github" / "workflows" / "import-prixtracker.yml").read_text(encoding="utf-8")
+        shared_group = "group: prix-malin-price-data-refresh"
+        self.assertIn(shared_group, awin)
+        self.assertIn(shared_group, tracker)
+        self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', awin)
+        self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', tracker)
+        self.assertIn("trois tentatives", awin)
+        self.assertIn("trois tentatives", tracker)
+        self.assertIn("github.event.pull_request.head.sha || github.ref", tracker)
+
     def test_homepage_sections_partners_and_affiliate_rel(self):
         page = (ROOT / "index.html").read_text(encoding="utf-8")
         for marker in ('id="pm-partners"', 'id="pm-top-prices"', 'id="pm-gifts"', 'fetch("/data/home-deals.json"'):

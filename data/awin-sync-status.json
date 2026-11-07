@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-06T13:31:06.235Z",
+  "fetched_at": "2026-11-07T08:14:10.006Z",
   "source": "Awin Direct Product Data Feed",
   "publisher_id": "3137386",
   "locale": "fr_FR",
@@ -13,17 +13,17 @@
     "joined_advertisers_checked": 0,
     "pending_advertisers_detected": 6,
     "additional_authorized_offers_imported": 0,
-    "products": 7500,
-    "merchant_offers": 7500,
+    "products": 7508,
+    "merchant_offers": 7508,
     "merchants": 7,
     "brands": 0,
     "products_with_gtin": 0,
     "products_with_mpn": 0,
     "products_with_brand_mpn": 0,
     "multi_merchant_products": 0,
-    "offers_with_shipping": 4223,
+    "offers_with_shipping": 4231,
     "offers_with_availability": 0,
     "offers_with_tax_included": 0,
-    "products_other_category": 32
+    "products_other_category": 26
   }
 }

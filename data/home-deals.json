@@ -1,6 +1,6 @@
 {
  "version": 1,
- "awin_fetched_at": "2026-11-06T13:31:06.235Z",
+ "awin_fetched_at": "2026-11-07T08:14:10.006Z",
  "sheets_period": {
   "from": "2026-10-09",
   "to": "2026-11-05"
@@ -190,7 +190,7 @@
    "family": "parfum",
    "family_label": "Parfums",
    "band": "30-60",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -204,49 +204,49 @@
    "family": "tech",
    "family_label": "High-tech",
    "band": "moins-30",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-131019-46102550164",
-   "name": "Chaussettes d'entraînement XC – 34-36",
+   "id": "awin-awin-131019-46102548832",
+   "name": "Chaussettes Gwen – Gris chiné – 35-38",
    "merchant": "Chaussettes-en-ligne.fr/ (FR)",
    "price_eur": 17.95,
    "shipping_eur": null,
-   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/p/r/products-1907902_999975_01_1_pwbtojjl1qnki00m.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=46102550164&a=3137386&m=131019",
+   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/p/r/products-oroblu-gwen-sokken-vobfcb30s-3_1_mbvzx5unhtkgdzuc.jpg",
+   "url": "https://www.awin1.com/pclick.php?p=46102548832&a=3137386&m=131019",
    "family": "mode",
    "family_label": "Mode",
    "band": "moins-30",
-   "price_date": "2026-03-24 15:07:16",
+   "price_date": "2026-06-26 14:39:24",
    "price_date_kind": "merchant"
   },
   {
-   "id": "awin-awin-111020-40152237655",
-   "name": "Distributeur de savon rectangulaire ambré",
+   "id": "awin-awin-111020-40438223189",
+   "name": "Distributeur de savon ambré minimaliste",
    "merchant": "Kuishi",
-   "price_eur": 17.95,
+   "price_eur": 16.95,
    "shipping_eur": 0.0,
-   "image": "https://cdn.shopify.com/s/files/1/0819/9759/4967/files/Amber-Rectangular---Black-Plastic.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=40152237655&a=3137386&m=111020",
+   "image": "https://cdn.shopify.com/s/files/1/0819/9759/4967/files/Minimal-Hand-Wash-PL_18eeef04-279e-45cb-86c7-b8607ab5a3e0.jpg",
+   "url": "https://www.awin1.com/pclick.php?p=40438223189&a=3137386&m=111020",
    "family": "bougie",
    "family_label": "Bougies & bien-être",
    "band": "moins-30",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-105475-41455397311",
-   "name": "Cleanance Aqua Gel Matificant 50 ml",
+   "id": "awin-awin-105475-44079960168",
+   "name": "Huile purifiante mousseuse",
    "merchant": "Perfumeria Comas FR",
-   "price_eur": 20.5,
+   "price_eur": 20.7,
    "shipping_eur": 9.35,
-   "image": "https://perfumeriacomas.com/cdnassets/products/134652-1_s.webp",
-   "url": "https://www.awin1.com/pclick.php?p=41455397311&a=3137386&m=105475",
+   "image": "https://perfumeriacomas.com/cdnassets/products/127335-1_s-d4d83763.webp",
+   "url": "https://www.awin1.com/pclick.php?p=44079960168&a=3137386&m=105475",
    "family": "autre",
    "family_label": "Idées cadeaux",
    "band": "moins-30",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -274,7 +274,7 @@
    "family": "parfum",
    "family_label": "Parfums",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -288,21 +288,21 @@
    "family": "tech",
    "family_label": "High-tech",
    "band": "30-60",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-131019-46102550183",
-   "name": "Thermo set en tailles enfant Core dry – 122",
+   "id": "awin-awin-131019-46102542296",
+   "name": "Chaussettes de travail en Tencel - 6 paires - Noires - 35-38",
    "merchant": "Chaussettes-en-ligne.fr/ (FR)",
-   "price_eur": 39.95,
+   "price_eur": 41.7,
    "shipping_eur": null,
-   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/p/r/products-1909713_999000_01_4_z9poiqaeqmve262l.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=46102550183&a=3137386&m=131019",
+   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/s/o/sokken-online-10cel-werksokken-zwart-hoog-6-paar_zoku67zas2aermij.jpg",
+   "url": "https://www.awin1.com/pclick.php?p=46102542296&a=3137386&m=131019",
    "family": "mode",
    "family_label": "Mode",
    "band": "30-60",
-   "price_date": "2026-03-24 14:04:08",
+   "price_date": "2026-04-29 09:37:05",
    "price_date_kind": "merchant"
   },
   {
@@ -316,21 +316,21 @@
    "family": "bougie",
    "family_label": "Bougies & bien-être",
    "band": "30-60",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-105475-40209899066",
-   "name": "Only The Brave Tattoo",
+   "id": "awin-awin-105475-39179013177",
+   "name": "Biovergetures",
    "merchant": "Perfumeria Comas FR",
-   "price_eur": 42.5,
+   "price_eur": 42.9,
    "shipping_eur": 0.0,
-   "image": "https://perfumeriacomas.com/cdnassets/products/11833-1_m-8047891d.webp",
-   "url": "https://www.awin1.com/pclick.php?p=40209899066&a=3137386&m=105475",
-   "family": "parfum",
-   "family_label": "Parfums",
+   "image": "https://perfumeriacomas.com/cdnassets/products/10873-1_s.webp",
+   "url": "https://www.awin1.com/pclick.php?p=39179013177&a=3137386&m=105475",
+   "family": "autre",
+   "family_label": "Idées cadeaux",
    "band": "30-60",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -358,7 +358,7 @@
    "family": "parfum",
    "family_label": "Parfums",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -372,7 +372,7 @@
    "family": "tech",
    "family_label": "High-tech",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -400,21 +400,21 @@
    "family": "bougie",
    "family_label": "Bougies & bien-être",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-105475-39179012067",
-   "name": "D&apos;Issey Pivoine",
+   "id": "awin-awin-105475-39179014097",
+   "name": "Alien Hypersense Floral",
    "merchant": "Perfumeria Comas FR",
    "price_eur": 79.9,
    "shipping_eur": 0.0,
-   "image": "https://perfumeriacomas.com/cdnassets/products/126862-1_s.webp",
-   "url": "https://www.awin1.com/pclick.php?p=39179012067&a=3137386&m=105475",
+   "image": "https://perfumeriacomas.com/cdnassets/products/134313-1_s.webp",
+   "url": "https://www.awin1.com/pclick.php?p=39179014097&a=3137386&m=105475",
    "family": "parfum",
    "family_label": "Parfums",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -442,7 +442,7 @@
    "family": "parfum",
    "family_label": "Parfums",
    "band": "30-60",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -456,7 +456,7 @@
    "family": "tech",
    "family_label": "High-tech",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -484,21 +484,21 @@
    "family": "bougie",
    "family_label": "Bougies & bien-être",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-105475-44079959823",
-   "name": "Burning Barbershop 50 ml",
+   "id": "awin-awin-105475-44079959822",
+   "name": "Bowmakers 50 ml",
    "merchant": "Perfumeria Comas FR",
    "price_eur": 169.0,
    "shipping_eur": 0.0,
-   "image": "https://perfumeriacomas.com/cdnassets/products/133234-1_s.webp",
-   "url": "https://www.awin1.com/pclick.php?p=44079959823&a=3137386&m=105475",
+   "image": "https://perfumeriacomas.com/cdnassets/products/133237-1_s.webp",
+   "url": "https://www.awin1.com/pclick.php?p=44079959822&a=3137386&m=105475",
    "family": "parfum",
    "family_label": "Parfums",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -526,7 +526,7 @@
    "family": "parfum",
    "family_label": "Parfums",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -540,49 +540,49 @@
    "family": "tech",
    "family_label": "High-tech",
    "band": "moins-30",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-131019-46102554523",
-   "name": "Chaussettes de sport montantes - 5 paires - Noires - Pointures 41 à 45",
+   "id": "awin-awin-131019-46102549909",
+   "name": "Lot de 2 boxers Basset en bambou – Bleu marine – Taille L",
    "merchant": "Chaussettes-en-ligne.fr/ (FR)",
-   "price_eur": 17.95,
+   "price_eur": 17.0,
    "shipping_eur": null,
-   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/s/o/sokken-online-caterpillar-sportsokken-zwart-1_53u1bsvyp8owfl9i.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=46102554523&a=3137386&m=131019",
+   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/p/r/products-31050_4990_03_3_pqdzsy7hp1vdawa4.jpg",
+   "url": "https://www.awin1.com/pclick.php?p=46102549909&a=3137386&m=131019",
    "family": "mode",
    "family_label": "Mode",
    "band": "moins-30",
-   "price_date": "2026-02-18 00:25:34",
+   "price_date": "2026-06-02 08:29:46",
    "price_date_kind": "merchant"
   },
   {
-   "id": "awin-awin-111020-40438223189",
-   "name": "Distributeur de savon ambré minimaliste",
+   "id": "awin-awin-111020-40152238280",
+   "name": "Bouteille en verre ambré et bouchon en métal",
    "merchant": "Kuishi",
    "price_eur": 16.95,
    "shipping_eur": 0.0,
-   "image": "https://cdn.shopify.com/s/files/1/0819/9759/4967/files/Minimal-Hand-Wash-PL_18eeef04-279e-45cb-86c7-b8607ab5a3e0.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=40438223189&a=3137386&m=111020",
-   "family": "bougie",
-   "family_label": "Bougies & bien-être",
+   "image": "https://cdn.shopify.com/s/files/1/0819/9759/4967/files/Clear-Screw-Bottle-Black.jpg",
+   "url": "https://www.awin1.com/pclick.php?p=40152238280&a=3137386&m=111020",
+   "family": "maison",
+   "family_label": "Maison",
    "band": "moins-30",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-105475-39179014314",
-   "name": "Base de maquillage en crème Compact Couvrance",
+   "id": "awin-awin-105475-41394403701",
+   "name": "Biology Crème Anti-Rojeces 40 ml",
    "merchant": "Perfumeria Comas FR",
-   "price_eur": 20.5,
+   "price_eur": 20.75,
    "shipping_eur": 9.35,
-   "image": "https://perfumeriacomas.com/cdnassets/products/137800-1_s.webp",
-   "url": "https://www.awin1.com/pclick.php?p=39179014314&a=3137386&m=105475",
+   "image": "https://perfumeriacomas.com/cdnassets/products/117548-1_s.webp",
+   "url": "https://www.awin1.com/pclick.php?p=41394403701&a=3137386&m=105475",
    "family": "autre",
    "family_label": "Idées cadeaux",
    "band": "moins-30",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -610,7 +610,7 @@
    "family": "parfum",
    "family_label": "Parfums",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -624,21 +624,21 @@
    "family": "tech",
    "family_label": "High-tech",
    "band": "30-60",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-131019-46102548848",
-   "name": "Pantalon de confort CORE Dry Active pour femme - Noir - M",
+   "id": "awin-awin-131019-46102550181",
+   "name": "Thermoset en tailles enfant Core dry – 86",
    "merchant": "Chaussettes-en-ligne.fr/ (FR)",
    "price_eur": 39.95,
    "shipping_eur": null,
-   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/p/r/products-2693_b63b5f07b1-1911163-999000_core-dry-active-comfort-pant-w_closeup5-original_3__2_ttfb28pvritusj6l.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=46102548848&a=3137386&m=131019",
+   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/p/r/products-1909713_999000_01_1_nwdupl4mu0hqxoni.jpg",
+   "url": "https://www.awin1.com/pclick.php?p=46102550181&a=3137386&m=131019",
    "family": "mode",
    "family_label": "Mode",
    "band": "30-60",
-   "price_date": "2026-03-24 14:12:47",
+   "price_date": "2026-03-24 14:04:08",
    "price_date_kind": "merchant"
   },
   {
@@ -652,21 +652,21 @@
    "family": "bougie",
    "family_label": "Bougies & bien-être",
    "band": "30-60",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-105475-41484300230",
-   "name": "Pincel Maquillage Fond 1 ud.",
+   "id": "awin-awin-105475-46019723005",
+   "name": "SÉRUM THÉRAPIE CUTANÉE ERBORIAN 30ML 30 ml",
    "merchant": "Perfumeria Comas FR",
    "price_eur": 42.5,
    "shipping_eur": 0.0,
-   "image": "https://perfumeriacomas.com/cdnassets/products/79633-1_s.webp",
-   "url": "https://www.awin1.com/pclick.php?p=41484300230&a=3137386&m=105475",
+   "image": "https://perfumeriacomas.com/cdnassets/products/131680-1_s-0ef9e1f5.webp",
+   "url": "https://www.awin1.com/pclick.php?p=46019723005&a=3137386&m=105475",
    "family": "autre",
    "family_label": "Idées cadeaux",
    "band": "30-60",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -694,7 +694,7 @@
    "family": "parfum",
    "family_label": "Parfums",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -708,17 +708,17 @@
    "family": "tech",
    "family_label": "High-tech",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-131019-46102559372",
-   "name": "T-shirt en cachemire Perfect Line - Dentelle - Manches longues - Taille L - Noir",
+   "id": "awin-awin-131019-46102559371",
+   "name": "T-shirt en cachemire Perfect Line - Dentelle - Manches longues - Taille M - Noir",
    "merchant": "Chaussettes-en-ligne.fr/ (FR)",
    "price_eur": 74.95,
    "shipping_eur": null,
-   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/v/o/vobt67430-black-1_1_1.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=46102559372&a=3137386&m=131019",
+   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/v/o/vobt67430-black-1_1.jpg",
+   "url": "https://www.awin1.com/pclick.php?p=46102559371&a=3137386&m=131019",
    "family": "mode",
    "family_label": "Mode",
    "band": "60-100",
@@ -736,21 +736,21 @@
    "family": "maison",
    "family_label": "Maison",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-105475-42813646947",
-   "name": "Enigma Supreme Hair Mist 50 ml",
+   "id": "awin-awin-105475-42813653232",
+   "name": "Suprême Crème Sublime de Jeunesse 50 ml",
    "merchant": "Perfumeria Comas FR",
-   "price_eur": 79.9,
+   "price_eur": 79.5,
    "shipping_eur": 0.0,
-   "image": "https://perfumeriacomas.com/cdnassets/products/114594-1_s.webp",
-   "url": "https://www.awin1.com/pclick.php?p=42813646947&a=3137386&m=105475",
-   "family": "parfum",
-   "family_label": "Parfums",
+   "image": "https://perfumeriacomas.com/cdnassets/products/135749-1_s.webp",
+   "url": "https://www.awin1.com/pclick.php?p=42813653232&a=3137386&m=105475",
+   "family": "autre",
+   "family_label": "Idées cadeaux",
    "band": "60-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -778,7 +778,7 @@
    "family": "parfum",
    "family_label": "Parfums",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -792,7 +792,7 @@
    "family": "tech",
    "family_label": "High-tech",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
@@ -820,21 +820,21 @@
    "family": "bougie",
    "family_label": "Bougies & bien-être",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   },
   {
-   "id": "awin-awin-105475-44079959822",
-   "name": "Bowmakers 50 ml",
+   "id": "awin-awin-105475-44079959823",
+   "name": "Burning Barbershop 50 ml",
    "merchant": "Perfumeria Comas FR",
    "price_eur": 169.0,
    "shipping_eur": 0.0,
-   "image": "https://perfumeriacomas.com/cdnassets/products/133237-1_s.webp",
-   "url": "https://www.awin1.com/pclick.php?p=44079959822&a=3137386&m=105475",
+   "image": "https://perfumeriacomas.com/cdnassets/products/133234-1_s.webp",
+   "url": "https://www.awin1.com/pclick.php?p=44079959823&a=3137386&m=105475",
    "family": "parfum",
    "family_label": "Parfums",
    "band": "plus-100",
-   "price_date": "2026-11-06T13:31:06.235Z",
+   "price_date": "2026-11-07T08:14:10.006Z",
    "price_date_kind": "feed"
   }
  ]

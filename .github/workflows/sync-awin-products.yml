@@ -14,7 +14,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: awin-product-catalogue
+  # Awin et PrixTracker publient tous deux data/home-deals.json.
+  group: prix-malin-price-data-refresh
   cancel-in-progress: false
 
 jobs:
@@ -93,7 +94,20 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/awin-products.json data/awin-sync-status.json data/home-deals.json idees-cadeaux prix sitemap-prix.xml
           git commit -m "Refresh authorized Awin product catalogue"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          for attempt in 1 2 3; do
+            git fetch origin "${GITHUB_REF_NAME}"
+            if ! git rebase "origin/${GITHUB_REF_NAME}"; then
+              git rebase --abort || true
+              echo "::error::La branche a changé sur les mêmes données pendant la synchronisation Awin ; aucune donnée précédente n'est écrasée."
+              exit 1
+            fi
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "La branche a avancé pendant la publication Awin (tentative ${attempt}/3)."
+          done
+          echo "::error::Impossible de publier le snapshot Awin après trois tentatives."
+          exit 1
       - name: Vérifier que le nouveau flux Awin est visible sur le site public
         if: steps.save.outputs.changed == 'true' && github.ref == 'refs/heads/main'
         env:
@@ -166,9 +180,15 @@ jobs:
                 curl --fail --silent --show-error --location --connect-timeout 3 --max-time 10 \
                   -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
                   "https://prixbasmalin.fr/catalogue.html?v=${EXPECTED_FETCHED_AT}" --output /tmp/catalogue-public.html
-                grep -q 'id="pmAwinFeedStatus"' /tmp/catalogue-public.html
-                grep -q 'Aucune comparaison multi-marchands exacte avec prix TTC confirmé' /tmp/catalogue-public.html
-                echo "Interface publique du comparateur : statut de flux et état vide vérifiés."
+                if grep -Fq 'id="pmAwinFeedStatus"' /tmp/catalogue-public.html; then
+                  echo "::error::Un diagnostic technique Awin ne doit pas être exposé aux visiteurs."
+                  exit 1
+                fi
+                grep -Fq 'id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden' /tmp/catalogue-public.html
+                grep -Fq 'verifiedShelf.hidden=true;' /tmp/catalogue-public.html
+                grep -Fq 'offer.currency!=="EUR"||offer.price_tax_status!=="included"' /tmp/catalogue-public.html
+                grep -Fq 'age<=maxAgeHours*60*60*1000' /tmp/catalogue-public.html
+                echo "Interface publique vérifiée : comparaisons masquées sans offre exacte, fraîche et TTC ; aucun diagnostic technique exposé."
                 exit 0
               fi
             fi
