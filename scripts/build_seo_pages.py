@@ -420,7 +420,7 @@ def build():
     sheets_data = json.loads(SHEETS.read_text(encoding="utf-8"))
     sheets = sheets_data["products"]
     period = sheets_data["dataset_period"]
-    awin = json.loads(AWIN.read_text(encoding="utf-8")) if AWIN.exists() else {"products": []}
+    deals = json.loads(DEALS.read_text(encoding="utf-8")) if DEALS.exists() else {"gifts": []}
     files = {}
     for p in sheets:
         files[f"prix/{p['id']}.html"] = product_page(p, sheets, period)
@@ -432,14 +432,15 @@ def build():
         files[f"prix/{slug}.html"] = page
         groups.append((cat, label, items))
     files["prix/index.html"] = index_page(groups, len(sheets))
-    fetched = awin.get("fetched_at")
     budgets = []
+    reference_time = datetime.now(timezone.utc)
     for slug, label, lo, hi in GIFT_BUDGETS:
-        items = gift_items(awin, lo, hi)
-        budgets.append((slug, label, items))
+        items = gift_items(deals, lo, hi, now=reference_time)
+        budgets.append((slug, label, lo, hi, items))
+    for slug, label, lo, hi, items in budgets:
         if items:
-            files[f"idees-cadeaux/{slug}.html"] = gift_page(slug, label, items, fetched, GIFT_BUDGETS)
-    files["idees-cadeaux/index.html"] = gift_index(budgets, fetched)
+            files[f"idees-cadeaux/{slug}.html"] = gift_page(slug, label, items, budgets)
+    files["idees-cadeaux/index.html"] = gift_index(budgets)
     return files
 
 
