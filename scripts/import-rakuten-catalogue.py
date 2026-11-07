@@ -266,6 +266,15 @@ def select_balanced(rows, limit):
     return selected[:limit]
 
 
+def resolve_price_tax_status(value, verified):
+    """Ne confirme le TTC que sur un signal de confirmation explicite."""
+    if value not in ("included", "unspecified"):
+        raise ValueError("--price-tax-status doit valoir included ou unspecified.")
+    if not isinstance(verified, bool):
+        raise ValueError("La confirmation TVA doit être un booléen.")
+    return "included" if value == "included" and verified else "unspecified"
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", default=".")
@@ -273,6 +282,7 @@ def main():
     parser.add_argument("--date-format", default=os.environ.get("RAKUTEN_DATE_FORMAT", ""))
     parser.add_argument("--max-age-hours", type=int, default=48)
     parser.add_argument("--price-tax-status", default=os.environ.get("RAKUTEN_PRICE_TAX_STATUS", "unspecified"))
+    parser.add_argument("--price-tax-status-verified", choices=("true", "false"), default=os.environ.get("RAKUTEN_PRICE_TAX_STATUS_VERIFIED", "false"))
     parser.add_argument("--decathlon-limit", type=int, default=1500)
     parser.add_argument("--nicchia-limit", type=int, default=1500)
     args = parser.parse_args()
@@ -281,8 +291,12 @@ def main():
         raise SystemExit("Import bloqué : confirmer RAKUTEN_DATE_FORMAT (MM/DD/YYYY ou DD/MM/YYYY).")
     if args.max_age_hours < 1 or args.max_age_hours > 720:
         raise SystemExit("--max-age-hours doit être compris entre 1 et 720.")
-    if args.price_tax_status not in ("included", "unspecified"):
-        raise SystemExit("--price-tax-status doit valoir included ou unspecified.")
+    try:
+        effective_price_tax_status = resolve_price_tax_status(
+            args.price_tax_status, args.price_tax_status_verified == "true"
+        )
+    except ValueError as error:
+        raise SystemExit(str(error))
 
     now = dt.datetime.now(UTC)
     all_products = []
@@ -298,7 +312,7 @@ def main():
             continue
         try:
             rows, source_created, stats = parse_feed(
-                path, merchant, slug, args.date_format, now, args.max_age_hours, args.price_tax_status,
+                path, merchant, slug, args.date_format, now, args.max_age_hours, effective_price_tax_status,
                 require_trailer=not filename.endswith("_cmp.xml.gz")
             )
         except (OSError, EOFError, ET.ParseError, ValueError) as error:
@@ -322,13 +336,16 @@ def main():
         "status": "ok",
         "source": "Rakuten Advertising Product Catalog",
         "generated_at": generated_at,
-        "priceTaxStatus": args.price_tax_status,
+        "priceTaxStatus": effective_price_tax_status,
+        "priceTaxStatusVerified": effective_price_tax_status == "included",
         "source_stats": source_stats,
         "notes": [
             "Instantané issu de flux marchands autorisés et validés.",
             "La date generated_at est celle du flux marchand, pas celle de l'exécution du script.",
             "Prix en EUR communiqués par le marchand : prix de vente affiché aux particuliers sur son site.",
-            "priceTaxStatus=included : un site marchand B2C doit afficher ses prix TTC (France : arrêté du 3 décembre 1987 ; UE : directive 98/6/CE).",
+            "Le statut TTC n'est jamais déduit du seul fait que le marchand vend aux particuliers.",
+            "priceTaxStatus=included et priceTaxStatusVerified=true exigent une confirmation explicite de la TVA par la source marchande.",
+            "Sans confirmation explicite, priceTaxStatus=unspecified et le prix est exclu des comparaisons TTC.",
             "Frais de livraison conservés séparément ; aucun total n'est comparé lorsque la livraison est inconnue.",
             "Aucun rapprochement entre marchands sans GTIN valide commun ou identité fabricant exacte.",
         ],
@@ -344,7 +361,8 @@ def main():
 
     print(json.dumps({
         "generated_at": generated_at,
-        "priceTaxStatus": args.price_tax_status,
+        "priceTaxStatus": effective_price_tax_status,
+        "priceTaxStatusVerified": effective_price_tax_status == "included",
         "sources": source_stats,
         "published_total": len(all_products),
         "with_gtin": sum(bool(row["gtin"]) for row in all_products),
