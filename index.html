@@ -259,8 +259,6 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 .pm-history-empty{color:#dce3ec;font-size:13px;padding:12px}
 @media(max-width:760px){.pm-discovery-image{height:125px}.pm-discovery-card{flex-basis:72vw}}
 </style>
-<link rel="stylesheet" href="/css/pm-product-art.css">
-<script src="/js/pm-product-art.js"></script>
 <script id="pm-history-comparisons-loader">
 (async function(){
  // Ce script est chargé dans <head> : attendre que la liste de produits existe dans la page.
@@ -383,7 +381,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    const url="/produit.html?id="+encodeURIComponent(sheet.id);
    const card=document.createElement("article");card.className="pm-history-card pm-cmp-card";
    const media=document.createElement("a");media.className="pm-cmp-media";media.href=url;media.setAttribute("aria-label","Voir les relevés historiques "+sheet.name);
-   if(sheet.image){const img=document.createElement("img");img.setAttribute("data-pm-art","");img.dataset.category=sheet.category;img.dataset.brand=sheet.brand;img.alt=sheet.name;img.loading="lazy";img.decoding="async";img.src=sheet.image;media.append(img);}
+   if(sheet.image){const img=document.createElement("img");img.alt=sheet.name;img.loading="lazy";img.decoding="async";img.src=sheet.image;img.addEventListener("error",()=>{media.hidden=true;},{once:true});media.append(img);}
    else{media.hidden=true;}
    const badge=document.createElement("span");badge.className="pm-cmp-badge";badge.textContent=sheet.offer_count+" marchands relevés";media.append(badge);
    const body=document.createElement("div");body.className="pm-cmp-body";
@@ -1522,7 +1520,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   const day=v=>{const t=new Date(String(v||"").length===10?v+"T12:00:00":String(v||"").replace(" ","T"));return Number.isFinite(t.getTime())?t.toLocaleDateString("fr-FR"):"";};
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const visual=(image,category,brand,alt)=>{
-    if(image)return '<div class="pm-hp-media"><img src="'+esc(image)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-pm-art data-category="'+esc(category)+'" data-brand="'+esc(brand)+'"></div>';
+    if(image)return '<div class="pm-hp-media"><img src="'+esc(image)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" ></div>';
     return "";
   };
   const topCard=p=>'<a class="pm-hp-card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p.image,p.category,p.brand,p.name)
@@ -1566,6 +1564,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
       showGifts(tab.dataset.gift);
     }));
     showGifts("all");
+    [topRail,giftRail].forEach(rail=>rail&&rail.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{const media=img.closest(".pm-hp-media");if(media)media.remove();},{once:true})));
   }).catch(()=>{fail(document.getElementById("pm-top-prices-rail"));fail(document.getElementById("pm-gifts-rail"));});
 
 })();
