@@ -151,8 +151,7 @@ def build_gifts(awin, limit=48, now=None):
     return gifts
 
 def build_top(sheets, limit=12):
-    """Les produits les plus comparés, en alternant les catégories (pas de pourcentage d'écart affiché :
-    les relevés mélangent parfois des packs ou des configurations différentes)."""
+    """Les références PrixTracker les plus observées, présentées comme relevés historiques datés."""
     candidates = sorted((s for s in sheets.get("products", []) if s.get("offer_count", 0) >= 8),
                         key=lambda s: (not s.get("image"), -s["offer_count"], s["name"]))
     lanes = {}
@@ -199,7 +198,7 @@ def main():
             return 1
         return 0
     OUTPUT.write_text(text, encoding="utf-8")
-    print(f"Vitrine d'accueil : {len(data['top'])} meilleurs prix, {len(data['gifts'])} idées cadeaux")
+    print(f"Vitrine d'accueil : {len(data['top'])} références historiques, {len(data['gifts'])} idées cadeaux")
     return 0
 
 
