@@ -6109,7 +6109,7 @@ function render(){
     if(!galleryImages.length)gallery.hidden=true;
     galleryImages.forEach((url,index)=>{
       const thumb=document.createElement("button");thumb.type="button";thumb.className="pm-awin-thumb"+(index===0?" active":"");thumb.setAttribute("aria-label","Afficher la vue "+(index+1)+" de "+p.name);
-      const thumbImage=document.createElement("img");thumbImage.alt="";thumbImage.loading="lazy";thumbImage.onerror=()=>thumb.remove();thumbImage.src=url;thumb.append(thumbImage);
+      const thumbImage=document.createElement("img");thumbImage.alt="";thumbImage.loading="lazy";thumbImage.onerror=()=>{thumb.remove();if(!gallery.children.length)gallery.hidden=true;};thumbImage.src=url;thumb.append(thumbImage);
       thumb.addEventListener("click",()=>{img.dataset.pmHandlingError="0";photo.hidden=false;img.style.display="";photo.classList.add("pm-photo-loading");if(imageObserver){imageObserver.disconnect();imageObserver=null;}img.src=url;startImageFallbackTimer();gallery.querySelectorAll(".pm-awin-thumb").forEach(button=>button.classList.toggle("active",button===thumb));});gallery.append(thumb);
     });
 
