@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#080d14">
 <meta name="robots" content="noindex">
 <title>Page introuvable — Prix Malin</title>
-<meta name="description" content="Cette page n’existe plus. Retrouvez les meilleurs prix, le comparateur et les idées cadeaux Prix Malin.">
+<meta name="description" content="Cette page n’existe plus. Retrouvez le catalogue, les relevés historiques de prix et les idées cadeaux Prix Malin.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/css/pm-product-art.css">
@@ -65,12 +65,12 @@ h2{margin:22px 0 10px;font-size:21px;color:#fff}h2 span{color:#ff7a1a}
   <button type="submit">Rechercher</button>
  </form>
  <nav class="quick" aria-label="Raccourcis">
-  <a href="/produit.html"><b>Comparateur</b><span>86 produits, jusqu’à 24 marchands</span></a>
+  <a href="/produit.html"><b>Historique des prix</b><span>Relevés datés chez plusieurs marchands</span></a>
   <a href="/catalogue.html"><b>Catalogue</b><span>Des milliers de produits avec prix</span></a>
   <a href="/#pm-gifts"><b>Idées cadeaux</b><span>Parfums, maison, high-tech…</span></a>
   <a class="amazon" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener"><b>Amazon</b><span>Offres du jour ↗</span></a>
  </nav>
- <h2>🔥 Meilleurs prix <span>du moment</span></h2>
+ <h2>📊 Prix observés <span>(historique)</span></h2>
  <div class="rail" id="rail"></div>
  <p class="note">Prix relevés et datés, à confirmer chez le marchand. Le lien Amazon est affilié : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
 </main>
@@ -93,7 +93,7 @@ h2{margin:22px 0 10px;font-size:21px;color:#fff}h2 span{color:#ff7a1a}
     if(!d||!Array.isArray(d.top))return;
     document.getElementById("rail").innerHTML=d.top.slice(0,10).map(function(p){
       var media=p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy" data-pm-art data-category="'+esc(p.category)+'" data-brand="'+esc(p.brand)+'">':pmProductArt(p.category,p.brand);
-      return '<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'"><div class="media">'+media+'</div><div class="body"><small>'+esc(p.category_label)+'</small><h3>'+esc(p.name)+'</h3><em>'+p.offer_count+' offres à partir de</em><strong>'+euro.format(p.min_price_eur)+'</strong></div></a>';
+      return '<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'"><div class="media">'+media+'</div><div class="body"><small>'+esc(p.category_label)+'</small><h3>'+esc(p.name)+'</h3><em>'+p.offer_count+' marchands relevés · prix minimum observé</em><strong>'+euro.format(p.min_price_eur)+'</strong></div></a>';
     }).join("");
   }).catch(function(){});
 })();
