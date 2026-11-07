@@ -27,7 +27,7 @@ permissions:
   contents: write
 concurrency:
   # Partagé avec Awin : les deux workflows reconstruisent data/home-deals.json.
-  group: prix-malin-price-data-refresh
+  group: ${{ github.event_name == 'pull_request' && format('prix-malin-pr-{0}-{1}', github.event.pull_request.number, github.workflow) || 'prix-malin-price-data-refresh' }}
   cancel-in-progress: false
 jobs:
   refresh:
