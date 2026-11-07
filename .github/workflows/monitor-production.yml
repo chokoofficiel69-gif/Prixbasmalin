@@ -282,6 +282,7 @@ jobs:
             https://prixbasmalin.fr/historique-prix.html --output /tmp/historique-prix.html
           grep -q "Les prix dans le temps" /tmp/historique-prix.html
       - name: Vérifier les pages SEO historiques publiques
+        if: github.event_name != 'pull_request'
         run: |
           set -e
           cache_bust="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
