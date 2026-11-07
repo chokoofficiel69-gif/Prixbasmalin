@@ -65,7 +65,10 @@ class ProductSheetsTests(unittest.TestCase):
         self.assertIn("Licence Ouverte 2.0", page)
         self.assertIn('const AMAZON_TAG="prixbasmalin2-21";', page)
         self.assertIn('link.affiliate?"sponsored nofollow noopener":"nofollow noopener"', page)
-        self.assertIn("Meilleur prix relevé", page)
+        self.assertIn("Plus bas relevé", page)
+        self.assertIn("Relevés historiques par marchand", page)
+        self.assertIn("pas des offres actuelles", page)
+        self.assertIn('label:"Rechercher"', page)
 
 
 if __name__ == "__main__":
