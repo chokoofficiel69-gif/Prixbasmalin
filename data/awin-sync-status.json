@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-07T08:51:37.701Z",
+  "fetched_at": "2026-11-07T09:10:08.412Z",
   "source": "Awin Direct Product Data Feed",
   "publisher_id": "3137386",
   "locale": "fr_FR",
@@ -24,6 +24,6 @@
     "offers_with_shipping": 4231,
     "offers_with_availability": 0,
     "offers_with_tax_included": 0,
-    "products_other_category": 26
+    "products_other_category": 31
   }
 }
