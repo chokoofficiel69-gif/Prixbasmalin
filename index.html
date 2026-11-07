@@ -462,10 +462,10 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   <h2 id="pm-partners-title" class="pm-partners-title">⚡ Accès direct <span>partenaires</span></h2>
   <div class="pm-partners-grid">
     <!-- Liens d'affiliation : un bouton n'apparaît que si son lien data-href est renseigné. -->
-    <a class="pm-partner pm-partner-amazon" data-partner="amazon" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener"><b>Amazon</b><span>Offres du jour ↗</span></a>
-    <a class="pm-partner pm-partner-amazon-gift" data-partner="amazon-gifts" href="https://www.amazon.fr/gp/bestsellers?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener"><b>Amazon</b><span>Meilleures ventes ↗</span></a>
-    <a class="pm-partner pm-partner-decathlon" data-partner="decathlon" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=44806&amp;murl=https%3A%2F%2Fwww.decathlon.fr%2F" target="_blank" rel="sponsored nofollow noopener" hidden><b>Decathlon</b><span>Sport &amp; loisirs ↗</span></a>
-    <a class="pm-partner pm-partner-luxury" data-partner="nicchia-luxury" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=54306&amp;murl=https%3A%2F%2Fwww.nicchialuxury.com%2F" target="_blank" rel="sponsored nofollow noopener" hidden><b>Nicchia Luxury</b><span>Mode &amp; luxe ↗</span></a>
+    <a class="pm-partner pm-partner-amazon" data-partner="amazon" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener"><b>Amazon</b><span>Offres du jour</span></a>
+    <a class="pm-partner pm-partner-amazon-gift" data-partner="amazon-gifts" href="https://www.amazon.fr/gp/bestsellers?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener"><b>Amazon</b><span>Meilleures ventes</span></a>
+    <a class="pm-partner pm-partner-decathlon" data-partner="decathlon" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=44806&amp;murl=https%3A%2F%2Fwww.decathlon.fr%2F" target="_blank" rel="sponsored nofollow noopener" hidden><b>Decathlon</b><span>Sport &amp; loisirs</span></a>
+    <a class="pm-partner pm-partner-luxury" data-partner="nicchia-luxury" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=54306&amp;murl=https%3A%2F%2Fwww.nicchialuxury.com%2F" target="_blank" rel="sponsored nofollow noopener" hidden><b>Nicchia Luxury</b><span>Parfums &amp; luxe</span></a>
   </div>
   <p class="pm-hp-note">Liens partenaires affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
 </section>
@@ -1544,17 +1544,16 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 .pm-partners-title{margin:0 0 10px;font-size:clamp(20px,5vw,26px);color:#fff}
 .pm-partners-title span{color:#ff7a1a}
 .pm-partners-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.pm-partner{display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:70px;padding:12px 14px;border-radius:14px;text-decoration:none;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.28);transition:transform .15s ease}
+.pm-partner{position:relative;display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:70px;padding:12px 30px 12px 18px;border-radius:14px;text-decoration:none;color:#fff;background:#101722;border:1px solid #3e4a59;box-shadow:0 6px 16px rgba(0,0,0,.28);overflow:hidden;transition:transform .15s ease,border-color .15s ease}
+.pm-partner::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--pm-brand,#ff7a1a)}
+.pm-partner::after{content:"→";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#9aa6b4;font-weight:900}
 .pm-partner[hidden]{display:none!important}
-.pm-partner:hover,.pm-partner:focus-visible{transform:translateY(-2px)}
-.pm-partner b{font-size:18px;font-weight:900;letter-spacing:-.01em}
-.pm-partner span{font-size:13px;font-weight:700;opacity:.95}
-.pm-partner-amazon{background:linear-gradient(120deg,#232f3e,#37475a);border:2px solid #ff9900}
-.pm-partner-amazon b{color:#ff9900}
-.pm-partner-amazon-gift{background:linear-gradient(120deg,#ff9900,#f08804);color:#111}
-.pm-partner-decathlon{background:linear-gradient(120deg,#0055a0,#3643ba)}
-.pm-partner-luxury{background:linear-gradient(120deg,#111,#3a2f1d);border:2px solid #c9a24b}
-.pm-partner-luxury b{color:#e6c477}
+.pm-partner:hover,.pm-partner:focus-visible{transform:translateY(-2px);border-color:var(--pm-brand,#ff7a1a)}
+.pm-partner b{font-size:18px;font-weight:900;letter-spacing:-.01em;color:var(--pm-brand-text,#fff)}
+.pm-partner span{font-size:13px;font-weight:700;color:#c8d1dc}
+.pm-partner-amazon,.pm-partner-amazon-gift{--pm-brand:#ff9900;--pm-brand-text:#ff9900}
+.pm-partner-decathlon{--pm-brand:#3643ba;--pm-brand-text:#7c89ff}
+.pm-partner-luxury{--pm-brand:#c9a24b;--pm-brand-text:#e6c477}
 @media(min-width:760px){.pm-partners-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:760px){.pm-hp-rail{grid-auto-columns:230px}}
 /* Accueil resserré : blocs enchaînés sans grands espaces noirs. */
