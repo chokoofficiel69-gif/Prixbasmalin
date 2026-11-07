@@ -279,7 +279,7 @@ def product_page(p, sheets, period):
 <p class="source">À lire : <a href="/guide-black-friday-2026.html">repérer les vraies bonnes affaires</a> · <a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a> · <a href="/guides.html">tous nos guides</a></p>
 <p class="source">Source : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Ces montants ne sont pas des prix en direct. Prix Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
 {ART_SCRIPT}"""
-    crumbs = [("Accueil", "/"), ("Comparateur", "/prix/"), (p["category_label"], f"/prix/{cat_slug}.html"), (p["name"], f"/prix/{p['id']}.html")]
+    crumbs = [("Accueil", "/"), ("Historique des prix", "/prix/"), (p["category_label"], f"/prix/{cat_slug}.html"), (p["name"], f"/prix/{p['id']}.html")]
     extra = f'<script type="application/ld+json">{json.dumps(faq_ld, ensure_ascii=False)}</script>\n'
     return layout(title, description, f"/prix/{p['id']}.html", body, crumbs, extra)
 
@@ -287,19 +287,19 @@ def product_page(p, sheets, period):
 def category_page(cat, label, items):
     slug = CATEGORY_SLUGS.get(cat, cat)
     cheapest = min(items, key=lambda s: s["min_price_eur"])
-    title = fit_title(f"{label} au meilleur prix : {len(items)} modèles | Prix Malin",
-                      f"{label} au meilleur prix | Prix Malin", f"{label} au meilleur prix")
-    description = fit_description(f"Comparez les prix de {len(items)} {label.lower()} chez jusqu’à {max(s['offer_count'] for s in items)} marchands : "
-                                  f"{', '.join(s['name'] for s in items[:3])}… Dès {euro(cheapest['min_price_eur'])}.")
+    title = fit_title(f"Historique des prix {label.lower()} | Prix Malin",
+                      f"Historique des prix {label.lower()}", f"{label} : historique des prix")
+    description = fit_description(f"{len(items)} produits {label.lower()} avec relevés historiques PrixTracker chez jusqu’à "
+                                  f"{max(s['offer_count'] for s in items)} marchands. Données datées, pas des offres en direct.")
     guide = {"smartphone": ("/guide-choisir-smartphone.html", "Comment choisir un smartphone sans payer trop cher"),
              "audio": ("/guide-ecouteurs-sans-fil-petit-prix.html", "Bien choisir des écouteurs sans fil à petit prix"),
              "enceinte": ("/guide-ecouteurs-sans-fil-petit-prix.html", "Guide audio : écouteurs et enceintes"),
              "aspirateur": ("/guide-choisir-aspirateur-robot.html", "Comment choisir un aspirateur robot")}.get(cat, ("/guide-black-friday-2026.html", "Black Friday 2026 : repérer les vraies bonnes affaires"))
-    body = f"""<section class="panel"><p style="margin:0 0 10px">📘 Notre guide : <a href="{guide[0]}">{e(guide[1])}</a> · <a href="/guides.html">tous les guides</a></p><h1>{e(label)} au meilleur prix</h1>
-<p>{len(items)} modèles comparés chez Amazon, Fnac, Darty, Cdiscount, Boulanger et des dizaines d’autres marchands. Pour chaque produit, nous affichons le prix le plus bas relevé, le nombre de marchands comparés et l’évolution du prix.</p>
+    body = f"""<section class="panel"><p style="margin:0 0 10px">📘 Notre guide : <a href="{guide[0]}">{e(guide[1])}</a> · <a href="/guides.html">tous les guides</a></p><h1>Historique des prix : {e(label)}</h1>
+<p>{len(items)} produits avec relevés historiques PrixTracker. Les montants affichés sont des observations passées, pas des offres actuelles ni des prix en temps réel.</p>
 <div class="grid">{''.join(product_card(s) for s in items)}</div></section>
-<p class="source">Prix relevés et datés (PrixTracker, Licence Ouverte 2.0), à confirmer chez le marchand.</p>{ART_SCRIPT}"""
-    return slug, layout(title, description, f"/prix/{slug}.html", body, [("Accueil", "/"), ("Comparateur", "/prix/"), (label, f"/prix/{slug}.html")])
+<p class="source">Source : PrixTracker via data.gouv.fr, Licence Ouverte 2.0. Relevés historiques à vérifier chez le marchand ; aucune disponibilité ou livraison actuelle n’est garantie.</p>{ART_SCRIPT}"""
+    return slug, layout(title, description, f"/prix/{slug}.html", body, [("Accueil", "/"), ("Historique des prix", "/prix/"), (label, f"/prix/{slug}.html")])
 
 
 def index_page(groups, total):
@@ -308,11 +308,11 @@ def index_page(groups, total):
         f'<div class="grid">{"".join(product_card(s) for s in items[:8])}</div>'
         f'<p><a href="/prix/{CATEGORY_SLUGS.get(cat, cat)}.html">Voir les {len(items)} {e(label.lower())} →</a></p></section>'
         for cat, label, items in groups)
-    body = f"""<section class="panel"><h1>Comparateur de prix high-tech</h1>
-<p>{total} produits comparés chez plus de 60 marchands : smartphones, consoles, écouteurs, tablettes, ordinateurs, montres connectées, enceintes et aspirateurs. Les offres sont classées du moins cher au plus cher.</p></section>{sections}{ART_SCRIPT}"""
-    return layout("Comparateur de prix high-tech | Prix Malin",
-                  fit_description(f"Comparez les prix de {total} produits high-tech chez Amazon, Fnac, Darty, Cdiscount, Boulanger et 60 autres marchands. Prix relevés et datés."),
-                  "/prix/", body, [("Accueil", "/"), ("Comparateur", "/prix/")])
+    body = f"""<section class="panel"><h1>Historique des prix high-tech</h1>
+<p>{total} produits avec relevés historiques PrixTracker chez plusieurs marchands : smartphones, consoles, écouteurs, tablettes, ordinateurs, montres connectées, enceintes et aspirateurs. Ces montants sont des observations passées, pas des offres en direct.</p></section>{sections}{ART_SCRIPT}"""
+    return layout("Historique des prix high-tech | Prix Malin",
+                  fit_description(f"{total} produits high-tech avec relevés historiques PrixTracker, datés et sourcés. Ces montants ne sont pas des offres en temps réel."),
+                  "/prix/", body, [("Accueil", "/"), ("Historique des prix", "/prix/")])
 
 
 def gift_items(awin, lo, hi, limit=36):
