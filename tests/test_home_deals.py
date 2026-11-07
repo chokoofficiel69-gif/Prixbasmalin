@@ -88,6 +88,12 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn("tab.hidden=!hasVerifiedGiftPrice", page)
         self.assertIn("Prix TTC vérifié", page)
 
+    def test_404_historical_cards_do_not_use_art_placeholders(self):
+        page = (ROOT / "404.html").read_text(encoding="utf-8")
+        self.assertNotIn("pmProductArt(", page)
+        self.assertNotIn("pm-product-art.js", page)
+        self.assertIn('img.addEventListener("error"', page)
+
     def test_homepage_top_deals_are_explicitly_historical(self):
         page = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("Prix observés <span>(historique)</span>", page)
