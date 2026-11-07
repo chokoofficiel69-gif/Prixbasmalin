@@ -7,11 +7,15 @@ on:
       - "price-engine/import-prixtracker*.mjs"
       - "price-engine/sync-prixtracker.mjs"
       - "scripts/build_product_sheets.py"
+      - "scripts/build_home_deals.py"
+      - "tests/test_home_deals.py"
       - ".github/workflows/import-prixtracker.yml"
   pull_request:
     paths:
       - "price-engine/import-prixtracker*.mjs"
       - "price-engine/sync-prixtracker.mjs"
+      - "scripts/build_home_deals.py"
+      - "tests/test_home_deals.py"
       - ".github/workflows/import-prixtracker.yml"
   schedule:
     - cron: "35 5 * * *"
@@ -40,6 +44,7 @@ jobs:
         run: |
           python3 scripts/build_product_sheets.py
           python3 scripts/build_home_deals.py
+          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
           python3 scripts/build_seo_pages.py
           python3 scripts/build_sitemap.py
       - name: Publier uniquement si les fichiers ont changé
