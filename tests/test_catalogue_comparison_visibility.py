@@ -38,6 +38,16 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertIn('o.merchant||o.merchant_name||o.retailer', source)
         self.assertIn('o.url||o.product_url', source)
 
+    def test_missing_catalogue_photos_are_hidden_without_placeholders(self):
+        page = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn("photo.hidden=true", page)
+        self.assertIn(".photo[hidden]", page)
+        self.assertIn(".verified-image[hidden]", page)
+        self.assertNotIn("showVerifiedImageFallback", page)
+        self.assertNotIn("Photo non vérifiée", page)
+        self.assertNotIn("Photo indisponible", page)
+        self.assertNotIn("pm-image-fallback", page)
+
     def test_awin_publication_check_matches_the_current_public_shelf(self):
         workflow = (CATALOGUE.parent / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
         self.assertNotIn("grep -q 'id=\"pmAwinFeedStatus\"'", workflow)
