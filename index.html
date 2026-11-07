@@ -1528,7 +1528,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     +'<span class="pm-hp-from">Prix minimum observé</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Dernier relevé : '+day(p.last_date)+'</span></div></a>';
   const giftCard=g=>{
     const priceOk=g.price_status==="verified_current"&&g.price_eur!==null&&g.price_eur!==undefined&&Number.isFinite(Number(g.price_eur))&&Number(g.price_eur)>0;
-    const reasons={missing_merchant_date:"Date de mise à jour marchand absente",invalid_merchant_date:"Date marchand invalide",stale:"Dernier relevé marchand trop ancien",tax_unconfirmed:"TVA incluse non confirmée",invalid_price:"Prix non valide"};
+    const reasons={missing_merchant_date:"Date de mise à jour marchand absente",invalid_merchant_date:"Date marchand invalide",stale:"Dernier relevé marchand trop ancien",stale_feed:"Flux marchand trop ancien",tax_unconfirmed:"TVA incluse non confirmée",invalid_price:"Prix non valide"};
     const reason=reasons[g.price_status_reason]||"Prix actuel non vérifié";
     const dateLabel=g.price_date_kind==="merchant"?(priceOk?"Mise à jour marchande le ":"Dernier relevé marchand le "):"Flux importé le ";
     const shippingKnown=g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur));
