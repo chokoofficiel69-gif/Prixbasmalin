@@ -1,0 +1,14 @@
+/* Pied de page commun : liens légaux et mentions d'affiliation (visibles par Google et AdSense). */
+.pm-site-footer{background:#05080d;border-top:1px solid #1f2a3a;color:#9aa6b8;font:13px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;padding:20px 16px calc(96px + env(safe-area-inset-bottom));text-align:center}
+.pm-site-footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin-bottom:10px}
+.pm-site-footer a{color:#dbe3ee;text-decoration:none;font-weight:700}
+.pm-site-footer a:hover,.pm-site-footer a:focus-visible{color:#ffad66;text-decoration:underline}
+.pm-site-footer p{max-width:760px;margin:6px auto;color:#9aa6b8}
+.pm-site-footer strong{color:#fff}
+/* Bloc de liens internes (guides, comparateur, catégories) affiché avant le pied de page. */
+.pm-related-links{max-width:980px;margin:18px auto 0;padding:16px;border:1px solid #2b3a4f;border-radius:16px;background:#101722;color:#e9eef5;font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+.pm-related-links h2{margin:0 0 10px;font-size:19px;color:#fff}
+.pm-related-links ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.pm-related-links a{display:block;padding:10px 12px;border-radius:10px;background:#162235;color:#ffd2b0;text-decoration:none;font-weight:700}
+.pm-related-links a:hover,.pm-related-links a:focus-visible{background:#1d2c44;color:#fff}
+@media(max-width:640px){.pm-related-links{margin:14px 12px 0}}

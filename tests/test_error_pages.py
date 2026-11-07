@@ -11,7 +11,7 @@ class ErrorPagesTests(unittest.TestCase):
         self.assertIn('<meta name="robots" content="noindex">', page)
         self.assertIn('action="/produit.html"', page)
         self.assertIn('fetch("/data/home-deals.json"', page)
-        self.assertIn('location.replace("/produit.html?id="+encodeURIComponent(m[1]))', page)
+        self.assertIn('location.replace("/prix/"+encodeURIComponent(m[1])+".html")', page)
         # Les sondes de robots (wp-login, admin…) ne préremplissent pas la recherche.
         self.assertIn("!/^(wp|admin|login|xmlrpc|cgi|env|config)/.test(words)", page)
         # Toutes les ressources en chemin absolu : la page est servie à n'importe quelle adresse.

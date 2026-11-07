@@ -100,6 +100,8 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
 <link rel="stylesheet" href="/css/pm-product-art.css">
 <script src="/js/pm-product-art.js"></script>
 <script src="/js/cookie-consent.js" defer></script>
+<link rel="stylesheet" href="/css/pm-site-footer.css">
+<meta name="robots" content="noindex,follow">
 </head>
 <body>
 <header class="top">
@@ -185,7 +187,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  function renderProduct(p){
   setMeta(p.name+" au meilleur prix : comparez "+p.offer_count+" offres — Prix Malin",
    p.name+" à partir de "+euro.format(p.min_price_eur)+" : comparez les prix relevés chez "+p.offer_count+" marchands (Amazon, Fnac, Darty, Cdiscount…). Historique et alerte prix.",
-   "https://prixbasmalin.fr/produit.html?id="+encodeURIComponent(p.id));
+   "https://prixbasmalin.fr/prix/"+encodeURIComponent(p.id)+".html");
   let sort="price",shown=8;
   const similar=data.products.filter(x=>x.category===p.category&&x.id!==p.id).slice(0,10);
   app.innerHTML='<nav class="crumbs" aria-label="Fil d’Ariane"><a href="/produit.html">Comparateur</a> › <a href="/produit.html?cat='+encodeURIComponent(p.category)+'">'+esc(p.category_label)+'</a></nav>'
@@ -244,5 +246,19 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  });
 })();
 </script>
+<footer class="pm-site-footer" id="pm-site-footer">
+ <nav aria-label="Informations">
+  <a href="/a-propos.html">À propos</a>
+  <a href="/confidentialite.html">Confidentialité et cookies</a>
+  <a href="/prix/">Comparateur de prix</a>
+  <a href="/idees-cadeaux/">Idées cadeaux</a>
+  <a href="/guides.html">Guides d’achat</a>
+  <a href="/catalogue.html">Catalogue</a>
+  <a href="/partenaires.html">Partenaires</a>
+  <a href="/credits-photos.html">Crédits photos</a>
+ </nav>
+ <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix relevés et datés, à confirmer chez le marchand.</p>
+ <p>Certains liens sont des liens d’affiliation : Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+</footer>
 </body>
 </html>

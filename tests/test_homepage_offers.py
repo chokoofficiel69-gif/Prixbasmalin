@@ -51,7 +51,7 @@ class HomepageOffersTests(unittest.TestCase):
         self.assertIn("Vérifier les garde-fous prix et le rail mobile après publication", workflow)
         self.assertIn("if: github.event_name != 'pull_request'", workflow)
         self.assertIn("pm-mobile-new-arrivals-rail", workflow)
-        self.assertIn("Prix TTC vérifié indisponible", workflow)
+        self.assertIn('priceValue:priceStatus==="fresh"?Number(product.priceValue):null', workflow)
         self.assertIn("Publication GitHub Pages encore en propagation", workflow)
 
 
