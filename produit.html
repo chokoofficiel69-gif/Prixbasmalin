@@ -35,7 +35,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
 .panel{background:var(--panel);border-radius:16px;padding:16px}
 .notice{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#fff7ec;border:1px solid #ffd7ad;color:#7a4510;font-size:12.5px;line-height:1.45}
 /* Fiche produit */
-.hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center}.hero.no-image{grid-template-columns:1fr}
 .hero h1{margin:0 0 6px;font-size:clamp(24px,5.5vw,34px);line-height:1.15;color:var(--ink)}
 .brand-line{font-size:14px;color:var(--muted);font-weight:700}
 .from{margin-top:14px;font-size:15px;color:var(--muted)}
@@ -106,7 +106,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  <div class="top-in">
   <div class="top-row">
    <a class="logo" href="/"><img src="/assets/logo-sac-prix-malin.svg" alt="" width="38" height="38"><b>Prix <span>Malin</span></b></a>
-   <nav class="top-links" aria-label="Navigation"><a href="/produit.html">Comparateur</a><a href="/catalogue.html">Catalogue</a></nav>
+   <nav class="top-links" aria-label="Navigation"><a href="/produit.html">Historique des prix</a><a href="/catalogue.html">Catalogue</a></nav>
   </div>
   <form class="search" role="search" id="searchForm">
    <input id="q" type="search" placeholder="Rechercher un produit : iPhone, PS5, AirPods…" autocomplete="off" aria-label="Rechercher un produit">
@@ -114,7 +114,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   </form>
  </div>
 </header>
-<main id="app" aria-live="polite"><p class="empty">Chargement des prix…</p></main>
+<main id="app" aria-live="polite"><p class="empty">Chargement des relevés historiques…</p></main>
 <script>
 (function(){
  "use strict";
@@ -153,9 +153,9 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  };
  const visual=(p,eager)=>p.image
   ?'<div class="visual"><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" '+(eager?'':'loading="lazy" ')+'decoding="async" data-category="'+esc(p.category)+'" data-brand="'+esc(p.brand)+'"></div>'
-  :'<div class="visual">'+pmProductArt(p.category,p.brand||p.category_label)+'</div>';
- // Photo indisponible : remplacer par l'illustration vectorielle.
- document.addEventListener("error",e=>{const img=e.target;if(img&&img.tagName==="IMG"&&img.closest(".visual")){img.parentNode.innerHTML=pmProductArt(img.dataset.category,img.dataset.brand);}},true);
+  :'';
+ // Une image absente ou cassée est masquée ; aucune illustration ne la remplace.
+ document.addEventListener("error",e=>{const img=e.target;if(img&&img.tagName==="IMG"&&img.closest(".visual")){const hero=img.closest(".hero");const box=img.closest(".visual");if(box)box.remove();if(hero)hero.classList.add("no-image");}},true);
  const card=p=>'<a class="card" href="/produit.html?id='+encodeURIComponent(p.id)+'">'+visual(p,false)+'<div class="c"><span class="cat">'+esc(p.category_label)+'</span><h3>'+esc(p.name)+'</h3><span class="n">'+p.offer_count+' relevés marchands</span><span class="pr">Prix minimum observé : '+euro.format(p.min_price_eur)+'</span></div></a>';
  const params=new URLSearchParams(location.search);
  const qInput=document.getElementById("q");
@@ -188,8 +188,8 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
    "https://prixbasmalin.fr/produit.html?id="+encodeURIComponent(p.id));
   let sort="price",shown=8;
   const similar=data.products.filter(x=>x.category===p.category&&x.id!==p.id).slice(0,10);
-  app.innerHTML='<nav class="crumbs" aria-label="Fil d’Ariane"><a href="/produit.html">Comparateur</a> › <a href="/produit.html?cat='+encodeURIComponent(p.category)+'">'+esc(p.category_label)+'</a></nav>'
-   +'<article class="panel"><div class="hero"><div><h1>'+esc(p.name)+'</h1><div class="brand-line">'+esc(p.brand)+' · '+esc(p.category_label)+'</div>'
+  app.innerHTML='<nav class="crumbs" aria-label="Fil d’Ariane"><a href="/produit.html">Historique des prix</a> › <a href="/produit.html?cat='+encodeURIComponent(p.category)+'">'+esc(p.category_label)+'</a></nav>'
+   +'<article class="panel"><div class="hero'+(p.image?'':' no-image')+'"><div><h1>'+esc(p.name)+'</h1><div class="brand-line">'+esc(p.brand)+' · '+esc(p.category_label)+'</div>'
    +'<div class="from">Prix minimum observé<strong>'+euro.format(p.min_price_eur)+'</strong></div><div class="range">Prix maximum observé : '+euro.format(p.max_price_eur)+' · écart entre relevés : '+euro.format(p.max_price_eur-p.min_price_eur)+'</div></div>'+visual(p,true)+'</div>'
    +(p.image_credit?'<small class="pm-photo-credit">'+pmImageCredit(p.image_credit)+'</small>':'')
    +'<a class="cta" href="#offres">Voir les relevés de '+p.offer_count+' marchands</a>'
@@ -207,7 +207,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
    const best=Math.min(...p.offers.map(o=>o.price_eur));
    list.innerHTML=offers.slice(0,shown).map(o=>{
     const link=merchantLink(o.merchant,p);const isBest=o.price_eur===best;
-    return '<div class="offer'+(isBest?' best':'')+'"><div class="p"><strong>'+euro.format(o.price_eur)+'</strong><small>Relevé historique du '+fmtDate(o.date)+'</small>'+(isBest?'<em>Meilleur prix relevé</em>':'')+'</div><div class="m"><b>'+esc(merchantName(o.merchant))+'</b><small>Livraison non relevée par PrixTracker</small></div><a class="go" href="'+esc(link.url)+'" target="_blank" rel="'+(link.affiliate?"sponsored nofollow noopener":"nofollow noopener")+'" aria-label="'+esc(link.label+" "+p.name+" chez "+merchantName(o.merchant))+'">'+link.label+'</a></div>';
+    return '<div class="offer'+(isBest?' best':'')+'"><div class="p"><strong>'+euro.format(o.price_eur)+'</strong><small>Relevé historique du '+fmtDate(o.date)+'</small>'+(isBest?'<em>Plus bas relevé</em>':'')+'</div><div class="m"><b>'+esc(merchantName(o.merchant))+'</b><small>Livraison non relevée par PrixTracker</small></div><a class="go" href="'+esc(link.url)+'" target="_blank" rel="'+(link.affiliate?"sponsored nofollow noopener":"nofollow noopener")+'" aria-label="'+esc(link.label+" "+p.name+" chez "+merchantName(o.merchant))+'">'+link.label+'</a></div>';
    }).join("");
    more.hidden=shown>=offers.length;more.textContent="Voir les "+(offers.length-shown)+" autres relevés";
   };
