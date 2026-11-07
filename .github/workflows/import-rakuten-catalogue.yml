@@ -68,7 +68,7 @@ jobs:
             exit 0
           fi
           mkdir -p "$HOME/.ssh"
-          printf '%s\\n' "$RAKUTEN_SFTP_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          printf '%s\n' "$RAKUTEN_SFTP_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/known_hosts"
           if ! ssh-keygen -F "aftp.linksynergy.com" -f "$HOME/.ssh/known_hosts" >/dev/null; then
             echo "::error::La clé hôte épinglée ne contient pas aftp.linksynergy.com."
