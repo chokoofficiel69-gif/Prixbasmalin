@@ -6,7 +6,7 @@
 - /prix/<catégorie>.html : une page par catégorie (smartphones, consoles…).
 - /prix/index.html : le sommaire.
 - /idees-cadeaux/<budget>.html : idées cadeaux par budget (flux marchands Awin).
-- /sitemap-prix.xml : le plan de ces pages.
+- Le plan du site est construit par scripts/build_sitemap.py.
 
 Aucun prix n'est inventé : relevés PrixTracker datés et prix publics des flux marchands,
 toujours présentés comme « à confirmer chez le marchand ».
@@ -66,6 +66,21 @@ GIFT_BUDGETS = [
 GIFT_EXCLUDED = re.compile(r"bandelette|glyc[eé]mie|glucose|lancette|tensiom|culotte|gaine|spanx|collant|string|slip|support|fixation|boîtier|boitier|câble|cable|batterie", re.I)
 
 e = html.escape
+
+
+def fit_title(*candidates, limit=60):
+    """Premier titre candidat qui tient dans la limite affichée par Google."""
+    for c in candidates:
+        if len(c) <= limit:
+            return c
+    return candidates[-1][: limit - 1].rstrip() + "…"
+
+
+def fit_description(text, limit=155):
+    if len(text) <= limit:
+        return text
+    cut = text[: limit - 1]
+    return cut[: cut.rfind(" ")].rstrip(" ,;:—-") + "…"
 
 
 def euro(value):
@@ -222,9 +237,13 @@ def product_page(p, sheets, period):
                     f'<td class="h">{date_fr(o["date"])}</td><td><a class="go" href="{e(url)}" target="_blank" rel="{rel}">{label}</a></td></tr>')
     similar = [s for s in sheets if s["category"] == p["category"] and s["id"] != p["id"]][:8]
     cat_slug = CATEGORY_SLUGS.get(p["category"], "high-tech")
-    title = f"{p['name']} au meilleur prix : {euro(p['min_price_eur'])} — comparez {p['offer_count']} marchands | Prix Malin"
-    description = (f"{p['name']} à partir de {euro(p['min_price_eur'])} chez {cheapest_names}. Prix relevés chez {p['offer_count']} marchands "
-                   f"(Amazon, Fnac, Darty, Cdiscount…), écart de {euro(gap)}. Historique du prix et alerte gratuite.")
+    price = euro(p['min_price_eur'])
+    title = fit_title(f"{p['name']} au meilleur prix : {price} | Prix Malin",
+                      f"{p['name']} au meilleur prix : {price}",
+                      f"{p['name']} : dès {price}",
+                      f"Prix {p['name']}")
+    description = fit_description(f"{p['name']} dès {price} chez {cheapest_names} : prix relevés chez {p['offer_count']} marchands, "
+                                  f"écart de {euro(gap)}. Historique du prix et alerte gratuite.")
     faq = [
         (f"Où acheter {p['name']} le moins cher ?",
          f"Au dernier relevé, le prix le plus bas pour {p['name']} est de {euro(best['price_eur'])} chez {cheapest_names} "
@@ -259,6 +278,7 @@ def product_page(p, sheets, period):
 <a class="cta" style="background:#fff;color:#0b63ce;border:2px solid #0b63ce" href="/produit.html?id={e(p['id'])}#alerte">Créer une alerte prix gratuite</a></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
 {f'<section class="panel"><h2>Autres {e(p["category_label"].lower())} comparés</h2><div class="grid">{"".join(product_card(s) for s in similar)}</div><p><a href="/prix/{cat_slug}.html">Tous les {e(p["category_label"].lower())} →</a></p></section>' if similar else ''}
+<p class="source">À lire : <a href="/guide-black-friday-2026.html">repérer les vraies bonnes affaires</a> · <a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a> · <a href="/guides.html">tous nos guides</a></p>
 <p class="source">Source des prix : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Prix Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
 {ART_SCRIPT}"""
     crumbs = [("Accueil", "/"), ("Comparateur", "/prix/"), (p["category_label"], f"/prix/{cat_slug}.html"), (p["name"], f"/prix/{p['id']}.html")]
@@ -269,10 +289,15 @@ def product_page(p, sheets, period):
 def category_page(cat, label, items):
     slug = CATEGORY_SLUGS.get(cat, cat)
     cheapest = min(items, key=lambda s: s["min_price_eur"])
-    title = f"{label} au meilleur prix : {len(items)} modèles comparés | Prix Malin"
-    description = (f"Comparez les prix de {len(items)} {label.lower()} chez jusqu’à {max(s['offer_count'] for s in items)} marchands : "
-                   f"{', '.join(s['name'] for s in items[:4])}… À partir de {euro(cheapest['min_price_eur'])}.")
-    body = f"""<section class="panel"><h1>{e(label)} au meilleur prix</h1>
+    title = fit_title(f"{label} au meilleur prix : {len(items)} modèles | Prix Malin",
+                      f"{label} au meilleur prix | Prix Malin", f"{label} au meilleur prix")
+    description = fit_description(f"Comparez les prix de {len(items)} {label.lower()} chez jusqu’à {max(s['offer_count'] for s in items)} marchands : "
+                                  f"{', '.join(s['name'] for s in items[:3])}… Dès {euro(cheapest['min_price_eur'])}.")
+    guide = {"smartphone": ("/guide-choisir-smartphone.html", "Comment choisir un smartphone sans payer trop cher"),
+             "audio": ("/guide-ecouteurs-sans-fil-petit-prix.html", "Bien choisir des écouteurs sans fil à petit prix"),
+             "enceinte": ("/guide-ecouteurs-sans-fil-petit-prix.html", "Guide audio : écouteurs et enceintes"),
+             "aspirateur": ("/guide-choisir-aspirateur-robot.html", "Comment choisir un aspirateur robot")}.get(cat, ("/guide-black-friday-2026.html", "Black Friday 2026 : repérer les vraies bonnes affaires"))
+    body = f"""<section class="panel"><p style="margin:0 0 10px">📘 Notre guide : <a href="{guide[0]}">{e(guide[1])}</a> · <a href="/guides.html">tous les guides</a></p><h1>{e(label)} au meilleur prix</h1>
 <p>{len(items)} modèles comparés chez Amazon, Fnac, Darty, Cdiscount, Boulanger et des dizaines d’autres marchands. Pour chaque produit, nous affichons le prix le plus bas relevé, le nombre de marchands comparés et l’évolution du prix.</p>
 <div class="grid">{''.join(product_card(s) for s in items)}</div></section>
 <p class="source">Prix relevés et datés (PrixTracker, Licence Ouverte 2.0), à confirmer chez le marchand.</p>{ART_SCRIPT}"""
@@ -287,8 +312,8 @@ def index_page(groups, total):
         for cat, label, items in groups)
     body = f"""<section class="panel"><h1>Comparateur de prix high-tech</h1>
 <p>{total} produits comparés chez plus de 60 marchands : smartphones, consoles, écouteurs, tablettes, ordinateurs, montres connectées, enceintes et aspirateurs. Les offres sont classées du moins cher au plus cher.</p></section>{sections}{ART_SCRIPT}"""
-    return layout("Comparateur de prix high-tech : smartphones, consoles, AirPods… | Prix Malin",
-                  f"Comparez les prix de {total} produits high-tech chez Amazon, Fnac, Darty, Cdiscount, Boulanger et 60 autres marchands. Prix relevés et datés.",
+    return layout("Comparateur de prix high-tech | Prix Malin",
+                  fit_description(f"Comparez les prix de {total} produits high-tech chez Amazon, Fnac, Darty, Cdiscount, Boulanger et 60 autres marchands. Prix relevés et datés."),
                   "/prix/", body, [("Accueil", "/"), ("Comparateur", "/prix/")])
 
 
@@ -328,8 +353,8 @@ def gift_page(slug, label, items, fetched_at, all_budgets):
 <p>Autres budgets : {links}</p>
 <div class="grid">{''.join(gift_card(p) for p in items)}</div></section>
 <p class="source">Liens partenaires affiliés (Awin) : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>"""
-    return layout(f"{label} : {len(items)} idées pour Noël | Prix Malin",
-                  f"{label} : {len(items)} cadeaux avec photo et prix du marchand — parfums, bougies, maison, high-tech. Sélection Prix Malin pour Noël.",
+    return layout(fit_title(f"{label} : {len(items)} idées | Prix Malin", f"{label} | Prix Malin", label),
+                  fit_description(f"{label} : {len(items)} cadeaux de Noël avec photo et prix du marchand — parfums, bougies, maison, high-tech."),
                   f"/idees-cadeaux/{slug}.html", body, [("Accueil", "/"), ("Idées cadeaux", "/idees-cadeaux/"), (label, f"/idees-cadeaux/{slug}.html")])
 
 
@@ -369,13 +394,6 @@ def build():
         if items:
             files[f"idees-cadeaux/{slug}.html"] = gift_page(slug, label, items, fetched, GIFT_BUDGETS)
     files["idees-cadeaux/index.html"] = gift_index(budgets, fetched)
-    urls = []
-    for path in sorted(files):
-        url = "/" + path.removesuffix("index.html")
-        lastmod = (sheets_data.get("source_generated_at") or "")[:10] if path.startswith("prix/") else (fetched or "")[:10]
-        urls.append(f"  <url><loc>{SITE}{url}</loc>{f'<lastmod>{lastmod}</lastmod>' if lastmod else ''}</url>")
-    files["sitemap-prix.xml"] = ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-                                 + "\n".join(urls) + "\n</urlset>\n")
     return files
 
 
@@ -399,7 +417,7 @@ def main():
             for old in (ROOT / folder).glob("*.html"):
                 if f"{folder}/{old.name}" not in files:
                     old.unlink()
-        print(f"{len(files)} fichiers générés (pages produits, catégories, idées cadeaux, sitemap-prix.xml)")
+        print(f"{len(files)} fichiers générés (pages produits, catégories, idées cadeaux)")
         return 0
     if stale:
         print("Pages SEO à régénérer : " + ", ".join(stale[:5]), file=sys.stderr)

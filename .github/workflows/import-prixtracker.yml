@@ -41,10 +41,11 @@ jobs:
           python3 scripts/build_product_sheets.py
           python3 scripts/build_home_deals.py
           python3 scripts/build_seo_pages.py
+          python3 scripts/build_sitemap.py
       - name: Publier uniquement si les fichiers ont changé
         if: github.event_name != 'pull_request'
         run: |
-          git add data/prixtracker-prices.json data/prixtracker-best-daily.json data/fiches-produits.json data/home-deals.json prix idees-cadeaux sitemap-prix.xml
+          git add data/prixtracker-prices.json data/prixtracker-best-daily.json data/fiches-produits.json data/home-deals.json prix idees-cadeaux sitemap.xml sitemap.txt data/sitemap-lastmod.json
           if git diff --cached --quiet; then
             echo "Aucune évolution des données."
             exit 0

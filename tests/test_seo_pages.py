@@ -25,10 +25,13 @@ class SeoPagesTests(unittest.TestCase):
         self.assertIn('rel="sponsored nofollow noopener"', page)
 
     def test_sitemap_and_robots_list_seo_pages(self):
-        sitemap = (ROOT / "sitemap-prix.xml").read_text(encoding="utf-8")
-        self.assertIn("https://prixbasmalin.fr/prix/airpods-4.html", sitemap)
-        self.assertIn("https://prixbasmalin.fr/idees-cadeaux/", sitemap)
-        self.assertIn("Sitemap: https://prixbasmalin.fr/sitemap-prix.xml", (ROOT / "robots.txt").read_text(encoding="utf-8"))
+        sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
+        self.assertIn("<loc>https://prixbasmalin.fr/prix/airpods-4.html</loc><lastmod>", sitemap)
+        self.assertIn("<loc>https://prixbasmalin.fr/idees-cadeaux/</loc>", sitemap)
+        self.assertIn("https://prixbasmalin.fr/guide-black-friday-2026.html", (ROOT / "sitemap.txt").read_text(encoding="utf-8"))
+        robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
+        self.assertIn("Sitemap: https://prixbasmalin.fr/sitemap.xml", robots)
+        self.assertNotIn("sitemap-prix.xml", robots)
 
     def test_gift_pages_exclude_medical_and_lingerie(self):
         for rel in ("idees-cadeaux/moins-de-30-euros.html", "idees-cadeaux/30-a-60-euros.html"):

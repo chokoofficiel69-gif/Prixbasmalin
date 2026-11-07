@@ -16,6 +16,15 @@ ul{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}li{display:gr
 li img{width:72px;height:72px;object-fit:contain;background:#f3f4f6;border-radius:8px}li b{display:block}li small{color:#4b5563}li a{color:#0b63ce}
 </style>
 <link rel="stylesheet" href="/css/pm-site-footer.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Prix Malin">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="Crédits photos — Prix Malin">
+<meta property="og:description" content="Auteurs et licences des photos de produits utilisées sur Prix Malin.">
+<meta property="og:url" content="https://prixbasmalin.fr/credits-photos.html">
+<meta property="og:image" content="https://prixbasmalin.fr/assets/prixmalin-publicite.webp">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://prixbasmalin.fr/"}, {"@type": "ListItem", "position": 2, "name": "Crédits photos", "item": "https://prixbasmalin.fr/credits-photos.html"}]}</script>
 </head>
 <body>
 <header><a href="/">Prix <span>Malin</span></a></header>
@@ -29,7 +38,7 @@ li img{width:72px;height:72px;object-fit:contain;background:#f3f4f6;border-radiu
 fetch("/data/fiches-produits.json",{cache:"no-cache"}).then(r=>r.json()).then(d=>{
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const items=(d.products||[]).filter(p=>p.image&&p.image_credit);
-  document.getElementById("list").innerHTML=items.length?items.map(p=>'<li><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy"><span><b><a href="/produit.html?id='+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></b><small>'+pmImageCredit(p.image_credit)+'</small></span></li>').join(""):'<li><span></span><span>Aucune photo sous licence libre n’est utilisée pour le moment.</span></li>';
+  document.getElementById("list").innerHTML=items.length?items.map(p=>'<li><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="lazy"><span><b><a href="/prix/'+encodeURIComponent(p.id)+'.html">'+esc(p.name)+'</a></b><small>'+pmImageCredit(p.image_credit)+'</small></span></li>').join(""):'<li><span></span><span>Aucune photo sous licence libre n’est utilisée pour le moment.</span></li>';
 }).catch(()=>{});
 </script>
 <footer class="pm-site-footer" id="pm-site-footer">
@@ -38,6 +47,7 @@ fetch("/data/fiches-produits.json",{cache:"no-cache"}).then(r=>r.json()).then(d=
   <a href="/confidentialite.html">Confidentialité et cookies</a>
   <a href="/prix/">Comparateur de prix</a>
   <a href="/idees-cadeaux/">Idées cadeaux</a>
+  <a href="/guides.html">Guides d’achat</a>
   <a href="/catalogue.html">Catalogue</a>
   <a href="/partenaires.html">Partenaires</a>
   <a href="/credits-photos.html">Crédits photos</a>
