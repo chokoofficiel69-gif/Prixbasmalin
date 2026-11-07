@@ -22,10 +22,17 @@ class ErrorPagesTests(unittest.TestCase):
         for name in ("favicon.ico", "apple-touch-icon.png", "apple-touch-icon-precomposed.png"):
             self.assertGreater((ROOT / name).stat().st_size, 1000, name)
 
-    def test_rakuten_placeholder_avoids_404_without_publishing_offers(self):
+    def test_rakuten_file_exists_and_only_publishes_sourced_affiliate_offers(self):
+        # Le fichier existe toujours (pas de 404) ; s'il contient des offres, chacune a sa source et sa date.
         data = json.loads((ROOT / "data" / "rakuten-products.json").read_text(encoding="utf-8"))
-        self.assertNotEqual(data["status"], "ok")
-        self.assertEqual(data["products"], [])
+        if data["status"] != "ok":
+            self.assertEqual(data["products"], [])
+            return
+        self.assertTrue(data["generated_at"])
+        for product in data["products"]:
+            self.assertTrue(product["sourceUrl"].startswith("https://click.linksynergy.com/"))
+            self.assertTrue(product["sourceCreatedAt"])
+            self.assertGreater(product["priceValue"], 0)
 
     def test_catalogue_accepts_query_from_url(self):
         page = (ROOT / "catalogue.html").read_text(encoding="utf-8")

@@ -48,7 +48,7 @@ jobs:
           RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
           RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
           RAKUTEN_SFTP_KNOWN_HOSTS: ${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}
-          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY' }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -109,23 +109,25 @@ jobs:
           }
 
           download_feed "44806" "44806_4768926_mp.xml.gz" /tmp/44806_4768926_mp.xml.gz true
+          download_feed "54306" "54306_4768926_mp.xml.gz" /tmp/54306_4768926_mp.xml.gz false
           download_feed "54306" "54306_4768926_1_cmp.xml.gz" /tmp/54306_4768926_1_cmp.xml.gz false
 
           gzip -t /tmp/44806_4768926_mp.xml.gz
           if [[ -f /tmp/54306_4768926_1_cmp.xml.gz ]]; then gzip -t /tmp/54306_4768926_1_cmp.xml.gz; fi
+          if [[ -f /tmp/54306_4768926_mp.xml.gz ]]; then gzip -t /tmp/54306_4768926_mp.xml.gz; fi
           rm -f "$HOME/.netrc-rakuten"
       - name: Convertir seulement les sources fraîches et complètes
         if: steps.config.outputs.ready == 'true'
         env:
-          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY' }}
-          RAKUTEN_PRICE_TAX_STATUS: ${{ vars.RAKUTEN_PRICE_TAX_STATUS }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY' }}
+          RAKUTEN_PRICE_TAX_STATUS: ${{ vars.RAKUTEN_PRICE_TAX_STATUS || 'included' }}
         run: |
           python3 scripts/import-rakuten-catalogue.py \
             --directory /tmp \
             --output data/rakuten-products.json \
             --date-format "$RAKUTEN_DATE_FORMAT" \
             --max-age-hours 48 \
-            --price-tax-status "${RAKUTEN_PRICE_TAX_STATUS:-unspecified}" \
+            --price-tax-status "${RAKUTEN_PRICE_TAX_STATUS:-included}" \
             --decathlon-limit 1500 \
             --nicchia-limit 1500
       - name: Publier le snapshot validé sans écraser les données précédentes en cas d'échec

@@ -13,7 +13,9 @@ from urllib.parse import urlparse
 UTC = dt.timezone.utc
 FEEDS = [
     ("44806_4768926_mp.xml.gz", "Decathlon National", "decathlon"),
-    ("54306_4768926_1_cmp.xml.gz", "Nicchia Luxury (flux catégorie)", "nicchia"),
+    # Flux complet Nicchia (avec trailer) en priorité ; flux catégorie en secours.
+    ("54306_4768926_mp.xml.gz", "Nicchia Luxury", "nicchia"),
+    ("54306_4768926_1_cmp.xml.gz", "Nicchia Luxury", "nicchia"),
 ]
 
 
@@ -91,7 +93,7 @@ def active_price(node, now):
         return None
     sale_node = price_node.find("sale")
     sale = parse_eur((sale_node.text or "").strip()) if sale_node is not None else None
-    if sale is None:
+    if sale is None or sale >= retail:
         return retail
     begin_raw = sale_node.get("begin_date", "") if sale_node is not None else ""
     end_raw = sale_node.get("end_date", "") if sale_node is not None else ""
@@ -163,6 +165,8 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
         if price is None or price <= 0:
             skipped["price"] += 1
             continue
+        regular = parse_eur(price_node.findtext("retail"))
+        regular_price = regular if regular and regular > price else None
 
         image = (node.findtext("./URL/productImage") or "").strip()
         source_url = (node.findtext("./URL/product") or "").strip()
@@ -203,8 +207,10 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
             "imageSource": image,
             "imageSourceName": merchant,
             "imageKind": "merchant_feed",
+            "imageStatus": "authorized_feed_image",
             "merchant": merchant,
             "priceValue": price,
+            "regularPriceValue": regular_price,
             "priceTaxStatus": price_tax_status,
             "shippingPriceValue": shipping,
             "sourceUrl": source_url,
@@ -234,6 +240,11 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
 
 
 def select_balanced(rows, limit):
+    # Les promotions (prix barré fourni par le marchand) passent en premier, la plus forte remise d'abord.
+    def discount(row):
+        regular = row.get("regularPriceValue")
+        return (regular - row["priceValue"]) / regular if regular else 0.0
+    rows = sorted(rows, key=lambda row: -discount(row))
     by_category = collections.defaultdict(list)
     for row in rows:
         by_category[row["category"]].append(row)
@@ -277,7 +288,10 @@ def main():
     all_products = []
     source_stats = {}
     source_dates = []
+    loaded_slugs = set()
     for filename, merchant, slug in FEEDS:
+        if slug in loaded_slugs:
+            continue
         path = os.path.join(args.directory, filename)
         if not os.path.isfile(path):
             print("Source ignorée (fichier complet absent) : " + filename)
@@ -296,6 +310,7 @@ def main():
         source_dates.append(source_created)
         stats["published_products"] = len(selected)
         source_stats[merchant] = stats
+        loaded_slugs.add(slug)
 
     if not all_products:
         raise SystemExit("Aucun flux Rakuten complet, daté sans ambiguïté et frais de moins de " + str(args.max_age_hours) + " h. Fichier public précédent conservé.")
@@ -312,8 +327,8 @@ def main():
         "notes": [
             "Instantané issu de flux marchands autorisés et validés.",
             "La date generated_at est celle du flux marchand, pas celle de l'exécution du script.",
-            "Prix en EUR communiqués par le marchand ; la documentation du flux ne précise pas le traitement de la TVA.",
-            "Ne pas qualifier les prix de TTC tant que le statut TVA n'est pas confirmé.",
+            "Prix en EUR communiqués par le marchand : prix de vente affiché aux particuliers sur son site.",
+            "priceTaxStatus=included : un site marchand B2C doit afficher ses prix TTC (France : arrêté du 3 décembre 1987 ; UE : directive 98/6/CE).",
             "Frais de livraison conservés séparément ; aucun total n'est comparé lorsque la livraison est inconnue.",
             "Aucun rapprochement entre marchands sans GTIN valide commun ou identité fabricant exacte.",
         ],

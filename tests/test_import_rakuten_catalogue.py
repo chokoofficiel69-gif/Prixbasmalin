@@ -79,6 +79,8 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertEqual(rows[0]["shippingPriceValue"], 5.0)
         self.assertEqual(rows[0]["gtin"], "4006381333931")
         self.assertEqual(rows[0]["priceTaxStatus"], "unspecified")
+        self.assertEqual(rows[0]["imageStatus"], "authorized_feed_image")
+        self.assertIsNone(rows[0]["regularPriceValue"])
         self.assertEqual(rows[0]["sourceCreatedAt"], "2026-11-05T00:13:11Z")
         self.assertEqual(stats["raw_products"], 1)
         self.assertEqual(source_created, dt.datetime(2026, 11, 5, 0, 13, 11, tzinfo=UTC))
@@ -155,7 +157,10 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIn('sftp://aftp.linksynergy.com/${mid}/', workflow)
         self.assertIn('44806_4768926_mp.xml.gz', workflow)
         self.assertIn('racine et dossier MID vérifiés', workflow)
-        self.assertEqual(workflow.count("vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY'"), 2)
+        self.assertEqual(workflow.count("vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY'"), 2)
+        self.assertNotIn("vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY'", workflow)
+        self.assertIn('54306_4768926_mp.xml.gz', workflow)
+        self.assertIn("vars.RAKUTEN_PRICE_TAX_STATUS || 'included'", workflow)
         self.assertIn("if: github.event_name != 'pull_request'", workflow)
 
     def test_sftp_workflow_expands_secrets_and_shell_variables(self):
@@ -166,6 +171,19 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIn("RAKUTEN_SFTP_KNOWN_HOSTS: ${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}", workflow)
         self.assertIn('if [[ -z "${RAKUTEN_SFTP_USER:-}"', workflow)
         self.assertIn('if [[ "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY"', workflow)
+
+    def test_promotions_are_selected_first(self):
+        rows = [
+            {"id": "a", "category": "sport", "priceValue": 10.0, "regularPriceValue": None},
+            {"id": "b", "category": "sport", "priceValue": 5.0, "regularPriceValue": 10.0},
+            {"id": "c", "category": "sport", "priceValue": 8.0, "regularPriceValue": 10.0},
+        ]
+        self.assertEqual([r["id"] for r in MODULE.select_balanced(rows, 2)], ["b", "c"])
+
+    def test_real_rakuten_header_date_is_day_first(self):
+        # En-tête réel reçu le 7 novembre 2026 : "07/11/2026 0:11:13".
+        parsed = MODULE.parse_source_timestamp("07/11/2026 0:11:13", "DD/MM/YYYY")
+        self.assertEqual(parsed, dt.datetime(2026, 11, 7, 0, 11, 13, tzinfo=UTC))
 
 
 if __name__ == "__main__":
