@@ -69,7 +69,9 @@ class ProductSheetsTests(unittest.TestCase):
         self.assertIn("Rechercher le produit", page)
         self.assertNotIn("Voir l’offre", page)
         self.assertNotIn("offres à partir de", page)
-        self.assertIn("Prix le plus bas observé", page)
+        self.assertIn("Prix minimum observé", page)
+        self.assertNotIn("pmProductArt(", page)
+        self.assertNotIn("pm-product-art.js", page)
 
 
 if __name__ == "__main__":
