@@ -27,8 +27,35 @@ class HomeDealsTests(unittest.TestCase):
         ]}
         gifts = deals.build_gifts(awin)
         self.assertEqual([g["name"] for g in gifts], ["Eau de parfum"])
-        self.assertEqual(gifts[0]["price_date_kind"], "feed")
+        self.assertFalse(gifts[0]["price_verified"])
+        self.assertIsNone(gifts[0]["price_eur"])
+        self.assertEqual(gifts[0]["price_date_kind"], "missing")
+        self.assertEqual(gifts[0]["band"], "a-confirmer")
+
+    def test_gifts_show_price_only_with_fresh_merchant_date_and_explicit_ttc(self):
+        awin = {"fetched_at": "2026-11-06T13:00:00Z", "products": [
+            product("Parfum vérifié", "A", 59.9, merchantUpdatedAt="2026-11-06T12:30:00Z",
+                    priceTaxStatus="included", shippingPriceValue=3.5)
+        ]}
+        gifts = deals.build_gifts(awin, now=deals.parse_utc("2026-11-06T13:00:00Z"))
+        self.assertEqual(len(gifts), 1)
+        self.assertTrue(gifts[0]["price_verified"])
+        self.assertEqual(gifts[0]["price_eur"], 59.9)
+        self.assertEqual(gifts[0]["shipping_eur"], 3.5)
         self.assertEqual(gifts[0]["band"], "30-60")
+        self.assertEqual(gifts[0]["price_date_kind"], "merchant")
+
+    def test_gifts_hide_stale_or_tax_unconfirmed_prices(self):
+        awin = {"fetched_at": "2026-11-06T13:00:00Z", "products": [
+            product("Parfum ancien", "A", 59.9, merchantUpdatedAt="2026-11-03T12:30:00Z",
+                    priceTaxStatus="included", shippingPriceValue=0),
+            product("Parfum TVA inconnue", "B", 49.9, merchantUpdatedAt="2026-11-06T12:30:00Z",
+                    priceTaxStatus="unspecified", shippingPriceValue=0),
+        ]}
+        gifts = deals.build_gifts(awin, now=deals.parse_utc("2026-11-06T13:00:00Z"))
+        self.assertEqual(len(gifts), 2)
+        self.assertTrue(all(not gift["price_verified"] and gift["price_eur"] is None for gift in gifts))
+        self.assertTrue(all(gift["shipping_eur"] is None and gift["band"] == "a-confirmer" for gift in gifts))
 
     def test_gifts_alternate_merchants(self):
         awin = {"products": [product(f"Parfum {i}", m, 20 + i) for m in ("A", "B") for i in range(3)]}
@@ -39,6 +66,7 @@ class HomeDealsTests(unittest.TestCase):
         data = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
         self.assertTrue(data["top"])
         self.assertTrue(all("gap_percent" not in t and t["offer_count"] >= 8 for t in data["top"]))
+        self.assertTrue(all(t["price_kind"] == "historical" for t in data["top"]))
 
     def test_published_file_is_up_to_date(self):
         awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
@@ -67,6 +95,14 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn('data-partner="decathlon" data-href="" target="_blank" rel="sponsored nofollow noopener" hidden', page)
         self.assertIn(".pm-partner[hidden]{display:none!important}", page)
         self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(g.image', page)
+        self.assertIn("function giftPriceIsCurrent(g)", page)
+        self.assertIn("Prix observés", page)
+        self.assertIn("prix affichés seulement si date marchande récente et TTC confirmé", page)
+        product_page = (ROOT / "produit.html").read_text(encoding="utf-8")
+        self.assertIn("Historique des prix", product_page)
+        self.assertIn("Relevés historiques par marchand", product_page)
+        self.assertIn("pas des offres actuelles", product_page)
+        self.assertIn('label:"Rechercher"', product_page)
 
 
 class ProductSheetOutlierTests(unittest.TestCase):
