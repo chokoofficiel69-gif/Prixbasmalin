@@ -17,9 +17,21 @@ class HomepageOffersTests(unittest.TestCase):
 
     def test_each_price_comparison_has_an_affiliate_link(self):
         self.assertIn('buy.textContent="Voir sur Amazon ↗";', self.source)
-        self.assertIn('more.textContent="Comparer les "+sheet.offer_count+" prix →";', self.source)
+        self.assertIn('more.textContent="Voir les "+sheet.offer_count+" relevés →";', self.source)
         self.assertIn('"&tag=prixbasmalin2-21"', self.source)
         self.assertIn('buy.rel="sponsored nofollow noopener noreferrer";', self.source)
+
+    def test_historical_price_data_is_not_joined_to_home_cards_by_name(self):
+        self.assertNotIn("sheetsReady", self.source)
+        self.assertNotIn("pmPriced", self.source)
+        self.assertNotIn("norm(s.name)", self.source)
+        self.assertNotIn("cdn8.web4s.vn", self.source)
+
+    def test_history_section_is_labelled_as_historical(self):
+        self.assertIn("Relevés historiques PrixTracker chez 5 à 24 marchands", self.source)
+        self.assertIn("Prix le plus bas observé", self.source)
+        self.assertIn("Voir les "+'"+sheet.offer_count+"'+ " relevés", self.source)
+        self.assertIn("Prix historiques ; liens marchands directs et stock non fournis", self.source)
 
     def test_merchant_ids_are_shown_with_readable_names(self):
         self.assertIn('shop.textContent=pmMerchantLabel(offer.merchant);', self.source)
