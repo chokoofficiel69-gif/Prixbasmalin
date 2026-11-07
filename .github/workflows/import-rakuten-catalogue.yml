@@ -61,18 +61,19 @@ jobs:
             echo "::error::RAKUTEN_DATE_FORMAT doit être MM/DD/YYYY ou DD/MM/YYYY."
             exit 1
           fi
-          mkdir -p "$HOME/.ssh"
-          if [[ -n "${RAKUTEN_SFTP_KNOWN_HOSTS:-}" ]]; then
-            printf '%s\n' "$RAKUTEN_SFTP_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          else
-            # Sans clé épinglée : on lit la clé publiée par le serveur Rakuten et on l'affiche
-            # (empreinte) pour pouvoir l'épingler ensuite dans la variable RAKUTEN_SFTP_KNOWN_HOSTS.
-            ssh-keyscan -T 15 -t ed25519,ecdsa,rsa aftp.linksynergy.com > "$HOME/.ssh/known_hosts" 2>/dev/null
-            [[ -s "$HOME/.ssh/known_hosts" ]] || { echo "::error::Clé hôte SFTP Rakuten introuvable."; exit 1; }
-            echo "::notice::Clé hôte Rakuten non épinglée, lue au démarrage :"
-            ssh-keygen -lf "$HOME/.ssh/known_hosts"
+          if [[ -z "${RAKUTEN_SFTP_KNOWN_HOSTS:-}" ]]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Import Rakuten bloqué : la clé hôte officielle doit être épinglée dans RAKUTEN_SFTP_KNOWN_HOSTS."
+            echo "- Import Rakuten bloqué : clé hôte SFTP officielle non configurée ; snapshot précédent conservé." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
+          mkdir -p "$HOME/.ssh"
+          printf '%s\\n' "$RAKUTEN_SFTP_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/known_hosts"
+          if ! ssh-keygen -F "aftp.linksynergy.com" -f "$HOME/.ssh/known_hosts" >/dev/null; then
+            echo "::error::La clé hôte épinglée ne contient pas aftp.linksynergy.com."
+            exit 1
+          fi
           curl --version | grep -qi sftp || { echo "::error::curl ne prend pas SFTP en charge."; exit 1; }
           curl --help all | grep -q -- '--knownhosts' || { echo "::error::curl ne permet pas de vérifier la clé hôte SFTP."; exit 1; }
           echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -86,14 +87,15 @@ jobs:
           set -euo pipefail
           umask 077
           printf 'machine aftp.linksynergy.com login %s password %s\n' "$RAKUTEN_SFTP_USER" "$RAKUTEN_SFTP_PASSWORD" > "$HOME/.netrc-rakuten"
-          CURL=(curl --proto '=sftp' --fail --show-error --silent --ignore-content-length --knownhosts "$HOME/.ssh/known_hosts" --netrc-file "$HOME/.netrc-rakuten" --connect-timeout 15 --max-time 600)
+          trap 'rm -f "$HOME/.netrc-rakuten"' EXIT
+          CURL=(curl --proto '=sftp' --fail --show-error --silent --ignore-content-length --knownhosts "$HOME/.ssh/known_hosts" --netrc-file "$HOME/.netrc-rakuten" --connect-timeout 15 --max-time 600 --retry 3 --retry-all-errors --retry-delay 3 --retry-max-time 600)
           "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/" > /tmp/rakuten-root-list.txt
 
           # Rakuten confirme que chaque annonceur dispose d'un dossier nommé par son MID.
           # Le fichier peut aussi être à la racine selon le compte : on détecte les deux cas,
           # sans supposer un chemin ni désactiver la vérification de clé hôte.
           download_feed() {
-            local mid="$1" filename="$2" output="$3" required="$4" remote_path=""
+            local mid="$1" filename="$2" output="$3" required="$4" remote_path="" temporary="${output}.part"
             if grep -Fxq "$filename" /tmp/rakuten-root-list.txt; then
               remote_path="$filename"
             elif grep -Fxq "$mid" /tmp/rakuten-root-list.txt; then
@@ -114,7 +116,17 @@ jobs:
             fi
 
             echo "Flux trouvé pour MID $mid : $filename."
-            "${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "$output"
+            rm -f "$temporary"
+            if ! "${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "$temporary"; then
+              rm -f "$temporary"
+              return 1
+            fi
+            if [[ ! -s "$temporary" ]] || ! gzip -t "$temporary"; then
+              rm -f "$temporary"
+              echo "::error::Flux gzip incomplet ou invalide : $filename."
+              return 1
+            fi
+            mv "$temporary" "$output"
           }
 
           download_feed "44806" "44806_4768926_mp.xml.gz" /tmp/44806_4768926_mp.xml.gz true
@@ -129,14 +141,14 @@ jobs:
         if: steps.config.outputs.ready == 'true'
         env:
           RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'DD/MM/YYYY' }}
-          RAKUTEN_PRICE_TAX_STATUS: ${{ vars.RAKUTEN_PRICE_TAX_STATUS || 'included' }}
+          RAKUTEN_PRICE_TAX_STATUS: ${{ vars.RAKUTEN_PRICE_TAX_STATUS || 'unspecified' }}
         run: |
           python3 scripts/import-rakuten-catalogue.py \
             --directory /tmp \
             --output data/rakuten-products.json \
             --date-format "$RAKUTEN_DATE_FORMAT" \
             --max-age-hours 48 \
-            --price-tax-status "${RAKUTEN_PRICE_TAX_STATUS:-included}" \
+            --price-tax-status "${RAKUTEN_PRICE_TAX_STATUS:-unspecified}" \
             --decathlon-limit 1500 \
             --nicchia-limit 1500
       - name: Publier le snapshot validé sans écraser les données précédentes en cas d'échec
