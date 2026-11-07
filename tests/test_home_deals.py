@@ -26,7 +26,7 @@ class HomeDealsTests(unittest.TestCase):
             product("Trop bon marché", "A", 3),
             product("Sans lien", "A", 40, sourceUrl="http://insecure"),
         ]}
-        gifts = deals.build_gifts(awin)
+        gifts = deals.build_gifts(awin, now=deals.parse_merchant_date(awin["fetched_at"]))
         self.assertEqual([g["name"] for g in gifts], ["Eau de parfum"])
         self.assertEqual(gifts[0]["price_date_kind"], "feed")
         self.assertEqual(gifts[0]["price_status"], "unverified")
@@ -56,6 +56,18 @@ class HomeDealsTests(unittest.TestCase):
         self.assertEqual(gifts["Fresh no shipping"]["price_status"], "verified_current")
         self.assertIsNone(gifts["Fresh no shipping"]["shipping_eur"])
 
+    def test_stale_awin_snapshot_cannot_publish_a_current_price(self):
+        now = datetime(2026, 11, 7, 9, 0, tzinfo=timezone.utc)
+        awin = {"fetched_at": (now - timedelta(hours=72)).isoformat(), "products": [
+            product("Recent merchant date but stale feed", "A", 59.9,
+                    merchantUpdatedAt=(now - timedelta(hours=1)).isoformat(),
+                    priceTaxStatus="included", shippingPriceValue=0)
+        ]}
+        gift = deals.build_gifts(awin, now=now)[0]
+        self.assertEqual(gift["price_status_reason"], "stale_feed")
+        self.assertIsNone(gift["price_eur"])
+        self.assertIsNone(gift["shipping_eur"])
+
     def test_gifts_alternate_merchants(self):
         awin = {"products": [product(f"Parfum {i}", m, 20 + i) for m in ("A", "B") for i in range(3)]}
         merchants = [g["merchant"] for g in deals.build_gifts(awin)]
@@ -70,7 +82,9 @@ class HomeDealsTests(unittest.TestCase):
         awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
-        self.assertEqual(published, deals.build(awin, sheets))
+        build_time = deals.parse_merchant_date(published.get("generated_at"))
+        self.assertIsNotNone(build_time)
+        self.assertEqual(published, deals.build(awin, sheets, now=build_time))
 
     def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
         awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
