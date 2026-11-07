@@ -187,7 +187,7 @@ def build(awin, sheets, now=None):
         "generated_at": generated_at,
         "awin_fetched_at": awin.get("fetched_at"),
         "sheets_period": sheets.get("dataset_period"),
-        "price_policy": "Les prix cadeaux ne sont affichés que si la date marchande est de moins de 48 h et si la TVA incluse est explicitement confirmée. Les fiches PrixTracker sont des relevés historiques, jamais des prix en direct.",
+        "price_policy": "Les prix cadeaux ne sont affichés que si le flux et la date marchande ont moins de 48 h et si la TVA incluse est explicitement confirmée. Les fiches PrixTracker sont des relevés historiques, jamais des prix en direct.",
         "top": build_top(sheets),
         "gifts": build_gifts(awin, now=now),
     }
