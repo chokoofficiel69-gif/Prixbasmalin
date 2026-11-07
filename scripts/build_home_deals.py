@@ -118,11 +118,19 @@ def build_gifts(awin, limit=48, now=None):
         })
     # Dans chaque marchand : alterner les gammes de prix (livraison connue d'abord), puis alterner les marchands.
     for merchant, items in by_merchant.items():
-        items.sort(key=lambda g: (g["shipping_eur"] is None, g["price_eur"], g["name"]))
+        items.sort(key=lambda g: (
+            g["shipping_eur"] is None,
+            g["price_eur"] is None,
+            g["price_eur"] if g["price_eur"] is not None else float("inf"),
+            g["name"],
+        ))
         bands = {}
         for g in items:
             bands.setdefault(g["band"], []).append(g)
-        mixed, lanes = [], [bands[b] for _, _, b in PRICE_BANDS if b in bands]
+        lane_keys = [b for _, _, b in PRICE_BANDS if b in bands]
+        if "a-confirmer" in bands:
+            lane_keys.append("a-confirmer")
+        mixed, lanes = [], [bands[b] for b in lane_keys]
         while any(lanes):
             for lane in lanes:
                 if lane:
