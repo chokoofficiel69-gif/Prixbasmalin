@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """Génère des pages statiques pensées pour Google à partir des données du site.
 
-- /prix/<produit>.html : une page par produit comparé (tableau de tous les marchands,
-  évolution du prix, questions fréquentes), lisible sans JavaScript.
-- /prix/<catégorie>.html : une page par catégorie (smartphones, consoles…).
-- /prix/index.html : le sommaire.
-- /idees-cadeaux/<budget>.html : idées cadeaux par budget (flux marchands Awin).
+- /prix/<produit>.html : fiches d'historique PrixTracker, jamais présentées comme des offres en direct.
+- /prix/<catégorie>.html et /prix/index.html : sommaires des relevés historiques.
+- /idees-cadeaux/<budget>.html : uniquement des offres Awin avec date marchande de moins de
+  48 h et statut TTC explicitement confirmé.
 - Le plan du site est construit par scripts/build_sitemap.py.
 
-Aucun prix n'est inventé : relevés PrixTracker datés et prix publics des flux marchands,
-toujours présentés comme « à confirmer chez le marchand ».
+Les prix historiques restent des observations passées. Les prix Awin non datés ou sans
+confirmation TTC ne sont jamais publiés comme des prix actuels.
 """
 import argparse
 import html
 import json
 import re
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote, urlencode
 
@@ -24,7 +24,6 @@ SITE = "https://prixbasmalin.fr"
 AMAZON_TAG = "prixbasmalin2-21"
 SHEETS = ROOT / "data" / "fiches-produits.json"
 DEALS = ROOT / "data" / "home-deals.json"
-AWIN = ROOT / "data" / "awin-products.json"
 
 MERCHANTS = {
     "amazon": ("Amazon", lambda q: "https://www.amazon.fr/s?" + urlencode({"k": q, "tag": AMAZON_TAG})),
@@ -103,7 +102,7 @@ def merchant_name(mid):
 
 def merchant_link(mid, query):
     if mid in MERCHANTS:
-        return MERCHANTS[mid][1](query), "Voir l’offre", mid == "amazon"
+        return MERCHANTS[mid][1](query), "Rechercher", mid == "amazon"
     return "https://www.google.com/search?" + urlencode({"q": merchant_name(mid) + " " + query}), "Rechercher", False
 
 
@@ -159,7 +158,7 @@ def layout(title, description, canonical, body, breadcrumbs, extra_head=""):
 {extra_head}<script src="/js/pm-product-art.js"></script>
 </head>
 <body>
-<header class="top"><a class="logo" href="/"><img src="/assets/logo-sac-prix-malin.svg" alt="" width="34" height="34">Prix <span>Malin</span></a><nav><a href="/prix/">Comparateur</a><a href="/idees-cadeaux/">Cadeaux</a></nav></header>
+<header class="top"><a class="logo" href="/"><img src="/assets/logo-sac-prix-malin.svg" alt="" width="34" height="34">Prix <span>Malin</span></a><nav><a href="/prix/">Historique des prix</a><a href="/idees-cadeaux/">Cadeaux</a></nav></header>
 <main>
 <nav class="crumbs" aria-label="Fil d’Ariane">{crumbs_html}</nav>
 {body}
@@ -184,8 +183,8 @@ ART_SCRIPT = """<script>document.querySelectorAll("[data-art-category]").forEach
 
 
 def product_card(p):
-    return (f'<a class="card" href="/prix/{e(p["id"])}.html">{visual(p)}<div class="c"><small>{e(p["category_label"])} · {p["offer_count"]} marchands</small>'
-            f'<b>{e(p["name"])}</b><small>à partir de</small><strong>{euro(p["min_price_eur"])}</strong></div></a>')
+    return (f'<a class="card" href="/prix/{e(p["id"])}.html">{visual(p)}<div class="c"><small>{e(p["category_label"])} · {p["offer_count"]} marchands suivis</small>'
+            f'<b>{e(p["name"])}</b><small>Plus bas relevé historique</small><strong>{euro(p["min_price_eur"])}</strong><small>Dernier relevé : {date_fr(p["last_date"])}</small></div></a>')
 
 
 def trend_sentence(p):
@@ -238,23 +237,22 @@ def product_page(p, sheets, period):
     similar = [s for s in sheets if s["category"] == p["category"] and s["id"] != p["id"]][:8]
     cat_slug = CATEGORY_SLUGS.get(p["category"], "high-tech")
     price = euro(p['min_price_eur'])
-    title = fit_title(f"{p['name']} au meilleur prix : {price} | Prix Malin",
-                      f"{p['name']} au meilleur prix : {price}",
-                      f"{p['name']} : dès {price}",
-                      f"Prix {p['name']}")
-    description = fit_description(f"{p['name']} dès {price} chez {cheapest_names} : prix relevés chez {p['offer_count']} marchands, "
-                                  f"écart de {euro(gap)}. Historique du prix et alerte gratuite.")
+    last_date = date_fr(p.get("last_date") or best["date"])
+    title = fit_title(f"{p['name']} : dernier relevé {price} | Prix Malin",
+                      f"Historique des prix de {p['name']} | Prix Malin",
+                      f"Historique {p['name']}")
+    description = fit_description(f"Dernier relevé historique du {last_date} : {price} chez {cheapest_names}. "
+                                  f"Données PrixTracker passées, pas un prix en direct ; vérifiez le marchand.")
     faq = [
-        (f"Où acheter {p['name']} le moins cher ?",
-         f"Au dernier relevé, le prix le plus bas pour {p['name']} est de {euro(best['price_eur'])} chez {cheapest_names} "
-         f"(relevé du {date_fr(best['date'])}). Les prix évoluent souvent : vérifiez le prix final chez le marchand."),
-        (f"Quel est l’écart de prix entre les marchands pour {p['name']} ?",
-         f"Les prix relevés vont de {euro(p['min_price_eur'])} à {euro(p['max_price_eur'])}, soit {euro(gap)} d’écart pour le même produit "
-         f"selon le marchand. Comparer avant d’acheter permet donc d’économiser jusqu’à {euro(gap)}."),
+        (f"Quel est le dernier prix observé pour {p['name']} ?",
+         f"Au relevé du {date_fr(best['date'])}, le plus bas montant observé pour {p['name']} était de {euro(best['price_eur'])} chez {cheapest_names}. "
+         "C’est une observation historique, pas un prix actuel garanti."),
+        (f"Quel écart historique a été observé pour {p['name']} ?",
+         f"Les relevés historiques vont de {euro(p['min_price_eur'])} à {euro(p['max_price_eur'])}, soit {euro(gap)} d’écart. "
+         "Cet écart passé ne constitue pas une économie garantie aujourd’hui."),
         (f"Le prix de {p['name']} baisse-t-il ?", trend_sentence(p) or "L’historique disponible est encore trop court pour dégager une tendance."),
         ("D’où viennent ces prix ?",
-         "Ce sont des relevés quotidiens publiés par PrixTracker sous licence ouverte (data.gouv.fr). Prix Malin les classe du moins cher au plus cher, "
-         "sans tenir compte des commissions."),
+         "Ce sont des relevés historiques publiés par PrixTracker sous licence ouverte (data.gouv.fr). Ils ne représentent pas des offres actuelles ; les liens ouvrent une recherche chez le marchand."),
     ]
     faq_html = "".join(f"<dt>{e(qq)}</dt><dd>{e(a)}</dd>" for qq, a in faq)
     faq_ld = {"@context": "https://schema.org", "@type": "FAQPage",
@@ -264,22 +262,22 @@ def product_page(p, sheets, period):
         c = p["image_credit"]
         credit = f'<p class="source" style="color:#6b7280">Photo : {e(c.get("author") or "")} · {e(c.get("license") or "")} · <a style="color:#0b63ce" href="{e(c.get("file_page") or "")}">Wikimedia Commons</a></p>'
     body = f"""<article class="panel">
-<div class="hero"><div><h1>{e(p['name'])} au meilleur prix</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
-<div class="from">à partir de<strong>{euro(p['min_price_eur'])}</strong>chez {e(cheapest_names)} · jusqu’à {euro(p['max_price_eur'])} ailleurs</div></div>{visual(p)}</div>
-{credit}<a class="cta" href="#prix">Comparer les {p['offer_count']} prix</a>
-<p class="notice">Prix relevés chez chaque marchand entre le {date_fr(period['from'])} et le {date_fr(period['to'])} : ils peuvent avoir changé. Le prix final s’affiche chez le marchand.</p>
+<div class="hero"><div><h1>Historique des prix de {e(p['name'])}</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
+<div class="from">Dernier prix observé le {date_fr(best['date'])}<strong>{euro(p['min_price_eur'])}</strong>chez {e(cheapest_names)} · relevé historique</div></div>{visual(p)}</div>
+{credit}<a class="cta" href="#prix">Voir les relevés historiques</a>
+<p class="notice">Historique PrixTracker : les montants ci-dessous sont des observations passées, pas des offres actuelles. Les liens ouvrent une recherche chez le marchand ; vérifiez la référence exacte, le prix final, la disponibilité et la livraison.</p>
 </article>
-<section class="panel" id="prix"><h2>Comparatif des prix de {e(p['name'])}</h2>
-<p>Nous avons relevé <strong>{p['offer_count']} offres</strong> pour {e(p['name'])}. La moins chère est à <strong>{euro(best['price_eur'])}</strong> chez {e(cheapest_names)}, la plus chère à {euro(p['max_price_eur'])} : un écart de <strong>{euro(gap)}</strong> pour le même produit.</p>
-<table><thead><tr><th>Marchand</th><th>Prix relevé</th><th class="h">Date</th><th><span style="position:absolute;left:-9999px">Lien</span></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
-<p class="source" style="color:#6b7280">Liens Amazon affiliés. Pour les autres marchands, le bouton ouvre leur recherche du produit.</p>
+<section class="panel" id="prix"><h2>Relevés historiques par marchand pour {e(p['name'])}</h2>
+<p>L’historique contient <strong>{p['offer_count']} relevés marchands</strong>. Le plus bas relevé était de <strong>{euro(best['price_eur'])}</strong> chez {e(cheapest_names)} le {date_fr(best['date'])} ; le plus haut relevé atteint {euro(p['max_price_eur'])}. Cet écart est historique, pas une comparaison de prix actuels.</p>
+<table><thead><tr><th>Marchand</th><th>Prix observé</th><th class="h">Date du relevé</th><th><span style="position:absolute;left:-9999px">Recherche</span></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
+<p class="source" style="color:#6b7280">Les liens ouvrent une recherche du produit chez le marchand, pas une offre produit garantie.</p>
 </section>
-<section class="panel"><h2>Évolution du prix</h2>{chart_svg(p)}<p>{e(trend_sentence(p))}</p>
+<section class="panel"><h2>Évolution des prix relevés</h2>{chart_svg(p)}<p>{e(trend_sentence(p))}</p>
 <a class="cta" style="background:#fff;color:#0b63ce;border:2px solid #0b63ce" href="/produit.html?id={e(p['id'])}#alerte">Créer une alerte prix gratuite</a></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
 {f'<section class="panel"><h2>Autres {e(p["category_label"].lower())} comparés</h2><div class="grid">{"".join(product_card(s) for s in similar)}</div><p><a href="/prix/{cat_slug}.html">Tous les {e(p["category_label"].lower())} →</a></p></section>' if similar else ''}
 <p class="source">À lire : <a href="/guide-black-friday-2026.html">repérer les vraies bonnes affaires</a> · <a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a> · <a href="/guides.html">tous nos guides</a></p>
-<p class="source">Source des prix : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Prix Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
+<p class="source">Source : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Ces montants ne sont pas des prix en direct. Prix Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
 {ART_SCRIPT}"""
     crumbs = [("Accueil", "/"), ("Comparateur", "/prix/"), (p["category_label"], f"/prix/{cat_slug}.html"), (p["name"], f"/prix/{p['id']}.html")]
     extra = f'<script type="application/ld+json">{json.dumps(faq_ld, ensure_ascii=False)}</script>\n'
