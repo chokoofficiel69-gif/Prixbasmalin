@@ -95,7 +95,7 @@ def build_gifts(awin, limit=48, now=None):
         url = str(p.get("sourceUrl") or "")
         if not isinstance(price, (int, float)) or isinstance(price, bool) or not 12 <= price <= 300:
             continue
-        if not image.startswith("https://") or not url.startswith("https://") or not p.get("merchant"):
+        if not p.get("name") or not image.startswith("https://") or not url.startswith("https://") or not p.get("merchant"):
             continue
         if EXCLUDED.search(f"{p.get('name')} {p.get('desc')}"):
             continue
