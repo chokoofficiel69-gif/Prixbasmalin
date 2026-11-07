@@ -1527,11 +1527,12 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     +'<span class="pm-hp-badge">'+p.offer_count+' marchands relevés</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
     +'<span class="pm-hp-from">Prix minimum observé</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Dernier relevé : '+day(p.last_date)+'</span></div></a>';
   const giftCard=g=>{
-    const priceOk=g.price_status==="verified_current"&&Number.isFinite(Number(g.price_eur));
+    const priceOk=g.price_status==="verified_current"&&g.price_eur!==null&&g.price_eur!==undefined&&Number.isFinite(Number(g.price_eur))&&Number(g.price_eur)>0;
     const reasons={missing_merchant_date:"Date de mise à jour marchand absente",invalid_merchant_date:"Date marchand invalide",stale:"Dernier relevé marchand trop ancien",tax_unconfirmed:"TVA incluse non confirmée",invalid_price:"Prix non valide"};
     const reason=reasons[g.price_status_reason]||"Prix actuel non vérifié";
     const dateLabel=g.price_date_kind==="merchant"?(priceOk?"Mise à jour marchande le ":"Dernier relevé marchand le "):"Flux importé le ";
-    const shippingLabel=priceOk?(Number.isFinite(Number(g.shipping_eur))?(Number(g.shipping_eur)===0?"Livraison gratuite":"Livraison "+euro.format(g.shipping_eur)):"Livraison non renseignée"):"";
+    const shippingKnown=g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur));
+    const shippingLabel=priceOk?(shippingKnown?(Number(g.shipping_eur)===0?"Livraison gratuite":"Livraison "+euro.format(g.shipping_eur)):"Livraison non renseignée"):"";
     const priceBlock=priceOk
       ?'<span class="pm-hp-from">Prix TTC vérifié</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">'+dateLabel+day(g.price_date)+' · '+shippingLabel+'</span>'
       :'<span class="pm-hp-from">Prix TTC actuel indisponible</span><span class="pm-hp-meta">'+esc(reason)+(g.price_date?' · '+dateLabel+day(g.price_date):'')+'</span>';
@@ -1548,7 +1549,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     const topRail=document.getElementById("pm-top-prices-rail"),giftRail=document.getElementById("pm-gifts-rail");
     if(topRail)topRail.innerHTML=(data.top||[]).map(topCard).join("")||'<p class="pm-hp-note">Comparaisons en cours de mise à jour.</p>';
     const gifts=Array.isArray(data.gifts)?data.gifts:[];
-    const hasVerifiedGiftPrice=gifts.some(g=>g.price_status==="verified_current"&&Number.isFinite(Number(g.price_eur)));
+    const hasVerifiedGiftPrice=gifts.some(g=>g.price_status==="verified_current"&&g.price_eur!==null&&g.price_eur!==undefined&&Number.isFinite(Number(g.price_eur))&&Number(g.price_eur)>0);
     const budgetKeys=new Set(["moins-30","30-60","60-100","plus-100"]);
     document.querySelectorAll("#pm-gifts [data-gift]").forEach(tab=>{
       if(budgetKeys.has(tab.dataset.gift))tab.hidden=!hasVerifiedGiftPrice;
