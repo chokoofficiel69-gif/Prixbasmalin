@@ -13,6 +13,7 @@ on:
       - "confidentialite.html"
       - "js/prix-malin-auth.js"
       - "catalogue.html"
+      - "produit.html"
       - "index.html"
       - "partenaires.html"
       - "publicite.html"
@@ -40,6 +41,7 @@ on:
       - "js/track-outbound.js"
       - "js/prix-malin-auth.js"
       - "catalogue.html"
+      - "produit.html"
       - "index.html"
       - "partenaires.html"
       - "publicite.html"
@@ -170,6 +172,19 @@ jobs:
           NODE
       - name: Vérifier la syntaxe JavaScript du catalogue
         run: node --check /tmp/catalogue-inline.js
+      - name: Extraire le JavaScript de la page historique produit
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const html = fs.readFileSync("produit.html", "utf8");
+          const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
+            .filter(([, attrs, body]) => !/\\bsrc\\s*=/i.test(attrs) && !/\\btype\\s*=\\s*["\\']application\\/ld\\+json["\\']/i.test(attrs) && body.trim())
+            .map(([, , body]) => body);
+          if (scripts.length === 0) throw new Error("Aucun script inline trouvé dans produit.html");
+          fs.writeFileSync("/tmp/produit-inline.js", scripts.join("\\n;\\n"));
+          NODE
+      - name: Vérifier la syntaxe JavaScript de la page historique produit
+        run: node --check /tmp/produit-inline.js
       - name: Vérifier la séparation catalogue découverte / tarifs vérifiés
         run: |
           node --input-type=module <<'NODE'
