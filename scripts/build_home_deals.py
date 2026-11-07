@@ -181,10 +181,8 @@ def build_top(sheets, limit=12):
 
 def build(awin, sheets, now=None):
     now = now or datetime.now(timezone.utc)
-    generated_at = now.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
     return {
         "version": 2,
-        "generated_at": generated_at,
         "awin_fetched_at": awin.get("fetched_at"),
         "sheets_period": sheets.get("dataset_period"),
         "price_policy": "Les prix cadeaux ne sont affichés que si le flux et la date marchande ont moins de 48 h et si la TVA incluse est explicitement confirmée. Les fiches PrixTracker sont des relevés historiques, jamais des prix en direct.",
