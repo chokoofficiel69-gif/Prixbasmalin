@@ -5767,17 +5767,17 @@ async function pmLoadAwinCatalogue(){
   const setStatus=()=>{};
   try{
     const response=await fetch("/data/awin-products.json",{cache:"no-cache"});
-    if(!response.ok){setStatus("Flux Awin momentanément indisponible ; les prix marchands ne sont pas actualisés.");return;}
+    if(!response.ok){setStatus("Flux marchand momentanément indisponible ; les prix marchands ne sont pas actualisés.");return;}
     const feed=await response.json();
     if(feed?.status!=="ok"||!Array.isArray(feed.products)){
-      setStatus("Le flux Awin reçu n’a pas le format attendu ; aucun prix de ce flux n’est affiché.");
+      setStatus("Le flux marchand reçu n’a pas le format attendu ; aucun prix de ce flux n’est affiché.");
       return;
     }
     const fetchedAt=Date.parse(feed.fetched_at||"");
     const age=Date.now()-fetchedAt;
     if(!Number.isFinite(fetchedAt)||age < -5*60*1000||age > 48*60*60*1000){
       const date=Number.isFinite(fetchedAt)?new Date(fetchedAt).toLocaleString("fr-FR"):"date inconnue";
-      setStatus("Flux Awin trop ancien ou datation invalide (dernier import : "+date+"). Les prix de ce flux sont masqués jusqu’à une actualisation fiable.");
+      setStatus("Flux marchand trop ancien ou datation invalide (dernier import : "+date+"). Les prix de ce flux sont masqués jusqu’à une actualisation fiable.");
       return;
     }
     // Le catalogue public présente les fiches illustrées même lorsqu'aucun prix fiable n'est disponible.
@@ -5811,7 +5811,7 @@ async function pmLoadAwinCatalogue(){
     displayProducts.forEach(product=>{
       if(product.isAwinProduct&&!product.imageSource&&product.sourceUrl){
         product.imageSource=product.image;
-        product.imageSourceName=product.merchant||"Marchand Awin";
+        product.imageSourceName=product.merchant||"Marchand partenaire";
         product.imageKind="merchant_feed";
         product.imageStatus="authorized_feed_image";
       }
@@ -5866,8 +5866,8 @@ async function pmLoadAwinCatalogue(){
     });
     renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts]);
   }catch(error){
-    setStatus("Flux Awin momentanément indisponible ; les dernières données fiables ne sont pas remplacées.");
-    console.warn("Le flux de produits autorisés Awin est momentanément indisponible.");
+    setStatus("Flux marchand momentanément indisponible ; les dernières données fiables ne sont pas remplacées.");
+    console.warn("Le flux de produits autorisés est momentanément indisponible.");
   }
 }
 let selectedBrand="";
@@ -7013,7 +7013,7 @@ function pmRakutenIsValidGtin(value){
     pmRakutenVerifiedProducts=exactComparisons;
     renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts]);
   }catch(error){
-    console.warn("Import Rakuten indisponible ; le catalogue principal reste accessible.");
+    console.warn("Import d’un flux partenaire indisponible ; le catalogue principal reste accessible.");
   }
 })();
 </script>
@@ -7166,7 +7166,7 @@ function pmSheetMerchantName(id){return pmSheetMerchantNames[id]||String(id||"Ma
   <a href="/credits-photos.html">Crédits photos</a>
  </nav>
  <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix relevés et datés, à confirmer chez le marchand.</p>
- <p>Prix Malin travaille avec plusieurs programmes d’affiliation : <strong>Amazon</strong>, <strong>Decathlon</strong> et <strong>Nicchia Luxury</strong> (via Rakuten), ainsi que des marchands du réseau Awin ; d’autres partenaires sont en cours d’intégration. Lorsque vous achetez après avoir cliqué sur un lien partenaire, Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+ <p>Prix Malin travaille avec plusieurs partenaires, dont <strong>Amazon</strong>, <strong>Decathlon</strong> et <strong>Nicchia Luxury</strong>, et de nouveaux partenaires arrivent bientôt. Lorsque vous achetez après avoir cliqué sur un lien partenaire, Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
 </footer>
 </body></html>
 <style id="pm-catalogue-horizontal-product-rails">
