@@ -1,0 +1,135 @@
+.pm-partner-ad-slot[hidden] {
+  display: none !important;
+}
+.pm-partner-ad-slot:not([hidden]) {
+  display: block;
+  width: 100%;
+  margin: 18px 0 22px;
+}
+.pm-partner-ad-card {
+  display: grid;
+  grid-template-columns: minmax(112px, 24%) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 13px 16px;
+  border: 1px solid #39495c;
+  border-radius: 16px;
+  background: linear-gradient(112deg, #151e2a 0%, #090e15 100%);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .16);
+}
+.pm-partner-ad-card:hover {
+  border-color: #ff8a43;
+}
+.pm-partner-ad-media {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid #e6e9ee;
+  border-radius: 11px;
+  background: #fff;
+}
+.pm-partner-ad-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.pm-partner-ad-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+}
+.pm-partner-ad-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ff681c;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.pm-partner-ad-title {
+  color: #fff;
+  font-size: clamp(14px, 1.8vw, 19px);
+  line-height: 1.25;
+  font-weight: 900;
+}
+.pm-partner-ad-description {
+  color: #d3dbe5;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.pm-partner-ad-advertiser {
+  color: #ffb47e;
+  font-size: 10px;
+  font-weight: 800;
+}
+.pm-partner-ad-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 9px;
+  background: linear-gradient(100deg, #ff9b21, #ff5b0b);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.pm-partner-ad-card--text-only {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.pm-partner-ad-card:focus-visible {
+  outline: 3px solid #ffb46f;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .pm-partner-ad-slot:not([hidden]) {
+    margin: 13px 0 17px;
+  }
+  .pm-partner-ad-card {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+    border-radius: 13px;
+  }
+  .pm-partner-ad-media {
+    aspect-ratio: 1 / 1;
+    align-self: start;
+  }
+  .pm-partner-ad-title {
+    font-size: 13px;
+  }
+  .pm-partner-ad-description {
+    font-size: 10px;
+  }
+  .pm-partner-ad-cta {
+    grid-column: 2;
+    justify-self: start;
+    min-height: 31px;
+    padding: 0 11px;
+    font-size: 10px;
+  }
+  .pm-partner-ad-card--text-only {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pm-partner-ad-card--text-only .pm-partner-ad-cta {
+    grid-column: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pm-partner-ad-card {
+    transition: none;
+  }
+}
