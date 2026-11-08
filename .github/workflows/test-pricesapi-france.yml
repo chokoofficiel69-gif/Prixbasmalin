@@ -1,0 +1,110 @@
+name: Test PricesAPI — pilote France (isolé)
+
+on:
+  push:
+    branches:
+      - "test/pricesapi-france-pilot"
+    paths:
+      - ".github/workflows/test-pricesapi-france.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pricesapi-france-pilot
+  cancel-in-progress: false
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Vérifier la présence du secret sans l'afficher
+        env:
+          PRICESAPI_API_KEY: \${{ secrets.PRICESAPI_API_KEY }}
+        run: |
+          if [ -z "$PRICESAPI_API_KEY" ]; then
+            echo "::error::Secret PRICESAPI_API_KEY absent ou indisponible pour cette exécution."
+            exit 1
+          fi
+          echo "Secret présent (valeur masquée)."
+
+      - name: Tester trois produits sur le marché français
+        env:
+          PRICESAPI_API_KEY: \${{ secrets.PRICESAPI_API_KEY }}
+        run: |
+          node --input-type=module <<'NODE'
+          const queries = [
+            "Nintendo Switch 2 console",
+            "Sony WH-1000XM5 casque",
+            "Apple AirPods 4"
+          ];
+          const summary = [];
+          for (const q of queries) {
+            const params = new URLSearchParams({ q, market: "fr", limit: "3", offers_limit: "10" });
+            const response = await fetch("https://api.pricesapi.io/api/v1/products/search?" + params, {
+              headers: { Authorization: "Bearer " + process.env.PRICESAPI_API_KEY },
+              signal: AbortSignal.timeout(95000)
+            });
+            const body = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              const code = body?.error?.code ?? response.status;
+              const message = body?.error?.message ?? "Réponse API non lisible";
+              throw new Error("PricesAPI " + code + ' pour "' + q + '" : ' + message);
+            }
+            const products = Array.isArray(body?.data?.products) ? body.data.products : [];
+            const rows = products.map(p => {
+              const offers = Array.isArray(p.offers) ? p.offers : [];
+              return {
+                title: p.title ?? null,
+                pid: p.pid ?? null,
+                source: p.source ?? null,
+                headline_price: p.headline_price ?? null,
+                headline_currency: p.headline_currency ?? null,
+                scraped_at: p.scraped_at ?? null,
+                cache_source: p.cache_source ?? body?.meta?.cache_source ?? null,
+                image_available: typeof p.image === "string" && p.image.length > 0,
+                offer_count: offers.length,
+                offers: offers.map(o => ({
+                  seller: o.seller ?? null,
+                  price: o.price ?? null,
+                  currency: o.currency ?? null,
+                  product_title: o.product_title ?? null,
+                  stock_status: o.stock_status ?? null,
+                  delivery_info: o.delivery_info ?? null,
+                  seller_domain: o.seller_domain ?? null,
+                  url_present: typeof o.url === "string" && o.url.length > 0
+                }))
+              };
+            });
+            summary.push({
+              query: q,
+              market: body?.data?.market ?? "fr",
+              candidate_count: rows.length,
+              total_offers_returned: rows.reduce((n, p) => n + p.offer_count, 0),
+              degraded: body?.meta?.degraded ?? false,
+              products: rows
+            });
+            console.log(JSON.stringify(summary.at(-1), null, 2));
+          }
+          const sections = summary.map(item => {
+            const lines = [
+              "## " + item.query,
+              "- Candidats : " + item.candidate_count,
+              "- Offres renvoyées : " + item.total_offers_returned,
+              "- Réponse dégradée : " + (item.degraded ? "oui" : "non")
+            ];
+            for (const p of item.products) {
+              lines.push("- " + (p.title ?? "Produit sans titre") + " — " + p.offer_count +
+                " offre(s), image : " + (p.image_available ? "oui" : "non") +
+                ", capture : " + (p.scraped_at ?? "date inconnue"));
+            }
+            return lines.join("\n");
+          });
+          const report = "# Pilote PricesAPI — marché France\n\n" +
+            "Test isolé de trois recherches. headline_price n'est pas considéré comme prix d'offre.\n\n" +
+            sections.join("\n\n");
+          const fs = await import("node:fs/promises");
+          await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, report + "\n");
+          NODE
