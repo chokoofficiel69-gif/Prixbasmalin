@@ -82,7 +82,11 @@ class MeasurementLoadingTests(unittest.TestCase):
         db.executescript((ROOT / "migrations" / "0000-schema-reference.sql").read_text(encoding="utf-8"))
         db.executescript((ROOT / "migrations" / "2026-11-06-traffic-attribution-country.sql").read_text(encoding="utf-8"))
         db.execute("INSERT INTO page_views (page_path, visitor_id) VALUES ('/', 'ancienne-ligne-1')")
+        # La base réelle possède déjà ses index created_at : la migration ne doit pas en ajouter de doublons.
+        indexes_before = db.execute("SELECT tbl_name, COUNT(*) FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND sql LIKE '%created_at%' GROUP BY tbl_name ORDER BY tbl_name").fetchall()
         db.executescript(sql)
+        indexes_after = db.execute("SELECT tbl_name, COUNT(*) FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND sql LIKE '%created_at%' GROUP BY tbl_name ORDER BY tbl_name").fetchall()
+        self.assertEqual(indexes_after, indexes_before)
         self.assertEqual(db.execute("SELECT COUNT(*) FROM page_views").fetchone()[0], 1)
 
 
