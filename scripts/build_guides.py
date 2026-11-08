@@ -139,6 +139,7 @@ GUIDES = [
     },
     {
         "slug": "guide-black-friday-2026",
+        "og_image": "/assets/og-black-friday.jpg",
         "title": "Black Friday 2026 : vrais bons plans | Prix Malin",
         "h1": "Black Friday 2026 : comment repérer les vraies bonnes affaires ?",
         "description": "Dates du Black Friday 2026, prix de référence, historique des prix, alertes, droit de rétractation : la méthode pour éviter les fausses promotions.",
@@ -253,7 +254,9 @@ def render(g, style, footer):
   <meta property="og:title" content="{e(g['h1'])}">
   <meta property="og:description" content="{e(g['description'])}">
   <meta property="og:url" content="{url}">
-  <meta property="og:image" content="{SITE}/assets/prixmalin-publicite.webp">
+  <meta property="og:image" content="{SITE}{g.get('og_image', '/assets/og-prix-malin.jpg')}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.ico" sizes="any">
   {style}
@@ -305,7 +308,7 @@ def render_index(style, footer):
   <link rel="canonical" href="{SITE}/guides.html">
   <meta property="og:type" content="website"><meta property="og:site_name" content="Prix Malin"><meta property="og:locale" content="fr_FR">
   <meta property="og:title" content="Guides d’achat Prix Malin"><meta property="og:description" content="{e(desc)}">
-  <meta property="og:url" content="{SITE}/guides.html"><meta property="og:image" content="{SITE}/assets/prixmalin-publicite.webp">
+  <meta property="og:url" content="{SITE}/guides.html"><meta property="og:image" content="{SITE}/assets/og-prix-malin.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.ico" sizes="any">
   {style}
