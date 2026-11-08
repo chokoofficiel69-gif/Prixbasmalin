@@ -197,9 +197,9 @@ function stockValues(values) {
 }
 
 function stockState(value) {
-  const stock = norm(value).replace(/[_-]+/g, " ").replace(/\\s+/g, " ").trim();
-  if (/\\b(?:0|out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|pas en stock|epuise|false|no)\\b/.test(stock)) return "out_of_stock";
-  if (/\\b(?:1|in stock|instock|available|disponible|for sale|yes|true)\\b/.test(stock)) return "in_stock";
+  const stock = norm(value).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  if (/\b(?:0|out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|pas en stock|epuise|false|no)\b/.test(stock)) return "out_of_stock";
+  if (/\b(?:1|in stock|instock|available|disponible|for sale|yes|true)\b/.test(stock)) return "in_stock";
   return "unknown";
 }
 
