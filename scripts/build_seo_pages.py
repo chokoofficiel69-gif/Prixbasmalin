@@ -271,7 +271,8 @@ def product_page(p, sheets, period):
          "Cet écart passé ne constitue pas une économie garantie aujourd’hui."),
         (f"Le prix de {p['name']} baisse-t-il ?", trend_sentence(p) or "L’historique disponible est encore trop court pour dégager une tendance."),
         ("D’où viennent ces prix ?",
-         "Ce sont des relevés historiques publiés par PrixTracker sous licence ouverte (data.gouv.fr). Ils ne représentent pas des offres actuelles ; les liens ouvrent une recherche chez le marchand."),
+         "Ce sont des relevés historiques publiés par PrixTracker sous licence ouverte (data.gouv.fr). Ils ne représentent pas des offres actuelles ; "
+         + ("le bouton Amazon ouvre la fiche du produit et les autres liens une recherche chez le marchand." if amz_direct else "les liens ouvrent une recherche chez le marchand.")),
     ]
     faq_html = "".join(f"<dt>{e(qq)}</dt><dd>{e(a)}</dd>" for qq, a in faq)
     faq_ld = {"@context": "https://schema.org", "@type": "FAQPage",
@@ -290,7 +291,7 @@ def product_page(p, sheets, period):
 <section class="panel" id="prix"><h2>Relevés historiques par marchand pour {e(p['name'])}</h2>
 <p>L’historique contient <strong>{p['offer_count']} relevés marchands</strong>. Le plus bas relevé était de <strong>{euro(best['price_eur'])}</strong> chez {e(cheapest_names)} le {date_fr(best['date'])} ; le plus haut relevé atteint {euro(p['max_price_eur'])}. Cet écart est historique, pas une comparaison de prix actuels.</p>
 <table><thead><tr><th>Marchand</th><th>Prix observé</th><th class="h">Date du relevé</th><th><span style="position:absolute;left:-9999px">Recherche</span></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
-<p class="source" style="color:#6b7280">Les liens ouvrent une recherche du produit chez le marchand, pas une offre produit garantie.</p>
+<p class="source" style="color:#6b7280">{"Le lien Amazon ouvre la fiche du produit ; les autres liens ouvrent une recherche chez le marchand. Aucun de ces liens n’est une offre garantie." if amz_direct else "Les liens ouvrent une recherche du produit chez le marchand, pas une offre produit garantie."}</p>
 </section>
 <section class="panel"><h2>Évolution des prix relevés</h2>{chart_svg(p)}<p>{e(trend_sentence(p))}</p>
 <a class="cta pm-btn pm-btn-ghost pm-btn-block" href="/produit.html?id={e(p['id'])}#alerte">Créer une alerte prix gratuite</a></section>

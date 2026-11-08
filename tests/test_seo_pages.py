@@ -29,7 +29,8 @@ class SeoPagesTests(unittest.TestCase):
         self.assertIn('"@type": "BreadcrumbList"', page)
         self.assertIn("tag=prixbasmalin2-21", page)
         self.assertIn('rel="sponsored nofollow noopener"', page)
-        self.assertIn("Rechercher sur Amazon ↗", page)
+        # Bouton Amazon : fiche produit directe si l'ASIN a été fourni, sinon recherche.
+        self.assertRegex(page, r"(Rechercher|Voir) sur Amazon ↗")
         self.assertNotIn("Voir le prix du jour sur Amazon", page)
 
     def test_sitemap_and_robots_list_seo_pages(self):
