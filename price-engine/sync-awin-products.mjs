@@ -267,6 +267,7 @@ async function loadDirectAwinFeed(rawOffers) {
       const rows = objectRowsFromCsv(csv);
       if (!rows.length) throw new Error("Le flux Awin est vide ou son CSV est illisible.");
       const headers = new Set(Object.keys(rows[0] || {}));
+      log("En-têtes CSV Awin observés : " + [...headers].sort().join(", ") + ".");
       if (!headers.has("product_name") || !(headers.has("search_price") || headers.has("store_price") || headers.has("display_price"))) {
         throw new Error("Les colonnes produit/prix attendues sont absentes du flux Awin.");
       }
