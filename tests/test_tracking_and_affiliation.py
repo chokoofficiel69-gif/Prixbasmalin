@@ -44,7 +44,7 @@ class AmazonAffiliationTests(unittest.TestCase):
         bad = []
         for path in SOURCES:
             text = path.read_text(encoding="utf-8", errors="ignore")
-            for m in re.finditer(r"amazon\.fr/(?:s\?|gp/goldbox\?|gp/bestsellers\?)", text):
+            for m in re.finditer(r"amazon\.fr/(?:s\?|dp/|gp/goldbox\?|gp/bestsellers\?)", text):
                 window = text[m.start():m.start() + 320]
                 if not re.search(r"tag\W{0,8}(prixbasmalin2-21|[A-Z_]*TAG\b|amazonTag)", window):
                     bad.append(f"{path.relative_to(ROOT)}: {window[:90]!r}")

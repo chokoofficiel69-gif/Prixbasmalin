@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://prixbasmalin.fr"
 STATE = ROOT / "data" / "sitemap-lastmod.json"
-PRIORITY_FIRST = ["index.html", "prix/index.html", "idees-cadeaux/index.html", "guides.html", "catalogue.html"]
+PRIORITY_FIRST = ["index.html", "black-friday.html", "prix/index.html", "idees-cadeaux/index.html", "guides.html", "catalogue.html"]
 
 
 def url_for(rel):

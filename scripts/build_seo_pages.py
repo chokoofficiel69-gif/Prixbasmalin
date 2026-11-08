@@ -21,6 +21,9 @@ from urllib.parse import quote, urlencode
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from site_chrome import CONSENT_SCRIPT, CSS_LINK, header_html  # noqa: E402  (en-tête commun)
+import amazon_links  # noqa: E402  (liens Amazon directs, ASIN fournis par le propriétaire)
+
+AMAZON_ASINS = amazon_links.load()
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://prixbasmalin.fr"
@@ -103,7 +106,17 @@ def merchant_name(mid):
     return re.sub(r"(comfr|fr|com|eu)$", "", str(mid), flags=re.I).capitalize() or "Marchand"
 
 
-def merchant_link(mid, query):
+def amazon_link(p):
+    """(url, libellé, direct) : fiche produit Amazon si l'ASIN est connu, sinon recherche."""
+    asin = AMAZON_ASINS.get(p["id"])
+    if asin:
+        return amazon_links.product_url(asin), "Voir sur Amazon ↗", True
+    return MERCHANTS["amazon"][1](query_for(p)), "Rechercher sur Amazon ↗", False
+
+
+def merchant_link(mid, query, p=None):
+    if mid == "amazon" and p is not None and AMAZON_ASINS.get(p["id"]):
+        return amazon_links.product_url(AMAZON_ASINS[p["id"]]), "Voir le produit", True
     if mid in MERCHANTS:
         return MERCHANTS[mid][1](query), "Rechercher", mid == "amazon"
     return "https://www.google.com/search?" + urlencode({"q": merchant_name(mid) + " " + query}), "Rechercher", False
@@ -234,13 +247,14 @@ def product_page(p, sheets, period):
     gap = p["max_price_eur"] - p["min_price_eur"]
     rows = []
     for o in p["offers"]:
-        url, label, aff = merchant_link(o["merchant"], q)
+        url, label, aff = merchant_link(o["merchant"], q, p)
         rel = "sponsored nofollow noopener" if aff else "nofollow noopener"
         cls = ' class="best"' if o["price_eur"] == best["price_eur"] else ""
         rows.append(f'<tr{cls}><td><b>{e(merchant_name(o["merchant"]))}</b></td><td class="p">{euro(o["price_eur"])}</td>'
                     f'<td class="h">{date_fr(o["date"])}</td><td><a class="go" href="{e(url)}" target="_blank" rel="{rel}">{label}</a></td></tr>')
     similar = [s for s in sheets if s["category"] == p["category"] and s["id"] != p["id"]][:8]
     cat_slug = CATEGORY_SLUGS.get(p["category"], "high-tech")
+    amz_url, amz_label, amz_direct = amazon_link(p)
     price = euro(p['min_price_eur'])
     last_date = date_fr(p.get("last_date") or best["date"])
     title = fit_title(f"{p['name']} : dernier relevé {price} | Prix Malin",
@@ -270,8 +284,8 @@ def product_page(p, sheets, period):
 <div class="hero"><div><h1>Historique des prix de {e(p['name'])}</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
 <div class="from">Dernier prix observé le {date_fr(best['date'])}<strong>{euro(p['min_price_eur'])}</strong>chez {e(cheapest_names)} · relevé historique</div></div>{visual(p)}</div>
 {credit}<a class="cta pm-btn pm-btn-compare pm-btn-block" href="#prix">Voir les relevés historiques</a>
-<a class="cta pm-btn pm-btn-amazon pm-btn-block" href="{e(MERCHANTS['amazon'][1](q))}" target="_blank" rel="sponsored nofollow noopener">Rechercher sur Amazon ↗</a>
-<p class="notice">Historique PrixTracker : les montants ci-dessous sont des observations passées, pas des offres actuelles. Les liens ouvrent une recherche chez le marchand ; vérifiez la référence exacte, le prix final, la disponibilité et la livraison.</p>
+<a class="cta pm-btn pm-btn-amazon pm-btn-block" href="{e(amz_url)}" target="_blank" rel="sponsored nofollow noopener">{amz_label}</a>
+<p class="notice">Historique PrixTracker : les montants ci-dessous sont des observations passées, pas des offres actuelles. {"Le bouton Amazon ouvre la fiche du produit ; les autres liens ouvrent une recherche chez le marchand" if amz_direct else "Les liens ouvrent une recherche chez le marchand"} ; vérifiez la référence exacte, le prix final, la disponibilité et la livraison.</p>
 </article>
 <section class="panel" id="prix"><h2>Relevés historiques par marchand pour {e(p['name'])}</h2>
 <p>L’historique contient <strong>{p['offer_count']} relevés marchands</strong>. Le plus bas relevé était de <strong>{euro(best['price_eur'])}</strong> chez {e(cheapest_names)} le {date_fr(best['date'])} ; le plus haut relevé atteint {euro(p['max_price_eur'])}. Cet écart est historique, pas une comparaison de prix actuels.</p>
@@ -423,6 +437,84 @@ def gift_index(budgets_with_items):
 
 
 
+BF_BUDGETS = [
+    ("moins-de-100", "Moins de 100 €", 0, 100),
+    ("100-200", "De 100 à 200 €", 100, 200),
+    ("200-500", "De 200 à 500 €", 200, 500),
+    ("plus-de-500", "Plus de 500 €", 500, float("inf")),
+]
+BF_CSS = """<style>
+.bf-hero{background:linear-gradient(120deg,#111827,#1f2937);color:#fff;border-radius:16px;padding:18px 16px;margin-bottom:12px}
+.bf-hero h1{color:#fff}.bf-hero p{color:#dbe3ee;margin:6px 0 0}.bf-date{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:999px;background:#ff650b;color:#fff;font-weight:900;font-size:14px}
+.bf-jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.bf-jump a{padding:8px 12px;border-radius:999px;background:#fff;color:#111827;font-weight:800;text-decoration:none;font-size:14px}
+.bf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px}
+.bf-card{display:flex;flex-direction:column;border:1px solid #e3e7ee;border-radius:12px;overflow:hidden;background:#fff}
+.bf-card .visual{border-radius:0;aspect-ratio:4/3}.bf-card .c{padding:8px 10px 10px;display:flex;flex-direction:column;gap:3px;flex:1}
+.bf-card small{color:#6b7280;font-size:12px}.bf-card b{font-size:14.5px;line-height:1.3}.bf-card strong{color:#f05a00;font-size:19px}
+.bf-card .bf-actions{display:flex;flex-direction:column;gap:6px;margin-top:auto;padding-top:6px}.bf-card .bf-actions a{min-height:40px!important;font-size:13px!important;padding:8px 6px!important}
+</style>"""
+BF_SCRIPT = """<script>(function(){var el=document.getElementById("bf-countdown");if(!el)return;var start=Date.UTC(2026,10,26,23),end=Date.UTC(2026,11,1,23),now=Date.now();
+if(now<start){var d=Math.ceil((start-now)/864e5);el.textContent="Black Friday dans "+d+" jour"+(d>1?"s":"")+" · vendredi 27 novembre";}
+else if(now<end){el.textContent="C’est le Black Friday · jusqu’au Cyber Monday 30 novembre";}
+else{el.textContent="Black Friday terminé · les prix relevés restent consultables";}})();</script>"""
+
+
+def bf_card(p):
+    best = p["offers"][0]
+    url, label, _ = amazon_link(p)
+    return (f'<article class="bf-card">{visual(p)}<div class="c"><small>{e(p["category_label"])}</small><b>{e(p["name"])}</b>'
+            f'<small>Plus bas prix relevé</small><strong>{euro(best["price_eur"])}</strong>'
+            f'<small>chez {e(merchant_name(best["merchant"]))} le {date_fr(best["date"])}</small>'
+            f'<div class="bf-actions"><a class="pm-btn pm-btn-compare pm-btn-block" href="/prix/{e(p["id"])}.html">Comparer les prix</a>'
+            f'<a class="pm-btn pm-btn-amazon pm-btn-block" href="{e(url)}" target="_blank" rel="sponsored nofollow noopener">{e(label)}</a></div></div></article>')
+
+
+def bf_selection(sheets, lo, hi, limit=8):
+    items = [p for p in sheets if p.get("offers") and lo <= p["offers"][0]["price_eur"] < hi]
+    # Les produits suivis chez le plus de marchands d'abord (les plus recherchés), photo réelle en priorité.
+    items.sort(key=lambda p: (not p.get("image"), -p["offer_count"], p["offers"][0]["price_eur"], p["id"]))
+    return items[:limit]
+
+
+def black_friday_page(sheets):
+    groups = [(slug, label, bf_selection(sheets, lo, hi)) for slug, label, lo, hi in BF_BUDGETS]
+    groups = [g for g in groups if g[2]]
+    latest = max((p.get("last_date") or "") for p in sheets)
+    jump = "".join(f'<a href="#{slug}">{e(label)}</a>' for slug, label, _ in groups)
+    sections = "".join(
+        f'<section class="panel" id="{slug}"><h2>{e(label)}</h2><div class="bf-grid">{"".join(bf_card(p) for p in items)}</div></section>'
+        for slug, label, items in groups)
+    count = sum(len(items) for _, _, items in groups)
+    faq = [
+        ("Quand a lieu le Black Friday 2026 ?", "Le vendredi 27 novembre 2026, suivi du Cyber Monday le lundi 30 novembre. Beaucoup de marchands lancent leurs offres plusieurs jours avant."),
+        ("Les prix affichés sont-ils des prix Black Friday ?", "Non. Ce sont les plus bas prix relevés avant l’événement, avec leur date et le marchand. Ils servent de repère : si une « promo » Black Friday est plus chère que ce repère, ce n’est pas une bonne affaire."),
+        ("Comment savoir si une promotion est réelle ?", "Comparez le prix proposé avec le plus bas prix relevé sur nos fiches et chez les autres marchands. En France, une réduction affichée doit être calculée à partir du prix le plus bas des 30 derniers jours chez ce vendeur."),
+    ]
+    faq_html = "".join(f"<dt>{e(q)}</dt><dd>{e(a)}</dd>" for q, a in faq)
+    ld = [
+        {"@context": "https://schema.org", "@type": "FAQPage",
+         "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
+        {"@context": "https://schema.org", "@type": "ItemList", "name": "Sélection high-tech Black Friday 2026",
+         "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{SITE}/prix/{p['id']}.html", "name": p["name"]}
+                             for i, p in enumerate(p for _, _, items in groups for p in items)]},
+    ]
+    extra = BF_CSS + "\n" + "\n".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld) + "\n"
+    body = f"""<section class="bf-hero"><h1>Black Friday 2026 : notre sélection high-tech par budget</h1>
+<p>{count} produits très demandés, classés par budget, avec le plus bas prix que nous avons relevé avant le Black Friday. Le bon réflexe : une promotion n’est intéressante que si elle passe sous ce repère.</p>
+<span class="bf-date" id="bf-countdown">Vendredi 27 novembre 2026 · Cyber Monday le 30 novembre</span>
+<div class="bf-jump">{jump}</div></section>
+<p class="notice" style="margin:0 0 12px">Prix relevés avant le Black Friday (dernier relevé : {date_fr(latest)}), pas des prix promotionnels en direct. Vérifiez toujours le prix final, le vendeur et la livraison chez le marchand.</p>
+{sections}
+<section class="panel"><h2>Éviter les fausses promotions</h2><p>Préparez votre liste, notez le prix repère de chaque produit et créez une alerte prix gratuite depuis la fiche du produit. Notre guide détaille la méthode : <a href="/guide-black-friday-2026.html">Black Friday 2026 : repérer les vraies bonnes affaires</a>.</p>
+<p>Vous cherchez des idées cadeaux ? <a href="/idees-cadeaux/">Idées cadeaux par budget</a> · <a href="/prix/">Tout le comparateur</a></p></section>
+<section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
+<p class="source">Source des prix : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
+{ART_SCRIPT}{BF_SCRIPT}"""
+    return layout("Black Friday 2026 : high-tech par budget | Prix Malin",
+                  fit_description(f"Black Friday 2026 : {count} produits high-tech par budget avec le plus bas prix relevé avant l’événement, pour repérer les vraies promotions."),
+                  "/black-friday.html", body, [("Accueil", "/"), ("Black Friday 2026", "/black-friday.html")], extra)
+
+
 def build():
     sheets_data = json.loads(SHEETS.read_text(encoding="utf-8"))
     sheets = sheets_data["products"]
@@ -439,6 +531,7 @@ def build():
         files[f"prix/{slug}.html"] = page
         groups.append((cat, label, items))
     files["prix/index.html"] = index_page(groups, len(sheets))
+    files["black-friday.html"] = black_friday_page(sheets)
     budgets = []
     reference_time = datetime.now(timezone.utc)
     for slug, label, lo, hi in GIFT_BUDGETS:
