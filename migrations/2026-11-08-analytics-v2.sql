@@ -36,8 +36,7 @@ ALTER TABLE outbound_clicks ADD COLUMN schema_version INTEGER;
 -- Les anciennes lignes ont event_id NULL : SQLite autorise plusieurs NULL dans un index unique.
 CREATE UNIQUE INDEX IF NOT EXISTS ux_page_views_event_id ON page_views(event_id);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_outbound_clicks_event_id ON outbound_clicks(event_id);
-CREATE INDEX IF NOT EXISTS ix_page_views_created_at ON page_views(created_at);
-CREATE INDEX IF NOT EXISTS ix_outbound_clicks_created_at ON outbound_clicks(created_at);
+-- Les index created_at existent déjà dans la base de production ; ne pas en ajouter de doublons.
 
 -- Rapports officiels Amazon Partenaires importés manuellement (scripts/import_amazon_report.py).
 -- Aucune donnée n'y est jamais déduite des clics.
