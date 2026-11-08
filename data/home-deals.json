@@ -1,6 +1,6 @@
 {
  "version": 1,
- "awin_fetched_at": "2026-11-08T11:25:51.646Z",
+ "awin_fetched_at": "2026-11-08T15:07:59.932Z",
  "sheets_period": {
   "from": "2026-10-09",
   "to": "2026-11-08"
@@ -756,18 +756,18 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-131019-46102543425",
-   "name": "Chaussettes hautes en laine mérinos épaisse S6 – 46-48",
+   "id": "awin-awin-131019-46102552343",
+   "name": "Chaussettes hautes en laine mérinos épaisse S6 – 31-34",
    "merchant": "Chaussettes-en-ligne.fr/ (FR)",
    "price_verified": false,
    "price_eur": null,
    "shipping_eur": null,
-   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/s/6/s6-grey-melange-voorkant_8pda9h8vtesaprxj.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=46102543425&a=3137386&m=131019",
+   "image": "https://chaussettes-en-ligne.fr/media/catalog/product/s/6/s6-grey-melange-voorkant_z7phansjoryf3ukw.jpg",
+   "url": "https://www.awin1.com/pclick.php?p=46102552343&a=3137386&m=131019",
    "family": "mode",
    "family_label": "Mode",
    "band": "a-confirmer",
-   "price_date": "2026-05-12 13:41:03",
+   "price_date": "2026-05-12 13:44:17",
    "price_date_kind": "merchant",
    "price_tax_status": "unspecified"
   },
@@ -964,14 +964,14 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-111020-40152238337",
+   "id": "awin-awin-111020-40152238319",
    "name": "Distributeurs de savon muraux doubles noirs",
    "merchant": "Kuishi",
    "price_verified": false,
    "price_eur": null,
    "shipping_eur": null,
    "image": "https://cdn.shopify.com/s/files/1/0819/9759/4967/files/black-double-wall-mounted-soap-dispensers-silver-250ml-amber-kuishi-3.jpg",
-   "url": "https://www.awin1.com/pclick.php?p=40152238337&a=3137386&m=111020",
+   "url": "https://www.awin1.com/pclick.php?p=40152238319&a=3137386&m=111020",
    "family": "bougie",
    "family_label": "Bougies & bien-être",
    "band": "a-confirmer",
