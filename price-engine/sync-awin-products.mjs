@@ -345,11 +345,11 @@ function parseFeedRow(row, program, advertiser) {
     size: row.size,
     gtin: firstField(row, GTIN_FIELDS),
     mpn: firstField(row, MPN_FIELDS),
-    image_link: row.merchant_image_url || row.image_link || row.large_image || row.aw_image_url || row.aw_thumb_url,
+    image_link: row.merchant_image_url || row.image_url || row.image_link || row.large_image || row.aw_image_url || row.aw_thumb_url,
     additional_image_link: extra,
     price: price.toFixed(2) + " EUR",
     availability: "in_stock",
-    aw_deep_link: row.aw_deep_link || row.merchant_deep_link || row.purl,
+    aw_deep_link: row.aw_deep_link || row.deep_link || row.merchant_deep_link || row.purl,
     shipping_price_eur: parseFeedMoney(row.delivery_cost || row.shipping, currency, true),
     price_tax_status: explicitPriceTaxStatus(row),
     last_updated: row.last_updated || ""
@@ -732,10 +732,10 @@ async function runSelfTests() {
   const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
     '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","4006381333931","AB-X1"';
   const rows = objectRowsFromCsv(sampleCsv);
-  for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock","pas en stock","epuise"]) {
+  for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock","pas en stock","epuise","0"]) {
     if (stockState(value) !== "out_of_stock") throw new Error("TEST ÉCHEC : statut indisponible mal reconnu : " + value);
   }
-  for (const value of ["in stock","instock","available","disponible","in_stock","yes","true"]) {
+  for (const value of ["in stock","instock","available","disponible","in_stock","yes","true","1"]) {
     if (stockState(value) !== "in_stock") throw new Error("TEST ÉCHEC : statut disponible mal reconnu : " + value);
   }
   const offer = parseDirectFeedRow(rows[0]);
@@ -878,14 +878,29 @@ async function runSelfTests() {
       const value = String(url);
       if (value.includes("/publisher/3137386/test-standard-key/1/feedList")) {
         standardListRequested = true;
-        return new Response("Advertiser ID,Advertiser Name,Primary Region,Membership Status,Datafeed Format,Feed ID,Feed Name,Language,Vertical,Last Imported,Last Checked,No of products,URL\\n", { status: 200 });
+        return new Response(
+          "Advertiser ID,Advertiser Name,Primary Region,Membership Status,Datafeed Format,Feed ID,Feed Name,Language,Vertical,Last Imported,Last Checked,No of products,URL\\n" +
+          "1234,Boutique Test,FR,active,Awin,5678,Catalogue FR,French,Retail,2026-11-08 10:00:00,2026-11-08 10:00:00,1,https://productdata.awin.com/datafeed/download/apikey/test.csv\\n",
+          { status: 200 }
+        );
+      }
+      if (value === "https://productdata.awin.com/datafeed/download/apikey/test.csv") {
+        return new Response(
+          "product_id,product_name,price,currency,brand_name,ean,mpn,deep_link,image_url,in_stock,delivery_cost,last_updated\\n" +
+          "sku-1,Casque test,49.90,EUR,AudioBrand,4006381333931,AB-1,https://shop.example/casque,https://cdn.example/casque.jpg,1,4.99,2026-11-08T10:00:00Z\\n",
+          { status: 200 }
+        );
       }
       throw new Error("URL inattendue dans le test du flux standard : " + value);
     };
     const standardOnly = [{ id: "direct-feed-standard-fallback" }];
     const standardStatus = await loadEnhancedAwinFeeds(standardOnly, { optional: true, token: "" });
-    if (!standardListRequested || standardStatus.joinedCount !== null || standardStatus.importedOffers !== 0 || standardOnly.length !== 1) {
-      throw new Error("TEST ÉCHEC : le flux standard autorisé doit être interrogé même sans jeton Publisher API.");
+    if (!standardListRequested || standardStatus.joinedCount !== null || standardStatus.importedOffers !== 1 ||
+        standardOnly.length !== 2 || standardOnly[1].gtin !== "4006381333931" ||
+        standardOnly[1].brand !== "AudioBrand" || standardOnly[1].mpn !== "AB-1" ||
+        standardOnly[1].price_eur !== 49.9 || standardOnly[1].shipping_price_eur !== 4.99 ||
+        standardOnly[1].price_tax_status !== "unspecified" || standardOnly[1].merchant_updated_at !== "2026-11-08T10:00:00Z") {
+      throw new Error("TEST ÉCHEC : le flux Awin actuel (active/French) doit importer EAN, marque, MPN, prix, livraison et date sans inventer le TTC.");
     }
   } finally {
     globalThis.fetch = originalFetch;
