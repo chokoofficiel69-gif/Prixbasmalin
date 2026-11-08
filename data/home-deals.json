@@ -3,7 +3,7 @@
  "awin_fetched_at": "2026-11-08T11:25:51.646Z",
  "sheets_period": {
   "from": "2026-10-09",
-  "to": "2026-11-05"
+  "to": "2026-11-08"
  },
  "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
@@ -23,7 +23,26 @@
    "min_price_eur": 129.0,
    "max_price_eur": 186.0,
    "offer_count": 24,
-   "last_date": "2026-11-03",
+   "last_date": "2026-11-06",
+   "price_kind": "historical"
+  },
+  {
+   "id": "playstation-vr2",
+   "name": "PlayStation VR2",
+   "brand": "Sony",
+   "category": "accessoire-ps5",
+   "category_label": "Accessoires PS5",
+   "image": "/assets/produits/playstation-vr2.jpg",
+   "image_credit": {
+    "author": "ArlindoPereira",
+    "license": "CC BY 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_VR2.jpg",
+    "match": "verifie_visuellement"
+   },
+   "min_price_eur": 409.22,
+   "max_price_eur": 537.09,
+   "offer_count": 19,
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   },
   {
@@ -42,26 +61,26 @@
    "min_price_eur": 54.99,
    "max_price_eur": 80.5,
    "offer_count": 18,
-   "last_date": "2026-11-05",
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   },
   {
-   "id": "playstation-vr2",
-   "name": "PlayStation VR2",
-   "brand": "Sony",
-   "category": "accessoire-ps5",
-   "category_label": "Accessoires PS5",
-   "image": "/assets/produits/playstation-vr2.jpg",
+   "id": "switch",
+   "name": "Nintendo Switch",
+   "brand": "Nintendo",
+   "category": "console",
+   "category_label": "Consoles",
+   "image": "/assets/produits/switch.jpg",
    "image_credit": {
-    "author": "ArlindoPereira",
-    "license": "CC BY 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_VR2.jpg",
+    "author": "KK IN HK",
+    "license": "CC BY-SA 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_-_Red.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 414.0,
-   "max_price_eur": 537.09,
-   "offer_count": 18,
-   "last_date": "2026-11-03",
+   "min_price_eur": 199.99,
+   "max_price_eur": 304.0,
+   "offer_count": 17,
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   },
   {
@@ -80,26 +99,7 @@
    "min_price_eur": 1277.99,
    "max_price_eur": 1399.0,
    "offer_count": 16,
-   "last_date": "2026-11-04",
-   "price_kind": "historical"
-  },
-  {
-   "id": "switch",
-   "name": "Nintendo Switch",
-   "brand": "Nintendo",
-   "category": "console",
-   "category_label": "Consoles",
-   "image": "/assets/produits/switch.jpg",
-   "image_credit": {
-    "author": "KK IN HK",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_-_Red.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 199.99,
-   "max_price_eur": 304.0,
-   "offer_count": 16,
-   "last_date": "2026-11-05",
+   "last_date": "2026-11-07",
    "price_kind": "historical"
   },
   {
@@ -117,8 +117,8 @@
    },
    "min_price_eur": 1085.59,
    "max_price_eur": 1229.0,
-   "offer_count": 15,
-   "last_date": "2026-11-02",
+   "offer_count": 16,
+   "last_date": "2026-11-07",
    "price_kind": "historical"
   },
   {
@@ -134,10 +134,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 381.9,
+   "min_price_eur": 327.99,
    "max_price_eur": 436.55,
    "offer_count": 14,
-   "last_date": "2026-11-04",
+   "last_date": "2026-11-07",
    "price_kind": "historical"
   },
   {
@@ -156,7 +156,7 @@
    "min_price_eur": 48.99,
    "max_price_eur": 59.36,
    "offer_count": 12,
-   "last_date": "2026-11-04",
+   "last_date": "2026-11-07",
    "price_kind": "historical"
   },
   {
@@ -167,24 +167,24 @@
    "category_label": "Tablettes",
    "image": "",
    "image_credit": null,
-   "min_price_eur": 590.99,
-   "max_price_eur": 879.99,
-   "offer_count": 16,
-   "last_date": "2026-10-30",
+   "min_price_eur": 617.44,
+   "max_price_eur": 969.0,
+   "offer_count": 17,
+   "last_date": "2026-11-07",
    "price_kind": "historical"
   },
   {
-   "id": "dreame-x50-ultra",
-   "name": "Dreame X50 Ultra Complete",
-   "brand": "Dreame",
+   "id": "dyson-v16-piston-animal-submarine",
+   "name": "Dyson V16 Piston Animal Submarine",
+   "brand": "Dyson",
    "category": "aspirateur",
    "category_label": "Aspirateurs",
    "image": "",
    "image_credit": null,
-   "min_price_eur": 599.0,
-   "max_price_eur": 1057.49,
-   "offer_count": 14,
-   "last_date": "2026-11-04",
+   "min_price_eur": 699.0,
+   "max_price_eur": 1003.49,
+   "offer_count": 15,
+   "last_date": "2026-11-07",
    "price_kind": "historical"
   },
   {
@@ -200,24 +200,29 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 203.99,
+   "min_price_eur": 199.0,
    "max_price_eur": 325.88,
    "offer_count": 24,
-   "last_date": "2026-11-03",
+   "last_date": "2026-11-06",
    "price_kind": "historical"
   },
   {
-   "id": "joy-con-2",
-   "name": "Joy-Con 2 (paire)",
-   "brand": "Nintendo",
-   "category": "accessoire-switch",
-   "category_label": "Accessoires Switch",
-   "image": "",
-   "image_credit": null,
-   "min_price_eur": 69.99,
-   "max_price_eur": 115.33,
-   "offer_count": 18,
-   "last_date": "2026-11-05",
+   "id": "playstation-portal",
+   "name": "PlayStation Portal",
+   "brand": "Sony",
+   "category": "accessoire-ps5",
+   "category_label": "Accessoires PS5",
+   "image": "/assets/produits/playstation-portal.jpg",
+   "image_credit": {
+    "author": "ArlindoPereira",
+    "license": "CC BY 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_Portal.jpg",
+    "match": "verifie_visuellement"
+   },
+   "min_price_eur": 237.9,
+   "max_price_eur": 254.5,
+   "offer_count": 13,
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   }
  ],
