@@ -9,6 +9,7 @@ on:
       - "scripts/build_product_sheets.py"
       - "scripts/build_home_deals.py"
       - "scripts/build_seo_pages.py"
+      - "scripts/build_home_showcase.py"
       - "tests/test_home_deals.py"
       - "tests/test_seo_pages.py"
       - ".github/workflows/import-prixtracker.yml"
@@ -18,6 +19,7 @@ on:
       - "price-engine/sync-prixtracker.mjs"
       - "scripts/build_home_deals.py"
       - "scripts/build_seo_pages.py"
+      - "scripts/build_home_showcase.py"
       - "tests/test_home_deals.py"
       - "tests/test_seo_pages.py"
       - ".github/workflows/import-prixtracker.yml"
@@ -49,15 +51,17 @@ jobs:
           python3 scripts/build_product_sheets.py
           python3 scripts/build_home_deals.py
           python3 scripts/build_seo_pages.py
+          python3 scripts/build_home_showcase.py
           python3 scripts/build_sitemap.py
       - name: Tester la vitrine et les pages SEO avec prix vérifiés
         run: |
           python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
           python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
+          python3 -m unittest discover -s tests -p 'test_home_showcase.py' -v
       - name: Publier uniquement si les fichiers ont changé
         if: github.event_name != 'pull_request'
         run: |
-          git add data/prixtracker-prices.json data/prixtracker-best-daily.json data/fiches-produits.json data/home-deals.json prix idees-cadeaux sitemap.xml sitemap.txt data/sitemap-lastmod.json
+          git add data/prixtracker-prices.json data/prixtracker-best-daily.json data/fiches-produits.json data/home-deals.json prix idees-cadeaux black-friday.html index.html sitemap.xml sitemap.txt data/sitemap-lastmod.json
           if git diff --cached --quiet; then
             echo "Aucune évolution des données."
             exit 0
