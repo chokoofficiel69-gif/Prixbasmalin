@@ -98,3 +98,22 @@ Certains liens sont affiliés. Prix Malin peut percevoir une commission, sans su
 - Les 12 liens Amazon directs présents dans le dépôt sont renseignés à partir d'ASIN fournis par le propriétaire ; les autres produits peuvent encore renvoyer vers une recherche Amazon.
 - Le tableau de bord Prix Malin ne déduit jamais les ventes des clics. Importer le rapport officiel Amazon pour confirmer commandes et commissions.
 - Ce document est un kit de rédaction. Il ne donne pas accès aux comptes Facebook, Instagram, TikTok ou autres et ne publie rien à leur place.
+
+
+## Liens traçables par réseau social (UTM)
+
+Le script de mesure Prix Malin lit `utm_source`, `utm_medium` et `utm_campaign` après consentement à la mesure d’audience. Utiliser le lien correspondant au réseau où la publication est réellement diffusée. Les statistiques distingueront ainsi Facebook, Instagram et TikTok au lieu de mélanger leurs visites. Les visites des personnes ayant refusé la mesure ne seront pas comptées.
+
+Campagne commune : `black_friday_2026` · support : `social`.
+
+| Publication | Facebook | Instagram | TikTok |
+|---|---|---|---|
+| J1 · AirPods | https://prixbasmalin.fr/prix/airpods-4.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=airpods | https://prixbasmalin.fr/prix/airpods-4.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=airpods | https://prixbasmalin.fr/prix/airpods-4.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=airpods |
+| J2 · Nintendo Switch 2 | https://prixbasmalin.fr/prix/switch-2.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=switch2 | https://prixbasmalin.fr/prix/switch-2.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=switch2 | https://prixbasmalin.fr/prix/switch-2.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=switch2 |
+| J3 · JBL Clip 5 | https://prixbasmalin.fr/prix/jbl-clip-5.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=jbl | https://prixbasmalin.fr/prix/jbl-clip-5.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=jbl | https://prixbasmalin.fr/prix/jbl-clip-5.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=jbl |
+| J4 · DualSense | https://prixbasmalin.fr/prix/dualsense.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=dualsense | https://prixbasmalin.fr/prix/dualsense.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=dualsense | https://prixbasmalin.fr/prix/dualsense.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=dualsense |
+| J5 · Apple Watch SE 3 | https://prixbasmalin.fr/prix/apple-watch-se-3.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=watchse3 | https://prixbasmalin.fr/prix/apple-watch-se-3.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=watchse3 | https://prixbasmalin.fr/prix/apple-watch-se-3.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=watchse3 |
+| J6 · Guide anti-fausses promos | https://prixbasmalin.fr/guide-black-friday-2026.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=guide | https://prixbasmalin.fr/guide-black-friday-2026.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=guide | https://prixbasmalin.fr/guide-black-friday-2026.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=guide |
+| J7 · Sélection complète | https://prixbasmalin.fr/black-friday.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=selection | https://prixbasmalin.fr/black-friday.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=selection | https://prixbasmalin.fr/black-friday.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=selection |
+
+**Contrôle après diffusion :** dans `stats.html`, consulter « Provenance des sessions » et sélectionner la période de publication. Les chiffres dépendent du consentement et peuvent être inférieurs aux statistiques natives des réseaux sociaux. Ne pas assimiler une visite à un clic Amazon, ni un clic Amazon à une commande.
