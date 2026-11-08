@@ -17,6 +17,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CSS_LINK = '<link rel="stylesheet" href="/css/pm-design.css">'
+# Gestionnaire de consentement : la mesure d'audience et le suivi des clics ne se chargent qu'après accord.
+CONSENT_SCRIPT = '<script src="/js/cookie-consent.js" defer></script>'
 START, END = "<!-- pm-site-header -->", "<!-- /pm-site-header -->"
 AMAZON_DEALS = "https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21"
 
@@ -89,6 +91,8 @@ def apply(text, current):
         text, n = re.subn(r"<header\b.*?</header>", lambda _m: new_header, text, count=1, flags=re.S)
         if n != 1:
             raise ValueError("aucun <header> à remplacer")
+    if "/js/cookie-consent.js" not in text:
+        text = text.replace("</head>", CONSENT_SCRIPT + "\n</head>", 1)
     if CSS_LINK not in text:
         # La feuille commune est chargée en dernier dans <head> pour primer sur les styles anciens.
         text = text.replace("</head>", CSS_LINK + "\n</head>", 1)

@@ -14,7 +14,7 @@ from pathlib import Path
 from urllib.parse import urlencode
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from site_chrome import CSS_LINK, header_html  # noqa: E402  (en-tête commun)
+from site_chrome import CONSENT_SCRIPT, CSS_LINK, header_html  # noqa: E402  (en-tête commun)
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://prixbasmalin.fr"
@@ -261,6 +261,7 @@ def render(g, style, footer):
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=3">
 <link rel="stylesheet" href="/css/pm-site-footer.css">
 {CSS_LINK}
+{CONSENT_SCRIPT}
 </head>
 <body>
 {header_html("guide")}
@@ -312,6 +313,7 @@ def render_index(style, footer):
 <link rel="stylesheet" href="/css/prix-malin-theme.css?v=3">
 <link rel="stylesheet" href="/css/pm-site-footer.css">
 {CSS_LINK}
+{CONSENT_SCRIPT}
 </head>
 <body>
 {header_html("guide")}

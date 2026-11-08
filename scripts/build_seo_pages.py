@@ -20,7 +20,7 @@ from pathlib import Path
 from urllib.parse import quote, urlencode
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from site_chrome import CSS_LINK, header_html  # noqa: E402  (en-tête commun)
+from site_chrome import CONSENT_SCRIPT, CSS_LINK, header_html  # noqa: E402  (en-tête commun)
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = "https://prixbasmalin.fr"
@@ -158,6 +158,7 @@ def layout(title, description, canonical, body, breadcrumbs, extra_head=""):
 <link rel="stylesheet" href="/css/pm-product-art.css"><link rel="stylesheet" href="/css/pm-site-footer.css">
 <style>{HEAD_CSS}</style>
 {CSS_LINK}
+{CONSENT_SCRIPT}
 <script type="application/ld+json">{json.dumps(crumbs_ld, ensure_ascii=False)}</script>
 {extra_head}<script src="/js/pm-product-art.js"></script>
 </head>
@@ -285,7 +286,8 @@ def product_page(p, sheets, period):
 <p class="source">Source : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Ces montants ne sont pas des prix en direct. Prix Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
 {ART_SCRIPT}"""
     crumbs = [("Accueil", "/"), ("Historique des prix", "/prix/"), (p["category_label"], f"/prix/{cat_slug}.html"), (p["name"], f"/prix/{p['id']}.html")]
-    extra = f'<script type="application/ld+json">{json.dumps(faq_ld, ensure_ascii=False)}</script>\n'
+    # Identifiant produit lu par la mesure d'audience (produits consultés).
+    extra = f'<meta name="pm-product-id" content="{e(p["id"])}">\n<script type="application/ld+json">{json.dumps(faq_ld, ensure_ascii=False)}</script>\n'
     return layout(title, description, f"/prix/{p['id']}.html", body, crumbs, extra)
 
 
