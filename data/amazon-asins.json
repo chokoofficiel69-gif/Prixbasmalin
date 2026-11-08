@@ -15,8 +15,36 @@
    "asin": "B0FQF32239",
    "added": "2026-11-08"
   },
+  "apple-watch-se-3": {
+   "asin": "B0HJB6FZ3V",
+   "added": "2026-11-08"
+  },
+  "dualsense": {
+   "asin": "B094WLFGD3",
+   "added": "2026-11-08"
+  },
+  "jbl-clip-5": {
+   "asin": "B0CX94G62T",
+   "added": "2026-11-08"
+  },
+  "jbl-flip-7": {
+   "asin": "B0DXKMXPXW",
+   "added": "2026-11-08"
+  },
+  "jbl-go-4": {
+   "asin": "B0CZDCWM48",
+   "added": "2026-11-08"
+  },
   "joy-con-2": {
    "asin": "B0F3JM95S4",
+   "added": "2026-11-08"
+  },
+  "playstation-portal": {
+   "asin": "B0DSPWD3RP",
+   "added": "2026-11-08"
+  },
+  "switch-2": {
+   "asin": "B0HCPTNRZJ",
    "added": "2026-11-08"
   }
  }
