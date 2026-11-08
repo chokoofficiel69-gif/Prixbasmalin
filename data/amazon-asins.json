@@ -2,5 +2,22 @@
  "version": 1,
  "tag": "prixbasmalin2-21",
  "note": "Références Amazon copiées depuis les fiches produit amazon.fr par le propriétaire du site. Ne jamais deviner un ASIN.",
- "products": {}
+ "products": {
+  "airpods-4": {
+   "asin": "B0DGHWD7CT",
+   "added": "2026-11-08"
+  },
+  "airpods-4-anc": {
+   "asin": "B0DGHYDYJL",
+   "added": "2026-11-08"
+  },
+  "airpods-pro-3": {
+   "asin": "B0FQF32239",
+   "added": "2026-11-08"
+  },
+  "joy-con-2": {
+   "asin": "B0F3JM95S4",
+   "added": "2026-11-08"
+  }
+ }
 }
