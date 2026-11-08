@@ -149,6 +149,7 @@ CSS = """<style id="pm-showcase-style">
 .pmx-cmp-l em.x{background:none;padding:0}.pmx-cmp-l b{color:#ff7a1a}.pmx-cmp-l small{color:var(--mut)}
 .pmx-cmp-l a{padding:7px 10px;border-radius:9px;background:var(--o);color:#fff;font-weight:800;font-size:12px;text-decoration:none}
 .pmx-cmp-g{display:flex;flex-direction:column;gap:4px}.pmx-cmp-g strong{font-size:30px;color:#22c55e;font-weight:900}.pmx-cmp-g small{color:var(--mut);font-size:12px}
+.pmx-promo{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;justify-content:space-between;margin:14px 0 0;padding:14px 18px;border-radius:14px;border:2px dashed #ffb02e;background:#1a1410;color:#fff!important;text-decoration:none}.pmx-promo b{font-size:18px}.pmx-promo span{color:#ffcf99;font-size:13.5px;font-weight:700}
 .pmx-note{color:var(--mut);font-size:12px;margin:8px 2px 0}
 @media(max-width:860px){.pmx-hero{min-height:0}.pmx-hero-img{position:relative;width:100%;height:auto;aspect-ratio:987/541;order:2;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 28%);mask-image:linear-gradient(180deg,transparent 0,#000 28%);margin-top:-30px}
  .pmx-hero-txt{order:1;padding:20px 16px 0}.pmx-trust{order:3;padding:10px 16px 14px;gap:8px 14px;font-size:11.5px}.pmx-trust i{width:26px;height:26px;font-size:13px}
@@ -189,6 +190,7 @@ def build_block():
 <a class="pmx-b c2" href="/high-tech.html"><img src="/assets/accueil/ban-high-tech.webp" alt="" loading="lazy"><b>High-Tech</b><small>Les dernières nouveautés, prix comparés</small><span>Voir les offres →</span></a>
 <a class="pmx-b c3" href="/maison-deco.html"><img src="/assets/accueil/ban-maison.webp" alt="" loading="lazy"><b>Maison &amp; Déco</b><small>Des idées pour un intérieur qui vous ressemble</small><span>Voir la sélection →</span></a>
 </section>
+<a class="pmx-promo" href="/boutiques-partenaires.html"><b>🎟️ Codes promo &amp; boutiques partenaires</b><span>Des réductions réservées aux visiteurs de Prix Malin · Commerçants : devenez partenaire →</span></a>
 {compare_block(sheets[COMPARE_ID])}
 <p class="pmx-note">Prix relevés et datés (relevés PrixTracker, data.gouv.fr, Licence Ouverte 2.0), pas des offres en direct : vérifiez le prix final chez le marchand. Visuels Prix Malin et photos libres créditées. Certains liens sont affiliés.</p>
 </div>
