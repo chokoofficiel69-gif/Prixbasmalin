@@ -290,13 +290,13 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           set -euo pipefail
-          cache_bust="\${GITHUB_RUN_ID}-\${GITHUB_RUN_ATTEMPT}"
+          cache_bust="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           curl --fail --silent --show-error --location --retry 3 --retry-all-errors --max-time 25 \
-            "https://prixbasmalin.fr/js/partner-ads.js?check=\${cache_bust}" --output /tmp/partner-ads.js
+            "https://prixbasmalin.fr/js/partner-ads.js?check=${cache_bust}" --output /tmp/partner-ads.js
           curl --fail --silent --show-error --location --retry 3 --retry-all-errors --max-time 25 \
-            "https://prixbasmalin.fr/css/partner-ads.css?check=\${cache_bust}" --output /tmp/partner-ads.css
+            "https://prixbasmalin.fr/css/partner-ads.css?check=${cache_bust}" --output /tmp/partner-ads.css
           curl --fail --silent --show-error --location --retry 3 --retry-all-errors --max-time 25 \
-            "https://prixbasmalin.fr/data/partner-ads.json?check=\${cache_bust}" --output /tmp/partner-ads.json
+            "https://prixbasmalin.fr/data/partner-ads.json?check=${cache_bust}" --output /tmp/partner-ads.json
           node --check /tmp/partner-ads.js
           grep -Fq '.pm-partner-ad-slot[hidden]' /tmp/partner-ads.css
           node --input-type=module <<'NODE'
