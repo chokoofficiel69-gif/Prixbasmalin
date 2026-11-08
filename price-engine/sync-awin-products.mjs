@@ -879,15 +879,15 @@ async function runSelfTests() {
       if (value.includes("/publisher/3137386/test-standard-key/1/feedList")) {
         standardListRequested = true;
         return new Response(
-          "Advertiser ID,Advertiser Name,Primary Region,Membership Status,Datafeed Format,Feed ID,Feed Name,Language,Vertical,Last Imported,Last Checked,No of products,URL\\n" +
-          "1234,Boutique Test,FR,active,Awin,5678,Catalogue FR,French,Retail,2026-11-08 10:00:00,2026-11-08 10:00:00,1,https://productdata.awin.com/datafeed/download/apikey/test.csv\\n",
+          "Advertiser ID,Advertiser Name,Primary Region,Membership Status,Datafeed Format,Feed ID,Feed Name,Language,Vertical,Last Imported,Last Checked,No of products,URL\n" +
+          "1234,Boutique Test,FR,active,Awin,5678,Catalogue FR,French,Retail,2026-11-08 10:00:00,2026-11-08 10:00:00,1,https://productdata.awin.com/datafeed/download/apikey/test.csv\n",
           { status: 200 }
         );
       }
       if (value === "https://productdata.awin.com/datafeed/download/apikey/test.csv") {
         return new Response(
-          "product_id,product_name,price,currency,brand_name,ean,mpn,deep_link,image_url,in_stock,delivery_cost,last_updated\\n" +
-          "sku-1,Casque test,49.90,EUR,AudioBrand,4006381333931,AB-1,https://shop.example/casque,https://cdn.example/casque.jpg,1,4.99,2026-11-08T10:00:00Z\\n",
+          "product_id,product_name,price,currency,brand_name,ean,mpn,deep_link,image_url,in_stock,delivery_cost,last_updated\n" +
+          "sku-1,Casque test,49.90,EUR,AudioBrand,4006381333931,AB-1,https://shop.example/casque,https://cdn.example/casque.jpg,1,4.99,2026-11-08T10:00:00Z\n",
           { status: 200 }
         );
       }
