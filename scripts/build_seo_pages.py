@@ -148,7 +148,7 @@ dl{margin:0}dt{font-weight:800;margin-top:10px}dd{margin:2px 0 0;color:#374151}.
 @media(max-width:560px){.hero{grid-template-columns:1fr 110px}th.h,td.h{display:none}}"""
 
 
-def layout(title, description, canonical, body, breadcrumbs, extra_head=""):
+def layout(title, description, canonical, body, breadcrumbs, extra_head="", og_image="/assets/og-prix-malin.jpg"):
     crumbs_ld = {
         "@context": "https://schema.org", "@type": "BreadcrumbList",
         "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": n, "item": SITE + u} for i, (n, u) in enumerate(breadcrumbs)],
@@ -166,7 +166,7 @@ def layout(title, description, canonical, body, breadcrumbs, extra_head=""):
 <link rel="canonical" href="{SITE}{canonical}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Prix Malin"><meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(description)}"><meta property="og:url" content="{SITE}{canonical}">
-<meta property="og:image" content="{SITE}/assets/prixmalin-publicite.webp">
+<meta property="og:image" content="{SITE}{og_image}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/css/pm-product-art.css"><link rel="stylesheet" href="/css/pm-site-footer.css">
 <style>{HEAD_CSS}</style>
@@ -513,7 +513,8 @@ def black_friday_page(sheets):
 {ART_SCRIPT}{BF_SCRIPT}"""
     return layout("Black Friday 2026 : high-tech par budget | Prix Malin",
                   fit_description(f"Black Friday 2026 : {count} produits high-tech par budget avec le plus bas prix relevé avant l’événement, pour repérer les vraies promotions."),
-                  "/black-friday.html", body, [("Accueil", "/"), ("Black Friday 2026", "/black-friday.html")], extra)
+                  "/black-friday.html", body, [("Accueil", "/"), ("Black Friday 2026", "/black-friday.html")], extra,
+                  og_image="/assets/og-black-friday.jpg")
 
 
 def build():
