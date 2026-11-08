@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Vérifier la présence du secret sans l'afficher
         env:
-          PRICESAPI_API_KEY: \${{ secrets.PRICESAPI_API_KEY }}
+          PRICESAPI_API_KEY: ${{ secrets.PRICESAPI_API_KEY }}
         run: |
           if [ -z "$PRICESAPI_API_KEY" ]; then
             echo "::error::Secret PRICESAPI_API_KEY absent ou indisponible pour cette exécution."
@@ -32,7 +32,7 @@ jobs:
 
       - name: Tester trois produits sur le marché français
         env:
-          PRICESAPI_API_KEY: \${{ secrets.PRICESAPI_API_KEY }}
+          PRICESAPI_API_KEY: ${{ secrets.PRICESAPI_API_KEY }}
         run: |
           node --input-type=module <<'NODE'
           const queries = [
