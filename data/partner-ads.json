@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-11-08",
+  "campaigns": [],
+  "notes": [
+    "Aucune campagne active : les emplacements restent invisibles.",
+    "Une campagne ne s'affiche qu'après validation manuelle, statut active et dates de diffusion valides.",
+    "Les liens de destination doivent être HTTPS. Les visuels doivent être hébergés localement sous /assets/ads/ après vérification des droits.",
+    "Ne jamais inscrire de prix, remise ou promesse commerciale sans validation écrite de l'annonceur."
+  ]
+}
