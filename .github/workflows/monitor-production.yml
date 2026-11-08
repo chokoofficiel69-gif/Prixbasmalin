@@ -13,6 +13,9 @@ on:
       - "confidentialite.html"
       - "js/prix-malin-auth.js"
       - "catalogue.html"
+      - "css/partner-ads.css"
+      - "js/partner-ads.js"
+      - "data/partner-ads.json"
       - "produit.html"
       - "index.html"
       - "partenaires.html"
@@ -47,6 +50,9 @@ on:
       - "js/track-outbound.js"
       - "js/prix-malin-auth.js"
       - "catalogue.html"
+      - "css/partner-ads.css"
+      - "js/partner-ads.js"
+      - "data/partner-ads.json"
       - "produit.html"
       - "index.html"
       - "partenaires.html"
@@ -95,6 +101,8 @@ jobs:
         run: node --check workers/prixbasmalin-attribution.js
       - name: Vérifier la syntaxe du module compte et alertes
         run: node --check js/prix-malin-auth.js
+      - name: Vérifier la syntaxe du module publicités partenaires
+        run: node --check js/partner-ads.js
 
       - name: Vérifier que la mesure d'audience respecte le consentement
         run: |
@@ -253,6 +261,8 @@ jobs:
               -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
               "https://prixbasmalin.fr/catalogue.html?pm-deploy-check=${cache_bust}" --output /tmp/catalogue-after.html &&
               grep -Fq "pm-mobile-new-arrivals-rail" /tmp/home-after.html &&
+              grep -Fq 'data-pm-ad-slot="home-top"' /tmp/home-after.html &&
+              grep -Fq 'data-pm-ad-slot="catalogue-inline"' /tmp/catalogue-after.html &&
               grep -Fq "fresh(p.merchantUpdatedAt)" /tmp/home-after.html &&
               grep -Fq 'const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";' /tmp/catalogue-after.html &&
               grep -Fq 'priceValue:priceStatus==="fresh"?Number(product.priceValue):null' /tmp/catalogue-after.html &&
@@ -276,6 +286,31 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/catalogue.html --output /tmp/catalogue.html
           test -s /tmp/catalogue.html
+      - name: Vérifier les scripts, styles et inventaire publicitaires publiés
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          cache_bust="\${GITHUB_RUN_ID}-\${GITHUB_RUN_ATTEMPT}"
+          curl --fail --silent --show-error --location --retry 3 --retry-all-errors --max-time 25 \
+            "https://prixbasmalin.fr/js/partner-ads.js?check=\${cache_bust}" --output /tmp/partner-ads.js
+          curl --fail --silent --show-error --location --retry 3 --retry-all-errors --max-time 25 \
+            "https://prixbasmalin.fr/css/partner-ads.css?check=\${cache_bust}" --output /tmp/partner-ads.css
+          curl --fail --silent --show-error --location --retry 3 --retry-all-errors --max-time 25 \
+            "https://prixbasmalin.fr/data/partner-ads.json?check=\${cache_bust}" --output /tmp/partner-ads.json
+          node --check /tmp/partner-ads.js
+          grep -Fq '.pm-partner-ad-slot[hidden]' /tmp/partner-ads.css
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/partner-ads.json", "utf8"));
+          if (data.schema_version !== 1 || !Array.isArray(data.campaigns)) {
+            throw new Error("Inventaire publicitaire publié invalide.");
+          }
+          const source = fs.readFileSync("/tmp/partner-ads.js", "utf8");
+          for (const required of ['campaign.approved !== true', 'url.protocol === "https:"', 'url.pathname.startsWith("/assets/ads/")', 'card.rel = "sponsored nofollow noopener noreferrer"']) {
+            if (!source.includes(required)) throw new Error("Garde-fou publicitaire absent : " + required);
+          }
+          console.log("Emplacements partenaires publiés ; inventaire valide :", data.campaigns.length, "campagne(s).");
+          NODE
       - name: Vérifier la page d'historique publiée
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
