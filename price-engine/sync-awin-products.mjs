@@ -197,9 +197,9 @@ function stockValues(values) {
 }
 
 function stockState(value) {
-  const stock = norm(value).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
-  if (/\b(?:out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|pas en stock|epuise|false|no)\b/.test(stock)) return "out_of_stock";
-  if (/\b(?:in stock|instock|available|disponible|for sale|yes|true)\b/.test(stock)) return "in_stock";
+  const stock = norm(value).replace(/[_-]+/g, " ").replace(/\\s+/g, " ").trim();
+  if (/\\b(?:0|out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|pas en stock|epuise|false|no)\\b/.test(stock)) return "out_of_stock";
+  if (/\\b(?:1|in stock|instock|available|disponible|for sale|yes|true)\\b/.test(stock)) return "in_stock";
   return "unknown";
 }
 
@@ -363,15 +363,30 @@ async function loadStandardAwinFeeds(rawOffers) {
     log("Clé de flux Awin standard absente : aucun flux standard ne sera interrogé.");
     return 0;
   }
-  const listUrl = "https://productdata.awin.com/datafeed/list/apikey/" + encodeURIComponent(key);
-  const response = await fetch(listUrl,{headers:{Accept:"text/csv"},signal:AbortSignal.timeout(TIMEOUT_MS)});
+  const listUrl = "https://ui.awin.com/productdata-darwin-download/publisher/" +
+    encodeURIComponent(PUBLISHER_ID) + "/" + encodeURIComponent(key) + "/1/feedList";
+  let response = await fetch(listUrl,{headers:{Accept:"text/csv"},signal:AbortSignal.timeout(TIMEOUT_MS)});
+  if (!response.ok) {
+    // Compatibilité avec l'ancien endpoint encore documenté dans certaines pages Awin.
+    const legacyUrl = "https://productdata.awin.com/datafeed/list/apikey/" + encodeURIComponent(key);
+    response = await fetch(legacyUrl,{headers:{Accept:"text/csv"},signal:AbortSignal.timeout(TIMEOUT_MS)});
+  }
   if (!response.ok) {
     log("Liste des flux standards Awin indisponible (HTTP "+response.status+").");
     return 0;
   }
   const listText = await response.text();
   const feedRows = objectRowsFromCsv(listText);
-  const joined = feedRows.filter(row => /joined|soft member|auto.?join/.test(norm(row.membership_status || row.membership)) && /^(fr|french|fr_fr)$/.test(norm(row.language || row.feed_language)));
+  const joined = feedRows.filter(row => {
+    const membership = norm(row.membership_status || row.membership);
+    const language = norm(row.language || row.feed_language);
+    const region = norm(row.primary_region || row.region);
+    const format = norm(row.datafeed_format || row.feed_format || "");
+    const accessible = /^(active|joined|soft member|soft_member|auto.?join)$/.test(membership) ||
+      /joined|soft member|auto.?join/.test(membership);
+    const french = /^(fr|french|fr_fr)$/.test(language) || region === "fr";
+    return accessible && french && (!format || format === "awin");
+  });
   log(joined.length+" flux standard(s) français accessibles dans la liste Awin.");
   let cursor = 0;
   let imported = 0;
@@ -861,9 +876,9 @@ async function runSelfTests() {
     let standardListRequested = false;
     globalThis.fetch = async (url, options = {}) => {
       const value = String(url);
-      if (value.includes("datafeed/list/apikey/test-standard-key")) {
+      if (value.includes("/publisher/3137386/test-standard-key/1/feedList")) {
         standardListRequested = true;
-        return new Response("advertiser_id,program_name,membership_status,language\\n", { status: 200 });
+        return new Response("Advertiser ID,Advertiser Name,Primary Region,Membership Status,Datafeed Format,Feed ID,Feed Name,Language,Vertical,Last Imported,Last Checked,No of products,URL\\n", { status: 200 });
       }
       throw new Error("URL inattendue dans le test du flux standard : " + value);
     };
