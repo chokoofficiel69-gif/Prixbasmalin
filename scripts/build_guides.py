@@ -160,14 +160,14 @@ GUIDES = [
 <li><strong>Les accessoires</strong> indispensables non inclus (chargeur, câble, sacs pour une station…).</li>
 </ol>"""),
             ("5. Achetez sereinement en ligne", """<p>Pour un achat à distance auprès d'un professionnel, vous disposez en principe d'un <strong>droit de rétractation de 14 jours</strong> après la réception, avec quelques exceptions. Vérifiez qui paie les frais de retour. Méfiez-vous des sites inconnus aux prix très inférieurs au marché, des paiements par virement à l'étranger et des offres reçues par SMS ou message privé.</p>"""),
-            ("6. Nos raccourcis pour le Black Friday", """<p>Pour gagner du temps : le comparateur Prix Malin classe les offres du moins cher au plus cher pour des dizaines de produits high-tech, et nos pages d'idées cadeaux sont organisées par budget. Les offres du jour Amazon regroupent aussi des promotions limitées dans le temps.</p>"""),
+            ("6. Nos raccourcis pour le Black Friday", """<p>Notre <a href="/black-friday.html">sélection Black Friday par budget</a> réunit les produits les plus recherchés avec leur plus bas prix relevé. Pour gagner du temps : le comparateur Prix Malin classe les offres du moins cher au plus cher pour des dizaines de produits high-tech, et nos pages d'idées cadeaux sont organisées par budget. Les offres du jour Amazon regroupent aussi des promotions limitées dans le temps.</p>"""),
         ],
         "faq": [
             ("Quand a lieu le Black Friday 2026 ?", "Le vendredi 27 novembre 2026. Le Cyber Monday suit le lundi 30 novembre, et de nombreuses enseignes proposent des offres sur plusieurs jours, voire tout le mois."),
             ("Les prix sont-ils vraiment plus bas pendant le Black Friday ?", "Parfois, mais pas toujours. Comparez avec le prix habituel et avec les autres marchands avant d'acheter."),
             ("Peut-on retourner un produit acheté pendant le Black Friday ?", "Les règles habituelles s'appliquent : en ligne, le droit de rétractation de 14 jours vaut en principe pour les achats auprès d'un professionnel, sauf exceptions prévues par la loi."),
         ],
-        "links": [("Comparer les prix high-tech", "/prix/"), ("Idées cadeaux par budget", "/idees-cadeaux/"), ("Offres du jour Amazon", "https://www.amazon.fr/gp/goldbox?tag=" + TAG)],
+        "links": [("Notre sélection Black Friday par budget", "/black-friday.html"), ("Comparer les prix high-tech", "/prix/"), ("Idées cadeaux par budget", "/idees-cadeaux/"), ("Offres du jour Amazon", "https://www.amazon.fr/gp/goldbox?tag=" + TAG)],
     },
     {
         "slug": "guide-payer-moins-cher-en-ligne",
