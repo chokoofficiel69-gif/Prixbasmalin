@@ -51,15 +51,18 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertIn('giftRail.innerHTML=rotated.map(giftCard).join("")', text)
         self.assertNotIn('giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")', text)
 
-        gifts = list(range(48))
+        # The current published gift feed has 45 unique image URLs.
+        gifts = list(range(45))
         def selected(slot):
             limit = min(16, len(gifts))
             start = (slot * limit) % len(gifts)
             return [gifts[(start + index) % len(gifts)] for index in range(limit)]
 
+        self.assertEqual(len(selected(0)), 16)
+        self.assertEqual(len(set(selected(0))), 16)
         self.assertTrue(set(selected(0)).isdisjoint(selected(1)))
         self.assertTrue(set(selected(1)).isdisjoint(selected(2)))
-        self.assertEqual(selected(0), selected(3))
+        self.assertNotEqual(selected(0), selected(3))
 
 
 if __name__ == "__main__":
