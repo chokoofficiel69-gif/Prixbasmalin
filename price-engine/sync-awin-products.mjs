@@ -881,6 +881,7 @@ async function runSelfTests() {
     [{ title: "Armoire à vin climatisée Kibernetik WKH168F01 en acier chromé" }, "home", "SODEAL CH"],
     [{ title: "Aspirateur balai sans fil 2 en 1" }, "home", "SODEAL CH"],
     [{ title: "Balai Brosse Ajustable Élimination Poussière Fentes" }, "home", "SODEAL CH"],
+    [{ title: "Balai d'essuie-glace de rechange" }, "other", "SODEAL CH"],
     [{ title: "Balance Pèse-personne One Umi 160kg" }, "home", "SODEAL CH"],
     [{ title: "Barbecue à gaz 3 brûleurs" }, "home", "SODEAL CH"],
     [{ title: "Bidet Pliable pour Toilettes" }, "home", "SODEAL CH"],
