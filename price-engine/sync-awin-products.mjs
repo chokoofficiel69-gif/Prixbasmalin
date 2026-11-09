@@ -572,7 +572,15 @@ function aggregateOffers(rawOffers, fetchedAt) {
   }
   const result = [];
   for (const group of groups.values()) {
-    const offers = group.offers.sort(compareOfferCosts);
+    // Une comparaison n'a de sens qu'entre marchands distincts : un même marchand
+    // qui publie plusieurs fiches pour le même GTIN ne compte qu'une fois (la moins chère).
+    const seenMerchants = new Set();
+    const offers = group.offers.sort(compareOfferCosts).filter(item => {
+      const merchantKey = String(item.advertiser_id || "") + "|" + norm(item.merchant);
+      if (seenMerchants.has(merchantKey)) return false;
+      seenMerchants.add(merchantKey);
+      return true;
+    });
     const best = offers[0];
     const first = group.first;
     result.push({
@@ -923,6 +931,13 @@ async function runSelfTests() {
       grouped.imageKind !== "merchant_feed" || grouped.imageSourceName !== "Boutique B") {
     throw new Error("TEST ÉCHEC : comparaison MPN, priorité au total connu ou provenance image.");
   }
+  const sameMerchant = aggregateOffers([
+    { identity: "gtin:4006381333931", advertiser_id: "7", id: "a", merchant: "Boutique Unique", name: "Produit Y", brand: "", category: "tech", color: "", size: "", gtin: "4006381333931", mpn: "", images: [], price_eur: 20, shipping_price_eur: null, availability: "in_stock", merchant_updated_at: null, url: "https://example.com/a" },
+    { identity: "gtin:4006381333931", advertiser_id: "7", id: "b", merchant: "Boutique Unique", name: "Produit Y", brand: "", category: "tech", color: "", size: "", gtin: "4006381333931", mpn: "", images: [], price_eur: 18, shipping_price_eur: null, availability: "in_stock", merchant_updated_at: null, url: "https://example.com/b" }
+  ], "2026-11-09T06:00:00.000Z")[0];
+  if (!sameMerchant || sameMerchant.offers.length !== 1 || sameMerchant.offers[0].priceValue !== 18) {
+    throw new Error("TEST ÉCHEC : plusieurs fiches d'un même marchand ne doivent pas simuler une comparaison.");
+  }
   if (parseDirectFeedRow({ ...rows[0], stock_status: "out_of_stock" }) !== null) {
     throw new Error("TEST ÉCHEC : une offre explicitement en rupture doit être rejetée.");
   }
@@ -1007,7 +1022,7 @@ async function runSelfTests() {
     if (originalDirectFeedUrl === undefined) delete process.env.AWIN_PRODUCT_DATA_FEED_URL;
     else process.env.AWIN_PRODUCT_DATA_FEED_URL = originalDirectFeedUrl;
   }
-  log("Autotests réussis : CSV, prix EUR, TVA explicite, livraison, GTIN valide, MPN+marque, variantes, catégories, liens, rupture, API joined/pending, clé Awin dérivée sans exposition, conservation du flux direct après 403 et URL sécurisée.");
+  log("Autotests réussis : CSV, un seul prix par marchand, prix EUR, TVA explicite, livraison, GTIN valide, MPN+marque, variantes, catégories, liens, rupture, API joined/pending, clé Awin dérivée sans exposition, conservation du flux direct après 403 et URL sécurisée.");
 }
 
 if (process.argv.includes("--self-test")) {
