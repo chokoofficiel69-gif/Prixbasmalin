@@ -1733,7 +1733,22 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
       if(!giftRail)return;
       const priority={parfum:0,bougie:1,tech:2,mode:3,maison:4};
       const list=key==="all"?gifts.map((g,i)=>[g,i]).sort((a,b)=>((priority[a[0].family]??9)-(priority[b[0].family]??9))||a[1]-b[1]).map(x=>x[0]):key==="a-confirmer"?gifts.filter(g=>!giftPriceIsCurrent(g)):gifts.filter(g=>g.family===key||g.band===key);
-      giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")||'<p class="pm-hp-note">Pas encore d’idée dans cette gamme : essayez une autre.</p>';
+      // Une seule carte par URL image, puis rotation déterministe par fenêtre de 48 h.
+      const seenGiftImages=new Set();
+      const uniqueList=list.filter(g=>{
+        const image=String(g&&g.image||"").trim();
+        if(!image.startsWith("https://")||seenGiftImages.has(image))return false;
+        seenGiftImages.add(image);
+        return true;
+      });
+      const rotationSlot=Math.floor(Date.now()/172800000);
+      const limit=Math.min(16,uniqueList.length);
+      const start=uniqueList.length?(rotationSlot*limit)%uniqueList.length:0;
+      const rotated=Array.from({length:limit},(_,index)=>uniqueList[(start+index)%uniqueList.length]);
+      giftRail.dataset.pmRotationSlot=String(rotationSlot);
+      giftRail.dataset.pmRotationDate=new Date().toISOString();
+      giftRail.dataset.pmRotationProductIds=rotated.map(g=>String(g.id||g.name||"")).join(",");
+      giftRail.innerHTML=rotated.map(giftCard).join("")||'<p class="pm-hp-note">Pas encore d’idée dans cette gamme : essayez une autre.</p>';
       giftRail.scrollLeft=0;
     };
     document.querySelectorAll("#pm-gifts [data-gift]").forEach(tab=>tab.addEventListener("click",()=>{

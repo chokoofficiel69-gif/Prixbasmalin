@@ -41,5 +41,29 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertRegex(self.block, r"le \d{2}/\d{2}/\d{4}")
 
 
+    def test_gift_rail_rotates_unique_https_images_every_48_hours(self):
+        text = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn("const seenGiftImages=new Set();", text)
+        self.assertIn("const rotationSlot=Math.floor(Date.now()/172800000);", text)
+        self.assertIn("giftRail.dataset.pmRotationSlot=String(rotationSlot);", text)
+        self.assertIn("giftRail.dataset.pmRotationDate=new Date().toISOString();", text)
+        self.assertIn('giftRail.dataset.pmRotationProductIds=rotated.map(g=>String(g.id||g.name||"")).join(",");', text)
+        self.assertIn('giftRail.innerHTML=rotated.map(giftCard).join("")', text)
+        self.assertNotIn('giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")', text)
+
+        # The current published gift feed has 45 unique image URLs.
+        gifts = list(range(45))
+        def selected(slot):
+            limit = min(16, len(gifts))
+            start = (slot * limit) % len(gifts)
+            return [gifts[(start + index) % len(gifts)] for index in range(limit)]
+
+        self.assertEqual(len(selected(0)), 16)
+        self.assertEqual(len(set(selected(0))), 16)
+        self.assertTrue(set(selected(0)).isdisjoint(selected(1)))
+        self.assertTrue(set(selected(1)).isdisjoint(selected(2)))
+        self.assertNotEqual(selected(0), selected(3))
+
+
 if __name__ == "__main__":
     unittest.main()
