@@ -30,13 +30,13 @@ jobs:
           fi
           echo "Secret présent (valeur masquée)."
 
-      - name: Tester uniquement les AirPods 4 (les deux autres produits ont déjà été testés)
+      - name: Test unique autorisé — AirPods 4 (1 requête, plafond 10 crédits)
         env:
           PRICESAPI_API_KEY: ${{ secrets.PRICESAPI_API_KEY }}
         run: |
           node --input-type=module <<'NODE'
           const q = "Apple AirPods 4";
-          const params = new URLSearchParams({ q, market: "fr", limit: "3", offers_limit: "10" });
+          const params = new URLSearchParams({ q, market: "fr", limit: "1", offers_limit: "10" });
           const started = new Date().toISOString();
           try {
             const response = await fetch("https://api.pricesapi.io/api/v1/products/search?" + params, {
