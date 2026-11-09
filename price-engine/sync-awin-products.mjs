@@ -357,11 +357,33 @@ function parseFeedRow(row, program, advertiser) {
   return offerFromRow(normalized,program,advertiser);
 }
 
+function extractAwinDataFeedKey(rawUrl) {
+  let parsed;
+  try { parsed = new URL(String(rawUrl || "")); } catch { return ""; }
+  if (parsed.protocol !== "https:" || !["productdata.awin.com", "ui.awin.com"].includes(parsed.hostname.toLowerCase())) return "";
+  const parts = parsed.pathname.split("/").filter(Boolean);
+  const apiKeyIndex = parts.findIndex(part => part.toLowerCase() === "apikey");
+  if (apiKeyIndex >= 0 && parts[apiKeyIndex + 1]) {
+    try { return decodeURIComponent(parts[apiKeyIndex + 1]).replace(/\\.csv$/i, ""); } catch { return ""; }
+  }
+  const publisherIndex = parts.findIndex(part => part.toLowerCase() === "publisher");
+  if (publisherIndex >= 0 && parts[publisherIndex + 1] === String(PUBLISHER_ID) &&
+      parts[publisherIndex + 2] && parts[publisherIndex + 3] === "1" && parts[publisherIndex + 4] === "feedList") {
+    try { return decodeURIComponent(parts[publisherIndex + 2]); } catch { return ""; }
+  }
+  return "";
+}
+
 async function loadStandardAwinFeeds(rawOffers) {
-  const key = process.env.AWIN_PRODUCT_DATA_API_KEY || "";
+  const explicitKey = String(process.env.AWIN_PRODUCT_DATA_API_KEY || "").trim();
+  const derivedKey = explicitKey ? "" : extractAwinDataFeedKey(process.env.AWIN_PRODUCT_DATA_FEED_URL);
+  const key = explicitKey || derivedKey;
   if (!key) {
-    log("Clé de flux Awin standard absente : aucun flux standard ne sera interrogé.");
+    log("Clé de flux Awin standard absente : secret dédié absent et URL directe non exploitable.");
     return 0;
+  }
+  if (!explicitKey && derivedKey) {
+    log("Clé de flux standard extraite de l'URL directe Awin (valeur masquée).");
   }
   const listUrl = "https://ui.awin.com/productdata-darwin-download/publisher/" +
     encodeURIComponent(PUBLISHER_ID) + "/" + encodeURIComponent(key) + "/1/feedList";
@@ -845,6 +867,13 @@ async function runSelfTests() {
 
   const originalFetch = globalThis.fetch;
   const originalStandardKey = process.env.AWIN_PRODUCT_DATA_API_KEY;
+  const originalDirectFeedUrl = process.env.AWIN_PRODUCT_DATA_FEED_URL;
+  const derivedLegacyKey = extractAwinDataFeedKey("https://productdata.awin.com/datafeed/download/apikey/test-key.csv");
+  const derivedListKey = extractAwinDataFeedKey("https://ui.awin.com/productdata-darwin-download/publisher/" + PUBLISHER_ID + "/test-key/1/feedList");
+  const rejectedForeignKey = extractAwinDataFeedKey("https://evil.example/datafeed/download/apikey/not-a-key.csv");
+  if (derivedLegacyKey !== "test-key" || derivedListKey !== "test-key" || rejectedForeignKey) {
+    throw new Error("TEST ÉCHEC : extraction de clé Awin uniquement depuis les chemins et domaines officiels.");
+  }
   try {
     delete process.env.AWIN_PRODUCT_DATA_API_KEY;
     const requested = [];
@@ -872,7 +901,8 @@ async function runSelfTests() {
       throw new Error("TEST ÉCHEC : un 403 API ne doit pas effacer le flux direct.");
     }
 
-    process.env.AWIN_PRODUCT_DATA_API_KEY = "test-standard-key";
+    delete process.env.AWIN_PRODUCT_DATA_API_KEY;
+    process.env.AWIN_PRODUCT_DATA_FEED_URL = "https://productdata.awin.com/datafeed/download/apikey/test-standard-key.csv";
     let standardListRequested = false;
     globalThis.fetch = async (url, options = {}) => {
       const value = String(url);
@@ -906,8 +936,10 @@ async function runSelfTests() {
     globalThis.fetch = originalFetch;
     if (originalStandardKey === undefined) delete process.env.AWIN_PRODUCT_DATA_API_KEY;
     else process.env.AWIN_PRODUCT_DATA_API_KEY = originalStandardKey;
+    if (originalDirectFeedUrl === undefined) delete process.env.AWIN_PRODUCT_DATA_FEED_URL;
+    else process.env.AWIN_PRODUCT_DATA_FEED_URL = originalDirectFeedUrl;
   }
-  log("Autotests réussis : CSV, prix EUR, TVA explicite, livraison, GTIN valide, MPN+marque, variantes, catégories, liens, rupture, API joined/pending, conservation du flux direct après 403 et URL sécurisée.");
+  log("Autotests réussis : CSV, prix EUR, TVA explicite, livraison, GTIN valide, MPN+marque, variantes, catégories, liens, rupture, API joined/pending, clé Awin dérivée sans exposition, conservation du flux direct après 403 et URL sécurisée.");
 }
 
 if (process.argv.includes("--self-test")) {
