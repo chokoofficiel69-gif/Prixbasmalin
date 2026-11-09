@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-09T00:23:29.976Z",
+  "fetched_at": "2026-11-09T00:25:41.586Z",
   "source": "Awin Direct + flux programmes/standards autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
@@ -24,7 +24,7 @@
     "offers_with_shipping": 8551,
     "offers_with_availability": 11517,
     "offers_with_tax_included": 0,
-    "products_other_category": 392,
+    "products_other_category": 369,
     "offers_fresh_last_48h": 0,
     "offers_missing_timestamp": 12935,
     "offers_stale": 6085,
