@@ -58,7 +58,7 @@ function classifyCategory(text) {
   if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile|alcootest|breathalyzer|alcohol tester/.test(text)) return "auto";
   if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t[- ]?shirt|tshirt|polo|fashion|backpack|back pack|rucksack|luggage|travel bag|sac de voyage|valise|bagage|bijou|jewelry|jewellery|bague|collier|bracelet|pendentif|gants?|gloves|mittens|fleece|polaire/.test(text)) return "fashion";
   if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette|shampoo|shampoing|conditioner|haircare|hair care|cheveux|capillaire|parapharmacie|supplement|nutrition|complement alimentaire|vitamin|vitamine|massage|masseur|massager|phototherapie|phototherapy|thermotherapy|vibrotherapy|anti[- ]?age|raffermissant|soin visage|eye care/.test(text)) return "beauty";
-  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt|tool|outil|bricolage|scie|saw|drill|perceuse|encens|incense|sauge|palo santo|fondue|raclette|sandwich.?maker|presse legumes|food processor|appareil de cuisine|kitchen appliance|aide au sommeil|sleep aid|relaxation|aspirateur|vacuum|ventilateur|robinet|faucet|armoire|cave a vin|wine cooler|refrigerateur|frigo|congelateur|climatiseur|humidificateur|dehumidificateur|purificateur|air purifier|attrape.?soleil|feng shui|cristal|ornement|amulette|objet decoratif|porte bonheur|suspension/.test(text)) return "home";
+  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt|tool|outil|bricolage|scie|saw|drill|perceuse|encens|incense|sauge|palo santo|fondue|raclette|sandwich.?maker|presse legumes|food processor|appareil de cuisine|kitchen appliance|aide au sommeil|sleep aid|relaxation|aspirateur|vacuum|ventilateur|robinet|faucet|armoire|cave a vin|wine cooler|refrigerateur|frigo|congelateur|climatiseur|humidificateur|dehumidificateur|purificateur|air purifier|attrape.?soleil|feng shui|cristal|ornement|amulette|objet decoratif|porte bonheur|suspension|barbecue|bbq|grill|plancha|balai brosse|broom|dust removal|cleaning brush|pese.?personne|balance pese.?personne|bathroom scale|personal scale|bidet|toilettes?|toilet seat|toilet bowl/.test(text)) return "home";
   if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur|smartwatch|smart watch|montre connectee|montre intelligente|wearable/.test(text)) return "tech";
   if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation|hiking|trekking|randonnee|batons? de randonnee|walking poles|boxe|boxing|punching|entrainement/.test(text)) return "sport";
   if (/accessories|accessoire/.test(text)) return "fashion";
@@ -888,6 +888,12 @@ async function runSelfTests() {
     [{ title: "ArcticCool Ventilateur de Cou" }, "home", "SODEAL CH"],
     [{ title: "Armoire à vin climatisée Kibernetik WKH168F01 en acier chromé" }, "home", "SODEAL CH"],
     [{ title: "Aspirateur balai sans fil 2 en 1" }, "home", "SODEAL CH"],
+    [{ title: "Balai Brosse Ajustable Élimination Poussière Fentes" }, "home", "SODEAL CH"],
+    [{ title: "Balai d'essuie-glace de rechange" }, "other", "SODEAL CH"],
+    [{ title: "Balance Pèse-personne One Umi 160kg" }, "home", "SODEAL CH"],
+    [{ title: "Barbecue à gaz 3 brûleurs" }, "home", "SODEAL CH"],
+    [{ title: "Bidet Pliable pour Toilettes" }, "home", "SODEAL CH"],
+    [{ title: "Eau de Toilette fraîche" }, "beauty", "SODEAL CH"],
     [{ title: "Attrape-Soleil Ailes d'Ange Lumière protection élégance spirituelle" }, "home", "Bonheur de lune"],
     [{ title: "Attrape-soleil Arbre de Vie Cristal Violet Suspension Feng Shui" }, "home", "Bonheur de lune"],
     [{ title: "12 Bouteilles Villa Sintesi 2024 Sicilia DOC" }, "other", "SODEAL CH"]
