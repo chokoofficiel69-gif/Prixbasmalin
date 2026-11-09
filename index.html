@@ -349,9 +349,9 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
      const checked=checkedDate&&Number.isFinite(checkedDate.getTime())?checkedDate.toLocaleDateString("fr-FR"):"date non précisée";
      note.textContent=euroFormat.format(product.livePrice)+" chez "+product.liveMerchant+" · "+taxLabel+" · "+shippingLabel+" · "+stockLabel+" · prix marchand daté du "+checked;
     }else{
-     note.textContent="Prix non vérifié en direct — consultez le marchand.";
+     note.textContent="Sélection produit · découvrez les offres en boutique.";
     }
-    const link=document.createElement("a");link.className="pm-discovery-link";link.href=safeUrl(product.liveUrl||product.sourceUrl);link.target="_blank";link.rel="sponsored nofollow noopener noreferrer";link.textContent=Number(product.livePrice)>0?"Voir l’offre chez "+(product.liveMerchant||"le marchand")+" ↗":"Voir le prix chez le marchand ↗";
+    const link=document.createElement("a");link.className="pm-discovery-link";link.href=safeUrl(product.liveUrl||product.sourceUrl);link.target="_blank";link.rel="sponsored nofollow noopener noreferrer";link.textContent=Number(product.livePrice)>0?"Voir l’offre chez "+(product.liveMerchant||"le marchand")+" ↗":"Découvrir chez le marchand ↗";
     card.append(img,brand,title,note,link);fragment.append(card);
    });
    list.replaceChildren(fragment);
@@ -412,7 +412,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    buy.href="https://www.amazon.fr/s?k="+encodeURIComponent((sheet.brand&&!sheet.name.toLowerCase().includes(sheet.brand.toLowerCase())?sheet.brand+" ":"")+sheet.name)+"&tag=prixbasmalin2-21";
    buy.target="_blank";buy.rel="sponsored nofollow noopener noreferrer";buy.textContent="Voir sur Amazon ↗";
    buy.setAttribute("aria-label","Voir "+sheet.name+" sur Amazon (lien affilié)");
-   const stamp=document.createElement("small");stamp.className="pm-cmp-stamp";stamp.textContent="Prix relevés jusqu’au "+dateFr(sheet.last_date)+" · à confirmer chez le marchand";
+   const stamp=document.createElement("small");stamp.className="pm-cmp-stamp";stamp.textContent="Relevés disponibles jusqu’au "+dateFr(sheet.last_date)";
    body.append(cat,title,bestBox,podium,rest,more,buy,stamp);
    card.append(media,body);fragment.append(card);
   }
@@ -526,12 +526,12 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 </section>
 <a class="pmx-promo" href="/boutiques-partenaires.html"><b>🎟️ Codes promo &amp; boutiques partenaires</b><span>Des réductions réservées aux visiteurs de Prix Malin · Commerçants : devenez partenaire →</span></a>
 <section class="pmx-sec pmx-compare" aria-labelledby="pmx-compare-t">
-<div class="pmx-head"><h2 id="pmx-compare-t">📊 Comparatif de prix <span>relevés</span></h2><small>Un exemple réel : prix relevés et datés, à confirmer chez le marchand</small></div>
+<div class="pmx-head"><h2 id="pmx-compare-t">📊 Comparatif de prix <span>relevés</span></h2><small>Exemple de comparaison fondé sur des relevés datés</small></div>
 <div class="pmx-cmp"><div class="pmx-cmp-p"><img src="/assets/produits/airpods-4.jpg" alt="AirPods 4" loading="lazy"><div><h3>AirPods 4</h3><small>24 marchands suivis</small><a class="pmx-btn" href="/prix/airpods-4.html">Voir tous les relevés</a></div></div>
 <ul class="pmx-cmp-l"><li><span class="m">Amazon</span><em>Plus bas relevé</em><b>129,00 €</b><small>06/11/2026</small><a href="/prix/airpods-4.html">Comparer →</a></li><li><span class="m">Boulanger</span><em class="x"></em><b>129,00 €</b><small>06/11/2026</small><a href="/prix/airpods-4.html">Comparer →</a></li><li><span class="m">Kaufland</span><em class="x"></em><b>131,37 €</b><small>06/11/2026</small><a href="/prix/airpods-4.html">Comparer →</a></li><li><span class="m">Topbiz</span><em class="x"></em><b>133,89 €</b><small>06/11/2026</small><a href="/prix/airpods-4.html">Comparer →</a></li></ul>
 <div class="pmx-cmp-g"><small>Écart entre marchands</small><strong>57,00 €</strong><small>entre le plus bas et le plus haut relevé</small><svg viewBox="0 0 240 64" role="img" aria-label="Évolution du plus bas prix relevé"><polyline points="6.0,12.0 18.0,12.0 30.0,12.0 42.0,12.0 54.0,12.0 66.0,12.0 78.0,12.0 90.0,12.0 102.0,12.0 114.0,12.0 126.0,44.9 138.0,44.9 150.0,28.5 162.0,58.0 174.0,12.0 186.0,12.0 198.0,12.0 210.0,12.0 222.0,12.0 234.0,12.0" fill="none" stroke="#ffb02e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg><small>Plus bas relevé : 129,00 € le 06/11/2026</small></div></div>
 </section>
-<p class="pmx-note">Prix relevés et datés (relevés PrixTracker, data.gouv.fr, Licence Ouverte 2.0), pas des offres en direct : vérifiez le prix final chez le marchand. Visuels Prix Malin et photos libres créditées. Certains liens sont affiliés.</p>
+<p class="pmx-note">Historique établi à partir de relevés PrixTracker et data.gouv.fr (Licence Ouverte 2.0). Ces données décrivent des prix observés à des dates précises, et non des offres en temps réel. Certains liens sont affiliés.</p>
 </div>
 <!-- /pm-showcase -->
 <h1 class="sr-only">Prix Malin : comparateur de prix, produits et bonnes affaires</h1>
@@ -648,10 +648,10 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <button type="button" role="tab" aria-selected="false" data-gift="maison">Maison</button>
     <button type="button" role="tab" aria-selected="false" data-gift="tech">High-tech</button>
     <button type="button" role="tab" aria-selected="false" data-gift="mode">Mode</button>
-    <button type="button" role="tab" aria-selected="false" data-gift="a-confirmer">Prix à confirmer</button>
+    <button type="button" role="tab" aria-selected="false" data-gift="all">Toutes les idées</button>
   </div>
   <div id="pm-gifts-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
-  <p class="pm-hp-note">Prix indiqués par les marchands (flux partenaires) ou relevés datés, à confirmer sur leur site. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html" style="color:#ffad66">Crédits photos</a>.</p>
+  <p class="pm-hp-note">Les prix affichés proviennent de flux marchands ou de relevés historiques datés. Certains liens sont affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html" style="color:#ffad66">Crédits photos</a>.</p>
 </section>
 <section id="pm-visual-gallery" class="pm-visual-gallery" aria-labelledby="pm-visual-gallery-title">
   <div class="section-head">
@@ -674,17 +674,17 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <div><h2 id="pm-history-title">💶 Qui est le moins cher ?</h2><small>Comparaisons de prix chez 5 à 24 marchands · relevés PrixTracker</small></div>
     <a class="pm-history-badge" href="/produit.html" style="text-decoration:none">Voir tous les produits comparés →</a>
   </div>
-  <p class="pm-history-intro">Le même produit, des prix très différents : voyez d’un coup d’œil qui est le moins cher. Prix relevés et datés, à confirmer chez le marchand.</p>
+  <p class="pm-history-intro">Le même produit, des prix très différents : voyez d’un coup d’œil qui est le moins cher. Prix observés chez différents marchands, avec leur date de relevé.</p>
   <div id="pm-history-status" class="pm-history-status" role="status" aria-live="polite">Chargement des comparaisons…</div>
-  <div id="pm-history-list" class="pm-history-list" aria-label="Produits et comparaisons"><article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://cdn8.web4s.vn/media/products/3605/tai-nghe-airpods-pro-3-2025-chinh-hang-05.jpg" alt="Apple AirPods Pro 3" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple AirPods Pro 3</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+AirPods+Pro+3&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&amp;imwidth=700" alt="Polo Lacoste L.12.12 Original" loading="lazy" decoding="async"><span class="pm-discovery-brand">Lacoste</span><h3>Polo Lacoste L.12.12 Original</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=polo+Lacoste+L.12.12+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://lsco.scene7.com/is/image/lsco/005013220-front-pdp?fit=crop%2C1&amp;fmt=jpeg&amp;hei=700&amp;op_usm=0.6%2C0.6%2C8&amp;qlt=85&amp;resMode=sharp2&amp;wid=700" alt="Jean Levi’s 501 Original" loading="lazy" decoding="async"><span class="pm-discovery-brand">Levi’s</span><h3>Jean Levi’s 501 Original</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Levi%27s+501+Original+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://contents.mediadecathlon.com/p2782988/k%2432c148ca8d95625f2f9b9308de024676/picture.jpg?f=700x0&amp;format=auto" alt="Pantalon de jogging PUMA Active" loading="lazy" decoding="async"><span class="pm-discovery-brand">PUMA</span><h3>Pantalon de jogging PUMA Active</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=PUMA+pantalon+jogging+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://lsco.scene7.com/is/image/lsco/005014021-front-pdp?fit=crop%2C1&amp;fmt=jpeg&amp;hei=700&amp;op_usm=0.6%2C0.6%2C8&amp;qlt=85&amp;resMode=sharp2&amp;wid=700" alt="Levi’s 501 Original noir" loading="lazy" decoding="async"><span class="pm-discovery-brand">Levi’s</span><h3>Levi’s 501 Original noir</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Levi%27s+501+noir+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple iPhone 18 Pro</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+iPhone+18+Pro&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.apple.com/newsroom/images/2025/09/apple-debuts-apple-watch-series-11-featuring-groundbreaking-health-insights/article/Apple-Watch-Series-11-aluminum-space-gray-250909_inline.jpg.large.jpg" alt="Apple Watch Series 11" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple Watch Series 11</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+Watch+Series+11&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article>
-<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.samsungmobile.co.il/pub/media/catalog/product/cache/07c27feb0b57ff821c444b41a5827060/e/0/E000001194_0-17884961561746791.jpg" alt="Samsung Galaxy S26 FE" loading="lazy" decoding="async"><span class="pm-discovery-brand">Samsung</span><h3>Samsung Galaxy S26 FE</h3><p class="pm-history-meta">Prix non vérifié en direct — consultez le marchand.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Samsung+Galaxy+S26+FE+5G&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Voir le prix chez le marchand ↗</a></article></div>
-  <p class="pm-history-source">Source : PrixTracker · Licence Ouverte 2.0 · prix observés, sans lien d’achat ni vérification du stock.</p>
+  <div id="pm-history-list" class="pm-history-list" aria-label="Produits et comparaisons"><article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://cdn8.web4s.vn/media/products/3605/tai-nghe-airpods-pro-3-2025-chinh-hang-05.jpg" alt="Apple AirPods Pro 3" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple AirPods Pro 3</h3><p class="pm-history-meta">Sélection produit · découvrez les offres en boutique.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+AirPods+Pro+3&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Découvrir chez le marchand ↗</a></article>
+<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://image1.lacoste.com/dw/image/v2/AAQM_PRD/on/demandware.static/Sites-FR-Site/Sites-master/fr/dwda797075/L1212_166_24.jpg?impolicy=zoom&amp;imwidth=700" alt="Polo Lacoste L.12.12 Original" loading="lazy" decoding="async"><span class="pm-discovery-brand">Lacoste</span><h3>Polo Lacoste L.12.12 Original</h3><p class="pm-history-meta">Sélection produit · découvrez les offres en boutique.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=polo+Lacoste+L.12.12+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Découvrir chez le marchand ↗</a></article>
+<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://lsco.scene7.com/is/image/lsco/005013220-front-pdp?fit=crop%2C1&amp;fmt=jpeg&amp;hei=700&amp;op_usm=0.6%2C0.6%2C8&amp;qlt=85&amp;resMode=sharp2&amp;wid=700" alt="Jean Levi’s 501 Original" loading="lazy" decoding="async"><span class="pm-discovery-brand">Levi’s</span><h3>Jean Levi’s 501 Original</h3><p class="pm-history-meta">Sélection produit · découvrez les offres en boutique.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Levi%27s+501+Original+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Découvrir chez le marchand ↗</a></article>
+<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://contents.mediadecathlon.com/p2782988/k%2432c148ca8d95625f2f9b9308de024676/picture.jpg?f=700x0&amp;format=auto" alt="Pantalon de jogging PUMA Active" loading="lazy" decoding="async"><span class="pm-discovery-brand">PUMA</span><h3>Pantalon de jogging PUMA Active</h3><p class="pm-history-meta">Sélection produit · découvrez les offres en boutique.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=PUMA+pantalon+jogging+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Découvrir chez le marchand ↗</a></article>
+<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://lsco.scene7.com/is/image/lsco/005014021-front-pdp?fit=crop%2C1&amp;fmt=jpeg&amp;hei=700&amp;op_usm=0.6%2C0.6%2C8&amp;qlt=85&amp;resMode=sharp2&amp;wid=700" alt="Levi’s 501 Original noir" loading="lazy" decoding="async"><span class="pm-discovery-brand">Levi’s</span><h3>Levi’s 501 Original noir</h3><p class="pm-history-meta">Sélection produit · découvrez les offres en boutique.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Levi%27s+501+noir+homme&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Découvrir chez le marchand ↗</a></article>
+<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple iPhone 18 Pro</h3><p class="pm-history-meta">Sélection produit · découvrez les offres en boutique.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+iPhone+18+Pro&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Découvrir chez le marchand ↗</a></article>
+<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.apple.com/newsroom/images/2025/09/apple-debuts-apple-watch-series-11-featuring-groundbreaking-health-insights/article/Apple-Watch-Series-11-aluminum-space-gray-250909_inline.jpg.large.jpg" alt="Apple Watch Series 11" loading="lazy" decoding="async"><span class="pm-discovery-brand">Apple</span><h3>Apple Watch Series 11</h3><p class="pm-history-meta">Sélection produit · découvrez les offres en boutique.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Apple+Watch+Series+11&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Découvrir chez le marchand ↗</a></article>
+<article class="pm-history-card pm-discovery-card"><img class="pm-discovery-image" src="https://www.samsungmobile.co.il/pub/media/catalog/product/cache/07c27feb0b57ff821c444b41a5827060/e/0/E000001194_0-17884961561746791.jpg" alt="Samsung Galaxy S26 FE" loading="lazy" decoding="async"><span class="pm-discovery-brand">Samsung</span><h3>Samsung Galaxy S26 FE</h3><p class="pm-history-meta">Sélection produit · découvrez les offres en boutique.</p><a class="pm-discovery-link" href="https://www.amazon.fr/s?k=Samsung+Galaxy+S26+FE+5G&amp;tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener noreferrer">Découvrir chez le marchand ↗</a></article></div>
+  <p class="pm-history-source">Source : PrixTracker · Licence Ouverte 2.0 · relevés historiques.</p>
 </section>
 <section id="categories"><div class="section-head"><h2>🔥 Nos grandes catégories</h2><a class="all-categories-link" href="catalogue.html">Voir tout le catalogue →</a></div><div class="categories">
 <a class="cat" href="guide-cadeaux.html"><img src="https://images.unsplash.com/photo-1512909006721-3d6018887383?w=400&q=80" alt=""><div>Idées cadeaux</div></a>
@@ -708,7 +708,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 <section id="deals" class="pm-home-selection">
 <div class="section-head">
   <h2>🔥 Toute la sélection Prix Malin</h2>
-  <small id="home-products-meta">Sélection de produits à découvrir · prix et disponibilité à confirmer chez le marchand</small>
+  <small id="home-products-meta">Sélection de produits à découvrir · accès direct aux boutiques</small>
 </div>
 <div class="pm-product-rail">
   <button class="pm-rail-button pm-rail-prev" type="button" data-pm-scroll="prev" aria-label="Produits précédents" aria-controls="products">‹</button>
@@ -1099,7 +1099,7 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
 
   const updateCount = () => {
     const count = rail.querySelectorAll(".product[data-pm-catalogue-product]").length;
-    if (count) meta.textContent = count + " références avec visuel vérifié · prix et disponibilité à confirmer chez le marchand";
+    if (count) meta.textContent = count + " références avec visuel vérifié";
   };
 
   const makeCard = product => {
@@ -1156,7 +1156,7 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
     }
     const checked = document.createElement("p");
     checked.className = "pm-product-check";
-    checked.textContent = "Prix à vérifier chez le marchand";
+    checked.textContent = "Découvrir chez le marchand";
     body.appendChild(checked);
 
     const link = document.createElement("a");
@@ -1709,14 +1709,11 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     +'<span class="pm-hp-badge">'+p.offer_count+' marchands suivis</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
     +'<span class="pm-hp-from">Plus bas relevé historique</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Dernier relevé : '+day(p.last_date)+'</span></div></a>';
   const giftCard=g=>{
-    const verified=giftPriceIsCurrent(g);
-    const dateLabel=g.price_date_kind==="merchant"&&g.price_date?"Dernière date marchande : "+day(g.price_date):"Date marchande absente";
+    if(!giftPriceIsCurrent(g))return "";
     const shippingKnown=g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur))&&Number(g.shipping_eur)>=0;
-    const shippingLabel=shippingKnown?"Livraison "+euro.format(Number(g.shipping_eur)):"Livraison à confirmer";
     return '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(g.image,"",g.merchant,g.name)
-      +(verified&&g.shipping_eur===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
-      +(verified?'<span class="pm-hp-from">Prix TTC confirmé par le flux</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">Indiqué le '+day(g.price_date)+' · '+shippingLabel+' · à confirmer chez le marchand</span>'
-        :'<span class="pm-hp-from">Prix non vérifié</span><span class="pm-hp-price">À confirmer chez le marchand</span><span class="pm-hp-meta">'+dateLabel+' · date hors 48 h ou TVA TTC non confirmée</span>')
+      +(shippingKnown&&Number(g.shipping_eur)===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
+      +'<span class="pm-hp-from">Prix TTC communiqué par le marchand</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">Relevé du '+day(g.price_date)+(shippingKnown?' · Livraison '+euro.format(Number(g.shipping_eur)):'')+'</span>'
       +'</div></a>';
   };
   document.querySelectorAll(".pm-partner[data-href]").forEach(a=>{
@@ -1795,7 +1792,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   <a href="/boutiques-partenaires.html">Boutiques &amp; codes promo</a>
   <a href="/credits-photos.html">Crédits photos</a>
  </nav>
- <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix relevés et datés, à confirmer chez le marchand.</p>
+ <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix observés chez différents marchands, avec leur date de relevé.</p>
  <p>Prix Malin travaille avec plusieurs partenaires, dont <strong>Amazon</strong>, <strong>Decathlon</strong> et <strong>Nicchia Luxury</strong>, et de nouveaux partenaires arrivent bientôt. Lorsque vous achetez après avoir cliqué sur un lien partenaire, Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
 </footer>
 </body></html>
