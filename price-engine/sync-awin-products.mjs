@@ -70,6 +70,23 @@ function categoryFor(row) {
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
   return classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
 }
+function offerTimestampCoverage(offers, now = Date.now()) {
+  const coverage = { fresh: 0, missing: 0, stale: 0, invalidOrFuture: 0 };
+  for (const offer of offers || []) {
+    const value = String(offer.merchant_updated_at || "").trim();
+    if (!value) { coverage.missing++; continue; }
+    const timestamp = Date.parse(value);
+    if (!Number.isFinite(timestamp) || timestamp > now + 5 * 60 * 1000) {
+      coverage.invalidOrFuture++;
+    } else if (now - timestamp <= 48 * 60 * 60 * 1000) {
+      coverage.fresh++;
+    } else {
+      coverage.stale++;
+    }
+  }
+  return coverage;
+}
+
 function parseJsonl(body) {
   const rows = [];
   for (const [index, line] of body.split(/\r?\n/).entries()) {
@@ -753,6 +770,18 @@ async function runSelfTests() {
   }
   const sampleCsv = 'aw_deep_link,product_name,aw_product_id,merchant_product_id,merchant_image_url,merchant_category,search_price,merchant_name,merchant_id,currency,delivery_cost,language,last_updated,brand_name,gtin,manufacturer_part_number\n' +
     '"https://www.awin1.com/cread.php?awinmid=123&id=1","Casque Audio X","501","SKU-1","https://cdn.example/image.jpg","Audio","49.90","Boutique Test","123","EUR","4.99","fr","2026-11-04T10:00:00Z","AudioBrand","4006381333931","AB-X1"';
+  const freshnessNow = Date.parse("2026-11-09T00:00:00Z");
+  const freshnessCheck = offerTimestampCoverage([
+    { merchant_updated_at: "2026-11-08T23:00:00Z" },
+    { merchant_updated_at: "2026-11-06T23:00:00Z" },
+    { merchant_updated_at: "" },
+    { merchant_updated_at: "date-invalide" },
+    { merchant_updated_at: "2026-11-09T00:10:00Z" }
+  ], freshnessNow);
+  if (freshnessCheck.fresh !== 1 || freshnessCheck.stale !== 1 ||
+      freshnessCheck.missing !== 1 || freshnessCheck.invalidOrFuture !== 2) {
+    throw new Error("TEST ÉCHEC : la fraîcheur combinée des offres doit distinguer fraîches, périmées, absentes et invalides.");
+  }
   const rows = objectRowsFromCsv(sampleCsv);
   for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock","pas en stock","epuise","0"]) {
     if (stockState(value) !== "out_of_stock") throw new Error("TEST ÉCHEC : statut indisponible mal reconnu : " + value);
@@ -965,6 +994,8 @@ if (process.argv.includes("--self-test")) {
   if (!rawOffers.length) throw new Error("Aucune offre Awin exploitable : le catalogue précédent est conservé.");
 const fetchedAt = new Date().toISOString();
 const products = aggregateOffers(rawOffers, fetchedAt).slice(0, MAX_PRODUCTS);
+const freshnessCoverage = offerTimestampCoverage(rawOffers);
+log("Fraîcheur des offres importées (moins de 48 h) : " + JSON.stringify(freshnessCoverage) + ".");
 const output = {
   schema_version: 1,
   source: directFeedConfigured
@@ -989,7 +1020,11 @@ const output = {
     offers_with_shipping: rawOffers.filter(offer => Number.isFinite(offer.shipping_price_eur) && offer.shipping_price_eur >= 0).length,
     offers_with_availability: rawOffers.filter(offer => offer.availability && offer.availability !== "unknown").length,
     offers_with_tax_included: rawOffers.filter(offer => offer.price_tax_status === "included").length,
-    products_other_category: products.filter(product => product.category === "other").length
+    products_other_category: products.filter(product => product.category === "other").length,
+    offers_fresh_last_48h: freshnessCoverage.fresh,
+    offers_missing_timestamp: freshnessCoverage.missing,
+    offers_stale: freshnessCoverage.stale,
+    offers_invalid_or_future_timestamp: freshnessCoverage.invalidOrFuture
   },
   products,
   attribution: "Données produits, prix, images et liens provenant des flux marchands Awin accessibles au compte éditeur Prix Malin. Prix et disponibilité à reconfirmer sur la fiche marchande."
