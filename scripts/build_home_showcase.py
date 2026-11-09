@@ -51,6 +51,24 @@ def categories():
     ]
 
 
+ICONS = {
+    "idees-cadeaux": '<rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M12 9v12M3 13h18M12 9C10 4 6 5 7 7.5 8 9 12 9 12 9Zm0 0c2-5 6-4 5-1.5C16 9 12 9 12 9Z"/>',
+    "high-tech": '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+    "maison-deco": '<path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><path d="M2 12a2 2 0 0 1 4 0v3h12v-3a2 2 0 0 1 4 0v6H2z"/><path d="M5 18v2M19 18v2"/>',
+    "beaute-sante": '<rect x="6" y="9" width="12" height="12" rx="3"/><path d="M10 9V6h4v3M9 3h6v3H9z"/>',
+    "mode": '<path d="M8 3 3 6l2 5 3-1v11h8V10l3 1 2-5-5-3a4 4 0 0 1-8 0Z"/>',
+    "sport-loisirs": '<path d="M7 7v10M17 7v10M4 9v6M20 9v6M7 12h10"/>',
+    "bebe-enfant": '<circle cx="12" cy="13" r="6"/><circle cx="6.5" cy="7" r="2.5"/><circle cx="17.5" cy="7" r="2.5"/><path d="M10 12h.01M14 12h.01M10.5 15.5c.9.7 2.1.7 3 0"/>',
+    "auto-moto": '<path d="M3 16v-3l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5v3"/><path d="M3 13h18M3 16h18"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+    "bricolage-jardin": '<path d="M3 7h12l2 3h4v3h-4l-2 3H9v5H6v-5H3z"/>',
+    "electromenager": '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 9h14M9 6h.01M12 6h.01"/><circle cx="12" cy="15" r="3"/>',
+}
+
+
+def icon(slug, cls):
+    return f'<svg class="{cls}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{ICONS[slug]}</svg>'
+
+
 def offer_card(p):
     offers = p["offers"]
     best = offers[0]
@@ -151,6 +169,22 @@ CSS = """<style id="pm-showcase-style">
 .pmx-cmp-g{display:flex;flex-direction:column;gap:4px}.pmx-cmp-g strong{font-size:30px;color:#22c55e;font-weight:900}.pmx-cmp-g small{color:var(--mut);font-size:12px}
 .pmx-promo{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;justify-content:space-between;margin:14px 0 0;padding:14px 18px;border-radius:14px;border:2px dashed #ffb02e;background:#1a1410;color:#fff!important;text-decoration:none}.pmx-promo b{font-size:18px}.pmx-promo span{color:#ffcf99;font-size:13.5px;font-weight:700}
 .pmx-note{color:var(--mut);font-size:12px;margin:8px 2px 0}
+.pmx-hero-art,.pmx-ci,.pmx-bi{display:none}
+@media(min-width:1024px){.pm-old-bottom{display:none!important}}
+@media(min-width:761px) and (max-width:1279px){.pmx-hero-art{width:36%!important}.pmx-hero-art .p1,.pmx-hero-art .p3{display:none!important}.pmx-hero-art .p2{left:auto!important;right:0!important;top:10%!important;bottom:auto!important;width:96px!important;height:96px!important}.pmx-hero-art .m{right:12%!important;max-height:290px!important}.pmx-hero-txt{max-width:62%}.pmx-trust{max-width:64%}}
+@media(min-width:761px){
+ .pmx-hero-img{display:none}
+ .pmx-hero{min-height:360px;background:radial-gradient(520px 340px at 76% 52%,#ff650b40,transparent 70%),linear-gradient(120deg,#0b0f17,#141010)}
+ .pmx-hero-art{display:block;position:absolute;right:2%;top:0;bottom:0;width:52%}
+ .pmx-hero-art .m{position:absolute;right:6%;bottom:6px;height:88%;max-height:330px;filter:drop-shadow(0 18px 30px #000a)}
+ .pmx-hero-art .p{position:absolute;width:150px;height:150px;object-fit:cover;border-radius:18px;background:#fff;border:3px solid #fff;box-shadow:0 18px 40px #000b}
+ .pmx-hero-art .p1{left:4%;top:14%;transform:rotate(-7deg)}.pmx-hero-art .p2{left:22%;bottom:10%;transform:rotate(5deg)}.pmx-hero-art .p3{left:38%;top:6%;width:128px;height:128px;transform:rotate(4deg)}
+ .pmx-cat img,.pmx-b img{display:none}
+ .pmx-cat{background:radial-gradient(circle at 50% 38%,#ff650b33,#141b27 72%)}
+ .pmx-ci{display:block;width:46%;margin:22px auto 6px;color:#ffb27a;filter:drop-shadow(0 0 10px #ff650b88)}
+ .pmx-cat:hover .pmx-ci{color:#fff}
+ .pmx-bi{display:block;position:absolute;right:18px;top:50%;width:96px;height:96px;transform:translateY(-50%);color:#ffffffd9;filter:drop-shadow(0 0 16px #ff650baa)}
+}
 @media(max-width:860px){.pmx-hero{min-height:0}.pmx-hero-img{position:relative;width:100%;height:auto;aspect-ratio:987/541;order:2;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 28%);mask-image:linear-gradient(180deg,transparent 0,#000 28%);margin-top:-30px}
  .pmx-hero-txt{order:1;padding:20px 16px 0}.pmx-trust{order:3;padding:10px 16px 14px;gap:8px 14px;font-size:11.5px}.pmx-trust i{width:26px;height:26px;font-size:13px}
  .pmx-ban{grid-template-columns:1fr;gap:8px}.pmx-b{min-height:112px;padding:14px}.pmx-b b{font-size:18px}
@@ -167,11 +201,12 @@ def build_block():
     sheets = {p["id"]: p for p in json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]}
     top = [sheets[i] for i in TOP_IDS if i in sheets and sheets[i].get("image")]
     cats = "".join(
-        f'<a class="pmx-cat" href="{e(url)}"><img src="/assets/accueil/cat-{slug}.webp" alt="" loading="lazy" decoding="async"><b>{name}</b></a>'
+        f'<a class="pmx-cat" href="{e(url)}"><img src="/assets/accueil/cat-{slug}.webp" alt="" loading="lazy" decoding="async">{icon(slug, "pmx-ci")}<b>{name}</b></a>'
         for name, url, slug in categories())
     latest = max(p["last_date"] for p in top)
     hero = """<section class="pmx-hero" aria-label="Prix Malin">
 <img class="pmx-hero-img" src="/assets/accueil/hero.webp" alt="" fetchpriority="high">
+<div class="pmx-hero-art" aria-hidden="true"><img class="p p1" src="/assets/produits/airpods-4.jpg" alt="" loading="lazy"><img class="p p2" src="/assets/produits/manette-switch-pro.jpg" alt="" loading="lazy"><img class="p p3" src="/assets/produits/macbook-air-13-m5.jpg" alt="" loading="lazy"><img class="m" src="/assets/malin-3d.webp" alt="" loading="lazy"></div>
 <div class="pmx-hero-txt"><p class="t">Les meilleurs prix<br><span>au même endroit !</span></p>
 <p>Comparez, économisez et trouvez les meilleures offres sur vos produits préférés, avec la date de chaque prix relevé.</p>
 <div class="pmx-cta"><a class="pmx-btn" href="/prix/">Voir toutes les offres →</a><a class="pmx-btn ghost" href="/black-friday.html">Black Friday · 27 nov.</a></div></div>
@@ -186,9 +221,9 @@ def build_block():
 <section class="pmx-sec" aria-labelledby="pmx-top-t"><div class="pmx-head"><h2 id="pmx-top-t">🔥 Top offres <span>relevées</span></h2><a href="/prix/">Tout le comparateur →</a><small>Les produits les plus suivis, avec le plus bas prix relevé et les marchands les moins chers (dernier relevé : {seo.date_fr(latest)})</small></div>
 <div class="pmx-rail pmx-offers">{"".join(offer_card(p) for p in top)}</div></section>
 <section class="pmx-sec pmx-ban" aria-label="Sélections">
-<a class="pmx-b c1" href="/idees-cadeaux/"><img src="/assets/accueil/ban-cadeaux.webp" alt="" loading="lazy"><b>Idées cadeaux</b><small>Pour toutes les occasions</small><span>Découvrir la sélection →</span></a>
-<a class="pmx-b c2" href="/high-tech.html"><img src="/assets/accueil/ban-high-tech.webp" alt="" loading="lazy"><b>High-Tech</b><small>Les dernières nouveautés, prix comparés</small><span>Voir les offres →</span></a>
-<a class="pmx-b c3" href="/maison-deco.html"><img src="/assets/accueil/ban-maison.webp" alt="" loading="lazy"><b>Maison &amp; Déco</b><small>Des idées pour un intérieur qui vous ressemble</small><span>Voir la sélection →</span></a>
+<a class="pmx-b c1" href="/idees-cadeaux/"><img src="/assets/accueil/ban-cadeaux.webp" alt="" loading="lazy">{icon("idees-cadeaux", "pmx-bi")}<b>Idées cadeaux</b><small>Pour toutes les occasions</small><span>Découvrir la sélection →</span></a>
+<a class="pmx-b c2" href="/high-tech.html"><img src="/assets/accueil/ban-high-tech.webp" alt="" loading="lazy">{icon("high-tech", "pmx-bi")}<b>High-Tech</b><small>Les dernières nouveautés, prix comparés</small><span>Voir les offres →</span></a>
+<a class="pmx-b c3" href="/maison-deco.html"><img src="/assets/accueil/ban-maison.webp" alt="" loading="lazy">{icon("maison-deco", "pmx-bi")}<b>Maison &amp; Déco</b><small>Des idées pour un intérieur qui vous ressemble</small><span>Voir la sélection →</span></a>
 </section>
 <a class="pmx-promo" href="/boutiques-partenaires.html"><b>🎟️ Codes promo &amp; boutiques partenaires</b><span>Des réductions réservées aux visiteurs de Prix Malin · Commerçants : devenez partenaire →</span></a>
 {compare_block(sheets[COMPARE_ID])}
