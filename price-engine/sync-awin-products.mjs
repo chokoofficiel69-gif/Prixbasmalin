@@ -995,6 +995,22 @@ const output = {
   attribution: "Données produits, prix, images et liens provenant des flux marchands Awin accessibles au compte éditeur Prix Malin. Prix et disponibilité à reconfirmer sur la fiche marchande."
 };
 
+const otherCategoryCounts = new Map();
+const otherCategoryExamples = [];
+for (const product of products) {
+  if (product.category !== "other") continue;
+  const merchants = [...new Set((product.offers || []).map(offer => String(offer.merchant || "").trim()).filter(Boolean))];
+  const merchant = merchants.join(", ") || "(marchand inconnu)";
+  const sourceCategory = String(product.product_type || "").trim() || "(catégorie source absente)";
+  const key = merchant + " | " + sourceCategory;
+  otherCategoryCounts.set(key, (otherCategoryCounts.get(key) || 0) + 1);
+  if (otherCategoryExamples.length < 12) {
+    otherCategoryExamples.push({ merchant, source_category: sourceCategory, product: String(product.name || "").slice(0, 100) });
+  }
+}
+log("Principales valeurs source encore classées other : " + JSON.stringify([...otherCategoryCounts].sort((a, b) => b[1] - a[1]).slice(0, 20)));
+log("Exemples de fiches other (sans prix ni URL) : " + JSON.stringify(otherCategoryExamples));
+
 await fs.mkdir(path.dirname(OUTPUT), { recursive: true });
 const statusReport = buildSyncStatus({
   fetchedAt,
