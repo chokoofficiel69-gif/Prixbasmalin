@@ -54,21 +54,30 @@ function classifyCategory(text) {
   // Les familles explicites priment sur les mots du titre, souvent ambigus.
   if (/sport.*(sock|chaussette)|(sock|chaussette).*sport/.test(text)) return "sport";
   if (/baby|toys|toy|toys games|children|bebe|enfant|jouet|puericulture|nursery|kids/.test(text)) return "kids";
-  if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile/.test(text)) return "auto";
-  if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t shirt|tshirt|polo|fashion/.test(text)) return "fashion";
+  if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile|alcootest|breathalyzer|alcohol tester/.test(text)) return "auto";
+  if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation|hiking|trekking|randonnee|batons? de randonnee|walking poles/.test(text)) return "sport";
+  if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t[- ]?shirt|tshirt|polo|fashion|backpack|back pack|rucksack|luggage|travel bag|sac de voyage|valise|bagage|bijou|jewelry|jewellery|bague|collier|bracelet|pendentif/.test(text)) return "fashion";
   if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette|shampoo|shampoing|conditioner|haircare|hair care|cheveux|capillaire|parapharmacie|supplement|nutrition|complement alimentaire|vitamin|vitamine/.test(text)) return "beauty";
-  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt/.test(text)) return "home";
-  if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur/.test(text)) return "tech";
-  if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation/.test(text)) return "sport";
+  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt|tool|outil|bricolage|scie|saw|drill|perceuse|encens|incense|sauge|palo santo/.test(text)) return "home";
+  if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur|smartwatch|smart watch|montre connectee|montre intelligente|wearable/.test(text)) return "tech";
   if (/accessories|accessoire/.test(text)) return "fashion";
   return "other";
 }
-function categoryFor(row) {
-  const metadata = norm([row.google_product_category, row.product_type, row.product_category].join(" "));
+function categoryFor(row, merchantName = "") {
+  const merchant = norm([merchantName, row.merchant, row.merchant_name, row.advertiser_name].join(" "));
+  const metadata = norm([row.google_product_category, row.product_type, row.product_category, row.merchant_category].join(" "));
   const metadataCategory = classifyCategory(metadata);
+  // Ces marchands sont spécialisés : leur nom sert uniquement de secours quand
+  // la catégorie source est absente ou générique, jamais pour remplacer une catégorie explicite différente.
+  if (/milk bar babystore/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "kids";
+  if (/bodycross/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "sport";
+  if (/mibro/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "tech";
   if (metadataCategory !== "other") return metadataCategory;
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
-  return classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
+  const titleCategory = classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
+  if (titleCategory !== "other") return titleCategory;
+  if (/chaussettes-en-ligne/.test(merchant)) return "fashion";
+  return "other";
 }
 function offerTimestampCoverage(offers, now = Date.now()) {
   const coverage = { fresh: 0, missing: 0, stale: 0, invalidOrFuture: 0 };
@@ -521,7 +530,7 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
     name,
     brand,
     description: String(row.description || row.product_short_description || "").trim(),
-    category: categoryFor(row),
+    category: categoryFor(row, program?.name || row.merchant || row.merchant_name || ""),
     product_type: String(row.product_type || row.google_product_category || "").trim(),
     color: String(row.color || row.colour || "").trim(),
     size: String(row.size || "").trim(),
@@ -843,11 +852,22 @@ async function runSelfTests() {
     [{ product_type: "Cadeaux", title: "Shampoing hydratant cheveux 250 ml" }, "beauty"],
     [{ product_type: "Cadeaux", title: "Chaussettes à paillettes pour filles — 2 paires" }, "fashion"],
     [{ product_type: "Bougies", title: "Roses of the Pays de Grasse Scented Candle" }, "home"],
-    [{ google_product_category: "Health & Beauty > Personal Care > Cosmetics > Perfume & Cologne", title: "ANDALUSIAN GARDEN" }, "beauty"]
+    [{ google_product_category: "Health & Beauty > Personal Care > Cosmetics > Perfume & Cologne", title: "ANDALUSIAN GARDEN" }, "beauty"],
+    [{ title: "Wooden Cot" }, "kids", "Milk Bar Babystore"],
+    [{ title: "Adventure BackPack" }, "sport", "Bodycross (FR)"],
+    [{ title: "Mibro GS Pro2" }, "tech", "Mibro FR"],
+    [{ title: "Lot de chaussettes unisexes" }, "fashion", "Chaussettes-en-ligne.fr/ (FR)"],
+    [{ title: "2 Bâtons de randonnée pliables AlpineFlex" }, "sport", "SODEAL CH"],
+    [{ title: "Adaptateur de Scie Sauteuse pour Perceuse" }, "home", "SODEAL CH"],
+    [{ title: "AeroFlex Sac de Voyage Cabine EasyJet" }, "fashion", "SODEAL CH"],
+    [{ title: "Alcootest Numérique DriveCheck" }, "auto", "SODEAL CH"],
+    [{ title: "Bague Cube de Métatron" }, "fashion", "Bonheur de lune"],
+    [{ title: "Encens Sauge Blanche" }, "home", "Bonheur de lune"],
+    [{ title: "12 Bouteilles Villa Sintesi 2024 Sicilia DOC" }, "other", "SODEAL CH"]
   ];
-  for (const [row, expected] of categoryCases) {
-    if (categoryFor(row) !== expected) {
-      throw new Error("TEST ÉCHEC : catégorie attendue " + expected + " pour " + JSON.stringify(row));
+  for (const [row, expected, merchantName] of categoryCases) {
+    if (categoryFor(row, merchantName) !== expected) {
+      throw new Error("TEST ÉCHEC : catégorie attendue " + expected + " pour " + JSON.stringify({ row, merchantName }));
     }
   }
   const normalizedMpnValue = normalizedMpn({ manufacturer_part_number: "  AB-X1   Pro  " });
