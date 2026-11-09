@@ -364,7 +364,7 @@ function extractAwinDataFeedKey(rawUrl) {
   const parts = parsed.pathname.split("/").filter(Boolean);
   const apiKeyIndex = parts.findIndex(part => part.toLowerCase() === "apikey");
   if (apiKeyIndex >= 0 && parts[apiKeyIndex + 1]) {
-    try { return decodeURIComponent(parts[apiKeyIndex + 1]).replace(/\\.csv$/i, ""); } catch { return ""; }
+    try { return decodeURIComponent(parts[apiKeyIndex + 1]).replace(/\.csv$/i, ""); } catch { return ""; }
   }
   const publisherIndex = parts.findIndex(part => part.toLowerCase() === "publisher");
   if (publisherIndex >= 0 && parts[publisherIndex + 1] === String(PUBLISHER_ID) &&
