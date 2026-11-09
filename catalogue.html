@@ -1,5 +1,5 @@
 <!doctype html><html lang="fr"><head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff"><title>Catalogue produits et marques — Prix Malin</title><meta name="description" content="Catalogue Prix Malin : smartphones, audio, maison, beauté et mode. Des milliers de produits avec photo et prix du marchand, à confirmer avant achat.">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6459242759876759" crossorigin="anonymous"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff"><title>Catalogue produits et marques — Prix Malin</title><meta name="description" content="Catalogue Prix Malin : smartphones, audio, maison, beauté et mode. Des sélections de produits, des comparaisons et un accès direct aux boutiques partenaires.">
 <link rel="canonical" href="https://prixbasmalin.fr/catalogue.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Prix Malin">
@@ -6531,7 +6531,7 @@ function renderVerifiedProducts(products){
       const availabilityLabel=availability==="in_stock"?"stock indiqué":availability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
       storeState.textContent=offerIsCurrent
         ?"Relevé "+new Date(offerData.checked_at).toLocaleString("fr-FR")+" • "+availabilityLabel
-        :"Dernier prix connu — à confirmer";
+        :"Dernier relevé disponible · consulter la boutique pour le tarif actuel";
       const priceBox=document.createElement("div");
       priceBox.className="verified-offer-price";
       const offerPrice=document.createElement("strong");
@@ -6982,7 +6982,7 @@ function pmRakutenIsValidGtin(value){
         id:p.id,name:p.name,desc:[p.desc,shippingLabel,priceNote].filter(Boolean).join(" • "),
         category:p.category||"sport",brand:p.brand||p.merchant,mpn:p.mpn||"",query:p.query||p.name,
         image:p.image,images:[],merchant:p.merchant,
-        price:hasVerifiedPrice?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(base):"Prix à vérifier",
+        price:hasVerifiedPrice?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(base):"Consulter la boutique",
         priceValue:hasVerifiedPrice?base:null,shippingPriceValue:shipping,
         sourceUrl:p.sourceUrl,gtin:p.gtin||"",sku:p.sku||"",availability:p.availability||"unknown",
         imageSource:p.image,imageSourceName:p.merchant,imageKind:"merchant_feed",
@@ -7169,7 +7169,7 @@ function pmSheetMerchantName(id){return pmSheetMerchantNames[id]||String(id||"Ma
   <a href="/boutiques-partenaires.html">Boutiques &amp; codes promo</a>
   <a href="/credits-photos.html">Crédits photos</a>
  </nav>
- <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix relevés et datés, à confirmer chez le marchand.</p>
+ <p><strong>Prix Malin</strong> · comparateur indépendant de prix et de produits, fondé sur des sources marchandes et des relevés datés.</p>
  <p>Prix Malin travaille avec plusieurs partenaires, dont <strong>Amazon</strong>, <strong>Decathlon</strong> et <strong>Nicchia Luxury</strong>, et de nouveaux partenaires arrivent bientôt. Lorsque vous achetez après avoir cliqué sur un lien partenaire, Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
 </footer>
 </body></html>
