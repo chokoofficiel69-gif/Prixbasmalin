@@ -1002,7 +1002,7 @@ const productData=[
   {
     "id": "victorias-secret-lingerie",
     "name": "Lingerie Victoria’s Secret",
-    "desc": "Dentelle, ensembles élégants et pièces glamour • prix à vérifier",
+    "desc": "Dentelle, ensembles élégants et pièces glamour",
     "category": "fashion",
     "brand": "Victoria’s Secret",
     "query": "Victoria's Secret lingerie femme",
@@ -1128,7 +1128,7 @@ const productData=[
   {
     "id": "cadeau-parfum",
     "name": "Coffret parfum à offrir",
-    "desc": "Parfums et coffrets beauté • prix à vérifier",
+    "desc": "Parfums et coffrets beauté",
     "category": "beauty",
     "brand": "Beauté",
     "query": "coffret parfum femme homme cadeau",
@@ -6163,7 +6163,7 @@ function render(){
     const listedSourceText=priceDateText?"Prix indiqué par le marchand le "+priceDateText:(feedDateText?"Prix du flux marchand récupéré le "+feedDateText:"Prix indiqué par le marchand");
     const shippingOf=value=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&Number(value)>=0?Number(value):null;
     const shippingValue=shippingOf(p.shippingPriceValue);
-    const availabilityLabel=value=>{const v=String(value||"").toLowerCase().replace(/[\s_]+/g,"-");return v==="in-stock"||v==="available"?"En stock selon le marchand":v==="out-of-stock"?"Rupture indiquée":"À vérifier chez le marchand";};
+    const availabilityLabel=value=>{const v=String(value||"").toLowerCase().replace(/[\s_]+/g,"-");return v==="in-stock"||v==="available"?"En stock selon le marchand":v==="out-of-stock"?"Rupture indiquée":"Non renseignée";};
     const categoryNames={tech:"High-Tech",fashion:"Mode",home:"Maison",beauty:"Beauté & Santé",kids:"Bébé & Enfant",sport:"Sport & Loisirs",auto:"Auto & Moto",diy:"Bricolage",other:"Divers"};
     const body=document.createElement("div");body.className="pm-c2-body";
     const top=document.createElement("div");top.className="pm-c2-top";
@@ -6181,13 +6181,13 @@ function render(){
     price.textContent=hasVerifiedPrice?money(p.priceValue):listedPrice!==null?money(listedPrice):sheet?money(sheet.min_price_eur):"Prix chez le marchand";
     if(listedPrice!==null)priceBox.classList.add("pm-c2-listed");
     const shippingLine=document.createElement("div");shippingLine.className="pm-c2-shipping";
-    shippingLine.textContent=sheet?sheet.offer_count+" marchands comparés":(hasVerifiedPrice||listedPrice!==null)?(shippingValue===null?"livraison à confirmer":shippingValue===0?"Livraison gratuite":"+ "+money(shippingValue)+" de livraison"):"Prix et livraison à vérifier chez le marchand";
+    shippingLine.textContent=sheet?sheet.offer_count+" marchands comparés":(hasVerifiedPrice||listedPrice!==null)?(shippingValue===null?"Frais de livraison non renseignés":shippingValue===0?"Livraison gratuite":"+ "+money(shippingValue)+" de livraison"):"Consulter la boutique pour le tarif actuel";
     priceBox.append(price,shippingLine);
     const note=document.createElement("p");
     note.className="discovery-disclaimer pm-c2-date";
-    note.textContent=sheet?"Prix le plus bas relevé le "+sheetDate+" — à confirmer chez le marchand."
+    note.textContent=sheet?"Prix historique relevé le "+sheetDate+"."
       :!hasVerifiedPrice&&listedPrice!==null
-      ?listedSourceText+" — à confirmer sur son site."
+      ?listedSourceText+"."
       :!hasVerifiedPrice
       ?(p.priceStatus==="dated"&&priceDateText
         ?"Dernier relevé marchand du "+priceDateText+" — trop ancien ou incomplet pour être comparé."
@@ -6236,7 +6236,7 @@ function render(){
       const left=document.createElement("div");left.className="pm-c2-offer-price";
       const big=document.createElement("strong");big.textContent=money(listedPrice);
       const total=document.createElement("span");total.className="pm-c2-offer-total";
-      total.textContent=shippingValue===null?"Prix à confirmer · livraison à confirmer":money(listedPrice+shippingValue)+" livraison incl. · à confirmer";
+      total.textContent=shippingValue===null?"Prix indiqué hors frais de livraison":money(listedPrice+shippingValue)+" livraison incl. · à confirmer";
       left.append(big,total);
       const mid=document.createElement("div");mid.className="pm-c2-offer-merchant";
       const shop=document.createElement("b");shop.textContent=p.merchant||"Marchand";mid.append(shop);
@@ -6261,7 +6261,7 @@ function render(){
     }else if(!rows.length){
       const empty=document.createElement("p");
       empty.className="pm-c2-empty";
-      empty.textContent="Aucune offre TTC récente et confirmée pour ce produit.";
+      empty.textContent="Consultez la boutique pour découvrir les offres disponibles.";
       offerList.append(empty);
     }
     rows.forEach((row,rowIndex)=>{
@@ -6271,7 +6271,7 @@ function render(){
       const big=document.createElement("strong");big.textContent=money(row.price);
       left.append(big);
       const total=document.createElement("span");total.className="pm-c2-offer-total";
-      total.textContent=row.shipping===null?"Livraison à confirmer":money(row.total)+" livraison incl.";
+      total.textContent=row.shipping===null?"Frais de livraison non renseignés":money(row.total)+" livraison incl.";
       if(isBest){const best=document.createElement("em");best.textContent="Meilleur prix total";left.append(best);}
       left.append(total);
       const mid=document.createElement("div");mid.className="pm-c2-offer-merchant";
@@ -6282,11 +6282,11 @@ function render(){
       offer.append(left,mid,link);offerList.append(offer);
     });
     const stamp=document.createElement("p");stamp.className="pm-c2-stamp";
-    stamp.textContent=sheet?"Relevés PrixTracker · "+sheet.offer_count+" marchands":hasVerifiedPrice&&priceDateText?"Relevé marchand : "+priceDateText:listedPrice!==null?listedSourceText+" · non classé « meilleur prix »":"Aucun prix TTC frais et confirmé.";
+    stamp.textContent=sheet?"Relevés PrixTracker · "+sheet.offer_count+" marchands":hasVerifiedPrice&&priceDateText?"Relevé marchand : "+priceDateText:listedPrice!==null?listedSourceText+" · non classé « meilleur prix »":"Consultez la boutique pour les offres disponibles.";
     compare.append(heading,offerList,stamp);
     const amazonSearchButton=document.createElement("a");
     amazonSearchButton.className="pm-c2-amazon-search";
-    amazonSearchButton.textContent="Rechercher aussi sur Amazon (prix à confirmer) ↗";
+    amazonSearchButton.textContent="Découvrir aussi sur Amazon ↗";
     amazonSearchButton.href="https://www.amazon.fr/s?"+new URLSearchParams({k:p.query||p.name,tag:"prixbasmalin2-21"}).toString();
     amazonSearchButton.target="_blank";
     amazonSearchButton.rel="noopener noreferrer sponsored";
@@ -6405,7 +6405,7 @@ function verifiedPriceBreakdown(offer){
   if(Number.isFinite(base)&&base>=0&&shippingKnown&&Number.isFinite(shipping)&&shipping>=0){
     return "Produit TTC "+money(base)+" + livraison "+money(shipping);
   }
-  return "Produit TTC "+(Number.isFinite(base)?money(base):"à vérifier")+" • livraison à confirmer";
+  return "Produit TTC "+(Number.isFinite(base)?money(base):"à vérifier") +" • frais de livraison non renseignés";
 }
 
 function isCurrentVerifiedOffer(offer){
@@ -6499,7 +6499,7 @@ function renderVerifiedProducts(products){
     price.className="price";
     price.textContent=shippingKnown(best)
       ?"Total TTC avec livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice)
-      :"Prix TTC du produit : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice)+" • livraison à confirmer";
+      :"Prix TTC du produit : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice) +" • frais de livraison non renseignés";
     const original=Number(p.original_price_eur||p.regular_price_eur||0);
     if(original>bestComparablePrice){
       const old=document.createElement("div");old.className="verified-original";
@@ -6971,7 +6971,7 @@ function pmRakutenIsValidGtin(value){
       if(known.has(p.id))return;
       const base=Number(p.priceValue);
       const shipping=p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue);
-      const shippingLabel=shipping===null||!Number.isFinite(shipping)?"Livraison à confirmer":"Livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(shipping);
+      const shippingLabel=shipping===null||!Number.isFinite(shipping)?"Frais de livraison non renseignés":"Livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(shipping);
       const priceTaxStatus=taxStatusVerified&&p.priceTaxStatus==="included"?"included":"unspecified";
       const sourceUpdatedAt=p.sourceCreatedAt||null;
       const sourceFresh=fresh&&Boolean(sourceUpdatedAt)&&pmAwinPriceIsFresh(sourceUpdatedAt);
