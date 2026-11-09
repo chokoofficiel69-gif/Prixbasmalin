@@ -1,0 +1,117 @@
+{
+  "_provenance": {
+    "source": "Journal GitHub Actions, exécution 42598871937 (branche test/pricesapi-france-pilot), 2026-11-09T10:10Z",
+    "note": "Copie du rapport déjà produit : aucune nouvelle requête PricesAPI, aucun crédit consommé. Donnée de test, jamais publiée sur le site.",
+    "url_values": "non conservées dans le rapport d'origine (seulement url_present)"
+  },
+  "query": "Apple AirPods 4",
+  "market": "fr",
+  "started_at": "2026-11-09T10:10:06.425Z",
+  "finished_at": "2026-11-09T10:10:17.385Z",
+  "candidate_count": 1,
+  "total_offers_returned": 10,
+  "degraded": false,
+  "products": [
+    {
+      "title": "Apple AirPods 4 White MXP63LL/A with Personalized Spatial Audio",
+      "pid": 115207557,
+      "headline_price": 119,
+      "headline_currency": "EUR",
+      "scraped_at": null,
+      "cache_source": "miss",
+      "image_available": true,
+      "offers": [
+        {
+          "seller": "Electro Dépôt",
+          "price": 119,
+          "currency": "EUR",
+          "product_title": "Apple Airpods 4",
+          "stock_status": "In stock",
+          "delivery_info": "Free delivery",
+          "url_present": true
+        },
+        {
+          "seller": "Carrefour",
+          "price": 125.95,
+          "currency": "EUR",
+          "product_title": "Airpods 4",
+          "stock_status": "In stock",
+          "delivery_info": "Free delivery",
+          "url_present": true
+        },
+        {
+          "seller": "iPaddy",
+          "price": 69.37,
+          "currency": "EUR",
+          "product_title": "Original AirPods 4 Loose Parts | Left earpiece, Right earpiece or Charging case New / Rechter AirPod 4",
+          "stock_status": "In stock",
+          "delivery_info": "Delivery between 16–18 Nov €7.99",
+          "url_present": true
+        },
+        {
+          "seller": "iBOOD",
+          "price": 109,
+          "currency": "EUR",
+          "product_title": "Apple AirPods 4",
+          "stock_status": "In stock",
+          "delivery_info": "Delivery €7.95",
+          "url_present": true
+        },
+        {
+          "seller": "Habitium",
+          "price": 137.44,
+          "currency": "EUR",
+          "product_title": "Apple Écouteurs Bluetooth blancs puce H2 audio spatial autonomie 5 h 30 h boîtier recharge USB C IP54 Apple",
+          "stock_status": "In stock",
+          "delivery_info": "Free delivery between 12–16 Nov",
+          "url_present": true
+        },
+        {
+          "seller": "Leboncoin",
+          "price": 90,
+          "currency": "EUR",
+          "product_title": "AirPod 4",
+          "stock_status": "In stock",
+          "delivery_info": "Delivery €3.99",
+          "url_present": true
+        },
+        {
+          "seller": "Topbiz",
+          "price": 133.89,
+          "currency": "EUR",
+          "product_title": "Apple AirPods 4 Casque Sans fil Ecouteurs Appels/Musique/Sport/Au quotidien Bluetooth Blanc – réf. MXP63LL/A",
+          "stock_status": "In stock",
+          "delivery_info": "Free delivery between 13–18 Nov",
+          "url_present": true
+        },
+        {
+          "seller": "Wishibam",
+          "price": 199,
+          "currency": "EUR",
+          "product_title": "APPLE AirPods 4 Lightning (écouteurs 4e gen) - Neuf",
+          "stock_status": "In stock",
+          "delivery_info": "Delivery between 10–17 Nov €4.40",
+          "url_present": true
+        },
+        {
+          "seller": "La tech factory",
+          "price": 149.9,
+          "currency": "EUR",
+          "product_title": "Écouteurs Apple AirPods 4 - Blanc",
+          "stock_status": "In stock",
+          "delivery_info": "Free delivery between Tue - Thu",
+          "url_present": true
+        },
+        {
+          "seller": "PcComponentes FR",
+          "price": 125.99,
+          "currency": "EUR",
+          "product_title": "Auriculares Apple AirPods 4 sans fil Bluetooth 5.3 appels sport IP54 blancs",
+          "stock_status": "In stock",
+          "delivery_info": "Free delivery",
+          "url_present": true
+        }
+      ]
+    }
+  ]
+}
