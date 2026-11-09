@@ -55,11 +55,11 @@ function classifyCategory(text) {
   if (/sport.*(sock|chaussette)|(sock|chaussette).*sport/.test(text)) return "sport";
   if (/baby|toys|toy|toys games|children|bebe|enfant|jouet|puericulture|nursery|kids/.test(text)) return "kids";
   if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile|alcootest|breathalyzer|alcohol tester/.test(text)) return "auto";
-  if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation|hiking|trekking|randonnee|batons? de randonnee|walking poles/.test(text)) return "sport";
   if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t[- ]?shirt|tshirt|polo|fashion|backpack|back pack|rucksack|luggage|travel bag|sac de voyage|valise|bagage|bijou|jewelry|jewellery|bague|collier|bracelet|pendentif/.test(text)) return "fashion";
   if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette|shampoo|shampoing|conditioner|haircare|hair care|cheveux|capillaire|parapharmacie|supplement|nutrition|complement alimentaire|vitamin|vitamine/.test(text)) return "beauty";
   if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt|tool|outil|bricolage|scie|saw|drill|perceuse|encens|incense|sauge|palo santo/.test(text)) return "home";
   if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur|smartwatch|smart watch|montre connectee|montre intelligente|wearable/.test(text)) return "tech";
+  if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation|hiking|trekking|randonnee|batons? de randonnee|walking poles/.test(text)) return "sport";
   if (/accessories|accessoire/.test(text)) return "fashion";
   return "other";
 }
