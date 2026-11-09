@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "catalogue.html productData",
-  "generated_at": "2026-11-06",
+  "generated_at": "2026-11-09",
   "count": 341,
   "verified_image_count": 14,
   "unverified_image_count": 327,
@@ -226,7 +226,7 @@
     {
       "id": "victorias-secret-lingerie",
       "name": "Lingerie Victoria’s Secret",
-      "desc": "Dentelle, ensembles élégants et pièces glamour • prix à vérifier",
+      "desc": "Dentelle, ensembles élégants et pièces glamour",
       "category": "fashion",
       "brand": "Victoria’s Secret",
       "image": "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=900&q=85",
@@ -307,7 +307,7 @@
     {
       "id": "cadeau-parfum",
       "name": "Coffret parfum à offrir",
-      "desc": "Parfums et coffrets beauté • prix à vérifier",
+      "desc": "Parfums et coffrets beauté",
       "category": "beauty",
       "brand": "Beauté",
       "image": "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=900&q=85",
