@@ -412,7 +412,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    buy.href="https://www.amazon.fr/s?k="+encodeURIComponent((sheet.brand&&!sheet.name.toLowerCase().includes(sheet.brand.toLowerCase())?sheet.brand+" ":"")+sheet.name)+"&tag=prixbasmalin2-21";
    buy.target="_blank";buy.rel="sponsored nofollow noopener noreferrer";buy.textContent="Voir sur Amazon ↗";
    buy.setAttribute("aria-label","Voir "+sheet.name+" sur Amazon (lien affilié)");
-   const stamp=document.createElement("small");stamp.className="pm-cmp-stamp";stamp.textContent="Relevés disponibles jusqu’au "+dateFr(sheet.last_date)";
+   const stamp=document.createElement("small");stamp.className="pm-cmp-stamp";stamp.textContent="Relevés disponibles jusqu’au "+dateFr(sheet.last_date);
    body.append(cat,title,bestBox,podium,rest,more,buy,stamp);
    card.append(media,body);fragment.append(card);
   }
