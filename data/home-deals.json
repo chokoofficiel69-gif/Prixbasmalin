@@ -1,6 +1,6 @@
 {
  "version": 1,
- "awin_fetched_at": "2026-11-10T12:32:46.564Z",
+ "awin_fetched_at": "2026-11-10T12:41:44.385Z",
  "sheets_period": {
   "from": "2026-10-09",
   "to": "2026-11-08"
@@ -235,7 +235,7 @@
    "price_eur": null,
    "shipping_eur": null,
    "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Marine%20%28Top%29-1775043417.webp",
-   "url": "https://www.awin1.com/pclick.php?p=44726456818&a=3137386&m=126135",
+   "url": "https://www.awin1.com/pclick.php?p=44989158973&a=3137386&m=126135",
    "family": "parfum",
    "family_label": "Parfums",
    "band": "a-confirmer",
@@ -260,7 +260,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-125844-44778859898",
+   "id": "awin-brand-name-bodycross-power-hydration-belt-250ml---",
    "name": "Power Hydration Belt 250ml",
    "merchant": "Bodycross (FR)",
    "price_verified": false,
@@ -276,7 +276,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-128881-46451430781",
+   "id": "awin-brand-name-bonheur-de-lune-carte-cadeau-bonheur-de-lune-cadeau-esoterique-spirituel-100-00---",
    "name": "Carte Cadeau Bonheur de Lune – Cadeau Ésotérique & Spirituel | 100,00 €",
    "merchant": "Bonheur de lune",
    "price_verified": false,
@@ -340,7 +340,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-111342-44570109972",
+   "id": "awin-brand-name-minymo-minymo-chemise-a-manches-courtes-rayee---",
    "name": "Minymo Chemise à manches courtes - Rayée",
    "merchant": "Milk Bar Babystore",
    "price_verified": false,
@@ -388,14 +388,14 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-gtin-6300900340003",
-   "name": "MARRAKECH",
+   "id": "awin-gtin-6300900340379",
+   "name": "MALACHITE",
    "merchant": "Al Jazeera Perfumes EU",
    "price_verified": false,
    "price_eur": null,
    "shipping_eur": null,
-   "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Marrakech%20%28Top%29-1775043446.webp",
-   "url": "https://www.awin1.com/pclick.php?p=44726456750&a=3137386&m=126135",
+   "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Malachite%20%28Top%29-1775043331.webp",
+   "url": "https://www.awin1.com/pclick.php?p=44989158838&a=3137386&m=126135",
    "family": "parfum",
    "family_label": "Parfums",
    "band": "a-confirmer",
@@ -436,7 +436,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-128881-46451430671",
+   "id": "awin-brand-name-bonheur-de-lune-brume-d-ambiance-sauge-blanche-lavande-protection-sommeil-paisible-bonheur-de-lune---",
    "name": "Brume d’Ambiance \"Sauge Blanche & Lavande\" – Protection & Sommeil Paisible | Bonheur de Lune",
    "merchant": "Bonheur de lune",
    "price_verified": false,
@@ -500,7 +500,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-111342-43394297667",
+   "id": "awin-brand-name-milk-bar-minymo-combinaison-rayee-argent-rose---",
    "name": "Minymo Combinaison Rayée Argent Rose",
    "merchant": "Milk Bar Babystore",
    "price_verified": false,
@@ -548,14 +548,14 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-gtin-6300900340379",
-   "name": "MALACHITE",
+   "id": "awin-gtin-6300900340003",
+   "name": "MARRAKECH",
    "merchant": "Al Jazeera Perfumes EU",
    "price_verified": false,
    "price_eur": null,
    "shipping_eur": null,
-   "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Malachite%20%28Top%29-1775043331.webp",
-   "url": "https://www.awin1.com/pclick.php?p=44726456683&a=3137386&m=126135",
+   "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Marrakech%20%28Top%29-1775043446.webp",
+   "url": "https://www.awin1.com/pclick.php?p=44989158905&a=3137386&m=126135",
    "family": "parfum",
    "family_label": "Parfums",
    "band": "a-confirmer",
@@ -596,7 +596,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-128881-46451430665",
+   "id": "awin-brand-name-bonheur-de-lune-chapelet-de-communion-en-perles-de-verre-rose-collier-long-avec-croix-chretienne-et-medaille-vierge-marie-bonheur-de-lune---",
    "name": "Chapelet de Communion en Perles de Verre Rose - Collier Long avec Croix Chrétienne et Médaille Vierge Marie | Bonheur de Lune",
    "merchant": "Bonheur de lune",
    "price_verified": false,
@@ -660,7 +660,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-111342-43394297729",
+   "id": "awin-brand-name-minymo-minymo-chemise-manches-longues-blanc-brillant---",
    "name": "Minymo Chemise Manches Longues Blanc Brillant",
    "merchant": "Milk Bar Babystore",
    "price_verified": false,
@@ -708,14 +708,14 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-gtin-6300900340201",
-   "name": "MOSCOW",
+   "id": "awin-gtin-6300900341253",
+   "name": "MAHARANI",
    "merchant": "Al Jazeera Perfumes EU",
    "price_verified": false,
    "price_eur": null,
    "shipping_eur": null,
-   "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Moscow%20%28Top%29-1732017245-1775043523.webp",
-   "url": "https://www.awin1.com/pclick.php?p=44726456680&a=3137386&m=126135",
+   "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Maharani%20%28Top%29-1775043298.webp",
+   "url": "https://www.awin1.com/pclick.php?p=44989158927&a=3137386&m=126135",
    "family": "parfum",
    "family_label": "Parfums",
    "band": "a-confirmer",
@@ -740,7 +740,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-125844-44778859906",
+   "id": "awin-brand-name-bodycross-terrarun-long-t-shirt---",
    "name": "TerraRun Long T-shirt",
    "merchant": "Bodycross (FR)",
    "price_verified": false,
@@ -756,7 +756,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-128881-46451430720",
+   "id": "awin-brand-name-bonheur-de-lune-brume-d-ambiance-boho-dreams-apaisant-et-sacre-bonheur-de-lune---",
    "name": "Brume d’Ambiance \"Boho Dreams\" – Apaisant et Sacré | Bonheur de Lune",
    "merchant": "Bonheur de lune",
    "price_verified": false,
@@ -820,7 +820,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-111342-45425615620",
+   "id": "awin-brand-name-minymo-minymo-combinaison-cotelee-a-manches-longues-fauve---",
    "name": "Minymo Combinaison côtelée à manches longues - Fauve",
    "merchant": "Milk Bar Babystore",
    "price_verified": false,
@@ -868,14 +868,14 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-gtin-6300900341253",
-   "name": "MAHARANI",
+   "id": "awin-gtin-6300900340201",
+   "name": "MOSCOW",
    "merchant": "Al Jazeera Perfumes EU",
    "price_verified": false,
    "price_eur": null,
    "shipping_eur": null,
-   "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Maharani%20%28Top%29-1775043298.webp",
-   "url": "https://www.awin1.com/pclick.php?p=44726456772&a=3137386&m=126135",
+   "image": "https://api-europe.aljazeeraperfumes.com/storage/uploads/Moscow%20%28Top%29-1732017245-1775043523.webp",
+   "url": "https://www.awin1.com/pclick.php?p=44989158835&a=3137386&m=126135",
    "family": "parfum",
    "family_label": "Parfums",
    "band": "a-confirmer",
@@ -916,7 +916,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-128881-46451430649",
+   "id": "awin-brand-name-bonheur-de-lune-chaudron-en-fonte-taille-moyenne-rituel-purification-bonheur-de-lune---",
    "name": "Chaudron en Fonte Taille moyenne – Rituel & Purification | Bonheur de Lune",
    "merchant": "Bonheur de lune",
    "price_verified": false,
@@ -980,7 +980,7 @@
    "price_tax_status": "unspecified"
   },
   {
-   "id": "awin-awin-111342-45425615608",
+   "id": "awin-brand-name-minymo-minymo-chaussettes-a-paillettes-lot-de-2-orchidee-poussiereuse---",
    "name": "Minymo Chaussettes à paillettes (lot de 2) - Orchidée poussiéreuse",
    "merchant": "Milk Bar Babystore",
    "price_verified": false,
