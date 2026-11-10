@@ -9,6 +9,11 @@ const STATUS_OUTPUT = path.join(ROOT, "data", "awin-sync-status.json");
 const TOKEN = process.env.AWIN_API_TOKEN || "";
 const PUBLISHER_ID = process.env.AWIN_PUBLISHER_ID || "3137386";
 const LOCALE = process.env.AWIN_FEED_LOCALE || "fr_FR";
+// Annonceurs qui ne vendent pas au public français (boutique et livraison hors de France) :
+// Sportdirect.ca (Canada) = 25243, SODEAL CH (Suisse) = 48021. Liste remplaçable par
+// AWIN_EXCLUDED_ADVERTISERS (identifiants séparés par des virgules).
+const EXCLUDED_ADVERTISERS = new Set(String(process.env.AWIN_EXCLUDED_ADVERTISERS ?? "25243,48021")
+  .split(",").map(value => value.trim()).filter(Boolean));
 const MAX_PROGRAMMES = 100;
 const MAX_PRODUCTS = 25000;
 const MAX_PER_ADVERTISER = 3000;
@@ -518,6 +523,7 @@ function groupKey(row, advertiser) {
 }
 
 function offerFromRow(row, program, advertiser, { allowUnknownAvailability = false } = {}) {
+  if (EXCLUDED_ADVERTISERS.has(String(advertiser))) return null;
   const name = String(row.title || row.product_name || "").trim().replace(/\s+/g, " ");
   const brand = firstField(row, BRAND_FIELDS);
   const gtin = normalizedGtin(row);
@@ -847,6 +853,10 @@ async function runSelfTests() {
   }
   const booleanOutOfStock = offerFromRow({...aliasRow,availability:false,stock_status:""}, {name:"Boutique Alias"}, "999", {allowUnknownAvailability:true});
   if (booleanOutOfStock) throw new Error("TEST ÉCHEC : availability=false ne doit pas être accepté comme stock inconnu.");
+  if (offerFromRow(aliasRow, {name:"Sportdirect.ca (Canada)"}, "25243") !== null ||
+      offerFromRow(aliasRow, {name:"SODEAL CH"}, "48021") !== null) {
+    throw new Error("Les annonceurs hors de France doivent être exclus du catalogue.");
+  }
   const wrongCurrency = offerFromRow({...aliasRow,currency:"USD"}, {name:"Boutique Alias"}, "999", {allowUnknownAvailability:true});
   if (wrongCurrency) throw new Error("TEST ÉCHEC : une devise USD ne doit pas être convertie en offre EUR.");
   const standardAlias = parseFeedRow({
