@@ -184,7 +184,7 @@ class RakutenImportValidationTests(unittest.TestCase):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
         self.assertIn('EXPECTED_SHA256_A="d98a0cdd102177804f99a3534a4a04c6b31ce81622cb87103c1101134b4961"', workflow)
         self.assertIn('EXPECTED_SHA256_B="6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc"', workflow)
-        self.assertIn('key_sha256_hex', workflow)
+        self.assertIn('key_sha256_b64', workflow)
         self.assertIn('ssh-keyscan -T 10 -t rsa,ecdsa,ed25519 aftp.linksynergy.com', workflow)
         self.assertIn('ssh-keygen -F "aftp.linksynergy.com"', workflow)
         self.assertIn("--retry-all-errors", workflow)
