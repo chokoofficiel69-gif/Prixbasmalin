@@ -33,7 +33,7 @@ jobs:
             ip=$(getent hosts "$h" | awk '{print $1; exit}')
             echo "### $h (${ip:-non résolu})"
             [[ -n "$ip" ]] || continue
-            ssh-keyscan -T 8 -t rsa,ecdsa,ed25519,dsa "$h" 2>/dev/null | while read -r host type data; do
+            ssh-keyscan -T 8 -t rsa,ecdsa,ed25519 "$h" 2>/dev/null | while read -r host type data; do
               [[ -n "${data:-}" ]] || continue
               s256=$(printf '%s' "$data" | base64 -d | sha256sum | cut -d' ' -f1)
               s1=$(printf '%s' "$data" | base64 -d | sha1sum | cut -d' ' -f1)
