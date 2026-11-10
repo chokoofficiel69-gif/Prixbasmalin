@@ -63,7 +63,6 @@ jobs:
             exit 1
           fi
           # Empreintes officielles communiquées par Rakuten le 10/11/2026.
-          EXPECTED_SHA1="d98a0cdd102177804f99a3534a4a04c6b31ce816"
           EXPECTED_SHA256="6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc"
           mkdir -p "$HOME/.ssh"
           SCAN="$(ssh-keyscan -T 10 -t rsa,ecdsa,ed25519 aftp.linksynergy.com 2>/dev/null || true)"
@@ -77,8 +76,7 @@ jobs:
             [[ -n "${key_data:-}" ]] || continue
             [[ "$host" == \#* ]] && continue
             key_blob="$(printf '%s' "$key_data" | base64 -d | sha256sum | awk '{print $1}')"
-            key_sha1="$(printf '%s' "$key_data" | base64 -d | sha1sum | awk '{print $1}')"
-            if [[ "$key_blob" == "$EXPECTED_SHA256" && "$key_sha1" == "$EXPECTED_SHA1" ]]; then
+            if [[ "$key_blob" == "$EXPECTED_SHA256" ]]; then
               printf '%s %s %s\n' "$host" "$key_type" "$key_data" >> "$HOME/.ssh/known_hosts"
               MATCHED=true
             fi
