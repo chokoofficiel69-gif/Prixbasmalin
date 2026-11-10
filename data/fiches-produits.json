@@ -1,10 +1,10 @@
 {
  "version": 1,
  "generated_from": "data/prixtracker-prices.json",
- "source_generated_at": "2026-11-09T14:12:51.714Z",
+ "source_generated_at": "2026-11-10T13:41:42.205Z",
  "dataset_period": {
   "from": "2026-10-09",
-  "to": "2026-11-08"
+  "to": "2026-11-09"
  },
  "status": "historical_reference",
  "price_policy": "Prix relevés par PrixTracker (historique daté), à confirmer chez le marchand. Aucun prix n'est présenté comme actuel.",
@@ -27,37 +27,42 @@
    "offer_count": 24,
    "min_price_eur": 129.0,
    "max_price_eur": 186.0,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 129.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 129.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 131.0,
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 131.37,
-     "date": "2026-11-06"
+     "price_eur": 131.34,
+     "date": "2026-11-08"
     },
     {
      "merchant": "topbizfr",
      "price_eur": 133.89,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 135.9,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 138.69,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -77,7 +82,7 @@
     {
      "merchant": "reicheltcomfr",
      "price_eur": 140.19,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
@@ -85,24 +90,19 @@
      "date": "2026-10-11"
     },
     {
-     "merchant": "pixmaniafr",
-     "price_eur": 141.37,
-     "date": "2026-11-06"
-    },
-    {
      "merchant": "cartouche24eu",
      "price_eur": 145.28,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "prindofr",
      "price_eur": 145.88,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "toner24fr",
      "price_eur": 145.88,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
@@ -112,27 +112,27 @@
     {
      "merchant": "sonvideocom",
      "price_eur": 149.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 150.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "helloedgefr",
      "price_eur": 151.49,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 155.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "photospecialistfr",
      "price_eur": 159.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
@@ -147,7 +147,7 @@
     {
      "merchant": "maxiburofr",
      "price_eur": 186.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -230,6 +230,10 @@
     {
      "date": "2026-11-06",
      "min_price_eur": 129.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 129.0
     }
    ]
   },
@@ -244,37 +248,37 @@
    "offer_count": 24,
    "min_price_eur": 128.99,
    "max_price_eur": 237.6,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "bosavernadefr",
      "price_eur": 128.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 129.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
      "price_eur": 129.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 134.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 159.97,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "carrefourfr",
      "price_eur": 159.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
@@ -293,33 +297,33 @@
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 166.36,
-     "date": "2026-11-06"
+     "price_eur": 166.34,
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 169.5,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 174.9,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 180.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "prindofr",
      "price_eur": 184.84,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "toner24fr",
      "price_eur": 184.84,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
@@ -334,7 +338,7 @@
     {
      "merchant": "reicheltcomfr",
      "price_eur": 190.61,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
@@ -344,27 +348,27 @@
     {
      "merchant": "helloedgefr",
      "price_eur": 195.49,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cartouche24eu",
      "price_eur": 198.98,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 206.4,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "photospecialistfr",
      "price_eur": 209.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "maxiburofr",
      "price_eur": 237.6,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -443,6 +447,10 @@
     {
      "date": "2026-11-06",
      "min_price_eur": 128.99
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 128.99
     }
    ]
   },
@@ -460,15 +468,10 @@
     "match": "verifie_visuellement"
    },
    "offer_count": 24,
-   "min_price_eur": 199.0,
+   "min_price_eur": 203.99,
    "max_price_eur": 325.88,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "offers": [
-    {
-     "merchant": "joybuyfr",
-     "price_eur": 199.0,
-     "date": "2026-11-06"
-    },
     {
      "merchant": "eleclercfrmarketplac",
      "price_eur": 203.99,
@@ -477,87 +480,92 @@
     {
      "merchant": "amazon",
      "price_eur": 209.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 210.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 215.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 222.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 225.41,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 228.9,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 229.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "reicheltcomfr",
      "price_eur": 230.95,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "joybuyfr",
+     "price_eur": 239.0,
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 247.93,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "topbizfr",
      "price_eur": 248.29,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "getgoodscomfr",
      "price_eur": 248.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 249.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "carrefourfr",
      "price_eur": 249.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "sonvideocom",
      "price_eur": 249.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 249.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 249.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 250.8,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "photospecialistfr",
@@ -567,7 +575,7 @@
     {
      "merchant": "bixotocomfr",
      "price_eur": 268.5,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
@@ -661,6 +669,10 @@
     {
      "date": "2026-11-06",
      "min_price_eur": 199.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 209.0
     }
    ]
   },
@@ -672,50 +684,50 @@
    "category_label": "Accessoires PS5",
    "image": "",
    "image_credit": null,
-   "offer_count": 19,
-   "min_price_eur": 199.99,
+   "offer_count": 20,
+   "min_price_eur": 189.0,
    "max_price_eur": 229.99,
-   "last_date": "2026-11-08",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
-     "price_eur": 199.99,
-     "date": "2026-11-08"
+     "price_eur": 189.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 199.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "joybuyfr",
      "price_eur": 199.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "reicheltcomfr",
      "price_eur": 201.78,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 201.9,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "getgoodscomfr",
      "price_eur": 204.97,
-     "date": "2026-11-06"
+     "date": "2026-11-09"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 207.5,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pccomponentesfr",
      "price_eur": 209.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "rueducommercefrmarke",
@@ -728,24 +740,19 @@
      "date": "2026-10-27"
     },
     {
+     "merchant": "topbizfr",
+     "price_eur": 215.69,
+     "date": "2026-11-09"
+    },
+    {
      "merchant": "kauflandfr",
      "price_eur": 216.5,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 218.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 218.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "topbizfr",
-     "price_eur": 219.49,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "carrefourfr",
@@ -753,9 +760,19 @@
      "date": "2026-11-06"
     },
     {
+     "merchant": "cdiscount",
+     "price_eur": 219.99,
+     "date": "2026-11-09"
+    },
+    {
      "merchant": "fnac",
      "price_eur": 219.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "sonvideocom",
+     "price_eur": 219.99,
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
@@ -857,6 +874,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 199.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 189.0
     }
    ]
   },
@@ -1614,7 +1635,7 @@
    "offer_count": 17,
    "min_price_eur": 419.99,
    "max_price_eur": 566.99,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
@@ -1624,17 +1645,17 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 421.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 474.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 474.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
@@ -1648,8 +1669,8 @@
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 487.52,
-     "date": "2026-11-06"
+     "price_eur": 487.53,
+     "date": "2026-11-08"
     },
     {
      "merchant": "ubaldimarketplace",
@@ -1659,7 +1680,7 @@
     {
      "merchant": "boulanger",
      "price_eur": 519.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
@@ -1669,12 +1690,12 @@
     {
      "merchant": "fnac",
      "price_eur": 519.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "getgoodscomfr",
      "price_eur": 519.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
@@ -1689,17 +1710,17 @@
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 529.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 547.68,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "helloedgefr",
      "price_eur": 566.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -1773,6 +1794,10 @@
     },
     {
      "date": "2026-11-06",
+     "min_price_eur": 421.99
+    },
+    {
+     "date": "2026-11-08",
      "min_price_eur": 421.99
     }
    ]
@@ -2153,7 +2178,7 @@
    "offer_count": 17,
    "min_price_eur": 617.44,
    "max_price_eur": 969.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "inmacwstorecom",
@@ -2178,12 +2203,12 @@
     {
      "merchant": "mondofficefr",
      "price_eur": 678.52,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "asgoodasnewfr",
      "price_eur": 679.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fibresetcablescomfr",
@@ -2193,12 +2218,12 @@
     {
      "merchant": "galaxusfr",
      "price_eur": 696.59,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 749.28,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
@@ -2213,7 +2238,7 @@
     {
      "merchant": "helloedgefr",
      "price_eur": 841.49,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "wellbotsfr",
@@ -2223,12 +2248,12 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 866.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ubaldimarketplace",
-     "price_eur": 920.43,
-     "date": "2026-11-07"
+     "price_eur": 922.3,
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
@@ -2238,7 +2263,7 @@
     {
      "merchant": "boulanger",
      "price_eur": 969.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -2313,6 +2338,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 678.52
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 678.52
     }
    ]
   },
@@ -2327,7 +2356,7 @@
    "offer_count": 16,
    "min_price_eur": 75.22,
    "max_price_eur": 107.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "aliexpress",
@@ -2347,7 +2376,7 @@
     {
      "merchant": "alternatefr",
      "price_eur": 87.9,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "carrefourfr",
@@ -2357,17 +2386,17 @@
     {
      "merchant": "amazon",
      "price_eur": 92.17,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
      "price_eur": 94.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pccomponentesfr",
      "price_eur": 94.2,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
@@ -2375,24 +2404,19 @@
      "date": "2026-11-05"
     },
     {
-     "merchant": "visunextfr",
-     "price_eur": 95.47,
-     "date": "2026-11-05"
-    },
-    {
      "merchant": "kauflandfr",
      "price_eur": 98.01,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 99.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 99.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
@@ -2403,6 +2427,11 @@
      "merchant": "fnac",
      "price_eur": 104.99,
      "date": "2026-10-26"
+    },
+    {
+     "merchant": "visunextfr",
+     "price_eur": 105.47,
+     "date": "2026-11-08"
     },
     {
      "merchant": "xtremeinnfr",
@@ -2478,6 +2507,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 75.22
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 87.9
     }
    ]
   },
@@ -2497,57 +2530,57 @@
    "offer_count": 16,
    "min_price_eur": 1277.99,
    "max_price_eur": 1399.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "onbuycomfr",
      "price_eur": 1277.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 1279.1,
-     "date": "2026-11-05"
+     "date": "2026-11-08"
     },
     {
      "merchant": "hellorsefr",
      "price_eur": 1280.28,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 1298.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 1298.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 1298.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
      "price_eur": 1298.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 1299.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
      "price_eur": 1319.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 1348.0,
      "date": "2026-10-20"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 1356.04,
+     "date": "2026-11-08"
     },
     {
      "merchant": "laboutiquedunetcom",
@@ -2562,7 +2595,7 @@
     {
      "merchant": "inmacwstorecom",
      "price_eur": 1398.17,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
@@ -2655,6 +2688,10 @@
     },
     {
      "date": "2026-11-07",
+     "min_price_eur": 1277.99
+    },
+    {
+     "date": "2026-11-08",
      "min_price_eur": 1277.99
     }
    ]
@@ -2829,6 +2866,352 @@
    ]
   },
   {
+   "id": "ps5-slim",
+   "name": "PS5 Slim (édition disque)",
+   "brand": "Sony",
+   "category": "console",
+   "category_label": "Consoles",
+   "image": "",
+   "image_credit": null,
+   "offer_count": 16,
+   "min_price_eur": 639.0,
+   "max_price_eur": 873.69,
+   "last_date": "2026-11-09",
+   "offers": [
+    {
+     "merchant": "ebay",
+     "price_eur": 639.0,
+     "date": "2026-10-31"
+    },
+    {
+     "merchant": "pccomponentesfr",
+     "price_eur": 639.0,
+     "date": "2026-10-13"
+    },
+    {
+     "merchant": "carrefourfr",
+     "price_eur": 649.0,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "sonvideocom",
+     "price_eur": 649.0,
+     "date": "2026-11-06"
+    },
+    {
+     "merchant": "boulanger",
+     "price_eur": 649.99,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 649.99,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "joybuyfr",
+     "price_eur": 649.99,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "aliexpress",
+     "price_eur": 651.84,
+     "date": "2026-10-31"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 690.07,
+     "date": "2026-10-24"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 749.0,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 759.99,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "frmobileshopeu",
+     "price_eur": 779.0,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 794.06,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "rueducommercefrmarke",
+     "price_eur": 811.43,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 814.0,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "topbizfr",
+     "price_eur": 873.69,
+     "date": "2026-11-09"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-10",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-11",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-13",
+     "min_price_eur": 639.0
+    },
+    {
+     "date": "2026-10-14",
+     "min_price_eur": 549.99
+    },
+    {
+     "date": "2026-10-16",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-17",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-18",
+     "min_price_eur": 644.86
+    },
+    {
+     "date": "2026-10-20",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-21",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-23",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-24",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-28",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-10-30",
+     "min_price_eur": 639.0
+    },
+    {
+     "date": "2026-10-31",
+     "min_price_eur": 639.0
+    },
+    {
+     "date": "2026-11-03",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-11-05",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-11-06",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 649.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 649.99
+    }
+   ]
+  },
+  {
+   "id": "ipad-air-13-m3",
+   "name": "iPad Air 13\" M3",
+   "brand": "Apple",
+   "category": "tablette",
+   "category_label": "Tablettes",
+   "image": "",
+   "image_credit": null,
+   "offer_count": 16,
+   "min_price_eur": 799.0,
+   "max_price_eur": 1139.0,
+   "last_date": "2026-11-08",
+   "offers": [
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 799.0,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "inmacwstorecom",
+     "price_eur": 818.98,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "laboutiquedunetcom",
+     "price_eur": 822.96,
+     "date": "2026-10-12"
+    },
+    {
+     "merchant": "eleclercfrmarketplac",
+     "price_eur": 829.99,
+     "date": "2026-10-19"
+    },
+    {
+     "merchant": "topbizfr",
+     "price_eur": 850.59,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "helloedgefr",
+     "price_eur": 905.49,
+     "date": "2026-10-22"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 939.0,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 949.99,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 949.99,
+     "date": "2026-10-30"
+    },
+    {
+     "merchant": "bixotocomfr",
+     "price_eur": 958.5,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "onbuycomfr",
+     "price_eur": 1028.99,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "boulanger",
+     "price_eur": 1039.0,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 1079.99,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "joybuyfr",
+     "price_eur": 1099.0,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "ebay",
+     "price_eur": 1105.9,
+     "date": "2026-11-04"
+    },
+    {
+     "merchant": "wellbotsfr",
+     "price_eur": 1139.0,
+     "date": "2026-11-08"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-09",
+     "min_price_eur": 779.97
+    },
+    {
+     "date": "2026-10-10",
+     "min_price_eur": 779.97
+    },
+    {
+     "date": "2026-10-12",
+     "min_price_eur": 779.97
+    },
+    {
+     "date": "2026-10-13",
+     "min_price_eur": 779.97
+    },
+    {
+     "date": "2026-10-15",
+     "min_price_eur": 779.97
+    },
+    {
+     "date": "2026-10-16",
+     "min_price_eur": 801.0
+    },
+    {
+     "date": "2026-10-18",
+     "min_price_eur": 801.0
+    },
+    {
+     "date": "2026-10-19",
+     "min_price_eur": 801.0
+    },
+    {
+     "date": "2026-10-20",
+     "min_price_eur": 801.0
+    },
+    {
+     "date": "2026-10-22",
+     "min_price_eur": 801.0
+    },
+    {
+     "date": "2026-10-23",
+     "min_price_eur": 671.99
+    },
+    {
+     "date": "2026-10-26",
+     "min_price_eur": 765.0
+    },
+    {
+     "date": "2026-10-28",
+     "min_price_eur": 671.99
+    },
+    {
+     "date": "2026-10-29",
+     "min_price_eur": 771.0
+    },
+    {
+     "date": "2026-10-30",
+     "min_price_eur": 771.0
+    },
+    {
+     "date": "2026-11-04",
+     "min_price_eur": 771.0
+    },
+    {
+     "date": "2026-11-05",
+     "min_price_eur": 799.0
+    },
+    {
+     "date": "2026-11-07",
+     "min_price_eur": 799.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 799.0
+    }
+   ]
+  },
+  {
    "id": "iphone-17-pro",
    "name": "iPhone 17 Pro",
    "brand": "Apple",
@@ -2844,7 +3227,7 @@
    "offer_count": 16,
    "min_price_eur": 1085.59,
    "max_price_eur": 1229.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "informaticabaratacom",
@@ -2854,12 +3237,12 @@
     {
      "merchant": "ebay",
      "price_eur": 1099.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
-     "merchant": "joybuyfr",
-     "price_eur": 1099.0,
-     "date": "2026-11-07"
+     "merchant": "eleclercfrmarketplac",
+     "price_eur": 1099.98,
+     "date": "2026-11-09"
     },
     {
      "merchant": "friphonerycom",
@@ -2869,17 +3252,17 @@
     {
      "merchant": "grouponfr",
      "price_eur": 1129.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "asgoodasnewfr",
      "price_eur": 1139.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
-     "merchant": "eleclercfrmarketplac",
-     "price_eur": 1139.99,
-     "date": "2026-10-11"
+     "merchant": "joybuyfr",
+     "price_eur": 1159.99,
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
@@ -2889,22 +3272,22 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 1219.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 1226.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 1229.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 1229.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
@@ -2919,12 +3302,12 @@
     {
      "merchant": "fnac",
      "price_eur": 1229.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 1229.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -2991,6 +3374,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1099.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 1099.0
     }
    ]
   },
@@ -3005,12 +3392,12 @@
    "offer_count": 15,
    "min_price_eur": 250.99,
    "max_price_eur": 299.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "onbuycomfr",
      "price_eur": 250.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclercfrmarketplac",
@@ -3020,27 +3407,27 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 259.89,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 264.9,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "getgoodscomfr",
      "price_eur": 266.04,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
      "price_eur": 267.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 269.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
@@ -3060,22 +3447,22 @@
     {
      "merchant": "diturfr",
      "price_eur": 275.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 291.5,
-     "date": "2026-11-06"
+     "date": "2026-11-09"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 294.41,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "topbizfr",
      "price_eur": 298.8,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -3167,6 +3554,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 250.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 250.99
     }
    ]
   },
@@ -3181,52 +3572,52 @@
    "offer_count": 15,
    "min_price_eur": 699.0,
    "max_price_eur": 1003.49,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "boulanger",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "dysonfr",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "manomanofr",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
-     "price_eur": 748.86,
-     "date": "2026-11-07"
+     "price_eur": 751.91,
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 769.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "grouponfr",
      "price_eur": 789.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "frmobileshopeu",
@@ -3236,27 +3627,27 @@
     {
      "merchant": "pccomponentesfr",
      "price_eur": 849.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 930.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 949.5,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kastneroehlerfr",
      "price_eur": 999.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "helloedgefr",
      "price_eur": 1003.49,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -3335,6 +3726,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 699.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 699.0
     }
    ]
   },
@@ -3349,17 +3744,17 @@
    "offer_count": 15,
    "min_price_eur": 449.0,
    "max_price_eur": 719.9,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 449.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 449.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
@@ -3368,48 +3763,48 @@
     },
     {
      "merchant": "fnac",
-     "price_eur": 514.24,
-     "date": "2026-11-07"
+     "price_eur": 512.84,
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
-     "price_eur": 521.31,
-     "date": "2026-11-07"
+     "price_eur": 520.77,
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 528.35,
-     "date": "2026-11-07"
+     "price_eur": 528.2,
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 541.05,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 542.5,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "manomanofr",
+     "price_eur": 547.91,
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
      "price_eur": 549.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
-     "price_eur": 551.89,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "manomanofr",
-     "price_eur": 552.36,
-     "date": "2026-11-07"
+     "price_eur": 551.9,
+     "date": "2026-11-08"
     },
     {
      "merchant": "pccomponentesfr",
      "price_eur": 599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "topbizfr",
@@ -3419,7 +3814,7 @@
     {
      "merchant": "galaxusfr",
      "price_eur": 665.22,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "aosomfr",
@@ -3507,170 +3902,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 449.0
-    }
-   ]
-  },
-  {
-   "id": "ps5-slim",
-   "name": "PS5 Slim (édition disque)",
-   "brand": "Sony",
-   "category": "console",
-   "category_label": "Consoles",
-   "image": "",
-   "image_credit": null,
-   "offer_count": 15,
-   "min_price_eur": 639.0,
-   "max_price_eur": 814.0,
-   "last_date": "2026-11-08",
-   "offers": [
-    {
-     "merchant": "ebay",
-     "price_eur": 639.0,
-     "date": "2026-10-31"
-    },
-    {
-     "merchant": "pccomponentesfr",
-     "price_eur": 639.0,
-     "date": "2026-10-13"
-    },
-    {
-     "merchant": "carrefourfr",
-     "price_eur": 649.0,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "sonvideocom",
-     "price_eur": 649.0,
-     "date": "2026-11-06"
-    },
-    {
-     "merchant": "boulanger",
-     "price_eur": 649.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 649.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "fnac",
-     "price_eur": 649.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "joybuyfr",
-     "price_eur": 649.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "aliexpress",
-     "price_eur": 651.84,
-     "date": "2026-10-31"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 690.07,
-     "date": "2026-10-24"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 749.0,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 759.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "rueducommercefrmarke",
-     "price_eur": 762.36,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "frmobileshopeu",
-     "price_eur": 779.0,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "amazon",
-     "price_eur": 814.0,
-     "date": "2026-11-08"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-10",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-11",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-13",
-     "min_price_eur": 639.0
-    },
-    {
-     "date": "2026-10-14",
-     "min_price_eur": 549.99
-    },
-    {
-     "date": "2026-10-16",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-17",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-18",
-     "min_price_eur": 644.86
-    },
-    {
-     "date": "2026-10-20",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-21",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-23",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-24",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-28",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-10-30",
-     "min_price_eur": 639.0
-    },
-    {
-     "date": "2026-10-31",
-     "min_price_eur": 639.0
-    },
-    {
-     "date": "2026-11-03",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-11-05",
-     "min_price_eur": 649.0
-    },
-    {
-     "date": "2026-11-06",
-     "min_price_eur": 649.0
     },
     {
      "date": "2026-11-08",
-     "min_price_eur": 649.0
+     "min_price_eur": 449.0
     }
    ]
   },
@@ -3685,22 +3920,22 @@
    "offer_count": 15,
    "min_price_eur": 599.0,
    "max_price_eur": 815.59,
-   "last_date": "2026-11-08",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 599.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "carrefourfr",
      "price_eur": 599.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 599.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pccomponentesfr",
@@ -3725,7 +3960,7 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 689.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "frmobileshopeu",
@@ -3740,27 +3975,27 @@
     {
      "merchant": "fnac",
      "price_eur": 761.46,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 764.26,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 770.1,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
      "price_eur": 797.64,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 804.8,
+     "date": "2026-11-09"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 815.59,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -3839,6 +4074,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 599.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 599.0
     }
    ]
   },
@@ -3853,12 +4092,12 @@
    "offer_count": 15,
    "min_price_eur": 414.99,
    "max_price_eur": 501.7,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
      "price_eur": 414.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "informaticabaratacom",
@@ -3873,17 +4112,17 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 449.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 456.84,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 456.84,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
@@ -3893,7 +4132,7 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 471.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "asgoodasnewfr",
@@ -3908,12 +4147,12 @@
     {
      "merchant": "getgoodscomfr",
      "price_eur": 492.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ubaldimarketplace",
      "price_eur": 495.06,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
@@ -4011,170 +4250,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 414.99
-    }
-   ]
-  },
-  {
-   "id": "ipad-air-13-m3",
-   "name": "iPad Air 13\" M3",
-   "brand": "Apple",
-   "category": "tablette",
-   "category_label": "Tablettes",
-   "image": "",
-   "image_credit": null,
-   "offer_count": 15,
-   "min_price_eur": 799.0,
-   "max_price_eur": 1105.9,
-   "last_date": "2026-11-07",
-   "offers": [
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 799.0,
-     "date": "2026-11-07"
     },
     {
-     "merchant": "inmacwstorecom",
-     "price_eur": 818.98,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "laboutiquedunetcom",
-     "price_eur": 822.96,
-     "date": "2026-10-12"
-    },
-    {
-     "merchant": "eleclercfrmarketplac",
-     "price_eur": 829.99,
-     "date": "2026-10-19"
-    },
-    {
-     "merchant": "topbizfr",
-     "price_eur": 850.69,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "helloedgefr",
-     "price_eur": 905.49,
-     "date": "2026-10-22"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 939.0,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 949.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 949.99,
-     "date": "2026-10-30"
-    },
-    {
-     "merchant": "bixotocomfr",
-     "price_eur": 958.5,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "onbuycomfr",
-     "price_eur": 1028.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "boulanger",
-     "price_eur": 1039.0,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "fnac",
-     "price_eur": 1079.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "joybuyfr",
-     "price_eur": 1099.0,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "ebay",
-     "price_eur": 1105.9,
-     "date": "2026-11-04"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-09",
-     "min_price_eur": 779.97
-    },
-    {
-     "date": "2026-10-10",
-     "min_price_eur": 779.97
-    },
-    {
-     "date": "2026-10-12",
-     "min_price_eur": 779.97
-    },
-    {
-     "date": "2026-10-13",
-     "min_price_eur": 779.97
-    },
-    {
-     "date": "2026-10-15",
-     "min_price_eur": 779.97
-    },
-    {
-     "date": "2026-10-16",
-     "min_price_eur": 801.0
-    },
-    {
-     "date": "2026-10-18",
-     "min_price_eur": 801.0
-    },
-    {
-     "date": "2026-10-19",
-     "min_price_eur": 801.0
-    },
-    {
-     "date": "2026-10-20",
-     "min_price_eur": 801.0
-    },
-    {
-     "date": "2026-10-22",
-     "min_price_eur": 801.0
-    },
-    {
-     "date": "2026-10-23",
-     "min_price_eur": 671.99
-    },
-    {
-     "date": "2026-10-26",
-     "min_price_eur": 765.0
-    },
-    {
-     "date": "2026-10-28",
-     "min_price_eur": 671.99
-    },
-    {
-     "date": "2026-10-29",
-     "min_price_eur": 771.0
-    },
-    {
-     "date": "2026-10-30",
-     "min_price_eur": 771.0
-    },
-    {
-     "date": "2026-11-04",
-     "min_price_eur": 771.0
-    },
-    {
-     "date": "2026-11-05",
-     "min_price_eur": 799.0
-    },
-    {
-     "date": "2026-11-07",
-     "min_price_eur": 799.0
+     "date": "2026-11-08",
+     "min_price_eur": 414.99
     }
    ]
   },
@@ -4189,7 +4268,7 @@
    "offer_count": 15,
    "min_price_eur": 1059.99,
    "max_price_eur": 1434.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
@@ -4204,12 +4283,12 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 1127.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1173.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
@@ -4219,37 +4298,37 @@
     {
      "merchant": "getgoodscomfr",
      "price_eur": 1250.04,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 1318.87,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 1318.87,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 1318.87,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 1318.91,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 1319.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 1319.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "informaticabaratacom",
@@ -4347,6 +4426,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1109.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 1127.99
     }
    ]
   },
@@ -4361,7 +4444,7 @@
    "offer_count": 15,
    "min_price_eur": 521.99,
    "max_price_eur": 689.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "joybuyfr",
@@ -4371,7 +4454,7 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 571.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "informaticabaratacom",
@@ -4381,7 +4464,7 @@
     {
      "merchant": "wellbotsfr",
      "price_eur": 609.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
@@ -4396,7 +4479,7 @@
     {
      "merchant": "galaxusfr",
      "price_eur": 627.39,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
@@ -4406,7 +4489,7 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 639.15,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "topbizfr",
@@ -4421,22 +4504,22 @@
     {
      "merchant": "getgoodscomfr",
      "price_eur": 668.04,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
      "price_eur": 689.9,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 689.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 689.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -4519,6 +4602,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 571.99
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 571.99
     }
    ]
   },
@@ -4533,22 +4620,22 @@
    "offer_count": 15,
    "min_price_eur": 629.0,
    "max_price_eur": 850.41,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "ebay",
      "price_eur": 629.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 670.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
-     "price_eur": 699.0,
-     "date": "2026-11-03"
+     "price_eur": 675.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
@@ -4558,27 +4645,27 @@
     {
      "merchant": "cdiscount",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
      "price_eur": 699.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 699.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 706.8,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -4587,8 +4674,8 @@
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 765.99,
-     "date": "2026-11-07"
+     "price_eur": 763.88,
+     "date": "2026-11-09"
     },
     {
      "merchant": "onbuycomfr",
@@ -4603,12 +4690,12 @@
     {
      "merchant": "fibresetcablescomfr",
      "price_eur": 793.15,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "getgoodscomfr",
      "price_eur": 850.41,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -4694,6 +4781,10 @@
     },
     {
      "date": "2026-11-07",
+     "min_price_eur": 629.0
+    },
+    {
+     "date": "2026-11-09",
      "min_price_eur": 629.0
     }
    ]
@@ -4874,27 +4965,27 @@
    "offer_count": 14,
    "min_price_eur": 327.99,
    "max_price_eur": 436.55,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "onbuycomfr",
      "price_eur": 327.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 381.9,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
      "price_eur": 384.9,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 389.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
@@ -4914,12 +5005,12 @@
     {
      "merchant": "fnac",
      "price_eur": 399.99,
-     "date": "2026-10-27"
+     "date": "2026-11-09"
     },
     {
      "merchant": "blitzhandel24fr",
      "price_eur": 402.3,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "joybuyfr",
@@ -4929,12 +5020,12 @@
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 413.82,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 419.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "bixotocomfr",
@@ -5031,6 +5122,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 327.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 327.99
     }
    ]
   },
@@ -5045,12 +5140,12 @@
    "offer_count": 14,
    "min_price_eur": 599.0,
    "max_price_eur": 1057.49,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
@@ -5060,47 +5155,47 @@
     {
      "merchant": "cdiscount",
      "price_eur": 599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "easyloungecom",
      "price_eur": 599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "manomanofr",
      "price_eur": 599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 632.8,
+     "date": "2026-11-08"
     },
     {
      "merchant": "reicheltcomfr",
      "price_eur": 705.87,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 708.59,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 791.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 856.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclercfrmarketplac",
@@ -5110,12 +5205,12 @@
     {
      "merchant": "bixotocomfr",
      "price_eur": 1054.89,
-     "date": "2026-11-05"
+     "date": "2026-11-08"
     },
     {
      "merchant": "helloedgefr",
      "price_eur": 1057.49,
-     "date": "2026-11-04"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -5202,6 +5297,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 599.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 599.0
     }
    ]
   },
@@ -5214,59 +5313,59 @@
    "image": "",
    "image_credit": null,
    "offer_count": 14,
-   "min_price_eur": 98.47,
+   "min_price_eur": 98.96,
    "max_price_eur": 124.95,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
-    {
-     "merchant": "amazon",
-     "price_eur": 98.47,
-     "date": "2026-11-07"
-    },
     {
      "merchant": "ebay",
      "price_eur": 98.96,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 101.59,
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 104.62,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "xtremeinnfr",
      "price_eur": 106.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 107.71,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pccomponentesfr",
      "price_eur": 107.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cartouche24eu",
      "price_eur": 108.73,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "prindofr",
      "price_eur": 109.33,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "toner24fr",
      "price_eur": 109.33,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "topbizfr",
      "price_eur": 111.1,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
@@ -5274,19 +5373,19 @@
      "date": "2026-10-21"
     },
     {
-     "merchant": "helloedgefr",
-     "price_eur": 121.49,
-     "date": "2026-11-07"
+     "merchant": "manomanofr",
+     "price_eur": 120.11,
+     "date": "2026-11-09"
     },
     {
-     "merchant": "manomanofr",
-     "price_eur": 121.85,
-     "date": "2026-11-07"
+     "merchant": "helloedgefr",
+     "price_eur": 121.49,
+     "date": "2026-11-09"
     },
     {
      "merchant": "salontotalfr",
      "price_eur": 124.95,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -5365,6 +5464,181 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 98.47
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 98.96
+    }
+   ]
+  },
+  {
+   "id": "jbl-go-4",
+   "name": "JBL Go 4",
+   "brand": "JBL",
+   "category": "enceinte",
+   "category_label": "Enceintes",
+   "image": "",
+   "image_credit": null,
+   "offer_count": 14,
+   "min_price_eur": 34.99,
+   "max_price_eur": 72.75,
+   "last_date": "2026-11-09",
+   "offers": [
+    {
+     "merchant": "carrefourfr",
+     "price_eur": 34.99,
+     "date": "2026-11-03"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 39.99,
+     "date": "2026-10-19"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 40.9,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 45.99,
+     "date": "2026-10-12"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 45.99,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "xtremeinnfr",
+     "price_eur": 47.49,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "maxiburofr",
+     "price_eur": 47.94,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "pccomponentesfr",
+     "price_eur": 47.99,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 52.99,
+     "date": "2026-10-21"
+    },
+    {
+     "merchant": "manomanofr",
+     "price_eur": 54.0,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "mondofficefr",
+     "price_eur": 60.96,
+     "date": "2026-10-26"
+    },
+    {
+     "merchant": "helloedgefr",
+     "price_eur": 62.99,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "onbuycomfr",
+     "price_eur": 70.3,
+     "date": "2026-10-26"
+    },
+    {
+     "merchant": "kauflandfr",
+     "price_eur": 72.75,
+     "date": "2026-11-09"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-09",
+     "min_price_eur": 34.99
+    },
+    {
+     "date": "2026-10-11",
+     "min_price_eur": 34.99
+    },
+    {
+     "date": "2026-10-12",
+     "min_price_eur": 34.99
+    },
+    {
+     "date": "2026-10-14",
+     "min_price_eur": 34.99
+    },
+    {
+     "date": "2026-10-15",
+     "min_price_eur": 24.99
+    },
+    {
+     "date": "2026-10-16",
+     "min_price_eur": 24.99
+    },
+    {
+     "date": "2026-10-18",
+     "min_price_eur": 24.99
+    },
+    {
+     "date": "2026-10-19",
+     "min_price_eur": 24.99
+    },
+    {
+     "date": "2026-10-21",
+     "min_price_eur": 24.99
+    },
+    {
+     "date": "2026-10-22",
+     "min_price_eur": 24.99
+    },
+    {
+     "date": "2026-10-24",
+     "min_price_eur": 24.99
+    },
+    {
+     "date": "2026-10-25",
+     "min_price_eur": 39.66
+    },
+    {
+     "date": "2026-10-26",
+     "min_price_eur": 39.66
+    },
+    {
+     "date": "2026-10-28",
+     "min_price_eur": 39.66
+    },
+    {
+     "date": "2026-10-29",
+     "min_price_eur": 40.9
+    },
+    {
+     "date": "2026-10-31",
+     "min_price_eur": 40.9
+    },
+    {
+     "date": "2026-11-01",
+     "min_price_eur": 24.99
+    },
+    {
+     "date": "2026-11-03",
+     "min_price_eur": 34.99
+    },
+    {
+     "date": "2026-11-06",
+     "min_price_eur": 41.39
+    },
+    {
+     "date": "2026-11-07",
+     "min_price_eur": 39.9
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 40.9
     }
    ]
   },
@@ -5384,7 +5658,7 @@
    "offer_count": 14,
    "min_price_eur": 2278.81,
    "max_price_eur": 2949.98,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "galaxusfr",
@@ -5398,8 +5672,8 @@
     },
     {
      "merchant": "joybuyfr",
-     "price_eur": 2595.02,
-     "date": "2026-11-07"
+     "price_eur": 2604.0,
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -5409,27 +5683,27 @@
     {
      "merchant": "amazon",
      "price_eur": 2694.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 2694.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 2699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 2699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 2699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
@@ -5444,17 +5718,17 @@
     {
      "merchant": "inmacwstorecom",
      "price_eur": 2898.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "hellorsefr",
      "price_eur": 2907.48,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 2949.98,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -5533,6 +5807,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 2595.02
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 2604.0
     }
    ]
   },
@@ -5714,8 +5992,8 @@
    },
    "offer_count": 14,
    "min_price_eur": 911.0,
-   "max_price_eur": 997.0,
-   "last_date": "2026-11-08",
+   "max_price_eur": 1015.0,
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "friphonerycom",
@@ -5730,17 +6008,17 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 931.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
      "price_eur": 935.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 935.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "informaticabaratacom",
@@ -5749,18 +6027,13 @@
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 955.55,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "amazon",
-     "price_eur": 968.0,
-     "date": "2026-11-05"
+     "price_eur": 949.99,
+     "date": "2026-11-09"
     },
     {
      "merchant": "grouponfr",
      "price_eur": 969.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
@@ -5775,7 +6048,7 @@
     {
      "merchant": "ebay",
      "price_eur": 985.4,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "frmobileshopeu",
@@ -5785,7 +6058,12 @@
     {
      "merchant": "kauflandfr",
      "price_eur": 997.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 1015.0,
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -5872,6 +6150,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 931.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 931.99
     }
    ]
   },
@@ -5891,12 +6173,12 @@
    "offer_count": 14,
    "min_price_eur": 609.0,
    "max_price_eur": 1109.77,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "pixmaniafr",
      "price_eur": 609.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclercfrmarketplac",
@@ -5911,7 +6193,7 @@
     {
      "merchant": "ebay",
      "price_eur": 645.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -5921,12 +6203,7 @@
     {
      "merchant": "kauflandfr",
      "price_eur": 748.02,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 769.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "mondofficefr",
@@ -5936,7 +6213,7 @@
     {
      "merchant": "fibresetcablescomfr",
      "price_eur": 818.32,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
@@ -5959,9 +6236,14 @@
      "date": "2026-11-07"
     },
     {
+     "merchant": "galaxusfr",
+     "price_eur": 966.16,
+     "date": "2026-11-09"
+    },
+    {
      "merchant": "manomanofr",
      "price_eur": 1109.77,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -6044,6 +6326,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 609.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 609.0
     }
    ]
   },
@@ -6063,7 +6349,7 @@
    "offer_count": 14,
    "min_price_eur": 1194.0,
    "max_price_eur": 1379.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "friphonerycom",
@@ -6073,17 +6359,17 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 1199.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
      "price_eur": 1209.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclercfrmarketplac",
      "price_eur": 1209.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "nbmobileeu",
@@ -6091,29 +6377,29 @@
      "date": "2026-10-24"
     },
     {
-     "merchant": "amazon",
-     "price_eur": 1249.0,
-     "date": "2026-11-07"
-    },
-    {
      "merchant": "joybuyfr",
      "price_eur": 1249.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "grouponfr",
      "price_eur": 1259.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "asgoodasnewfr",
      "price_eur": 1269.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 1289.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 1299.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
@@ -6123,12 +6409,12 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 1310.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 1369.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -6220,6 +6506,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1199.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 1199.0
     }
    ]
   },
@@ -6239,7 +6529,7 @@
    "offer_count": 14,
    "min_price_eur": 854.0,
    "max_price_eur": 1079.97,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "friphonerycom",
@@ -6249,22 +6539,22 @@
     {
      "merchant": "ebay",
      "price_eur": 869.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "asgoodasnewfr",
      "price_eur": 889.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 891.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "grouponfr",
      "price_eur": 899.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
@@ -6284,17 +6574,17 @@
     {
      "merchant": "amazon",
      "price_eur": 989.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 989.0,
-     "date": "2026-11-04"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 989.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ubaldimarketplace",
@@ -6388,168 +6678,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 869.0
-    }
-   ]
-  },
-  {
-   "id": "jbl-go-4",
-   "name": "JBL Go 4",
-   "brand": "JBL",
-   "category": "enceinte",
-   "category_label": "Enceintes",
-   "image": "",
-   "image_credit": null,
-   "offer_count": 13,
-   "min_price_eur": 34.99,
-   "max_price_eur": 72.0,
-   "last_date": "2026-11-07",
-   "offers": [
-    {
-     "merchant": "carrefourfr",
-     "price_eur": 34.99,
-     "date": "2026-11-03"
     },
     {
-     "merchant": "amazon",
-     "price_eur": 39.9,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 39.99,
-     "date": "2026-10-19"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 45.99,
-     "date": "2026-10-12"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 45.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "xtremeinnfr",
-     "price_eur": 47.49,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "maxiburofr",
-     "price_eur": 47.94,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "pccomponentesfr",
-     "price_eur": 47.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "fnac",
-     "price_eur": 52.99,
-     "date": "2026-10-21"
-    },
-    {
-     "merchant": "manomanofr",
-     "price_eur": 54.0,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "mondofficefr",
-     "price_eur": 60.96,
-     "date": "2026-10-26"
-    },
-    {
-     "merchant": "onbuycomfr",
-     "price_eur": 70.3,
-     "date": "2026-10-26"
-    },
-    {
-     "merchant": "kauflandfr",
-     "price_eur": 72.0,
-     "date": "2026-11-07"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-09",
-     "min_price_eur": 34.99
-    },
-    {
-     "date": "2026-10-11",
-     "min_price_eur": 34.99
-    },
-    {
-     "date": "2026-10-12",
-     "min_price_eur": 34.99
-    },
-    {
-     "date": "2026-10-14",
-     "min_price_eur": 34.99
-    },
-    {
-     "date": "2026-10-15",
-     "min_price_eur": 24.99
-    },
-    {
-     "date": "2026-10-16",
-     "min_price_eur": 24.99
-    },
-    {
-     "date": "2026-10-18",
-     "min_price_eur": 24.99
-    },
-    {
-     "date": "2026-10-19",
-     "min_price_eur": 24.99
-    },
-    {
-     "date": "2026-10-21",
-     "min_price_eur": 24.99
-    },
-    {
-     "date": "2026-10-22",
-     "min_price_eur": 24.99
-    },
-    {
-     "date": "2026-10-24",
-     "min_price_eur": 24.99
-    },
-    {
-     "date": "2026-10-25",
-     "min_price_eur": 39.66
-    },
-    {
-     "date": "2026-10-26",
-     "min_price_eur": 39.66
-    },
-    {
-     "date": "2026-10-28",
-     "min_price_eur": 39.66
-    },
-    {
-     "date": "2026-10-29",
-     "min_price_eur": 40.9
-    },
-    {
-     "date": "2026-10-31",
-     "min_price_eur": 40.9
-    },
-    {
-     "date": "2026-11-01",
-     "min_price_eur": 24.99
-    },
-    {
-     "date": "2026-11-03",
-     "min_price_eur": 34.99
-    },
-    {
-     "date": "2026-11-06",
-     "min_price_eur": 41.39
-    },
-    {
-     "date": "2026-11-07",
-     "min_price_eur": 39.9
+     "date": "2026-11-09",
+     "min_price_eur": 869.0
     }
    ]
   },
@@ -6564,22 +6696,22 @@
    "offer_count": 13,
    "min_price_eur": 2999.99,
    "max_price_eur": 3646.33,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "boulanger",
      "price_eur": 2999.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 3115.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 3145.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
@@ -6588,38 +6720,38 @@
     },
     {
      "merchant": "hellorsefr",
-     "price_eur": 3298.68,
-     "date": "2026-11-07"
+     "price_eur": 3395.88,
+     "date": "2026-11-08"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 3396.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 3399.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 3399.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 3399.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 3399.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 3443.98,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
@@ -6629,7 +6761,7 @@
     {
      "merchant": "fibresetcablescomfr",
      "price_eur": 3646.33,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -6707,6 +6839,10 @@
     },
     {
      "date": "2026-11-07",
+     "min_price_eur": 2999.99
+    },
+    {
+     "date": "2026-11-08",
      "min_price_eur": 2999.99
     }
    ]
@@ -6877,62 +7013,62 @@
    "offer_count": 13,
    "min_price_eur": 237.9,
    "max_price_eur": 254.5,
-   "last_date": "2026-11-08",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "alternatefr",
      "price_eur": 237.9,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "getgoodscomfr",
      "price_eur": 237.96,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 239.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
      "price_eur": 246.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 246.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
      "price_eur": 249.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "sonvideocom",
      "price_eur": 249.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 249.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "carrefourfr",
      "price_eur": 249.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 249.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "joybuyfr",
      "price_eur": 249.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pccomponentesfr",
@@ -7017,6 +7153,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 237.9
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 237.9
     }
    ]
   },
@@ -7030,38 +7170,38 @@
    "image_credit": null,
    "offer_count": 13,
    "min_price_eur": 189.0,
-   "max_price_eur": 252.79,
-   "last_date": "2026-11-07",
+   "max_price_eur": 249.9,
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 189.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ubaldicom",
      "price_eur": 203.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
-     "price_eur": 213.09,
-     "date": "2026-11-07"
+     "price_eur": 213.0,
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
-     "price_eur": 213.1,
-     "date": "2026-11-07"
+     "price_eur": 213.03,
+     "date": "2026-11-08"
     },
     {
      "merchant": "laboutiquedunetcom",
-     "price_eur": 213.85,
-     "date": "2026-11-07"
+     "price_eur": 213.79,
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
-     "price_eur": 215.65,
-     "date": "2026-11-07"
+     "price_eur": 215.67,
+     "date": "2026-11-08"
     },
     {
      "merchant": "ubaldimarketplace",
@@ -7070,33 +7210,33 @@
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 221.08,
-     "date": "2026-11-07"
+     "price_eur": 221.09,
+     "date": "2026-11-08"
     },
     {
      "merchant": "manomanofr",
      "price_eur": 225.14,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "rowentafr",
      "price_eur": 235.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "abribatfr",
      "price_eur": 236.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 247.74,
+     "date": "2026-11-08"
     },
     {
      "merchant": "electroamompfr",
      "price_eur": 249.9,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 252.79,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -7175,6 +7315,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 189.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 189.0
     }
    ]
   },
@@ -7194,12 +7338,12 @@
    "offer_count": 13,
    "min_price_eur": 645.0,
    "max_price_eur": 739.0,
-   "last_date": "2026-11-08",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 645.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
@@ -7209,12 +7353,12 @@
     {
      "merchant": "darty",
      "price_eur": 685.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 685.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "informaticabaratacom",
@@ -7222,9 +7366,14 @@
      "date": "2026-11-02"
     },
     {
+     "merchant": "kauflandfr",
+     "price_eur": 689.0,
+     "date": "2026-11-09"
+    },
+    {
      "merchant": "pixmaniafr",
-     "price_eur": 695.0,
-     "date": "2026-11-08"
+     "price_eur": 690.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "onbuycomfr",
@@ -7232,14 +7381,9 @@
      "date": "2026-10-30"
     },
     {
-     "merchant": "kauflandfr",
-     "price_eur": 697.0,
-     "date": "2026-11-08"
-    },
-    {
      "merchant": "grouponfr",
      "price_eur": 699.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclercfrmarketplac",
@@ -7334,6 +7478,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 645.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 645.0
     }
    ]
   },
@@ -7352,8 +7500,8 @@
    },
    "offer_count": 13,
    "min_price_eur": 868.99,
-   "max_price_eur": 954.0,
-   "last_date": "2026-11-08",
+   "max_price_eur": 960.99,
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "onbuycomfr",
@@ -7361,24 +7509,14 @@
      "date": "2026-10-14"
     },
     {
-     "merchant": "eleclercfrmarketplac",
-     "price_eur": 869.98,
-     "date": "2026-10-26"
-    },
-    {
      "merchant": "ebay",
      "price_eur": 888.7,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "joybuyfr",
-     "price_eur": 889.0,
-     "date": "2026-10-20"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 889.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "frmobileshopeu",
@@ -7388,17 +7526,27 @@
     {
      "merchant": "darty",
      "price_eur": 899.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 900.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 907.31,
      "date": "2026-10-11"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 911.0,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "joybuyfr",
+     "price_eur": 919.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
@@ -7411,14 +7559,14 @@
      "date": "2026-11-08"
     },
     {
-     "merchant": "amazon",
-     "price_eur": 939.0,
-     "date": "2026-11-08"
-    },
-    {
      "merchant": "alternatefr",
      "price_eur": 954.0,
      "date": "2026-11-05"
+    },
+    {
+     "merchant": "eleclercfrmarketplac",
+     "price_eur": 960.99,
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -7505,6 +7653,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 888.7
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 888.7
     }
    ]
   },
@@ -7519,7 +7671,7 @@
    "offer_count": 13,
    "min_price_eur": 826.99,
    "max_price_eur": 1019.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
@@ -7529,27 +7681,27 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 880.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
      "price_eur": 913.1,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 919.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 919.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 919.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
@@ -7559,12 +7711,12 @@
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 919.7,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 953.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
@@ -7574,7 +7726,7 @@
     {
      "merchant": "getgoodscomfr",
      "price_eur": 966.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "informaticabaratacom",
@@ -7584,7 +7736,7 @@
     {
      "merchant": "boulanger",
      "price_eur": 1019.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -7663,6 +7815,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 880.99
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 880.99
     }
    ]
   },
@@ -7677,17 +7833,12 @@
    "offer_count": 12,
    "min_price_eur": 657.97,
    "max_price_eur": 786.79,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
      "price_eur": 657.97,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "joybuyfr",
-     "price_eur": 671.92,
-     "date": "2026-11-01"
+     "date": "2026-11-09"
     },
     {
      "merchant": "asgoodasnewfr",
@@ -7696,33 +7847,38 @@
     },
     {
      "merchant": "ebay",
-     "price_eur": 708.93,
-     "date": "2026-11-07"
+     "price_eur": 707.51,
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 713.71,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 735.6,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 751.5,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "joybuyfr",
+     "price_eur": 753.95,
+     "date": "2026-11-09"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 753.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
      "price_eur": 755.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ubaldimarketplace",
@@ -7732,7 +7888,7 @@
     {
      "merchant": "diturfr",
      "price_eur": 779.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
@@ -7816,6 +7972,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 657.97
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 657.97
     }
    ]
   },
@@ -7830,12 +7990,12 @@
    "offer_count": 12,
    "min_price_eur": 99.95,
    "max_price_eur": 179.95,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "bosefr",
      "price_eur": 99.95,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
@@ -7844,8 +8004,8 @@
     },
     {
      "merchant": "amazon",
-     "price_eur": 139.12,
-     "date": "2026-11-07"
+     "price_eur": 138.03,
+     "date": "2026-11-09"
     },
     {
      "merchant": "xtremeinnfr",
@@ -7855,7 +8015,7 @@
     {
      "merchant": "kauflandfr",
      "price_eur": 152.36,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
@@ -7875,22 +8035,22 @@
     {
      "merchant": "cdiscount",
      "price_eur": 176.6,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 178.23,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "manomanofr",
      "price_eur": 178.33,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 178.59,
+     "date": "2026-11-09"
     },
     {
      "merchant": "sonvideocom",
      "price_eur": 179.95,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -7961,6 +8121,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 99.95
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 99.95
     }
    ]
   },
@@ -7975,67 +8139,67 @@
    "offer_count": 12,
    "min_price_eur": 449.0,
    "max_price_eur": 719.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "dysonfr",
      "price_eur": 449.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "manomanofr",
      "price_eur": 449.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pccomponentesfr",
-     "price_eur": 529.0,
-     "date": "2026-11-07"
+     "price_eur": 509.99,
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 545.5,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "helloedgefr",
      "price_eur": 583.49,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 598.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 603.38,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 703.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 719.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 719.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 719.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -8114,6 +8278,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 449.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 449.0
     }
    ]
   },
@@ -8128,7 +8296,7 @@
    "offer_count": 12,
    "min_price_eur": 579.0,
    "max_price_eur": 800.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "pccomponentesfr",
@@ -8148,12 +8316,12 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 659.22,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 708.91,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
@@ -8162,13 +8330,13 @@
     },
     {
      "merchant": "manomanofr",
-     "price_eur": 733.5,
-     "date": "2026-11-07"
+     "price_eur": 733.8,
+     "date": "2026-11-08"
     },
     {
      "merchant": "kastneroehlerfr",
      "price_eur": 749.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "carrefourfr",
@@ -8183,7 +8351,7 @@
     {
      "merchant": "galaxusfr",
      "price_eur": 799.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "helloedgefr",
@@ -8271,6 +8439,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 659.22
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 659.22
     }
    ]
   },
@@ -8283,59 +8455,59 @@
    "image": "",
    "image_credit": null,
    "offer_count": 12,
-   "min_price_eur": 321.2,
-   "max_price_eur": 379.78,
-   "last_date": "2026-11-07",
+   "min_price_eur": 321.7,
+   "max_price_eur": 379.24,
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "cdiscount",
-     "price_eur": 321.2,
-     "date": "2026-11-07"
+     "price_eur": 321.7,
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
      "price_eur": 322.14,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 322.14,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
      "price_eur": 322.14,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ubaldimarketplace",
      "price_eur": 326.05,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 341.95,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "easyloungecom",
      "price_eur": 349.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "sonvideocom",
      "price_eur": 349.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
      "price_eur": 349.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 350.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 352.71,
+     "date": "2026-11-09"
     },
     {
      "merchant": "manomanofr",
@@ -8344,8 +8516,8 @@
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 379.78,
-     "date": "2026-11-07"
+     "price_eur": 379.24,
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -8424,6 +8596,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 321.2
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 321.7
     }
    ]
   },
@@ -8438,42 +8614,42 @@
    "offer_count": 12,
    "min_price_eur": 99.99,
    "max_price_eur": 166.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "boulanger",
      "price_eur": 99.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pccomponentesfr",
      "price_eur": 130.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
-     "price_eur": 132.41,
-     "date": "2026-11-07"
+     "price_eur": 133.15,
+     "date": "2026-11-09"
     },
     {
      "merchant": "topbizfr",
      "price_eur": 134.49,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "xtremeinnfr",
      "price_eur": 137.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 142.4,
-     "date": "2026-11-07"
+     "price_eur": 141.92,
+     "date": "2026-11-09"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 142.89,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
@@ -8483,22 +8659,22 @@
     {
      "merchant": "manomanofr",
      "price_eur": 148.23,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 149.98,
-     "date": "2026-11-07"
+     "price_eur": 149.76,
+     "date": "2026-11-09"
     },
     {
      "merchant": "helloedgefr",
      "price_eur": 153.49,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
      "price_eur": 166.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -8569,6 +8745,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 99.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 99.99
     }
    ]
   },
@@ -8588,37 +8768,37 @@
    "offer_count": 12,
    "min_price_eur": 48.99,
    "max_price_eur": 59.36,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 48.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 48.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 48.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 49.92,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "visunextfr",
      "price_eur": 49.92,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "easyloungecom",
      "price_eur": 51.9,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "carrefourfr",
@@ -8633,7 +8813,7 @@
     {
      "merchant": "xtremeinnfr",
      "price_eur": 56.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pccomponentesfr",
@@ -8731,6 +8911,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 48.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 48.99
     }
    ]
   },
@@ -8745,12 +8929,12 @@
    "offer_count": 12,
    "min_price_eur": 1559.0,
    "max_price_eur": 1699.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "alternatefr",
      "price_eur": 1559.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
@@ -8760,12 +8944,12 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 1660.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1686.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
@@ -8775,32 +8959,32 @@
     {
      "merchant": "hellorsefr",
      "price_eur": 1697.88,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 1697.88,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 1699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 1699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 1699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 1699.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
@@ -8884,6 +9068,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1559.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 1559.0
     }
    ]
   },
@@ -8903,17 +9091,17 @@
    "offer_count": 12,
    "min_price_eur": 65.9,
    "max_price_eur": 70.3,
-   "last_date": "2026-11-08",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "alternatefr",
      "price_eur": 65.9,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "reicheltcomfr",
      "price_eur": 68.57,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
@@ -8923,22 +9111,22 @@
     {
      "merchant": "cstechstorefr",
      "price_eur": 68.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 69.26,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
      "price_eur": 69.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "carrefourfr",
      "price_eur": 69.99,
      "date": "2026-10-18"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 69.99,
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
@@ -8953,7 +9141,7 @@
     {
      "merchant": "joybuyfr",
      "price_eur": 69.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
@@ -9038,6 +9226,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 65.9
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 65.9
     }
    ]
   },
@@ -9050,19 +9242,19 @@
    "image": "",
    "image_credit": null,
    "offer_count": 12,
-   "min_price_eur": 154.96,
+   "min_price_eur": 141.03,
    "max_price_eur": 221.08,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
-     "price_eur": 154.96,
-     "date": "2026-11-07"
+     "price_eur": 141.03,
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 154.96,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "onbuycomfr",
@@ -9082,32 +9274,32 @@
     {
      "merchant": "sonvideocom",
      "price_eur": 179.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 179.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
      "price_eur": 179.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 179.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 179.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 181.16,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "manomanofr",
@@ -9183,6 +9375,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 154.96
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 141.03
     }
    ]
   },
@@ -9197,7 +9393,7 @@
    "offer_count": 12,
    "min_price_eur": 652.98,
    "max_price_eur": 819.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
@@ -9212,7 +9408,12 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 714.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 726.55,
+     "date": "2026-11-08"
     },
     {
      "merchant": "joybuyfr",
@@ -9222,42 +9423,37 @@
     {
      "merchant": "ebay",
      "price_eur": 738.2,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 772.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 777.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "getgoodscomfr",
      "price_eur": 777.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 818.82,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 818.82,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 818.84,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 819.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -9340,6 +9536,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 714.99
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 714.99
     }
    ]
   },
@@ -9354,7 +9554,7 @@
    "offer_count": 12,
    "min_price_eur": 1199.99,
    "max_price_eur": 1669.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
@@ -9362,44 +9562,44 @@
      "date": "2026-11-04"
     },
     {
-     "merchant": "asgoodasnewfr",
-     "price_eur": 1349.0,
-     "date": "2026-11-07"
-    },
-    {
      "merchant": "onbuycomfr",
      "price_eur": 1350.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "asgoodasnewfr",
+     "price_eur": 1429.0,
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1463.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 1549.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 1549.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 1549.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 1549.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "getgoodscomfr",
      "price_eur": 1580.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "informaticabaratacom",
@@ -9409,12 +9609,12 @@
     {
      "merchant": "darty",
      "price_eur": 1669.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 1669.99,
-     "date": "2026-10-27"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -9501,6 +9701,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1349.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 1350.99
     }
    ]
   },
@@ -9520,12 +9724,12 @@
    "offer_count": 12,
    "min_price_eur": 709.9,
    "max_price_eur": 950.43,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "pixmaniafr",
      "price_eur": 709.9,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclercfrmarketplac",
@@ -9535,7 +9739,7 @@
     {
      "merchant": "ebay",
      "price_eur": 839.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "wellbotsfr",
@@ -9550,22 +9754,22 @@
     {
      "merchant": "grouponfr",
      "price_eur": 899.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 920.72,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fibresetcablescomfr",
      "price_eur": 938.63,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
      "price_eur": 949.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
@@ -9663,6 +9867,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 709.9
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 709.9
     }
    ]
   },
@@ -9677,22 +9885,22 @@
    "offer_count": 11,
    "min_price_eur": 449.0,
    "max_price_eur": 646.92,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "boulanger",
      "price_eur": 449.0,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 469.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 469.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 505.81,
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
@@ -9706,33 +9914,33 @@
     },
     {
      "merchant": "cdiscount",
-     "price_eur": 527.9,
-     "date": "2026-11-07"
+     "price_eur": 525.1,
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 543.51,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "manomanofr",
-     "price_eur": 543.78,
-     "date": "2026-11-07"
+     "price_eur": 541.7,
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 546.89,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "manomanofr",
+     "price_eur": 547.36,
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 569.25,
-     "date": "2026-11-07"
+     "price_eur": 567.55,
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 646.92,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -9803,6 +10011,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 449.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 449.0
     }
    ]
   },
@@ -9822,7 +10034,7 @@
    "offer_count": 11,
    "min_price_eur": 858.0,
    "max_price_eur": 1049.34,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "nbmobileeu",
@@ -9832,12 +10044,12 @@
     {
      "merchant": "ebay",
      "price_eur": 869.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclercfrmarketplac",
      "price_eur": 869.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "joybuyfr",
@@ -9846,23 +10058,23 @@
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 903.88,
-     "date": "2026-11-07"
+     "price_eur": 905.55,
+     "date": "2026-11-09"
     },
     {
      "merchant": "grouponfr",
      "price_eur": 909.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 950.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "asgoodasnewfr",
      "price_eur": 959.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "informaticabaratacom",
@@ -9956,6 +10168,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 869.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 869.0
     }
    ]
   },
@@ -9973,24 +10189,24 @@
     "match": "verifie_visuellement"
    },
    "offer_count": 11,
-   "min_price_eur": 1429.99,
+   "min_price_eur": 1429.98,
    "max_price_eur": 1629.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
-     "price_eur": 1429.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "ebay",
-     "price_eur": 1499.0,
-     "date": "2026-11-07"
+     "price_eur": 1429.98,
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 1506.63,
-     "date": "2026-11-07"
+     "price_eur": 1510.55,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "ebay",
+     "price_eur": 1579.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "friphonerycom",
@@ -10000,12 +10216,12 @@
     {
      "merchant": "grouponfr",
      "price_eur": 1599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
      "price_eur": 1629.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
@@ -10015,12 +10231,12 @@
     {
      "merchant": "cdiscount",
      "price_eur": 1629.0,
-     "date": "2026-11-04"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 1629.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
@@ -10030,7 +10246,7 @@
     {
      "merchant": "galaxusfr",
      "price_eur": 1629.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -10109,6 +10325,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1429.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 1429.98
     }
    ]
   },
@@ -10128,12 +10348,12 @@
    "offer_count": 10,
    "min_price_eur": 175.99,
    "max_price_eur": 332.28,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "bosavernadefr",
      "price_eur": 175.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
@@ -10148,7 +10368,7 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 206.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "buyylocomfr",
@@ -10158,12 +10378,12 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 238.76,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "reicheltcomfr",
      "price_eur": 241.03,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fibresetcablescomfr",
@@ -10173,7 +10393,7 @@
     {
      "merchant": "kauflandfr",
      "price_eur": 270.55,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
@@ -10253,6 +10473,10 @@
     {
      "date": "2026-11-06",
      "min_price_eur": 175.99
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 175.99
     }
    ]
   },
@@ -10267,52 +10491,52 @@
    "offer_count": 10,
    "min_price_eur": 149.99,
    "max_price_eur": 282.49,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 149.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "kauflandfr",
-     "price_eur": 210.91,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
-     "price_eur": 229.61,
-     "date": "2026-11-07"
+     "price_eur": 229.64,
+     "date": "2026-11-09"
     },
     {
-     "merchant": "fnac",
-     "price_eur": 239.2,
-     "date": "2026-11-07"
+     "merchant": "kauflandfr",
+     "price_eur": 240.75,
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
-     "price_eur": 242.92,
-     "date": "2026-11-07"
+     "price_eur": 241.79,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 241.81,
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 244.77,
-     "date": "2026-11-07"
+     "price_eur": 245.94,
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 249.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "easyloungecom",
      "price_eur": 279.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "sonvideocom",
      "price_eur": 279.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "xtremeinnfr",
@@ -10396,6 +10620,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 149.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 149.99
     }
    ]
   },
@@ -10410,7 +10638,7 @@
    "offer_count": 10,
    "min_price_eur": 75.48,
    "max_price_eur": 149.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "manomanofr",
@@ -10420,37 +10648,37 @@
     {
      "merchant": "alternatefr",
      "price_eur": 133.9,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 139.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 139.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 140.83,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 144.11,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "easyloungecom",
      "price_eur": 146.09,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 148.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pccomponentesfr",
@@ -10543,6 +10771,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 133.9
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 133.9
     }
    ]
   },
@@ -10557,7 +10789,7 @@
    "offer_count": 10,
    "min_price_eur": 899.0,
    "max_price_eur": 2109.48,
-   "last_date": "2026-11-08",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "cdiscount",
@@ -10570,44 +10802,44 @@
      "date": "2026-10-28"
     },
     {
-     "merchant": "getgoodscomfr",
-     "price_eur": 1500.0,
-     "date": "2026-11-08"
-    },
-    {
      "merchant": "amazon",
      "price_eur": 1548.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
-     "merchant": "fnac",
-     "price_eur": 1680.9,
-     "date": "2026-11-08"
+     "merchant": "getgoodscomfr",
+     "price_eur": 1548.99,
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
-     "price_eur": 1684.8,
-     "date": "2026-11-08"
+     "price_eur": 1683.66,
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 1683.66,
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1709.99,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "rueducommercefrmarke",
      "price_eur": 1759.85,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "topbizfr",
-     "price_eur": 1766.19,
-     "date": "2026-11-08"
+     "price_eur": 1770.69,
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
      "price_eur": 2109.48,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -10694,6 +10926,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 1500.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 1548.99
     }
    ]
   },
@@ -10707,58 +10943,58 @@
    "image_credit": null,
    "offer_count": 10,
    "min_price_eur": 699.99,
-   "max_price_eur": 861.65,
-   "last_date": "2026-11-07",
+   "max_price_eur": 884.7,
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 699.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 699.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "manomanofr",
      "price_eur": 699.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "roborockfr",
      "price_eur": 699.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 768.31,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "bixotocomfr",
      "price_eur": 800.5,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "topbizfr",
-     "price_eur": 801.29,
-     "date": "2026-11-07"
+     "price_eur": 801.19,
+     "date": "2026-11-08"
     },
     {
      "merchant": "pearlfr",
      "price_eur": 829.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
-     "merchant": "kauflandfr",
-     "price_eur": 837.85,
-     "date": "2026-11-07"
+     "merchant": "galaxusfr",
+     "price_eur": 839.0,
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 861.65,
-     "date": "2026-11-07"
+     "price_eur": 857.79,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "kauflandfr",
+     "price_eur": 884.7,
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -10833,6 +11069,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 699.99
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 699.99
     }
    ]
   },
@@ -10847,57 +11087,57 @@
    "offer_count": 10,
    "min_price_eur": 759.0,
    "max_price_eur": 853.15,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 759.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 759.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 759.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 759.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 759.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 759.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 768.47,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "topbizfr",
      "price_eur": 781.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 817.63,
-     "date": "2026-11-07"
+     "price_eur": 813.37,
+     "date": "2026-11-08"
     },
     {
      "merchant": "fibresetcablescomfr",
      "price_eur": 853.15,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -10907,6 +11147,10 @@
     },
     {
      "date": "2026-11-07",
+     "min_price_eur": 759.0
+    },
+    {
+     "date": "2026-11-08",
      "min_price_eur": 759.0
     }
    ]
@@ -10927,37 +11171,37 @@
    "offer_count": 10,
    "min_price_eur": 1309.0,
    "max_price_eur": 1479.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "ebay",
      "price_eur": 1309.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 1320.0,
-     "date": "2026-11-07"
+     "price_eur": 1322.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclercfrmarketplac",
-     "price_eur": 1334.99,
-     "date": "2026-11-07"
+     "price_eur": 1334.98,
+     "date": "2026-11-09"
     },
     {
      "merchant": "grouponfr",
      "price_eur": 1389.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 1400.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
      "price_eur": 1479.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
@@ -10967,7 +11211,7 @@
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 1479.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
@@ -11064,6 +11308,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1309.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 1309.0
     }
    ]
   },
@@ -11078,27 +11326,27 @@
    "offer_count": 9,
    "min_price_eur": 39.9,
    "max_price_eur": 45.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 39.9,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 39.9,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "easyloungecom",
      "price_eur": 39.9,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 39.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "carrefourfr",
@@ -11108,22 +11356,22 @@
     {
      "merchant": "darty",
      "price_eur": 41.29,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 41.29,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pccomponentesfr",
      "price_eur": 44.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "xtremeinnfr",
      "price_eur": 45.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -11133,6 +11381,10 @@
     },
     {
      "date": "2026-11-07",
+     "min_price_eur": 39.9
+    },
+    {
+     "date": "2026-11-08",
      "min_price_eur": 39.9
     }
    ]
@@ -11147,53 +11399,53 @@
    "image_credit": null,
    "offer_count": 9,
    "min_price_eur": 199.99,
-   "max_price_eur": 278.3,
-   "last_date": "2026-11-07",
+   "max_price_eur": 286.16,
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "boulanger",
      "price_eur": 199.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 199.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
      "price_eur": 199.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 199.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 236.32,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 241.0,
-     "date": "2026-11-07"
+     "price_eur": 242.85,
+     "date": "2026-11-09"
     },
     {
      "merchant": "manomanofr",
-     "price_eur": 254.08,
-     "date": "2026-11-07"
+     "price_eur": 252.59,
+     "date": "2026-11-09"
     },
     {
      "merchant": "helloedgefr",
      "price_eur": 275.49,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "amazon",
-     "price_eur": 278.3,
-     "date": "2026-11-07"
+     "price_eur": 286.16,
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -11276,6 +11528,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 199.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 199.99
     }
    ]
   },
@@ -11290,52 +11546,52 @@
    "offer_count": 9,
    "min_price_eur": 299.99,
    "max_price_eur": 349.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 299.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "boulanger",
-     "price_eur": 299.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pccomponentesfr",
      "price_eur": 299.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 319.3,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 321.63,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
      "price_eur": 324.48,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "xtremeinnfr",
      "price_eur": 330.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 341.05,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
+    },
+    {
+     "merchant": "boulanger",
+     "price_eur": 349.99,
+     "date": "2026-11-09"
     },
     {
      "merchant": "pearlfr",
      "price_eur": 349.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -11345,6 +11601,10 @@
     },
     {
      "date": "2026-11-07",
+     "min_price_eur": 299.99
+    },
+    {
+     "date": "2026-11-09",
      "min_price_eur": 299.99
     }
    ]
@@ -11360,52 +11620,52 @@
    "offer_count": 9,
    "min_price_eur": 2297.28,
    "max_price_eur": 2474.68,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "inmacwstorecom",
      "price_eur": 2297.28,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "hellorsefr",
+     "price_eur": 2297.88,
+     "date": "2026-11-08"
     },
     {
      "merchant": "amazon",
      "price_eur": 2299.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 2299.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 2299.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 2299.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 2299.0,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "hellorsefr",
-     "price_eur": 2306.28,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 2318.7,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fibresetcablescomfr",
      "price_eur": 2474.68,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -11415,6 +11675,10 @@
     },
     {
      "date": "2026-11-07",
+     "min_price_eur": 2297.28
+    },
+    {
+     "date": "2026-11-08",
      "min_price_eur": 2297.28
     }
    ]
@@ -11569,37 +11833,37 @@
    "offer_count": 8,
    "min_price_eur": 459.0,
    "max_price_eur": 999.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 459.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 459.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 459.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 459.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 540.17,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 822.77,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
@@ -11609,7 +11873,7 @@
     {
      "merchant": "manomanofr",
      "price_eur": 999.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -11680,6 +11944,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 459.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 459.0
     }
    ]
   },
@@ -11694,12 +11962,12 @@
    "offer_count": 8,
    "min_price_eur": 349.0,
    "max_price_eur": 549.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "kauflandfr",
      "price_eur": 349.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "bixotocomfr",
@@ -11713,18 +11981,18 @@
     },
     {
      "merchant": "amazon",
-     "price_eur": 368.43,
-     "date": "2026-11-07"
+     "price_eur": 369.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "manomanofr",
-     "price_eur": 393.66,
-     "date": "2026-11-07"
+     "price_eur": 391.58,
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 549.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
@@ -11734,7 +12002,7 @@
     {
      "merchant": "fnac",
      "price_eur": 549.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -11809,6 +12077,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 349.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 349.0
     }
    ]
   },
@@ -11822,18 +12094,18 @@
    "image_credit": null,
    "offer_count": 8,
    "min_price_eur": 499.0,
-   "max_price_eur": 753.75,
-   "last_date": "2026-11-07",
+   "max_price_eur": 742.95,
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "boulanger",
      "price_eur": 499.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 499.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ebay",
@@ -11843,27 +12115,27 @@
     {
      "merchant": "darty",
      "price_eur": 499.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "fnac",
      "price_eur": 499.99,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 724.37,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "manomanofr",
-     "price_eur": 741.75,
-     "date": "2026-11-07"
+     "price_eur": 717.85,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 723.03,
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 753.75,
-     "date": "2026-11-07"
+     "price_eur": 742.95,
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -11942,6 +12214,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 499.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 499.0
     }
    ]
   },
@@ -11955,18 +12231,18 @@
    "image_credit": null,
    "offer_count": 7,
    "min_price_eur": 894.91,
-   "max_price_eur": 1371.0,
-   "last_date": "2026-11-07",
+   "max_price_eur": 1386.95,
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "fnac",
      "price_eur": 894.91,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "manomanofr",
      "price_eur": 894.91,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "galaxusfr",
@@ -11975,23 +12251,23 @@
     },
     {
      "merchant": "amazon",
-     "price_eur": 1119.97,
-     "date": "2026-11-07"
+     "price_eur": 1117.57,
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 1299.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1299.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 1371.0,
-     "date": "2026-11-07"
+     "price_eur": 1386.95,
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -12074,6 +12350,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 894.91
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 894.91
     }
    ]
   },
@@ -12091,44 +12371,44 @@
     "match": "verifie_visuellement"
    },
    "offer_count": 7,
-   "min_price_eur": 729.0,
+   "min_price_eur": 789.0,
    "max_price_eur": 1753.68,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
-     "price_eur": 729.0,
-     "date": "2026-10-11"
+     "price_eur": 789.0,
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
      "price_eur": 1123.99,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1452.85,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 1599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
      "price_eur": 1599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 1599.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ubaldimarketplace",
      "price_eur": 1753.68,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -12211,6 +12491,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1123.99
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 789.0
     }
    ]
   },
@@ -12225,12 +12509,12 @@
    "offer_count": 6,
    "min_price_eur": 427.0,
    "max_price_eur": 449.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "getgoodscomfr",
      "price_eur": 427.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "eleclercfrmarketplac",
@@ -12240,7 +12524,7 @@
     {
      "merchant": "amazon",
      "price_eur": 449.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
@@ -12250,12 +12534,12 @@
     {
      "merchant": "eleclerchightechfr",
      "price_eur": 449.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 449.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -12334,6 +12618,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 427.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 427.0
     }
    ]
   },
@@ -12348,22 +12636,22 @@
    "offer_count": 6,
    "min_price_eur": 859.0,
    "max_price_eur": 899.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 859.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "boulanger",
      "price_eur": 859.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 859.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "getgoodscomfr",
@@ -12373,7 +12661,7 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 870.8,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
@@ -12461,6 +12749,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 859.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 859.0
     }
    ]
   },
@@ -12480,7 +12772,7 @@
    "offer_count": 6,
    "min_price_eur": 1210.0,
    "max_price_eur": 1549.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "onbuycomfr",
@@ -12490,12 +12782,12 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 1260.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
      "price_eur": 1349.9,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "darty",
@@ -12510,7 +12802,7 @@
     {
      "merchant": "galaxusfr",
      "price_eur": 1549.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -12589,6 +12881,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1260.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 1260.0
     }
    ]
   },
@@ -12607,18 +12903,18 @@
    },
    "offer_count": 6,
    "min_price_eur": 2339.0,
-   "max_price_eur": 4099.03,
-   "last_date": "2026-11-08",
+   "max_price_eur": 3659.85,
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "amazon",
      "price_eur": 2339.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 2339.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "inmacwstorecom",
@@ -12628,17 +12924,17 @@
     {
      "merchant": "pixmaniafr",
      "price_eur": 2799.0,
-     "date": "2026-11-08"
+     "date": "2026-11-09"
     },
     {
      "merchant": "kauflandfr",
-     "price_eur": 3641.83,
-     "date": "2026-11-08"
+     "price_eur": 3598.99,
+     "date": "2026-11-09"
     },
     {
      "merchant": "ebay",
-     "price_eur": 4099.03,
-     "date": "2026-11-08"
+     "price_eur": 3659.85,
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -12721,6 +13017,10 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 2339.0
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 2339.0
     }
    ]
   },
@@ -12735,37 +13035,37 @@
    "offer_count": 6,
    "min_price_eur": 523.81,
    "max_price_eur": 699.99,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "kauflandfr",
      "price_eur": 523.81,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "manomanofr",
-     "price_eur": 572.91,
-     "date": "2026-11-07"
+     "price_eur": 574.56,
+     "date": "2026-11-08"
     },
     {
      "merchant": "cdiscount",
-     "price_eur": 576.34,
-     "date": "2026-11-07"
+     "price_eur": 574.79,
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 598.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "darty",
      "price_eur": 625.78,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     },
     {
      "merchant": "boulanger",
      "price_eur": 699.99,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -12840,6 +13140,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 523.81
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 523.81
     }
    ]
   },
@@ -12859,7 +13163,7 @@
    "offer_count": 5,
    "min_price_eur": 2649.0,
    "max_price_eur": 4429.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "galaxusfr",
@@ -12884,7 +13188,7 @@
     {
      "merchant": "fnac",
      "price_eur": 4429.0,
-     "date": "2026-11-07"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -12963,6 +13267,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 4429.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 4429.0
     }
    ]
   },
@@ -12982,17 +13290,17 @@
    "offer_count": 5,
    "min_price_eur": 1099.89,
    "max_price_eur": 1559.0,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "offers": [
     {
      "merchant": "kauflandfr",
      "price_eur": 1099.89,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1501.78,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "cdiscount",
@@ -13002,12 +13310,12 @@
     {
      "merchant": "darty",
      "price_eur": 1559.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     },
     {
      "merchant": "fnac",
      "price_eur": 1559.0,
-     "date": "2026-11-07"
+     "date": "2026-11-09"
     }
    ],
    "history": [
@@ -13090,6 +13398,10 @@
     {
      "date": "2026-11-07",
      "min_price_eur": 1099.89
+    },
+    {
+     "date": "2026-11-09",
+     "min_price_eur": 1099.89
     }
    ]
   },
@@ -13109,7 +13421,7 @@
    "offer_count": 4,
    "min_price_eur": 132.49,
    "max_price_eur": 234.99,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "topbizfr",
@@ -13117,19 +13429,19 @@
      "date": "2026-10-30"
     },
     {
-     "merchant": "kauflandfr",
-     "price_eur": 140.5,
-     "date": "2026-11-06"
+     "merchant": "pixmaniafr",
+     "price_eur": 138.69,
+     "date": "2026-11-08"
     },
     {
-     "merchant": "pixmaniafr",
-     "price_eur": 143.67,
-     "date": "2026-11-06"
+     "merchant": "kauflandfr",
+     "price_eur": 145.55,
+     "date": "2026-11-08"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 234.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -13196,6 +13508,10 @@
     {
      "date": "2026-11-06",
      "min_price_eur": 140.5
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 138.69
     }
    ]
   },
@@ -13215,7 +13531,7 @@
    "offer_count": 4,
    "min_price_eur": 1329.0,
    "max_price_eur": 2599.0,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "amazon",
@@ -13235,7 +13551,7 @@
     {
      "merchant": "fnac",
      "price_eur": 2599.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -13310,6 +13626,10 @@
     {
      "date": "2026-11-06",
      "min_price_eur": 1329.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 2599.0
     }
    ]
   },
@@ -13329,7 +13649,7 @@
    "offer_count": 4,
    "min_price_eur": 1269.0,
    "max_price_eur": 1669.99,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "fnac",
@@ -13339,12 +13659,12 @@
     {
      "merchant": "joybuyfr",
      "price_eur": 1299.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1583.99,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
     },
     {
      "merchant": "ubaldimarketplace",
@@ -13424,101 +13744,10 @@
     {
      "date": "2026-11-06",
      "min_price_eur": 1299.0
-    }
-   ]
-  },
-  {
-   "id": "macbook-air-15-m3",
-   "name": "MacBook Air 15\" M3",
-   "brand": "Apple",
-   "category": "laptop",
-   "category_label": "Ordinateurs portables",
-   "image": "",
-   "image_credit": null,
-   "offer_count": 2,
-   "min_price_eur": 1566.99,
-   "max_price_eur": 2492.83,
-   "last_date": "2026-11-06",
-   "offers": [
-    {
-     "merchant": "onbuycomfr",
-     "price_eur": 1566.99,
-     "date": "2026-11-06"
     },
     {
-     "merchant": "pixmaniafr",
-     "price_eur": 2492.83,
-     "date": "2026-11-06"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-10",
-     "min_price_eur": 1498.99
-    },
-    {
-     "date": "2026-10-12",
-     "min_price_eur": 1498.99
-    },
-    {
-     "date": "2026-10-13",
-     "min_price_eur": 1498.99
-    },
-    {
-     "date": "2026-10-14",
-     "min_price_eur": 1498.99
-    },
-    {
-     "date": "2026-10-16",
-     "min_price_eur": 1498.99
-    },
-    {
-     "date": "2026-10-17",
-     "min_price_eur": 1498.99
-    },
-    {
-     "date": "2026-10-19",
-     "min_price_eur": 1498.99
-    },
-    {
-     "date": "2026-10-20",
-     "min_price_eur": 1575.99
-    },
-    {
-     "date": "2026-10-22",
-     "min_price_eur": 1575.99
-    },
-    {
-     "date": "2026-10-24",
-     "min_price_eur": 1512.99
-    },
-    {
-     "date": "2026-10-26",
-     "min_price_eur": 1511.99
-    },
-    {
-     "date": "2026-10-27",
-     "min_price_eur": 1511.99
-    },
-    {
-     "date": "2026-10-29",
-     "min_price_eur": 1520.99
-    },
-    {
-     "date": "2026-10-30",
-     "min_price_eur": 1604.99
-    },
-    {
-     "date": "2026-11-02",
-     "min_price_eur": 1604.99
-    },
-    {
-     "date": "2026-11-04",
-     "min_price_eur": 1566.99
-    },
-    {
-     "date": "2026-11-06",
-     "min_price_eur": 1566.99
+     "date": "2026-11-08",
+     "min_price_eur": 1299.0
     }
    ]
   },
@@ -13530,10 +13759,10 @@
    "category_label": "Ordinateurs portables",
    "image": "",
    "image_credit": null,
-   "offer_count": 2,
+   "offer_count": 4,
    "min_price_eur": 1839.0,
-   "max_price_eur": 2135.0,
-   "last_date": "2026-11-06",
+   "max_price_eur": 5653.78,
+   "last_date": "2026-11-08",
    "offers": [
     {
      "merchant": "fnac",
@@ -13543,7 +13772,17 @@
     {
      "merchant": "asgoodasnewfr",
      "price_eur": 2135.0,
-     "date": "2026-11-06"
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "bixotocomfr",
+     "price_eur": 3527.5,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "ebay",
+     "price_eur": 5653.78,
+     "date": "2026-11-08"
     }
    ],
    "history": [
@@ -13618,6 +13857,109 @@
     {
      "date": "2026-11-06",
      "min_price_eur": 2135.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 2135.0
+    }
+   ]
+  },
+  {
+   "id": "macbook-air-15-m3",
+   "name": "MacBook Air 15\" M3",
+   "brand": "Apple",
+   "category": "laptop",
+   "category_label": "Ordinateurs portables",
+   "image": "",
+   "image_credit": null,
+   "offer_count": 2,
+   "min_price_eur": 1566.99,
+   "max_price_eur": 2492.83,
+   "last_date": "2026-11-08",
+   "offers": [
+    {
+     "merchant": "onbuycomfr",
+     "price_eur": 1566.99,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 2492.83,
+     "date": "2026-11-08"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-10",
+     "min_price_eur": 1498.99
+    },
+    {
+     "date": "2026-10-12",
+     "min_price_eur": 1498.99
+    },
+    {
+     "date": "2026-10-13",
+     "min_price_eur": 1498.99
+    },
+    {
+     "date": "2026-10-14",
+     "min_price_eur": 1498.99
+    },
+    {
+     "date": "2026-10-16",
+     "min_price_eur": 1498.99
+    },
+    {
+     "date": "2026-10-17",
+     "min_price_eur": 1498.99
+    },
+    {
+     "date": "2026-10-19",
+     "min_price_eur": 1498.99
+    },
+    {
+     "date": "2026-10-20",
+     "min_price_eur": 1575.99
+    },
+    {
+     "date": "2026-10-22",
+     "min_price_eur": 1575.99
+    },
+    {
+     "date": "2026-10-24",
+     "min_price_eur": 1512.99
+    },
+    {
+     "date": "2026-10-26",
+     "min_price_eur": 1511.99
+    },
+    {
+     "date": "2026-10-27",
+     "min_price_eur": 1511.99
+    },
+    {
+     "date": "2026-10-29",
+     "min_price_eur": 1520.99
+    },
+    {
+     "date": "2026-10-30",
+     "min_price_eur": 1604.99
+    },
+    {
+     "date": "2026-11-02",
+     "min_price_eur": 1604.99
+    },
+    {
+     "date": "2026-11-04",
+     "min_price_eur": 1566.99
+    },
+    {
+     "date": "2026-11-06",
+     "min_price_eur": 1566.99
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 1566.99
     }
    ]
   },

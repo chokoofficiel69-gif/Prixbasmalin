@@ -3,7 +3,7 @@
  "awin_fetched_at": "2026-11-10T12:51:05.998Z",
  "sheets_period": {
   "from": "2026-10-09",
-  "to": "2026-11-08"
+  "to": "2026-11-09"
  },
  "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
@@ -23,7 +23,7 @@
    "min_price_eur": 129.0,
    "max_price_eur": 186.0,
    "offer_count": 24,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   },
   {
@@ -99,7 +99,7 @@
    "min_price_eur": 1277.99,
    "max_price_eur": 1399.0,
    "offer_count": 16,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   },
   {
@@ -118,7 +118,7 @@
    "min_price_eur": 1085.59,
    "max_price_eur": 1229.0,
    "offer_count": 16,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "price_kind": "historical"
   },
   {
@@ -137,7 +137,7 @@
    "min_price_eur": 327.99,
    "max_price_eur": 436.55,
    "offer_count": 14,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "price_kind": "historical"
   },
   {
@@ -156,7 +156,7 @@
    "min_price_eur": 48.99,
    "max_price_eur": 59.36,
    "offer_count": 12,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-09",
    "price_kind": "historical"
   },
   {
@@ -170,7 +170,7 @@
    "min_price_eur": 617.44,
    "max_price_eur": 969.0,
    "offer_count": 17,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   },
   {
@@ -184,7 +184,7 @@
    "min_price_eur": 699.0,
    "max_price_eur": 1003.49,
    "offer_count": 15,
-   "last_date": "2026-11-07",
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   },
   {
@@ -200,10 +200,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 199.0,
+   "min_price_eur": 203.99,
    "max_price_eur": 325.88,
    "offer_count": 24,
-   "last_date": "2026-11-06",
+   "last_date": "2026-11-08",
    "price_kind": "historical"
   },
   {
@@ -222,7 +222,7 @@
    "min_price_eur": 237.9,
    "max_price_eur": 254.5,
    "offer_count": 13,
-   "last_date": "2026-11-08",
+   "last_date": "2026-11-09",
    "price_kind": "historical"
   }
  ],
