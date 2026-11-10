@@ -188,10 +188,12 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
         if not name or not product_id:
             skipped["identity"] += 1
             continue
-        if product_id in seen_product_ids:
+        # Decathlon partage product_id/sku entre les variantes d'un modèle ; le GTIN identifie la variante.
+        variant_key = (product_id, gtin or mpn)
+        if variant_key in seen_product_ids:
             skipped["duplicate_product_id"] += 1
             continue
-        seen_product_ids.add(product_id)
+        seen_product_ids.add(variant_key)
         if not gtin and not (brand and mpn):
             skipped["no_exact_identity"] += 1
             continue
@@ -235,7 +237,8 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
         secondary = (node.findtext("./category/secondary") or "").replace("~~", " / ").strip()
         description = (node.findtext("./description/short") or "").strip()
         rows.append({
-            "id": f"{slug}-{product_id}",
+            "id": f"{slug}-{product_id}-{gtin}" if gtin else f"{slug}-{product_id}",
+            "productId": product_id,
             "name": name,
             "desc": description,
             "category": category_for(slug, name, primary, secondary),

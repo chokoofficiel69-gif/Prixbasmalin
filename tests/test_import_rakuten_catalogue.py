@@ -275,6 +275,24 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertEqual(rows[0]["priceValue"], 15.0)
         self.assertEqual(stats["skipped"], {"duplicate_product_id": 1, "duplicate_gtin": 1})
 
+    def test_variants_sharing_a_product_id_keep_distinct_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "variants.xml.gz"
+            write_feed(path)
+            root = ET.fromstring(gzip.open(path).read())
+            variant = ET.fromstring(ET.tostring(root.find("product")))
+            variant.find("upc").text = "4006381333948"
+            trailer = root.find("trailer"); root.remove(trailer); root.extend([variant, trailer])
+            trailer.find("numberOfProducts").text = "2"
+            with gzip.open(path, "wb") as stream:
+                stream.write(ET.tostring(root, encoding="utf-8"))
+            rows, _, stats = MODULE.parse_feed(path, "Decathlon National", "decathlon", "MM/DD/YYYY",
+                                               now=dt.datetime(2026, 11, 5, 12, 0, tzinfo=UTC))
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(len({row["id"] for row in rows}), 2)
+        self.assertEqual({row["productId"] for row in rows}, {"item-1"})
+        self.assertEqual(stats["skipped"], {})
+
     def test_partial_import_cannot_replace_complete_snapshot(self):
         previous = {"status": "ok", "source_stats": {
             "Decathlon National": {"raw_products": 65942},
