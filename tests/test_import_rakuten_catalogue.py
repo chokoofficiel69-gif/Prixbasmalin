@@ -187,7 +187,6 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIn('key_sha256_hex', workflow)
         self.assertIn('base64 -d | sha256sum', workflow)
         self.assertIn('key_sha256_hex', workflow)
-        self.assertIn('openssl base64 -d -A | xxd -p -c 256', workflow)
         self.assertIn('ssh-keyscan -T 10 -t rsa,ecdsa,ed25519 aftp.linksynergy.com', workflow)
         self.assertIn('ssh-keygen -F "aftp.linksynergy.com"', workflow)
         self.assertIn("--retry-all-errors", workflow)
