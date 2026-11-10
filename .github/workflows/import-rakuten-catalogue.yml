@@ -80,9 +80,8 @@ jobs:
             [[ "$host" == \#* ]] && continue
             fingerprint_file="$(mktemp)"
             printf '%s %s\n' "$key_type" "$key_data" > "$fingerprint_file"
-            key_sha256_b64="$(ssh-keygen -E sha256 -lf "$fingerprint_file" 2>/dev/null | awk '{print $2}')"
+            key_sha256_hex="$(printf '%s' "$key_data" | base64 -d | sha256sum | awk '{print $1}')"
             rm -f "$fingerprint_file"
-            key_sha256_hex="$(printf '%s' "${key_sha256_b64#SHA256:}" | openssl base64 -d -A | xxd -p -c 256)"
             match_a=false
             match_b=false
             [[ "$key_sha256_hex" == "$EXPECTED_SHA256_A" ]] && match_a=true
