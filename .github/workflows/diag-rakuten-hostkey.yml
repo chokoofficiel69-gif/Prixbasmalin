@@ -15,3 +15,9 @@ jobs:
         run: getent ahosts aftp.linksynergy.com | sort -u || true
       - name: Clés présentées par le serveur et comparaison aux empreintes officielles
         run: python3 scripts/rakuten-hostkey-diagnostic.py aftp.linksynergy.com 22
+      - name: Toutes les clés via ssh-keyscan (RSA comprise), toutes les formes
+        run: |
+          for port in 22 2222; do
+            echo "### port $port"
+            ssh-keyscan -T 10 -p $port -t rsa,ecdsa,ed25519 aftp.linksynergy.com 2>/dev/null | python3 scripts/rakuten-hostkey-variants.py || true
+          done
