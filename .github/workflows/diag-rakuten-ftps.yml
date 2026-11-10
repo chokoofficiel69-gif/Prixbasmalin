@@ -12,65 +12,33 @@ permissions:
 jobs:
   diag:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: Certificat FTPS (AUTH TLS) comparé aux empreintes officielles, sans identifiants
+      - name: DNS (CNAME, SSHFP, DNSSEC) des serveurs Rakuten
+        shell: bash
+        run: |
+          sudo apt-get install -y -qq bind9-dnsutils >/dev/null 2>&1 || true
+          for n in aftp.linksynergy.com sftp-rakuten.feedonomics.com; do
+            echo "== $n"
+            dig +dnssec +noall +answer +comments "$n" A | grep -E 'flags|IN' || true
+            echo "-- SSHFP"; dig +dnssec +noall +answer "$n" SSHFP || true
+          done
+      - name: Clés SSH d'hôtes Rakuten voisins comparées aux empreintes officielles (sans identifiants)
         shell: bash
         run: |
           set -u
-          python3 - <<'PY'
-          import ftplib, hashlib, socket, ssl
-          OFFICIAL = {
-              "6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc": "SHA256 officielle",
-              "d98a0cdd102177804f99a3534a4a04c6b31ce816": "SHA1 officielle",
-          }
-          host = "aftp.linksynergy.com"
-          print("DNS:", socket.getaddrinfo(host, 21, proto=socket.IPPROTO_TCP)[0][4])
-          for label, ctx_factory in (("TLS par défaut", ssl.create_default_context), ("TLS 1.2 max", None)):
-              print("###", label)
-              try:
-                  ftp = ftplib.FTP_TLS(timeout=20)
-                  ctx = ssl.create_default_context()
-                  ctx.check_hostname = False
-                  ctx.verify_mode = ssl.CERT_NONE  # diagnostic : on lit le certificat pour le comparer, aucune donnée envoyée
-                  if ctx_factory is None:
-                      ctx.maximum_version = ssl.TLSVersion.TLSv1_2
-                  ftp.context = ctx
-                  print("welcome:", ftp.connect(host, 21))
-                  try:
-                      print("FEAT:", ftp.sendcmd("FEAT").replace("\n", " | "))
-                  except Exception as e:
-                      print("FEAT erreur:", e)
-                  print("AUTH TLS:", ftp.auth())
-                  sock = ftp.sock
-                  print("TLS:", sock.version(), sock.cipher())
-                  chain = []
-                  try:
-                      chain = [c.public_bytes(ssl._ssl.ENCODING_DER) if hasattr(c, "public_bytes") else c for c in sock.get_unverified_chain()]
-                  except Exception as e:
-                      print("chaîne indisponible:", e)
-                  leaf = sock.getpeercert(binary_form=True)
-                  certs = [leaf] + [c for c in chain if c != leaf]
-                  for i, der in enumerate(certs):
-                      s256 = hashlib.sha256(der).hexdigest(); s1 = hashlib.sha1(der).hexdigest()
-                      print(f"cert[{i}] SHA256={s256} SHA1={s1}")
-                      for v in (s256, s1):
-                          if v in OFFICIAL:
-                              print(f"   >>> CORRESPONDANCE {OFFICIAL[v]} (cert[{i}])")
-                  pem = ssl.DER_cert_to_PEM_cert(leaf)
-                  open("/tmp/leaf.pem", "w").write(pem)
-                  ftp.close()
-              except Exception as e:
-                  print("échec:", type(e).__name__, e)
-          PY
-          if [[ -s /tmp/leaf.pem ]]; then
-            openssl x509 -in /tmp/leaf.pem -noout -subject -issuer -startdate -enddate -ext subjectAltName
-            openssl x509 -in /tmp/leaf.pem -noout -fingerprint -sha256
-            openssl x509 -in /tmp/leaf.pem -noout -fingerprint -sha1
-            echo -n "SPKI sha256 (pinnedpubkey) : "
-            openssl x509 -in /tmp/leaf.pem -noout -pubkey | openssl pkey -pubin -outform DER | openssl dgst -sha256 -binary | openssl base64 -A; echo
-          fi
-          echo "### openssl s_client -starttls ftp (stderr inclus)"
-          echo | timeout 20 openssl s_client -starttls ftp -connect aftp.linksynergy.com:21 -servername aftp.linksynergy.com 2>&1 | head -30
-          echo "### curl FTPS explicite (sans identifiants, anonyme refusé attendu)"
-          timeout 30 curl -sS -v --ssl-reqd --insecure --list-only ftp://aftp.linksynergy.com/ 2>&1 | grep -E '^\*|^<' | grep -v -i 'pass' | head -40 || true
+          OFF256=6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc
+          OFF1=d98a0cdd102177804f99a3534a4a04c6b31ce816
+          for h in aftp.linksynergy.com ftp.linksynergy.com sftp.linksynergy.com mftp.linksynergy.com ftp2.linksynergy.com aftp.rakutenadvertising.com sftp.rakutenadvertising.com ftp.rakutenadvertising.com sftp-rakuten.feedonomics.com sftp.feedonomics.com; do
+            ip=$(getent hosts "$h" | awk '{print $1; exit}')
+            echo "### $h (${ip:-non résolu})"
+            [[ -n "$ip" ]] || continue
+            ssh-keyscan -T 8 -t rsa,ecdsa,ed25519,dsa "$h" 2>/dev/null | while read -r host type data; do
+              [[ -n "${data:-}" ]] || continue
+              s256=$(printf '%s' "$data" | base64 -d | sha256sum | cut -d' ' -f1)
+              s1=$(printf '%s' "$data" | base64 -d | sha1sum | cut -d' ' -f1)
+              ossh=$(printf '%s %s\n' "$type" "$data" | ssh-keygen -E sha256 -lf - | awk '{print $2}')
+              m=""; [[ "$s256" == "$OFF256" ]] && m=" >>> SHA256 OFFICIELLE"; [[ "$s1" == "$OFF1" ]] && m="$m >>> SHA1 OFFICIELLE"
+              echo "  $type $ossh sha256hex=$s256 sha1hex=$s1$m"
+            done
+          done
