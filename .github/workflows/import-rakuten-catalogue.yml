@@ -49,7 +49,10 @@ jobs:
         env:
           RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
           RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
-          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY' }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'AUTO' }}
+          # Empreinte(s) SHA256 officielle(s) de la clé hôte SSH, confirmée(s) par Rakuten.
+          # Formats acceptés, séparés par des espaces : 64 caractères hexadécimaux ou SHA256:<base64> (format OpenSSH).
+          RAKUTEN_SSH_HOST_SHA256: ${{ vars.RAKUTEN_SSH_HOST_SHA256 || '6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -59,14 +62,27 @@ jobs:
             echo "- Import Rakuten bloqué : identifiants SFTP manquants ; snapshot précédent conservé." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          if [[ "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY" && "$RAKUTEN_DATE_FORMAT" != "DD/MM/YYYY" ]]; then
-            echo "::error::RAKUTEN_DATE_FORMAT doit être MM/DD/YYYY ou DD/MM/YYYY."
+          if [[ "$RAKUTEN_DATE_FORMAT" != "AUTO" && "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY" && "$RAKUTEN_DATE_FORMAT" != "DD/MM/YYYY" ]]; then
+            echo "::error::RAKUTEN_DATE_FORMAT doit être AUTO, MM/DD/YYYY ou DD/MM/YYYY."
             exit 1
           fi
-          # Les deux empreintes fournies par Rakuten (mail Maya, 10/11/2026).
-          # Les deux valeurs fournies sont des empreintes SHA256 hexadécimales de 64 caractères.
-          EXPECTED_SHA256_A="d98a0cdd102177804f99a3534a4a04c6b31ce81622cb87103c1101134b4961"
-          EXPECTED_SHA256_B="6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc"
+          # Mail Rakuten (Maya, 10/11/2026) : une empreinte SHA256 et une empreinte SHA1 (40 caractères).
+          # L'ancienne constante EXPECTED_SHA256_A (62 caractères) était la SHA1 suivie de caractères parasites :
+          # elle ne pouvait correspondre à aucune clé. Seules les empreintes SHA256 servent à accorder la confiance.
+          OFFICIAL_SHA1_REFERENCE="d98a0cdd102177804f99a3534a4a04c6b31ce816"
+          expected=()
+          for value in $RAKUTEN_SSH_HOST_SHA256; do
+            if [[ "$value" =~ ^[0-9a-fA-F]{64}$ ]]; then
+              expected+=("${value,,}")
+            elif [[ "$value" =~ ^SHA256:[A-Za-z0-9+/]{43}=?$ ]]; then
+              b64="${value#SHA256:}"; b64="${b64%=}="
+              expected+=("$(printf '%s' "$b64" | base64 -d | od -An -v -tx1 | tr -d ' \n')")
+            else
+              echo "::error::Empreinte officielle mal formée dans RAKUTEN_SSH_HOST_SHA256 (64 hex ou SHA256:base64 attendus)."
+              exit 1
+            fi
+          done
+          [[ ${#expected[@]} -gt 0 ]] || { echo "::error::Aucune empreinte SHA256 officielle configurée."; exit 1; }
           mkdir -p "$HOME/.ssh"
           SCAN="$(ssh-keyscan -T 10 -t rsa,ecdsa,ed25519 aftp.linksynergy.com 2>/dev/null || true)"
           if [[ -z "$SCAN" ]]; then
@@ -75,25 +91,31 @@ jobs:
           fi
           : > "$HOME/.ssh/known_hosts"
           MATCHED=false
+          OBSERVED=""
           while read -r host key_type key_data; do
             [[ -n "${key_data:-}" ]] || continue
             [[ "$host" == \#* ]] && continue
-            fingerprint_file="$(mktemp)"
-            printf '%s %s\n' "$key_type" "$key_data" > "$fingerprint_file"
             key_sha256_hex="$(printf '%s' "$key_data" | base64 -d | sha256sum | awk '{print $1}')"
-            rm -f "$fingerprint_file"
-            match_a=false
-            match_b=false
-            [[ "$key_sha256_hex" == "$EXPECTED_SHA256_A" ]] && match_a=true
-            [[ "$key_sha256_hex" == "$EXPECTED_SHA256_B" ]] && match_b=true
-            echo "SSH host key: type=$key_type observed_sha256_hex=$key_sha256_hex official_fingerprint_A=$match_a official_fingerprint_B=$match_b"
-            if [[ "$match_a" == true || "$match_b" == true ]]; then
+            key_sha1_hex="$(printf '%s' "$key_data" | base64 -d | sha1sum | awk '{print $1}')"
+            key_openssh="$(printf '%s %s\n' "$key_type" "$key_data" | ssh-keygen -E sha256 -lf /dev/stdin 2>/dev/null | awk '{print $2}')"
+            match=false
+            for official in "${expected[@]}"; do [[ "$key_sha256_hex" == "$official" ]] && match=true; done
+            sha1_match=false; [[ "$key_sha1_hex" == "$OFFICIAL_SHA1_REFERENCE" ]] && sha1_match=true
+            echo "SSH host key: type=$key_type openssh=$key_openssh sha256_hex=$key_sha256_hex official_sha256=$match official_sha1=$sha1_match"
+            OBSERVED="${OBSERVED}- \`$key_type\` \`$key_openssh\` (hex \`$key_sha256_hex\`)"$'\n'
+            if [[ "$match" == true ]]; then
               printf '%s %s %s\n' "$host" "$key_type" "$key_data" >> "$HOME/.ssh/known_hosts"
               MATCHED=true
             fi
           done <<< "$SCAN"
           if [[ "$MATCHED" != true ]]; then
-            echo "::error::La clé présentée par aftp.linksynergy.com ne correspond pas aux empreintes officielles Rakuten."
+            echo "::error::La clé présentée par aftp.linksynergy.com ne correspond à aucune empreinte SHA256 officielle Rakuten. Aucun identifiant envoyé ; snapshot précédent conservé."
+            {
+              echo "### Import Rakuten bloqué : clé hôte SSH non confirmée"
+              echo "Aucun identifiant n'a été envoyé. Clés présentées par aftp.linksynergy.com (à faire confirmer par Rakuten) :"
+              printf '%s' "$OBSERVED"
+              echo "Une fois l'empreinte confirmée par écrit par Rakuten, l'enregistrer dans la variable de dépôt \`RAKUTEN_SSH_HOST_SHA256\`."
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
           chmod 600 "$HOME/.ssh/known_hosts"
@@ -112,7 +134,8 @@ jobs:
           umask 077
           printf 'machine aftp.linksynergy.com login %s password %s\n' "$RAKUTEN_SFTP_USER" "$RAKUTEN_SFTP_PASSWORD" > "$HOME/.netrc-rakuten"
           trap 'rm -f "$HOME/.netrc-rakuten"' EXIT
-          CURL=(curl --proto '=sftp' --fail --show-error --silent --ignore-content-length --knownhosts "$HOME/.ssh/known_hosts" --netrc-file "$HOME/.netrc-rakuten" --connect-timeout 15 --max-time 600 --retry 3 --retry-all-errors --retry-delay 3 --retry-max-time 600)
+          BASE_CURL=(curl --proto '=sftp' --fail --show-error --silent --knownhosts "$HOME/.ssh/known_hosts" --netrc-file "$HOME/.netrc-rakuten" --connect-timeout 15)
+          CURL=("${BASE_CURL[@]}" --ignore-content-length --max-time 600 --retry 3 --retry-all-errors --retry-delay 3 --retry-max-time 600)
           "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/" > /tmp/rakuten-root-list.txt
 
           # Rakuten confirme que chaque annonceur dispose d'un dossier nommé par son MID.
@@ -140,16 +163,33 @@ jobs:
             fi
 
             echo "Flux trouvé pour MID $mid : $filename."
+            local url="sftp://aftp.linksynergy.com/${remote_path}" expected_size="" size attempt
+            expected_size="$("${BASE_CURL[@]}" --max-time 60 --head "$url" 2>/dev/null | tr -d '\r' | awk -F': ' 'tolower($1)=="content-length"{print $2}' | tail -1 || true)"
             rm -f "$temporary"
-            if ! "${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "$temporary"; then
-              rm -f "$temporary"
-              return 1
-            fi
+            # Transfert binaire SFTP, une connexion à la fois (limite Rakuten : 5 simultanées).
+            # Un transfert interrompu (curl 18) reprend là où il s'est arrêté au lieu d'échouer.
+            for attempt in 1 2 3 4 5; do
+              if "${CURL[@]}" --continue-at - "$url" --output "$temporary"; then
+                size="$(stat -c %s "$temporary" 2>/dev/null || echo 0)"
+                # gzip -t contrôle le CRC32 et la longueur du flux complet : un fichier tronqué échoue ici.
+                if gzip -t "$temporary" 2>/dev/null; then
+                  [[ -z "$expected_size" || "$size" == "$expected_size" ]] || echo "::warning::$filename : taille reçue $size, taille annoncée $expected_size (gzip valide)."
+                  break
+                fi
+                echo "Fichier incohérent après la tentative $attempt (taille $size / attendu ${expected_size:-inconnu}) : nouveau téléchargement complet."
+                rm -f "$temporary"
+              else
+                echo "Transfert interrompu (tentative $attempt), reprise."
+              fi
+              sleep $((attempt * 5))
+            done
+            size="$(stat -c %s "$temporary" 2>/dev/null || echo 0)"
             if [[ ! -s "$temporary" ]] || ! gzip -t "$temporary"; then
               rm -f "$temporary"
-              echo "::error::Flux gzip incomplet ou invalide : $filename."
+              echo "::error::Flux gzip incomplet ou invalide après 5 tentatives : $filename (reçu $size octets, attendu ${expected_size:-inconnu})."
               return 1
             fi
+            echo "Flux complet : $filename ($size octets, gzip valide)."
             mv "$temporary" "$output"
           }
 
@@ -164,11 +204,13 @@ jobs:
       - name: Convertir seulement les sources fraîches et complètes
         if: steps.config.outputs.ready == 'true'
         env:
-          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY' }}
+          RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'AUTO' }}
           RAKUTEN_PRICE_TAX_STATUS: ${{ vars.RAKUTEN_PRICE_TAX_STATUS || 'unspecified' }}
           # À passer à true uniquement après confirmation écrite de la TVA par la source marchande.
           RAKUTEN_PRICE_TAX_STATUS_VERIFIED: ${{ vars.RAKUTEN_PRICE_TAX_STATUS_VERIFIED || 'false' }}
+        shell: bash
         run: |
+          set -euo pipefail
           python3 scripts/import-rakuten-catalogue.py \
             --directory /tmp \
             --output data/rakuten-products.json \
@@ -177,7 +219,18 @@ jobs:
             --price-tax-status "${RAKUTEN_PRICE_TAX_STATUS:-unspecified}" \
             --price-tax-status-verified "${RAKUTEN_PRICE_TAX_STATUS_VERIFIED:-false}" \
             --decathlon-limit 1500 \
-            --nicchia-limit 1500
+            --nicchia-limit 1500 | tee /tmp/rakuten-import-report.json
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          report = json.loads(open("/tmp/rakuten-import-report.json", encoding="utf-8").read().strip().splitlines()[-1])
+          print("### Import Rakuten : flux validés")
+          print(f"- Produits publiés : {report['published_total']} ; GTIN valides : {report['with_gtin']} ; livraison connue : {report['with_shipping']}")
+          print(f"- TVA : priceTaxStatus={report['priceTaxStatus']} ; vérifiée={report['priceTaxStatusVerified']}")
+          for merchant, stats in report["sources"].items():
+              print(f"- {merchant} : fichier {stats['file']}, créé le {stats['created_on_raw']} (lu {stats['date_format_detected']}), "
+                    f"{stats['raw_products']} bruts, {stats['eligible_products']} validés, {stats['with_gtin']} GTIN, "
+                    f"{stats['with_brand_and_mpn']} marque+MPN, {stats['with_shipping']} livraison, {stats['published_products']} publiés, rejets {stats['skipped']}")
+          PY
       - name: Publier le snapshot validé sans écraser les données précédentes en cas d'échec
         if: steps.config.outputs.ready == 'true'
         shell: bash

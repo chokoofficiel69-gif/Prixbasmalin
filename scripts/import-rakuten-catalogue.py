@@ -32,6 +32,36 @@ def parse_source_timestamp(value, date_format):
     raise ValueError("Date createdOn illisible : " + value)
 
 
+DATE_FORMATS = ("MM/DD/YYYY", "DD/MM/YYYY")
+
+
+def resolve_source_timestamp(value, date_format, now, max_age_hours):
+    """Lit createdOn ; en mode AUTO, ne retient que la lecture qui tombe dans la fenêtre de fraîcheur.
+
+    Une date JJ/MM lue en MM/JJ (ou l'inverse) tombe à plusieurs mois de la date réelle : la fenêtre
+    de fraîcheur (quelques heures) départage donc les deux lectures sans supposition. Si les deux
+    lectures distinctes sont fraîches, ou aucune, le flux est rejeté.
+    """
+    if date_format != "AUTO":
+        return parse_source_timestamp(value, date_format), date_format
+    readings = {}
+    for candidate in DATE_FORMATS:
+        try:
+            readings[candidate] = parse_source_timestamp(value, candidate)
+        except ValueError:
+            pass
+    if not readings:
+        raise ValueError("Date createdOn illisible : " + str(value or "").strip())
+    window_start, window_end = dt.timedelta(minutes=-5), dt.timedelta(hours=max_age_hours)
+    fresh = {fmt: ts for fmt, ts in readings.items() if window_start <= now - ts <= window_end}
+    if len(set(fresh.values())) > 1:
+        raise ValueError("Date createdOn ambiguë (MM/DD et DD/MM toutes deux fraîches) : " + str(value).strip())
+    if not fresh:
+        raise ValueError("Flux périmé : createdOn " + str(value).strip() + " (aucune lecture MM/DD ou DD/MM dans la fenêtre de " + str(max_age_hours) + " h).")
+    chosen = sorted(fresh)[0]
+    return fresh[chosen], chosen
+
+
 def parse_optional_datetime(value):
     value = str(value or "").strip()
     if not value:
@@ -122,7 +152,7 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
 
     header = root.find("./header")
     created_on = header.findtext("createdOn") if header is not None else ""
-    source_created = parse_source_timestamp(created_on, date_format)
+    source_created, detected_date_format = resolve_source_timestamp(created_on, date_format, now, max_age_hours)
     age = now - source_created
     if age < dt.timedelta(minutes=-5):
         raise ValueError("Flux daté dans le futur : " + created_on)
@@ -143,16 +173,25 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
 
     rows = []
     skipped = collections.Counter()
+    quality = collections.Counter()
+    seen_product_ids = set()
     for node in product_nodes:
         name = (node.get("name") or "").strip()
         product_id = (node.get("product_id") or "").strip()
         sku = (node.get("sku_number") or "").strip()
         brand = (node.findtext("./brand") or node.get("manufacturer_name") or "").strip()
         mpn = (node.get("part_number") or "").strip()
-        gtin = normalize_gtin(node.findtext("./upc"))
+        raw_gtin = (node.findtext("./upc") or "").strip()
+        gtin = normalize_gtin(raw_gtin)
+        if raw_gtin and not gtin:
+            quality["invalid_gtin_in_feed"] += 1
         if not name or not product_id:
             skipped["identity"] += 1
             continue
+        if product_id in seen_product_ids:
+            skipped["duplicate_product_id"] += 1
+            continue
+        seen_product_ids.add(product_id)
         if not gtin and not (brand and mpn):
             skipped["no_exact_identity"] += 1
             continue
@@ -224,6 +263,23 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
             "isRakutenProduct": True,
         })
 
+    # Un même GTIN ne doit apparaître qu'une fois par marchand : on garde l'offre au prix actif le plus bas.
+    position_by_gtin = {}
+    deduplicated = []
+    for row in rows:
+        if not row["gtin"]:
+            deduplicated.append(row)
+            continue
+        position = position_by_gtin.get(row["gtin"])
+        if position is None:
+            position_by_gtin[row["gtin"]] = len(deduplicated)
+            deduplicated.append(row)
+            continue
+        skipped["duplicate_gtin"] += 1
+        if row["priceValue"] < deduplicated[position]["priceValue"]:
+            deduplicated[position] = row
+    rows = deduplicated
+
     if not rows:
         raise ValueError("Aucune fiche exploitable après validation des identifiants, prix, images et liens.")
     stats = {
@@ -234,6 +290,15 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
         "with_gtin": sum(bool(row["gtin"]) for row in rows),
         "with_mpn": sum(bool(row["mpn"]) for row in rows),
         "with_shipping": sum(row["shippingPriceValue"] is not None for row in rows),
+        "with_brand_and_mpn": sum(bool(row["brand"] and row["mpn"]) for row in rows),
+        "with_price_eur": sum(row["priceValue"] > 0 for row in rows),
+        "with_regular_price": sum(row["regularPriceValue"] is not None for row in rows),
+        "with_image": sum(bool(row["image"]) for row in rows),
+        "availability": dict(collections.Counter(row["availability"] for row in rows)),
+        "date_format_detected": detected_date_format,
+        "created_on_raw": str(created_on or "").strip(),
+        "trailer_checked": bool(require_trailer),
+        "quality": dict(quality),
         "skipped": dict(skipped),
     }
     return rows, source_created, stats
@@ -275,6 +340,22 @@ def resolve_price_tax_status(value, verified):
     return "included" if value == "included" and verified else "unspecified"
 
 
+def check_against_previous_snapshot(previous, source_stats, max_drop_ratio=0.5):
+    """Refuse un snapshot qui perd un marchand ou plus de la moitié de son flux brut."""
+    if not isinstance(previous, dict) or previous.get("status") != "ok":
+        return []
+    problems = []
+    for merchant, old in (previous.get("source_stats") or {}).items():
+        new = source_stats.get(merchant)
+        if new is None:
+            problems.append("marchand absent du nouvel import : " + merchant)
+            continue
+        old_raw = int(old.get("raw_products") or 0)
+        if old_raw and new["raw_products"] < old_raw * (1 - max_drop_ratio):
+            problems.append(f"{merchant} : {new['raw_products']} produits bruts contre {old_raw} au snapshot précédent")
+    return problems
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", default=".")
@@ -285,10 +366,12 @@ def main():
     parser.add_argument("--price-tax-status-verified", choices=("true", "false"), default=os.environ.get("RAKUTEN_PRICE_TAX_STATUS_VERIFIED", "false"))
     parser.add_argument("--decathlon-limit", type=int, default=1500)
     parser.add_argument("--nicchia-limit", type=int, default=1500)
+    parser.add_argument("--allow-partial", choices=("true", "false"), default="false",
+                        help="Autoriser la perte d'un marchand ou d'une grande partie d'un flux par rapport au snapshot précédent.")
     args = parser.parse_args()
 
-    if args.date_format not in ("MM/DD/YYYY", "DD/MM/YYYY"):
-        raise SystemExit("Import bloqué : confirmer RAKUTEN_DATE_FORMAT (MM/DD/YYYY ou DD/MM/YYYY).")
+    if args.date_format not in DATE_FORMATS + ("AUTO",):
+        raise SystemExit("Import bloqué : RAKUTEN_DATE_FORMAT doit valoir AUTO, MM/DD/YYYY ou DD/MM/YYYY.")
     if args.max_age_hours < 1 or args.max_age_hours > 720:
         raise SystemExit("--max-age-hours doit être compris entre 1 et 720.")
     try:
@@ -328,6 +411,25 @@ def main():
 
     if not all_products:
         raise SystemExit("Aucun flux Rakuten complet, daté sans ambiguïté et frais de moins de " + str(args.max_age_hours) + " h. Fichier public précédent conservé.")
+
+    previous = None
+    if os.path.isfile(args.output):
+        try:
+            with open(args.output, encoding="utf-8") as stream:
+                previous = json.load(stream)
+        except (OSError, ValueError):
+            previous = None
+    problems = check_against_previous_snapshot(previous, source_stats)
+    if problems and args.allow_partial != "true":
+        raise SystemExit("Import incomplet refusé, snapshot précédent conservé : " + " ; ".join(problems))
+
+    # Un même produit ne doit figurer qu'une fois dans le résultat final.
+    unique, seen_ids = [], set()
+    for row in all_products:
+        if row["id"] not in seen_ids:
+            seen_ids.add(row["id"])
+            unique.append(row)
+    all_products = unique
 
     all_products.sort(key=lambda row: (row["merchant"], row["name"].casefold(), row["id"]))
     generated_at = min(source_dates).isoformat().replace("+00:00", "Z")
