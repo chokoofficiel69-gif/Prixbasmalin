@@ -21,3 +21,20 @@ jobs:
             echo "### port $port"
             ssh-keyscan -T 10 -p $port -t rsa,ecdsa,ed25519 aftp.linksynergy.com 2>/dev/null | python3 scripts/rakuten-hostkey-variants.py || true
           done
+      - name: Certificat TLS FTPS (port 21, AUTH TLS) comparé aux empreintes officielles
+        run: |
+          for mode in "-starttls ftp -connect aftp.linksynergy.com:21" "-connect aftp.linksynergy.com:990"; do
+            echo "### openssl s_client $mode"
+            echo | timeout 20 openssl s_client $mode -servername aftp.linksynergy.com -showcerts 2>/dev/null > /tmp/s.txt || true
+            awk '/BEGIN CERT/,/END CERT/' /tmp/s.txt | awk 'BEGIN{n=0}/BEGIN CERT/{n++}{print > "/tmp/cert" n ".pem"}'
+            for c in /tmp/cert*.pem; do
+              [ -s "$c" ] || continue
+              openssl x509 -in "$c" -noout -subject -issuer -enddate
+              s256=$(openssl x509 -in "$c" -outform DER | sha256sum | cut -d' ' -f1)
+              s1=$(openssl x509 -in "$c" -outform DER | sha1sum | cut -d' ' -f1)
+              echo "   CERT SHA256=$s256 SHA1=$s1"
+              [ "$s256" = 6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc ] && echo "   >>> CORRESPONDANCE SHA256 officielle"
+              [ "$s1" = d98a0cdd102177804f99a3534a4a04c6b31ce816 ] && echo "   >>> CORRESPONDANCE SHA1 officielle"
+              rm -f "$c"
+            done
+          done
