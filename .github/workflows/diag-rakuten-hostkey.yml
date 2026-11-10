@@ -38,3 +38,10 @@ jobs:
               rm -f "$c"
             done
           done
+      - name: Ports ouverts et bannières
+        run: |
+          for p in 21 22 990 2222; do
+            printf "port %s : " $p
+            timeout 8 bash -c "exec 3<>/dev/tcp/aftp.linksynergy.com/$p && timeout 4 head -c 120 <&3 | tr -d '\r\n'; echo" 2>&1 || echo "fermé/filtré"
+          done
+          echo | timeout 20 openssl s_client -starttls ftp -connect aftp.linksynergy.com:21 2>&1 | head -15 || true
