@@ -47,7 +47,6 @@ jobs:
         env:
           RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
           RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
-          RAKUTEN_SFTP_KNOWN_HOSTS: ${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}
           RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'MM/DD/YYYY' }}
         shell: bash
         run: |
@@ -62,19 +61,32 @@ jobs:
             echo "::error::RAKUTEN_DATE_FORMAT doit être MM/DD/YYYY ou DD/MM/YYYY."
             exit 1
           fi
-          if [[ -z "${RAKUTEN_SFTP_KNOWN_HOSTS:-}" ]]; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Import Rakuten bloqué : la clé hôte officielle doit être épinglée dans RAKUTEN_SFTP_KNOWN_HOSTS."
-            echo "- Import Rakuten bloqué : clé hôte SFTP officielle non configurée ; snapshot précédent conservé." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
+          # Empreintes officielles communiquées par Rakuten le 10/11/2026.
+          EXPECTED_SHA1="d98a0cdd102177804f99a3534a4a04c6b31ce816"
+          EXPECTED_SHA256="6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc"
           mkdir -p "$HOME/.ssh"
-          printf '%s\n' "$RAKUTEN_SFTP_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          chmod 600 "$HOME/.ssh/known_hosts"
-          if ! ssh-keygen -F "aftp.linksynergy.com" -f "$HOME/.ssh/known_hosts" >/dev/null; then
-            echo "::error::La clé hôte épinglée ne contient pas aftp.linksynergy.com."
+          SCAN="$(ssh-keyscan -T 10 -t rsa,ecdsa,ed25519 aftp.linksynergy.com 2>/dev/null || true)"
+          if [[ -z "$SCAN" ]]; then
+            echo "::error::Impossible de récupérer une clé SSH du serveur Rakuten."
             exit 1
           fi
+          : > "$HOME/.ssh/known_hosts"
+          MATCHED=false
+          while read -r host key_type key_data; do
+            [[ -n "${key_data:-}" ]] || continue
+            key_blob="$(printf '%s' "$key_data" | base64 -d | sha256sum | awk '{print $1}')"
+            key_sha1="$(printf '%s' "$key_data" | base64 -d | sha1sum | awk '{print $1}')"
+            if [[ "$key_blob" == "$EXPECTED_SHA256" && "$key_sha1" == "$EXPECTED_SHA1" ]]; then
+              printf '%s %s %s\n' "$host" "$key_type" "$key_data" >> "$HOME/.ssh/known_hosts"
+              MATCHED=true
+            fi
+          done <<< "$SCAN"
+          if [[ "$MATCHED" != true ]]; then
+            echo "::error::La clé présentée par aftp.linksynergy.com ne correspond pas aux empreintes officielles Rakuten."
+            exit 1
+          fi
+          chmod 600 "$HOME/.ssh/known_hosts"
+          ssh-keygen -F "aftp.linksynergy.com" -f "$HOME/.ssh/known_hosts" >/dev/null
           curl --version | grep -qi sftp || { echo "::error::curl ne prend pas SFTP en charge."; exit 1; }
           curl --help all | grep -q -- '--knownhosts' || { echo "::error::curl ne permet pas de vérifier la clé hôte SFTP."; exit 1; }
           echo "ready=true" >> "$GITHUB_OUTPUT"
