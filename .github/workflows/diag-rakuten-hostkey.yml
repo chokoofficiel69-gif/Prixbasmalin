@@ -1,0 +1,17 @@
+name: Diagnostic clé hôte Rakuten (lecture seule)
+on:
+  push:
+    branches: [diag/rakuten-hostkey]
+permissions:
+  contents: read
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --quiet paramiko cryptography
+      - name: Résolution DNS
+        run: getent ahosts aftp.linksynergy.com | sort -u || true
+      - name: Clés présentées par le serveur et comparaison aux empreintes officielles
+        run: python3 scripts/rakuten-hostkey-diagnostic.py aftp.linksynergy.com 22
