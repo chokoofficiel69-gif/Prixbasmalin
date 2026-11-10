@@ -954,6 +954,10 @@ async function runSelfTests() {
   try { validateDirectFeedUrl("http://productdata.awin.com/feed.csv"); } catch { rejectsHttp = true; }
   if (!rejectsHttp) throw new Error("TEST ÉCHEC : une URL HTTP doit être rejetée.");
 
+  const feedListUrl = "https://ui.awin.com/productdata-darwin-download/publisher/" + PUBLISHER_ID + "/test-key/1/feedList";
+  if (extractAwinDataFeedKey(feedListUrl) !== "test-key") {
+    throw new Error("TEST ÉCHEC : l'URL feedList Awin doit être reconnue comme une clé de flux standard, pas comme un flux CSV direct.");
+  }
   const originalFetch = globalThis.fetch;
   const originalStandardKey = process.env.AWIN_PRODUCT_DATA_API_KEY;
   const originalDirectFeedUrl = process.env.AWIN_PRODUCT_DATA_FEED_URL;
@@ -1035,7 +1039,9 @@ if (process.argv.includes("--self-test")) {
   await runSelfTests();
 } else {
   const rawOffers = [];
-  const directFeedConfigured = Boolean(process.env.AWIN_PRODUCT_DATA_FEED_URL);
+  const configuredFeedUrl = process.env.AWIN_PRODUCT_DATA_FEED_URL || "";
+  const feedListKey = extractAwinDataFeedKey(configuredFeedUrl);
+  const directFeedConfigured = Boolean(configuredFeedUrl) && !feedListKey;
   let joinedAdvertisersChecked = null;
   let pendingAdvertisersDetected = null;
   let additionalAwinOffers = 0;
@@ -1046,6 +1052,9 @@ if (process.argv.includes("--self-test")) {
     pendingAdvertisersDetected = programmeStatus.pendingCount;
     additionalAwinOffers = programmeStatus.importedOffers;
   } else {
+    if (feedListKey) {
+      log("URL Awin feedList reconnue : utilisation de la clé pour récupérer les flux standards, sans traiter feedList comme un CSV produit direct.");
+    }
     const programmeStatus = await loadEnhancedAwinFeeds(rawOffers);
     joinedAdvertisersChecked = programmeStatus.joinedCount;
     pendingAdvertisersDetected = programmeStatus.pendingCount;
