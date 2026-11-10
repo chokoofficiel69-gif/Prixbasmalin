@@ -14,6 +14,7 @@ on:
     paths:
       - ".github/workflows/import-rakuten-catalogue.yml"
       - "scripts/import-rakuten-catalogue.py"
+      - "tests/test_import_rakuten_catalogue.py"
 
 permissions:
   contents: write
