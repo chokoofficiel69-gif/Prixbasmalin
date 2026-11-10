@@ -504,6 +504,16 @@ function groupKey(row, advertiser) {
     const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
     if (color || size || variant) return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size + ":" + variant;
   }
+  // Secours strict : même marque + même intitulé normalisé, uniquement pour
+  // des titres suffisamment distinctifs. Aucun rapprochement sur le titre seul.
+  const title = identityPart(row.title || row.product_name || row.name || "");
+  const titleTokens = title.split(" ").filter(token => token.length > 1);
+  if (brand && title.length >= 20 && titleTokens.length >= 3) {
+    const color = identityPart(row.color || row.colour || "");
+    const size = identityPart(row.size || "");
+    const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
+    return "brand-name:" + brand + ":" + title + ":" + color + ":" + size + ":" + variant;
+  }
   return "awin:" + advertiser + ":" + String(row.id || row.product_id || "");
 }
 
@@ -923,11 +933,17 @@ async function runSelfTests() {
   const mpnKeyVariantDifferent = groupKey({ brand: "AudioBrand", mpn: "AB-X1", variant: "Blanc 128 Go" }, "annonceur-3");
   const mpnKeyMissingVariantA = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-1");
   const mpnKeyMissingVariantB = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-2");
+  const titleKeyA = groupKey({ brand: "AudioBrand", title: "Casque audio bluetooth premium noir" }, "annonceur-1");
+  const titleKeyB = groupKey({ brand: "AudioBrand", product_name: "Casque audio bluetooth premium noir" }, "annonceur-2");
+  const titleKeyDifferent = groupKey({ brand: "AudioBrand", title: "Casque audio bluetooth premium blanc" }, "annonceur-3");
+  const titleKeyTooShort = groupKey({ brand: "AudioBrand", title: "Casque audio" }, "annonceur-4");
   if (mpnKeyA !== mpnKeyB || mpnKeyA === mpnKeyDifferentVariant ||
       mpnKeyVariantA !== mpnKeyVariantB || mpnKeyVariantA === mpnKeyVariantDifferent ||
       mpnKeyMissingVariantA === mpnKeyMissingVariantB ||
-      groupKey({ mpn: "AB-X1" }, "annonceur-1") === groupKey({ mpn: "AB-X1" }, "annonceur-2")) {
-    throw new Error("TEST ÉCHEC : le rapprochement MPN doit exiger une marque et une variante exacte.");
+      groupKey({ mpn: "AB-X1" }, "annonceur-1") === groupKey({ mpn: "AB-X1" }, "annonceur-2") ||
+      titleKeyA !== titleKeyB || titleKeyA === titleKeyDifferent ||
+      !titleKeyA.startsWith("brand-name:") || titleKeyTooShort === groupKey({ brand: "AudioBrand", title: "Casque audio" }, "annonceur-5")) {
+    throw new Error("TEST ÉCHEC : les identifiants et le rapprochement de secours doivent rester stricts.");
   }
   const grouped = aggregateOffers([
     { identity: mpnKeyA, advertiser_id: "1", id: "1", merchant: "Boutique A", name: "Casque Audio X", brand: "AudioBrand", category: "tech", color: "Noir", size: "", gtin: "", mpn: "AB-X1", images: ["https://cdn.example/a.jpg"], price_eur: 45, shipping_price_eur: null, availability: "unknown", merchant_updated_at: null, url: "https://example.com/a" },
