@@ -34,6 +34,7 @@ jobs:
           python3 -m py_compile scripts/import-rakuten-catalogue.py
           python3 -m unittest discover -s tests -p 'test_import_rakuten_catalogue.py' -v
 
+  # La clé hôte est épinglée par comparaison des empreintes officielles Rakuten.
   import:
     if: github.event_name != 'pull_request'
     needs: validate
