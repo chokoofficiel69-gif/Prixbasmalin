@@ -76,6 +76,7 @@ jobs:
             [[ -n "${key_data:-}" ]] || continue
             [[ "$host" == \#* ]] && continue
             key_blob="$(printf '%s' "$key_data" | base64 -d | sha256sum | awk '{print $1}')"
+            echo "SSH host key: type=$key_type SHA256_HEX=$key_blob"
             if [[ "$key_blob" == "$EXPECTED_SHA256" ]]; then
               printf '%s %s %s\n' "$host" "$key_type" "$key_data" >> "$HOME/.ssh/known_hosts"
               MATCHED=true
