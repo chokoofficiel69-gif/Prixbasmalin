@@ -182,7 +182,9 @@ class RakutenImportValidationTests(unittest.TestCase):
 
     def test_workflow_requires_pinned_host_key_and_retries_atomic_downloads(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
-        self.assertIn('if [[ -z "${RAKUTEN_SFTP_KNOWN_HOSTS:-}" ]]', workflow)
+        self.assertIn('EXPECTED_SHA1="d98a0cdd102177804f99a3534a4a04c6b31ce816"', workflow)
+        self.assertIn('EXPECTED_SHA256="6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc"', workflow)
+        self.assertIn('ssh-keyscan -T 10 -t rsa,ecdsa,ed25519 aftp.linksynergy.com', workflow)
         self.assertIn('ssh-keygen -F "aftp.linksynergy.com"', workflow)
         self.assertNotIn("ssh-keyscan", workflow)
         self.assertIn("--retry-all-errors", workflow)
@@ -194,7 +196,6 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertNotIn(r"\${", workflow)
         self.assertIn("RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}", workflow)
         self.assertIn("RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}", workflow)
-        self.assertIn("RAKUTEN_SFTP_KNOWN_HOSTS: ${{ vars.RAKUTEN_SFTP_KNOWN_HOSTS }}", workflow)
         self.assertIn('if [[ -z "${RAKUTEN_SFTP_USER:-}"', workflow)
         self.assertIn('if [[ "$RAKUTEN_DATE_FORMAT" != "MM/DD/YYYY"', workflow)
 
