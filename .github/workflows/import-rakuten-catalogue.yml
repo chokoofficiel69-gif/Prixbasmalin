@@ -80,9 +80,10 @@ jobs:
           while read -r host key_type key_data; do
             [[ -n "${key_data:-}" ]] || continue
             [[ "$host" == \#* ]] && continue
-            decoded_key="$(printf '%s' "$key_data" | base64 -d)"
-            key_sha256_hex="$(printf '%s' "$decoded_key" | sha256sum | awk '{print $1}')"
-            key_sha256_b64="$(printf '%s' "$decoded_key" | ssh-keygen -E sha256 -lf /dev/stdin 2>/dev/null | awk '{print $2}')"
+            fingerprint_file="$(mktemp)"
+            printf '%s %s\n' "$key_type" "$key_data" > "$fingerprint_file"
+            key_sha256_b64="$(ssh-keygen -E sha256 -lf "$fingerprint_file" 2>/dev/null | awk '{print $2}')"
+            rm -f "$fingerprint_file"
             match_a=false
             match_b=false
             [[ "$key_sha256_hex" == "$EXPECTED_SHA256_A" || "$key_sha256_b64" == "$EXPECTED_SHA256_A_OPENSSH" ]] && match_a=true
