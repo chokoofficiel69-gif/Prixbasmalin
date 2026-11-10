@@ -186,7 +186,6 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIn('EXPECTED_SHA256="6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc"', workflow)
         self.assertIn('ssh-keyscan -T 10 -t rsa,ecdsa,ed25519 aftp.linksynergy.com', workflow)
         self.assertIn('ssh-keygen -F "aftp.linksynergy.com"', workflow)
-        self.assertNotIn("ssh-keyscan", workflow)
         self.assertIn("--retry-all-errors", workflow)
         self.assertIn('temporary="${output}.part"', workflow)
         self.assertIn('gzip -t "$temporary"', workflow)
