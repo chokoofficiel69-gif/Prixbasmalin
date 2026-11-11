@@ -77,7 +77,9 @@ function categoryFor(row, merchantName = "") {
   // la catégorie source est absente ou générique, jamais pour remplacer une catégorie explicite différente.
   if (/milk bar babystore/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "kids";
   if (/bodycross/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "sport";
-  if (/mibro/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "tech";
+  if (/mibro|akko/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "tech";
+  if (/deluxehomeart/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "home";
+  if (/perfumeria comas|boucleme/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "beauty";
   if (metadataCategory !== "other") return metadataCategory;
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
   const titleCategory = classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
@@ -934,7 +936,11 @@ async function runSelfTests() {
     [{ title: "Eau de Toilette fraîche" }, "beauty", "SODEAL CH"],
     [{ title: "Attrape-Soleil Ailes d'Ange Lumière protection élégance spirituelle" }, "home", "Bonheur de lune"],
     [{ title: "Attrape-soleil Arbre de Vie Cristal Violet Suspension Feng Shui" }, "home", "Bonheur de lune"],
-    [{ title: "12 Bouteilles Villa Sintesi 2024 Sicilia DOC" }, "other", "SODEAL CH"]
+    [{ title: "12 Bouteilles Villa Sintesi 2024 Sicilia DOC" }, "other", "SODEAL CH"],
+    [{ title: "2 piles x C" }, "home", "Deluxehomeartshop FR"],
+    [{ title: "2.4G Wireless Receiver" }, "tech", "AKKO FR"],
+    [{ title: "Produit sans catégorie" }, "beauty", "Perfumeria Comas FR"],
+    [{ title: "Produit sans catégorie" }, "beauty", "Bouclème"]
   ];
   for (const [row, expected, merchantName] of categoryCases) {
     if (categoryFor(row, merchantName) !== expected) {
