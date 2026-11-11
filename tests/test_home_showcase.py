@@ -34,12 +34,28 @@ class HomeShowcaseTests(unittest.TestCase):
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
         known = {f"{o['price_eur']:.2f}".replace(".", ",") for p in sheets for o in p["offers"]}
         known |= {f"{p['max_price_eur'] - p['min_price_eur']:.2f}".replace(".", ",") for p in sheets}
+        sc = load("build_home_showcase")
+        ref = max(p["last_date"] for p in sheets if p.get("last_date"))
+        views = [v for v in (sc.fresh_view(p, ref) for p in sheets) if v]
+        known |= {f"{v['max_price_eur'] - v['min_price_eur']:.2f}".replace(".", ",") for v in views}
         for amount in re.findall(r"(\d[\d \u00a0\u202f]*,\d{2})\s?€", self.block):
             amount = re.sub(r"[ \u00a0\u202f]", "", amount)
             self.assertIn(amount, known, amount)
         self.assertIn("Plus bas prix relevé", self.block)
         self.assertRegex(self.block, r"le \d{2}/\d{2}/\d{4}")
 
+
+    def test_gaps_use_only_recent_new_offers(self):
+        sc = load("build_home_showcase")
+        p = {"id": "x", "image": "https://a/x.jpg", "offers": [
+            {"merchant": "amazon", "price_eur": 100.0, "date": "2026-11-11"},
+            {"merchant": "fnac", "price_eur": 120.0, "date": "2026-11-10"},
+            {"merchant": "alternatefr", "price_eur": 80.0, "date": "2026-10-21"},
+            {"merchant": "asgoodasnewfr", "price_eur": 60.0, "date": "2026-11-11"}]}
+        v = sc.fresh_view(p, "2026-11-11")
+        self.assertEqual([o["merchant"] for o in v["offers"]], ["amazon", "fnac"])
+        self.assertEqual(v["max_price_eur"] - v["min_price_eur"], 20.0)
+        self.assertIsNone(sc.fresh_view({**p, "offers": p["offers"][2:]}, "2026-11-11"))
 
     def test_gift_rail_rotates_unique_https_images_every_48_hours(self):
         text = (ROOT / "index.html").read_text(encoding="utf-8")
