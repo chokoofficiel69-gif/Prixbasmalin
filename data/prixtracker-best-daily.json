@@ -4,7 +4,7 @@
   "source_url": "https://prixtracker.fr/donnees/meilleur-prix-du-jour.csv",
   "license": "Licence Ouverte 2.0",
   "attribution": "Source : PrixTracker (prixtracker.fr/donnees), réutilisé sous Licence Ouverte 2.0 via data.gouv.fr.",
-  "generated_at": "2026-11-11T17:28:19.967Z",
+  "generated_at": "2026-11-11T19:49:01.492Z",
   "dataset_period": {
     "from": "2025-12-11",
     "to": "2026-11-11"
@@ -12,7 +12,7 @@
   "status": "historical_reference",
   "methodology": "Historique du prix minimum observé par produit et par jour chez les marchands suivis. Ce relevé n'est pas une offre disponible en temps réel; le CSV ne fournit ni URL produit ni preuve de stock.",
   "counts": {
-    "rows": 6074,
+    "rows": 6088,
     "products": 106,
     "merchants": 51,
     "categories": 12,
@@ -7879,6 +7879,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "dreame-l40s-pro-ultra",
+      "product": "Dreame L40s Pro Ultra",
+      "category": "aspirateur",
+      "brand": "Dreame",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 459,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "dreame-l40s-pro-ultra",
       "product": "Dreame L40s Pro Ultra",
@@ -8296,6 +8306,16 @@
       "brand": "Dreame",
       "lowest_observed_merchant": "rakuten",
       "lowest_observed_price_eur_ttc": 499,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "dreame-x50-ultra",
+      "product": "Dreame X50 Ultra Complete",
+      "category": "aspirateur",
+      "brand": "Dreame",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 599,
       "source": "releve PrixTracker"
     },
     {
@@ -9689,6 +9709,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "dyson-v12s-detect-slim-submarine",
+      "product": "Dyson V12s Detect Slim Submarine",
+      "category": "aspirateur",
+      "brand": "Dyson",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 449,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-08",
       "product_id": "dyson-v12s-detect-slim-submarine",
       "product": "Dyson V12s Detect Slim Submarine",
@@ -10116,6 +10146,16 @@
       "brand": "Dyson",
       "lowest_observed_merchant": "manomanofr",
       "lowest_observed_price_eur_ttc": 434,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "dyson-v15-detect-absolute",
+      "product": "Dyson V15 Detect Absolute",
+      "category": "aspirateur",
+      "brand": "Dyson",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 735.2,
       "source": "releve PrixTracker"
     },
     {
@@ -10559,6 +10599,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "dyson-v16-piston-animal-submarine",
+      "product": "Dyson V16 Piston Animal Submarine",
+      "category": "aspirateur",
+      "brand": "Dyson",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 699,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-08",
       "product_id": "dyson-v16-piston-animal-submarine",
       "product": "Dyson V16 Piston Animal Submarine",
@@ -10986,6 +11036,16 @@
       "brand": "Dyson",
       "lowest_observed_merchant": "manomanofr",
       "lowest_observed_price_eur_ttc": 784,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "ecovacs-deebot-t90-pro-omni",
+      "product": "Ecovacs Deebot T90 Pro Omni",
+      "category": "aspirateur",
+      "brand": "Ecovacs",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 449,
       "source": "releve PrixTracker"
     },
     {
@@ -14986,6 +15046,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "eleclercfrmarketplac",
       "lowest_observed_price_eur_ttc": 816.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "ipad-mini-a17-pro",
+      "product": "iPad mini (A17 Pro)",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 679.9,
       "source": "releve PrixTracker"
     },
     {
@@ -39049,6 +39119,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "irobot-roomba-max-705-combo",
+      "product": "iRobot Roomba Max 705 Combo + AutoWash",
+      "category": "aspirateur",
+      "brand": "iRobot",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 699.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "irobot-roomba-max-705-combo",
       "product": "iRobot Roomba Max 705 Combo + AutoWash",
@@ -40079,6 +40159,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "jbl-charge-6",
+      "product": "JBL Charge 6",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 133.9,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "jbl-charge-6",
       "product": "JBL Charge 6",
@@ -40709,6 +40799,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "jbl-flip-7",
+      "product": "JBL Flip 7",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 79,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "jbl-flip-7",
       "product": "JBL Flip 7",
@@ -41186,6 +41286,16 @@
       "brand": "JBL",
       "lowest_observed_merchant": "samsungfr",
       "lowest_observed_price_eur_ttc": 38,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "jbl-go-5",
+      "product": "JBL Go 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 39.99,
       "source": "releve PrixTracker"
     },
     {
@@ -55559,6 +55669,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "rowenta-silence-force-ro7457ea",
+      "product": "Rowenta Silence Force RO7457EA",
+      "category": "aspirateur",
+      "brand": "Rowenta",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 225.14,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "rowenta-silence-force-ro7457ea",
       "product": "Rowenta Silence Force RO7457EA",
@@ -55999,6 +56119,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "rowenta-x-force-flex-16-60",
+      "product": "Rowenta X-Force Flex 16.60",
+      "category": "aspirateur",
+      "brand": "Rowenta",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 449,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-08",
       "product_id": "rowenta-x-force-flex-16-60",
       "product": "Rowenta X-Force Flex 16.60",
@@ -56406,6 +56536,16 @@
       "brand": "Rowenta",
       "lowest_observed_merchant": "darty",
       "lowest_observed_price_eur_ttc": 476.64,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "samsung-bespoke-ai-jet-lite",
+      "product": "Samsung Bespoke AI Jet Lite Complete",
+      "category": "aspirateur",
+      "brand": "Samsung",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 499,
       "source": "releve PrixTracker"
     },
     {
