@@ -101,7 +101,7 @@ class HomeDealsTests(unittest.TestCase):
         for line in awin.splitlines():
             if "${{" in line:
                 self.assertEqual(line.count("${{"), line.count("}}"), line)
-                self.assertEqual(line.count("}"), 2, line)
+                self.assertTrue(line.endswith("}}") and not line.endswith("}}}"), line)
         self.assertIn("github.event.pull_request.head.sha || github.ref", tracker)
 
     def test_homepage_sections_partners_and_affiliate_rel(self):
