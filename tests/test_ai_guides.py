@@ -36,15 +36,24 @@ class AiGuidesTest(unittest.TestCase):
         self.assertIsNone(g.validate({**GOOD, "faq": GOOD["faq"][:1]}))
         self.assertIsNone(g.validate("pas un objet"))
 
-    def test_model_is_picked_from_provider_list(self):
+    def test_only_explicitly_free_models_are_selected(self):
         g = load("generate_ai_guides")
-        groq = ["whisper-large-v3", "openai/gpt-oss-20b", "openai/gpt-oss-120b", "meta-llama/llama-guard-4-12b", "llama-3.1-8b-instant"]
-        self.assertEqual(g.pick_model(groq), "openai/gpt-oss-120b")
-        gem = ["models/embedding-001", "models/gemini-2.5-flash-preview-tts", "models/gemini-2.5-flash", "models/gemini-2.5-pro", "models/gemini-3-flash-preview"]
-        self.assertEqual(g.pick_model(gem), "gemini-2.5-flash")
-        orr = ["meta-llama/llama-3.3-70b-instruct", "meta-llama/llama-3.3-70b-instruct:free"]
-        self.assertEqual(g.pick_model(orr, free_only=True), "meta-llama/llama-3.3-70b-instruct:free")
-        self.assertIsNone(g.pick_model(["whisper-large-v3"]))
+        models = [
+            "meta-llama/llama-3.3-70b-instruct",
+            "openai/gpt-oss-120b",
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "whisper-large-v3",
+        ]
+        self.assertEqual(g.pick_model(models, free_only=True), "meta-llama/llama-3.3-70b-instruct:free")
+        self.assertIsNone(g.pick_model(["openai/gpt-oss-120b", "llama-3.3-70b"], free_only=True))
+        self.assertIsNone(g.pick_model(["whisper-large-v3"], free_only=True))
+
+    def test_call_refuses_paid_or_unapproved_providers_before_network(self):
+        g = load("generate_ai_guides")
+        with self.assertRaises(ValueError):
+            g.call(("groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", "llama-3.3-70b"), {})
+        with self.assertRaises(ValueError):
+            g.call(("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", "meta-llama/llama-3.3-70b-instruct"), {})
 
     def test_no_key_means_no_change(self):
         g = load("generate_ai_guides")
