@@ -87,6 +87,9 @@ function categoryFor(row, merchantName = "") {
   const titleCategory = classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
   if (titleCategory !== "other") return titleCategory;
   if (/chaussettes-en-ligne/.test(merchant)) return "fashion";
+  // LUSINI est un fournisseur hôtel-restauration et Ecovacs un fabricant d'entretien domestique.
+  // Ce fallback n'intervient qu'après l'analyse du titre : les familles explicites restent prioritaires.
+  if (/lusini|ecovacs/.test(merchant)) return "home";
   return "other";
 }
 function offerTimestampCoverage(offers, now = Date.now()) {
@@ -961,6 +964,9 @@ async function runSelfTests() {
     [{ title: "VEGA Planchette en ardoise naturelle Patara" }, "home", "LUSINI FR"],
     [{ title: "DEEBOT T50 PRO OMNI Gen3" }, "home", "Ecovacs FR"],
     [{ title: "Chaussures de service professionnel" }, "fashion", "LUSINI FR"],
+    [{ title: "Article professionnel sans catégorie descriptive" }, "home", "LUSINI FR"],
+    [{ title: "Ecovacs référence générique" }, "home", "Ecovacs FR"],
+    [{ title: "Article générique sans catégorie" }, "other", "Bonheur de lune"],
     [{ title: "Appareil d'aide au sommeil et relaxation" }, "home", "SODEAL CH"],
     [{ title: "Appareil d'Entraînement de Boxe" }, "sport", "SODEAL CH"],
     [{ title: "Appareil Oculaire Anti-âge avec Photothérapie, Thermothérapie et Vibrothérapie" }, "beauty", "SODEAL CH"],
