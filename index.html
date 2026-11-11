@@ -1813,7 +1813,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   // On peut lier une carte à sa fiche historique, mais pas afficher son minimum comme une offre actuelle.
   sheetsReady.then(data=>{
     if(!data||data.status!=="historical_reference"||!Array.isArray(data.products))return;
-    const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
+    const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
     const index=new Map();
     data.products.forEach(s=>[norm(s.name),norm(s.brand+" "+s.name)].forEach(k=>{if(k&&!index.has(k))index.set(k,s);}));
     const linkHistory=()=>{
