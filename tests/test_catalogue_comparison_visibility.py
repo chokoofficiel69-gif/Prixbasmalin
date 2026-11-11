@@ -55,13 +55,13 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
 
     def test_search_ranking_counts_only_fresh_eur_ttc_offers(self):
         source = CATALOGUE.read_text(encoding="utf-8")
-        self.assertIn("const pmVerifiedOfferSummary=product=>", source)
+        self.assertIn("const pmVerifiedMerchantCount=product=>", source)
         self.assertIn('currency!=="EUR"', source)
         self.assertIn('taxStatus!=="included"', source)
         self.assertIn('!pmAwinPriceIsFresh(checkedAt)', source)
-        self.assertIn("multiMerchant:summary.merchantCount>1", source)
-        self.assertIn("hasPrice:summary.hasPrice", source)
-        self.assertIn("shippingKnown:summary.shippingKnown", source)
+        self.assertIn("multiMerchant:hasPrice&&merchantCount>1", source)
+        self.assertIn('const hasPrice=product.priceStatus==="fresh"&&', source)
+        self.assertIn("shippingKnown,\n      total:hasPrice?", source)
 
     def test_each_merchant_offer_requires_its_own_fresh_timestamp(self):
         source = CATALOGUE.read_text(encoding="utf-8")
