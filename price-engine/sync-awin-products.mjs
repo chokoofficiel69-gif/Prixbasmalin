@@ -104,6 +104,18 @@ function offerTimestampCoverage(offers, now = Date.now()) {
   return coverage;
 }
 
+function temporalFieldCoverage(rows) {
+  const sample = Array.isArray(rows) ? rows : [];
+  const fields = [...new Set(sample.flatMap(row => Object.keys(row || {})))]
+    .filter(field => /(date|time|updated|modified|last)/i.test(field))
+    .sort();
+  return fields.map(field => ({
+    field,
+    populated: sample.filter(row => String(row?.[field] ?? "").trim()).length,
+    total: sample.length
+  }));
+}
+
 function parseJsonl(body) {
   const rows = [];
   for (const [index, line] of body.split(/\r?\n/).entries()) {
@@ -463,6 +475,12 @@ async function loadStandardAwinFeeds(rawOffers) {
         const rows = objectRowsFromCsv(bytes.toString("utf8"));
         const advertiser = String(row.advertiser_id || row.advertiserid || row.id || row.feed_id || "standard");
         const program = {name:row.advertiser_name || row.advertiser || ("Annonceur Awin "+advertiser)};
+        const temporalFields = temporalFieldCoverage(rows);
+        const temporalSummary = temporalFields.length
+          ? temporalFields.map(field => field.field + "=" + field.populated + "/" + field.total).join(", ")
+          : "aucune colonne temporelle";
+        const lastUpdatedColumn = Object.prototype.hasOwnProperty.call(rows[0] || {}, "last_updated") ? "présente" : "absente";
+        log(program.name + " (flux standard) : champs temporels : " + temporalSummary + " ; last_updated " + lastUpdatedColumn + ".");
         let count = 0;
         for (const productRow of rows) {
           const offer = parseFeedRow(productRow,program,advertiser);
@@ -820,6 +838,14 @@ async function runSelfTests() {
     throw new Error("TEST ÉCHEC : la fraîcheur combinée des offres doit distinguer fraîches, périmées, absentes et invalides.");
   }
   const rows = objectRowsFromCsv(sampleCsv);
+  const temporalDiagnostics = temporalFieldCoverage([
+    { last_updated: "2026-11-04T10:00:00Z", updated_at: "" },
+    { last_updated: "", updated_at: "2026-11-04T11:00:00Z" }
+  ]);
+  if (JSON.stringify(temporalDiagnostics) !== JSON.stringify([
+    { field: "last_updated", populated: 1, total: 2 },
+    { field: "updated_at", populated: 1, total: 2 }
+  ])) throw new Error("TEST ÉCHEC : les colonnes temporelles des flux standards doivent être diagnostiquées sans utiliser leur valeur comme prix actuel.");
   for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock","pas en stock","epuise","0"]) {
     if (stockState(value) !== "out_of_stock") throw new Error("TEST ÉCHEC : statut indisponible mal reconnu : " + value);
   }
