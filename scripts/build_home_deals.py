@@ -77,9 +77,21 @@ def verified_merchant_price(product, reference_time):
     return timedelta(minutes=-5) <= age <= timedelta(hours=48)
 
 
-def build_gifts(awin, limit=48, now=None):
+def build_gifts(awin, limit=48, now=None, previous_gifts=None):
     fetched_at = awin.get("fetched_at")
     reference_time = now or parse_utc(fetched_at)
+    previous_images = {}
+    for previous in previous_gifts or []:
+        if not isinstance(previous, dict):
+            continue
+        previous_image = str(previous.get("image") or "")
+        if previous_image and previous_image not in previous_images:
+            previous_images[previous_image] = {
+                "image_verified": previous.get("image_verified") is True,
+                "image_verified_at": previous.get("image_verified_at"),
+                "image_checked_at": previous.get("image_checked_at"),
+                "image_check_status": previous.get("image_check_status") or "pending",
+            }
     by_merchant = {}
     seen = set()
     for p in awin.get("products", []):
@@ -108,6 +120,11 @@ def build_gifts(awin, limit=48, now=None):
             "price_eur": round(float(price), 2) if price_verified else None,
             "shipping_eur": round(float(shipping), 2) if price_verified and isinstance(shipping, (int, float)) and not isinstance(shipping, bool) and shipping >= 0 else None,
             "image": image,
+            "image_provenance": "Flux marchand Awin autorisé",
+            "image_verified": previous_images.get(image, {}).get("image_verified", False),
+            "image_verified_at": previous_images.get(image, {}).get("image_verified_at"),
+            "image_checked_at": previous_images.get(image, {}).get("image_checked_at"),
+            "image_check_status": previous_images.get(image, {}).get("image_check_status", "pending"),
             "url": url,
             "family": family,
             "family_label": family_label,
@@ -168,15 +185,16 @@ def build_top(sheets, limit=12):
     return top
 
 
-def build(awin, sheets):
+def build(awin, sheets, previous=None):
     reference_time = parse_utc(awin.get("fetched_at"))
+    previous_gifts = (previous or {}).get("gifts", []) if isinstance(previous, dict) else []
     return {
         "version": 1,
         "awin_fetched_at": awin.get("fetched_at"),
         "sheets_period": sheets.get("dataset_period"),
         "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
         "top": build_top(sheets),
-        "gifts": build_gifts(awin, now=reference_time),
+        "gifts": build_gifts(awin, now=reference_time, previous_gifts=previous_gifts),
     }
 
 
@@ -184,7 +202,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    data = build(json.loads(AWIN.read_text(encoding="utf-8")), json.loads(SHEETS.read_text(encoding="utf-8")))
+    previous = {}
+    if OUTPUT.exists():
+        try:
+            previous = json.loads(OUTPUT.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            previous = {}
+    data = build(json.loads(AWIN.read_text(encoding="utf-8")), json.loads(SHEETS.read_text(encoding="utf-8")), previous=previous)
     text = json.dumps(data, ensure_ascii=False, indent=1) + "\n"
     if args.check:
         if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != text:
