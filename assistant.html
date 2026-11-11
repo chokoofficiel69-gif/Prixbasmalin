@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b10">
+<meta name="description" content="Posez vos questions à l’assistant Prix Malin et trouvez des produits sur Amazon France.">
+<link rel="canonical" href="https://prixbasmalin.fr/assistant.html">
+<title>Assistant IA — Prix Malin</title>
+<style>
+:root{--bg:#080b10;--panel:#111821;--line:#303b49;--text:#f7f8fa;--muted:#b5bec9;--orange:#ff681c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+a{color:inherit}.wrap{width:min(900px,calc(100% - 32px));margin:auto}
+header{border-bottom:1px solid #39414b;padding:18px 0}.head{display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-size:25px;font-weight:950;text-decoration:none;letter-spacing:-1px}.brand span{color:var(--orange)}.back{color:#ff9a5c;font-weight:750;text-decoration:none}
+main{padding:36px 0 70px}.eyebrow{color:#ff9a5c;font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.intro h1{font-size:clamp(30px,6vw,48px);line-height:1.05;letter-spacing:-1.6px;margin:9px 0}.intro p{color:var(--muted);line-height:1.6;margin:0;max-width:680px}
+.panel{margin-top:26px;padding:22px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#151e29,#0e141d);box-shadow:0 18px 45px #0005}
+.suggestions{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:17px}.suggestions button{border:1px solid #465363;background:#1a2532;color:#f7f8fa;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:700;cursor:pointer}
+label{display:block;font-weight:800;margin-bottom:9px}.composer{display:flex;gap:10px}.composer input{min-width:0;flex:1;border:1px solid #596675;border-radius:12px;background:#f4f5f7;color:#151a20;padding:14px 15px;font-size:16px}.composer button,.amazon-link{border:0;border-radius:12px;background:linear-gradient(135deg,#ff9b20,#ff5b0c);color:white;padding:0 19px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.composer button:disabled{opacity:.55;cursor:wait}.hint{font-size:12px;color:#aeb8c5;line-height:1.5;margin:11px 0 0}
+.answer{display:none;margin-top:18px;border:1px solid #394757;border-radius:14px;background:#0a1018;padding:16px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}.answer[data-visible=true]{display:block}.answer strong{color:#ff9a5c}.amazon-link{min-height:42px;margin-top:13px;padding:0 15px}.status{min-height:22px;color:#ffb27f;font-size:13px;margin-top:10px}
+footer{border-top:1px solid #303b49;padding:20px 0;color:#9ca8b6;font-size:12px;line-height:1.5}
+@media(max-width:600px){main{padding-top:27px}.panel{padding:16px}.composer{flex-direction:column}.composer button{min-height:48px}.brand{font-size:22px}}
+</style>
+</head>
+<body>
+<header><div class="wrap head"><a class="brand" href="/">PRIX <span>MALIN</span></a><a class="back" href="/">← Retour au site</a></div></header>
+<main class="wrap">
+<section class="intro"><div class="eyebrow">Assistant intelligent Prix Malin</div><h1>Une question ? On cherche malin.</h1><p>Demandez un conseil, une explication ou une idée d’achat. Pour les recherches de produits, l’assistant vous oriente vers Amazon France. Les prix et stocks ne sont jamais inventés.</p></section>
+<section class="panel" aria-label="Conversation avec l’assistant">
+<div class="suggestions" aria-label="Exemples de questions">
+<button type="button" data-prompt="Trouve-moi un casque Bluetooth pas cher">Casque Bluetooth pas cher</button>
+<button type="button" data-prompt="Quel smartphone choisir pour moins de 200 euros ?">Smartphone à moins de 200 €</button>
+<button type="button" data-prompt="Comment comparer deux aspirateurs robots ?">Comparer deux produits</button>
+</div>
+<form id="pm-ai-form">
+<label for="pm-ai-input">Que recherchez-vous ?</label>
+<div class="composer"><input id="pm-ai-input" name="message" maxlength="4000" autocomplete="off" placeholder="Ex. : trouve-moi des écouteurs sans fil à petit prix" required><button id="pm-ai-send" type="submit">Envoyer</button></div>
+<p class="hint">Service gratuit à ce stade, soumis aux quotas du fournisseur. Les demandes de produits déclenchent une recherche Amazon ; l’assistant ne prétend pas disposer de prix en direct s’ils ne sont pas vérifiés.</p>
+</form>
+<div id="pm-ai-status" class="status" role="status" aria-live="polite"></div>
+<div id="pm-ai-answer" class="answer" data-visible="false" aria-live="polite"></div>
+<a id="pm-ai-amazon" class="amazon-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Voir les résultats sur Amazon France →</a>
+</section>
+</main>
+<footer><div class="wrap">Prix Malin · Comparez. Économisez. Malin. · <a href="/confidentialite.html">Confidentialité</a></div></footer>
+<script src="/js/pm-assistant.js" defer></script>
+</body>
+</html>
