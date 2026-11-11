@@ -15,6 +15,7 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 AWIN = ROOT / "data" / "awin-products.json"
@@ -40,6 +41,21 @@ def gift_family(product):
         if pattern.search(text):
             return key, label
     return "autre", "Idées cadeaux"
+
+
+PLACEHOLDER_IMAGE_PATTERN = re.compile(
+    r"(?:^|[/_.-])(?:no[-_]?image|placeholder|missing[-_]?image)(?:[._/-]|$)",
+    re.I,
+)
+
+
+def is_placeholder_image_url(url):
+    """Reject merchant-feed placeholders even when the URL returns a valid image response."""
+    try:
+        path = urlsplit(str(url)).path.lower()
+    except ValueError:
+        return True
+    return bool(PLACEHOLDER_IMAGE_PATTERN.search(path))
 
 
 def base_name(name):
@@ -101,6 +117,8 @@ def build_gifts(awin, limit=48, now=None, previous_gifts=None):
         if not isinstance(price, (int, float)) or not 12 <= price <= 300:
             continue
         if not image.startswith("https://") or not url.startswith("https://") or not p.get("merchant"):
+            continue
+        if is_placeholder_image_url(image):
             continue
         if EXCLUDED.search(f"{p.get('name')} {p.get('desc')}"):
             continue
