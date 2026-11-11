@@ -10,6 +10,7 @@ des vraies données du site.
   <!-- /pm-showcase --> ; --check vérifie qu'il est à jour.
 """
 import argparse
+import datetime as dt
 import html
 import json
 import sys
@@ -26,6 +27,24 @@ e = lambda s: html.escape(str(s), quote=True)
 
 TOP_IDS = ["airpods-4", "manette-switch-pro", "macbook-air-13-m5", "playstation-vr2", "iphone-17", "switch"]
 COMPARE_ID = "airpods-4"
+# Écarts et « plus bas prix » calculés uniquement sur des relevés récents : un prix vieux de
+# plusieurs semaines ou un produit reconditionné fausserait la comparaison avec le neuf.
+FRESH_DAYS = 3
+REFURBISHED = {"asgoodasnewfr", "backmarketfr", "backmarket"}
+
+
+def fresh_view(p, ref_date):
+    """Copie de la fiche limitée aux relevés neufs des FRESH_DAYS derniers jours."""
+    cutoff = (dt.date.fromisoformat(ref_date) - dt.timedelta(days=FRESH_DAYS)).isoformat()
+    offers = sorted((o for o in p.get("offers") or []
+                     if o.get("date", "") >= cutoff and o.get("merchant") not in REFURBISHED),
+                    key=lambda o: (o["price_eur"], o["merchant"]))
+    if len(offers) < 2:
+        return None
+    prices = [o["price_eur"] for o in offers]
+    return {**p, "offers": offers, "offer_count": len(offers),
+            "min_price_eur": min(prices), "max_price_eur": max(prices),
+            "last_date": max(o["date"] for o in offers)}
 
 
 def first_image(items, category, prefix=("https://",)):
@@ -57,11 +76,11 @@ def offer_card(p):
     rows = "".join(
         f'<li class="{"b" if i == 0 else ""}"><span>{e(seo.merchant_name(o["merchant"]))}</span><b>{seo.euro(o["price_eur"])}</b></li>'
         for i, o in enumerate(offers[:3]))
-    return (f'<article class="pmx-card"><span class="pmx-badge">{p["offer_count"]} marchands</span>'
+    return (f'<article class="pmx-card"><span class="pmx-badge">{p["offer_count"]} marchands relevés</span>'
             f'<a class="pmx-ph" href="/prix/{e(p["id"])}.html"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy" decoding="async"></a>'
             f'<h3>{e(p["name"])}</h3><small>Plus bas prix relevé</small><strong>{seo.euro(best["price_eur"])}</strong>'
             f'<small>chez {e(seo.merchant_name(best["merchant"]))} · le {seo.date_fr(best["date"])}</small>'
-            f'<span class="pmx-gap" title="Écart entre le plus bas et le plus haut prix relevés">Écart relevé : {seo.euro(p["max_price_eur"] - p["min_price_eur"])}</span>'
+            f'<span class="pmx-gap" title="Écart entre le plus bas et le plus haut prix relevés ces derniers jours (neuf uniquement)">Écart relevé : {seo.euro(p["max_price_eur"] - p["min_price_eur"])}</span>'
             f'<ul>{rows}</ul><a class="pmx-go" href="/prix/{e(p["id"])}.html">Comparer les prix →</a></article>')
 
 
@@ -88,9 +107,9 @@ def compare_block(p):
     gap = p["max_price_eur"] - p["min_price_eur"]
     return f"""<section class="pmx-sec pmx-compare" aria-labelledby="pmx-compare-t">
 <div class="pmx-head"><h2 id="pmx-compare-t">📊 Comparatif de prix <span>relevés</span></h2><small>Un exemple réel : prix relevés et datés, à confirmer chez le marchand</small></div>
-<div class="pmx-cmp"><div class="pmx-cmp-p"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy"><div><h3>{e(p["name"])}</h3><small>{p["offer_count"]} marchands suivis</small><a class="pmx-btn" href="/prix/{e(p["id"])}.html">Voir tous les relevés</a></div></div>
+<div class="pmx-cmp"><div class="pmx-cmp-p"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy"><div><h3>{e(p["name"])}</h3><small>{p["offer_count"]} marchands relevés ces {FRESH_DAYS} derniers jours</small><a class="pmx-btn" href="/prix/{e(p["id"])}.html">Voir tous les relevés</a></div></div>
 <ul class="pmx-cmp-l">{rows}</ul>
-<div class="pmx-cmp-g"><small>Écart entre marchands</small><strong>{seo.euro(gap)}</strong><small>entre le plus bas et le plus haut relevé</small>{sparkline(p)}<small>Plus bas relevé : {seo.euro(best["price_eur"])} le {seo.date_fr(best["date"])}</small></div></div>
+<div class="pmx-cmp-g"><small>Écart entre marchands</small><strong>{seo.euro(gap)}</strong><small>entre le plus bas et le plus haut relevé ces {FRESH_DAYS} derniers jours</small>{sparkline(p)}<small>Plus bas relevé : {seo.euro(best["price_eur"])} le {seo.date_fr(best["date"])}</small></div></div>
 </section>"""
 
 
@@ -164,8 +183,20 @@ CSS = """<style id="pm-showcase-style">
 
 
 def build_block():
-    sheets = {p["id"]: p for p in json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]}
-    top = [sheets[i] for i in TOP_IDS if i in sheets and sheets[i].get("image")]
+    all_sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
+    ref_date = max(p["last_date"] for p in all_sheets if p.get("last_date"))
+    sheets = {}
+    for p in all_sheets:
+        v = fresh_view(p, ref_date) if p.get("image") else None
+        if v:
+            sheets[p["id"]] = v
+    top = [sheets[i] for i in TOP_IDS if i in sheets]
+    for v in sorted(sheets.values(), key=lambda v: (-v["offer_count"], v["id"])):
+        if len(top) >= len(TOP_IDS):
+            break
+        if v not in top:
+            top.append(v)
+    compare = sheets.get(COMPARE_ID) or top[0]
     cats = "".join(
         f'<a class="pmx-cat" href="{e(url)}"><img src="/assets/accueil/cat-{slug}.webp" alt="" loading="lazy" decoding="async"><b>{name}</b></a>'
         for name, url, slug in categories())
@@ -191,7 +222,7 @@ def build_block():
 <a class="pmx-b c3" href="/maison-deco.html"><img src="/assets/accueil/ban-maison.webp" alt="" loading="lazy"><b>Maison &amp; Déco</b><small>Des idées pour un intérieur qui vous ressemble</small><span>Voir la sélection →</span></a>
 </section>
 <a class="pmx-promo" href="/boutiques-partenaires.html"><b>🎟️ Codes promo &amp; boutiques partenaires</b><span>Des réductions réservées aux visiteurs de Prix Malin · Commerçants : devenez partenaire →</span></a>
-{compare_block(sheets[COMPARE_ID])}
+{compare_block(compare)}
 <p class="pmx-note">Prix relevés et datés (relevés PrixTracker, data.gouv.fr, Licence Ouverte 2.0), pas des offres en direct : vérifiez le prix final chez le marchand. Visuels Prix Malin et photos libres créditées. Certains liens sont affiliés.</p>
 </div>
 {END}"""
