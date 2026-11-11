@@ -30,6 +30,23 @@ SITE = "https://prixbasmalin.fr"
 AMAZON_TAG = "prixbasmalin2-21"
 SHEETS = ROOT / "data" / "fiches-produits.json"
 DEALS = ROOT / "data" / "home-deals.json"
+AI_GUIDES = ROOT / "data" / "ai-guides.json"
+
+
+def load_ai_guides():
+    """Conseils rédigés par IA (sans chiffres), validés par scripts/generate_ai_guides.py."""
+    if not AI_GUIDES.exists():
+        return {}
+    return json.loads(AI_GUIDES.read_text(encoding="utf-8")).get("products", {})
+
+
+def ai_guide_html(g):
+    if not g:
+        return ""
+    items = "".join(f"<li>{e(c)}</li>" for c in g["criteres"])
+    return (f'<section class="panel"><h2>Conseils avant d’acheter</h2><p>{e(g["intro"])}</p><ul>{items}</ul>'
+            '<p class="source" style="color:#6b7280">Conseils généraux rédigés automatiquement par une IA, sans prix ni caractéristique inventés : '
+            'vérifiez la fiche technique chez le marchand.</p></section>')
 
 MERCHANTS = {
     "amazon": ("Amazon", lambda q: "https://www.amazon.fr/s?" + urlencode({"k": q, "tag": AMAZON_TAG})),
@@ -239,7 +256,7 @@ def chart_svg(p):
             f'<path d="{line}" fill="none" stroke="#f05a00" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>')
 
 
-def product_page(p, sheets, period):
+def product_page(p, sheets, period, guide=None):
     q = query_for(p)
     best = p["offers"][0]
     cheapest = [o for o in p["offers"] if o["price_eur"] == best["price_eur"]]
@@ -274,6 +291,8 @@ def product_page(p, sheets, period):
          "Ce sont des relevés historiques publiés par PrixTracker sous licence ouverte (data.gouv.fr). Ils ne représentent pas des offres actuelles ; "
          + ("le bouton Amazon ouvre la fiche du produit et les autres liens une recherche chez le marchand." if amz_direct else "les liens ouvrent une recherche chez le marchand.")),
     ]
+    if guide:
+        faq += [(f["q"], f["a"]) for f in guide["faq"]]
     faq_html = "".join(f"<dt>{e(qq)}</dt><dd>{e(a)}</dd>" for qq, a in faq)
     faq_ld = {"@context": "https://schema.org", "@type": "FAQPage",
               "mainEntity": [{"@type": "Question", "name": qq, "acceptedAnswer": {"@type": "Answer", "text": a}} for qq, a in faq]}
@@ -295,7 +314,7 @@ def product_page(p, sheets, period):
 </section>
 <section class="panel"><h2>Évolution des prix relevés</h2>{chart_svg(p)}<p>{e(trend_sentence(p))}</p>
 <a class="cta pm-btn pm-btn-ghost pm-btn-block" href="/produit.html?id={e(p['id'])}#alerte">Créer une alerte prix gratuite</a></section>
-<section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
+{ai_guide_html(guide)}<section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
 {f'<section class="panel"><h2>Autres {e(p["category_label"].lower())} comparés</h2><div class="grid pm-cards">{"".join(product_card(s) for s in similar)}</div><p><a href="/prix/{cat_slug}.html">Tous les {e(p["category_label"].lower())} →</a></p></section>' if similar else ''}
 <p class="source">À lire : <a href="/guide-black-friday-2026.html">repérer les vraies bonnes affaires</a> · <a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a> · <a href="/guides.html">tous nos guides</a></p>
 <p class="source">Source : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Ces montants ne sont pas des prix en direct. Prix Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
@@ -522,9 +541,10 @@ def build():
     sheets = sheets_data["products"]
     period = sheets_data["dataset_period"]
     deals = json.loads(DEALS.read_text(encoding="utf-8")) if DEALS.exists() else {"gifts": []}
+    ai_guides = load_ai_guides()
     files = {}
     for p in sheets:
-        files[f"prix/{p['id']}.html"] = product_page(p, sheets, period)
+        files[f"prix/{p['id']}.html"] = product_page(p, sheets, period, ai_guides.get(p["id"]))
     groups = []
     for cat in dict.fromkeys(s["category"] for s in sheets):
         items = [s for s in sheets if s["category"] == cat]
