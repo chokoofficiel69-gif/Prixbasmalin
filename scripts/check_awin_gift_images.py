@@ -38,6 +38,9 @@ def check_image_url(url, timeout=8):
     try:
         with urlopen(request, timeout=timeout) as response:
             status = response.getcode()
+            final_url = response.geturl() if hasattr(response, "geturl") else url
+            if not str(final_url).startswith("https://"):
+                return "invalid"
             content_type = (response.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
             sample = response.read(2048)
             if status not in (200, 206) or not content_type.startswith("image/") or not sample:
