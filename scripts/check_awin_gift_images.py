@@ -2,6 +2,7 @@
 """Vérifie les images des idées cadeaux Awin sans toucher aux prix ni aux liens."""
 import ipaddress
 import json
+import re
 import socket
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -85,8 +86,25 @@ def parse_utc(value):
     return parsed.astimezone(timezone.utc)
 
 
+PLACEHOLDER_IMAGE_PATTERN = re.compile(
+    r"(?:^|[/_.-])(?:no[-_]?image|placeholder|missing[-_]?image)(?:[._/-]|$)",
+    re.I,
+)
+
+
+def is_placeholder_image_url(url):
+    """Reject known no-image assets before making any network request."""
+    try:
+        path = urlsplit(str(url)).path.lower()
+    except ValueError:
+        return True
+    return bool(PLACEHOLDER_IMAGE_PATTERN.search(path))
+
+
 def check_image_url(url, timeout=8):
     if not isinstance(url, str):
+        return "invalid"
+    if is_placeholder_image_url(url):
         return "invalid"
     initial_status = public_https_url_status(url)
     if initial_status != "ok":
