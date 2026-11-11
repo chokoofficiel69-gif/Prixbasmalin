@@ -63,7 +63,7 @@ function classifyCategory(text) {
   if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile|alcootest|breathalyzer|alcohol tester/.test(text)) return "auto";
   if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t[- ]?shirt|tshirt|polo|fashion|backpack|back pack|rucksack|luggage|travel bag|sac de voyage|valise|bagage|bijou|jewelry|jewellery|earrings?|boucles? d.?oreilles|bague|collier|bracelet|pendentif|gants?|gloves|mittens|fleece|polaire/.test(text)) return "fashion";
   if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette|shampoo|shampoing|conditioner|haircare|hair care|cheveux|capillaire|parapharmacie|supplement|nutrition|complement alimentaire|vitamin|vitamine|massage|masseur|massager|phototherapie|phototherapy|thermotherapy|vibrotherapy|anti[- ]?age|raffermissant|soin visage|eye care/.test(text)) return "beauty";
-  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt|tool|outil|bricolage|scie|saw|drill|perceuse|encens|incense|sauge|palo santo|fondue|raclette|sandwich.?maker|presse legumes|food processor|appareil de cuisine|kitchen appliance|aide au sommeil|sleep aid|relaxation|aspirateur|vacuum|ventilateur|robinet|faucet|armoire|cave a vin|wine cooler|refrigerateur|frigo|congelateur|climatiseur|humidificateur|dehumidificateur|purificateur|air purifier|attrape.?soleil|feng shui|cristal|ornement|amulette|objet decoratif|porte bonheur|suspension|barbecue|bbq|grill|plancha|balai brosse|broom|dust removal|cleaning brush|pese.?personne|balance pese.?personne|bathroom scale|personal scale|bidet|toilettes?|toilet seat|toilet bowl/.test(text)) return "home";
+  if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt|tool|outil|bricolage|scie|saw|drill|perceuse|encens|incense|sauge|palo santo|fondue|raclette|sandwich.?maker|presse legumes|food processor|appareil de cuisine|kitchen appliance|aide au sommeil|sleep aid|relaxation|aspirateur|vacuum|ventilateur|robinet|faucet|armoire|cave a vin|wine cooler|refrigerateur|frigo|congelateur|climatiseur|humidificateur|dehumidificateur|purificateur|air purifier|attrape.?soleil|feng shui|cristal|ornement|amulette|objet decoratif|porte bonheur|suspension|barbecue|bbq|grill|plancha|balai brosse|broom|dust removal|cleaning brush|pese.?personne|balance pese.?personne|bathroom scale|personal scale|bidet|toilettes?|toilet seat|toilet bowl|accroche.?porte|chevalet de table|produit d.?entretien|lave.?verres|flute|carafe|coupelle|vaisselle|tableware|glassware|porcelaine|hotel supplies|hotel equipment|horeca|restaurant supplies|catering equipment|art de la table|linge de table|sac a linge|service a table/.test(text)) return "home";
   if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur|smartwatch|smart watch|montre connectee|montre intelligente|wearable/.test(text)) return "tech";
   if (/sport|fitness|outdoor|sports equipment|running|cycling|training|gym|musculation|hiking|trekking|randonnee|batons? de randonnee|walking poles|boxe|boxing|punching|entrainement/.test(text)) return "sport";
   if (/accessories|accessoire/.test(text)) return "fashion";
@@ -80,6 +80,8 @@ function categoryFor(row, merchantName = "") {
   if (/mibro|akko/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "tech";
   if (/deluxehomeart/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "home";
   if (/perfumeria comas|boucleme/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "beauty";
+  // Jowissa est une maison horlogère : ses montres, bijoux et bracelets relèvent de la mode.
+  if (/jowissa/.test(merchant) && metadataCategory === "other") return "fashion";
   if (metadataCategory !== "other") return metadataCategory;
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
   const titleCategory = classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
@@ -944,6 +946,13 @@ async function runSelfTests() {
     [{ title: "Masseur de cheville chauffant et vibrant USB" }, "beauty", "SODEAL CH"],
     [{ title: "Appareil à fondue électrique Fiesta Russell Hobbs" }, "home", "SODEAL CH"],
     [{ title: "Appareil à Raclette 8 Personnes 3 en 1 Ohmex" }, "home", "SODEAL CH"],
+    [{ title: "Jowissa Facet Oval Petite Montre Femme Suisse" }, "fashion", "Jowissa"],
+    [{ title: "10x PULSIVA Accroche-porte Presto ovale" }, "home", "LUSINI FR"],
+    [{ title: "10x PULSIVA Chevalet de table non fumeur" }, "home", "LUSINI FR"],
+    [{ title: "120x VEGA Produit d'entretien pour lave-verres" }, "home", "LUSINI FR"],
+    [{ title: "12x Bormioli Rocco Carafe Ypsilon" }, "home", "LUSINI FR"],
+    [{ title: "10x PULSIVA Sac à linge" }, "home", "LUSINI FR"],
+    [{ title: "Chaussures de service professionnel" }, "fashion", "LUSINI FR"],
     [{ title: "Appareil d'aide au sommeil et relaxation" }, "home", "SODEAL CH"],
     [{ title: "Appareil d'Entraînement de Boxe" }, "sport", "SODEAL CH"],
     [{ title: "Appareil Oculaire Anti-âge avec Photothérapie, Thermothérapie et Vibrothérapie" }, "beauty", "SODEAL CH"],
