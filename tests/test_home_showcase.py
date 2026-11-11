@@ -51,8 +51,14 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertIn('giftRail.innerHTML=rotated.map(giftCard).join("")', text)
         self.assertNotIn('giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")', text)
 
-        # The current published gift feed has 45 unique image URLs.
-        gifts = list(range(45))
+        # Use the current published feed, not a hard-coded image count.
+        feed = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
+        gifts = list(dict.fromkeys(
+            gift.get("image") for gift in feed.get("gifts", [])
+            if isinstance(gift.get("image"), str) and gift["image"].startswith("https://")
+        ))
+        self.assertGreaterEqual(len(gifts), 16)
+
         def selected(slot):
             limit = min(16, len(gifts))
             start = (slot * limit) % len(gifts)
