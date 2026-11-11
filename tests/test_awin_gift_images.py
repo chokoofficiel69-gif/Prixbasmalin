@@ -43,28 +43,50 @@ class FakeResponse:
 
 class AwinGiftImageTests(unittest.TestCase):
     def test_accepts_reachable_image_range_response(self):
-        with patch.object(checker, "urlopen", return_value=FakeResponse()):
+        with patch.object(checker, "public_https_url_status", return_value="ok"), patch.object(checker, "open_image_request", return_value=FakeResponse()):
             self.assertEqual(checker.check_image_url("https://cdn.example/item.webp"), "ok")
 
     def test_rejects_html_empty_and_oversized_images(self):
-        with patch.object(checker, "urlopen", return_value=FakeResponse(content_type="text/html")):
+        with patch.object(checker, "public_https_url_status", return_value="ok"), patch.object(checker, "open_image_request", return_value=FakeResponse(content_type="text/html")):
             self.assertEqual(checker.check_image_url("https://cdn.example/page"), "invalid")
-        with patch.object(checker, "urlopen", return_value=FakeResponse(sample=b"")):
+        with patch.object(checker, "public_https_url_status", return_value="ok"), patch.object(checker, "open_image_request", return_value=FakeResponse(sample=b"")):
             self.assertEqual(checker.check_image_url("https://cdn.example/empty.webp"), "invalid")
-        with patch.object(checker, "urlopen", return_value=FakeResponse(status=200, content_length=str(13 * 1024 * 1024))):
+        with patch.object(checker, "public_https_url_status", return_value="ok"), patch.object(checker, "open_image_request", return_value=FakeResponse(status=200, content_length=str(13 * 1024 * 1024))):
             self.assertEqual(checker.check_image_url("https://cdn.example/huge.webp"), "invalid")
 
-    def test_rejects_redirect_to_insecure_http(self):
-        response = FakeResponse(final_url="http://cdn.example/item.webp")
-        with patch.object(checker, "urlopen", return_value=response):
-            self.assertEqual(checker.check_image_url("https://cdn.example/redirect.webp"), "invalid")
+    def test_rejects_redirect_to_insecure_http_before_following(self):
+        handler = checker.SafeHTTPSRedirectHandler()
+        with patch.object(checker, "public_https_url_status", return_value="invalid"):
+            with self.assertRaises(HTTPError):
+                handler.redirect_request(None, None, 302, "Found", {}, "http://cdn.example/item.webp")
+
+    def test_rejects_redirect_to_private_https_host_before_following(self):
+        handler = checker.SafeHTTPSRedirectHandler()
+        with patch.object(checker, "public_https_url_status", return_value="invalid"):
+            with self.assertRaises(HTTPError):
+                handler.redirect_request(None, None, 302, "Found", {}, "https://169.254.169.254/latest/meta-data")
+
+    def test_rejects_private_initial_host_without_opening_it(self):
+        with patch.object(checker, "public_https_url_status", return_value="invalid"), \\
+             patch.object(checker, "open_image_request") as opener:
+            self.assertEqual(checker.check_image_url("https://127.0.0.1/metadata"), "invalid")
+            opener.assert_not_called()
+
+    def test_rejects_hostname_resolving_to_private_address(self):
+        private_record = (2, 1, 6, "", ("10.0.0.5", 443))
+        with patch.object(checker.socket, "getaddrinfo", return_value=[private_record]):
+            self.assertEqual(checker.public_https_url_status("https://cdn.example/item.webp"), "invalid")
+
+    def test_dns_failure_is_treated_as_transient(self):
+        with patch.object(checker.socket, "getaddrinfo", side_effect=checker.socket.gaierror("temporary")):
+            self.assertEqual(checker.public_https_url_status("https://cdn.example/item.webp"), "transient")
 
     def test_distinguishes_permanent_http_failure_from_temporary_failure(self):
         permanent = HTTPError("https://cdn.example/missing.webp", 404, "Not Found", None, None)
         temporary = HTTPError("https://cdn.example/busy.webp", 503, "Service Unavailable", None, None)
-        with patch.object(checker, "urlopen", side_effect=permanent):
+        with patch.object(checker, "public_https_url_status", return_value="ok"), patch.object(checker, "open_image_request", side_effect=permanent):
             self.assertEqual(checker.check_image_url("https://cdn.example/missing.webp"), "invalid")
-        with patch.object(checker, "urlopen", side_effect=temporary):
+        with patch.object(checker, "public_https_url_status", return_value="ok"), patch.object(checker, "open_image_request", side_effect=temporary):
             self.assertEqual(checker.check_image_url("https://cdn.example/busy.webp"), "transient")
 
     def test_transient_error_preserves_only_recently_verified_images(self):
