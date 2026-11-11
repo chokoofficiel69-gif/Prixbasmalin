@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Rédige des conseils d'achat et une FAQ pour les fiches /prix/<id>.html avec une IA gratuite.
+"""Rédige des conseils d'achat avec un modèle OpenRouter explicitement gratuit (:free).
 
 Règles de sécurité éditoriale :
 - l'IA ne reçoit que le nom, la marque, la catégorie et le nombre de marchands relevés ;
-- elle n'a le droit d'écrire AUCUN chiffre, prix, pourcentage ni date : les montants affichés
-  sur la page viennent uniquement des relevés datés (PrixTracker) ;
+- elle ne peut écrire aucun prix, chiffre, pourcentage ni date ;
 - tout texte qui enfreint ces règles est rejeté et n'est pas publié.
 
-Fournisseurs essayés dans l'ordre, selon les clés présentes (secrets GitHub) :
-FREELLMAPI_API_KEY (passerelle FreeLLMAPI de Prix Malin), GROQ_API_KEY, GEMINI_API_KEY, CEREBRAS_API_KEY, MISTRAL_API_KEY, OPENROUTER_API_KEY.
-Sans aucune clé, le script ne fait rien et sort sans erreur.
+Garde-fou financier :
+- seul OpenRouter est autorisé et le modèle doit porter le suffixe exact :free ;
+- aucun fournisseur payant ou modèle sans suffixe :free n'est appelé ;
+- sans clé ou sans modèle :free disponible, aucune requête de génération n'est envoyée.
 """
 import datetime as dt
 import json
@@ -28,12 +28,7 @@ MAX_PER_RUN = int(os.environ.get("AI_GUIDES_MAX", "20"))
 REFRESH_DAYS = 60
 
 PROVIDERS = [
-    ("freellmapi", "FREELLMAPI_API_KEY", os.environ.get("FREELLMAPI_BASE_URL", "https://freellmapi.prixbasmalin.prod.page/v1"), os.environ.get("FREELLMAPI_MODEL")),
-    ("groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", os.environ.get("GROQ_MODEL")),
-    ("gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai", os.environ.get("GEMINI_MODEL")),
-    ("cerebras", "CEREBRAS_API_KEY", "https://api.cerebras.ai/v1", os.environ.get("CEREBRAS_MODEL")),
-    ("mistral", "MISTRAL_API_KEY", "https://api.mistral.ai/v1", os.environ.get("MISTRAL_MODEL")),
-    ("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", os.environ.get("OPENROUTER_MODEL")),
+    ("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", None),
 ]
 
 # Modèles préférés, dans l'ordre, cherchés dans la liste /models de chaque fournisseur.
@@ -54,10 +49,14 @@ def pick_model(ids, free_only=False):
 
 
 def resolve(provider):
-    """Choisit un modèle disponible chez le fournisseur (liste /models), sauf modèle imposé."""
+    """Ne sélectionne qu'un modèle OpenRouter explicitement marqué :free."""
     name, env, base, model = provider
-    if model:
-        return provider
+    if name != "openrouter":
+        print(f"{name} : fournisseur refusé par la politique sans dépense.")
+        return None
+    if model and not model.endswith(":free"):
+        print("openrouter : modèle imposé refusé car il n'est pas explicitement :free.")
+        return None
     req = urllib.request.Request(base + "/models", headers={"Authorization": "Bearer " + os.environ[env], "User-Agent": "PrixMalin-guides/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
@@ -65,9 +64,12 @@ def resolve(provider):
     except (urllib.error.URLError, TimeoutError, ValueError) as exc:
         print(f"{name} : liste des modèles indisponible ({exc})")
         return None
-    chosen = pick_model(ids, free_only=(name == "openrouter"))
-    print(f"{name} : modèle choisi {chosen} parmi {len(ids)}")
-    return (name, env, base, chosen) if chosen else None
+    chosen = pick_model(ids, free_only=True)
+    if not chosen or not chosen.endswith(":free"):
+        print("openrouter : aucun modèle explicitement gratuit disponible ; aucun appel de génération.")
+        return None
+    print(f"openrouter : modèle gratuit choisi parmi {len(ids)} modèles listés.")
+    return (name, env, base, chosen)
 
 
 SYSTEM = (
@@ -115,6 +117,8 @@ def validate(data):
 
 def call(provider, p):
     name, env, base, model = provider
+    if name != "openrouter" or not model or not model.endswith(":free"):
+        raise ValueError("Appel refusé : seul un modèle OpenRouter explicitement :free est autorisé.")
     body = json.dumps({
         "model": model,
         "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt_for(p)}],
