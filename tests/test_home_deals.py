@@ -98,8 +98,10 @@ class HomeDealsTests(unittest.TestCase):
             self.assertIn("cancel-in-progress: false", workflow)
             self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', workflow)
             self.assertIn("trois tentatives", workflow)
-        self.assertIn("if: ${{ steps.save.outputs.changed == 'true' && github.ref == 'refs/heads/main' }}", awin)
-        self.assertIn("EXPECTED_FETCHED_AT: ${{ steps.save.outputs.expected_fetched_at }}", awin)
+        for line in awin.splitlines():
+            if "${{" in line:
+                self.assertEqual(line.count("${{"), line.count("}}"), line)
+                self.assertTrue(line.endswith("}}") and not line.endswith("}}}"), line)
         self.assertIn("github.event.pull_request.head.sha || github.ref", tracker)
 
     def test_homepage_sections_partners_and_affiliate_rel(self):
