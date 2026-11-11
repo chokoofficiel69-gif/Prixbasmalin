@@ -64,6 +64,27 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertTrue(set(selected(1)).isdisjoint(selected(2)))
         self.assertNotEqual(selected(0), selected(3))
 
+    def test_seasonal_theme_uses_paris_calendar_and_preserves_brand(self):
+        page = (ROOT / "index.html").read_text(encoding="utf-8")
+        for marker in ('id="pm-seasonal-theme-style"', 'id="pm-seasonal-theme-script"',
+                       'timeZone:"Europe/Paris"', 'document.documentElement.dataset.pmSeason=season'):
+            self.assertIn(marker, page)
+        for boundary in ("month===11||(month===12&&day<=26)",
+                         "(month===12&&day>=27)||(month===1&&day<=7)",
+                         "(month===1&&day>=8)||month===2",
+                         "month>=3&&month<=5",
+                         "month===6||month===7||(month===8&&day<=15)",
+                         "(month===8&&day>=16)||month===9",
+                         "month===10"):
+            self.assertIn(boundary, page)
+        for visual in (".pmx.pm-season-noel", "#14532d", "#7f1d2d", "#d6b45a",
+                       "radial-gradient", "❄  ✧  ❄"):
+            self.assertIn(visual, page)
+        self.assertIn('background-image:url("assets/prixmalin-publicite.webp")', page)
+        self.assertIn("grid-auto-flow:column;gap:12px;overflow-x:auto", page)
+        self.assertIn(".pmx-offers{grid-auto-columns:47%", page)
+        self.assertIn("background:linear-gradient(100deg,var(--o2),var(--o))", page)
+
 
 if __name__ == "__main__":
     unittest.main()
