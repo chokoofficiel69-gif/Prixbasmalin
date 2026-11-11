@@ -43,6 +43,17 @@ class HomepageOffersTests(unittest.TestCase):
         self.assertIn("const fallbackBatchSize=Math.min(6,fallbackPool.length);", self.source)
         self.assertIn('list.dataset.pmRotationProductIds=chosen.map(p=>p.id).join(",");', self.source)
 
+    def test_all_seasonal_campaigns_share_the_paris_calendar_and_requested_ranges(self):
+        self.assertIn('timeZone:"Europe/Paris"', self.source)
+        self.assertIn('month===11||(month===12&&day<=26)', self.source)
+        self.assertIn('(month===12&&day>=27)||(month===1&&day<=7)', self.source)
+        self.assertIn('(month===1&&day>=8)||month===2', self.source)
+        self.assertIn('month===6||month===7||(month===8&&day<=15)', self.source)
+        self.assertIn('(month===8&&day>=16)||month===9', self.source)
+        self.assertIn('season="rentree";label="La rentrée maline"', self.source)
+        self.assertIn('const season=document.documentElement.dataset.pmSeason||"hiver";', self.source)
+        self.assertNotIn('const now=new Date(), month=now.getMonth()+1, day=now.getDate();', self.source)
+
     def test_no_literal_backslash_n_is_rendered_in_the_page(self):
         self.assertNotIn("</script>\\n</head>", self.source)
 

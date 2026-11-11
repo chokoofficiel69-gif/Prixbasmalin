@@ -1434,18 +1434,27 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 <script id="pm-seasonal-campaign">
 (function(){
  const verifiedImageStatuses=new Set(["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"]);
- const now=new Date(), month=now.getMonth()+1, day=now.getDate();
+ let month,day;
+ try{
+   const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Paris",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+   month=Number(parts.find(part=>part.type==="month")?.value);
+   day=Number(parts.find(part=>part.type==="day")?.value);
+ }catch(error){
+   const now=new Date();month=now.getMonth()+1;day=now.getDate();
+ }
  let season="standard", label="Sélection Prix Malin", kicker="SÉLECTION RENOUVELÉE";
- if((month===11)||(month===12&&day<=26)){
+ if(month===11||(month===12&&day<=26)){
    season="noel";label="La magie des fêtes commence ici";kicker="IDÉES & SÉLECTIONS DE NOËL";
- }else if(month===12&&day>=27||month===1&&day<=5){
+ }else if((month===12&&day>=27)||(month===1&&day<=7)){
    season="nouvel-an";label="Bien commencer la nouvelle année";kicker="SÉLECTION NOUVELLE ANNÉE";
- }else if(month===1||month===2){
+ }else if((month===1&&day>=8)||month===2){
    season="hiver";label="Les essentiels de l’hiver";kicker="SÉLECTION HIVER";
  }else if(month>=3&&month<=5){
    season="printemps";label="Le printemps malin";kicker="SÉLECTION PRINTEMPS";
- }else if(month>=6&&month<=8){
+ }else if(month===6||month===7||(month===8&&day<=15)){
    season="ete";label="Cap sur l’été";kicker="SÉLECTION ÉTÉ";
+ }else if((month===8&&day>=16)||month===9){
+   season="rentree";label="La rentrée maline";kicker="SÉLECTION RENTRÉE";
  }else if(month===10){
    season="halloween";label="Les idées qui donnent des frissons";kicker="SÉLECTION HALLOWEEN";
  }
@@ -1845,25 +1854,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
 </footer>
 <script id="pm-seasonal-theme-script">
 (function(){
-  let month,day;
-  try{
-    const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Paris",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
-    month=Number(parts.find(part=>part.type==="month")?.value);
-    day=Number(parts.find(part=>part.type==="day")?.value);
-  }catch(error){
-    const now=new Date();
-    month=now.getMonth()+1;
-    day=now.getDate();
-  }
-  let season="hiver";
-  if(month===11||(month===12&&day<=26)) season="noel";
-  else if((month===12&&day>=27)||(month===1&&day<=7)) season="nouvel-an";
-  else if((month===1&&day>=8)||month===2) season="hiver";
-  else if(month>=3&&month<=5) season="printemps";
-  else if(month===6||month===7||(month===8&&day<=15)) season="ete";
-  else if((month===8&&day>=16)||month===9) season="rentree";
-  else if(month===10) season="halloween";
-  document.documentElement.dataset.pmSeason=season;
+  const season=document.documentElement.dataset.pmSeason||"hiver";
   const showcase=document.querySelector(".pmx");
   if(showcase) showcase.classList.add("pm-season-"+season);
 })();
