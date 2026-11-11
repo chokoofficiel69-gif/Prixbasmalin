@@ -48,7 +48,7 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         end = source.index("\n}", start)
         breakdown = source[start:end]
         self.assertIn("shippingValue!==null&&shippingValue!==undefined", breakdown)
-        self.assertIn("livraison à confirmer", breakdown)
+        self.assertIn("frais de livraison non renseignés", breakdown)
 
     def test_catalogue_uses_source_freshness_window_with_48_hour_fallback(self):
         source = CATALOGUE.read_text(encoding="utf-8")

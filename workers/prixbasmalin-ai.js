@@ -68,7 +68,7 @@ export default {
     const contentType = request.headers.get("Content-Type") || "";
     // Accept application/json with optional parameters (for example charset=utf-8),
     // but reject lookalike media types such as application/jsonp.
-    if (!/^application\\/json(?:\\s*;|\\s*$)/i.test(contentType)) {
+    if (!/^application\/json(?:\s*;|\s*$)/i.test(contentType)) {
       const diagnostic = {
         event: "ai_gateway_rejected_content_type",
         status: 415,
