@@ -46,7 +46,7 @@ PAGES = {
     "services.html": None, "partenaires.html": None, "publicite.html": None,
     "historique-prix.html": "compare", "comparateur-historique.html": "compare", "produit.html": "compare",
     "guide-cadeaux.html": "guide", "guide-choisir-smartphone.html": "guide",
-    "a-propos.html": None, "confidentialite.html": None, "credits-photos.html": None, "404.html": None,
+    "assistant.html": None, "a-propos.html": None, "confidentialite.html": None, "credits-photos.html": None, "404.html": None,
     # Le catalogue a sa propre barre de recherche collante : en-tête non collant, sans seconde recherche.
     "catalogue.html": ("catalogue", "compact"),
 }

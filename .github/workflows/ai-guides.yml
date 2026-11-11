@@ -1,0 +1,57 @@
+name: Rédiger les conseils d'achat (IA gratuite)
+
+# Chaque nuit : conseils d'achat et FAQ sans chiffres pour les fiches /prix/, via FreeLLMAPI ou une
+# clé IA gratuite (Groq, Gemini, Cerebras, Mistral, OpenRouter). Les textes enfreignant les règles
+# (prix, chiffres, promos) sont rejetés par scripts/generate_ai_guides.py.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: prix-malin-price-data-refresh
+  cancel-in-progress: false
+jobs:
+  guides:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rédiger les conseils manquants
+        env:
+          FREELLMAPI_API_KEY: ${{ secrets.FREELLMAPI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: python3 scripts/generate_ai_guides.py
+      - name: Régénérer les fiches et tester
+        run: |
+          python3 scripts/build_seo_pages.py
+          python3 -m unittest discover -s tests -p 'test_ai_guides.py' -v
+          python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
+      - name: Publier uniquement si quelque chose a changé
+        run: |
+          git add data/ai-guides.json prix
+          if git diff --cached --quiet; then
+            echo "Aucun nouveau conseil."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "contenu: conseils d'achat rédigés par IA (sans prix)"
+          for attempt in 1 2 3; do
+            git fetch origin "${GITHUB_REF_NAME}"
+            if ! git rebase "origin/${GITHUB_REF_NAME}"; then
+              git rebase --abort || true
+              echo "::error::Conflit pendant la publication des conseils ; rien n'est écrasé."
+              exit 1
+            fi
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              exit 0
+            fi
+            echo "La branche a avancé (tentative ${attempt}/3)."
+          done
+          exit 1

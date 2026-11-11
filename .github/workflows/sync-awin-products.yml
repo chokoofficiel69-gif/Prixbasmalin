@@ -9,8 +9,11 @@ on:
     paths:
       - "price-engine/sync-awin-products.mjs"
       - "scripts/build_home_deals.py"
+      - "scripts/check_awin_gift_images.py"
       - "scripts/build_seo_pages.py"
       - "tests/test_home_deals.py"
+      - "tests/test_awin_gift_images.py"
+      - "index.html"
       - "tests/test_seo_pages.py"
       - ".github/workflows/sync-awin-products.yml"
 
@@ -79,11 +82,13 @@ jobs:
       - name: Mettre à jour la vitrine d'accueil (idées cadeaux)
         run: |
           python3 scripts/build_home_deals.py
+          python3 scripts/check_awin_gift_images.py
           python3 scripts/build_seo_pages.py
           python3 scripts/build_sitemap.py
       - name: Tester les pages cadeaux et historiques publiées
         run: |
           python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+          python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v
           python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
       - name: Enregistrer le catalogue s'il a changé
         id: save
@@ -208,3 +213,47 @@ jobs:
           done
           echo "::error::Le site public n'a pas servi la nouvelle version du flux Awin après 10 minutes."
           exit 1
+      - name: Vérifier la vitrine cadeaux et les images marchandes publiques
+        if: ${{ steps.save.outputs.changed == 'true' && github.ref == 'refs/heads/main' }}
+        env:
+          EXPECTED_FETCHED_AT: ${{ steps.save.outputs.expected_fetched_at }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --connect-timeout 3 --max-time 10 \
+            -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
+            "https://prixbasmalin.fr/data/home-deals.json?v=${EXPECTED_FETCHED_AT}" --output /tmp/home-deals-public.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/home-deals-public.json", "utf8"));
+          if (data.awin_fetched_at !== process.env.EXPECTED_FETCHED_AT || !Array.isArray(data.gifts)) {
+            throw new Error("La vitrine cadeaux publique ne correspond pas au dernier import Awin.");
+          }
+          const gifts = data.gifts;
+          const invalidImages = gifts.filter(g => g.image_verified === true &&
+            (!/^https:\/\//i.test(String(g.image || "")) || g.image_provenance !== "Flux marchand Awin autorisé" ||
+             !g.image_verified_at));
+          const falsePrices = gifts.filter(g => g.price_verified !== true &&
+            (g.price_eur !== null || g.shipping_eur !== null));
+          const invalidPrices = gifts.filter(g => g.price_verified === true &&
+            (!Number.isFinite(Number(g.price_eur)) || g.price_tax_status !== "included" ||
+             g.price_date_kind !== "merchant" || !g.price_date));
+          if (invalidImages.length || falsePrices.length || invalidPrices.length) {
+            throw new Error("La vitrine cadeaux contient une image non sourcée ou un prix non vérifié.");
+          }
+          const uniqueVerified = new Set(gifts.filter(g => g.image_verified === true).map(g => g.image)).size;
+          const unpriced = gifts.filter(g => g.image_verified === true && g.price_verified !== true).length;
+          console.log("Vitrine cadeaux publique :", uniqueVerified, "images marchandes uniques vérifiées ;",
+            unpriced, "cartes sans prix affiché ;", gifts.filter(g => g.price_verified === true).length,
+            "prix TTC marchands vérifiés.");
+          if (uniqueVerified === 0) {
+            console.log("AVERTISSEMENT : aucune image marchande n'est vérifiée ; la vitrine conserve son message de secours.");
+          }
+          NODE
+          curl --fail --silent --show-error --location --connect-timeout 3 --max-time 10 \
+            -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
+            "https://prixbasmalin.fr/?v=${EXPECTED_FETCHED_AT}" --output /tmp/home-public.html
+          grep -Fq 'g.image_verified!==true' /tmp/home-public.html
+          grep -Fq 'Prix non vérifié' /tmp/home-public.html
+          grep -Fq 'giftRail.querySelectorAll("img")' /tmp/home-public.html
+          echo "Accueil public : cartes sans prix affiché tant que le TTC n'est pas confirmé ; images non vérifiées masquées."

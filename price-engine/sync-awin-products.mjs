@@ -9,6 +9,11 @@ const STATUS_OUTPUT = path.join(ROOT, "data", "awin-sync-status.json");
 const TOKEN = process.env.AWIN_API_TOKEN || "";
 const PUBLISHER_ID = process.env.AWIN_PUBLISHER_ID || "3137386";
 const LOCALE = process.env.AWIN_FEED_LOCALE || "fr_FR";
+// Annonceurs qui ne vendent pas au public français (boutique et livraison hors de France) :
+// Sportdirect.ca (Canada) = 25243, SODEAL CH (Suisse) = 48021. Liste remplaçable par
+// AWIN_EXCLUDED_ADVERTISERS (identifiants séparés par des virgules).
+const EXCLUDED_ADVERTISERS = new Set(String(process.env.AWIN_EXCLUDED_ADVERTISERS ?? "25243,48021")
+  .split(",").map(value => value.trim()).filter(Boolean));
 const MAX_PROGRAMMES = 100;
 const MAX_PRODUCTS = 25000;
 const MAX_PER_ADVERTISER = 3000;
@@ -56,7 +61,7 @@ function classifyCategory(text) {
   if (/gants? de boxe|boxing gloves|gants? de sport/.test(text)) return "sport";
   if (/baby|toys|toy|toys games|children|bebe|enfant|jouet|puericulture|nursery|kids/.test(text)) return "kids";
   if (/vehicle|automotive|auto|moto|car parts|car accessories|automobile|alcootest|breathalyzer|alcohol tester/.test(text)) return "auto";
-  if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t[- ]?shirt|tshirt|polo|fashion|backpack|back pack|rucksack|luggage|travel bag|sac de voyage|valise|bagage|bijou|jewelry|jewellery|bague|collier|bracelet|pendentif|gants?|gloves|mittens|fleece|polaire/.test(text)) return "fashion";
+  if (/sock|chaussette|hosiery|collant|culotte|lingerie|underwear|tights|bas de |chausson|vetement|apparel|clothing|shoes|footwear|mode|chaussure|pantalon|robe|t[- ]?shirt|tshirt|polo|fashion|backpack|back pack|rucksack|luggage|travel bag|sac de voyage|valise|bagage|bijou|jewelry|jewellery|earrings?|boucles? d.?oreilles|bague|collier|bracelet|pendentif|gants?|gloves|mittens|fleece|polaire/.test(text)) return "fashion";
   if (/beauty|cosmetic|personal care|health|beaute|soin|parfum|perfume|fragrance|maquillage|makeup|skincare|cosmetique|eau de parfum|eau de toilette|shampoo|shampoing|conditioner|haircare|hair care|cheveux|capillaire|parapharmacie|supplement|nutrition|complement alimentaire|vitamin|vitamine|massage|masseur|massager|phototherapie|phototherapy|thermotherapy|vibrotherapy|anti[- ]?age|raffermissant|soin visage|eye care/.test(text)) return "beauty";
   if (/home|garden|furniture|kitchen|household|maison|jardin|cuisine|bathroom|bath|salle de bain|soap|lotion dispenser|bathroom accessory|bedding|literie|decoration|deco|home decor|candle|bougie|diffuser|diffuseur|home fragrance|parfum d.?ambiance|wax melt|tool|outil|bricolage|scie|saw|drill|perceuse|encens|incense|sauge|palo santo|fondue|raclette|sandwich.?maker|presse legumes|food processor|appareil de cuisine|kitchen appliance|aide au sommeil|sleep aid|relaxation|aspirateur|vacuum|ventilateur|robinet|faucet|armoire|cave a vin|wine cooler|refrigerateur|frigo|congelateur|climatiseur|humidificateur|dehumidificateur|purificateur|air purifier|attrape.?soleil|feng shui|cristal|ornement|amulette|objet decoratif|porte bonheur|suspension|barbecue|bbq|grill|plancha|balai brosse|broom|dust removal|cleaning brush|pese.?personne|balance pese.?personne|bathroom scale|personal scale|bidet|toilettes?|toilet seat|toilet bowl/.test(text)) return "home";
   if (/electronics|electronic|computer|phone|mobile|audio|camera|television|informatique|electronique|video|gaming|laptop|smartphone|casque|ecouteur|smartwatch|smart watch|montre connectee|montre intelligente|wearable/.test(text)) return "tech";
@@ -72,7 +77,9 @@ function categoryFor(row, merchantName = "") {
   // la catégorie source est absente ou générique, jamais pour remplacer une catégorie explicite différente.
   if (/milk bar babystore/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "kids";
   if (/bodycross/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "sport";
-  if (/mibro/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "tech";
+  if (/mibro|akko/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "tech";
+  if (/deluxehomeart/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "home";
+  if (/perfumeria comas|boucleme/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "beauty";
   if (metadataCategory !== "other") return metadataCategory;
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
   const titleCategory = classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
@@ -95,6 +102,18 @@ function offerTimestampCoverage(offers, now = Date.now()) {
     }
   }
   return coverage;
+}
+
+function temporalFieldCoverage(rows) {
+  const sample = Array.isArray(rows) ? rows : [];
+  const fields = [...new Set(sample.flatMap(row => Object.keys(row || {})))]
+    .filter(field => /(date|time|updated|modified|last)/i.test(field))
+    .sort();
+  return fields.map(field => ({
+    field,
+    populated: sample.filter(row => String(row?.[field] ?? "").trim()).length,
+    total: sample.length
+  }));
 }
 
 function parseJsonl(body) {
@@ -226,7 +245,7 @@ function stockValues(values) {
 function stockState(value) {
   const stock = norm(value).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
   if (/\b(?:0|out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|pas en stock|epuise|false|no)\b/.test(stock)) return "out_of_stock";
-  if (/\b(?:1|in stock|instock|available|disponible|for sale|yes|true)\b/.test(stock)) return "in_stock";
+  if (/\b(?:1|in stock|instock|available|disponible|yes|true)\b/.test(stock)) return "in_stock";
   return "unknown";
 }
 
@@ -234,7 +253,8 @@ function parseDirectFeedRow(row) {
   const currency = String(row.currency || "EUR").trim().toUpperCase();
   const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
   const shippingPrice = parseFeedMoney(row.delivery_cost || row.shipping_cost || row.shipping || "", currency, true);
-  const stock = stockState(stockValues([row.stock_status, row.availability, row.is_for_sale, row.in_stock]));
+  const stock = stockState(stockValues([row.stock_status, row.availability, row.in_stock]));
+  if (/^(?:0|false|no)$/i.test(String(row.is_for_sale ?? "").trim())) return null;
   const adultFlag = norm([row.adult, row.adult_content, row.is_adult].filter(Boolean).join(" "));
   const categoryText = norm([row.merchant_category, row.category_name, row.product_type, row.product_name, row.title, row.name].filter(Boolean).join(" "));
   if (/^(1|yes|true|adult)$/.test(adultFlag) || /adult products?|sex toys?|erotic|erotique/.test(categoryText)) return null;
@@ -358,8 +378,9 @@ async function loadDirectAwinFeed(rawOffers) {
 function parseFeedRow(row, program, advertiser) {
   const currency = row.currency || "EUR";
   const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
-  const stock = stockState(stockValues([row.stock_status,row.availability,row.is_for_sale,row.in_stock]));
-  if (!price || String(currency).toUpperCase() !== "EUR" || stock !== "in_stock") return null;
+  const stock = stockState(stockValues([row.stock_status,row.availability,row.in_stock]));
+  if (/^(?:0|false|no)$/i.test(String(row.is_for_sale ?? "").trim())) return null;
+  if (!price || String(currency).toUpperCase() !== "EUR" || stock === "out_of_stock") return null;
   const extra = [row.alternate_image,row.alternate_image_two,row.alternate_image_three].filter(Boolean);
   const normalized = {
     id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.product_gtin,
@@ -375,13 +396,13 @@ function parseFeedRow(row, program, advertiser) {
     image_link: row.merchant_image_url || row.image_url || row.image_link || row.large_image || row.aw_image_url || row.aw_thumb_url,
     additional_image_link: extra,
     price: price.toFixed(2) + " EUR",
-    availability: "in_stock",
+    availability: stock,
     aw_deep_link: row.aw_deep_link || row.deep_link || row.merchant_deep_link || row.purl,
     shipping_price_eur: parseFeedMoney(row.delivery_cost || row.shipping, currency, true),
     price_tax_status: explicitPriceTaxStatus(row),
     last_updated: row.last_updated || ""
   };
-  return offerFromRow(normalized,program,advertiser);
+  return offerFromRow(normalized,program,advertiser,{ allowUnknownAvailability: true });
 }
 
 function extractAwinDataFeedKey(rawUrl) {
@@ -454,6 +475,12 @@ async function loadStandardAwinFeeds(rawOffers) {
         const rows = objectRowsFromCsv(bytes.toString("utf8"));
         const advertiser = String(row.advertiser_id || row.advertiserid || row.id || row.feed_id || "standard");
         const program = {name:row.advertiser_name || row.advertiser || ("Annonceur Awin "+advertiser)};
+        const temporalFields = temporalFieldCoverage(rows);
+        const temporalSummary = temporalFields.length
+          ? temporalFields.map(field => field.field + "=" + field.populated + "/" + field.total).join(", ")
+          : "aucune colonne temporelle";
+        const lastUpdatedColumn = Object.prototype.hasOwnProperty.call(rows[0] || {}, "last_updated") ? "présente" : "absente";
+        log(program.name + " (flux standard) : champs temporels : " + temporalSummary + " ; last_updated " + lastUpdatedColumn + ".");
         let count = 0;
         for (const productRow of rows) {
           const offer = parseFeedRow(productRow,program,advertiser);
@@ -504,17 +531,27 @@ function groupKey(row, advertiser) {
     const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
     if (color || size || variant) return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size + ":" + variant;
   }
+  // Secours de déduplication dans un même annonceur uniquement ; jamais de comparaison inter-marchands sans GTIN ou MPN + variante.
+  const title = identityPart(row.title || row.product_name || row.name || "");
+  const titleTokens = title.split(" ").filter(token => token.length > 1);
+  if (brand && title.length >= 20 && titleTokens.length >= 3) {
+    const color = identityPart(row.color || row.colour || "");
+    const size = identityPart(row.size || "");
+    const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
+    return "awin:" + advertiser + ":brand-name:" + brand + ":" + title + ":" + color + ":" + size + ":" + variant;
+  }
   return "awin:" + advertiser + ":" + String(row.id || row.product_id || "");
 }
 
 function offerFromRow(row, program, advertiser, { allowUnknownAvailability = false } = {}) {
+  if (EXCLUDED_ADVERTISERS.has(String(advertiser))) return null;
   const name = String(row.title || row.product_name || "").trim().replace(/\s+/g, " ");
   const brand = firstField(row, BRAND_FIELDS);
   const gtin = normalizedGtin(row);
   const mpn = normalizedMpn(row);
   const images = imageList(row);
   const link = httpsUrl(row.aw_deep_link || row.link || row.mobile_link);
-  const availability = stockState(stockValues([row.availability,row.stock_status,row.in_stock,row.is_for_sale]));
+  const availability = stockState(stockValues([row.availability,row.stock_status,row.in_stock]));
   const currency = String(row.currency || "EUR").trim().toUpperCase();
   const regular = parseMoney(row.price || row.search_price);
   const sale = currentSalePrice(row, Date.now());
@@ -801,12 +838,21 @@ async function runSelfTests() {
     throw new Error("TEST ÉCHEC : la fraîcheur combinée des offres doit distinguer fraîches, périmées, absentes et invalides.");
   }
   const rows = objectRowsFromCsv(sampleCsv);
+  const temporalDiagnostics = temporalFieldCoverage([
+    { last_updated: "2026-11-04T10:00:00Z", updated_at: "" },
+    { last_updated: "", updated_at: "2026-11-04T11:00:00Z" }
+  ]);
+  if (JSON.stringify(temporalDiagnostics) !== JSON.stringify([
+    { field: "last_updated", populated: 1, total: 2 },
+    { field: "updated_at", populated: 1, total: 2 }
+  ])) throw new Error("TEST ÉCHEC : les colonnes temporelles des flux standards doivent être diagnostiquées sans utiliser leur valeur comme prix actuel.");
   for (const value of ["not in stock","unavailable","not available","non disponible","indisponible","out_of_stock","no stock","pas en stock","epuise","0"]) {
     if (stockState(value) !== "out_of_stock") throw new Error("TEST ÉCHEC : statut indisponible mal reconnu : " + value);
   }
   for (const value of ["in stock","instock","available","disponible","in_stock","yes","true","1"]) {
     if (stockState(value) !== "in_stock") throw new Error("TEST ÉCHEC : statut disponible mal reconnu : " + value);
   }
+  if (stockState("for sale") !== "unknown") throw new Error("TEST ÉCHEC : « for sale » ne prouve pas la disponibilité en stock.");
   const offer = parseDirectFeedRow(rows[0]);
   if (!offer) throw new Error("TEST ÉCHEC : un flux direct valide doit produire une offre.");
   if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" ||
@@ -816,6 +862,8 @@ async function runSelfTests() {
   }
   const explicitOutOfStock = parseDirectFeedRow({ ...rows[0], is_for_sale: false });
   if (explicitOutOfStock) throw new Error("TEST ÉCHEC : un booléen is_for_sale=false ne doit jamais devenir une disponibilité inconnue.");
+  const saleFlagOnly = parseDirectFeedRow({ ...rows[0], stock_status: "", availability: "", in_stock: "", is_for_sale: true });
+  if (!saleFlagOnly || saleFlagOnly.availability !== "unknown") throw new Error("TEST ÉCHEC : is_for_sale=true ne prouve pas le stock.");
   const ttcOffer = parseDirectFeedRow({ ...rows[0], price_tax_status: "included" });
   if (!ttcOffer || ttcOffer.price_tax_status !== "included") {
     throw new Error("TEST ÉCHEC : seul un statut TVA explicitement inclus peut être reconnu.");
@@ -837,6 +885,10 @@ async function runSelfTests() {
   }
   const booleanOutOfStock = offerFromRow({...aliasRow,availability:false,stock_status:""}, {name:"Boutique Alias"}, "999", {allowUnknownAvailability:true});
   if (booleanOutOfStock) throw new Error("TEST ÉCHEC : availability=false ne doit pas être accepté comme stock inconnu.");
+  if (offerFromRow(aliasRow, {name:"Sportdirect.ca (Canada)"}, "25243") !== null ||
+      offerFromRow(aliasRow, {name:"SODEAL CH"}, "48021") !== null) {
+    throw new Error("Les annonceurs hors de France doivent être exclus du catalogue.");
+  }
   const wrongCurrency = offerFromRow({...aliasRow,currency:"USD"}, {name:"Boutique Alias"}, "999", {allowUnknownAvailability:true});
   if (wrongCurrency) throw new Error("TEST ÉCHEC : une devise USD ne doit pas être convertie en offre EUR.");
   const standardAlias = parseFeedRow({
@@ -848,6 +900,20 @@ async function runSelfTests() {
   if (!standardAlias || standardAlias.gtin !== "4006381333931" || standardAlias.mpn !== "AB-X1") {
     throw new Error("TEST ÉCHEC : les alias GTIN/MPN doivent aussi être lus dans les flux CSV standards.");
   }
+  const standardSaleFlagOnly = parseFeedRow({
+    product_name:"Casque sans stock déclaré",brand_name:"AudioBrand",ean_13:"4006381333931",
+    merchant_image_url:"https://cdn.example/unknown.jpg",aw_deep_link:"https://shop.example/unknown",
+    search_price:"49.90",currency:"EUR",is_for_sale:true
+  }, {name:"Boutique standard"}, "997");
+  if (!standardSaleFlagOnly || standardSaleFlagOnly.availability !== "unknown") {
+    throw new Error("TEST ÉCHEC : is_for_sale=true ne doit pas être transformé en stock confirmé.");
+  }
+  const standardNotForSale = parseFeedRow({
+    product_name:"Casque non commercialisé",brand_name:"AudioBrand",ean_13:"4006381333931",
+    merchant_image_url:"https://cdn.example/not-for-sale.jpg",aw_deep_link:"https://shop.example/not-for-sale",
+    search_price:"49.90",currency:"EUR",is_for_sale:false
+  }, {name:"Boutique standard"}, "996");
+  if (standardNotForSale) throw new Error("TEST ÉCHEC : is_for_sale=false doit exclure l'offre.");
   const categoryCases = [
     [{ product_type: "Home & Garden, Bathroom Accessories, Soap & Lotion Dispensers" }, "home"],
     [{ product_type: "Parfums > Parfums pour Femme > Eau de Parfum Femme" }, "beauty"],
@@ -872,6 +938,7 @@ async function runSelfTests() {
     [{ title: "Alcootest Numérique DriveCheck" }, "auto", "SODEAL CH"],
     [{ title: "Bague Cube de Métatron" }, "fashion", "Bonheur de lune"],
     [{ title: "Encens Sauge Blanche" }, "home", "Bonheur de lune"],
+    [{ title: "Boucles d’Oreilles Agate Blanche 8 mm – Sérénité & Équilibre – Acier Inoxydable" }, "fashion", "Bonheur de lune"],
     [{ title: "12 Bouteilles Villa Sintesi 2024 Sicilia DOC" }, "other", "SODEAL CH"],
     [{ title: "AlpaTouch Gants chauds en polaire d'alpaga" }, "fashion", "SODEAL CH"],
     [{ title: "Masseur de cheville chauffant et vibrant USB" }, "beauty", "SODEAL CH"],
@@ -896,7 +963,11 @@ async function runSelfTests() {
     [{ title: "Eau de Toilette fraîche" }, "beauty", "SODEAL CH"],
     [{ title: "Attrape-Soleil Ailes d'Ange Lumière protection élégance spirituelle" }, "home", "Bonheur de lune"],
     [{ title: "Attrape-soleil Arbre de Vie Cristal Violet Suspension Feng Shui" }, "home", "Bonheur de lune"],
-    [{ title: "12 Bouteilles Villa Sintesi 2024 Sicilia DOC" }, "other", "SODEAL CH"]
+    [{ title: "12 Bouteilles Villa Sintesi 2024 Sicilia DOC" }, "other", "SODEAL CH"],
+    [{ title: "2 piles x C" }, "home", "Deluxehomeartshop FR"],
+    [{ title: "2.4G Wireless Receiver" }, "tech", "AKKO FR"],
+    [{ title: "Produit sans catégorie" }, "beauty", "Perfumeria Comas FR"],
+    [{ title: "Produit sans catégorie" }, "beauty", "Bouclème"]
   ];
   for (const [row, expected, merchantName] of categoryCases) {
     if (categoryFor(row, merchantName) !== expected) {
@@ -923,11 +994,17 @@ async function runSelfTests() {
   const mpnKeyVariantDifferent = groupKey({ brand: "AudioBrand", mpn: "AB-X1", variant: "Blanc 128 Go" }, "annonceur-3");
   const mpnKeyMissingVariantA = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-1");
   const mpnKeyMissingVariantB = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-2");
+  const titleKeyA = groupKey({ brand: "AudioBrand", title: "Casque audio bluetooth premium noir" }, "annonceur-1");
+  const titleKeyB = groupKey({ brand: "AudioBrand", product_name: "Casque audio bluetooth premium noir" }, "annonceur-2");
+  const titleKeyDifferent = groupKey({ brand: "AudioBrand", title: "Casque audio bluetooth premium blanc" }, "annonceur-1");
+  const titleKeyTooShort = groupKey({ brand: "AudioBrand", title: "Casque audio" }, "annonceur-4");
   if (mpnKeyA !== mpnKeyB || mpnKeyA === mpnKeyDifferentVariant ||
       mpnKeyVariantA !== mpnKeyVariantB || mpnKeyVariantA === mpnKeyVariantDifferent ||
       mpnKeyMissingVariantA === mpnKeyMissingVariantB ||
-      groupKey({ mpn: "AB-X1" }, "annonceur-1") === groupKey({ mpn: "AB-X1" }, "annonceur-2")) {
-    throw new Error("TEST ÉCHEC : le rapprochement MPN doit exiger une marque et une variante exacte.");
+      groupKey({ mpn: "AB-X1" }, "annonceur-1") === groupKey({ mpn: "AB-X1" }, "annonceur-2") ||
+      titleKeyA === titleKeyB || titleKeyA === titleKeyDifferent ||
+      !titleKeyA.startsWith("awin:annonceur-1:brand-name:") || titleKeyTooShort === groupKey({ brand: "AudioBrand", title: "Casque audio" }, "annonceur-5")) {
+    throw new Error("TEST ÉCHEC : les identifiants et le rapprochement de secours doivent rester stricts.");
   }
   const grouped = aggregateOffers([
     { identity: mpnKeyA, advertiser_id: "1", id: "1", merchant: "Boutique A", name: "Casque Audio X", brand: "AudioBrand", category: "tech", color: "Noir", size: "", gtin: "", mpn: "AB-X1", images: ["https://cdn.example/a.jpg"], price_eur: 45, shipping_price_eur: null, availability: "unknown", merchant_updated_at: null, url: "https://example.com/a" },
@@ -954,6 +1031,10 @@ async function runSelfTests() {
   try { validateDirectFeedUrl("http://productdata.awin.com/feed.csv"); } catch { rejectsHttp = true; }
   if (!rejectsHttp) throw new Error("TEST ÉCHEC : une URL HTTP doit être rejetée.");
 
+  const feedListUrl = "https://ui.awin.com/productdata-darwin-download/publisher/" + PUBLISHER_ID + "/test-key/1/feedList";
+  if (extractAwinDataFeedKey(feedListUrl) !== "test-key") {
+    throw new Error("TEST ÉCHEC : l'URL feedList Awin doit être reconnue comme une clé de flux standard, pas comme un flux CSV direct.");
+  }
   const originalFetch = globalThis.fetch;
   const originalStandardKey = process.env.AWIN_PRODUCT_DATA_API_KEY;
   const originalDirectFeedUrl = process.env.AWIN_PRODUCT_DATA_FEED_URL;
@@ -1035,7 +1116,9 @@ if (process.argv.includes("--self-test")) {
   await runSelfTests();
 } else {
   const rawOffers = [];
-  const directFeedConfigured = Boolean(process.env.AWIN_PRODUCT_DATA_FEED_URL);
+  const configuredFeedUrl = process.env.AWIN_PRODUCT_DATA_FEED_URL || "";
+  const feedListKey = extractAwinDataFeedKey(configuredFeedUrl);
+  const directFeedConfigured = Boolean(configuredFeedUrl) && !feedListKey;
   let joinedAdvertisersChecked = null;
   let pendingAdvertisersDetected = null;
   let additionalAwinOffers = 0;
@@ -1046,6 +1129,9 @@ if (process.argv.includes("--self-test")) {
     pendingAdvertisersDetected = programmeStatus.pendingCount;
     additionalAwinOffers = programmeStatus.importedOffers;
   } else {
+    if (feedListKey) {
+      log("URL Awin feedList reconnue : utilisation de la clé pour récupérer les flux standards, sans traiter feedList comme un CSV produit direct.");
+    }
     const programmeStatus = await loadEnhancedAwinFeeds(rawOffers);
     joinedAdvertisersChecked = programmeStatus.joinedCount;
     pendingAdvertisersDetected = programmeStatus.pendingCount;

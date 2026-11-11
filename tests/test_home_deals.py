@@ -29,8 +29,22 @@ class HomeDealsTests(unittest.TestCase):
         self.assertEqual([g["name"] for g in gifts], ["Eau de parfum"])
         self.assertFalse(gifts[0]["price_verified"])
         self.assertIsNone(gifts[0]["price_eur"])
+        self.assertFalse(gifts[0]["image_verified"])
+        self.assertEqual(gifts[0]["image_provenance"], "Flux marchand Awin autorisé")
         self.assertEqual(gifts[0]["price_date_kind"], "missing")
         self.assertEqual(gifts[0]["band"], "a-confirmer")
+
+    def test_gifts_preserve_recent_image_verification_by_exact_url(self):
+        awin = {"fetched_at": "2026-11-11T12:00:00Z", "products": [
+            product("Parfum vérifié", "A", 59.9, image="https://img.example/parfum.webp")
+        ]}
+        previous = [{"image": "https://img.example/parfum.webp", "image_verified": True,
+                     "image_verified_at": "2026-11-10T12:00:00Z",
+                     "image_checked_at": "2026-11-10T12:00:00Z",
+                     "image_check_status": "ok"}]
+        gifts = deals.build_gifts(awin, previous_gifts=previous)
+        self.assertTrue(gifts[0]["image_verified"])
+        self.assertEqual(gifts[0]["image_verified_at"], "2026-11-10T12:00:00Z")
 
     def test_gifts_show_price_only_with_fresh_merchant_date_and_explicit_ttc(self):
         awin = {"fetched_at": "2026-11-06T13:00:00Z", "products": [
@@ -72,7 +86,7 @@ class HomeDealsTests(unittest.TestCase):
         awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
-        self.assertEqual(published, deals.build(awin, sheets))
+        self.assertEqual(published, deals.build(awin, sheets, previous=published))
 
     def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
         awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
@@ -84,6 +98,10 @@ class HomeDealsTests(unittest.TestCase):
             self.assertIn("cancel-in-progress: false", workflow)
             self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', workflow)
             self.assertIn("trois tentatives", workflow)
+        for line in awin.splitlines():
+            if "${{" in line:
+                self.assertEqual(line.count("${{"), line.count("}}"), line)
+                self.assertTrue(line.endswith("}}") and not line.endswith("}}}"), line)
         self.assertIn("github.event.pull_request.head.sha || github.ref", tracker)
 
     def test_homepage_sections_partners_and_affiliate_rel(self):
@@ -99,8 +117,11 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn('p.priceTaxStatus==="included"', page)
         self.assertIn('Number(p.regularPriceValue)>Number(p.priceValue)', page)
         self.assertIn(".pm-partner[hidden]{display:none!important}", page)
-        self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(g.image', page)
+        self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(image', page)
         self.assertIn("const giftPriceIsCurrent=g=>", page)
+        self.assertIn("g.image_verified!==true", page)
+        self.assertIn("Prix non vérifié", page)
+        self.assertIn('giftRail.querySelectorAll("img")', page)
         self.assertIn("Prix observés", page)
         self.assertIn("prix affichés seulement si date marchande récente et TTC confirmé", page)
         product_page = (ROOT / "produit.html").read_text(encoding="utf-8")
