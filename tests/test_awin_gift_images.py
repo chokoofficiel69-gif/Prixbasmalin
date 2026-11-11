@@ -15,8 +15,9 @@ spec.loader.exec_module(checker)
 
 class FakeResponse:
     def __init__(self, status=206, content_type="image/webp", content_length="2048",
-                 content_range="bytes 0-2047/4096", sample=b"image-bytes"):
+                 content_range="bytes 0-2047/4096", sample=b"image-bytes", final_url="https://cdn.example/item.webp"):
         self.status = status
+        self.final_url = final_url
         self.headers = {
             "Content-Type": content_type,
             "Content-Length": content_length,
@@ -26,6 +27,9 @@ class FakeResponse:
 
     def getcode(self):
         return self.status
+
+    def geturl(self):
+        return self.final_url
 
     def read(self, size):
         return self.sample[:size]
@@ -49,6 +53,11 @@ class AwinGiftImageTests(unittest.TestCase):
             self.assertEqual(checker.check_image_url("https://cdn.example/empty.webp"), "invalid")
         with patch.object(checker, "urlopen", return_value=FakeResponse(status=200, content_length=str(13 * 1024 * 1024))):
             self.assertEqual(checker.check_image_url("https://cdn.example/huge.webp"), "invalid")
+
+    def test_rejects_redirect_to_insecure_http(self):
+        response = FakeResponse(final_url="http://cdn.example/item.webp")
+        with patch.object(checker, "urlopen", return_value=response):
+            self.assertEqual(checker.check_image_url("https://cdn.example/redirect.webp"), "invalid")
 
     def test_distinguishes_permanent_http_failure_from_temporary_failure(self):
         permanent = HTTPError("https://cdn.example/missing.webp", 404, "Not Found", None, None)
