@@ -15,7 +15,7 @@ class CatalogueProductCardTests(unittest.TestCase):
 
     def test_amazon_search_is_separate_from_real_merchant_offers(self):
         self.assertNotIn('rows.push({merchant:"Amazon",price:null,', self.source)
-        self.assertIn('amazonSearchButton.textContent="Rechercher aussi sur Amazon (prix à confirmer) ↗";', self.source)
+        self.assertIn('amazonSearchButton.textContent="Découvrir aussi sur Amazon ↗";', self.source)
         self.assertIn('tag:"prixbasmalin2-21"', self.source)
         self.assertIn('const rawFeedOffers=Array.isArray(p.offers)', self.source)
         self.assertIn('taxStatus==="included"', self.source)
@@ -36,7 +36,7 @@ class CatalogueProductCardTests(unittest.TestCase):
         # mais seules les offres TTC fraîches entrent dans les comparaisons et « Meilleur prix total ».
         self.assertIn("listedPriceValue:hasPrice?Number(product.priceValue):null", self.source)
         self.assertIn("priceValue:priceStatus===\"fresh\"?Number(product.priceValue):null", self.source)
-        self.assertIn('listedSourceText+" — à confirmer sur son site."', self.source)
+        self.assertIn('listedSourceText+" · non classé « meilleur prix »"', self.source)
         self.assertIn('offer.className="pm-c2-offer pm-c2-offer-listed";', self.source)
         self.assertIn("const isBest=canRankByTotal&&rowIndex===0;", self.source)
 

@@ -29,7 +29,8 @@ test("415 explicite pour un Content-Type absent", async () => {
   const response = await worker.fetch(new Request(endpoint, {
     method: "POST",
     headers: { Origin: siteOrigin, "User-Agent": "test-agent" },
-    body: JSON.stringify({ provider: "agnes", message: "bonjour" })
+    // Un Blob sans type évite que Request ajoute « text/plain » tout seul.
+    body: new Blob([JSON.stringify({ provider: "agnes", message: "bonjour" })])
   }), env);
   assert.equal(response.status, 415);
   const data = await response.json();
