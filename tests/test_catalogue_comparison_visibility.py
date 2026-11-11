@@ -53,6 +53,35 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertIn('overflow-x:auto!important', source)
         self.assertIn('scroll-snap-type:x mandatory!important', source)
 
+    def test_search_ranking_counts_only_fresh_eur_ttc_offers(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn("const pmVerifiedMerchantCount=product=>", source)
+        self.assertIn('currency!=="EUR"', source)
+        self.assertIn('taxStatus!=="included"', source)
+        self.assertIn('!pmAwinPriceIsFresh(checkedAt)', source)
+        self.assertIn("multiMerchant:hasPrice&&merchantCount>1", source)
+        self.assertIn('const hasPrice=product.priceStatus==="fresh"&&', source)
+        self.assertIn("shippingKnown,\n      total:hasPrice?", source)
+
+    def test_each_merchant_offer_requires_its_own_fresh_timestamp(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('const checkedAt=offer.merchantUpdatedAt||offer.checked_at||"";', source)
+        self.assertNotIn('offer.merchantUpdatedAt||offer.checked_at||p.merchantUpdatedAt||p.sourceCreatedAt', source)
+        self.assertNotIn('offer.merchantUpdatedAt||product.merchantUpdatedAt', source)
+        self.assertIn('const merchantUpdatedAt=product.merchantUpdatedAt||"";', source)
+        self.assertNotIn('product.merchantUpdatedAt||product.sourceCreatedAt', source)
+        self.assertNotIn('p.merchantUpdatedAt||p.sourceCreatedAt', source)
+        self.assertIn('const url=offer.url||offer.product_url||"";', source)
+        self.assertIn('const ship=shippingOf(offer.shippingPriceValue??offer.shipping_price_eur);', source)
+        self.assertNotIn('offer.url||offer.product_url||p.sourceUrl', source)
+        self.assertNotIn('offer.shipping_price_eur??p.shippingPriceValue', source)
+        self.assertIn('Boolean(merchant)&&', source)
+
+    def test_related_suggestions_are_only_added_when_no_exact_text_match_exists(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('if(q&&exactMatchCount===0&&found.length<20&&relatedRule&&!selectedBrand)', source)
+        self.assertIn('name.textContent=p.name+(p._pmRelatedSuggestion?" • suggestion proche":"");', source)
+
 
 if __name__ == "__main__":
     unittest.main()

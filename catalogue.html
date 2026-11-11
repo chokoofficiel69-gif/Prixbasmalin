@@ -5787,8 +5787,8 @@ async function pmLoadAwinCatalogue(){
       /^https:\/\//i.test(String(product.sourceUrl||""))&&String(product.merchant||"").trim()
     );
     const displayProducts=feedProducts.map(product=>{
-      const merchantUpdatedAt=product.merchantUpdatedAt||
-        (Array.isArray(product.offers)?product.offers.map(offer=>offer&&offer.merchantUpdatedAt).find(Boolean):"")||"";
+      // La date produit correspond au prix principal (meilleure offre) : ne jamais emprunter la date d'un autre marchand.
+      const merchantUpdatedAt=product.merchantUpdatedAt||"";
       const hasPrice=Number.isFinite(Number(product.priceValue))&&Number(product.priceValue)>0;
       const priceFresh=hasPrice&&pmAwinPriceIsFresh(merchantUpdatedAt);
       const priceTaxIncluded=product.priceTaxStatus==="included"||product.price_tax_status==="included";
@@ -5848,7 +5848,7 @@ async function pmLoadAwinCatalogue(){
         name:product.name,
         image:product.image,
         offers:sourceOffers.map(offer=>{
-          const checkedAt=offer.merchantUpdatedAt||product.merchantUpdatedAt;
+          const checkedAt=offer.merchantUpdatedAt||offer.checked_at||"";
           return {
             merchant:offer.merchant,
             price_eur:Number(offer.priceValue),
@@ -5959,15 +5959,35 @@ function render(){
     if(product._pmRelatedSuggestion)value-=500;
     return value;
   };
+  const pmVerifiedMerchantCount=product=>{
+    const sourceOffers=Array.isArray(product.offers)&&product.offers.length?product.offers:[{
+      merchant:product.merchant,priceValue:product.priceValue,url:product.sourceUrl,
+      merchantUpdatedAt:product.merchantUpdatedAt||"",
+      priceTaxStatus:product.priceTaxStatus||product.price_tax_status,currency:product.currency
+    }];
+    const merchants=new Set();
+    sourceOffers.forEach(offer=>{
+      const base=Number(offer.priceValue??offer.price_eur);
+      const taxStatus=String(offer.priceTaxStatus||offer.price_tax_status||"").toLowerCase();
+      const checkedAt=offer.merchantUpdatedAt||offer.checked_at||"";
+      const currency=String(offer.currency||offer.currencyCode||(product.isAwinProduct?"EUR":"")).toUpperCase();
+      const url=offer.url||offer.product_url||"";
+      const merchant=String(offer.merchant||offer.merchant_name||offer.retailer||"").trim();
+      if(!merchant||!Number.isFinite(base)||base<=0||currency!=="EUR"||taxStatus!=="included"||!pmAwinPriceIsFresh(checkedAt)||!/^https:\/\//i.test(String(url||"")))return;
+      merchants.add(merchant.toLocaleLowerCase("fr"));
+    });
+    return merchants.size;
+  };
   const offerRank=product=>{
     const base=Number(product.priceValue);
-    const hasPrice=Number.isFinite(base)&&base>0;
-    const shippingKnown=product.shippingPriceValue!==null&&product.shippingPriceValue!==undefined&&
+    const hasPrice=product.priceStatus==="fresh"&&
+      (product.priceTaxStatus==="included"||product.price_tax_status==="included")&&
+      Number.isFinite(base)&&base>0&&pmAwinPriceIsFresh(product.merchantUpdatedAt||"");
+    const shippingKnown=hasPrice&&product.shippingPriceValue!==null&&product.shippingPriceValue!==undefined&&
       Number.isFinite(Number(product.shippingPriceValue))&&Number(product.shippingPriceValue)>=0;
-    const merchantCount=new Set((Array.isArray(product.offers)?product.offers:[])
-      .map(offer=>String(offer.merchant||"").trim().toLowerCase()).filter(Boolean)).size;
+    const merchantCount=pmVerifiedMerchantCount(product);
     return {
-      multiMerchant:merchantCount>1,
+      multiMerchant:hasPrice&&merchantCount>1,
       hasPrice,
       shippingKnown,
       total:hasPrice?base+(shippingKnown?Number(product.shippingPriceValue):0):Infinity,
@@ -6146,7 +6166,7 @@ function render(){
     // Carte produit façon comparateur : photo, prix mis en avant, bouton marchand, tableau comparatif, détails.
     card.classList.add("pm-card2");
     const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(value));
-    const updateValue=p.merchantUpdatedAt||p.sourceCreatedAt||null;
+    const updateValue=p.merchantUpdatedAt||null;
     const priceDateValue=updateValue;
     const hasVerifiedPrice=p.priceStatus==="fresh"&&
       (p.priceTaxStatus==="included"||p.price_tax_status==="included")&&
@@ -6206,19 +6226,22 @@ function render(){
     // Seules les offres marchandes fraîches, explicitement TTC et liées à une fiche directe entrent dans le tableau.
     const rawFeedOffers=Array.isArray(p.offers)&&p.offers.length?p.offers:[{
       merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl,shippingPriceValue:p.shippingPriceValue,
-      merchantUpdatedAt:p.merchantUpdatedAt||p.sourceCreatedAt,priceTaxStatus:p.priceTaxStatus||p.price_tax_status
+      merchantUpdatedAt:p.merchantUpdatedAt||"",priceTaxStatus:p.priceTaxStatus||p.price_tax_status,currency:p.currency
     }];
     const feedOffers=hasVerifiedPrice?rawFeedOffers.filter(offer=>{
       const base=Number(offer.priceValue??offer.price_eur);
       const taxStatus=offer.priceTaxStatus||offer.price_tax_status;
-      const checkedAt=offer.merchantUpdatedAt||offer.checked_at||p.merchantUpdatedAt||p.sourceCreatedAt;
-      const url=offer.url||offer.product_url||p.sourceUrl;
-      return Number.isFinite(base)&&base>0&&taxStatus==="included"&&pmAwinPriceIsFresh(checkedAt)&&/^https:\/\//i.test(String(url||""));
+      // Une offre doit porter sa propre date marchande ; la date du meilleur prix ne vaut pas pour les autres vendeurs.
+      const checkedAt=offer.merchantUpdatedAt||offer.checked_at||"";
+      const url=offer.url||offer.product_url||"";
+      const merchant=String(offer.merchant||offer.merchant_name||offer.retailer||"").trim();
+      const currency=String(offer.currency||offer.currencyCode||(p.isAwinProduct?"EUR":"")).toUpperCase();
+      return Boolean(merchant)&&Number.isFinite(base)&&base>0&&currency==="EUR"&&taxStatus==="included"&&pmAwinPriceIsFresh(checkedAt)&&/^https:\/\//i.test(String(url||""));
     }):[];
     const rows=feedOffers.map(offer=>{
       const base=Number(offer.priceValue??offer.price_eur);
-      const ship=shippingOf(offer.shippingPriceValue??offer.shipping_price_eur??p.shippingPriceValue);
-      return {merchant:offer.merchant||offer.merchant_name||p.merchant||"Marchand",price:base,shipping:ship,total:ship===null?null:base+ship,url:offer.url||offer.product_url||p.sourceUrl};
+      const ship=shippingOf(offer.shippingPriceValue??offer.shipping_price_eur);
+      return {merchant:offer.merchant||offer.merchant_name||offer.retailer||"Marchand",price:base,shipping:ship,total:ship===null?null:base+ship,url:offer.url||offer.product_url};
     });
     // Un même marchand ne compte qu'une fois (sa meilleure offre) : pas de fausse comparaison.
     rows.sort((a,b)=>a.price-b.price);
