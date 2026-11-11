@@ -122,6 +122,15 @@ def main():
         for prov in providers:
             try:
                 raw, used = call(prov, p)
+            except urllib.error.HTTPError as exc:
+                detail = ""
+                try:
+                    err = json.loads(exc.read().decode("utf-8", "replace"))
+                    detail = str((err.get("error") or {}).get("message") if isinstance(err.get("error"), dict) else err.get("error") or err)
+                except Exception:  # noqa: BLE001 - message d'erreur facultatif
+                    pass
+                print(f"{p['id']} : {prov[0]} refus HTTP {exc.code} {re.sub(r'[\r\n\t]+', ' ', detail)[:200]}")
+                continue
             except (urllib.error.URLError, TimeoutError, KeyError, ValueError, json.JSONDecodeError) as exc:
                 print(f"{p['id']} : {prov[0]} indisponible ({type(exc).__name__})")
                 continue
