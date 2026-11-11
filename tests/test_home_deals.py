@@ -34,6 +34,22 @@ class HomeDealsTests(unittest.TestCase):
         self.assertEqual(gifts[0]["price_date_kind"], "missing")
         self.assertEqual(gifts[0]["band"], "a-confirmer")
 
+    def test_gifts_exclude_known_placeholder_image_urls(self):
+        awin = {"products": [
+            product("Produit sans visuel", "Milk Bar Babystore", 30, desc="Mode",
+                    image="https://images2.productserve.com/noimage.gif"),
+            product("Eau de parfum", "A", 40, desc="Parfums",
+                    image="https://img.example/parfum.webp"),
+        ]}
+        gifts = deals.build_gifts(awin)
+        self.assertEqual([gift["name"] for gift in gifts], ["Eau de parfum"])
+        self.assertFalse(any(deals.is_placeholder_image_url(gift["image"]) for gift in gifts))
+
+    def test_published_gifts_do_not_mark_placeholder_images_as_usable(self):
+        data = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
+        self.assertFalse(any(deals.is_placeholder_image_url(gift.get("image")) for gift in data["gifts"]))
+
+
     def test_gifts_preserve_recent_image_verification_by_exact_url(self):
         awin = {"fetched_at": "2026-11-11T12:00:00Z", "products": [
             product("Parfum vérifié", "A", 59.9, image="https://img.example/parfum.webp")
