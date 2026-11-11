@@ -86,7 +86,9 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn("checked_at:checkedAt,", source)
         self.assertIn("stale:!pmAwinPriceIsFresh(checkedAt)", source)
         self.assertNotIn("checked_at:product.fetchedAt||feed.fetched_at", source)
-        self.assertIn("const updateValue=p.merchantUpdatedAt||p.sourceCreatedAt||null;", source)
+        self.assertIn("const updateValue=p.merchantUpdatedAt||null;", source)
+        self.assertNotIn("const updateValue=p.merchantUpdatedAt||p.sourceCreatedAt||null;", source)
+        self.assertIn('const merchantUpdatedAt=product.merchantUpdatedAt||"";', source)
         self.assertNotIn("const priceDateValue=updateValue||p.feedFetchedAt||null;", source)
         self.assertNotIn("const updateValue=p.merchantUpdatedAt||p.fetchedAt;", source)
 
