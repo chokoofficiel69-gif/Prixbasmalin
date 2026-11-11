@@ -216,7 +216,7 @@ jobs:
       - name: Vérifier la vitrine cadeaux et les images marchandes publiques
         if: ${{ steps.save.outputs.changed == 'true' && github.ref == 'refs/heads/main' }}
         env:
-          EXPECTED_FETCHED_AT: ${{ steps.save.outputs.expected_fetched_at }
+          EXPECTED_FETCHED_AT: ${{ steps.save.outputs.expected_fetched_at }}
         shell: bash
         run: |
           set -euo pipefail
