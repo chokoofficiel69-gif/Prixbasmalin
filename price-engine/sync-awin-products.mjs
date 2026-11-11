@@ -511,8 +511,7 @@ function groupKey(row, advertiser) {
     const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
     if (color || size || variant) return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size + ":" + variant;
   }
-  // Secours strict : même marque + même intitulé normalisé, uniquement pour
-  // des titres suffisamment distinctifs. Aucun rapprochement sur le titre seul.
+  // Secours de déduplication dans un même annonceur uniquement ; jamais de comparaison inter-marchands sans GTIN ou MPN + variante.
   const title = identityPart(row.title || row.product_name || row.name || "");
   const titleTokens = title.split(" ").filter(token => token.length > 1);
   if (brand && title.length >= 20 && titleTokens.length >= 3) {
