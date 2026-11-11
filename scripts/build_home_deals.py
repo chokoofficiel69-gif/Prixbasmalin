@@ -161,11 +161,30 @@ def build_gifts(awin, limit=48, now=None, previous_gifts=None):
     return gifts
 
 
+def has_verified_local_image(product):
+    """A top historical card needs a present local asset and explicit visual/licence provenance."""
+    image = str(product.get("image") or "")
+    if not image.startswith("/assets/produits/"):
+        return False
+    relative = Path(image.lstrip("/"))
+    if ".." in relative.parts or not (ROOT / relative).is_file():
+        return False
+    credit = product.get("image_credit")
+    return (
+        isinstance(credit, dict)
+        and credit.get("match") == "verifie_visuellement"
+        and all(str(credit.get(key) or "").strip() for key in ("author", "license", "file_page"))
+    )
+
+
 def build_top(sheets, limit=12):
     """Les produits les plus comparés, en alternant les catégories (pas de pourcentage d'écart affiché :
     les relevés mélangent parfois des packs ou des configurations différentes)."""
-    candidates = sorted((s for s in sheets.get("products", []) if s.get("offer_count", 0) >= 8),
-                        key=lambda s: (not s.get("image"), -s["offer_count"], s["name"]))
+    candidates = sorted(
+        (s for s in sheets.get("products", [])
+         if s.get("offer_count", 0) >= 8 and has_verified_local_image(s)),
+        key=lambda s: (-s["offer_count"], s["name"])
+    )
     lanes = {}
     for s in candidates:
         lanes.setdefault(s["category"], []).append(s)

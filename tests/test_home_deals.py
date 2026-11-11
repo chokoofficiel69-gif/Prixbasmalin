@@ -81,6 +81,15 @@ class HomeDealsTests(unittest.TestCase):
         self.assertTrue(data["top"])
         self.assertTrue(all("gap_percent" not in t and t["offer_count"] >= 8 for t in data["top"]))
         self.assertTrue(all(t["price_kind"] == "historical" for t in data["top"]))
+        self.assertTrue(all(deals.has_verified_local_image(t) for t in data["top"]))
+
+    def test_top_builder_skips_missing_or_uncredited_images(self):
+        sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
+        top = deals.build_top(sheets)
+        self.assertTrue(top)
+        self.assertTrue(all(deals.has_verified_local_image(item) for item in top))
+        self.assertNotIn("ipad-air-11-m3", {item["id"] for item in top})
+        self.assertNotIn("dreame-x50-ultra", {item["id"] for item in top})
 
     def test_published_file_is_up_to_date(self):
         awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
