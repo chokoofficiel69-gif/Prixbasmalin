@@ -67,10 +67,10 @@ class AwinGiftImageTests(unittest.TestCase):
                 handler.redirect_request(None, None, 302, "Found", {}, "https://169.254.169.254/latest/meta-data")
 
     def test_rejects_private_initial_host_without_opening_it(self):
-        with patch.object(checker, "public_https_url_status", return_value="invalid"), \\
-             patch.object(checker, "open_image_request") as opener:
-            self.assertEqual(checker.check_image_url("https://127.0.0.1/metadata"), "invalid")
-            opener.assert_not_called()
+        with patch.object(checker, "public_https_url_status", return_value="invalid"):
+            with patch.object(checker, "open_image_request") as opener:
+                self.assertEqual(checker.check_image_url("https://127.0.0.1/metadata"), "invalid")
+                opener.assert_not_called()
 
     def test_rejects_hostname_resolving_to_private_address(self):
         private_record = (2, 1, 6, "", ("10.0.0.5", 443))
