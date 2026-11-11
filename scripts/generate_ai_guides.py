@@ -28,13 +28,47 @@ MAX_PER_RUN = int(os.environ.get("AI_GUIDES_MAX", "20"))
 REFRESH_DAYS = 60
 
 PROVIDERS = [
-    ("freellmapi", "FREELLMAPI_API_KEY", os.environ.get("FREELLMAPI_BASE_URL", "https://freellmapi.prixbasmalin.prod.page/v1"), os.environ.get("FREELLMAPI_MODEL", "gpt-oss-120b")),
-    ("groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")),
-    ("gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai", os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")),
-    ("cerebras", "CEREBRAS_API_KEY", "https://api.cerebras.ai/v1", os.environ.get("CEREBRAS_MODEL", "llama-3.3-70b")),
-    ("mistral", "MISTRAL_API_KEY", "https://api.mistral.ai/v1", os.environ.get("MISTRAL_MODEL", "mistral-small-latest")),
-    ("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", os.environ.get("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")),
+    ("freellmapi", "FREELLMAPI_API_KEY", os.environ.get("FREELLMAPI_BASE_URL", "https://freellmapi.prixbasmalin.prod.page/v1"), os.environ.get("FREELLMAPI_MODEL")),
+    ("groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", os.environ.get("GROQ_MODEL")),
+    ("gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai", os.environ.get("GEMINI_MODEL")),
+    ("cerebras", "CEREBRAS_API_KEY", "https://api.cerebras.ai/v1", os.environ.get("CEREBRAS_MODEL")),
+    ("mistral", "MISTRAL_API_KEY", "https://api.mistral.ai/v1", os.environ.get("MISTRAL_MODEL")),
+    ("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", os.environ.get("OPENROUTER_MODEL")),
 ]
+
+# Modèles préférés, dans l'ordre, cherchés dans la liste /models de chaque fournisseur.
+PREFERRED = [r"gpt-oss-120b", r"gemini-[\d.]+-flash$", r"gemini-flash-latest", r"llama-4-maverick", r"llama-3\.3-70b",
+             r"qwen3?-.*\d+b", r"mistral-(small|medium)-latest", r"llama-4-scout", r"gpt-oss-20b", r"llama", r"gemini-.*flash"]
+EXCLUDED = re.compile(r"embed|tts|whisper|guard|audio|image|live|vision|ocr|moderation|transcri|speech|aqa|imagen|veo|lyria|learnlm|gemma", re.I)
+
+
+def pick_model(ids, free_only=False):
+    ids = [i.removeprefix("models/") for i in ids if not EXCLUDED.search(i)]
+    if free_only:
+        ids = [i for i in ids if i.endswith(":free")]
+    for pattern in PREFERRED:
+        hits = sorted((i for i in ids if re.search(pattern, i, re.I)), key=lambda i: ("preview" in i or "exp" in i, -len(re.findall(r"\d", i)), i))
+        if hits:
+            return hits[0]
+    return ids[0] if ids else None
+
+
+def resolve(provider):
+    """Choisit un modèle disponible chez le fournisseur (liste /models), sauf modèle imposé."""
+    name, env, base, model = provider
+    if model:
+        return provider
+    req = urllib.request.Request(base + "/models", headers={"Authorization": "Bearer " + os.environ[env], "User-Agent": "PrixMalin-guides/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            ids = [m.get("id", "") for m in json.load(r).get("data", [])]
+    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
+        print(f"{name} : liste des modèles indisponible ({exc})")
+        return None
+    chosen = pick_model(ids, free_only=(name == "openrouter"))
+    print(f"{name} : modèle choisi {chosen} parmi {len(ids)}")
+    return (name, env, base, chosen) if chosen else None
+
 
 SYSTEM = (
     "Tu rédiges des conseils d'achat neutres, en français, pour un comparateur de prix. "
@@ -107,7 +141,7 @@ def due(entry, today):
 
 
 def main():
-    providers = [pr for pr in PROVIDERS if os.environ.get(pr[1])]
+    providers = [r for r in (resolve(pr) for pr in PROVIDERS if os.environ.get(pr[1])) if r]
     if not providers:
         print("Aucune clé IA configurée : rien à générer.")
         return 0
