@@ -231,7 +231,7 @@ function stockValues(values) {
 function stockState(value) {
   const stock = norm(value).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
   if (/\b(?:0|out of stock|outofstock|no stock|sold out|discontinued|rupture|indisponible|unavailable|not available|not in stock|non disponible|non en stock|pas en stock|epuise|false|no)\b/.test(stock)) return "out_of_stock";
-  if (/\b(?:1|in stock|instock|available|disponible|for sale|yes|true)\b/.test(stock)) return "in_stock";
+  if (/\b(?:1|in stock|instock|available|disponible|yes|true)\b/.test(stock)) return "in_stock";
   return "unknown";
 }
 
@@ -239,7 +239,8 @@ function parseDirectFeedRow(row) {
   const currency = String(row.currency || "EUR").trim().toUpperCase();
   const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
   const shippingPrice = parseFeedMoney(row.delivery_cost || row.shipping_cost || row.shipping || "", currency, true);
-  const stock = stockState(stockValues([row.stock_status, row.availability, row.is_for_sale, row.in_stock]));
+  const stock = stockState(stockValues([row.stock_status, row.availability, row.in_stock]));
+  if (/^(?:0|false|no)$/i.test(String(row.is_for_sale ?? "").trim())) return null;
   const adultFlag = norm([row.adult, row.adult_content, row.is_adult].filter(Boolean).join(" "));
   const categoryText = norm([row.merchant_category, row.category_name, row.product_type, row.product_name, row.title, row.name].filter(Boolean).join(" "));
   if (/^(1|yes|true|adult)$/.test(adultFlag) || /adult products?|sex toys?|erotic|erotique/.test(categoryText)) return null;
@@ -363,8 +364,9 @@ async function loadDirectAwinFeed(rawOffers) {
 function parseFeedRow(row, program, advertiser) {
   const currency = row.currency || "EUR";
   const price = parseFeedMoney(row.search_price || row.display_price || row.store_price || row.price || "", currency);
-  const stock = stockState(stockValues([row.stock_status,row.availability,row.is_for_sale,row.in_stock]));
-  if (!price || String(currency).toUpperCase() !== "EUR" || stock !== "in_stock") return null;
+  const stock = stockState(stockValues([row.stock_status,row.availability,row.in_stock]));
+  if (/^(?:0|false|no)$/i.test(String(row.is_for_sale ?? "").trim())) return null;
+  if (!price || String(currency).toUpperCase() !== "EUR" || stock === "out_of_stock") return null;
   const extra = [row.alternate_image,row.alternate_image_two,row.alternate_image_three].filter(Boolean);
   const normalized = {
     id: row.aw_product_id || row.merchant_product_id || row.product_id || row.ean || row.product_gtin,
@@ -380,13 +382,13 @@ function parseFeedRow(row, program, advertiser) {
     image_link: row.merchant_image_url || row.image_url || row.image_link || row.large_image || row.aw_image_url || row.aw_thumb_url,
     additional_image_link: extra,
     price: price.toFixed(2) + " EUR",
-    availability: "in_stock",
+    availability: stock,
     aw_deep_link: row.aw_deep_link || row.deep_link || row.merchant_deep_link || row.purl,
     shipping_price_eur: parseFeedMoney(row.delivery_cost || row.shipping, currency, true),
     price_tax_status: explicitPriceTaxStatus(row),
     last_updated: row.last_updated || ""
   };
-  return offerFromRow(normalized,program,advertiser);
+  return offerFromRow(normalized,program,advertiser,{ allowUnknownAvailability: true });
 }
 
 function extractAwinDataFeedKey(rawUrl) {
@@ -509,15 +511,14 @@ function groupKey(row, advertiser) {
     const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
     if (color || size || variant) return "mpn:" + brand + ":" + mpn + ":" + color + ":" + size + ":" + variant;
   }
-  // Secours strict : même marque + même intitulé normalisé, uniquement pour
-  // des titres suffisamment distinctifs. Aucun rapprochement sur le titre seul.
+  // Secours de déduplication dans un même annonceur uniquement ; jamais de comparaison inter-marchands sans GTIN ou MPN + variante.
   const title = identityPart(row.title || row.product_name || row.name || "");
   const titleTokens = title.split(" ").filter(token => token.length > 1);
   if (brand && title.length >= 20 && titleTokens.length >= 3) {
     const color = identityPart(row.color || row.colour || "");
     const size = identityPart(row.size || "");
     const variant = identityPart(firstField(row, ["variant","product_variant","product_variant_name","variant_name","model_variant"]));
-    return "brand-name:" + brand + ":" + title + ":" + color + ":" + size + ":" + variant;
+    return "awin:" + advertiser + ":brand-name:" + brand + ":" + title + ":" + color + ":" + size + ":" + variant;
   }
   return "awin:" + advertiser + ":" + String(row.id || row.product_id || "");
 }
@@ -530,7 +531,7 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
   const mpn = normalizedMpn(row);
   const images = imageList(row);
   const link = httpsUrl(row.aw_deep_link || row.link || row.mobile_link);
-  const availability = stockState(stockValues([row.availability,row.stock_status,row.in_stock,row.is_for_sale]));
+  const availability = stockState(stockValues([row.availability,row.stock_status,row.in_stock]));
   const currency = String(row.currency || "EUR").trim().toUpperCase();
   const regular = parseMoney(row.price || row.search_price);
   const sale = currentSalePrice(row, Date.now());
@@ -823,6 +824,7 @@ async function runSelfTests() {
   for (const value of ["in stock","instock","available","disponible","in_stock","yes","true","1"]) {
     if (stockState(value) !== "in_stock") throw new Error("TEST ÉCHEC : statut disponible mal reconnu : " + value);
   }
+  if (stockState("for sale") !== "unknown") throw new Error("TEST ÉCHEC : « for sale » ne prouve pas la disponibilité en stock.");
   const offer = parseDirectFeedRow(rows[0]);
   if (!offer) throw new Error("TEST ÉCHEC : un flux direct valide doit produire une offre.");
   if (offer.price_eur !== 49.9 || offer.shipping_price_eur !== 4.99 || offer.availability !== "unknown" ||
@@ -832,6 +834,8 @@ async function runSelfTests() {
   }
   const explicitOutOfStock = parseDirectFeedRow({ ...rows[0], is_for_sale: false });
   if (explicitOutOfStock) throw new Error("TEST ÉCHEC : un booléen is_for_sale=false ne doit jamais devenir une disponibilité inconnue.");
+  const saleFlagOnly = parseDirectFeedRow({ ...rows[0], stock_status: "", availability: "", in_stock: "", is_for_sale: true });
+  if (!saleFlagOnly || saleFlagOnly.availability !== "unknown") throw new Error("TEST ÉCHEC : is_for_sale=true ne prouve pas le stock.");
   const ttcOffer = parseDirectFeedRow({ ...rows[0], price_tax_status: "included" });
   if (!ttcOffer || ttcOffer.price_tax_status !== "included") {
     throw new Error("TEST ÉCHEC : seul un statut TVA explicitement inclus peut être reconnu.");
@@ -868,6 +872,20 @@ async function runSelfTests() {
   if (!standardAlias || standardAlias.gtin !== "4006381333931" || standardAlias.mpn !== "AB-X1") {
     throw new Error("TEST ÉCHEC : les alias GTIN/MPN doivent aussi être lus dans les flux CSV standards.");
   }
+  const standardSaleFlagOnly = parseFeedRow({
+    product_name:"Casque sans stock déclaré",brand_name:"AudioBrand",ean_13:"4006381333931",
+    merchant_image_url:"https://cdn.example/unknown.jpg",aw_deep_link:"https://shop.example/unknown",
+    search_price:"49.90",currency:"EUR",is_for_sale:true
+  }, {name:"Boutique standard"}, "997");
+  if (!standardSaleFlagOnly || standardSaleFlagOnly.availability !== "unknown") {
+    throw new Error("TEST ÉCHEC : is_for_sale=true ne doit pas être transformé en stock confirmé.");
+  }
+  const standardNotForSale = parseFeedRow({
+    product_name:"Casque non commercialisé",brand_name:"AudioBrand",ean_13:"4006381333931",
+    merchant_image_url:"https://cdn.example/not-for-sale.jpg",aw_deep_link:"https://shop.example/not-for-sale",
+    search_price:"49.90",currency:"EUR",is_for_sale:false
+  }, {name:"Boutique standard"}, "996");
+  if (standardNotForSale) throw new Error("TEST ÉCHEC : is_for_sale=false doit exclure l'offre.");
   const categoryCases = [
     [{ product_type: "Home & Garden, Bathroom Accessories, Soap & Lotion Dispensers" }, "home"],
     [{ product_type: "Parfums > Parfums pour Femme > Eau de Parfum Femme" }, "beauty"],
@@ -945,14 +963,14 @@ async function runSelfTests() {
   const mpnKeyMissingVariantB = groupKey({ brand: "AudioBrand", mpn: "AB-X1" }, "annonceur-2");
   const titleKeyA = groupKey({ brand: "AudioBrand", title: "Casque audio bluetooth premium noir" }, "annonceur-1");
   const titleKeyB = groupKey({ brand: "AudioBrand", product_name: "Casque audio bluetooth premium noir" }, "annonceur-2");
-  const titleKeyDifferent = groupKey({ brand: "AudioBrand", title: "Casque audio bluetooth premium blanc" }, "annonceur-3");
+  const titleKeyDifferent = groupKey({ brand: "AudioBrand", title: "Casque audio bluetooth premium blanc" }, "annonceur-1");
   const titleKeyTooShort = groupKey({ brand: "AudioBrand", title: "Casque audio" }, "annonceur-4");
   if (mpnKeyA !== mpnKeyB || mpnKeyA === mpnKeyDifferentVariant ||
       mpnKeyVariantA !== mpnKeyVariantB || mpnKeyVariantA === mpnKeyVariantDifferent ||
       mpnKeyMissingVariantA === mpnKeyMissingVariantB ||
       groupKey({ mpn: "AB-X1" }, "annonceur-1") === groupKey({ mpn: "AB-X1" }, "annonceur-2") ||
-      titleKeyA !== titleKeyB || titleKeyA === titleKeyDifferent ||
-      !titleKeyA.startsWith("brand-name:") || titleKeyTooShort === groupKey({ brand: "AudioBrand", title: "Casque audio" }, "annonceur-5")) {
+      titleKeyA === titleKeyB || titleKeyA === titleKeyDifferent ||
+      !titleKeyA.startsWith("awin:annonceur-1:brand-name:") || titleKeyTooShort === groupKey({ brand: "AudioBrand", title: "Casque audio" }, "annonceur-5")) {
     throw new Error("TEST ÉCHEC : les identifiants et le rapprochement de secours doivent rester stricts.");
   }
   const grouped = aggregateOffers([
