@@ -50,6 +50,20 @@ class AsinParsingTests(unittest.TestCase):
             self.assertRegex(entry["asin"], r"^[A-Z0-9]{10}$")
 
 
+    def test_new_verified_asins_have_direct_links_on_static_pages(self):
+        expected = {
+            "dualsense-edge": "B0BJW7XKY2",
+            "airpods-max": "B0DGHXBDQQ",
+            "macbook-air-13-m5": "B0GR1YQD11",
+            "iphone-17-pro": "B0FQHGTMXP",
+        }
+        for product_id, asin in expected.items():
+            page = (ROOT / "prix" / f"{product_id}.html").read_text(encoding="utf-8")
+            direct_url = f"https://www.amazon.fr/dp/{asin}?tag=prixbasmalin2-21"
+            self.assertIn(direct_url, page, product_id)
+            self.assertIn("Voir sur Amazon", page, product_id)
+
+
 class GeneratedPagesTests(unittest.TestCase):
     def setUp(self):
         self.saved = dict(seo.AMAZON_ASINS)

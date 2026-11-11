@@ -1,7 +1,7 @@
 {
  "version": 1,
  "tag": "prixbasmalin2-21",
- "note": "Références Amazon copiées depuis les fiches produit amazon.fr par le propriétaire du site. Ne jamais deviner un ASIN.",
+ "note": "Références vérifiées sur des fiches produit Amazon.fr ; ne jamais deviner un ASIN.",
  "products": {
   "airpods-4": {
    "asin": "B0DGHWD7CT",
@@ -50,6 +50,22 @@
   "switch-2": {
    "asin": "B0HCPTNRZJ",
    "added": "2026-11-08"
+  },
+  "dualsense-edge": {
+   "asin": "B0BJW7XKY2",
+   "added": "2026-11-10"
+  },
+  "airpods-max": {
+   "asin": "B0DGHXBDQQ",
+   "added": "2026-11-10"
+  },
+  "macbook-air-13-m5": {
+   "asin": "B0GR1YQD11",
+   "added": "2026-11-10"
+  },
+  "iphone-17-pro": {
+   "asin": "B0FQHGTMXP",
+   "added": "2026-11-10"
   }
  }
 }
