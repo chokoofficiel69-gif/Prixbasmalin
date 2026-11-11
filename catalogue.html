@@ -5959,13 +5959,13 @@ function render(){
     if(product._pmRelatedSuggestion)value-=500;
     return value;
   };
-  const pmVerifiedOfferSummary=product=>{
+  const pmVerifiedMerchantCount=product=>{
     const sourceOffers=Array.isArray(product.offers)&&product.offers.length?product.offers:[{
-      merchant:product.merchant,priceValue:product.priceValue,shippingPriceValue:product.shippingPriceValue,
-      url:product.sourceUrl,merchantUpdatedAt:product.merchantUpdatedAt||product.sourceCreatedAt,
+      merchant:product.merchant,priceValue:product.priceValue,url:product.sourceUrl,
+      merchantUpdatedAt:product.merchantUpdatedAt||product.sourceCreatedAt,
       priceTaxStatus:product.priceTaxStatus||product.price_tax_status,currency:product.currency
     }];
-    const byMerchant=new Map();
+    const merchants=new Set();
     sourceOffers.forEach(offer=>{
       const base=Number(offer.priceValue??offer.price_eur);
       const taxStatus=String(offer.priceTaxStatus||offer.price_tax_status||"").toLowerCase();
@@ -5973,26 +5973,24 @@ function render(){
       const currency=String(offer.currency||offer.currencyCode||(product.isAwinProduct?"EUR":"")).toUpperCase();
       const url=offer.url||offer.product_url||product.sourceUrl;
       const merchant=String(offer.merchant||offer.merchant_name||offer.retailer||product.merchant||"").trim();
-      const rawShipping=offer.shippingPriceValue??offer.shipping_price_eur??product.shippingPriceValue;
-      const shipping=rawShipping!==null&&rawShipping!==undefined&&rawShipping!==""&&Number.isFinite(Number(rawShipping))&&Number(rawShipping)>=0?Number(rawShipping):null;
       if(!merchant||!Number.isFinite(base)||base<=0||currency!=="EUR"||taxStatus!=="included"||!pmAwinPriceIsFresh(checkedAt)||!/^https:\/\//i.test(String(url||"")))return;
-      const key=merchant.toLocaleLowerCase("fr");
-      const candidate={merchant,price:base,shipping,total:shipping===null?null:base+shipping};
-      const previous=byMerchant.get(key);
-      if(!previous||candidate.price<previous.price)byMerchant.set(key,candidate);
+      merchants.add(merchant.toLocaleLowerCase("fr"));
     });
-    const offers=[...byMerchant.values()];
-    const allShippingKnown=offers.length>1&&offers.every(offer=>offer.shipping!==null);
-    const ranked=offers.slice().sort((a,b)=>allShippingKnown?a.total-b.total:a.price-b.price);
-    return {merchantCount:offers.length,hasPrice:offers.length>0,shippingKnown:offers.length>0&&offers.every(offer=>offer.shipping!==null),best:ranked[0]||null,allShippingKnown};
+    return merchants.size;
   };
   const offerRank=product=>{
-    const summary=pmVerifiedOfferSummary(product);
+    const base=Number(product.priceValue);
+    const hasPrice=product.priceStatus==="fresh"&&
+      (product.priceTaxStatus==="included"||product.price_tax_status==="included")&&
+      Number.isFinite(base)&&base>0&&pmAwinPriceIsFresh(product.merchantUpdatedAt||"");
+    const shippingKnown=hasPrice&&product.shippingPriceValue!==null&&product.shippingPriceValue!==undefined&&
+      Number.isFinite(Number(product.shippingPriceValue))&&Number(product.shippingPriceValue)>=0;
+    const merchantCount=pmVerifiedMerchantCount(product);
     return {
-      multiMerchant:summary.merchantCount>1,
-      hasPrice:summary.hasPrice,
-      shippingKnown:summary.shippingKnown,
-      total:summary.best?(summary.allShippingKnown?summary.best.total:summary.best.price):Infinity,
+      multiMerchant:hasPrice&&merchantCount>1,
+      hasPrice,
+      shippingKnown,
+      total:hasPrice?base+(shippingKnown?Number(product.shippingPriceValue):0):Infinity,
       hasImage:pmHasRealProductImage(product)
     };
   };
