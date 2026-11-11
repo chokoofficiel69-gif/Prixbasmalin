@@ -1,4 +1,4 @@
-import { api, state, h, toastErr, currentProject } from './lib/core.js';
+import { api, state, h, toast, toastErr, currentProject, modal } from './lib/core.js';
 
 const VIEWS = [
   { id: 'accueil', label: 'ACCUEIL', title: 'Accueil', icon: '🏠', load: () => import('./views/home.js') },
@@ -64,27 +64,41 @@ async function render() {
   }
 }
 
-async function showApp() {
+async function showApp(me) {
+  state.me = me || (await api('/api/me')).user;
+  $('me-label').textContent = `Connecté : ${state.me?.name || ''}${state.me?.role === 'admin' ? ' (administrateur)' : ''}`;
   $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
   buildNav();
   try { await refreshProjects(); } catch (e) { toastErr(e); }
   render();
+  if (state.me?.mustChangePassword) askNewPassword();
+}
+
+async function askNewPassword() {
+  const cur = h('input', { type: 'password', autocomplete: 'current-password', placeholder: 'Mot de passe reçu' });
+  const nxt = h('input', { type: 'password', autocomplete: 'new-password', placeholder: '8 caractères minimum' });
+  const r = await modal('Bienvenue ! Choisissez votre mot de passe', h('div.stack', h('p.small.muted', 'Le mot de passe que vous avez reçu est provisoire. Choisissez-en un rien qu’à vous.'), h('label.f', 'Mot de passe reçu', cur), h('label.f', 'Nouveau mot de passe', nxt)), [{ label: 'Plus tard', value: false }, { label: 'Valider', primary: true, value: true }]);
+  if (!r) return;
+  try { await api('/api/password', { method: 'POST', body: { current: cur.value, next: nxt.value } }); state.me.mustChangePassword = false; toast('Mot de passe enregistré', 'ok'); }
+  catch (e) { toastErr(e); askNewPassword(); }
 }
 
 function showLogin(msg = '') {
   $('app').classList.add('hidden');
   $('login').classList.remove('hidden');
   $('login-err').textContent = msg;
-  $('login-pass').focus();
+  $('login-user').value ||= localStorage.getItem('studio.user') || '';
+  ($('login-user').value ? $('login-pass') : $('login-user')).focus();
 }
 
 $('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    await api('/api/login', { method: 'POST', body: { password: $('login-pass').value } });
+    localStorage.setItem('studio.user', $('login-user').value.trim());
+    const r = await api('/api/login', { method: 'POST', body: { username: $('login-user').value, password: $('login-pass').value } });
     $('login-pass').value = '';
-    showApp();
+    showApp(r.user);
   } catch (err) { $('login-err').textContent = err.message; }
 });
 $('logout-btn').onclick = async () => { await api('/api/logout', { method: 'POST' }).catch(() => {}); showLogin(); };
@@ -105,7 +119,7 @@ window.addEventListener('studio:logout', () => showLogin('Session expirée, reco
 (async () => {
   try {
     const me = await api('/api/me');
-    if (me.authenticated) return showApp();
-    showLogin(me.passwordConfigured ? '' : "Aucun mot de passe n'est configuré sur le serveur (STUDIO_PASSWORD).");
+    if (me.authenticated) return showApp(me.user);
+    showLogin();
   } catch (e) { showLogin('Serveur injoignable : ' + e.message); }
 })();

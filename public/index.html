@@ -16,7 +16,8 @@
     <form class="login-card" id="login-form">
       <div class="logo-big">✦</div>
       <h1>Studio IA</h1>
-      <p class="muted">Votre espace personnel : discussions, agents, images, clips, musique et voix.</p>
+      <p class="muted">Votre espace IA : discussions, agents, images, clips, musique et voix.</p>
+      <input type="text" id="login-user" placeholder="Identifiant" autocomplete="username" autocapitalize="none" spellcheck="false">
       <input type="password" id="login-pass" placeholder="Mot de passe" autocomplete="current-password" required>
       <button class="btn primary" type="submit">Entrer</button>
       <p id="login-err" class="err"></p>
@@ -32,6 +33,7 @@
       </div>
       <nav id="nav"></nav>
       <div class="side-foot">
+        <div class="tiny muted" id="me-label" style="width:100%"></div>
         <button class="btn ghost small" id="theme-btn" title="Thème clair / sombre">◐ Thème</button>
         <button class="btn ghost small" id="logout-btn">Déconnexion</button>
       </div>

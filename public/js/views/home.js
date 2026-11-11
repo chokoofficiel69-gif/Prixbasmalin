@@ -14,7 +14,7 @@ export async function render(el) {
   const hour = new Date().getHours();
   el.append(
     h('div.stack',
-      h('div', h('h1', `${hour < 18 ? 'Bonjour' : 'Bonsoir'} 👋`), h('p.muted', `Projet actif : ${p.icon} ${p.name}. Tout ce que vous créez est rangé dans ce projet.`)),
+      h('div', h('h1', `${hour < 18 ? 'Bonjour' : 'Bonsoir'} ${state.me?.name || ''} 👋`), h('p.muted', `Projet actif : ${p.icon} ${p.name}. Tout ce que vous créez est rangé dans ce projet.`)),
       h('div.grid#home-status', h('div.card', h('span.spinner'), ' Vérification des services…')),
       h('h3', 'Que voulez-vous faire ?'),
       h('div.grid', QUICK.map(([href, ic, t, d]) => h('a.card.link', { href, style: { textDecoration: 'none', color: 'inherit' } }, h('h3', ic, ' ', t), h('p.muted.small', d)))),
@@ -43,7 +43,7 @@ export async function render(el) {
             h('div.row', s.platforms.filter(x => x.ready).slice(0, 8).map(x => h('span.badge.ok', `${x.platform} · ${x.ready}`)))),
     ));
     const pct = st.quota ? Math.round((st.used / st.quota) * 100) : 0;
-    box.append(h('div.card', h('h3', '💾 Stockage du Studio'), h('div.kpi', fmtBytes(st.used)), h('p.small.muted', `sur ${fmtBytes(st.quota)} autorisés`),
+    box.append(h('div.card', h('h3', '💾 Votre espace fichiers'), h('div.kpi', fmtBytes(st.used)), h('p.small.muted', `sur ${fmtBytes(st.quota)} autorisés`),
       h('div.bar' + (pct > 85 ? '.bad' : pct > 65 ? '.warn' : ''), h('i', { style: { width: pct + '%' } }))));
   } else box.append(h('div.card.notice.bad', status.reason.message));
   if (usage.status === 'fulfilled') {

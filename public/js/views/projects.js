@@ -30,7 +30,7 @@ export async function render(el) {
     const name = h('input', { value: p?.name || '' });
     const icon = h('input', { value: p?.icon || '📁', style: { width: '70px' } });
     const color = h('input', { type: 'color', value: p?.color || '#6d5dfc', style: { width: '70px' } });
-    const instr = h('textarea', { rows: 6, placeholder: 'Ex : « Tu es mon associé pour Prix Malin. Réponds en français, avec du code complet… »' });
+    const instr = h('textarea', { rows: 6, placeholder: 'Ex : « Tu es mon coach musique : réponds en français, sois direct et donne des exemples… »' });
     instr.value = p?.instructions || '';
     const mem = h('textarea', { rows: 8, placeholder: 'Faits à retenir : objectifs, décisions prises, préférences, noms, chiffres clés…' });
     mem.value = p?.memory || '';

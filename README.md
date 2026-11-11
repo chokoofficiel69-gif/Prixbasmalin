@@ -1,6 +1,6 @@
 # Studio IA — votre espace IA personnel
 
-Une seule application web (ordinateur + téléphone, en français) qui réunit :
+Une seule application web (ordinateur + téléphone, en français), pour vous et vos amis, qui réunit :
 
 | Menu | Ce que ça fait réellement | Moteur |
 |---|---|---|
@@ -11,9 +11,9 @@ Une seule application web (ordinateur + téléphone, en français) qui réunit :
 | **VIDÉOS ET CLIPS** | Photos + vidéos + musique → **clip monté** : formats 9:16 / 16:9 / 1:1 / 4:5, transitions, mouvements de caméra, looks, titre, légendes, **sous-titres automatiques** depuis l'audio, **calage sur le tempo**, montage proposé par l'IA (qui regarde vos photos), plans vidéo générés par IA, export MP4/WebM | Navigateur + FreeLLMAPI (vision, transcription, vidéo) |
 | **STUDIO MUSIQUE** | **Instrumentales réellement synthétisées** (batterie, 808, basse, accords, mélodie) composées par l'IA ou à la main (séquenceur 16 pas, structure, mixage), export WAV et **pistes séparées** ; **paroles et refrains** (écriture, amélioration, rimes, critique, comptage des syllabes) ; voix de synthèse | Navigateur + FreeLLMAPI |
 | **ENREGISTREMENT AUDIO** | Enregistrement micro (avec l'instru dans le casque et le texte affiché), import, édition (couper, garder, fondus, normaliser), **réduction du bruit** spectrale, porte de bruit, **chaîne voix** (EQ, anti-sifflantes, compresseur, réverb), **mixage multipiste** et **mastering** (sonie LUFS + limiteur), export WAV 16/24 bits, transcription | Navigateur + FreeLLMAPI (transcription) |
-| **MES PROJETS** | Prix Malin, Musique, Clips, Projets personnels (+ les vôtres) : chacun a ses consignes, sa **mémoire de travail**, ses conversations et ses fichiers | Studio |
+| **MES PROJETS** | Discussions, Musique, Clips, Idées & perso (+ les vôtres) : chacun a ses consignes, sa **mémoire de travail**, ses conversations et ses fichiers | Studio |
 | **FICHIERS** | Bibliothèque par projet, glisser-déposer, aperçu image/vidéo/son/PDF/texte, renommer, déplacer, quota | Studio |
-| **SUIVI DES TOKENS** | Tokens par jour/mois, par modèle et fournisseur, latence, erreurs, fournisseurs prêts / en pause / sans clé, consommation déclarée par FreeLLMAPI, coût en €, **plafonds**, **mode gratuit**, changement de mot de passe | Studio + FreeLLMAPI `/v1/usage` |
+| **SUIVI DES TOKENS** | **Amis et accès** (administrateur : inviter, limites par personne, désactiver), tokens par jour/mois, par modèle et fournisseur, latence, erreurs, fournisseurs prêts / en pause / sans clé, consommation déclarée par FreeLLMAPI, coût en €, **plafonds**, **mode gratuit**, changement de mot de passe | Studio + FreeLLMAPI `/v1/usage` |
 
 ## Architecture
 
@@ -56,9 +56,16 @@ et ce qui a réellement été consommé.
 4. **Plafonds** : 500 000 tokens/jour, 10 M/mois, 40 générations média/jour (modifiables).
 5. Règle d'or : n'ajoutez jamais dans FreeLLMAPI une clé liée à un compte avec carte bancaire et facturation activée.
 
+## Comptes (vous + vos amis)
+
+- L'administrateur (identifiant `admin`) invite ses amis depuis **Suivi des tokens → Amis et accès** : le Studio crée un mot de passe provisoire et le message à envoyer.
+- Chaque ami a ses **propres** projets, conversations, fichiers et mémoire : personne ne voit ceux des autres (l'administrateur non plus).
+- Limites par ami (tokens/jour, médias/jour, espace fichiers) pour que les quotas gratuits partagés ne soient pas épuisés par une seule personne.
+- Désactiver un compte coupe l'accès immédiatement, sans effacer ses données.
+
 ## Sécurité
 
-- Connexion par mot de passe (`STUDIO_PASSWORD`, puis modifiable dans l'app ; stocké haché scrypt), cookie `HttpOnly` + `SameSite=Strict`, 10 essais / 15 min.
+- Connexion identifiant + mot de passe (administrateur : `STUDIO_PASSWORD` au départ, puis modifiable ; mots de passe hachés scrypt), cookie `HttpOnly` + `SameSite=Strict`, 10 essais / 15 min.
 - Toute écriture exige l'en-tête `X-Studio` (protection CSRF).
 - La clé FreeLLMAPI (`FREELLMAPI_KEY`) n'est jamais envoyée au navigateur.
 - Les liens publics de fichiers (nécessaires pour animer une photo en vidéo) sont signés et expirent en 30 minutes.
@@ -77,7 +84,7 @@ et ce qui a réellement été consommé.
 ```bash
 npm start                      # serveur sur :8080
 node test/mock-freellmapi.mjs  # faux FreeLLMAPI sur :9999 pour tester sans quota
-node test/ui.mjs               # 18 scénarios de bout en bout (Playwright, micro simulé)
+node test/ui.mjs               # 19 scénarios de bout en bout (Playwright, micro simulé)
 ```
 
 ## Ajouter ou remplacer un fournisseur

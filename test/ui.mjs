@@ -231,6 +231,40 @@ await step('Suivi des tokens', async () => {
   await page.screenshot({ path: `${OUT}/11-tokens.png`, fullPage: true });
 });
 
+await step('Amis : invitation, première connexion, données séparées', async () => {
+  await go('tokens');
+  await clickText('＋ Inviter un ami');
+  await page.locator('.modal input').first().fill('Lina');
+  await clickText('Créer le compte');
+  const creds = await page.locator('.modal pre').textContent();
+  const pw = /Mot de passe provisoire : (\S+)/.exec(creds)[1];
+  const user = /Identifiant : (\S+)/.exec(creds)[1];
+  if (user !== 'lina') throw new Error('identifiant inattendu ' + user);
+  await page.locator('.modal-back').click({ position: { x: 5, y: 5 } });
+  await page.getByText('Lina').first().waitFor();
+  await page.screenshot({ path: `${OUT}/15-amis.png`, fullPage: true });
+  const f = await browser.newContext({ viewport: { width: 1200, height: 850 } });
+  const fp = await f.newPage();
+  fp.on('pageerror', (e) => errors.push('ami pageerror: ' + e.message));
+  await fp.goto(B);
+  await fp.fill('#login-user', 'lina');
+  await fp.fill('#login-pass', pw);
+  await fp.click('#login-form button');
+  await fp.getByText('Choisissez votre mot de passe').waitFor();
+  await fp.locator('.modal input').nth(0).fill(pw);
+  await fp.locator('.modal input').nth(1).fill('mot-de-passe-lina');
+  await fp.getByRole('button', { name: 'Valider' }).click();
+  await fp.getByText('Mot de passe enregistré').waitFor();
+  await fp.getByText('Bonjour Lina').or(fp.getByText('Bonsoir Lina')).first().waitFor();
+  await fp.goto(`${B}/#/parler`);
+  await fp.locator('.conv-list').getByText('Aucune conversation').waitFor();
+  await fp.goto(`${B}/#/tokens`);
+  await fp.getByText('Ma consommation du jour').waitFor();
+  if (await fp.getByText('Amis et accès').count()) throw new Error('un ami voit la gestion des comptes');
+  await fp.screenshot({ path: `${OUT}/16-ami-vue.png` });
+  await f.close();
+});
+
 await step('Mobile (iPhone) : menu + chat', async () => {
   const m = await browser.newContext({ ...devices['iPhone 13'] });
   const mp = await m.newPage();

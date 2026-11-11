@@ -1,7 +1,7 @@
 import { api, sse, h, state, md, toast, toastErr, modelSelect, fmtNum, uploadFile, promptBox, downloadBlob } from '../lib/core.js';
 
 const TEAMS = {
-  dev: { label: '💼 Équipe dev (Prix Malin)', mode: 'chef', agents: [
+  dev: { label: '💻 Équipe projet / code', mode: 'chef', agents: [
     { name: 'Architecte', role: 'architecte logiciel : conçoit la solution, les choix techniques, la structure et les risques', model: 'auto:smart' },
     { name: 'Développeur', role: 'développeur full-stack : écrit le code complet, prêt à l’emploi, avec explications courtes', model: 'auto:smart' },
     { name: 'Testeur', role: 'testeur et relecteur critique : traque les bugs, failles de sécurité et cas limites, propose des tests', model: 'auto' },
@@ -39,7 +39,7 @@ export async function render(el, { params }) {
   modeSel.value = team.mode || 'equipe';
   const synthSel = modelSelect('auto:smart', { includeFusion: false });
   const agentsBox = h('div.stack');
-  const task = h('textarea', { rows: 5, placeholder: 'Décrivez la tâche. Ex : « Conçois un script qui compare les prix de 3 sites et m’envoie un résumé chaque matin » ou « Écris un rap de 2 couplets + refrain sur la persévérance »' });
+  const task = h('textarea', { rows: 5, placeholder: 'Décrivez la tâche. Ex : « Organise un week-end entre amis à Lyon avec un budget de 150 € chacun » ou « Écris un rap de 2 couplets + refrain sur la persévérance »' });
   const runBtn = h('button.btn.primary', '▶ Lancer l’équipe');
   const out = h('div.stack');
 

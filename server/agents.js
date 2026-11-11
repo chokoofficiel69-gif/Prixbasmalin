@@ -21,7 +21,7 @@ function extractJson(text) {
  * modes : 'equipe' (chaîne), 'parallele', 'debat', 'chef' (un coordinateur répartit le travail).
  * emit(evt) reçoit : {type:'step', id, agent, title} {type:'delta', id, content|reasoning} {type:'done', id, ...} {type:'final', ...}
  */
-export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, synthModel = 'auto', projectContext = '', emit, signal }) {
+export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, synthModel = 'auto', projectContext = '', emit, signal, uid }) {
   if (!agents?.length) throw new Error('Ajoutez au moins un agent.');
   agents = agents.slice(0, 6);
   const transcript = [];
@@ -34,6 +34,7 @@ export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, syn
       const r = await chat({
         model: agent.model || 'auto',
         src: 'agents',
+        uid,
         signal,
         messages: [
           { role: 'system', content: agentSystem(agent, projectContext) },

@@ -84,9 +84,9 @@ function estimateMessages(messages) {
  * Appel de chat. Avec onDelta, la réponse est streamée (texte et réflexion).
  * Renvoie { content, reasoning, routedVia, platform, model, usage, estimated, ms }.
  */
-export async function chat({ model = 'auto', messages, onDelta, onMeta, signal, temperature, maxTokens, src = 'chat', extra = {} }) {
+export async function chat({ model = 'auto', messages, onDelta, onMeta, signal, temperature, maxTokens, src = 'chat', extra = {}, uid }) {
   const platform = await platformOf(model);
-  const blocked = guard({ kind: src === 'agents' ? 'agents' : 'chat', model, platform });
+  const blocked = guard({ kind: src === 'agents' ? 'agents' : 'chat', model, platform, uid });
   if (blocked) throw new UpstreamError(blocked, 402);
   const t0 = Date.now();
   const stream = !!onDelta;
@@ -98,7 +98,7 @@ export async function chat({ model = 'auto', messages, onDelta, onMeta, signal, 
   try {
     res = await upstream('/v1/chat/completions', { method: 'POST', json: body, timeoutMs: 240000, signal });
   } catch (err) {
-    record({ kind: 'chat', model, platform, ok: false, err: err.message, ms: Date.now() - t0, src });
+    record({ uid, kind: 'chat', model, platform, ok: false, err: err.message, ms: Date.now() - t0, src });
     throw err;
   }
   const routedVia = decodeURIComponent(res.headers.get('x-routed-via') || '');
@@ -106,7 +106,7 @@ export async function chat({ model = 'auto', messages, onDelta, onMeta, signal, 
   const rModel = rest.join('/') || model;
   if (!res.ok) {
     const msg = await errorText(res);
-    record({ kind: 'chat', model, platform: rPlatform || platform, ok: false, err: msg, ms: Date.now() - t0, src });
+    record({ uid, kind: 'chat', model, platform: rPlatform || platform, ok: false, err: msg, ms: Date.now() - t0, src });
     throw new UpstreamError(msg, res.status);
   }
   onMeta?.({ routedVia, platform: rPlatform, model: rModel, fallbacks: res.headers.get('x-fallback-attempts') || '0' });
@@ -143,7 +143,7 @@ export async function chat({ model = 'auto', messages, onDelta, onMeta, signal, 
           if (d.content) { content += d.content; onDelta({ content: d.content }); }
         } catch (e) {
           if (e instanceof UpstreamError) {
-            record({ kind: 'chat', model: rModel, platform: rPlatform, ok: false, err: e.message, ms: Date.now() - t0, src });
+            record({ uid, kind: 'chat', model: rModel, platform: rPlatform, ok: false, err: e.message, ms: Date.now() - t0, src });
             throw e;
           }
         }
@@ -154,6 +154,6 @@ export async function chat({ model = 'auto', messages, onDelta, onMeta, signal, 
   const pt = usage?.prompt_tokens ?? estimateMessages(messages);
   const ct = usage?.completion_tokens ?? estimate(content + reasoning);
   const ms = Date.now() - t0;
-  record({ kind: 'chat', model: rModel, platform: rPlatform, pt, ct, tokens: usage?.total_tokens ?? pt + ct, estimated, ms, src });
+  record({ uid, kind: 'chat', model: rModel, platform: rPlatform, pt, ct, tokens: usage?.total_tokens ?? pt + ct, estimated, ms, src });
   return { content, reasoning, routedVia, platform: rPlatform, model: rModel, usage: { prompt: pt, completion: ct, total: pt + ct }, estimated, ms };
 }
