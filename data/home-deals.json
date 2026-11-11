@@ -99,7 +99,7 @@
    "min_price_eur": 1277.99,
    "max_price_eur": 1399.0,
    "offer_count": 16,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "price_kind": "historical"
   },
   {
@@ -168,9 +168,9 @@
    "image": "",
    "image_credit": null,
    "min_price_eur": 617.44,
-   "max_price_eur": 969.0,
-   "offer_count": 17,
-   "last_date": "2026-11-10",
+   "max_price_eur": 959.0,
+   "offer_count": 18,
+   "last_date": "2026-11-11",
    "price_kind": "historical"
   },
   {

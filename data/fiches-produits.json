@@ -1,7 +1,7 @@
 {
  "version": 1,
  "generated_from": "data/prixtracker-prices.json",
- "source_generated_at": "2026-11-11T12:53:31.082Z",
+ "source_generated_at": "2026-11-11T15:55:07.889Z",
  "dataset_period": {
   "from": "2026-10-09",
   "to": "2026-11-11"
@@ -1670,6 +1670,197 @@
    ]
   },
   {
+   "id": "ipad-air-11-m3",
+   "name": "iPad Air 11\" M3",
+   "brand": "Apple",
+   "category": "tablette",
+   "category_label": "Tablettes",
+   "image": "",
+   "image_credit": null,
+   "offer_count": 18,
+   "min_price_eur": 617.44,
+   "max_price_eur": 959.0,
+   "last_date": "2026-11-11",
+   "offers": [
+    {
+     "merchant": "inmacwstorecom",
+     "price_eur": 617.44,
+     "date": "2026-10-30"
+    },
+    {
+     "merchant": "topbizfr",
+     "price_eur": 644.99,
+     "date": "2026-10-29"
+    },
+    {
+     "merchant": "laboutiquedunetcom",
+     "price_eur": 645.73,
+     "date": "2026-10-29"
+    },
+    {
+     "merchant": "boulanger",
+     "price_eur": 649.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "eleclercfrmarketplac",
+     "price_eur": 656.99,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "asgoodasnewfr",
+     "price_eur": 669.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "mondofficefr",
+     "price_eur": 678.52,
+     "date": "2026-11-08"
+    },
+    {
+     "merchant": "fibresetcablescomfr",
+     "price_eur": 695.32,
+     "date": "2026-10-30"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 696.59,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 749.28,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 749.99,
+     "date": "2026-10-22"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 749.99,
+     "date": "2026-10-29"
+    },
+    {
+     "merchant": "helloedgefr",
+     "price_eur": 841.49,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "wellbotsfr",
+     "price_eur": 849.0,
+     "date": "2026-10-19"
+    },
+    {
+     "merchant": "onbuycomfr",
+     "price_eur": 860.99,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "joybuyfr",
+     "price_eur": 899.0,
+     "date": "2026-11-10"
+    },
+    {
+     "merchant": "ubaldimarketplace",
+     "price_eur": 922.3,
+     "date": "2026-11-10"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 959.0,
+     "date": "2026-11-05"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-09",
+     "min_price_eur": 617.44
+    },
+    {
+     "date": "2026-10-10",
+     "min_price_eur": 617.44
+    },
+    {
+     "date": "2026-10-12",
+     "min_price_eur": 617.44
+    },
+    {
+     "date": "2026-10-13",
+     "min_price_eur": 616.94
+    },
+    {
+     "date": "2026-10-15",
+     "min_price_eur": 616.94
+    },
+    {
+     "date": "2026-10-16",
+     "min_price_eur": 616.94
+    },
+    {
+     "date": "2026-10-18",
+     "min_price_eur": 616.94
+    },
+    {
+     "date": "2026-10-19",
+     "min_price_eur": 616.94
+    },
+    {
+     "date": "2026-10-20",
+     "min_price_eur": 617.44
+    },
+    {
+     "date": "2026-10-22",
+     "min_price_eur": 609.0
+    },
+    {
+     "date": "2026-10-23",
+     "min_price_eur": 609.0
+    },
+    {
+     "date": "2026-10-25",
+     "min_price_eur": 617.44
+    },
+    {
+     "date": "2026-10-26",
+     "min_price_eur": 617.44
+    },
+    {
+     "date": "2026-10-28",
+     "min_price_eur": 617.44
+    },
+    {
+     "date": "2026-10-29",
+     "min_price_eur": 617.44
+    },
+    {
+     "date": "2026-10-30",
+     "min_price_eur": 590.99
+    },
+    {
+     "date": "2026-11-05",
+     "min_price_eur": 679.0
+    },
+    {
+     "date": "2026-11-07",
+     "min_price_eur": 678.52
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 678.52
+    },
+    {
+     "date": "2026-11-10",
+     "min_price_eur": 679.0
+    },
+    {
+     "date": "2026-11-11",
+     "min_price_eur": 649.0
+    }
+   ]
+  },
+  {
    "id": "airpods-max",
    "name": "AirPods Max (USB-C)",
    "brand": "Apple",
@@ -2229,188 +2420,6 @@
    ]
   },
   {
-   "id": "ipad-air-11-m3",
-   "name": "iPad Air 11\" M3",
-   "brand": "Apple",
-   "category": "tablette",
-   "category_label": "Tablettes",
-   "image": "",
-   "image_credit": null,
-   "offer_count": 17,
-   "min_price_eur": 617.44,
-   "max_price_eur": 969.0,
-   "last_date": "2026-11-10",
-   "offers": [
-    {
-     "merchant": "inmacwstorecom",
-     "price_eur": 617.44,
-     "date": "2026-10-30"
-    },
-    {
-     "merchant": "topbizfr",
-     "price_eur": 644.99,
-     "date": "2026-10-29"
-    },
-    {
-     "merchant": "laboutiquedunetcom",
-     "price_eur": 645.73,
-     "date": "2026-10-29"
-    },
-    {
-     "merchant": "mondofficefr",
-     "price_eur": 678.52,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "asgoodasnewfr",
-     "price_eur": 679.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "fibresetcablescomfr",
-     "price_eur": 695.32,
-     "date": "2026-10-30"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 696.59,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 749.28,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 749.99,
-     "date": "2026-10-22"
-    },
-    {
-     "merchant": "fnac",
-     "price_eur": 749.99,
-     "date": "2026-10-29"
-    },
-    {
-     "merchant": "helloedgefr",
-     "price_eur": 841.49,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "wellbotsfr",
-     "price_eur": 849.0,
-     "date": "2026-10-19"
-    },
-    {
-     "merchant": "onbuycomfr",
-     "price_eur": 866.99,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "joybuyfr",
-     "price_eur": 899.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "ubaldimarketplace",
-     "price_eur": 922.3,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 959.0,
-     "date": "2026-11-05"
-    },
-    {
-     "merchant": "boulanger",
-     "price_eur": 969.0,
-     "date": "2026-11-10"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-09",
-     "min_price_eur": 617.44
-    },
-    {
-     "date": "2026-10-10",
-     "min_price_eur": 617.44
-    },
-    {
-     "date": "2026-10-12",
-     "min_price_eur": 617.44
-    },
-    {
-     "date": "2026-10-13",
-     "min_price_eur": 616.94
-    },
-    {
-     "date": "2026-10-15",
-     "min_price_eur": 616.94
-    },
-    {
-     "date": "2026-10-16",
-     "min_price_eur": 616.94
-    },
-    {
-     "date": "2026-10-18",
-     "min_price_eur": 616.94
-    },
-    {
-     "date": "2026-10-19",
-     "min_price_eur": 616.94
-    },
-    {
-     "date": "2026-10-20",
-     "min_price_eur": 617.44
-    },
-    {
-     "date": "2026-10-22",
-     "min_price_eur": 609.0
-    },
-    {
-     "date": "2026-10-23",
-     "min_price_eur": 609.0
-    },
-    {
-     "date": "2026-10-25",
-     "min_price_eur": 617.44
-    },
-    {
-     "date": "2026-10-26",
-     "min_price_eur": 617.44
-    },
-    {
-     "date": "2026-10-28",
-     "min_price_eur": 617.44
-    },
-    {
-     "date": "2026-10-29",
-     "min_price_eur": 617.44
-    },
-    {
-     "date": "2026-10-30",
-     "min_price_eur": 590.99
-    },
-    {
-     "date": "2026-11-05",
-     "min_price_eur": 679.0
-    },
-    {
-     "date": "2026-11-07",
-     "min_price_eur": 678.52
-    },
-    {
-     "date": "2026-11-08",
-     "min_price_eur": 678.52
-    },
-    {
-     "date": "2026-11-10",
-     "min_price_eur": 679.0
-    }
-   ]
-  },
-  {
    "id": "jbl-flip-7",
    "name": "JBL Flip 7",
    "brand": "JBL",
@@ -2599,37 +2608,42 @@
    "offer_count": 16,
    "min_price_eur": 1277.99,
    "max_price_eur": 1399.0,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
     {
      "merchant": "onbuycomfr",
      "price_eur": 1277.99,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 1298.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
-     "merchant": "eleclerchightechfr",
+     "merchant": "amazon",
      "price_eur": 1298.0,
-     "date": "2026-11-08"
+     "date": "2026-11-11"
     },
     {
      "merchant": "joybuyfr",
      "price_eur": 1298.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "cdiscount",
      "price_eur": 1299.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "eleclerchightechfr",
+     "price_eur": 1299.0,
+     "date": "2026-11-11"
     },
     {
      "merchant": "ebay",
      "price_eur": 1319.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "galaxusfr",
@@ -2659,12 +2673,7 @@
     {
      "merchant": "inmacwstorecom",
      "price_eur": 1398.17,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "amazon",
-     "price_eur": 1399.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "boulanger",
@@ -2674,7 +2683,7 @@
     {
      "merchant": "darty",
      "price_eur": 1399.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "fnac",
@@ -2765,6 +2774,10 @@
     },
     {
      "date": "2026-11-10",
+     "min_price_eur": 1277.99
+    },
+    {
+     "date": "2026-11-11",
      "min_price_eur": 1277.99
     }
    ]
@@ -3116,6 +3129,195 @@
    ]
   },
   {
+   "id": "ipad-a16",
+   "name": "iPad 11\" (A16)",
+   "brand": "Apple",
+   "category": "tablette",
+   "category_label": "Tablettes",
+   "image": "",
+   "image_credit": null,
+   "offer_count": 16,
+   "min_price_eur": 426.98,
+   "max_price_eur": 508.99,
+   "last_date": "2026-11-11",
+   "offers": [
+    {
+     "merchant": "eleclercfrmarketplac",
+     "price_eur": 426.98,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "informaticabaratacom",
+     "price_eur": 433.38,
+     "date": "2026-10-20"
+    },
+    {
+     "merchant": "blitzhandel24fr",
+     "price_eur": 444.66,
+     "date": "2026-11-02"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 456.84,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 456.84,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "joybuyfr",
+     "price_eur": 460.24,
+     "date": "2026-10-30"
+    },
+    {
+     "merchant": "onbuycomfr",
+     "price_eur": 461.99,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 471.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "asgoodasnewfr",
+     "price_eur": 479.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "alternatefr",
+     "price_eur": 492.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "getgoodscomfr",
+     "price_eur": 492.0,
+     "date": "2026-11-10"
+    },
+    {
+     "merchant": "ubaldimarketplace",
+     "price_eur": 494.07,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 499.0,
+     "date": "2026-11-05"
+    },
+    {
+     "merchant": "eleclerchightechfr",
+     "price_eur": 499.0,
+     "date": "2026-11-05"
+    },
+    {
+     "merchant": "ebay",
+     "price_eur": 501.7,
+     "date": "2026-10-13"
+    },
+    {
+     "merchant": "boulanger",
+     "price_eur": 508.99,
+     "date": "2026-11-11"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-09",
+     "min_price_eur": 448.99
+    },
+    {
+     "date": "2026-10-10",
+     "min_price_eur": 429.99
+    },
+    {
+     "date": "2026-10-12",
+     "min_price_eur": 439.99
+    },
+    {
+     "date": "2026-10-13",
+     "min_price_eur": 424.97
+    },
+    {
+     "date": "2026-10-15",
+     "min_price_eur": 424.97
+    },
+    {
+     "date": "2026-10-16",
+     "min_price_eur": 424.97
+    },
+    {
+     "date": "2026-10-18",
+     "min_price_eur": 424.97
+    },
+    {
+     "date": "2026-10-19",
+     "min_price_eur": 424.96
+    },
+    {
+     "date": "2026-10-20",
+     "min_price_eur": 424.96
+    },
+    {
+     "date": "2026-10-22",
+     "min_price_eur": 424.98
+    },
+    {
+     "date": "2026-10-23",
+     "min_price_eur": 424.98
+    },
+    {
+     "date": "2026-10-25",
+     "min_price_eur": 429.99
+    },
+    {
+     "date": "2026-10-26",
+     "min_price_eur": 424.98
+    },
+    {
+     "date": "2026-10-28",
+     "min_price_eur": 428.99
+    },
+    {
+     "date": "2026-10-29",
+     "min_price_eur": 427.99
+    },
+    {
+     "date": "2026-10-30",
+     "min_price_eur": 427.99
+    },
+    {
+     "date": "2026-11-02",
+     "min_price_eur": 414.99
+    },
+    {
+     "date": "2026-11-04",
+     "min_price_eur": 414.99
+    },
+    {
+     "date": "2026-11-05",
+     "min_price_eur": 414.99
+    },
+    {
+     "date": "2026-11-07",
+     "min_price_eur": 414.99
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 414.99
+    },
+    {
+     "date": "2026-11-10",
+     "min_price_eur": 414.99
+    },
+    {
+     "date": "2026-11-11",
+     "min_price_eur": 426.98
+    }
+   ]
+  },
+  {
    "id": "ipad-air-13-m3",
    "name": "iPad Air 13\" M3",
    "brand": "Apple",
@@ -3124,19 +3326,19 @@
    "image": "",
    "image_credit": null,
    "offer_count": 16,
-   "min_price_eur": 788.0,
+   "min_price_eur": 708.9,
    "max_price_eur": 1139.0,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
     {
      "merchant": "pixmaniafr",
-     "price_eur": 788.0,
-     "date": "2026-11-10"
+     "price_eur": 708.9,
+     "date": "2026-11-11"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 818.98,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "laboutiquedunetcom",
@@ -3149,9 +3351,14 @@
      "date": "2026-10-19"
     },
     {
+     "merchant": "boulanger",
+     "price_eur": 839.0,
+     "date": "2026-11-11"
+    },
+    {
      "merchant": "topbizfr",
-     "price_eur": 850.69,
-     "date": "2026-11-10"
+     "price_eur": 850.59,
+     "date": "2026-11-11"
     },
     {
      "merchant": "joybuyfr",
@@ -3164,19 +3371,19 @@
      "date": "2026-10-22"
     },
     {
-     "merchant": "galaxusfr",
-     "price_eur": 939.0,
-     "date": "2026-11-10"
-    },
-    {
      "merchant": "cdiscount",
-     "price_eur": 949.99,
-     "date": "2026-11-10"
+     "price_eur": 938.99,
+     "date": "2026-11-11"
     },
     {
      "merchant": "darty",
      "price_eur": 949.99,
      "date": "2026-10-30"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 949.99,
+     "date": "2026-11-11"
     },
     {
      "merchant": "bixotocomfr",
@@ -3186,12 +3393,7 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 1028.99,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "boulanger",
-     "price_eur": 1039.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "fnac",
@@ -3289,6 +3491,10 @@
     {
      "date": "2026-11-10",
      "min_price_eur": 788.0
+    },
+    {
+     "date": "2026-11-11",
+     "min_price_eur": 708.9
     }
    ]
   },
@@ -4531,186 +4737,6 @@
    ]
   },
   {
-   "id": "ipad-a16",
-   "name": "iPad 11\" (A16)",
-   "brand": "Apple",
-   "category": "tablette",
-   "category_label": "Tablettes",
-   "image": "",
-   "image_credit": null,
-   "offer_count": 15,
-   "min_price_eur": 414.99,
-   "max_price_eur": 501.7,
-   "last_date": "2026-11-10",
-   "offers": [
-    {
-     "merchant": "eleclercfrmarketplac",
-     "price_eur": 414.99,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "informaticabaratacom",
-     "price_eur": 433.38,
-     "date": "2026-10-20"
-    },
-    {
-     "merchant": "blitzhandel24fr",
-     "price_eur": 444.66,
-     "date": "2026-11-02"
-    },
-    {
-     "merchant": "onbuycomfr",
-     "price_eur": 449.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "amazon",
-     "price_eur": 456.84,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 456.84,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "joybuyfr",
-     "price_eur": 460.24,
-     "date": "2026-10-30"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 471.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "asgoodasnewfr",
-     "price_eur": 479.0,
-     "date": "2026-11-07"
-    },
-    {
-     "merchant": "getgoodscomfr",
-     "price_eur": 492.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "alternatefr",
-     "price_eur": 493.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "ubaldimarketplace",
-     "price_eur": 495.06,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 499.0,
-     "date": "2026-11-05"
-    },
-    {
-     "merchant": "eleclerchightechfr",
-     "price_eur": 499.0,
-     "date": "2026-11-05"
-    },
-    {
-     "merchant": "ebay",
-     "price_eur": 501.7,
-     "date": "2026-10-13"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-09",
-     "min_price_eur": 448.99
-    },
-    {
-     "date": "2026-10-10",
-     "min_price_eur": 429.99
-    },
-    {
-     "date": "2026-10-12",
-     "min_price_eur": 439.99
-    },
-    {
-     "date": "2026-10-13",
-     "min_price_eur": 424.97
-    },
-    {
-     "date": "2026-10-15",
-     "min_price_eur": 424.97
-    },
-    {
-     "date": "2026-10-16",
-     "min_price_eur": 424.97
-    },
-    {
-     "date": "2026-10-18",
-     "min_price_eur": 424.97
-    },
-    {
-     "date": "2026-10-19",
-     "min_price_eur": 424.96
-    },
-    {
-     "date": "2026-10-20",
-     "min_price_eur": 424.96
-    },
-    {
-     "date": "2026-10-22",
-     "min_price_eur": 424.98
-    },
-    {
-     "date": "2026-10-23",
-     "min_price_eur": 424.98
-    },
-    {
-     "date": "2026-10-25",
-     "min_price_eur": 429.99
-    },
-    {
-     "date": "2026-10-26",
-     "min_price_eur": 424.98
-    },
-    {
-     "date": "2026-10-28",
-     "min_price_eur": 428.99
-    },
-    {
-     "date": "2026-10-29",
-     "min_price_eur": 427.99
-    },
-    {
-     "date": "2026-10-30",
-     "min_price_eur": 427.99
-    },
-    {
-     "date": "2026-11-02",
-     "min_price_eur": 414.99
-    },
-    {
-     "date": "2026-11-04",
-     "min_price_eur": 414.99
-    },
-    {
-     "date": "2026-11-05",
-     "min_price_eur": 414.99
-    },
-    {
-     "date": "2026-11-07",
-     "min_price_eur": 414.99
-    },
-    {
-     "date": "2026-11-08",
-     "min_price_eur": 414.99
-    },
-    {
-     "date": "2026-11-10",
-     "min_price_eur": 414.99
-    }
-   ]
-  },
-  {
    "id": "ipad-pro-11-m5",
    "name": "iPad Pro 11\" M5",
    "brand": "Apple",
@@ -4721,7 +4747,7 @@
    "offer_count": 15,
    "min_price_eur": 1059.99,
    "max_price_eur": 1434.99,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
@@ -4736,17 +4762,17 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 1127.99,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1190.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "alternatefr",
      "price_eur": 1250.0,
-     "date": "2026-10-25"
+     "date": "2026-11-11"
     },
     {
      "merchant": "getgoodscomfr",
@@ -4754,34 +4780,34 @@
      "date": "2026-11-10"
     },
     {
-     "merchant": "amazon",
-     "price_eur": 1318.87,
-     "date": "2026-11-10"
+     "merchant": "cdiscount",
+     "price_eur": 1307.87,
+     "date": "2026-11-11"
     },
     {
-     "merchant": "cdiscount",
+     "merchant": "amazon",
      "price_eur": 1318.87,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 1318.87,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "boulanger",
      "price_eur": 1318.91,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "darty",
      "price_eur": 1319.99,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "fnac",
      "price_eur": 1319.99,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "informaticabaratacom",
@@ -4886,6 +4912,10 @@
     },
     {
      "date": "2026-11-10",
+     "min_price_eur": 1127.99
+    },
+    {
+     "date": "2026-11-11",
      "min_price_eur": 1127.99
     }
    ]
@@ -5773,7 +5803,7 @@
    "offer_count": 14,
    "min_price_eur": 2278.81,
    "max_price_eur": 2949.98,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
     {
      "merchant": "galaxusfr",
@@ -5788,7 +5818,7 @@
     {
      "merchant": "joybuyfr",
      "price_eur": 2604.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -5796,29 +5826,29 @@
      "date": "2026-11-01"
     },
     {
+     "merchant": "cdiscount",
+     "price_eur": 2683.0,
+     "date": "2026-11-11"
+    },
+    {
      "merchant": "amazon",
      "price_eur": 2694.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "boulanger",
      "price_eur": 2694.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 2694.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "darty",
      "price_eur": 2699.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "fnac",
      "price_eur": 2699.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "bixotocomfr",
@@ -5833,17 +5863,17 @@
     {
      "merchant": "inmacwstorecom",
      "price_eur": 2898.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "hellorsefr",
      "price_eur": 2907.48,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 2949.98,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     }
    ],
    "history": [
@@ -5929,6 +5959,10 @@
     },
     {
      "date": "2026-11-10",
+     "min_price_eur": 2604.0
+    },
+    {
+     "date": "2026-11-11",
      "min_price_eur": 2604.0
     }
    ]
@@ -6819,17 +6853,17 @@
    "offer_count": 13,
    "min_price_eur": 3115.0,
    "max_price_eur": 3646.33,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
     {
      "merchant": "alternatefr",
      "price_eur": 3115.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "onbuycomfr",
      "price_eur": 3145.99,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "galaxusfr",
@@ -6837,44 +6871,44 @@
      "date": "2026-10-20"
     },
     {
+     "merchant": "cdiscount",
+     "price_eur": 3388.0,
+     "date": "2026-11-11"
+    },
+    {
      "merchant": "hellorsefr",
-     "price_eur": 3395.88,
-     "date": "2026-11-10"
+     "price_eur": 3388.68,
+     "date": "2026-11-11"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 3396.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "amazon",
      "price_eur": 3399.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "boulanger",
      "price_eur": 3399.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 3399.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "darty",
      "price_eur": 3399.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "fnac",
      "price_eur": 3399.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 3443.98,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "bixotocomfr",
@@ -6884,7 +6918,7 @@
     {
      "merchant": "fibresetcablescomfr",
      "price_eur": 3646.33,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     }
    ],
    "history": [
@@ -6970,6 +7004,10 @@
     },
     {
      "date": "2026-11-10",
+     "min_price_eur": 3115.0
+    },
+    {
+     "date": "2026-11-11",
      "min_price_eur": 3115.0
     }
    ]
@@ -7812,34 +7850,29 @@
    "image": "",
    "image_credit": null,
    "offer_count": 13,
-   "min_price_eur": 826.99,
+   "min_price_eur": 846.99,
    "max_price_eur": 1019.0,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
     {
      "merchant": "eleclercfrmarketplac",
-     "price_eur": 826.99,
-     "date": "2026-11-04"
+     "price_eur": 846.99,
+     "date": "2026-11-11"
     },
     {
      "merchant": "onbuycomfr",
-     "price_eur": 880.99,
-     "date": "2026-11-10"
+     "price_eur": 881.99,
+     "date": "2026-11-11"
     },
     {
      "merchant": "ebay",
      "price_eur": 913.1,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 919.0,
-     "date": "2026-11-08"
+     "date": "2026-11-11"
     },
     {
      "merchant": "galaxusfr",
      "price_eur": 919.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "joybuyfr",
@@ -7849,7 +7882,7 @@
     {
      "merchant": "amazon",
      "price_eur": 919.7,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -7858,8 +7891,8 @@
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 942.0,
-     "date": "2026-11-10"
+     "price_eur": 927.34,
+     "date": "2026-11-11"
     },
     {
      "merchant": "alternatefr",
@@ -7875,6 +7908,11 @@
      "merchant": "informaticabaratacom",
      "price_eur": 988.94,
      "date": "2026-10-20"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 1008.0,
+     "date": "2026-11-11"
     },
     {
      "merchant": "boulanger",
@@ -7966,6 +8004,188 @@
     {
      "date": "2026-11-10",
      "min_price_eur": 880.99
+    },
+    {
+     "date": "2026-11-11",
+     "min_price_eur": 846.99
+    }
+   ]
+  },
+  {
+   "id": "ipad-pro-13-m5",
+   "name": "iPad Pro 13\" M5",
+   "brand": "Apple",
+   "category": "tablette",
+   "category_label": "Tablettes",
+   "image": "",
+   "image_credit": null,
+   "offer_count": 13,
+   "min_price_eur": 1199.99,
+   "max_price_eur": 1669.99,
+   "last_date": "2026-11-11",
+   "offers": [
+    {
+     "merchant": "eleclercfrmarketplac",
+     "price_eur": 1199.99,
+     "date": "2026-11-04"
+    },
+    {
+     "merchant": "onbuycomfr",
+     "price_eur": 1321.99,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "ebay",
+     "price_eur": 1369.9,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 1446.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 1538.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 1549.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "boulanger",
+     "price_eur": 1549.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 1549.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "asgoodasnewfr",
+     "price_eur": 1559.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "getgoodscomfr",
+     "price_eur": 1580.99,
+     "date": "2026-11-10"
+    },
+    {
+     "merchant": "informaticabaratacom",
+     "price_eur": 1634.05,
+     "date": "2026-11-01"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 1669.99,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 1669.99,
+     "date": "2026-11-11"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-10-09",
+     "min_price_eur": 1219.99
+    },
+    {
+     "date": "2026-10-10",
+     "min_price_eur": 1219.99
+    },
+    {
+     "date": "2026-10-12",
+     "min_price_eur": 1219.99
+    },
+    {
+     "date": "2026-10-13",
+     "min_price_eur": 1219.99
+    },
+    {
+     "date": "2026-10-15",
+     "min_price_eur": 1219.99
+    },
+    {
+     "date": "2026-10-16",
+     "min_price_eur": 1219.99
+    },
+    {
+     "date": "2026-10-17",
+     "min_price_eur": 1219.99
+    },
+    {
+     "date": "2026-10-19",
+     "min_price_eur": 1219.99
+    },
+    {
+     "date": "2026-10-20",
+     "min_price_eur": 1213.99
+    },
+    {
+     "date": "2026-10-22",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-10-23",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-10-25",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-10-26",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-10-27",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-10-29",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-10-30",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-11-01",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-11-02",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-11-04",
+     "min_price_eur": 1199.99
+    },
+    {
+     "date": "2026-11-05",
+     "min_price_eur": 1345.99
+    },
+    {
+     "date": "2026-11-07",
+     "min_price_eur": 1349.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 1350.99
+    },
+    {
+     "date": "2026-11-10",
+     "min_price_eur": 1350.99
+    },
+    {
+     "date": "2026-11-11",
+     "min_price_eur": 1321.99
     }
    ]
   },
@@ -9096,12 +9316,12 @@
    "offer_count": 12,
    "min_price_eur": 1559.0,
    "max_price_eur": 1699.0,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
     {
      "merchant": "alternatefr",
      "price_eur": 1559.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "galaxusfr",
@@ -9111,12 +9331,17 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 1660.99,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 1686.99,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 1688.0,
+     "date": "2026-11-11"
     },
     {
      "merchant": "joybuyfr",
@@ -9126,27 +9351,22 @@
     {
      "merchant": "hellorsefr",
      "price_eur": 1697.88,
-     "date": "2026-11-08"
+     "date": "2026-11-11"
     },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 1697.88,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "amazon",
      "price_eur": 1699.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 1699.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "darty",
      "price_eur": 1699.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -9242,6 +9462,10 @@
     },
     {
      "date": "2026-11-10",
+     "min_price_eur": 1559.0
+    },
+    {
+     "date": "2026-11-11",
      "min_price_eur": 1559.0
     }
    ]
@@ -9566,15 +9790,10 @@
    "image": "",
    "image_credit": null,
    "offer_count": 12,
-   "min_price_eur": 652.98,
+   "min_price_eur": 687.67,
    "max_price_eur": 819.0,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
-    {
-     "merchant": "eleclercfrmarketplac",
-     "price_eur": 652.98,
-     "date": "2026-11-04"
-    },
     {
      "merchant": "informaticabaratacom",
      "price_eur": 687.67,
@@ -9583,7 +9802,7 @@
     {
      "merchant": "onbuycomfr",
      "price_eur": 714.99,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "joybuyfr",
@@ -9593,12 +9812,12 @@
     {
      "merchant": "ebay",
      "price_eur": 738.2,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "pixmaniafr",
-     "price_eur": 772.0,
-     "date": "2026-11-10"
+     "price_eur": 768.0,
+     "date": "2026-11-11"
     },
     {
      "merchant": "alternatefr",
@@ -9611,19 +9830,24 @@
      "date": "2026-11-10"
     },
     {
-     "merchant": "amazon",
-     "price_eur": 818.82,
-     "date": "2026-11-10"
+     "merchant": "eleclercfrmarketplac",
+     "price_eur": 789.98,
+     "date": "2026-11-11"
     },
     {
      "merchant": "cdiscount",
+     "price_eur": 807.82,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "amazon",
      "price_eur": 818.82,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "galaxusfr",
-     "price_eur": 818.84,
-     "date": "2026-11-10"
+     "price_eur": 818.82,
+     "date": "2026-11-11"
     },
     {
      "merchant": "eleclerchightechfr",
@@ -9719,175 +9943,10 @@
     {
      "date": "2026-11-10",
      "min_price_eur": 714.99
-    }
-   ]
-  },
-  {
-   "id": "ipad-pro-13-m5",
-   "name": "iPad Pro 13\" M5",
-   "brand": "Apple",
-   "category": "tablette",
-   "category_label": "Tablettes",
-   "image": "",
-   "image_credit": null,
-   "offer_count": 12,
-   "min_price_eur": 1199.99,
-   "max_price_eur": 1669.99,
-   "last_date": "2026-11-10",
-   "offers": [
-    {
-     "merchant": "eleclercfrmarketplac",
-     "price_eur": 1199.99,
-     "date": "2026-11-04"
     },
     {
-     "merchant": "onbuycomfr",
-     "price_eur": 1350.99,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "asgoodasnewfr",
-     "price_eur": 1429.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 1463.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "amazon",
-     "price_eur": 1549.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "boulanger",
-     "price_eur": 1549.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 1549.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 1549.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "getgoodscomfr",
-     "price_eur": 1580.99,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "informaticabaratacom",
-     "price_eur": 1634.05,
-     "date": "2026-11-01"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 1669.99,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "fnac",
-     "price_eur": 1669.99,
-     "date": "2026-11-08"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-10-09",
-     "min_price_eur": 1219.99
-    },
-    {
-     "date": "2026-10-10",
-     "min_price_eur": 1219.99
-    },
-    {
-     "date": "2026-10-12",
-     "min_price_eur": 1219.99
-    },
-    {
-     "date": "2026-10-13",
-     "min_price_eur": 1219.99
-    },
-    {
-     "date": "2026-10-15",
-     "min_price_eur": 1219.99
-    },
-    {
-     "date": "2026-10-16",
-     "min_price_eur": 1219.99
-    },
-    {
-     "date": "2026-10-17",
-     "min_price_eur": 1219.99
-    },
-    {
-     "date": "2026-10-19",
-     "min_price_eur": 1219.99
-    },
-    {
-     "date": "2026-10-20",
-     "min_price_eur": 1213.99
-    },
-    {
-     "date": "2026-10-22",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-10-23",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-10-25",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-10-26",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-10-27",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-10-29",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-10-30",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-11-01",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-11-02",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-11-04",
-     "min_price_eur": 1199.99
-    },
-    {
-     "date": "2026-11-05",
-     "min_price_eur": 1345.99
-    },
-    {
-     "date": "2026-11-07",
-     "min_price_eur": 1349.0
-    },
-    {
-     "date": "2026-11-08",
-     "min_price_eur": 1350.99
-    },
-    {
-     "date": "2026-11-10",
-     "min_price_eur": 1350.99
+     "date": "2026-11-11",
+     "min_price_eur": 714.99
     }
    ]
   },
@@ -10198,6 +10257,94 @@
     {
      "date": "2026-11-08",
      "min_price_eur": 449.0
+    }
+   ]
+  },
+  {
+   "id": "ipad-mini-a20-pro",
+   "name": "iPad mini (A20 Pro)",
+   "brand": "Apple",
+   "category": "tablette",
+   "category_label": "Tablettes",
+   "image": "",
+   "image_credit": null,
+   "offer_count": 11,
+   "min_price_eur": 748.0,
+   "max_price_eur": 853.15,
+   "last_date": "2026-11-11",
+   "offers": [
+    {
+     "merchant": "cdiscount",
+     "price_eur": 748.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "amazon",
+     "price_eur": 759.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "boulanger",
+     "price_eur": 759.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "galaxusfr",
+     "price_eur": 759.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "darty",
+     "price_eur": 759.99,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "fnac",
+     "price_eur": 759.99,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "inmacwstorecom",
+     "price_eur": 768.47,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "alternatefr",
+     "price_eur": 773.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "topbizfr",
+     "price_eur": 781.99,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "pixmaniafr",
+     "price_eur": 789.46,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "fibresetcablescomfr",
+     "price_eur": 853.15,
+     "date": "2026-11-08"
+    }
+   ],
+   "history": [
+    {
+     "date": "2026-11-05",
+     "min_price_eur": 749.0
+    },
+    {
+     "date": "2026-11-07",
+     "min_price_eur": 759.0
+    },
+    {
+     "date": "2026-11-08",
+     "min_price_eur": 759.0
+    },
+    {
+     "date": "2026-11-11",
+     "min_price_eur": 748.0
     }
    ]
   },
@@ -10986,59 +11133,59 @@
    "image": "",
    "image_credit": null,
    "offer_count": 10,
-   "min_price_eur": 2297.28,
+   "min_price_eur": 2225.0,
    "max_price_eur": 2474.68,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
+    {
+     "merchant": "alternatefr",
+     "price_eur": 2225.0,
+     "date": "2026-11-11"
+    },
+    {
+     "merchant": "cdiscount",
+     "price_eur": 2288.0,
+     "date": "2026-11-11"
+    },
     {
      "merchant": "inmacwstorecom",
      "price_eur": 2297.28,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "hellorsefr",
      "price_eur": 2297.88,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "amazon",
      "price_eur": 2299.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "boulanger",
      "price_eur": 2299.0,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 2299.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "darty",
      "price_eur": 2299.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "fnac",
      "price_eur": 2299.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "pixmaniafr",
      "price_eur": 2318.7,
-     "date": "2026-11-10"
-    },
-    {
-     "merchant": "alternatefr",
-     "price_eur": 2319.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     },
     {
      "merchant": "fibresetcablescomfr",
      "price_eur": 2474.68,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     }
    ],
    "history": [
@@ -11057,6 +11204,10 @@
     {
      "date": "2026-11-10",
      "min_price_eur": 2297.28
+    },
+    {
+     "date": "2026-11-11",
+     "min_price_eur": 2225.0
     }
    ]
   },
@@ -11359,85 +11510,6 @@
     {
      "date": "2026-11-10",
      "min_price_eur": 499.99
-    }
-   ]
-  },
-  {
-   "id": "ipad-mini-a20-pro",
-   "name": "iPad mini (A20 Pro)",
-   "brand": "Apple",
-   "category": "tablette",
-   "category_label": "Tablettes",
-   "image": "",
-   "image_credit": null,
-   "offer_count": 10,
-   "min_price_eur": 759.0,
-   "max_price_eur": 853.15,
-   "last_date": "2026-11-08",
-   "offers": [
-    {
-     "merchant": "amazon",
-     "price_eur": 759.0,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "boulanger",
-     "price_eur": 759.0,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "cdiscount",
-     "price_eur": 759.0,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "galaxusfr",
-     "price_eur": 759.0,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "darty",
-     "price_eur": 759.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "fnac",
-     "price_eur": 759.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "inmacwstorecom",
-     "price_eur": 768.47,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "topbizfr",
-     "price_eur": 781.99,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "pixmaniafr",
-     "price_eur": 813.37,
-     "date": "2026-11-08"
-    },
-    {
-     "merchant": "fibresetcablescomfr",
-     "price_eur": 853.15,
-     "date": "2026-11-08"
-    }
-   ],
-   "history": [
-    {
-     "date": "2026-11-05",
-     "min_price_eur": 749.0
-    },
-    {
-     "date": "2026-11-07",
-     "min_price_eur": 759.0
-    },
-    {
-     "date": "2026-11-08",
-     "min_price_eur": 759.0
     }
    ]
   },
@@ -13434,7 +13506,7 @@
    "offer_count": 5,
    "min_price_eur": 2649.0,
    "max_price_eur": 4429.0,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "offers": [
     {
      "merchant": "galaxusfr",
@@ -13459,7 +13531,7 @@
     {
      "merchant": "fnac",
      "price_eur": 4429.0,
-     "date": "2026-11-10"
+     "date": "2026-11-11"
     }
    ],
    "history": [
@@ -13545,6 +13617,10 @@
     },
     {
      "date": "2026-11-10",
+     "min_price_eur": 4429.0
+    },
+    {
+     "date": "2026-11-11",
      "min_price_eur": 4429.0
     }
    ]

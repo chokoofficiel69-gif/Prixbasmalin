@@ -4,7 +4,7 @@
   "source_url": "https://prixtracker.fr/donnees/meilleur-prix-du-jour.csv",
   "license": "Licence Ouverte 2.0",
   "attribution": "Source : PrixTracker (prixtracker.fr/donnees), réutilisé sous Licence Ouverte 2.0 via data.gouv.fr.",
-  "generated_at": "2026-11-11T12:53:31.207Z",
+  "generated_at": "2026-11-11T15:55:08.042Z",
   "dataset_period": {
     "from": "2025-12-11",
     "to": "2026-11-11"
@@ -12,7 +12,7 @@
   "status": "historical_reference",
   "methodology": "Historique du prix minimum observé par produit et par jour chez les marchands suivis. Ce relevé n'est pas une offre disponible en temps réel; le CSV ne fournit ni URL produit ni preuve de stock.",
   "counts": {
-    "rows": 6062,
+    "rows": 6074,
     "products": 106,
     "merchants": 51,
     "categories": 12,
@@ -12749,6 +12749,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "ipad-a16",
+      "product": "iPad 11\" (A16)",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 456.84,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "ipad-a16",
       "product": "iPad 11\" (A16)",
@@ -13199,6 +13209,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "ipad-air-11-m3",
+      "product": "iPad Air 11\" M3",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 649,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-08",
       "product_id": "ipad-air-11-m3",
       "product": "iPad Air 11\" M3",
@@ -13616,6 +13636,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "laboutiquedunetcom",
       "lowest_observed_price_eur_ttc": 626.36,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "ipad-air-11-m4",
+      "product": "iPad Air 11\" M4",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 738.2,
       "source": "releve PrixTracker"
     },
     {
@@ -14069,6 +14099,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "ipad-air-13-m3",
+      "product": "iPad Air 13\" M3",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "inmacwstorecom",
+      "lowest_observed_price_eur_ttc": 818.98,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "ipad-air-13-m3",
       "product": "iPad Air 13\" M3",
@@ -14496,6 +14536,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "eleclercfrmarketplac",
       "lowest_observed_price_eur_ttc": 799.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "ipad-air-13-m4",
+      "product": "iPad Air 13\" M4",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 913.1,
       "source": "releve PrixTracker"
     },
     {
@@ -15409,6 +15459,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "ipad-pro-11-m5",
+      "product": "iPad Pro 11\" M5",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 1250,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "ipad-pro-11-m5",
       "product": "iPad Pro 11\" M5",
@@ -15856,6 +15916,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "eleclercfrmarketplac",
       "lowest_observed_price_eur_ttc": 1059.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "ipad-pro-13-m5",
+      "product": "iPad Pro 13\" M5",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 1369.9,
       "source": "releve PrixTracker"
     },
     {
@@ -42609,6 +42679,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "macbook-air-13-m5",
+      "product": "MacBook Air 13\" M5",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 1298,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "macbook-air-13-m5",
       "product": "MacBook Air 13\" M5",
@@ -44959,6 +45039,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "macbook-air-15-m5",
+      "product": "MacBook Air 15\" M5",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 1559,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "macbook-air-15-m5",
       "product": "MacBook Air 15\" M5",
@@ -46699,6 +46789,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "macbook-pro-14-m5",
+      "product": "MacBook Pro 14\" M5",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 2604,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "macbook-pro-14-m5",
       "product": "MacBook Pro 14\" M5",
@@ -47689,6 +47789,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-11",
+      "product_id": "macbook-pro-14-m6",
+      "product": "MacBook Pro 14\" M6",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 2225,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-10",
       "product_id": "macbook-pro-14-m6",
       "product": "MacBook Pro 14\" M6",
@@ -48656,6 +48766,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "boulanger",
       "lowest_observed_price_eur_ttc": 2499,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-11",
+      "product_id": "macbook-pro-16-m5",
+      "product": "MacBook Pro 16\" M5",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 3115,
       "source": "releve PrixTracker"
     },
     {
