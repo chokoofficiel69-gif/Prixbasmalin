@@ -429,6 +429,25 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "Prix Malin", "url": "https://prixbasmalin.fr/", "logo": "https://prixbasmalin.fr/apple-touch-icon.png", "description": "Comparateur de prix indépendant : prix relevés et datés chez plus de 60 marchands, idées cadeaux et alertes prix."}</script>
 <link rel="stylesheet" href="/css/partner-ads.css">
 <script src="/js/partner-ads.js" defer></script>
+<style id="pm-seasonal-theme-style">
+.pmx.pm-season-noel{--pm-season-accent:#d6b45a;--pm-season-line:#34513f;--pm-season-badge:#7f1d2d;--pm-season-deep:#14532d;--pm-season-label:"✦ NOËL"}
+.pmx.pm-season-nouvel-an{--pm-season-accent:#d7c6a1;--pm-season-line:#354253;--pm-season-badge:#28374a;--pm-season-deep:#34465c;--pm-season-label:"✧ NOUVEL AN"}
+.pmx.pm-season-hiver{--pm-season-accent:#8fc7df;--pm-season-line:#29465b;--pm-season-badge:#1e3a5f;--pm-season-deep:#1e3a5f;--pm-season-label:"❄ HIVER"}
+.pmx.pm-season-printemps{--pm-season-accent:#9bc79f;--pm-season-line:#304b3a;--pm-season-badge:#1f5b3c;--pm-season-deep:#1f5b3c;--pm-season-label:"✿ PRINTEMPS"}
+.pmx.pm-season-ete{--pm-season-accent:#75cbd0;--pm-season-line:#24505a;--pm-season-badge:#13505a;--pm-season-deep:#13645b;--pm-season-label:"☀ ÉTÉ"}
+.pmx.pm-season-rentree{--pm-season-accent:#d6b45a;--pm-season-line:#3c4c60;--pm-season-badge:#233d60;--pm-season-deep:#263b5c;--pm-season-label:"✦ RENTRÉE"}
+.pmx.pm-season-halloween{--pm-season-accent:#b78ad6;--pm-season-line:#47315c;--pm-season-badge:#5b21b6;--pm-season-deep:#4c1d95;--pm-season-label:"☾ HALLOWEEN"}
+.pmx[class*="pm-season-"] .pmx-hero{border-color:var(--pm-season-accent);box-shadow:0 0 0 1px rgba(0,0,0,.18),0 8px 24px #0007}
+.pmx[class*="pm-season-"] .pmx-card{border-color:var(--pm-season-line)}
+.pmx[class*="pm-season-"] .pmx-badge{background:var(--pm-season-badge);border:1px solid var(--pm-season-accent)}
+.pmx[class*="pm-season-"] .pmx-gap{background:var(--pm-season-deep)}
+.pmx[class*="pm-season-"] .pmx-hero::after{content:var(--pm-season-label);position:absolute;top:12px;right:14px;z-index:4;padding:6px 10px;border:1px solid var(--pm-season-accent);border-radius:999px;background:rgba(5,10,15,.84);color:var(--pm-season-accent);font-size:11px;letter-spacing:.08em;font-weight:900;pointer-events:none}
+.pmx[class*="pm-season-"] .pmx-head h2::after{content:" ✦";color:var(--pm-season-accent);font-size:.75em}
+.pmx.pm-season-noel .pmx-hero{background-image:radial-gradient(circle at 91% 18%,rgba(255,255,255,.2) 0 1px,transparent 1.8px),radial-gradient(circle at 83% 28%,rgba(214,180,90,.28) 0 1px,transparent 1.8px);background-size:28px 28px,36px 36px}
+.pmx.pm-season-noel .pmx-hero::before{content:"❄  ✧  ❄";position:absolute;right:22px;bottom:20px;z-index:3;color:rgba(255,255,255,.55);font-size:15px;letter-spacing:8px;pointer-events:none}
+.pmx.pm-season-noel .pmx-promo{border-color:#d6b45a;background:linear-gradient(110deg,#10251b,#1a1410)}
+@media(max-width:860px){.pmx[class*="pm-season-"] .pmx-hero::after{display:none}.pmx.pm-season-noel .pmx-hero::before{display:none}}
+</style>
 </head>
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
@@ -1795,4 +1814,29 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
  <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix observés chez différents marchands, avec leur date de relevé.</p>
  <p>Prix Malin travaille avec plusieurs partenaires, dont <strong>Amazon</strong>, <strong>Decathlon</strong> et <strong>Nicchia Luxury</strong>, et de nouveaux partenaires arrivent bientôt. Lorsque vous achetez après avoir cliqué sur un lien partenaire, Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
 </footer>
+<script id="pm-seasonal-theme-script">
+(function(){
+  let month,day;
+  try{
+    const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Paris",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+    month=Number(parts.find(part=>part.type==="month")?.value);
+    day=Number(parts.find(part=>part.type==="day")?.value);
+  }catch(error){
+    const now=new Date();
+    month=now.getMonth()+1;
+    day=now.getDate();
+  }
+  let season="hiver";
+  if(month===11||(month===12&&day<=26)) season="noel";
+  else if((month===12&&day>=27)||(month===1&&day<=7)) season="nouvel-an";
+  else if((month===1&&day>=8)||month===2) season="hiver";
+  else if(month>=3&&month<=5) season="printemps";
+  else if(month===6||month===7||(month===8&&day<=15)) season="ete";
+  else if((month===8&&day>=16)||month===9) season="rentree";
+  else if(month===10) season="halloween";
+  document.documentElement.dataset.pmSeason=season;
+  const showcase=document.querySelector(".pmx");
+  if(showcase) showcase.classList.add("pm-season-"+season);
+})();
+</script>
 </body></html>
