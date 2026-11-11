@@ -36,6 +36,16 @@ class AiGuidesTest(unittest.TestCase):
         self.assertIsNone(g.validate({**GOOD, "faq": GOOD["faq"][:1]}))
         self.assertIsNone(g.validate("pas un objet"))
 
+    def test_model_is_picked_from_provider_list(self):
+        g = load("generate_ai_guides")
+        groq = ["whisper-large-v3", "openai/gpt-oss-20b", "openai/gpt-oss-120b", "meta-llama/llama-guard-4-12b", "llama-3.1-8b-instant"]
+        self.assertEqual(g.pick_model(groq), "openai/gpt-oss-120b")
+        gem = ["models/embedding-001", "models/gemini-2.5-flash-preview-tts", "models/gemini-2.5-flash", "models/gemini-2.5-pro", "models/gemini-3-flash-preview"]
+        self.assertEqual(g.pick_model(gem), "gemini-2.5-flash")
+        orr = ["meta-llama/llama-3.3-70b-instruct", "meta-llama/llama-3.3-70b-instruct:free"]
+        self.assertEqual(g.pick_model(orr, free_only=True), "meta-llama/llama-3.3-70b-instruct:free")
+        self.assertIsNone(g.pick_model(["whisper-large-v3"]))
+
     def test_no_key_means_no_change(self):
         g = load("generate_ai_guides")
         import os
