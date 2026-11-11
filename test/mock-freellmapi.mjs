@@ -28,14 +28,26 @@ const server = http.createServer(async (req, res) => {
   const body = Buffer.concat(chunks);
   calls.push({ method: req.method, url: req.url, auth: req.headers.authorization });
   if (req.url === '/__calls') { res.end(JSON.stringify(calls)); return; }
+  // --- Faux OVH AI Endpoints (accès anonyme, sans clé) ---
+  if (req.url.startsWith('/ovh/v1/')) {
+    const p = req.url.slice(7);
+    if (p === '/models') { res.end(JSON.stringify({ data: ['gpt-oss-120b', 'qwen3-32b', 'Qwen2.5-VL-72B-Instruct', 'whisper-large-v3'].map(id => ({ id })) })); return; }
+    if (p === '/audio/transcriptions') {
+      if (body.includes('verbose_json')) { res.end(JSON.stringify({ text: 'Bonjour le studio. Deuxième phrase.', segments: [{ start: 0, end: 1.5, text: 'Bonjour le studio.' }, { start: 1.5, end: 3, text: 'Deuxième phrase.' }] })); return; }
+      res.end(JSON.stringify({ text: `Transcription test (${body.length} octets)` })); return;
+    }
+    if (p === '/chat/completions') { req.headers.authorization = `Bearer ${KEY}`; }
+    else { res.writeHead(404); res.end('{}'); return; }
+  }
+  if (req.url === '/mcp') { res.writeHead(403); res.end(JSON.stringify({ jsonrpc: '2.0', id: 1, error: { code: -32000, message: 'MCP server is disabled.' } })); return; }
   if (req.headers.authorization !== `Bearer ${KEY}`) { res.writeHead(401); res.end('{"error":{"message":"bad key"}}'); return; }
   const json = () => JSON.parse(body.toString() || '{}');
   if (req.url.startsWith('/v1/models')) { res.end(JSON.stringify({ data: [{ id: 'auto', owned_by: 'freellmapi', name: 'Auto' }, { id: 'fusion', owned_by: 'freellmapi', name: 'Fusion' }, ...models] })); return; }
   if (req.url === '/v1/usage') { res.end(JSON.stringify({ month: '2026-11', resetsAt: '2026-12-01T00:00:00Z', requests: 5, tokens: 1234, byKey: [{ keyId: 1, platform: 'ovh', label: 'OVH', requests: 5, tokens: 1234, requestCap: null, tokenCap: null }] })); return; }
-  if (req.url === '/v1/chat/completions') {
+  if (req.url === '/v1/chat/completions' || req.url === '/ovh/v1/chat/completions') {
     const b = json();
     const model = b.model.startsWith('auto') || b.model === 'fusion' ? 'gpt-oss-120b' : b.model;
-    const plat = models.find(m => m.id === model)?.owned_by || 'ovh';
+    const plat = req.url.startsWith('/ovh') ? 'ovh' : (models.find(m => m.id === model)?.owned_by || 'ovh');
     const content = reply(b.messages, model);
     res.setHeader('X-Routed-Via', `${plat}/${model}`);
     if (!b.stream) { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ choices: [{ message: { role: 'assistant', content } }], usage: { prompt_tokens: 50, completion_tokens: 30, total_tokens: 80 } })); return; }

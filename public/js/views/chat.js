@@ -168,7 +168,7 @@ export async function render(el, { params }) {
       if (m.role === 'assistant' && !m.streaming && !m.error) {
         meta.append(
           h('span', m.routedVia ? `via ${m.routedVia}` : ''),
-          m.usage ? h('span', `${fmtNum(m.usage.total)} tokens${m.estimated ? ' (estim.)' : ''}`) : '',
+          m.usage ? h('span', { title: m.estimated ? 'Le fournisseur n’a pas donné la mesure : estimation prudente' : 'Mesure exacte renvoyée par le fournisseur' }, `${fmtNum(m.usage.total)} tokens ${m.estimated ? '(estimés)' : '(réels)'}`) : '',
           m.ms ? h('span', `${(m.ms / 1000).toFixed(1)} s`) : '',
           h('button.btn.ghost', { onclick: () => navigator.clipboard?.writeText(m.content).then(() => toast('Copié')) }, 'Copier'),
           h('button.btn.ghost', { onclick: () => speak(m.content) }, '🔊 Lire'),
@@ -281,7 +281,7 @@ export async function render(el, { params }) {
   // ----- Modes -----
   function drawChat(body) {
     const list = h('div.messages');
-    const intro = h('div.empty', h('div', { style: { fontSize: '34px' } }, '💬'), h('p', 'Posez votre question. Vous pouvez joindre des images, des PDF, des textes ou des sons.'), h('p.small', 'Le modèle « Auto » choisit la meilleure IA gratuite disponible ; « Fusion » fait répondre plusieurs IA puis combine leurs réponses.'));
+    const intro = h('div.empty', h('div', { style: { fontSize: '34px' } }, '💬'), h('p', 'Posez votre question. Vous pouvez joindre des images, des PDF, des textes ou des sons.'), h('p.small', 'Le modèle « Auto » choisit une IA gratuite dont le fournisseur est vérifié avant l’appel. Chaque réponse est décomptée de votre quota mensuel.'));
     if (!conv.messages.length) list.append(intro);
     for (const m of conv.messages) list.append(msgEl(m, remember).el);
     body.append(list, composer(async (text, atts) => {
@@ -304,7 +304,7 @@ export async function render(el, { params }) {
     const buildCols = () => {
       grid.innerHTML = ''; cols.length = 0;
       conv.columns.forEach((c, i) => {
-        const sel = modelSelect(c.model, { includeFusion: true });
+        const sel = modelSelect(c.model);
         sel.onchange = () => { c.model = sel.value; };
         const list = h('div.messages');
         for (const m of c.messages) list.append(msgEl(m, remember).el);

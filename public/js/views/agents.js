@@ -37,7 +37,7 @@ export async function render(el, { params }) {
     h('option', { value: '' }, 'Charger une équipe type…'), Object.entries(TEAMS).map(([k, t]) => h('option', { value: k }, t.label)));
   const modeSel = h('select', { onchange: () => { team.mode = modeSel.value; saveTeam(); } }, MODES.map(([v, l]) => h('option', { value: v }, l)));
   modeSel.value = team.mode || 'equipe';
-  const synthSel = modelSelect('auto:smart', { includeFusion: false });
+  const synthSel = modelSelect('auto:smart');
   const agentsBox = h('div.stack');
   const task = h('textarea', { rows: 5, placeholder: 'Décrivez la tâche. Ex : « Organise un week-end entre amis à Lyon avec un budget de 150 € chacun » ou « Écris un rap de 2 couplets + refrain sur la persévérance »' });
   const runBtn = h('button.btn.primary', '▶ Lancer l’équipe');
@@ -46,7 +46,7 @@ export async function render(el, { params }) {
   function drawAgents() {
     agentsBox.innerHTML = '';
     team.agents.forEach((a, i) => {
-      const ms = modelSelect(a.model || 'auto', { includeFusion: false });
+      const ms = modelSelect(a.model || 'auto');
       ms.onchange = () => { a.model = ms.value; saveTeam(); };
       const name = h('input', { value: a.name, oninput: (e) => { a.name = e.target.value; saveTeam(); } });
       const role = h('textarea', { rows: 2, oninput: (e) => { a.role = e.target.value; saveTeam(); } });

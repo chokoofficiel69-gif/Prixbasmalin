@@ -42,15 +42,21 @@ export function ensureUserDirs(uid) {
 
 // ---------- Réglages globaux (administrateur) ----------
 export const DEFAULT_SETTINGS = {
-  freeOnly: true,               // mode gratuit : bloque tout fournisseur marqué payant
-  allowPaid: false,
+  freeOnly: true,               // mode gratuit : seuls les fournisseurs de la liste blanche, vérifiés AVANT l'appel
+  allowPaid: false,             // aucun fournisseur payant, jamais automatiquement
+  allowedPlatforms: ['ovh'],    // liste blanche (OVH AI Endpoints en accès anonyme)
   paidPlatforms: ['openai', 'anthropic', 'deepseek', 'custom', 'together', 'fireworks', 'deepinfra', 'replicate', 'xai'],
-  dailyTokenCap: 500000,        // plafond global par jour (tous les comptes)
-  monthlyTokenCap: 10000000,    // plafond global par mois
+  poolMonthlyTokens: 10000000,  // pool INTERNE du Studio, partagé par tous les comptes (≠ quota fournisseur)
+  dailyTokenCap: 500000,        // limite interne globale par jour (0 = aucune)
+  maxOutputTokens: 4096,        // plafond de sortie envoyé au fournisseur (max_tokens) = base de la réservation
+  ovhRpmPerModel: 2,            // limite OVH anonyme documentée : 2 requêtes/min, par IP et par modèle
+  gatewayMediaAllowed: false,   // images/vidéos/voix via FreeLLMAPI : fournisseur inconnu avant l'appel → bloqué par défaut
   dailyMediaCap: 40,            // plafond global de générations média par jour
   storageQuotaMB: 800,          // quota global des fichiers
   defaultModel: 'auto',
   ttsVoice: 'alloy',
+  // Tarifs en € par million de tokens, saisis par l'administrateur. Absent = « tarif non renseigné »
+  // (jamais interprété comme gratuit). Seul OVH anonyme est gratuit par construction (aucun compte).
   prices: {},
 };
 let settingsCache = null;
@@ -66,8 +72,23 @@ export function saveSettings(patch) {
 }
 
 // ---------- Comptes ----------
-export const DEFAULT_USER_LIMITS = { dailyTokenCap: 100000, dailyMediaCap: 10, storageQuotaMB: 200 };
+export const DEFAULT_USER_LIMITS = { monthlyTokenQuota: 500000, dailyTokenCap: 0, dailyMediaCap: 10, storageQuotaMB: 200 };
+export const ADMIN_DEFAULT_QUOTA = 2000000;
 export function getUsers() { return readJson('users.json', []); }
+export const allocatedTokens = (users = getUsers(), exceptId = null) => users.filter(u => !u.disabled && u.id !== exceptId).reduce((s, u) => s + (u.monthlyTokenQuota || 0), 0);
+/** Attribue un quota mensuel aux comptes qui n'en ont pas encore, sans jamais dépasser le pool. */
+export function migrateQuotas(pool) {
+  const users = getUsers();
+  let changed = false;
+  const ordered = [...users].sort((a, b) => (a.role === 'admin' ? 0 : 1) - (b.role === 'admin' ? 0 : 1));
+  for (const u of ordered) {
+    if (u.monthlyTokenQuota !== undefined) continue;
+    const free = Math.max(0, pool - allocatedTokens(users, u.id));
+    u.monthlyTokenQuota = Math.min(u.role === 'admin' ? ADMIN_DEFAULT_QUOTA : DEFAULT_USER_LIMITS.monthlyTokenQuota, free);
+    changed = true;
+  }
+  if (changed) saveUsers(users);
+}
 export function saveUsers(list) { writeJson('users.json', list); }
 export function getUser(id) { return getUsers().find(u => u.id === id) || null; }
 export function findUserByName(name) {
@@ -77,7 +98,7 @@ export function findUserByName(name) {
 export const publicUser = (u) => u && ({
   id: u.id, username: u.username, name: u.name || u.username, role: u.role, disabled: !!u.disabled,
   dailyTokenCap: u.dailyTokenCap ?? null, dailyMediaCap: u.dailyMediaCap ?? null, storageQuotaMB: u.storageQuotaMB ?? null,
-  createdAt: u.createdAt, lastLoginAt: u.lastLoginAt || null, mustChangePassword: !!u.mustChangePassword,
+  createdAt: u.createdAt, lastLoginAt: u.lastLoginAt || null, mustChangePassword: !!u.mustChangePassword, monthlyTokenQuota: u.monthlyTokenQuota ?? 0,
 });
 
 // ---------- Projets ----------
