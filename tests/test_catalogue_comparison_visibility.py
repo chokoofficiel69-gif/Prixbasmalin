@@ -69,6 +69,8 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn('offer.merchantUpdatedAt||offer.checked_at||p.merchantUpdatedAt||p.sourceCreatedAt', source)
         self.assertNotIn('offer.merchantUpdatedAt||product.merchantUpdatedAt', source)
         self.assertIn('const merchantUpdatedAt=product.merchantUpdatedAt||"";', source)
+        self.assertNotIn('product.merchantUpdatedAt||product.sourceCreatedAt', source)
+        self.assertNotIn('p.merchantUpdatedAt||p.sourceCreatedAt', source)
 
     def test_related_suggestions_are_only_added_when_no_exact_text_match_exists(self):
         source = CATALOGUE.read_text(encoding="utf-8")
