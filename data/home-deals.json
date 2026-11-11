@@ -84,25 +84,6 @@
    "price_kind": "historical"
   },
   {
-   "id": "macbook-air-13-m5",
-   "name": "MacBook Air 13\" M5",
-   "brand": "Apple",
-   "category": "laptop",
-   "category_label": "Ordinateurs portables",
-   "image": "/assets/produits/macbook-air-13-m5.jpg",
-   "image_credit": {
-    "author": "Kyu3a",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:M5_Macbook_Air_13_Sky_Blue_model.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 1277.99,
-   "max_price_eur": 1399.0,
-   "offer_count": 16,
-   "last_date": "2026-11-11",
-   "price_kind": "historical"
-  },
-  {
    "id": "iphone-17-pro",
    "name": "iPhone 17 Pro",
    "brand": "Apple",
@@ -119,6 +100,25 @@
    "max_price_eur": 1229.0,
    "offer_count": 16,
    "last_date": "2026-11-09",
+   "price_kind": "historical"
+  },
+  {
+   "id": "macbook-air-13-m5",
+   "name": "MacBook Air 13\" M5",
+   "brand": "Apple",
+   "category": "laptop",
+   "category_label": "Ordinateurs portables",
+   "image": "/assets/produits/macbook-air-13-m5.jpg",
+   "image_credit": {
+    "author": "Kyu3a",
+    "license": "CC BY-SA 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:M5_Macbook_Air_13_Sky_Blue_model.jpg",
+    "match": "verifie_visuellement"
+   },
+   "min_price_eur": 1277.99,
+   "max_price_eur": 1399.0,
+   "offer_count": 16,
+   "last_date": "2026-11-11",
    "price_kind": "historical"
   },
   {
@@ -160,34 +160,6 @@
    "price_kind": "historical"
   },
   {
-   "id": "ipad-air-11-m3",
-   "name": "iPad Air 11\" M3",
-   "brand": "Apple",
-   "category": "tablette",
-   "category_label": "Tablettes",
-   "image": "",
-   "image_credit": null,
-   "min_price_eur": 617.44,
-   "max_price_eur": 959.0,
-   "offer_count": 18,
-   "last_date": "2026-11-11",
-   "price_kind": "historical"
-  },
-  {
-   "id": "dreame-x50-ultra",
-   "name": "Dreame X50 Ultra Complete",
-   "brand": "Dreame",
-   "category": "aspirateur",
-   "category_label": "Aspirateurs",
-   "image": "",
-   "image_credit": null,
-   "min_price_eur": 588.0,
-   "max_price_eur": 1183.9,
-   "offer_count": 15,
-   "last_date": "2026-11-11",
-   "price_kind": "historical"
-  },
-  {
    "id": "airpods-4",
    "name": "AirPods 4",
    "brand": "Apple",
@@ -222,6 +194,44 @@
    "min_price_eur": 237.9,
    "max_price_eur": 254.5,
    "offer_count": 13,
+   "last_date": "2026-11-09",
+   "price_kind": "historical"
+  },
+  {
+   "id": "switch-lite",
+   "name": "Nintendo Switch Lite",
+   "brand": "Nintendo",
+   "category": "console",
+   "category_label": "Consoles",
+   "image": "/assets/produits/switch-lite.jpg",
+   "image_credit": {
+    "author": "GerdeeX",
+    "license": "CC BY-SA 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_switch_lite_blue.jpg",
+    "match": "verifie_visuellement"
+   },
+   "min_price_eur": 175.51,
+   "max_price_eur": 201.9,
+   "offer_count": 9,
+   "last_date": "2026-11-09",
+   "price_kind": "historical"
+  },
+  {
+   "id": "iphone-15",
+   "name": "iPhone 15",
+   "brand": "Apple",
+   "category": "smartphone",
+   "category_label": "Smartphones",
+   "image": "/assets/produits/iphone-15.jpg",
+   "image_credit": {
+    "author": "IPHONE 15",
+    "license": "CC BY-SA 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_15.jpg",
+    "match": "verifie_visuellement"
+   },
+   "min_price_eur": 609.0,
+   "max_price_eur": 1109.77,
+   "offer_count": 14,
    "last_date": "2026-11-09",
    "price_kind": "historical"
   }
