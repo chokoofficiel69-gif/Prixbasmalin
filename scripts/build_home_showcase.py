@@ -117,7 +117,11 @@ CSS = """<style id="pm-showcase-style">
 .hero-reference,.pm-benefits-banner,.pm-bf-banner{display:none!important}
 .pmx{--o:#ff650b;--o2:#ff8a2b;--card:#121a26;--line:#263142;--mut:#9aa6b8;color:#fff;margin:6px 0 4px}
 .pmx-hero{position:relative;min-height:330px;border-radius:18px;overflow:hidden;background:#0b0e14;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between}
-.pmx-hero-img{position:absolute;right:0;top:0;height:100%;width:68%;object-fit:cover;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 30%);mask-image:linear-gradient(90deg,transparent 0,#000 30%)}
+.pmx-hero{background:radial-gradient(ellipse 55% 90% at 78% 55%,#3a2416 0,#0b0e14 70%)}
+.pmx-hero-art{position:absolute;right:12%;top:0;bottom:0;margin:0;aspect-ratio:592/695;max-width:40%}
+.pmx-hero-img{display:block;width:100%;height:100%;object-fit:contain;object-position:bottom;-webkit-mask-image:radial-gradient(ellipse 56% 54% at 48% 50%,#000 60%,transparent 100%);mask-image:radial-gradient(ellipse 56% 54% at 48% 50%,#000 60%,transparent 100%)}
+.pmx-bubble{position:absolute;top:10%;right:88%;padding:12px 18px 14px;border-radius:26px;background:var(--o);color:#141414;font:900 clamp(15px,1.7vw,22px)/1.1 Inter,system-ui,sans-serif;transform:rotate(-6deg);box-shadow:0 8px 24px #0008;white-space:nowrap}
+.pmx-bubble::after{content:"";position:absolute;right:16%;bottom:-12px;border:8px solid transparent;border-top:14px solid var(--o);border-bottom:0}
 .pmx-hero-txt{position:relative;padding:30px 28px 10px;max-width:560px}
 .pmx-hero .t{font:900 clamp(30px,4.4vw,50px)/1.04 Inter,system-ui,sans-serif;letter-spacing:-1.5px;margin:0;text-shadow:0 2px 18px #000a}
 .pmx-hero .t span{color:var(--o)}
@@ -170,7 +174,7 @@ CSS = """<style id="pm-showcase-style">
 .pmx-cmp-g{display:flex;flex-direction:column;gap:4px}.pmx-cmp-g strong{font-size:30px;color:#22c55e;font-weight:900}.pmx-cmp-g small{color:var(--mut);font-size:12px}
 .pmx-promo{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;justify-content:space-between;margin:14px 0 0;padding:14px 18px;border-radius:14px;border:2px dashed #ffb02e;background:#1a1410;color:#fff!important;text-decoration:none}.pmx-promo b{font-size:18px}.pmx-promo span{color:#ffcf99;font-size:13.5px;font-weight:700}
 .pmx-note{color:var(--mut);font-size:12px;margin:8px 2px 0}
-@media(max-width:860px){.pmx-hero{min-height:0}.pmx-hero-img{position:relative;width:100%;height:auto;aspect-ratio:987/541;order:2;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 28%);mask-image:linear-gradient(180deg,transparent 0,#000 28%);margin-top:-30px}
+@media(max-width:860px){.pmx-hero{min-height:0}.pmx-hero-art{position:relative;right:auto;order:2;width:64%;max-width:300px;height:auto;margin:6px auto -4px}.pmx-bubble{right:auto;left:-14%;top:0;font-size:15px}
  .pmx-hero-txt{order:1;padding:20px 16px 0}.pmx-trust{order:3;padding:10px 16px 14px;gap:8px 14px;font-size:11.5px}.pmx-trust i{width:26px;height:26px;font-size:13px}
  .pmx-ban{grid-template-columns:1fr;gap:8px}.pmx-b{min-height:112px;padding:14px}.pmx-b b{font-size:18px}
  .pmx-cmp{grid-template-columns:1fr}.pmx-cmp-p img{width:84px;height:84px}
@@ -202,7 +206,7 @@ def build_block():
         for name, url, slug in categories())
     latest = max(p["last_date"] for p in top)
     hero = """<section class="pmx-hero" aria-label="Prix Malin">
-<img class="pmx-hero-img" src="/assets/accueil/hero.webp" alt="" fetchpriority="high">
+<figure class="pmx-hero-art"><img class="pmx-hero-img" src="/assets/accueil/mascotte-hero.webp" alt="La mascotte Prix Malin, un sac orange souriant" width="592" height="695" fetchpriority="high"><span class="pmx-bubble">Le moins cher,<br>en un clic !</span></figure>
 <div class="pmx-hero-txt"><p class="t">Les meilleurs prix<br><span>au même endroit !</span></p>
 <p>Comparez, économisez et trouvez les meilleures offres sur vos produits préférés, avec la date de chaque prix relevé.</p>
 <div class="pmx-cta"><a class="pmx-btn" href="/prix/">Voir toutes les offres →</a><a class="pmx-btn ghost" href="/black-friday.html">Black Friday · 27 nov.</a></div></div>
