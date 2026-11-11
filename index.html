@@ -1741,12 +1741,16 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     +'<span class="pm-hp-badge">'+p.offer_count+' marchands suivis</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
     +'<span class="pm-hp-from">Plus bas relevé historique</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Dernier relevé : '+day(p.last_date)+'</span></div></a>';
   const giftCard=g=>{
-    if(!giftPriceIsCurrent(g))return "";
-    const shippingKnown=g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur))&&Number(g.shipping_eur)>=0;
-    return '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(g.image,"",g.merchant,g.name)
-      +(shippingKnown&&Number(g.shipping_eur)===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">'+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
-      +'<span class="pm-hp-from">Prix TTC communiqué par le marchand</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">Relevé du '+day(g.price_date)+(shippingKnown?' · Livraison '+euro.format(Number(g.shipping_eur)):'')+'</span>'
-      +'</div></a>';
+    const image=String(g&&g.image||"").trim();
+    if(g.image_verified!==true||!/^https:\/\//i.test(image))return "";
+    const priceCurrent=giftPriceIsCurrent(g);
+    const shippingKnown=priceCurrent&&g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur))&&Number(g.shipping_eur)>=0;
+    const priceBlock=priceCurrent
+      ? '<span class="pm-hp-from">Prix TTC communiqué par le marchand</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">Relevé du '+day(g.price_date)+(shippingKnown?' · Livraison '+euro.format(Number(g.shipping_eur)):'')+'</span>'
+      : '<span class="pm-hp-from">Prix non vérifié</span><span class="pm-hp-meta">Consultez le prix sur le site marchand</span>';
+    return '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(image,"",g.merchant,g.name)
+      +(shippingKnown&&Number(g.shipping_eur)===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">Visuel marchand · '+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
+      +priceBlock+'</div></a>';
   };
   document.querySelectorAll(".pm-partner[data-href]").forEach(a=>{
     const href=a.getAttribute("data-href");
@@ -1766,7 +1770,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
       const seenGiftImages=new Set();
       const uniqueList=list.filter(g=>{
         const image=String(g&&g.image||"").trim();
-        if(!image.startsWith("https://")||seenGiftImages.has(image))return false;
+        if(g.image_verified!==true||!image.startsWith("https://")||seenGiftImages.has(image))return false;
         seenGiftImages.add(image);
         return true;
       });
@@ -1777,7 +1781,12 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
       giftRail.dataset.pmRotationSlot=String(rotationSlot);
       giftRail.dataset.pmRotationDate=new Date().toISOString();
       giftRail.dataset.pmRotationProductIds=rotated.map(g=>String(g.id||g.name||"")).join(",");
-      giftRail.innerHTML=rotated.map(giftCard).join("")||'<p class="pm-hp-note">Pas encore d’idée dans cette gamme : essayez une autre.</p>';
+      giftRail.innerHTML=rotated.map(giftCard).join("")||'<p class="pm-hp-note">Visuels marchands en cours de vérification.</p>';
+      giftRail.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{
+        const card=img.closest(".pm-hp-card");
+        if(card)card.remove();
+        if(!giftRail.querySelector(".pm-hp-card"))giftRail.innerHTML='<p class="pm-hp-note">Aucune image marchande vérifiée n’est actuellement disponible.</p>';
+      },{once:true}));
       giftRail.scrollLeft=0;
     };
     document.querySelectorAll("#pm-gifts [data-gift]").forEach(tab=>tab.addEventListener("click",()=>{
