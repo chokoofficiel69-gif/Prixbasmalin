@@ -54,6 +54,17 @@ class AwinGiftImageTests(unittest.TestCase):
         with patch.object(checker, "public_https_url_status", return_value="ok"), patch.object(checker, "open_image_request", return_value=FakeResponse(status=200, content_length=str(13 * 1024 * 1024))):
             self.assertEqual(checker.check_image_url("https://cdn.example/huge.webp"), "invalid")
 
+    def test_rejects_known_placeholder_urls_before_network_access(self):
+        for url in (
+            "https://images2.productserve.com/noimage.gif",
+            "https://cdn.example/placeholder.webp",
+            "https://cdn.example/missing-image.jpg",
+        ):
+            with patch.object(checker, "public_https_url_status") as host_check, patch.object(checker, "open_image_request") as opener:
+                self.assertEqual(checker.check_image_url(url), "invalid")
+                host_check.assert_not_called()
+                opener.assert_not_called()
+
     def test_rejects_redirect_to_insecure_http_before_following(self):
         handler = checker.SafeHTTPSRedirectHandler()
         with patch.object(checker, "public_https_url_status", return_value="invalid"):
