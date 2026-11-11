@@ -1,18 +1,76 @@
 #!/usr/bin/env python3
 """Vérifie les images des idées cadeaux Awin sans toucher aux prix ni aux liens."""
+import ipaddress
 import json
+import socket
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.parse import urlsplit
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 ROOT = Path(__file__).resolve().parents[1]
 FEED = ROOT / "data" / "home-deals.json"
 MAX_IMAGE_BYTES = 12 * 1024 * 1024
 PRESERVE_HOURS = 48
 TRANSIENT_HTTP = {429, 500, 502, 503, 504}
+
+
+def public_https_url_status(url):
+    """Allow only public HTTPS endpoints; treat DNS outages as transient."""
+    try:
+        parsed = urlsplit(str(url))
+        if parsed.scheme.lower() != "https" or not parsed.hostname:
+            return "invalid"
+        if parsed.username is not None or parsed.password is not None:
+            return "invalid"
+        if parsed.port not in (None, 443):
+            return "invalid"
+        host = parsed.hostname.rstrip(".").lower()
+        if host == "localhost" or host.endswith((".localhost", ".local", ".internal")):
+            return "invalid"
+        try:
+            literal = ipaddress.ip_address(host)
+        except ValueError:
+            try:
+                records = socket.getaddrinfo(host, parsed.port or 443, type=socket.SOCK_STREAM)
+            except (socket.gaierror, OSError):
+                return "transient"
+            addresses = {record[4][0].split("%", 1)[0] for record in records}
+            if not addresses:
+                return "transient"
+            for address in addresses:
+                try:
+                    if not ipaddress.ip_address(address).is_global:
+                        return "invalid"
+                except ValueError:
+                    return "invalid"
+        else:
+            if not literal.is_global:
+                return "invalid"
+        return "ok"
+    except (TypeError, ValueError):
+        return "invalid"
+
+
+class SafeHTTPSRedirectHandler(HTTPRedirectHandler):
+    """Reject downgrade and private-network redirects before following them."""
+    max_redirections = 5
+    max_repeats = 2
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        status = public_https_url_status(newurl)
+        if status == "transient":
+            raise URLError("DNS temporairement indisponible pour la redirection image")
+        if status != "ok":
+            raise HTTPError(newurl, code, "Redirection image non publique ou non HTTPS", headers, fp)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def open_image_request(request, timeout):
+    return build_opener(SafeHTTPSRedirectHandler()).open(request, timeout=timeout)
 
 
 def parse_utc(value):
@@ -28,18 +86,21 @@ def parse_utc(value):
 
 
 def check_image_url(url, timeout=8):
-    if not isinstance(url, str) or not url.startswith("https://"):
+    if not isinstance(url, str):
         return "invalid"
+    initial_status = public_https_url_status(url)
+    if initial_status != "ok":
+        return initial_status
     request = Request(url, headers={
         "User-Agent": "PrixMalinImageHealth/1.0",
         "Accept": "image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8",
         "Range": "bytes=0-2047",
     })
     try:
-        with urlopen(request, timeout=timeout) as response:
+        with open_image_request(request, timeout=timeout) as response:
             status = response.getcode()
             final_url = response.geturl() if hasattr(response, "geturl") else url
-            if not str(final_url).startswith("https://"):
+            if public_https_url_status(final_url) != "ok":
                 return "invalid"
             content_type = (response.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
             sample = response.read(2048)
