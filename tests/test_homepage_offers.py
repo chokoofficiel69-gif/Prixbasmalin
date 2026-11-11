@@ -36,6 +36,14 @@ class HomepageOffersTests(unittest.TestCase):
         self.assertNotIn("liveDateFromFeed", self.source)
         self.assertIn("Aucun prix TTC frais et confirmé n'est actuellement disponible", self.source)
 
+    def test_prixtracker_history_is_never_rendered_as_a_current_offer(self):
+        self.assertIn('data.status!=="historical_reference"', self.source)
+        self.assertIn('note.textContent=sheet.last_date?"Historique · dernier relevé le "+day(sheet.last_date):"Historique des prix";', self.source)
+        self.assertIn('cta.textContent="Voir l’historique →";', self.source)
+        self.assertNotIn('sheet.offer_count+\' offres à partir de\'', self.source)
+        self.assertNotIn('euro.format(sheet.min_price_eur)', self.source)
+        self.assertNotIn('cta.textContent="Comparer les "+sheet.offer_count+" prix →";', self.source)
+
     def test_homepage_fallback_rotation_uses_only_unique_verified_photos(self):
         self.assertIn("const seenFallbackImages=new Set();", self.source)
         self.assertIn("!seenFallbackImages.has(p.image)", self.source)

@@ -1809,28 +1809,29 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     }));
     showGifts("all");
   }).catch(()=>{fail(document.getElementById("pm-top-prices-rail"));fail(document.getElementById("pm-gifts-rail"));});
-  // Ajoute le prix comparé aux cartes de l'accueil dont le nom correspond exactement à une fiche produit.
+  // PrixTracker fournit un historique daté, jamais un prix marchand en direct.
+  // On peut lier une carte à sa fiche historique, mais pas afficher son minimum comme une offre actuelle.
   sheetsReady.then(data=>{
-    if(!data||!Array.isArray(data.products))return;
+    if(!data||data.status!=="historical_reference"||!Array.isArray(data.products))return;
     const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim();
     const index=new Map();
     data.products.forEach(s=>[norm(s.name),norm(s.brand+" "+s.name)].forEach(k=>{if(k&&!index.has(k))index.set(k,s);}));
-    const enhance=()=>{
+    const linkHistory=()=>{
       document.querySelectorAll(".pm-visual-card,.new-arrival,#products .product,.pm-discovery-card").forEach(card=>{
-        if(card.dataset.pmPriced)return;
+        if(card.dataset.pmHistoryLinked)return;
         const titleEl=card.querySelector("h3,.pname,.name");
         const sheet=index.get(norm(card.dataset.name||""))||index.get(norm(titleEl&&titleEl.textContent));
         if(!sheet)return;
-        card.dataset.pmPriced="1";
-        const tag=document.createElement("div");tag.className="pm-hp-price-tag";
-        tag.innerHTML='<small>'+sheet.offer_count+' offres à partir de</small><strong>'+euro.format(sheet.min_price_eur)+'</strong>';
+        card.dataset.pmHistoryLinked="1";
+        const note=document.createElement("small");note.className="pm-hp-meta";
+        note.textContent=sheet.last_date?"Historique · dernier relevé le "+day(sheet.last_date):"Historique des prix";
         const cta=[...card.querySelectorAll("a")].pop();
-        if(cta){cta.href="/prix/"+encodeURIComponent(sheet.id)+".html";cta.removeAttribute("target");cta.textContent="Comparer les "+sheet.offer_count+" prix →";cta.parentNode.insertBefore(tag,cta);}
-        else{(titleEl||card).after(tag);}
+        if(cta){cta.href="/prix/"+encodeURIComponent(sheet.id)+".html";cta.removeAttribute("target");cta.textContent="Voir l’historique →";cta.parentNode.insertBefore(note,cta);}
+        else{(titleEl||card).after(note);}
       });
     };
-    enhance();
-    ["pm-visual-gallery-grid","pm-history-list","products"].forEach(id=>{const el=document.getElementById(id);if(el)new MutationObserver(enhance).observe(el,{childList:true});});
+    linkHistory();
+    ["pm-visual-gallery-grid","pm-history-list","products"].forEach(id=>{const el=document.getElementById(id);if(el)new MutationObserver(linkHistory).observe(el,{childList:true});});
   });
 })();
 </script>
