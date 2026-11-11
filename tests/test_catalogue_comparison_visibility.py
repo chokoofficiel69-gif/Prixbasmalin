@@ -71,6 +71,11 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertIn('const merchantUpdatedAt=product.merchantUpdatedAt||"";', source)
         self.assertNotIn('product.merchantUpdatedAt||product.sourceCreatedAt', source)
         self.assertNotIn('p.merchantUpdatedAt||p.sourceCreatedAt', source)
+        self.assertIn('const url=offer.url||offer.product_url||"";', source)
+        self.assertIn('const ship=shippingOf(offer.shippingPriceValue??offer.shipping_price_eur);', source)
+        self.assertNotIn('offer.url||offer.product_url||p.sourceUrl', source)
+        self.assertNotIn('offer.shipping_price_eur??p.shippingPriceValue', source)
+        self.assertIn('Boolean(merchant)&&', source)
 
     def test_related_suggestions_are_only_added_when_no_exact_text_match_exists(self):
         source = CATALOGUE.read_text(encoding="utf-8")
