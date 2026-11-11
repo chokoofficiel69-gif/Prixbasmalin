@@ -6226,7 +6226,7 @@ function render(){
     // Seules les offres marchandes fraîches, explicitement TTC et liées à une fiche directe entrent dans le tableau.
     const rawFeedOffers=Array.isArray(p.offers)&&p.offers.length?p.offers:[{
       merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl,shippingPriceValue:p.shippingPriceValue,
-      merchantUpdatedAt:p.merchantUpdatedAt||"",priceTaxStatus:p.priceTaxStatus||p.price_tax_status
+      merchantUpdatedAt:p.merchantUpdatedAt||"",priceTaxStatus:p.priceTaxStatus||p.price_tax_status,currency:p.currency
     }];
     const feedOffers=hasVerifiedPrice?rawFeedOffers.filter(offer=>{
       const base=Number(offer.priceValue??offer.price_eur);
