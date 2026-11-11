@@ -5788,7 +5788,7 @@ async function pmLoadAwinCatalogue(){
     );
     const displayProducts=feedProducts.map(product=>{
       // La date produit correspond au prix principal (meilleure offre) : ne jamais emprunter la date d'un autre marchand.
-    const merchantUpdatedAt=product.merchantUpdatedAt||"";
+      const merchantUpdatedAt=product.merchantUpdatedAt||"";
       const hasPrice=Number.isFinite(Number(product.priceValue))&&Number(product.priceValue)>0;
       const priceFresh=hasPrice&&pmAwinPriceIsFresh(merchantUpdatedAt);
       const priceTaxIncluded=product.priceTaxStatus==="included"||product.price_tax_status==="included";
@@ -5962,7 +5962,7 @@ function render(){
   const pmVerifiedMerchantCount=product=>{
     const sourceOffers=Array.isArray(product.offers)&&product.offers.length?product.offers:[{
       merchant:product.merchant,priceValue:product.priceValue,url:product.sourceUrl,
-      merchantUpdatedAt:product.merchantUpdatedAt||"", 
+      merchantUpdatedAt:product.merchantUpdatedAt||"",
       priceTaxStatus:product.priceTaxStatus||product.price_tax_status,currency:product.currency
     }];
     const merchants=new Set();
@@ -5971,8 +5971,8 @@ function render(){
       const taxStatus=String(offer.priceTaxStatus||offer.price_tax_status||"").toLowerCase();
       const checkedAt=offer.merchantUpdatedAt||offer.checked_at||"";
       const currency=String(offer.currency||offer.currencyCode||(product.isAwinProduct?"EUR":"")).toUpperCase();
-      const url=offer.url||offer.product_url||product.sourceUrl;
-      const merchant=String(offer.merchant||offer.merchant_name||offer.retailer||product.merchant||"").trim();
+      const url=offer.url||offer.product_url||"";
+      const merchant=String(offer.merchant||offer.merchant_name||offer.retailer||"").trim();
       if(!merchant||!Number.isFinite(base)||base<=0||currency!=="EUR"||taxStatus!=="included"||!pmAwinPriceIsFresh(checkedAt)||!/^https:\/\//i.test(String(url||"")))return;
       merchants.add(merchant.toLocaleLowerCase("fr"));
     });
@@ -6233,14 +6233,15 @@ function render(){
       const taxStatus=offer.priceTaxStatus||offer.price_tax_status;
       // Une offre doit porter sa propre date marchande ; la date du meilleur prix ne vaut pas pour les autres vendeurs.
       const checkedAt=offer.merchantUpdatedAt||offer.checked_at||"";
-      const url=offer.url||offer.product_url||p.sourceUrl;
+      const url=offer.url||offer.product_url||"";
+      const merchant=String(offer.merchant||offer.merchant_name||offer.retailer||"").trim();
       const currency=String(offer.currency||offer.currencyCode||(p.isAwinProduct?"EUR":"")).toUpperCase();
-      return Number.isFinite(base)&&base>0&&currency==="EUR"&&taxStatus==="included"&&pmAwinPriceIsFresh(checkedAt)&&/^https:\/\//i.test(String(url||""));
+      return Boolean(merchant)&&Number.isFinite(base)&&base>0&&currency==="EUR"&&taxStatus==="included"&&pmAwinPriceIsFresh(checkedAt)&&/^https:\/\//i.test(String(url||""));
     }):[];
     const rows=feedOffers.map(offer=>{
       const base=Number(offer.priceValue??offer.price_eur);
-      const ship=shippingOf(offer.shippingPriceValue??offer.shipping_price_eur??p.shippingPriceValue);
-      return {merchant:offer.merchant||offer.merchant_name||p.merchant||"Marchand",price:base,shipping:ship,total:ship===null?null:base+ship,url:offer.url||offer.product_url||p.sourceUrl};
+      const ship=shippingOf(offer.shippingPriceValue??offer.shipping_price_eur);
+      return {merchant:offer.merchant||offer.merchant_name||offer.retailer||"Marchand",price:base,shipping:ship,total:ship===null?null:base+ship,url:offer.url||offer.product_url};
     });
     // Un même marchand ne compte qu'une fois (sa meilleure offre) : pas de fausse comparaison.
     rows.sort((a,b)=>a.price-b.price);
