@@ -5962,7 +5962,7 @@ function render(){
   const pmVerifiedMerchantCount=product=>{
     const sourceOffers=Array.isArray(product.offers)&&product.offers.length?product.offers:[{
       merchant:product.merchant,priceValue:product.priceValue,url:product.sourceUrl,
-      merchantUpdatedAt:product.merchantUpdatedAt||product.sourceCreatedAt,
+      merchantUpdatedAt:product.merchantUpdatedAt||"", 
       priceTaxStatus:product.priceTaxStatus||product.price_tax_status,currency:product.currency
     }];
     const merchants=new Set();
@@ -6166,7 +6166,7 @@ function render(){
     // Carte produit façon comparateur : photo, prix mis en avant, bouton marchand, tableau comparatif, détails.
     card.classList.add("pm-card2");
     const money=value=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(value));
-    const updateValue=p.merchantUpdatedAt||p.sourceCreatedAt||null;
+    const updateValue=p.merchantUpdatedAt||null;
     const priceDateValue=updateValue;
     const hasVerifiedPrice=p.priceStatus==="fresh"&&
       (p.priceTaxStatus==="included"||p.price_tax_status==="included")&&
@@ -6226,7 +6226,7 @@ function render(){
     // Seules les offres marchandes fraîches, explicitement TTC et liées à une fiche directe entrent dans le tableau.
     const rawFeedOffers=Array.isArray(p.offers)&&p.offers.length?p.offers:[{
       merchant:p.merchant,priceValue:p.priceValue,url:p.sourceUrl,shippingPriceValue:p.shippingPriceValue,
-      merchantUpdatedAt:p.merchantUpdatedAt||p.sourceCreatedAt,priceTaxStatus:p.priceTaxStatus||p.price_tax_status
+      merchantUpdatedAt:p.merchantUpdatedAt||"",priceTaxStatus:p.priceTaxStatus||p.price_tax_status
     }];
     const feedOffers=hasVerifiedPrice?rawFeedOffers.filter(offer=>{
       const base=Number(offer.priceValue??offer.price_eur);
