@@ -42,7 +42,8 @@ export async function render(el) {
   async function setMusic(blob, name) {
     try {
       const buffer = await decodeBlob(blob);
-      music = { buffer, name, offset: 0, beats: null, bpm: null, gainDb: 0 };
+      music = { buffer, name, offset: 0, beats: null, bpm: null, gainDb: 0, blob };
+      if (autoMusicLbl) autoMusicLbl.textContent = `🎵 ${name} (${fmtTime(buffer.duration)})`;
       musicLbl.textContent = `🎵 ${name} (${fmtTime(buffer.duration)})`;
       drawTimeline();
     } catch { toast('Audio illisible par ce navigateur.', 'bad'); }
@@ -355,6 +356,174 @@ export async function render(el) {
     btn.disabled = false; btn.textContent = '🎥 Générer le plan';
   }
 
+
+  // ---------- Clip automatique : musique → paroles exactes → scénario plan par plan ----------
+  const AUTO_STYLES = {
+    realiste: ['🎬 Réaliste (vraie vidéo)', 'photorealistic, cinematic 35mm film look, natural light, shallow depth of field, like real filmed footage'],
+    anime: ['🌸 Anime', 'Japanese anime style, vivid colors, clean line art, dynamic shading'],
+    cartoon3d: ['🧸 Dessin animé 3D', '3D animated film style, expressive characters, soft global illumination, Pixar-like render'],
+    bd: ['💥 BD / Comics', 'comic book style, bold ink outlines, flat colors, halftone shading'],
+  };
+  let autoMusicLbl = null; let autoPlan = null; let autoDuration = 0;
+  const lsGet = (k) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+  const fmtT = (x) => { x = Math.max(0, +x || 0); const m = Math.floor(x / 60); return `${m}:${(x - m * 60).toFixed(1).padStart(4, '0')}`; };
+  const unT = (x) => { const [m, sec] = String(x).split(':'); return sec === undefined ? +m : (+m) * 60 + (+sec); };
+  function parseTimedLyrics(txt) {
+    return txt.split('\n').map(l => /^\s*\[\s*([\d:.]+)\s*(?:→|->|-)\s*([\d:.]+)\s*\]\s*(.*)$/.exec(l)).filter(Boolean)
+      .map(m => ({ start: unT(m[1]), end: unT(m[2]), text: m[3].trim() })).filter(x => x.text);
+  }
+
+  async function autoListen(btn) {
+    if (!music?.blob) return toast('Choisis d’abord ta musique (bouton 🎵 juste au-dessus).');
+    if (music.blob.size > 24 * 1024 * 1024) return toast('Musique trop lourde pour la transcription (24 Mo max). Exporte-la en MP3.', 'bad');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> J’écoute ta musique et je note les paroles…';
+    try {
+      const hint = autoLyrics.value.split(/\s+/).filter(Boolean).slice(0, 120).join(' ');
+      const type = music.blob.type || 'audio/mpeg';
+      const r = await api(`/api/transcribe?lang=fr&format=verbose_json&exact=1${hint ? '&prompt=' + encodeURIComponent(hint) : ''}`,
+        { method: 'POST', body: music.blob, headers: { 'Content-Type': type } });
+      autoDuration = music.buffer.duration;
+      const segs = (r.segments?.length ? r.segments : [{ start: 0, end: autoDuration, text: r.text || '' }])
+        .map(x => ({ start: +x.start, end: +x.end, text: String(x.text || '').trim() })).filter(x => x.text);
+      if (!segs.length) throw new Error('Aucune parole entendue. Si c’est une instru, décris l’ambiance dans « Idée » plus bas.');
+      autoTimed.value = segs.map(x => `[${fmtT(x.start)} → ${fmtT(x.end)}] ${x.text}`).join('\n');
+      autoCheck.hidden = false;
+      // Les paroles deviennent aussi les sous-titres du montage
+      subsArea.value = segs.map(x => `${x.start.toFixed(1)}-${x.end.toFixed(1)} ${x.text}`).join('\n'); parseSubs();
+      await autoWrite(btn);
+    } catch (e) { toastErr(e); }
+    btn.disabled = false; btn.textContent = '🎬 Écouter ma musique et écrire le clip';
+  }
+
+  async function autoWrite(btn) {
+    const segs = parseTimedLyrics(autoTimed.value);
+    if (!segs.length) return toast('Je ne trouve aucune ligne « [0:00.0 → 0:04.0] paroles ».');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> J’écris le scénario du clip, plan par plan…';
+    try {
+      const [, styleEn] = AUTO_STYLES[autoStyle.value];
+      const written = autoLyrics.value.trim();
+      const look = autoLook.value.trim();
+      const total = autoDuration || segs[segs.length - 1].end;
+      const r = await api('/api/complete', { method: 'POST', body: { src: 'clips', projectId: state.projectId, temperature: 0.6, json: true,
+        system: 'Tu es réalisateur de clips de rap. Tu découpes une chanson en plans calés sur les paroles et le rythme. Tu réponds UNIQUEMENT avec un objet JSON valide.',
+        prompt: `Artiste : ${autoArtist.value.trim() || 'le rappeur'}.
+Apparence de l'artiste (même visage dans tout le clip) : ${look || 'non précisée : invente une description précise et garde-la identique partout'}.
+Style visuel imposé (en anglais, à répéter dans chaque prompt) : ${styleEn}.
+Idées de l'artiste : ${ideaInput.value.trim() || 'libre, colle au sens des paroles'}.
+Format : ${P.format}. Durée du son : ${Math.round(total)} s.
+Paroles horodatées (vérifiées) :
+${segs.map(x => `[${x.start.toFixed(1)}s → ${x.end.toFixed(1)}s] ${x.text}`).join('\n')}
+${written ? `\nPAROLES OFFICIELLES écrites par l'artiste (elles font foi mot pour mot ; les horodatages ci-dessus servent seulement au minutage) :\n${written}\n` : ''}
+Règles :
+- un plan toutes les 4 à 8 secondes, de 0 à ${Math.round(total)} s, sans trou ;
+- "paroles" = les mots EXACTS rappés pendant le plan, recopiés sans rien changer ni corriger${written ? ' (pris dans les PAROLES OFFICIELLES)' : ''} ; vide pendant l'instru ;
+- chaque plan montre ce que disent les paroles à ce moment (« moto » → on le voit sur une moto ; « bateau » → sur un bateau) ;
+- alterne "performance" (il rappe face caméra) et "histoire" (scène, décor) ;
+- "image_prompt" et "video_prompt" en ANGLAIS, 30 à 60 mots, qui reprennent toujours la description physique de l'artiste et le style imposé ;
+- "scene" en français, une phrase courte.
+JSON : {"titre":"...","personnage":"description physique en anglais","plans":[{"debut":0,"fin":6,"paroles":"...","type":"performance|histoire","scene":"...","camera":"plan + mouvement","image_prompt":"...","video_prompt":"..."}]}` } });
+      const j = parseJsonLoose(r.content);
+      if (!j?.plans?.length) throw new Error('Le scénario n’était pas lisible. Réessaie (une autre IA sera essayée).');
+      autoPlan = j;
+      if (j.personnage && !look) { autoLook.value = j.personnage; lsSet('studio_auto_look', j.personnage); }
+      if (j.titre && !P.title) { P.title = String(j.titre).slice(0, 80); titleInput.value = P.title; }
+      renderAutoPlan();
+      toast(`Scénario écrit via ${r.routedVia} : ${j.plans.length} plans`, 'ok');
+    } catch (e) { toastErr(e); }
+    btn.disabled = false; btn.textContent = '🎬 Écouter ma musique et écrire le clip';
+  }
+
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => { const o = btn.textContent; btn.textContent = '✅ Copié'; setTimeout(() => { btn.textContent = o; }, 1500); }, () => toast('Copie impossible'));
+  }
+  async function shotImage(p, btn) {
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+    try {
+      const size = P.format === '16:9' ? '1280x720' : P.format === '1:1' ? '1024x1024' : '720x1280';
+      const r = await api('/api/images', { method: 'POST', body: { prompt: p.image_prompt, size, projectId: state.projectId } });
+      const f = r.files?.[0]; if (!f) throw new Error('Aucune image reçue.');
+      await addMedia(await fetchFileBlob(f.id), f.name, f.id);
+      items[items.length - 1].dur = Math.max(1, (+p.fin || 0) - (+p.debut || 0)) || 4;
+      items[items.length - 1].caption = '';
+      drawTimeline();
+      p.fileId = f.id; btn.textContent = '✅ Image ajoutée';
+    } catch (e) { toastErr(e); btn.disabled = false; btn.textContent = '🖼️ Image'; }
+  }
+  async function shotVideo(p, btn) {
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 1 à 5 min';
+    try {
+      const r = await api('/api/videos', { method: 'POST', body: { prompt: p.video_prompt, duration: Math.min(10, Math.max(2, Math.round((+p.fin || 0) - (+p.debut || 0)) || 5)),
+        aspect_ratio: P.format === '16:9' ? '16:9' : '9:16', imageFileId: p.fileId || null, projectId: state.projectId } });
+      await addMedia(await fetchFileBlob(r.file.id), r.file.name, r.file.id);
+      btn.textContent = '✅ Vidéo ajoutée';
+    } catch (e) { toastErr(e); btn.disabled = false; btn.textContent = '🎥 Vidéo'; }
+  }
+  async function allImages(btn) {
+    if (!autoPlan) return;
+    btn.disabled = true;
+    const btns = [...autoShots.querySelectorAll('button[data-img]')];
+    for (const [i, b] of btns.entries()) {
+      if (b.disabled) continue;
+      btn.innerHTML = `<span class="spinner"></span> Image ${i + 1}/${btns.length}…`;
+      await shotImage(autoPlan.plans[+b.dataset.img], b);
+    }
+    btn.disabled = false; btn.textContent = '🖼️ Créer toutes les images';
+  }
+  function renderAutoPlan() {
+    const j = autoPlan; autoShots.innerHTML = '';
+    autoResult.hidden = false;
+    autoShots.append(...j.plans.map((p, i) => h('div.card.stack', { style: { padding: '10px' } },
+      h('div.row', h('b', `Plan ${i + 1}`), h('span.small.muted', `${fmtTime(+p.debut)} → ${fmtTime(+p.fin)}`), h('span.grow'),
+        h('span.tiny', p.type === 'performance' ? '🎤 il rappe' : '🎞️ histoire')),
+      p.paroles ? h('div.small', { style: { fontStyle: 'italic' } }, `« ${p.paroles} »`) : null,
+      h('div.small', p.scene || ''),
+      h('div.tiny.muted', `📷 ${p.camera || ''}`),
+      h('div.row',
+        h('button.btn.small.ghost', { onclick: (e) => copyText(p.image_prompt || '', e.target) }, '📋 Prompt image'),
+        h('button.btn.small.ghost', { onclick: (e) => copyText(p.video_prompt || '', e.target) }, '📋 Prompt vidéo'),
+        h('button.btn.small', { 'data-img': i, onclick: (e) => shotImage(p, e.target) }, '🖼️ Image'),
+        h('button.btn.small', { onclick: (e) => shotVideo(p, e.target) }, '🎥 Vidéo')))));
+  }
+  function copyAllPlan(btn) {
+    if (!autoPlan) return;
+    copyText(`${autoPlan.titre || 'Clip'}\nPersonnage : ${autoPlan.personnage || autoLook.value}\n\n` + autoPlan.plans.map((p, i) =>
+      `PLAN ${i + 1} (${fmtTime(+p.debut)}-${fmtTime(+p.fin)}) ${p.type}\nParoles : ${p.paroles || ''}\nScène : ${p.scene || ''}\nCaméra : ${p.camera || ''}\nIMAGE : ${p.image_prompt}\nVIDÉO : ${p.video_prompt}`).join('\n\n'), btn);
+  }
+
+  const autoStyle = h('select', Object.entries(AUTO_STYLES).map(([k, [label]]) => h('option', { value: k }, label)));
+  autoStyle.value = lsGet('studio_auto_style') || 'realiste';
+  autoStyle.onchange = () => lsSet('studio_auto_style', autoStyle.value);
+  const autoArtist = h('input', { placeholder: 'Nom d’artiste', value: lsGet('studio_auto_artist') || 'Chok Chokan', oninput: (e) => lsSet('studio_auto_artist', e.target.value) });
+  const autoLook = h('input', { placeholder: 'Ton apparence : « homme 30 ans, barbe courte, cheveux noirs, survêt noir »', value: lsGet('studio_auto_look'), oninput: (e) => lsSet('studio_auto_look', e.target.value) });
+  const autoLyrics = h('textarea', { rows: 4, placeholder: 'Colle tes paroles si tu les as : elles font foi mot pour mot et guident l’écoute.' });
+  const autoTimed = h('textarea', { rows: 8, style: { fontFamily: 'ui-monospace, monospace', fontSize: '13px' } });
+  const autoCheck = h('div.stack',
+    h('h4', '📝 Paroles entendues'),
+    h('p.tiny.muted', 'Un mot mal compris ? Corrige-le ici (sans toucher aux temps entre crochets), puis appuie sur « Refaire ».'),
+    autoTimed,
+    h('button.btn.small', { onclick: (e) => autoWrite(e.target) }, '🔁 Refaire le scénario avec mes corrections'));
+  autoCheck.hidden = true;
+  const autoShots = h('div.stack');
+  const autoResult = h('div.stack',
+    h('div.row', h('h4', '🎬 Ton clip, plan par plan'), h('span.grow'),
+      h('button.btn.small', { onclick: (e) => allImages(e.target) }, '🖼️ Créer toutes les images'),
+      h('button.btn.small.ghost', { onclick: (e) => copyAllPlan(e.target) }, '📋 Tout copier')),
+    h('p.tiny.muted', 'Les images créées s’ajoutent à la timeline avec la bonne durée ; le bouton 🎥 anime le plan (à partir de son image si tu l’as créée avant). Ensuite : Aperçu puis Exporter.'),
+    autoShots);
+  autoResult.hidden = true;
+  autoMusicLbl = h('span.small', 'Aucune musique');
+  const autoCard = () => h('div.card.stack',
+    h('h3', '⚡ Clip automatique : mets ta musique, l’IA fait le reste'),
+    h('div.row',
+      h('button.btn.small', { onclick: async () => { const [f] = await pickLocalFiles('audio/*', false); if (f) setMusic(f, f.name); } }, '🎵 Ma musique'),
+      h('button.btn.small', { onclick: async () => { const [f] = await pickFromLibrary({ kinds: ['audio'], multiple: false }); if (f) setMusic(await fetchFileBlob(f.id), f.name); } }, '📚 Mes fichiers'),
+      autoMusicLbl, h('span.grow'), autoStyle),
+    h('button.btn.primary', { onclick: (e) => autoListen(e.target) }, '🎬 Écouter ma musique et écrire le clip'),
+    h('details', h('summary.small', 'Options (remplies une fois, gardées pour la suite)'),
+      h('div.stack', autoArtist, autoLook, autoLyrics)),
+    autoCheck, autoResult);
+
   // ---------- Interface ----------
   function drawTimeline() {
     tl.innerHTML = '';
@@ -413,7 +582,7 @@ export async function render(el) {
   const fontSel = h('select', { onchange: (e) => { ts.font = e.target.value; drawFrame(0); } }, ['Impact, sans-serif', 'system-ui, sans-serif', 'Georgia, serif', '"Courier New", monospace'].map(f => h('option', { value: f }, f.split(',')[0].replace(/"/g, ''))));
   const posSel = h('select', { onchange: (e) => { ts.pos = e.target.value; drawFrame(0); } }, ['bas', 'centre', 'haut'].map(p => h('option', { value: p }, `Texte en ${p}`)));
 
-  el.append(h('div.grid.two',
+  el.append(autoCard(), h('div.grid.two',
     h('div.stack',
       h('div.card.stack',
         h('h3', '1. Médias'),

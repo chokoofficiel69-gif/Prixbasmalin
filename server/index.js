@@ -575,7 +575,11 @@ route('POST', '/api/speech', async (req, res, p, user) => {
 route('POST', '/api/transcribe', async (req, res, p, user) => {
   // Transcription : OVH en direct (Whisper, accès anonyme) si disponible, sinon passerelle (si autorisée).
   const ovhList = (await listOvhModels()).list || [];
-  const whisper = platformAllowed('ovh') ? ovhList.find(m => /whisper/i.test(m)) : null;
+  const exact = new URL(req.url, 'http://x').searchParams.get('exact') === '1';
+  // Mode « exact » : le Whisper le plus précis (large-v3 complet, pas la version turbo).
+  const whisper = platformAllowed('ovh')
+    ? ((exact && ovhList.find(m => /whisper-large-v3$/i.test(m))) || ovhList.find(m => /whisper/i.test(m)))
+    : null;
   if (!mediaGuard(res, 'transcription', user, !whisper)) return;
   const t0 = Date.now();
   try {
@@ -590,14 +594,18 @@ route('POST', '/api/transcribe', async (req, res, p, user) => {
     } else {
       audio = await readBody(req, 24 * 1024 * 1024);
       type = (req.headers['content-type'] || 'audio/webm').split(';')[0];
-      name = `audio.${type.split('/')[1] || 'webm'}`.replace('mpeg', 'mp3').replace('x-wav', 'wav');
+      name = `audio.${type.split('/')[1] || 'webm'}`.replace('mpeg', 'mp3').replace('x-wav', 'wav').replace('x-m4a', 'm4a').replace('mp4', 'm4a').replace('x-flac', 'flac');
     }
     if (!audio.length) return fail(res, 400, 'Audio vide.');
     const boundary = '----studio' + crypto.randomBytes(8).toString('hex');
     const field = (k, v) => `--${boundary}\r\nContent-Disposition: form-data; name="${k}"\r\n\r\n${v}\r\n`;
-    let head = field('model', 'auto');
+    let head = field('model', exact ? 'whisper-large-v3' : 'auto');
     const lang = u.searchParams.get('lang');
     if (lang && /^[a-z]{2}$/.test(lang)) head += field('language', lang);
+    if (exact) head += field('temperature', '0');
+    // Paroles connues : elles guident Whisper vers les bons mots.
+    const hint = String(u.searchParams.get('prompt') || '').replace(/[\r\n]+/g, ' ').slice(0, 900);
+    if (hint) head += field('prompt', hint);
     head += field('response_format', u.searchParams.get('format') === 'verbose_json' ? 'verbose_json' : 'json');
     head += `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${name.replace(/["\r\n]/g, '')}"\r\nContent-Type: ${type}\r\n\r\n`;
     const multipart = Buffer.concat([Buffer.from(head), audio, Buffer.from(`\r\n--${boundary}--\r\n`)]);
@@ -606,7 +614,7 @@ route('POST', '/api/transcribe', async (req, res, p, user) => {
       const slot = ovhSlot(whisper);
       if (!slot.ok) return fail(res, 429, `Capacité gratuite d’OVH pour la transcription momentanément atteinte. Réessayez dans ${slot.retryIn} s.`);
       ovhTake(whisper);
-      const mp = Buffer.from(multipart.toString('latin1').replace(`name="model"\r\n\r\nauto`, `name="model"\r\n\r\n${whisper}`), 'latin1');
+      const mp = Buffer.from(multipart.toString('latin1').replace(/name="model"\r\n\r\n[^\r]*/, `name="model"\r\n\r\n${whisper}`), 'latin1');
       r = await fetch(`${OVH_BASE}/audio/transcriptions`, { method: 'POST', body: mp, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` }, signal: AbortSignal.timeout(180000) });
       if (r.status === 429) ovhCooldown(whisper, 60);
     } else {

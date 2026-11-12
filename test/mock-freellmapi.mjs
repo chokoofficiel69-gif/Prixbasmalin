@@ -16,6 +16,9 @@ function reply(messages, model) {
   const last = messages[messages.length - 1];
   const text = typeof last.content === 'string' ? last.content : last.content.map(p => p.text || '[image]').join(' ');
   const sys = messages.find(m => m.role === 'system')?.content || '';
+  if (/réalisateur de clips/.test(sys)) return JSON.stringify({ titre: 'Clip test', personnage: 'young man, short beard, black tracksuit', plans: [
+    { debut: 0, fin: 1.5, paroles: 'Bonjour le studio.', type: 'performance', scene: 'Il rappe face caméra', camera: 'plan serré, travelling avant', image_prompt: 'young man rapping, photorealistic', video_prompt: 'young man rapping to camera' },
+    { debut: 1.5, fin: 3, paroles: 'Deuxième phrase.', type: 'histoire', scene: 'Il roule à moto la nuit', camera: 'plan large', image_prompt: 'young man on a motorbike at night', video_prompt: 'motorbike ride at night' }] });
   if (/UNIQUEMENT un objet JSON/.test(sys) || /JSON attendu|Réponds UNIQUEMENT avec du JSON|"etapes"/.test(text)) {
     if (/"etapes"/.test(text)) return '```json\n{"etapes":[{"agent":"Architecte","consigne":"Plan"},{"agent":"Développeur","consigne":"Code"}]}\n```';
     if (/plans/.test(text)) return '{"titre":"Mon été","plans":[{"media":1,"duree_secondes":2,"transition":"zoom","effet":"zoomin","texte":"Souvenirs"},{"media":0,"duree_secondes":2,"transition":"fondu","effet":"panG","texte":""}],"look":"vintage"}';
