@@ -14,6 +14,7 @@ const rules=[
 ];
 
 const child=spawn("git",["log","--all","--format=","--no-ext-diff","-p"],{stdio:["ignore","pipe","inherit"]});
+const exitPromise=new Promise((resolve,reject)=>{child.once("close",resolve);child.once("error",reject);});
 const rl=createInterface({input:child.stdout,crlfDelay:Infinity});
 let currentFile="(unknown)",findings=0;
 for await (const line of rl) {
@@ -27,7 +28,7 @@ for await (const line of rl) {
     }
   }
 }
-const code=await new Promise(resolve=>child.on("close",resolve));
+const code=await exitPromise;
 if(code!==0) {
   process.stderr.write("Impossible de lire l'historique Git complet.\n");
   process.exitCode=2;
