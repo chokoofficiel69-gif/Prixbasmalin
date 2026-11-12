@@ -59,6 +59,11 @@ on:
       - main
     paths:
       - ".github/workflows/monitor-production.yml"
+      - "workers/prixbasmalin-ai.test.mjs"
+      - "workers/prixbasmalin-ai.js"
+      - "workers/prixbasmalin-clicks.js"
+      - "workers/prixbasmalin-clicks.test.mjs"
+      - "workers/prixbasmalin-attribution.js"
       - "js/track-outbound.js"
       - "js/prix-malin-auth.js"
       - "catalogue.html"
@@ -478,13 +483,44 @@ jobs:
           NODE
       - name: Vérifier le Worker d'attribution
         run: |
-          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
-            https://prixbasmalin-attribution.chokoofficiel69.workers.dev/health --output /tmp/worker-health.json
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 --dump-header /tmp/attribution-headers.txt https://prixbasmalin-attribution.chokoofficiel69.workers.dev/health --output /tmp/attribution-health.json
           node --input-type=module <<'NODE'
           import fs from "node:fs";
-          const data = JSON.parse(fs.readFileSync("/tmp/worker-health.json", "utf8"));
-          if (data.ok !== true || data.service !== "prixbasmalin-attribution" || data.country_measurement !== true) {
-            throw new Error("Le Worker attribution n'a pas renvoyé le statut attendu");
+          const data = JSON.parse(fs.readFileSync("/tmp/attribution-health.json", "utf8"));
+          const headers = fs.readFileSync("/tmp/attribution-headers.txt", "utf8").toLowerCase();
+          if (data.ok !== true || data.service !== "prixbasmalin-attribution" || data.country_measurement !== true) throw new Error("Worker attribution non sain");
+          for (const h of ["x-content-type-options: nosniff", "x-frame-options: deny", "referrer-policy: strict-origin-when-cross-origin"]) {
+            if (!headers.includes(h)) throw new Error("En-tête de sécurité absent : " + h);
           }
-          console.log("Worker attribution joignable et sain.");
+          console.log("Worker attribution joignable, sain et protégé.");
           NODE
+      - name: Vérifier le Worker analytics et clics
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 --dump-header /tmp/clicks-headers.txt https://prixbasmalin-clicks.chokoofficiel69.workers.dev/health --output /tmp/clicks-health.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/clicks-health.json", "utf8"));
+          const headers = fs.readFileSync("/tmp/clicks-headers.txt", "utf8").toLowerCase();
+          if (data.ok !== true || data.service !== "prixbasmalin-analytics") throw new Error("Worker clicks non sain");
+          for (const h of ["x-content-type-options: nosniff", "x-frame-options: deny", "referrer-policy: strict-origin-when-cross-origin"]) {
+            if (!headers.includes(h)) throw new Error("En-tête de sécurité absent : " + h);
+          }
+          console.log("Worker clicks joignable, sain et protégé.");
+          NODE
+      - name: Vérifier le Worker IA et le refus des Content-Type invalides
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 --dump-header /tmp/ai-headers.txt https://prixbasmalin-ia.chokoofficiel69.workers.dev/health --output /tmp/ai-health.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/ai-health.json", "utf8"));
+          const headers = fs.readFileSync("/tmp/ai-headers.txt", "utf8").toLowerCase();
+          if (data.ok !== true || data.service !== "Prix Malin AI gateway" || data.configured !== true) throw new Error("Worker IA non sain ou fournisseur non configuré");
+          for (const h of ["x-content-type-options: nosniff", "x-frame-options: deny", "referrer-policy: strict-origin-when-cross-origin"]) {
+            if (!headers.includes(h)) throw new Error("En-tête de sécurité absent : " + h);
+          }
+          console.log("Worker IA joignable, sain et configuré ; aucun appel fournisseur effectué.");
+          NODE
+          status="$(curl --silent --show-error --location --max-time 20 --output /tmp/ai-jsonp.json --write-out "%{http_code}" --request POST --header "Origin: https://prixbasmalin.fr" --header "Content-Type: application/jsonp" --data '{"message":"smoke test"}' https://prixbasmalin-ia.chokoofficiel69.workers.dev/api/ai)"
+          if [[ "$status" != "415" ]]; then echo "Content-Type application/jsonp : HTTP $status au lieu de 415"; exit 1; fi
+          grep -q '"requiredContentType":"application/json"' /tmp/ai-jsonp.json
+          echo "Worker IA refuse bien application/jsonp (HTTP 415), sans appeler le fournisseur."
