@@ -155,7 +155,7 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn("if(authorized && ", page)
         self.assertIn('data-partner="decathlon" data-authorization-status="pending"', section)
         self.assertIn('data-partner="nicchia-luxury" data-authorization-status="unverified"', section)
-        self.assertIn('Les demandes en attente ne sont pas des partenariats actifs.', section)
+        self.assertIn('les demandes en attente ne sont pas des partenariats actifs.', section)
 
         footers = []
         cursor = 0
