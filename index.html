@@ -609,28 +609,28 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <a class="pm-partner pm-partner-luxury" data-partner="nicchia-luxury" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=54306&amp;murl=https%3A%2F%2Fwww.nicchialuxury.com%2F" target="_blank" rel="sponsored nofollow noopener" hidden><img class="pm-partner-logo pm-logo-nicchia" src="/assets/partenaires/nicchia-luxury.png" alt="Nicchia Luxury" width="420" height="62" loading="lazy"><span>Parfums &amp; luxe</span></a>
     <a class="pm-partner pm-partner-ecovacs" data-partner="ecovacs" data-href="https://www.awin1.com/cread.php?awinmid=131716&amp;awinaffid=3137386" target="_blank" rel="sponsored nofollow noopener" hidden><img class="pm-partner-logo pm-logo-white" src="/assets/partenaires/ecovacs.png" alt="Ecovacs" width="372" height="110" loading="lazy"><span>Robots aspirateurs</span></a>
     <a class="pm-partner pm-partner-mibro" data-partner="mibro" data-href="https://www.awin1.com/cread.php?awinmid=131783&amp;awinaffid=3137386" target="_blank" rel="sponsored nofollow noopener" hidden><img class="pm-partner-logo pm-logo-white" src="/assets/partenaires/mibro.png" alt="Mibro" width="371" height="110" loading="lazy"><span>Montres connectées</span></a>
-  </div>
-  <!-- Marques supplémentaires : même grille visuelle, sans lien commercial tant qu'il n'est pas activé. -->
-  <article class="pm-partner" aria-label="Fiido">
-    <img class="pm-partner-logo pm-logo-fiido" src="/assets/partenaires/fiido.webp" alt="Fiido" width="220" height="220" loading="lazy" decoding="async">
+    <!-- Marques partenaires supplémentaires (vitrine, sans lien commercial actif), même grille 2 colonnes. -->
+    <article class="pm-partner pm-partner--showcase" aria-label="Fiido">
+    <img class="pm-partner-logo pm-logo-tile pm-logo-fiido" src="/assets/partenaires/fiido.webp" alt="Fiido" width="220" height="220" loading="lazy" decoding="async">
     <span>Vélos électriques</span>
   </article>
-  <article class="pm-partner" aria-label="ANITA & ZAHA">
+  <article class="pm-partner pm-partner--showcase" aria-label="ANITA & ZAHA">
     <b class="pm-pending-wordmark">ANITA &amp; ZAHA</b>
     <span>Mode &amp; beauté</span>
   </article>
-  <article class="pm-partner" aria-label="Jowissa">
-    <img class="pm-partner-logo pm-logo-jowissa" src="/assets/partenaires/jowissa.webp" alt="Jowissa" width="220" height="220" loading="lazy" decoding="async">
+  <article class="pm-partner pm-partner--showcase" aria-label="Jowissa">
+    <img class="pm-partner-logo pm-logo-tile pm-logo-jowissa" src="/assets/partenaires/jowissa.webp" alt="Jowissa" width="220" height="220" loading="lazy" decoding="async">
     <span>Montres</span>
   </article>
-  <article class="pm-partner" aria-label="Lusini">
-    <img class="pm-partner-logo pm-logo-lusini" src="/assets/partenaires/lusini.webp" alt="Lusini" width="220" height="220" loading="lazy" decoding="async">
+  <article class="pm-partner pm-partner--showcase" aria-label="Lusini">
+    <img class="pm-partner-logo pm-logo-tile pm-logo-lusini" src="/assets/partenaires/lusini.webp" alt="Lusini" width="220" height="220" loading="lazy" decoding="async">
     <span>Équipement professionnel</span>
   </article>
-  <article class="pm-partner" aria-label="Imou">
-    <img class="pm-partner-logo pm-logo-imou" src="/assets/partenaires/imou.webp" alt="Imou" width="220" height="220" loading="lazy" decoding="async">
+  <article class="pm-partner pm-partner--showcase" aria-label="Imou">
+    <img class="pm-partner-logo pm-logo-tile pm-logo-imou" src="/assets/partenaires/imou.webp" alt="Imou" width="220" height="220" loading="lazy" decoding="async">
     <span>Maison connectée</span>
   </article>
+  </div>
   <p class="pm-hp-note">Liens partenaires affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
 </section>
 <section id="pm-partner-deals" class="pm-hp-section" aria-labelledby="pm-partner-deals-title" hidden>
@@ -1734,10 +1734,16 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 .pm-partner-ecovacs{--pm-brand:#1f6fd1;--pm-brand-text:#6fb0ff}
 .pm-partner-mibro{--pm-brand:#ff6a2b;--pm-brand-text:#ff9a6b}
 .pm-logo-white{background:#fff}
+/* Logos carrés/ronds des marques : tuile blanche nette, bien visible et homogène. */
+.pm-logo-tile{height:46px;width:auto;max-width:150px;background:#fff;padding:6px 12px;border-radius:12px;object-fit:contain;align-self:flex-start}
+/* Cartes vitrines (marque sans lien commercial actif) : pas de flèche ni d'effet de bouton. */
+.pm-partner--showcase{cursor:default}
+.pm-partner--showcase::after{content:none}
+.pm-partner--showcase:hover,.pm-partner--showcase:focus-visible{transform:none;border-color:#3e4a59}
 /* Logos des marques ajoutées dans la grille partenaires. */
 .pm-logo-fiido,.pm-logo-jowissa,.pm-logo-lusini{width:42px;height:42px;object-fit:contain;background:#fff;padding:3px;border-radius:8px}
 .pm-logo-imou{width:120px;height:32px;object-fit:cover;object-position:center;background:#fff;padding:0 4px;border-radius:8px}
-.pm-pending-wordmark{display:inline-block;align-self:flex-start;background:#fff;color:#161616;border-radius:8px;padding:0 7px;line-height:32px;font-family:Georgia,"Times New Roman",serif;font-size:21px;letter-spacing:.4px}
+.pm-partner .pm-pending-wordmark{display:inline-block;align-self:flex-start;background:#fff;color:#161616;border-radius:8px;padding:2px 10px;line-height:1.3;font-family:Georgia,"Times New Roman",serif;font-size:19px;letter-spacing:.4px}
 @media(min-width:760px){.pm-partners-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:760px){.pm-hp-rail{grid-auto-columns:230px}}
 /* Accueil resserré : blocs enchaînés sans grands espaces noirs. */
@@ -1876,7 +1882,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   <a href="/credits-photos.html">Crédits photos</a>
  </nav>
  <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix observés chez différents marchands, avec leur date de relevé.</p>
- <p>Prix Malin travaille avec plusieurs partenaires, dont <strong>Amazon</strong>, <strong>Decathlon</strong> et <strong>Nicchia Luxury</strong>, et de nouveaux partenaires arrivent bientôt. Lorsque vous achetez après avoir cliqué sur un lien partenaire, Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+ <p>Prix Malin travaille avec plusieurs partenaires, dont <strong>Amazon</strong>, <strong>Decathlon</strong>, <strong>Nicchia Luxury</strong>, <strong>Lusini</strong>, <strong>Imou</strong>, <strong>Jowissa</strong>, <strong>Ecovacs</strong> et <strong>Mibro</strong>, et de nouvelles marques arrivent régulièrement. Lorsque vous achetez après avoir cliqué sur un lien partenaire, Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
 </footer>
 <script id="pm-seasonal-theme-script">
 (function(){
