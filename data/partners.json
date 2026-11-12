@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01",
-  "note": "Statuts saisis d'après les informations communiquées par le propriétaire du site. Une demande envoyée ne vaut pas acceptation ni autorisation d'utiliser un flux, un logo ou des contenus protégés.",
+  "updatedAt": "2026-11-12",
+  "note": "Statuts saisis d'après les informations communiquées par le propriétaire du site. Une demande envoyée ne vaut pas acceptation ni autorisation d'utiliser un flux, un logo ou des contenus protégés. Les programmes Awin repérés dans l’onglet pendingInvitation le 2026-11-12 sont suivis séparément : ils ne sont pas présentés comme des partenariats actifs, et leurs logos ne sont pas publiés avant vérification du media kit et de l’autorisation d’usage.",
   "entries": [
     {
       "name": "Rakuten",
@@ -51,6 +51,77 @@
       "contactStatus": "request_reported_sent",
       "approvalStatus": "pending_confirmation",
       "integration": "Flux marchand à connecter selon accord"
+    },
+    {
+      "name": "Fiido Technology Development Co., Ltd",
+      "displayName": "Fiido",
+      "type": "retailer",
+      "category": "Vélos électriques",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 85523,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/85523",
+      "contactStatus": "visible_in_awin_pendingInvitation",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "pendingInvitation_tab",
+      "statusObservedAt": "2026-11-12",
+      "integration": "Ne pas activer sur l'accueil avant confirmation du statut joined et création d'un lien Awin autorisé."
+    },
+    {
+      "name": "ANITA & ZAHA",
+      "type": "brand",
+      "category": "Cosmétiques",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 115393,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/115393",
+      "contactStatus": "visible_in_awin_pendingInvitation",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "pendingInvitation_tab",
+      "statusObservedAt": "2026-11-12",
+      "integration": "Attendre la confirmation du statut joined et utiliser uniquement les visuels fournis dans le media kit Awin."
+    },
+    {
+      "name": "Jowissa",
+      "type": "brand",
+      "category": "Montres",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 59933,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/59933",
+      "contactStatus": "visible_in_awin_pendingInvitation",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "pendingInvitation_tab",
+      "statusObservedAt": "2026-11-12",
+      "integration": "Ne pas activer sur l'accueil avant confirmation du statut joined et création d'un lien Awin autorisé."
+    },
+    {
+      "name": "Lusini FR",
+      "type": "retailer",
+      "category": "Équipement professionnel CHR, arts de la table et mobilier",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 22619,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/22619",
+      "contactStatus": "visible_in_awin_pendingInvitation",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "pendingInvitation_tab",
+      "statusObservedAt": "2026-11-12",
+      "integration": "Ne pas activer sur l'accueil avant confirmation du statut joined et création d'un lien Awin autorisé."
+    },
+    {
+      "name": "Imou FR",
+      "type": "brand",
+      "category": "Maison connectée et sécurité",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 122426,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/122426",
+      "contactStatus": "visible_in_awin_pendingInvitation",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "pendingInvitation_tab",
+      "statusObservedAt": "2026-11-12",
+      "integration": "Ne pas activer sur l'accueil avant confirmation du statut joined et création d'un lien Awin autorisé."
     }
   ]
 }
