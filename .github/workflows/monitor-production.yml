@@ -9,6 +9,8 @@ on:
       - ".github/workflows/monitor-production.yml"
       - "js/track-outbound.js"
       - "workers/prixbasmalin-attribution.js"
+      - "workers/prixbasmalin-ai.js"
+      - "workers/prixbasmalin-ai.test.mjs"
       - "workers/prixbasmalin-clicks.js"
       - "workers/prixbasmalin-clicks.test.mjs"
       - "tests/**"
@@ -111,6 +113,10 @@ jobs:
         run: node --check workers/prixbasmalin-clicks.js
       - name: Tester le Worker mesure d'audience (tag Amazon, sessions, robots, sécurité) et le script de suivi
         run: node --test workers/prixbasmalin-clicks.test.mjs tests/js/track-outbound.test.mjs
+      - name: Vérifier la syntaxe du Worker IA
+        run: node --check workers/prixbasmalin-ai.js
+      - name: Tester le Worker IA (Content-Type strict et en-têtes)
+        run: node --test workers/prixbasmalin-ai.test.mjs
       - name: Vérifier la syntaxe des scripts Python modifiés
         run: python3 -m py_compile scripts/build_guides.py scripts/build_seo_pages.py scripts/import_amazon_report.py scripts/site_chrome.py
       - name: Tester l'affiliation Amazon, le consentement et l'import CSV officiel
