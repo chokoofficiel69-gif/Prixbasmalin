@@ -129,14 +129,67 @@ class HomeDealsTests(unittest.TestCase):
                 self.assertTrue(line.endswith("}}") and not line.endswith("}}}"), line)
         self.assertIn("github.event.pull_request.head.sha || github.ref", tracker)
 
+    def test_pending_awin_applications_are_not_published_as_active_partners(self):
+        from html import unescape
+
+        page = (ROOT / "index.html").read_text(encoding="utf-8")
+        partners = json.loads((ROOT / "data" / "partners.json").read_text(encoding="utf-8"))
+        start = page.index('<section id="pm-partners"')
+        end = page.index("</section>", start)
+        section = unescape(page[start:end]).casefold()
+
+        pending = [
+            entry for entry in partners.get("entries", [])
+            if entry.get("network") == "Awin" and entry.get("approvalStatus") != "approved"
+        ]
+        self.assertTrue(pending)
+        for entry in pending:
+            name = entry.get("displayName") or entry.get("name", "")
+            name = name.removesuffix(" FR")
+            self.assertNotIn(name.casefold(), section)
+        for logo_class in ("pm-logo-fiido", "pm-logo-jowissa", "pm-logo-lusini", "pm-logo-imou"):
+            self.assertNotIn(logo_class, section)
+
+        # Un lien affilié Awin/Rakuten n'est visible qu'après statut joined explicite.
+        self.assertIn('a.getAttribute("data-authorization-status")==="joined"', page)
+        self.assertIn("if(authorized && ", page)
+        self.assertIn('data-partner="decathlon" data-authorization-status="pending"', section)
+        self.assertIn('data-partner="nicchia-luxury" data-authorization-status="unverified"', section)
+        self.assertIn('les demandes en attente ne sont pas des partenariats actifs.', section)
+
+        footers = []
+        cursor = 0
+        while True:
+            start_footer = page.find("<footer", cursor)
+            if start_footer < 0:
+                break
+            end_footer = page.find("</footer>", start_footer)
+            if end_footer < 0:
+                break
+            footers.append(page[start_footer:end_footer + len("</footer>")])
+            cursor = end_footer + len("</footer>")
+        self.assertTrue(footers)
+        for footer in footers:
+            visible = unescape(footer).casefold()
+            for unapproved in ("<strong>decathlon</strong>", "<strong>nicchia luxury</strong>",
+                               "<strong>lusini</strong>", "<strong>imou</strong>",
+                               "<strong>jowissa</strong>", "<strong>ecovacs</strong>",
+                               "<strong>mibro</strong>"):
+                self.assertNotIn(unapproved, visible)
+
     def test_homepage_sections_partners_and_affiliate_rel(self):
         page = (ROOT / "index.html").read_text(encoding="utf-8")
         for marker in ('id="pm-partners"', 'id="pm-top-prices"', 'id="pm-gifts"', 'fetch("/data/home-deals.json"'):
             self.assertIn(marker, page)
         self.assertIn('href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21"', page)
-        # Les boutons partenaires restent masqués tant que le script n'a pas validé un lien https.
-        self.assertIn('data-partner="decathlon" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=44806&amp;murl=https%3A%2F%2Fwww.decathlon.fr%2F" target="_blank" rel="sponsored nofollow noopener" hidden', page)
-        self.assertIn('data-partner="nicchia-luxury" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=54306', page)
+        # Les liens restent masqués tant que le statut joined n’est pas confirmé.
+        self.assertIn('data-partner="decathlon" data-authorization-status="pending" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=44806&amp;murl=https%3A%2F%2Fwww.decathlon.fr%2F" target="_blank" rel="sponsored nofollow noopener" hidden', page)
+        self.assertIn('data-partner="nicchia-luxury" data-authorization-status="unverified" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=54306', page)
+        links = [line for line in page.splitlines() if "<a " in line and "data-href=" in line]
+        self.assertTrue(links)
+        for link in links:
+            if 'data-authorization-status="joined"' not in link:
+                self.assertIn(" hidden", link)
         # Promos partenaires : uniquement prix TTC frais, prix barré fourni par le marchand, liens affiliés.
         self.assertIn('id="pm-partner-deals"', page)
         self.assertIn('p.priceTaxStatus==="included"', page)
