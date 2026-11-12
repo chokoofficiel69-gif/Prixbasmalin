@@ -48,6 +48,12 @@ côté serveur dans 128 Mo. Votre appareil le fait gratuitement, sans limite et 
 Les quotas gratuits ne sont jamais inventés : le Studio affiche ce que les fournisseurs déclarent (« prêt », « en pause car quota atteint »)
 et ce qui a réellement été consommé.
 
+## Quota de tokens (pool mensuel)
+
+Voir [docs/QUOTAS.md](docs/QUOTAS.md) : pool interne de 10 000 000 tokens/mois partagé, quota individuel par compte
+(somme ≤ pool), réservation avant chaque appel, débit des tokens réels (ou estimés, marqués comme tels), remise à zéro
+mensuelle, blocage réel. OVH AI Endpoints est appelé en direct en accès anonyme (2 requêtes/min par IP et par modèle).
+
 ## Garde-fous « zéro dépense »
 
 1. FreeLLMAPI ne route que vers des offres gratuites.
@@ -83,8 +89,9 @@ et ce qui a réellement été consommé.
 
 ```bash
 npm start                      # serveur sur :8080
-node test/mock-freellmapi.mjs  # faux FreeLLMAPI sur :9999 pour tester sans quota
-node test/ui.mjs               # 19 scénarios de bout en bout (Playwright, micro simulé)
+node test/mock-freellmapi.mjs  # faux FreeLLMAPI + faux OVH (/ovh/v1) sur :9999
+node test/ui.mjs               # 19 scénarios
+node --test --test-concurrency=1 test/quota.test.mjs   # 13 tests du quota de bout en bout (Playwright, micro simulé)
 ```
 
 ## Ajouter ou remplacer un fournisseur

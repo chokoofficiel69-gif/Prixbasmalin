@@ -30,6 +30,9 @@ await step('Connexion', async () => {
   await page.click('#login-form button');
   await page.locator('#nav a').first().waitFor();
   if ((await page.locator('#nav a').count()) !== 10) throw new Error('menu incomplet');
+  // Pour ces tests d'interface : médias via passerelle autorisés et limite OVH relevée (faux fournisseurs)
+  const st = await page.evaluate(() => fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Studio': '1' }, body: JSON.stringify({ gatewayMediaAllowed: true, ovhRpmPerModel: 100 }) }).then(r => r.status));
+  if (st !== 200) throw new Error('réglages de test refusés');
 });
 
 await step('Accueil', async () => {
@@ -46,7 +49,8 @@ await step('Parler aux IA : discussion streamée + pièce jointe image', async (
   await page.locator('.att-chip').waitFor();
   await page.fill('.composer textarea', 'Bonjour, que vois-tu ?');
   await page.locator('.composer textarea').press('Enter');
-  await page.locator('.msg.assistant .meta').getByText('via ovh/gpt-oss-120b').waitFor();
+  await page.locator('.msg.assistant .meta').getByText('via ovh/Qwen2.5-VL-72B-Instruct').waitFor();
+  await page.locator('.msg.assistant .meta').getByText('(réels)').waitFor();
   await page.locator('.msg.assistant pre code').waitFor();
   await page.locator('.conv-list .item').first().waitFor();
   await page.screenshot({ path: `${OUT}/02-chat.png` });
@@ -64,7 +68,7 @@ await step('Parler aux IA : comparaison de 3 modèles', async () => {
   await clickText('＋ Ajouter un modèle');
   const cols = page.locator('.compare-col');
   if ((await cols.count()) !== 3) throw new Error('3 colonnes attendues');
-  await cols.nth(2).locator('select').selectOption('qwen3-32b');
+  await cols.nth(2).locator('select').selectOption('ovh/qwen3-32b');
   await page.fill('.composer textarea', 'Compare-vous');
   await page.locator('.composer textarea').press('Enter');
   await page.locator('.compare-col').nth(2).getByText('via ovh/qwen3-32b').waitFor();
@@ -226,16 +230,17 @@ await step('Mes projets : création + mémoire', async () => {
 
 await step('Suivi des tokens', async () => {
   await go('tokens');
-  await page.getByText('Modèles utilisés ce mois').waitFor();
-  await page.getByText('gpt-oss-120b').first().waitFor();
+  await page.getByText('Pool interne du Studio').waitFor();
+  await page.getByText('Capacité et limites confirmées chez les fournisseurs').waitFor();
+  await page.getByText('quota fournisseur non communiqué').first().waitFor();
   await page.screenshot({ path: `${OUT}/11-tokens.png`, fullPage: true });
 });
 
 await step('Amis : invitation, première connexion, données séparées', async () => {
   await go('tokens');
-  await clickText('＋ Inviter un ami');
+  await clickText('＋ Créer un compte');
   await page.locator('.modal input').first().fill('Lina');
-  await clickText('Créer le compte');
+  await page.locator('.modal').getByRole('button', { name: 'Créer', exact: true }).click();
   const creds = await page.locator('.modal pre').textContent();
   const pw = /Mot de passe provisoire : (\S+)/.exec(creds)[1];
   const user = /Identifiant : (\S+)/.exec(creds)[1];
@@ -259,8 +264,8 @@ await step('Amis : invitation, première connexion, données séparées', async 
   await fp.goto(`${B}/#/parler`);
   await fp.locator('.conv-list').getByText('Aucune conversation').waitFor();
   await fp.goto(`${B}/#/tokens`);
-  await fp.getByText('Ma consommation du jour').waitFor();
-  if (await fp.getByText('Amis et accès').count()) throw new Error('un ami voit la gestion des comptes');
+  await fp.getByText('Mon quota de tokens').waitFor();
+  if (await fp.getByText('Comptes et quotas individuels').count()) throw new Error('un ami voit la gestion des comptes');
   await fp.screenshot({ path: `${OUT}/16-ami-vue.png` });
   await f.close();
 });

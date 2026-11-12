@@ -348,32 +348,27 @@ export function parseJsonLoose(text) {
 
 export async function loadModels(force = false) {
   if (state.models && !force) return state.models;
-  try { state.models = await api('/api/models' + (force ? '?refresh=1' : '')); }
+  try { state.models = (await api('/api/models' + (force ? '?refresh=1' : ''))).models; }
   catch (e) { state.models = []; throw e; }
   return state.models;
 }
 
-/** <select> de modèles regroupés (routeur, prêts, épuisés…). */
-export function modelSelect(value = 'auto', { includeFusion = true } = {}) {
+/** <select> de modèles : routage automatique, OVH direct, passerelle vérifiée ; les modèles bloqués sont grisés. */
+export function modelSelect(value = 'auto') {
   const sel = h('select', { title: 'Choix du modèle' });
   const fill = (models) => {
     sel.innerHTML = '';
-    const routers = [['auto', '✨ Auto (meilleur modèle libre)'], ['auto:smart', '🧠 Auto : le plus intelligent'], ['auto:fast', '⚡ Auto : le plus rapide']];
-    if (includeFusion) routers.push(['fusion', '🤝 Fusion (plusieurs IA + juge)']);
-    const g0 = h('optgroup', { label: 'Routage automatique' }, routers.map(([v, l]) => h('option', { value: v }, l)));
-    sel.append(g0);
-    const extra = models.filter(m => m.router && !routers.some(r => r[0] === m.id) && m.id.startsWith('auto:'));
-    if (extra.length) sel.append(h('optgroup', { label: 'Vos chaînes' }, extra.map(m => h('option', { value: m.id }, m.name))));
-    const real = models.filter(m => !m.router);
-    const ready = real.filter(m => m.status === 'ready' && !m.paid);
-    const byPlat = {};
-    for (const m of ready) (byPlat[m.platform] ||= []).push(m);
-    for (const [p, list] of Object.entries(byPlat).sort()) {
-      sel.append(h('optgroup', { label: `${p} — disponible` }, list.sort((a, b) => a.name.localeCompare(b.name)).map(m => h('option', { value: m.id }, m.name))));
-    }
-    const ex = real.filter(m => m.status === 'exhausted' && !m.paid);
-    if (ex.length) sel.append(h('optgroup', { label: 'Quota momentanément épuisé' }, ex.map(m => h('option', { value: m.id }, `⏳ ${m.name} (${m.platform})`))));
-    if (![...sel.options].some(o => o.value === value)) sel.append(h('option', { value }, value));
+    const routers = models.filter(m => m.router);
+    sel.append(h('optgroup', { label: 'Routage automatique (fournisseurs gratuits vérifiés)' },
+      (routers.length ? routers : [{ id: 'auto', name: 'Auto' }]).map(m => h('option', { value: m.id }, `✨ ${m.name}`))));
+    const ovh = models.filter(m => m.provider === 'ovh');
+    if (ovh.length) sel.append(h('optgroup', { label: 'OVH AI Endpoints — gratuit (accès anonyme), 2 requêtes/min par modèle' },
+      ovh.map(m => h('option', { value: m.id, disabled: !m.allowed }, `${m.name}${m.status === 'busy' ? ` (occupé ${m.retryIn} s)` : ''}`))));
+    const gw = models.filter(m => m.provider === 'freellmapi');
+    const gwOk = gw.filter(m => m.allowed), gwNo = gw.filter(m => !m.allowed);
+    if (gwOk.length) sel.append(h('optgroup', { label: 'FreeLLMAPI — fournisseurs vérifiés avant l’appel' }, gwOk.map(m => h('option', { value: m.id }, `${m.name} (${(m.platforms || []).join(', ') || '?'})`))));
+    if (gwNo.length) sel.append(h('optgroup', { label: 'Bloqués par le mode gratuit' }, gwNo.slice(0, 40).map(m => h('option', { value: m.id, disabled: true, title: m.reason || '' }, `⛔ ${m.name}`))));
+    if (![...sel.options].some(o => o.value === value && !o.disabled)) value = 'auto';
     sel.value = value;
   };
   fill([]);

@@ -7,12 +7,17 @@ import { fileURLToPath } from 'node:url';
 import { pipeline } from 'node:stream/promises';
 import {
   DATA_DIR, ensureDirs, ensureUserDirs, newId, readJson, writeJson, getSettings, saveSettings, DEFAULT_SETTINGS,
-  getUsers, saveUsers, getUser, findUserByName, publicUser, DEFAULT_USER_LIMITS, migrateLegacy,
+  getUsers, saveUsers, getUser, findUserByName, publicUser, DEFAULT_USER_LIMITS, migrateLegacy, migrateQuotas, allocatedTokens,
   getProjects, saveProjects, getProject, listConversations, getConversation, saveConversation, deleteConversation,
   listFiles, getFileMeta, filePath, addFileMeta, updateFileMeta, removeFile, storageUsed, storageUsedAll,
 } from './store.js';
-import { loadUsage, record, guard, summary, perUser } from './usage.js';
-import { API_BASE, isConfigured, upstream, errorText, listModels, chat, UpstreamError } from './llm.js';
+import { loadUsage, record, guard, summary, perUser, costOf } from './usage.js';
+import { API_BASE, isConfigured, upstream, errorText, listModels, chat, UpstreamError, setLedger } from './llm.js';
+import { Ledger } from './quota.js';
+import {
+  PROVIDER_FACTS, OVH_BASE, listOvhModels, ovhChatModels, ovhCapacityNow, ovhSlot, ovhTake, ovhCooldown,
+  verifyGateway, gatewayState, gatewayMediaAllowed, platformAllowed,
+} from './providers.js';
 import { runAgents } from './agents.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -50,6 +55,31 @@ function envPasswordMatches(pw) {
   for (const u of users) getProjects(u.id);
 })();
 loadUsage();
+migrateQuotas(getSettings().poolMonthlyTokens);
+
+// Registre des tokens (pool mensuel global + quotas individuels + réservations)
+const clockFile = process.env.STUDIO_CLOCK_FILE; // tests uniquement : date simulée
+const ledger = new Ledger({
+  dir: path.join(DATA_DIR, 'ledger'),
+  now: () => { if (clockFile) { try { return new Date(fs.readFileSync(clockFile, 'utf8').trim()); } catch {} } return new Date(); },
+  limits: () => ({ pool: getSettings().poolMonthlyTokens, globalDaily: getSettings().dailyTokenCap }),
+  userLimits: (uid) => {
+    const u = getUser(uid);
+    if (!u || u.disabled) return { quota: 0, daily: 0 };
+    return { quota: u.monthlyTokenQuota || 0, daily: u.dailyTokenCap || 0 };
+  },
+});
+setLedger(ledger);
+{
+  // Reprise de la consommation du mois enregistrée avant le registre (une seule fois).
+  const m = new Date().toISOString().slice(0, 7);
+  try {
+    const legacy = fs.readFileSync(path.join(DATA_DIR, 'usage', `${m}.jsonl`), 'utf8').split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } })
+      .filter(x => x && x.ok !== false && (x.kind === 'chat' || !x.kind) && x.tokens > 0);
+    const n = ledger.importLegacy(legacy.map(x => ({ ...x, u: x.u || getUsers().find(u => u.role === 'admin')?.id })));
+    if (n) console.log(`Registre : ${n} consommation(s) antérieure(s) du mois reprise(s).`);
+  } catch {}
+}
 
 function checkLogin(username, password) {
   const u = findUserByName(username);
@@ -284,7 +314,8 @@ route('POST', '/api/password', async (req, res, p, user) => {
 const USERNAME_RE = /^[a-zA-Z0-9._-]{3,30}$/;
 route('GET', '/api/users', (req, res) => {
   const usage = perUser();
-  ok(res, getUsers().map(u => ({ ...publicUser(u), usage: usage[u.id] || { today: 0, todayMedia: 0, month: 0, requests: 0 }, storage: storageUsed(u.id) })));
+  const snap = ledger.snapshot(getUsers().map(u => u.id));
+  ok(res, getUsers().map(u => ({ ...publicUser(u), usage: usage[u.id] || { today: 0, todayMedia: 0, month: 0, requests: 0 }, tokens: snap.users[u.id], storage: storageUsed(u.id) })));
 }, { admin: true });
 route('POST', '/api/users', async (req, res) => {
   const b = await readJsonBody(req);
@@ -294,9 +325,12 @@ route('POST', '/api/users', async (req, res) => {
   if (!b.password || String(b.password).length < 8) return fail(res, 400, 'Mot de passe provisoire : 8 caractères minimum.');
   const users = getUsers();
   if (users.length >= 30) return fail(res, 400, '30 comptes maximum.');
+  const quota = Math.max(0, Math.floor(Number(b.monthlyTokenQuota ?? DEFAULT_USER_LIMITS.monthlyTokenQuota) || 0));
+  const free = getSettings().poolMonthlyTokens - allocatedTokens(users);
+  if (quota > free) return fail(res, 400, `Quota impossible : il ne reste que ${free.toLocaleString('fr-FR')} tokens non attribués dans le pool mensuel.`);
   const u = {
     id: newId('u'), username, name: String(b.name || username).slice(0, 40), role: 'member', passwordHash: hashPassword(String(b.password)),
-    mustChangePassword: true, dailyTokenCap: Math.max(0, Number(b.dailyTokenCap ?? DEFAULT_USER_LIMITS.dailyTokenCap) || 0),
+    mustChangePassword: true, monthlyTokenQuota: quota, dailyTokenCap: Math.max(0, Number(b.dailyTokenCap ?? DEFAULT_USER_LIMITS.dailyTokenCap) || 0),
     dailyMediaCap: Math.max(0, Number(b.dailyMediaCap ?? DEFAULT_USER_LIMITS.dailyMediaCap) || 0),
     storageQuotaMB: Math.max(10, Number(b.storageQuotaMB ?? DEFAULT_USER_LIMITS.storageQuotaMB) || 10), createdAt: new Date().toISOString(),
   };
@@ -312,8 +346,18 @@ route('PUT', '/api/users/:id', async (req, res, { id }, admin) => {
   for (const k of ['dailyTokenCap', 'dailyMediaCap', 'storageQuotaMB']) if (b[k] !== undefined && u.role !== 'admin') u[k] = Math.max(0, Math.floor(Number(b[k]) || 0));
   if (typeof b.disabled === 'boolean') {
     if (u.id === admin.id) return fail(res, 400, 'Vous ne pouvez pas désactiver votre propre compte.');
+    if (!b.disabled && u.disabled) {
+      const free = getSettings().poolMonthlyTokens - allocatedTokens(users, u.id);
+      if ((u.monthlyTokenQuota || 0) > free) return fail(res, 400, `Réactivation impossible : son quota (${(u.monthlyTokenQuota || 0).toLocaleString('fr-FR')}) dépasse les ${free.toLocaleString('fr-FR')} tokens non attribués. Réduisez d’abord son quota.`);
+    }
     u.disabled = b.disabled;
     if (u.disabled) dropSessionsOf(u.id);
+  }
+  if (b.monthlyTokenQuota !== undefined) {
+    const q = Math.max(0, Math.floor(Number(b.monthlyTokenQuota) || 0));
+    const free = getSettings().poolMonthlyTokens - allocatedTokens(users, u.id);
+    if (!u.disabled && q > free) return fail(res, 400, `Quota impossible : la somme des quotas dépasserait le pool. Maximum possible pour ce compte : ${free.toLocaleString('fr-FR')} tokens.`);
+    u.monthlyTokenQuota = q;
   }
   if (b.password) {
     if (String(b.password).length < 8) return fail(res, 400, 'Mot de passe : 8 caractères minimum.');
@@ -354,15 +398,35 @@ route('GET', '/api/status', async (req, res, p, user) => {
 });
 
 route('GET', '/api/models', async (req, res) => {
-  try {
-    const models = await listModels(req.url.includes('refresh'));
-    const s = getSettings();
-    ok(res, models.map(m => ({
-      id: m.id, name: m.name || m.id, platform: m.owned_by, status: m.execution_status || (m.available ? 'ready' : 'needsKey'),
-      context: m.context_window || null, router: m.owned_by === 'freellmapi',
-      paid: s.paidPlatforms.includes(String(m.owned_by || '').toLowerCase()),
-    })));
-  } catch (err) { fail(res, err.status || 502, err.message); }
+  const st = getSettings();
+  const out = [
+    { id: 'auto', name: 'Auto (meilleur modèle gratuit vérifié)', provider: 'routeur', router: true, allowed: true },
+    { id: 'auto:smart', name: 'Auto : le plus intelligent', provider: 'routeur', router: true, allowed: true },
+    { id: 'auto:fast', name: 'Auto : le plus rapide', provider: 'routeur', router: true, allowed: true },
+  ];
+  const ovh = await listOvhModels(req.url.includes('refresh'));
+  for (const m of ovhChatModels(ovh.list || [])) {
+    const slot = ovhSlot(m);
+    out.push({ id: `ovh/${m}`, name: m, provider: 'ovh', platforms: ['ovh'], verified: true, allowed: platformAllowed('ovh'), status: slot.ok ? 'ready' : 'busy', retryIn: slot.retryIn || 0 });
+  }
+  if (isConfigured()) {
+    const g = await verifyGateway();
+    if (g.ok) {
+      for (const [id, m] of Object.entries(g.models)) {
+        const allowed = !st.freeOnly || (m.platforms.length > 0 && m.platforms.every(p => platformAllowed(p)));
+        out.push({ id: `freellmapi/${id}`, name: m.name, provider: 'freellmapi', platforms: m.platforms, verified: true, allowed, status: 'ready',
+          reason: allowed ? '' : `Peut être servi par : ${m.platforms.join(', ')} (hors liste blanche)` });
+      }
+    } else {
+      try {
+        for (const m of (await listModels()).filter(x => x.owned_by === 'freellmapi' && x.id !== 'auto' && x.id !== 'fusion' && !x.id.startsWith('auto:'))) {
+          out.push({ id: `freellmapi/${m.id}`, name: m.name || m.id, provider: 'freellmapi', platforms: [], verified: false, allowed: !st.freeOnly,
+            status: m.execution_status || 'unknown', reason: 'Fournisseur réel inconnu avant l’appel (MCP FreeLLMAPI désactivé) : bloqué en mode gratuit' });
+        }
+      } catch {}
+    }
+  }
+  ok(res, { models: out, ovhError: ovh.error, gateway: { verified: gatewayState().ok, error: gatewayState().error } });
 });
 
 // --- Chat ---
@@ -417,7 +481,11 @@ route('POST', '/api/agents/run', async (req, res, p, user) => {
 });
 
 // --- Médias ---
-function mediaGuard(res, kind, user) {
+function mediaGuard(res, kind, user, viaGateway = true) {
+  if (viaGateway && !gatewayMediaAllowed()) {
+    fail(res, 403, 'Bloqué par le mode gratuit : les images, vidéos et voix passent par FreeLLMAPI dont le fournisseur réel n’est connu qu’après l’appel. L’administrateur peut les autoriser explicitement dans Suivi des tokens → Garde-fous.');
+    return false;
+  }
   const g = guard({ kind, uid: user.id });
   if (g) { fail(res, 402, g); return false; }
   return true;
@@ -505,7 +573,10 @@ route('POST', '/api/speech', async (req, res, p, user) => {
 });
 
 route('POST', '/api/transcribe', async (req, res, p, user) => {
-  if (!mediaGuard(res, 'transcription', user)) return;
+  // Transcription : OVH en direct (Whisper, accès anonyme) si disponible, sinon passerelle (si autorisée).
+  const ovhList = (await listOvhModels()).list || [];
+  const whisper = platformAllowed('ovh') ? ovhList.find(m => /whisper/i.test(m)) : null;
+  if (!mediaGuard(res, 'transcription', user, !whisper)) return;
   const t0 = Date.now();
   try {
     const u = new URL(req.url, 'http://x');
@@ -530,11 +601,21 @@ route('POST', '/api/transcribe', async (req, res, p, user) => {
     head += field('response_format', u.searchParams.get('format') === 'verbose_json' ? 'verbose_json' : 'json');
     head += `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${name.replace(/["\r\n]/g, '')}"\r\nContent-Type: ${type}\r\n\r\n`;
     const multipart = Buffer.concat([Buffer.from(head), audio, Buffer.from(`\r\n--${boundary}--\r\n`)]);
-    const r = await upstream('/v1/audio/transcriptions', { method: 'POST', body: multipart, timeoutMs: 180000, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` } });
+    let r;
+    if (whisper) {
+      const slot = ovhSlot(whisper);
+      if (!slot.ok) return fail(res, 429, `Capacité gratuite d’OVH pour la transcription momentanément atteinte. Réessayez dans ${slot.retryIn} s.`);
+      ovhTake(whisper);
+      const mp = Buffer.from(multipart.toString('latin1').replace(`name="model"\r\n\r\nauto`, `name="model"\r\n\r\n${whisper}`), 'latin1');
+      r = await fetch(`${OVH_BASE}/audio/transcriptions`, { method: 'POST', body: mp, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` }, signal: AbortSignal.timeout(180000) });
+      if (r.status === 429) ovhCooldown(whisper, 60);
+    } else {
+      r = await upstream('/v1/audio/transcriptions', { method: 'POST', body: multipart, timeoutMs: 180000, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` } });
+    }
     if (!r.ok) throw new UpstreamError(await errorText(r), r.status);
     const j = await r.json();
-    const provider = r.headers.get('x-provider') || '';
-    record({ uid: user.id, kind: 'transcription', model: r.headers.get('x-model') || 'auto', platform: provider, ms: Date.now() - t0 });
+    const provider = whisper ? 'ovh' : (r.headers.get('x-provider') || '');
+    record({ uid: user.id, kind: 'transcription', model: whisper || r.headers.get('x-model') || 'auto', platform: provider, ms: Date.now() - t0 });
     ok(res, { text: j.text || '', segments: j.segments || null, language: j.language || null, provider });
   } catch (err) {
     record({ uid: user.id, kind: 'transcription', model: 'auto', ok: false, err: err.message, ms: Date.now() - t0 });
@@ -642,44 +723,183 @@ route('DELETE', '/api/files/:id', (req, res, { id }, user) => {
 
 // --- Suivi et réglages ---
 let upstreamUsageCache = { t: 0, data: null };
+async function gatewayUsage(force = false) {
+  if (!isConfigured()) return null;
+  if (force || Date.now() - upstreamUsageCache.t > 60_000) {
+    try {
+      const r = await upstream('/v1/usage', { timeoutMs: 15000 });
+      upstreamUsageCache = { t: Date.now(), data: r.ok ? await r.json() : { error: await errorText(r) } };
+    } catch (err) { upstreamUsageCache = { t: Date.now(), data: { error: err.message } }; }
+  }
+  return upstreamUsageCache.data;
+}
+
+function poolAlerts(snap) {
+  const out = [];
+  const used = snap.consumed + snap.reserved;
+  const pct = snap.pool ? (used / snap.pool) * 100 : 100;
+  if (pct >= 100) out.push({ level: 'danger', message: 'Pool mensuel épuisé : toutes les requêtes de chat sont bloquées jusqu’au 1er du mois.' });
+  else if (pct >= 90) out.push({ level: 'danger', message: `Pool mensuel utilisé à ${pct.toFixed(1)} % : épuisement imminent.` });
+  else if (pct >= 80) out.push({ level: 'warning', message: `Pool mensuel utilisé à ${pct.toFixed(1)} %.` });
+  for (const [uid, u] of Object.entries(snap.users)) {
+    if (u.quota && u.consumed + u.reserved >= u.quota * 0.9) {
+      const usr = getUser(uid);
+      out.push({ level: u.consumed >= u.quota ? 'danger' : 'warning', message: `${usr?.name || uid} a utilisé ${Math.round(((u.consumed + u.reserved) / u.quota) * 100)} % de son quota mensuel.` });
+    }
+  }
+  return out;
+}
+
+function costBreakdown(history) {
+  const by = {};
+  for (const h of history) {
+    if (!h.tok) continue;
+    const key = h.platform || h.provider || 'inconnu';
+    by[key] ||= { platform: key, tokens: 0 };
+    by[key].tokens += h.tok;
+  }
+  return Object.values(by).map(x => { const eur = costOf(x.platform, x.tokens); return { ...x, eur, tariff: eur === null ? 'tarif non renseigné' : x.platform === 'ovh' ? 'gratuit (accès anonyme, aucune facturation possible)' : 'tarif renseigné' }; });
+}
+
 route('GET', '/api/usage', async (req, res, p, user) => {
   const isAdmin = user.role === 'admin';
-  const out = summary(isAdmin ? 'all' : user.id);
-  const s = getSettings();
-  out.role = user.role;
+  const users = getUsers();
+  const snap = ledger.snapshot(users.map(u => u.id));
+  const ops = summary(isAdmin ? 'all' : user.id);
+  const st = getSettings();
+  const names = Object.fromEntries(users.map(u => [u.id, u.name || u.username]));
+  const monthHistory = snap.history.filter(h => (h.rm || h.t.slice(0, 7)) === snap.month);
   if (isAdmin) {
-    out.settings = s;
-    if (isConfigured()) {
-      if (Date.now() - upstreamUsageCache.t > 60_000) {
-        try {
-          const r = await upstream('/v1/usage', { timeoutMs: 15000 });
-          upstreamUsageCache = { t: Date.now(), data: r.ok ? await r.json() : { error: await errorText(r) } };
-        } catch (err) { upstreamUsageCache = { t: Date.now(), data: { error: err.message } }; }
-      }
-      out.freellmapi = upstreamUsageCache.data;
-    }
+    ok(res, {
+      role: 'admin',
+      internal: {
+        month: snap.month, resetsAt: snap.resetsAt, pool: snap.pool, exact: snap.exact, estimated: snap.estimated, consumed: snap.consumed,
+        reserved: snap.reserved, remaining: snap.remaining, allocated: allocatedTokens(users), unallocated: Math.max(0, snap.pool - allocatedTokens(users)),
+        today: snap.today, days: snap.days, openReservations: snap.openReservations,
+      },
+      users: users.map(u => ({ id: u.id, name: names[u.id], username: u.username, role: u.role, disabled: !!u.disabled, ...snap.users[u.id] })),
+      history: snap.history.slice(0, 100).map(h => ({ ...h, name: names[h.u] || h.u })),
+      costs: costBreakdown(monthHistory),
+      alerts: [...poolAlerts(snap), ...ops.alerts],
+      ops: { models: ops.models, errors: ops.errors, today: ops.today, month: ops.month },
+      settings: st,
+    });
   } else {
-    out.settings = { freeOnly: s.freeOnly, paidPlatforms: s.paidPlatforms,
-      dailyTokenCap: user.dailyTokenCap ?? DEFAULT_USER_LIMITS.dailyTokenCap, dailyMediaCap: user.dailyMediaCap ?? DEFAULT_USER_LIMITS.dailyMediaCap, monthlyTokenCap: 0 };
+    const me = snap.users[user.id] || { quota: user.monthlyTokenQuota || 0, exact: 0, estimated: 0, consumed: 0, reserved: 0, remaining: user.monthlyTokenQuota || 0, today: 0 };
+    ok(res, {
+      role: 'member', month: snap.month, resetsAt: snap.resetsAt, me, days: snap.days,
+      history: snap.history.filter(h => h.u === user.id).slice(0, 50),
+      ops: { models: ops.models, errors: ops.errors },
+      settings: { freeOnly: st.freeOnly },
+    });
   }
-  ok(res, out);
 });
+
+// Capacité réellement confirmée chez les fournisseurs (séparée du quota interne)
+route('GET', '/api/providers', async (req, res) => {
+  const force = req.url.includes('refresh');
+  const ovh = await listOvhModels(force);
+  const g = await verifyGateway(force);
+  const ops = summary('all');
+  const recent429 = ops.errors.filter(e => /429/.test(e.err || '') || e.status === 429);
+  let gatewayModels = null;
+  try {
+    const list = await listModels(force);
+    gatewayModels = { total: list.filter(m => m.owned_by === 'freellmapi' && !m.id.startsWith('auto') && m.id !== 'fusion').length,
+      ready: list.filter(m => m.execution_status === 'ready').length, exhausted: list.filter(m => m.execution_status === 'exhausted').length,
+      needsKey: list.filter(m => m.execution_status === 'needsKey').length };
+  } catch (err) { gatewayModels = { error: err.message }; }
+  const chatModels = ovhChatModels(ovh.list || []);
+  ok(res, {
+    ovh: {
+      facts: PROVIDER_FACTS.ovh, allowed: platformAllowed('ovh'),
+      models: ovh.list || [], chatModels, listError: ovh.error, verifiedAt: ovh.verifiedAt || null,
+      capacityNow: ovhCapacityNow(chatModels),
+      theoretical: {
+        requestsPerMinute: chatModels.length * (getSettings().ovhRpmPerModel || 2),
+        note: 'Maximum théorique pour TOUT le Studio (une seule adresse IP de serveur), si chaque modèle est utilisé au maximum. Non garanti : OVH indique pouvoir appliquer des limites plus strictes.',
+      },
+      monthlyQuota: 'quota fournisseur non communiqué',
+      recent429: recent429.filter(e => e.platform === 'ovh').length,
+    },
+    freellmapi: {
+      facts: PROVIDER_FACTS.freellmapi, configured: isConfigured(),
+      verification: { ok: g.ok, error: g.error, verifiedAt: g.verifiedAt || null, models: g.ok ? Object.entries(g.models).map(([id, m]) => ({ id, platforms: m.platforms, allowed: m.platforms.every(p2 => platformAllowed(p2)) })) : [] },
+      catalog: gatewayModels, usage: await gatewayUsage(force),
+      monthlyQuota: 'quota fournisseur non communiqué',
+    },
+  });
+}, { admin: true });
+
+// Vérification réelle : appel OVH direct + appel via FreeLLMAPI comparé à /v1/usage
+route('POST', '/api/verify-real', async (req, res, p, user) => {
+  const b = await readJsonBody(req);
+  const report = { at: new Date().toISOString(), steps: [] };
+  const step = (name, data) => report.steps.push({ name, ...data });
+  const question = [{ role: 'user', content: 'Réponds uniquement par le mot : bonjour' }];
+  // 1) OVH direct (via le même chemin que les utilisateurs : réservation + débit)
+  try {
+    const before = ledger.snapshot([user.id]).users[user.id];
+    const r = await chat({ uid: user.id, model: 'auto', messages: question, maxTokens: 300, src: 'verification' });
+    const after = ledger.snapshot([user.id]).users[user.id];
+    step('OVH direct', { ok: true, model: r.model, provider: r.provider, usageFournisseur: r.exact ? r.usage : null, exact: r.exact,
+      debitRegistre: after.consumed - before.consumed, coherent: after.consumed - before.consumed === r.usage.total, reponse: r.content.slice(0, 80) });
+  } catch (err) { step('OVH direct', { ok: false, error: err.message, status: err.status }); }
+  // 2) Passerelle FreeLLMAPI : delta de /v1/usage comparé au champ usage de la réponse
+  const g = await verifyGateway(true);
+  const target = b.gatewayModel || 'gpt-oss-120b';
+  const verified = g.ok && g.models[target]?.platforms?.every(x => platformAllowed(x));
+  if (!isConfigured()) step('FreeLLMAPI', { ok: false, error: 'clé absente' });
+  else if (!verified && b.confirmUnverified !== true) {
+    step('FreeLLMAPI', { ok: false, skipped: true, error: `Non exécuté : fournisseurs de « ${target} » non vérifiables avant l’appel (${g.error || 'hors liste blanche'}). Relancez en confirmant explicitement.` });
+  } else {
+    try {
+      const u0 = await gatewayUsage(true);
+      const r = await upstream('/v1/chat/completions', { method: 'POST', timeoutMs: 120000, json: { model: target, messages: question, max_tokens: 300 } });
+      const routed = decodeURIComponent(r.headers.get('x-routed-via') || '');
+      const j = await r.json();
+      await new Promise(x => setTimeout(x, 2500));
+      const u1 = await gatewayUsage(true);
+      const delta = u1 && u0 && !u0.error && !u1.error ? { requests: u1.requests - u0.requests, tokens: u1.tokens - u0.tokens } : null;
+      step('FreeLLMAPI', { ok: r.ok, status: r.status, routedVia: routed, usageReponse: j.usage || null, deltaV1Usage: delta,
+        coherent: delta && j.usage ? delta.tokens === j.usage.total_tokens : null, verifiedBeforeCall: !!verified, reponse: (j.choices?.[0]?.message?.content || j.error?.message || '').slice(0, 80) });
+      record({ uid: user.id, kind: 'chat', model: target, platform: routed.split('/')[0], pt: j.usage?.prompt_tokens || 0, ct: j.usage?.completion_tokens || 0, src: 'verification-passerelle' });
+    } catch (err) { step('FreeLLMAPI', { ok: false, error: err.message }); }
+  }
+  // 3) Faits fournisseur
+  const ovh = await listOvhModels(true);
+  step('Capacité OVH', { modeles: ovh.list, erreur: ovh.error, limites: PROVIDER_FACTS.ovh.limits.map(l => l.text), quotaMensuel: 'quota fournisseur non communiqué' });
+  try { fs.appendFileSync(path.join(DATA_DIR, 'verifications.jsonl'), JSON.stringify(report) + '\n'); } catch {}
+  ok(res, report);
+}, { admin: true });
+
 route('GET', '/api/settings', (req, res) => ok(res, getSettings()), { admin: true });
 route('PUT', '/api/settings', async (req, res) => {
   const b = await readJsonBody(req);
   const patch = {};
   for (const k of ['freeOnly', 'allowPaid']) if (typeof b[k] === 'boolean') patch[k] = b[k];
-  for (const k of ['dailyTokenCap', 'monthlyTokenCap', 'dailyMediaCap', 'storageQuotaMB']) {
-    if (b[k] !== undefined) { const n = Math.max(0, Math.floor(Number(b[k]) || 0)); patch[k] = k === 'storageQuotaMB' ? Math.min(Math.max(n, 50), 9000) : n; }
+  for (const k of ['dailyTokenCap', 'dailyMediaCap', 'storageQuotaMB', 'maxOutputTokens', 'ovhRpmPerModel']) {
+    if (b[k] !== undefined) { const n = Math.max(0, Math.floor(Number(b[k]) || 0)); patch[k] = k === 'storageQuotaMB' ? Math.min(Math.max(n, 50), 9000) : k === 'maxOutputTokens' ? Math.min(Math.max(n, 256), 32000) : k === 'ovhRpmPerModel' ? Math.min(Math.max(n, 1), 400) : n; }
   }
+  if (b.poolMonthlyTokens !== undefined) {
+    const n = Math.max(0, Math.floor(Number(b.poolMonthlyTokens) || 0));
+    const alloc = allocatedTokens();
+    if (n < alloc) return fail(res, 400, `Le pool ne peut pas être inférieur à la somme des quotas déjà attribués (${alloc.toLocaleString('fr-FR')}). Réduisez d’abord des quotas.`);
+    patch.poolMonthlyTokens = n;
+  }
+  if (typeof b.gatewayMediaAllowed === 'boolean') patch.gatewayMediaAllowed = b.gatewayMediaAllowed;
+  if (Array.isArray(b.allowedPlatforms)) patch.allowedPlatforms = b.allowedPlatforms.map(x => String(x).trim().toLowerCase()).filter(Boolean).slice(0, 50);
   if (Array.isArray(b.paidPlatforms)) patch.paidPlatforms = b.paidPlatforms.map(x => String(x).trim().toLowerCase()).filter(Boolean).slice(0, 50);
   if (typeof b.defaultModel === 'string') patch.defaultModel = b.defaultModel.slice(0, 120);
   if (typeof b.ttsVoice === 'string') patch.ttsVoice = b.ttsVoice.slice(0, 40);
-  if (b.prices && typeof b.prices === 'object') patch.prices = Object.fromEntries(Object.entries(b.prices).map(([k, v]) => [String(k).toLowerCase(), Math.max(0, Number(v) || 0)]));
+  if (b.prices && typeof b.prices === 'object') patch.prices = Object.fromEntries(Object.entries(b.prices).filter(([, v]) => v !== '' && v !== null && Number.isFinite(Number(v))).map(([k, v]) => [String(k).toLowerCase(), Math.max(0, Number(v))]));
   if (patch.freeOnly === true) patch.allowPaid = false;
   ok(res, saveSettings(patch));
 }, { admin: true });
-route('POST', '/api/settings/reset', (req, res) => ok(res, saveSettings({ ...DEFAULT_SETTINGS })), { admin: true });
+route('POST', '/api/settings/reset', (req, res) => {
+  if (allocatedTokens() > DEFAULT_SETTINGS.poolMonthlyTokens) return fail(res, 400, 'Réduisez d’abord les quotas attribués : ils dépassent le pool par défaut.');
+  ok(res, saveSettings({ ...DEFAULT_SETTINGS }));
+}, { admin: true });
 
 route('GET', '/api/export', (req, res, p, user) => {
   const conversations = listConversations(user.id).map(c => getConversation(user.id, c.id)).filter(Boolean);

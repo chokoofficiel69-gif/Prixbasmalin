@@ -60,9 +60,11 @@ function addAlert(level, message) {
   try { fs.writeFileSync(path.join(DATA_DIR, 'usage', 'alerts.json'), JSON.stringify(alerts)); } catch {}
 }
 
+/** Coût connu en €, ou null si le tarif n'est pas renseigné (jamais 0 par défaut). */
 export function costOf(platform, tokens) {
-  const price = Number(getSettings().prices?.[platform] || 0);
-  return price > 0 ? (tokens / 1e6) * price : 0;
+  if (platform === 'ovh') return 0; // OVH en accès anonyme : aucune facturation possible
+  const price = getSettings().prices?.[platform];
+  return price !== undefined && price !== null && price !== '' && Number.isFinite(Number(price)) ? (tokens / 1e6) * Number(price) : null;
 }
 
 export function record(e) {
@@ -77,10 +79,7 @@ export function record(e) {
   const s = getSettings();
   const plat = (entry.platform || '').toLowerCase();
   if (plat && s.paidPlatforms.includes(plat)) addAlert('danger', `Le fournisseur « ${plat} » (marqué potentiellement payant) a servi une requête. Vérifiez sa clé dans FreeLLMAPI.`);
-  const today = scope('all').days[day()];
-  if (s.dailyTokenCap && today && today.tokens >= s.dailyTokenCap * 0.8) {
-    addAlert('warning', `80 % du plafond journalier global atteint (${today.tokens.toLocaleString('fr-FR')} / ${s.dailyTokenCap.toLocaleString('fr-FR')} tokens).`);
-  }
+  if (e.alert) addAlert('danger', e.err);
   return entry;
 }
 
@@ -98,18 +97,14 @@ export function guard({ kind = 'chat', model = '', platform = '', uid } = {}) {
   const s = getSettings();
   const all = scope('all');
   const today = all.days[day()] || { tokens: 0, media: 0 };
-  const mon = all.months[month()] || { tokens: 0 };
   const plat = (platform || '').toLowerCase();
   if (plat && s.paidPlatforms.includes(plat) && (s.freeOnly || !s.allowPaid)) {
     return `Le modèle « ${model} » passe par « ${plat} », marqué comme potentiellement payant. Il est bloqué tant que le mode gratuit est actif.`;
   }
   const lim = userLimits(uid);
   const mine = uid ? (scope(uid).days[day()] || { tokens: 0, media: 0 }) : null;
-  if (kind === 'chat' || kind === 'agents') {
-    if (s.dailyTokenCap && today.tokens >= s.dailyTokenCap) return `Plafond journalier du Studio atteint (${today.tokens.toLocaleString('fr-FR')} tokens). Réessayez demain.`;
-    if (s.monthlyTokenCap && mon.tokens >= s.monthlyTokenCap) return `Plafond mensuel du Studio atteint (${mon.tokens.toLocaleString('fr-FR')} tokens).`;
-    if (lim?.dailyTokenCap && mine.tokens >= lim.dailyTokenCap) return `Votre limite du jour est atteinte (${mine.tokens.toLocaleString('fr-FR')} tokens). Elle se remet à zéro demain.`;
-  } else {
+  // Les tokens sont contrôlés par le registre (server/quota.js) avec réservation ; ici : médias seulement.
+  if (kind !== 'chat' && kind !== 'agents') {
     if (s.dailyMediaCap && today.media >= s.dailyMediaCap) return `Plafond journalier de générations média du Studio atteint (${today.media}).`;
     if (lim?.dailyMediaCap && mine.media >= lim.dailyMediaCap) return `Votre limite du jour pour les images, vidéos et voix est atteinte (${mine.media}).`;
   }
@@ -129,7 +124,7 @@ export function summary(key = 'all') {
   const pick = (map) => Object.entries(map).filter(([k]) => k.startsWith(m + '|')).map(([, v]) => ({ ...v, eur: costOf(v.platform, v.tokens) }));
   return {
     today: { ...(S.days[d] || { tokens: 0, requests: 0, errors: 0, media: 0 }), day: d },
-    month: { ...(S.months[m] || { tokens: 0, requests: 0, errors: 0, media: 0 }), month: m, eur: pick(S.platforms).reduce((s, p) => s + p.eur, 0) },
+    month: { ...(S.months[m] || { tokens: 0, requests: 0, errors: 0, media: 0 }), month: m },
     days,
     models: pick(S.models).sort((a, b) => b.tokens - a.tokens || b.requests - a.requests),
     platforms: pick(S.platforms).sort((a, b) => b.tokens - a.tokens || b.requests - a.requests),

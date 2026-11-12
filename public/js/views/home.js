@@ -36,7 +36,7 @@ export async function render(el) {
     box.append(h('div.card',
       h('h3', '🔌 Intelligences artificielles'),
       !s.configured ? h('p.bad-t', 'FreeLLMAPI n’est pas relié (clé manquante côté serveur).')
-        : !s.reachable ? h('p.bad-t', `FreeLLMAPI injoignable : ${s.error || ''}`)
+        : !s.reachable ? h('p.small.muted', `Passerelle FreeLLMAPI injoignable (${s.error || ''}) — OVH reste utilisable en direct.`)
           : h('div',
             h('div.kpi', s.models.ready, h('span.muted.small', ` modèles prêts`)),
             h('p.small.muted', `${s.models.exhausted} en pause (quota), ${s.models.needsKey} nécessitent une clé · ${s.platforms.filter(x => x.ready).length} fournisseur(s) actifs`),
@@ -48,14 +48,16 @@ export async function render(el) {
   } else box.append(h('div.card.notice.bad', status.reason.message));
   if (usage.status === 'fulfilled') {
     const u = usage.value;
-    const cap = u.settings.dailyTokenCap;
-    const pct = cap ? Math.min(100, Math.round((u.today.tokens / cap) * 100)) : 0;
+    const q = u.role === 'admin' ? u.internal : u.me;
+    const total = u.role === 'admin' ? q.pool : q.quota;
+    const used = (q.consumed || 0) + (q.reserved || 0);
+    const pct = total ? Math.min(100, Math.round((used / total) * 100)) : 100;
     box.append(h('a.card.link', { href: '#/tokens', style: { textDecoration: 'none', color: 'inherit' } },
-      h('h3', '📊 Consommation du jour'),
-      h('div.kpi', fmtNum(u.today.tokens), h('span.muted.small', ' tokens')),
-      h('p.small.muted', `${u.today.requests} requêtes · ${u.today.errors} erreurs · ${u.today.media} médias · coût ${u.month.eur.toFixed(2)} € ce mois`),
-      cap ? h('div.bar' + (pct > 90 ? '.bad' : pct > 70 ? '.warn' : ''), h('i', { style: { width: pct + '%' } })) : null,
-      h('p.tiny.muted', u.settings.freeOnly ? '🛡️ Mode gratuit actif : services payants bloqués.' : '⚠️ Mode gratuit désactivé.'),
+      h('h3', u.role === 'admin' ? '📊 Pool du mois (tous les comptes)' : '🎟️ Mon quota du mois'),
+      h('div.kpi', fmtNum(q.remaining ?? 0), h('span.muted.small', ' tokens restants')),
+      h('p.small.muted', `${fmtNum(q.consumed)} consommés (${fmtNum(q.exact)} réels, ${fmtNum(q.estimated)} estimés) sur ${fmtNum(total)}`),
+      h('div.bar' + (pct > 90 ? '.bad' : pct > 70 ? '.warn' : ''), h('i', { style: { width: pct + '%' } })),
+      h('p.tiny.muted', u.settings?.freeOnly ? '🛡️ Mode gratuit : seuls des fournisseurs gratuits vérifiés avant l’appel.' : '⚠️ Mode gratuit désactivé.'),
     ));
   }
   const cBox = el.querySelector('#home-convs');

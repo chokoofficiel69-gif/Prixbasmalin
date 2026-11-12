@@ -1,0 +1,34 @@
+Preuves — tests du quota de tokens (exécutés le 2026-11-11 23:07 UTC, Node v22.23.4)
+
+▶ Registre (unitaire)
+  ✔ 5bis. 200 réservations simultanées ne dépassent jamais le quota (7.208163ms)
+  ✔ Règlement idempotent : jamais deux débits pour la même requête (2.19322ms)
+  ✔ Réservation ouverte lors d’un arrêt brutal : débit prudent de la totalité, une seule fois (1.383898ms)
+  ✔ 6bis. Remise à zéro au changement de mois UTC (0.933414ms)
+✔ Registre (unitaire) (13.277457ms)
+▶ Studio (intégration)
+  ✔ 1. Consommation exacte : les tokens renvoyés par le fournisseur sont débités tels quels (184.747434ms)
+  ✔ 2. Sans mesure du fournisseur : consommation marquée « estimée », jamais « réelle » (147.95453ms)
+  ✔ 3. Un utilisateur au quota épuisé est réellement bloqué (aucun appel au fournisseur) (296.695975ms)
+  ✔ 4. Le pool global épuisé bloque les requêtes, même si le compte a encore du quota (266.203624ms)
+  ✔ 5. Deux requêtes simultanées ne permettent pas de dépasser le plafond (1091.500573ms)
+  ✔ 6. Le quota mensuel se réinitialise au 1er du mois (et reste exact après redémarrage) (431.447062ms)
+  ✔ 7. Mode gratuit : aucun fournisseur payant ou non vérifié n’est appelé (196.088399ms)
+  ✔ 8. Une erreur 429 du fournisseur est signalée clairement et ne coûte rien (152.519937ms)
+  ✔ 9. Le tableau de bord correspond exactement au registre enregistré (313.1369ms)
+✔ Studio (intégration) (3081.252545ms)
+ℹ tests 13
+ℹ suites 2
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3178.124146
+
+Contrôle par mutation (le code est volontairement cassé, les tests doivent échouer) :
+- contrôle du quota individuel supprimé -> 3 tests échouent (5bis, 3, 5)
+- réservation non enregistrée -> 11 tests échouent
+- passerelle appelée sans vérification -> le test 7 échoue
+
+Tests d'interface (Playwright, faux fournisseurs) : 19/19 OK, aucune erreur JavaScript.
