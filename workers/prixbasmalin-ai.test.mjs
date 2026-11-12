@@ -69,3 +69,17 @@ test("retourne 400 pour un JSON invalide correctement typé", async () => {
   }), env);
   assert.equal(response.status, 400);
 });
+
+
+test("les réponses JSON et OPTIONS portent les en-têtes de sécurité", async () => {
+  const health = await worker.fetch(new Request("https://worker.example/health"), env);
+  const preflight = await worker.fetch(new Request(endpoint, {
+    method: "OPTIONS",
+    headers: { Origin: siteOrigin }
+  }), env);
+  for (const response of [health, preflight]) {
+    assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
+    assert.equal(response.headers.get("X-Frame-Options"), "DENY");
+    assert.equal(response.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin");
+  }
+});
