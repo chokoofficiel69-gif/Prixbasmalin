@@ -130,8 +130,18 @@ def call(provider, p):
         "Authorization": "Bearer " + os.environ[env], "Content-Type": "application/json",
         "User-Agent": "PrixMalin-guides/1.0"})
     with urllib.request.urlopen(req, timeout=60) as r:
-        content = json.load(r)["choices"][0]["message"]["content"]
-    content = re.sub(r"^```(?:json)?|```$", "", content.strip()).strip()
+        payload = json.load(r)
+    try:
+        choice = payload["choices"][0]
+        message = choice["message"]
+        content = message.get("content") if isinstance(message, dict) else None
+    except (KeyError, IndexError, TypeError):
+        content = None
+    if not isinstance(content, str) or not content.strip():
+        raise ValueError("Réponse OpenRouter sans contenu textuel exploitable.")
+    content = re.sub(r"^\`\`\`(?:json)?|\`\`\`$", "", content.strip()).strip()
+    if not content:
+        raise ValueError("Réponse OpenRouter sans contenu textuel exploitable.")
     return json.loads(content), f"{name}:{model}"
 
 
