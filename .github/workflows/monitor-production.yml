@@ -13,6 +13,7 @@ on:
       - "workers/prixbasmalin-clicks.test.mjs"
       - "tests/**"
       - "scripts/build_guides.py"
+      - "scripts/generate_ai_guides.py"
       - "scripts/site_chrome.py"
       - "scripts/import_amazon_report.py"
       - "js/cookie-consent.js"
@@ -20,6 +21,7 @@ on:
       - "migrations/**"
       - "confidentialite.html"
       - "js/prix-malin-auth.js"
+      - "scripts/generate_ai_guides.py"
       - "catalogue.html"
       - "css/partner-ads.css"
       - "js/partner-ads.js"
@@ -115,6 +117,10 @@ jobs:
         run: python3 -m py_compile scripts/build_guides.py scripts/build_seo_pages.py scripts/import_amazon_report.py scripts/site_chrome.py
       - name: Tester l'affiliation Amazon, le consentement et l'import CSV officiel
         run: python3 -m unittest discover -s tests -p 'test_tracking_and_affiliation.py' -v
+      - name: Tester les réponses OpenRouter vides et les conseils IA
+        run: |
+          python3 -m py_compile scripts/generate_ai_guides.py
+          python3 -m unittest discover -s tests -p 'test_ai_guides.py' -v
       - name: Vérifier la syntaxe du module compte et alertes
         run: node --check js/prix-malin-auth.js
       - name: Vérifier la syntaxe du module publicités partenaires
