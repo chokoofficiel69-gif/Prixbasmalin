@@ -139,7 +139,7 @@ def call(provider, p):
         content = None
     if not isinstance(content, str) or not content.strip():
         raise ValueError("Réponse OpenRouter sans contenu textuel exploitable.")
-    content = re.sub(r"^\`\`\`(?:json)?|\`\`\`$", "", content.strip()).strip()
+    content = re.sub(r"^```(?:json)?|```$", "", content.strip()).strip()
     if not content:
         raise ValueError("Réponse OpenRouter sans contenu textuel exploitable.")
     return json.loads(content), f"{name}:{model}"
