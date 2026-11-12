@@ -1,4 +1,5 @@
 import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal } from '../lib/core.js';
+import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName } from '../lib/voicefx.js';
 import { decodeBlob, encodeWav, denoise, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
 
 const VOICE_PRESETS = {
@@ -125,6 +126,36 @@ export async function render(el, { params }) {
     try { t.buffer = await fn(t.buffer, t); masterResult = null; drawList(); redrawSelected(); busy.textContent = `✓ ${label.replace('…', '')} terminé`; }
     catch (e) { busy.textContent = ''; toastErr(e); }
   }
+  // ---------- Effets voix & autotune (121 préréglages) ----------
+  const fxCat = h('select', VFX_CATS.map(c => h('option', { value: c }, `${c} (${VFX.filter(p => p.cat === c).length})`)));
+  const fxSel = h('select');
+  const fxKey = h('select', KEY_CHOICES.map(k => h('option', { value: k.v }, k.label)));
+  const fxInfo = h('span.small.muted');
+  const fxAudio = h('audio', { controls: true, style: { width: '100%', display: 'none' } });
+  const fillFx = () => { fxSel.innerHTML = ''; VFX.forEach((p, i) => { if (p.cat === fxCat.value) fxSel.append(h('option', { value: i }, p.name)); }); };
+  fxCat.onchange = fillFx; fillFx();
+  const fxKeyOpt = () => { if (!fxKey.value) return null; const [root, mode] = fxKey.value.split('|'); return { root: +root, mode }; };
+  async function fxPreview(btn, next = false) {
+    const t = tracks[selected]; if (!t) return toast('Sélectionne une piste de voix.');
+    if (next) { fxSel.selectedIndex = (fxSel.selectedIndex + 1) % fxSel.options.length; }
+    const preset = VFX[+fxSel.value];
+    btn.disabled = true; fxInfo.innerHTML = '<span class="spinner"></span> Préparation de l’extrait…';
+    try {
+      // extrait de 15 s qui commence là où la voix démarre
+      const d = t.buffer.getChannelData(0); let st = 0; for (let i = 0; i < d.length; i += 512) if (Math.abs(d[i]) > 0.02) { st = Math.max(0, i / t.buffer.sampleRate - 0.2); break; }
+      const part = sliceBuffer(t.buffer, st, Math.min(t.buffer.duration, st + 15));
+      const r = await applyChain(part, preset.chain, { key: fxKeyOpt(), onProgress: (m) => { fxInfo.innerHTML = `<span class="spinner"></span> ${m}`; } });
+      if (fxAudio.src) URL.revokeObjectURL(fxAudio.src);
+      fxAudio.src = URL.createObjectURL(encodeWav(r.buffer)); fxAudio.style.display = ''; fxAudio.play().catch(() => {});
+      fxInfo.textContent = `▶ « ${preset.name} »${r.key ? ` · tonalité ${keyName(r.key)}` : ''}`;
+    } catch (e) { fxInfo.textContent = ''; toastErr(e); }
+    btn.disabled = false;
+  }
+  const fxApply = () => {
+    const preset = VFX[+fxSel.value];
+    work(`Effet « ${preset.name} »…`, async (b) => (await applyChain(b, preset.chain, { key: fxKeyOpt(), onProgress: (m) => { busy.innerHTML = `<span class="spinner"></span> ${m}`; } })).buffer);
+  };
+
   const nrAmount = h('input', { type: 'range', min: 0.1, max: 1, step: 0.05, value: 0.6 });
   const presetSel = h('select', Object.entries(VOICE_PRESETS).map(([k, p]) => h('option', { value: k }, p.label)));
   const vc = { ...VOICE_PRESETS.rap };
@@ -168,6 +199,14 @@ export async function render(el, { params }) {
       h('h3', '✨ Améliorer la voix'),
       h('div.row', h('div.grow', presetSel), h('button.btn.small.primary', { onclick: () => work('Traitement voix…', (b) => voiceChain(b, vc)) }, '✨ Appliquer')),
       vcBox,
+      h('h3', '🎛️ Effets voix & autotune'),
+      h('div.row', h('div.grow', fxCat), h('div.grow', fxKey)),
+      h('div.row', h('div.grow', fxSel),
+        h('button.btn.small', { onclick: (e) => fxPreview(e.target) }, '▶ Écouter'),
+        h('button.btn.small', { onclick: (e) => fxPreview(e.target, true) }, '⏭ Suivant'),
+        h('button.btn.small.primary', { onclick: fxApply }, '✅ Appliquer')),
+      fxInfo, fxAudio,
+      h('p.tiny.muted', 'Écoute chaque effet sur 15 s de ta voix, puis applique celui qui te plaît (« Revenir à l’original » annule). Autotune : la tonalité est détectée toute seule, ou choisis celle de ton instru. Hard-tune = effet robot façon années 2000 ; Naturel = juste corrigé. Les voix féminines/graves gardent ton timbre ; pour une vraie autre voix, il faudra le clonage IA.'),
       h('h3', '📝 Transcrire'),
       h('div.row', h('button.btn.small', { onclick: async (e) => {
         e.target.disabled = true;
