@@ -3,14 +3,15 @@
  * Existing /api/ai callers remain compatible; credentials stay in Worker secrets.
  */
 const ALLOWED_ORIGINS = new Set(["https://prixbasmalin.fr","https://www.prixbasmalin.fr"]);
-const JSON_HEADERS = {"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin"};
+const SECURITY_HEADERS = {"X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin"};
+const JSON_HEADERS = {"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store",...SECURITY_HEADERS};
 const rateBuckets = new Map();
 function isRateLimited(key,now=Date.now()){const windowMs=60000,limit=2;let b=rateBuckets.get(key);if(!b||now-b.start>=windowMs)b={start:now,count:0};b.count++;rateBuckets.set(key,b);if(rateBuckets.size>2000)for(const[k,v]of rateBuckets)if(now-v.start>=windowMs)rateBuckets.delete(k);return b.count>limit;}
 function json(data,status,cors={}){return new Response(JSON.stringify(data),{status,headers:{...JSON_HEADERS,...cors}});}
 export default {async fetch(request,env){
  const origin=request.headers.get("Origin")||"",allowed=ALLOWED_ORIGINS.has(origin);
  const cors={...(allowed?{"Access-Control-Allow-Origin":origin}:{}),"Access-Control-Allow-Methods":"POST, GET, OPTIONS","Access-Control-Allow-Headers":"Content-Type","Vary":"Origin"};
- if(request.method==="OPTIONS")return allowed?new Response(null,{status:204,headers:cors}):new Response(null,{status:403});
+ if(request.method==="OPTIONS")return new Response(null,{status:allowed?204:403,headers:{...SECURITY_HEADERS,...cors}});
  const url=new URL(request.url);
  if(url.pathname==="/health"&&request.method==="GET")return json({ok:true,service:"Prix Malin AI gateway",provider:"FreeLLMAPI",configured:Boolean(env.FREELLMAPI_API_KEY),model:env.FREELLMAPI_MODEL||"gpt-oss-120b"},200,cors);
  if(url.pathname!=="/api/ai"||request.method!=="POST")return json({error:"Not found"},404,cors);

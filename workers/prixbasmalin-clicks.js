@@ -31,10 +31,13 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
 };
 
-// Limiteur de débit par IP pour l'écriture des événements : empêche qu'un script
-// extérieur ne gonfle artificiellement les compteurs. Fenêtre glissante d'une minute.
-// Limite large (une page légitime émet une vue + quelques clics) pour ne jamais
-// perdre de vraie mesure. Le cas échéant, le worker renvoie 429 sans écrire.
+// Limiteur de débit par IP pour l'écriture des événements : ralentit un script
+// extérieur qui gonflerait les compteurs. Fenêtre glissante d'une minute, limite large
+// (une page légitime émet une vue + quelques clics) pour ne jamais perdre de vraie mesure.
+// Au-delà, le worker renvoie 429 sans écrire.
+// IMPORTANT : le compteur vit en mémoire DANS CHAQUE isolate Cloudflare. C'est une défense
+// en profondeur par isolate, pas une limite globale stricte garantie sur toutes les instances.
+// Une limite globale exacte demanderait un stockage partagé (Durable Object ou KV).
 const RATE_LIMIT_PER_MINUTE = 90;
 const rateBuckets = new Map();
 function isRateLimited(key, now = Date.now()) {
@@ -288,7 +291,7 @@ export default {
     const url = new URL(request.url);
     const json = (data, status = 200) => Response.json(data, { status, headers: { ...cors, ...SECURITY_HEADERS, "Cache-Control": "no-store" } });
 
-    if (request.method === "OPTIONS") return ALLOWED_ORIGINS.has(origin) ? new Response(null, { status: 204, headers: cors }) : new Response(null, { status: 403 });
+    if (request.method === "OPTIONS") return new Response(null, { status: ALLOWED_ORIGINS.has(origin) ? 204 : 403, headers: { ...cors, ...SECURITY_HEADERS } });
     if (request.method === "GET" && url.pathname === "/health") return json({ ok: true, service: "prixbasmalin-analytics", schema_version: SCHEMA_VERSION });
 
     if (request.method === "POST" && (url.pathname === "/track" || url.pathname === "/view")) {

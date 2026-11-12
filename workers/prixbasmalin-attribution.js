@@ -4,7 +4,7 @@ export default {
     const origin = request.headers.get("Origin") || "";
     const cors = {"Access-Control-Allow-Origin":allowed.has(origin)?origin:"https://prixbasmalin.fr","Access-Control-Allow-Methods":"POST, OPTIONS, GET","Access-Control-Allow-Headers":"Content-Type","Access-Control-Max-Age":"86400","Vary":"Origin","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Referrer-Policy":"strict-origin-when-cross-origin"};
     const url = new URL(request.url);
-    if(request.method==="OPTIONS") return allowed.has(origin)?new Response(null,{status:204,headers:cors}):new Response(null,{status:403});
+    if(request.method==="OPTIONS") return new Response(null,{status:allowed.has(origin)?204:403,headers:cors});
     if(request.method==="GET"&&url.pathname==="/health") return Response.json({ok:true,service:"prixbasmalin-attribution",country_measurement:true},{headers:{...cors,"Cache-Control":"no-store"}});
     if(request.method!=="POST"||url.pathname!=="/view") return Response.json({error:"Not found"},{status:404,headers:cors});
     if(!allowed.has(origin)) return Response.json({error:"Origin not allowed"},{status:403,headers:cors});

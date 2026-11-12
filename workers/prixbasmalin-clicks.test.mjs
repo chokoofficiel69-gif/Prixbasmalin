@@ -196,3 +196,17 @@ test("les réponses portent les en-têtes de sécurité (nosniff, anti-iframe)",
   assert.equal(res.headers.get("X-Frame-Options"), "DENY");
   assert.equal(res.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin");
 });
+
+test("les en-têtes de sécurité sont aussi présents sur les prévols OPTIONS (autorisés et refusés)", async () => {
+  const env = { CLICKS: d1(database()) };
+  const ok = await worker.fetch(request("OPTIONS", "/track"), env);
+  assert.equal(ok.status, 204);
+  assert.equal(ok.headers.get("Access-Control-Allow-Origin"), ORIGIN);
+  assert.equal(ok.headers.get("X-Content-Type-Options"), "nosniff");
+  assert.equal(ok.headers.get("X-Frame-Options"), "DENY");
+  assert.equal(ok.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin");
+  const denied = await worker.fetch(request("OPTIONS", "/track", { origin: "https://evil.example" }), env);
+  assert.equal(denied.status, 403);
+  assert.equal(denied.headers.get("X-Content-Type-Options"), "nosniff");
+  assert.equal(denied.headers.get("X-Frame-Options"), "DENY");
+});

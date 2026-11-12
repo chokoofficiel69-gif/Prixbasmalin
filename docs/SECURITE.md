@@ -29,16 +29,26 @@ Ne pas activer une CSP bloquante sans cette étape d'observation.
 ## 2. En-têtes de sécurité des Workers (fait, dans le code)
 
 Les trois Workers (`prixbasmalin-clicks`, `prixbasmalin-ai`, `prixbasmalin-attribution`)
-renvoient désormais `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` et
-`Referrer-Policy: strict-origin-when-cross-origin` sur toutes leurs réponses.
+renvoient `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` et
+`Referrer-Policy: strict-origin-when-cross-origin`. Ces en-têtes sont présents sur toutes
+les réponses, **y compris les prévols `OPTIONS` et les refus `403`** (vérifié par test
+automatisé pour `prixbasmalin-clicks`).
 **À déployer** : les Workers se déploient à la main (éditeur Cloudflare ou `wrangler`).
-Recopier les fichiers `workers/*.js` de ce dépôt après fusion.
+Tant que les fichiers `workers/*.js` ne sont pas republiés, **la fusion seule n'active pas
+ces protections en production**. Recopier les fichiers `workers/*.js` de ce dépôt après fusion.
 
 ## 3. Limite de débit des statistiques (fait, dans le code)
 
-`prixbasmalin-clicks` limite désormais l'écriture d'événements à 90 par minute et par IP.
-Au-delà, réponse `429` sans écriture. Cela empêche un script extérieur de gonfler
-artificiellement les compteurs de vues et de clics. Couvert par un test automatisé.
+`prixbasmalin-clicks` applique une limite indicative d'environ **90 écritures par minute
+et par IP**. Au-delà, réponse `429` sans écriture. Cela ralentit fortement un script
+extérieur qui chercherait à gonfler les compteurs de vues et de clics.
+
+⚠️ **Portée réelle** : le compteur vit en mémoire **dans chaque isolate Cloudflare**. C'est
+une **défense en profondeur par isolate**, pas une limite globale stricte garantie : avec
+plusieurs isolates/instances en parallèle, ou après recyclage d'un isolate, le total effectif
+peut dépasser 90/min/IP. Le test automatisé couvre le comportement **sur un seul isolate**.
+Une limite globale exacte nécessiterait un stockage partagé (Durable Object ou KV), au prix
+d'une consommation supplémentaire — non retenu ici pour rester dans le budget 0 €.
 
 ## 4. Rotation des secrets — À FAIRE (urgent)
 
