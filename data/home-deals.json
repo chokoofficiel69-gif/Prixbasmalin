@@ -3,7 +3,7 @@
  "awin_fetched_at": "2026-11-12T13:04:54.571Z",
  "sheets_period": {
   "from": "2026-10-09",
-  "to": "2026-11-11"
+  "to": "2026-11-12"
  },
  "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
@@ -20,10 +20,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 199.0,
+   "min_price_eur": 193.99,
    "max_price_eur": 325.88,
    "offer_count": 25,
-   "last_date": "2026-11-11",
+   "last_date": "2026-11-12",
    "price_kind": "historical"
   },
   {
@@ -39,10 +39,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_VR2.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 414.0,
+   "min_price_eur": 411.12,
    "max_price_eur": 537.09,
    "offer_count": 19,
-   "last_date": "2026-11-09",
+   "last_date": "2026-11-12",
    "price_kind": "historical"
   },
   {
@@ -58,10 +58,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo-Switch-Pro-Controller-BR.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 53.49,
-   "max_price_eur": 80.5,
+   "min_price_eur": 49.99,
+   "max_price_eur": 98.28,
    "offer_count": 18,
-   "last_date": "2026-11-09",
+   "last_date": "2026-11-12",
    "price_kind": "historical"
   },
   {
@@ -78,9 +78,9 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 199.99,
-   "max_price_eur": 304.0,
+   "max_price_eur": 308.59,
    "offer_count": 17,
-   "last_date": "2026-11-09",
+   "last_date": "2026-11-12",
    "price_kind": "historical"
   },
   {
@@ -118,7 +118,7 @@
    "min_price_eur": 1085.59,
    "max_price_eur": 1229.0,
    "offer_count": 16,
-   "last_date": "2026-11-09",
+   "last_date": "2026-11-12",
    "price_kind": "historical"
   },
   {
@@ -134,10 +134,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 327.99,
+   "min_price_eur": 349.0,
    "max_price_eur": 436.55,
    "offer_count": 14,
-   "last_date": "2026-11-09",
+   "last_date": "2026-11-11",
    "price_kind": "historical"
   },
   {
@@ -153,10 +153,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:JBL_Clip_5.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 48.99,
+   "min_price_eur": 45.02,
    "max_price_eur": 59.36,
    "offer_count": 12,
-   "last_date": "2026-11-10",
+   "last_date": "2026-11-11",
    "price_kind": "historical"
   },
   {
@@ -172,10 +172,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_4.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 129.0,
+   "min_price_eur": 119.95,
    "max_price_eur": 186.0,
    "offer_count": 24,
-   "last_date": "2026-11-11",
+   "last_date": "2026-11-12",
    "price_kind": "historical"
   },
   {
@@ -194,7 +194,7 @@
    "min_price_eur": 237.9,
    "max_price_eur": 254.5,
    "offer_count": 13,
-   "last_date": "2026-11-09",
+   "last_date": "2026-11-12",
    "price_kind": "historical"
   },
   {
@@ -210,10 +210,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_switch_lite_blue.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 175.51,
+   "min_price_eur": 150.01,
    "max_price_eur": 201.9,
-   "offer_count": 9,
-   "last_date": "2026-11-09",
+   "offer_count": 10,
+   "last_date": "2026-11-12",
    "price_kind": "historical"
   },
   {
