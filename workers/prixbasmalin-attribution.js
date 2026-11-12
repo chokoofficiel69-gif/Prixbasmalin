@@ -2,8 +2,8 @@ const RATE_LIMIT_PER_MINUTE=60;
 const RATE_WINDOW_MS=60000;
 const rateBuckets=new Map();
 
-// Limite locale par isolate : IP volatile, jamais stockée en base ni journalisée.
-// Ce garde-fou n'est pas une limite globale garantie sur toutes les instances Cloudflare.
+// Limite locale par isolate et identifiant visiteur : l'adresse IP n'est ni lue ni stockée.
+// Ce garde-fou peut être contourné en changeant d'identifiant et n'est pas global.
 function isRateLimited(key,now=Date.now()) {
   let bucket=rateBuckets.get(key);
   if(!bucket||now-bucket.start>=RATE_WINDOW_MS) bucket={start:now,count:0};
@@ -45,8 +45,6 @@ export default {
     if(!allowed.has(origin)) return Response.json({error:"Origin not allowed"},{status:403,headers:cors});
     const contentType=(request.headers.get("Content-Type")||"").split(";")[0].trim().toLowerCase();
     if(contentType!=="application/json") return Response.json({error:"Content-Type must be application/json"},{status:415,headers:cors});
-    const clientIp=request.headers.get("CF-Connecting-IP")||"unknown";
-    if(isRateLimited(clientIp)) return Response.json({error:"Too many requests"},{status:429,headers:{...cors,"Retry-After":"60","Cache-Control":"no-store"}});
     let body;
     try {
       const parsed=await readJsonLimited(request,4096);
@@ -60,6 +58,7 @@ export default {
     const rawCountry=request.cf?.country;
     const country=typeof rawCountry==="string"&&/^[A-Z]{2}$/.test(rawCountry)?rawCountry:null;
     if(!pagePath.startsWith("/")||pagePath.includes("..")||!/^[a-zA-Z0-9-]{12,80}$/.test(visitorId)) return Response.json({error:"Invalid data"},{status:400,headers:cors});
+    if(isRateLimited(visitorId)) return Response.json({error:"Too many requests"},{status:429,headers:{...cors,"Retry-After":"60","Cache-Control":"no-store"}});
     await env.CLICKS.prepare("INSERT INTO traffic_attribution (page_path, visitor_id, source, medium, campaign, country) VALUES (?, ?, ?, ?, ?, ?)").bind(pagePath,visitorId,source,medium,campaign,country).run();
     return new Response(null,{status:204,headers:{...cors,"Cache-Control":"no-store"}});
   }
