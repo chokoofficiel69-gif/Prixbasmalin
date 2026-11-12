@@ -464,5 +464,15 @@ PRESETS.push(
   { cat: '🤖 Vocodeur / talkbox / robot', name: 'Robot funky (vocodeur + chorus)', chain: [{ t: 'vocoder', bands: 18, q: 5, voices: [0, 12] }, { t: 'fx', kind: 'chorus', mix: 0.5 }] },
   { cat: '🤖 Vocodeur / talkbox / robot', name: 'Talkbox G-funk', chain: [{ t: 'vocoder', bands: 10, q: 3.5, voices: [0, 7, 12] }, { t: 'fx', kind: 'band', lo: 250, hi: 4500 }] },
 );
+// Réglages tirés des mesures des références (basses/sub, médiums, présence, largeur, justesse)
+const REF_CAT = '🎯 Calés sur mes références';
+PRESETS.push(
+  { cat: REF_CAT, name: 'Basses et sub (type Naza / d_j_-vu)', chain: [{ t: 'fx', kind: 'peak', f: 70, q: 0.8, gain: 5 }, { t: 'fx', kind: 'peak', f: 140, q: 1, gain: 3 }] },
+  { cat: REF_CAT, name: 'Présence et brillance (type Naza / Lacrim)', chain: [{ t: 'fx', kind: 'peak', f: 4000, q: 1, gain: 3 }, { t: 'fx', kind: 'air', gain: 4 }] },
+  { cat: REF_CAT, name: 'Voix centrée, médiums ouverts (type Nada)', chain: [{ t: 'fx', kind: 'peak', f: 2800, q: 1.2, gain: 2.5 }, { t: 'fx', kind: 'warm' }] },
+  { cat: REF_CAT, name: 'Voix large (type Vacra)', chain: [{ t: 'fx', kind: 'chorus', mix: 0.22 }, { t: 'fx', kind: 'reverb', size: 1.4, mix: 0.15 }] },
+  { cat: REF_CAT, name: 'Justesse naturelle (type Nada / Vacra)', chain: [{ t: 'tune', strength: 1, speed: 35 }, { t: 'fx', kind: 'warm' }] },
+  { cat: REF_CAT, name: 'Pack 8 références (basses, présence, justesse)', chain: [{ t: 'tune', strength: 0.9, speed: 35 }, { t: 'fx', kind: 'peak', f: 70, q: 0.8, gain: 4 }, { t: 'fx', kind: 'peak', f: 4000, q: 1, gain: 2.5 }, { t: 'fx', kind: 'air', gain: 3 }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.14 }] },
+);
 export const PRESET_CATS = [...new Set(PRESETS.map(p => p.cat))];
 export const KEY_CHOICES = [{ v: '', label: 'Tonalité : détection auto' }, ...['majeur', 'mineur'].flatMap(mode => NOTE_FR.map((n, root) => ({ v: `${root}|${mode}`, label: `${n} ${mode}` })))];
