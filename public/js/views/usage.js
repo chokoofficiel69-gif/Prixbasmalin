@@ -165,16 +165,19 @@ const n1 = (x) => (Math.round(x * 10) / 10).toLocaleString('fr-FR');
 function realCapacityStrip(prov, pool) {
   const r = prov?.ovh?.real;
   if (!r) return h('div.notice.warn', 'Capacité réelle des fournisseurs indisponible pour l’instant.');
-  const month = r.tokensPerMonthContinuous;
+  const m30 = r.month30;
+  const estimated = r.models.some(m => m.tokensStatus === 'estimé');
   return h('div.stack',
     h('div.notice.warn', h('b', '⚠️ Le pool de ', tok(pool), ' est un plafond INTERNE, pas une capacité réelle. '),
       'Ce que les fournisseurs peuvent réellement servir est estimé ci-dessous.'),
     h('div.grid',
-      kpi('Capacité réelle estimée', `${n1(r.realRpm)} req/min`, `théorique : ${r.theoreticalRpm} req/min (${r.models.length} modèles × ${r.models[0]?.limitRpm ?? 2}) · non garanti`),
-      kpi('Débit réel estimé', r.tokensPerMin != null ? `${fmtNum(Math.round(r.tokensPerMin))} tokens/min` : 'pas encore mesuré', r.tokensPerMin != null ? `${r.measuredModels}/${r.models.length} modèles mesurés ce mois-ci` : 'faites quelques requêtes pour mesurer'),
-      kpi('Si utilisé 24 h/24 pendant 30 j', month != null ? tok(month) : '—', month != null ? (month < pool ? `moins que le pool interne : le pool ne sera jamais le facteur limitant` : `plus que le pool interne`) : ''),
+      kpi('Capacité réelle estimée', `${n1(r.realRpm)} req/min`, `${r.models.length} modèles × ${r.models[0]?.limitRpm ?? 2} req/min × (1 − erreurs) · théorique ${r.theoreticalRpm} · non garanti`),
+      kpi('Débit réel estimé', r.tokensPerMin != null ? `${fmtNum(Math.round(r.tokensPerMin))} tokens/min` : 'non mesuré',
+        r.tokensPerMin != null ? `${r.measuredModels}/${r.models.length} modèles mesurés${estimated ? ' · une partie estimée' : ''}` : 'faites quelques requêtes pour mesurer'),
+      kpi('Équivalent 30 jours', m30 ? tok(m30.tokens) : '—', m30 ? `bloque en premier : ${m30.blockedBy.label}` : ''),
     ),
-    h('div.tiny.muted', r.note));
+    m30 ? h('div.tiny.muted', 'Équivalent 30 jours = la plus petite de : ', m30.limits.map(l => `${l.label} ${tok(l.tokens)}`).join(' · ')) : null,
+    h('div.tiny.muted', r.note, ' ', r.parallel));
 }
 
 // ---------------- Capacité réelle des fournisseurs ----------------
@@ -195,14 +198,16 @@ function providersPanel(p, rerender) {
         o.listError ? h('div.notice.warn', o.listError) : h('div.small', h('b', `Modèles de chat disponibles (${o.chatModels.length}) : `), o.chatModels.join(', ') || '—', h('div.tiny.muted', o.verifiedAt ? `liste vérifiée en direct le ${fmtDate(o.verifiedAt)}` : '')),
         table(['Modèle', 'Requêtes (60 s)', 'Disponible'], o.capacityNow.map(c => h('tr', h('td', c.model), h('td', `${c.usedLastMinute}`), h('td', c.ok ? h('span.ok-t', 'oui') : h('span.warn-t', `dans ${c.retryIn} s`))))),
         h('div.small', `Refus 429 récents : ${o.recent429}`),
-        h('div.small', h('b', 'Répartition automatique : '), 'chaque requête part vers le modèle de chat le moins chargé sur la dernière minute ; un modèle choisi à la main mais déjà à 2 req/min bascule sur un autre au lieu de renvoyer une erreur 429.'),
-        o.real ? table(['Modèle', 'Latence moy.', 'Tokens/réponse', 'Erreurs', 'Req/min réelle', 'Tokens/min'], o.real.models.map(m => h('tr',
-          h('td', m.model, m.measured ? null : h('div.tiny.muted', 'non mesuré : moyennes des autres')),
+        h('div.small', h('b', 'Répartition automatique : '), 'charge comptée sur 60 s (requêtes lancées, en cours incluses) ; on prend le moins chargé du niveau. Un modèle saturé ou en pause (60 s après un 429) bascule d’abord vers un modèle du même niveau (haut / moyen / bas), puis du niveau inférieur. La conversation l’indique.'),
+        o.real ? table(['Modèle', 'Niveau', 'Mesures (n)', 'Latence moy. (info)', 'Tokens/réponse', 'Erreurs', 'Req/min réelle', 'Tokens/min'], o.real.models.map(m => h('tr',
+          h('td', m.model),
+          h('td', m.tier),
+          h('td', `${m.n}`, m.reliability === 'faible' ? h('div.tiny.warn-t', 'fiabilité faible') : null),
           h('td', m.latencyS != null ? `${Math.round(m.latencyS)} s` : '—'),
-          h('td', m.tokPerReply != null ? fmtNum(Math.round(m.tokPerReply)) : '—'),
-          h('td', m.measured ? `${Math.round(m.errorRate * 100)} %` : '—'),
-          h('td', `${n1(m.realRpm)}`, h('div.tiny.muted', `limité par : ${m.limitedBy}`)),
-          h('td', m.tokensPerMin != null ? fmtNum(Math.round(m.tokensPerMin)) : '—')))) : null,
+          h('td', m.tokPerReply != null ? fmtNum(Math.round(m.tokPerReply)) : 'non mesuré'),
+          h('td', m.errorRate != null ? `${Math.round(m.errorRate * 100)} %` : '—'),
+          h('td', `${n1(m.realRpm)}`),
+          h('td', m.tokensPerMin != null ? fmtNum(Math.round(m.tokensPerMin)) : 'non mesuré', m.tokensStatus === 'estimé' ? h('div.tiny.warn-t', 'estimé (moyenne des modèles mesurés)') : null)))) : null,
         o.excluded?.length ? h('div.small', h('b', 'Exclus du chat texte : '), o.excluded.map(x => `${x.id} (${x.reason})`).join(' · ')) : null),
       h('div.stack',
         h('h3', 'FreeLLMAPI (passerelle)', f.verification.ok ? h('span.badge.ok', 'fournisseurs vérifiables') : h('span.badge.bad', 'non vérifiable')),

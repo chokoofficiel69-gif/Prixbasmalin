@@ -132,7 +132,7 @@ export async function chat({ uid, model = 'auto', messages, onDelta, onMeta, sig
     }
     if (!res.ok) {
       const msg = await errorText(res);
-      if (res.status === 429 && route.provider === 'ovh') ovhCooldown(route.model, Number(res.headers.get('retry-after')) || 60);
+      if (res.status === 429 && route.provider === 'ovh') ovhCooldown(route.model, Math.max(60, Number(res.headers.get('retry-after')) || 0));
       settle({ exact: false, pt: 0, ct: 0, outcome: `échec-http-${res.status}` });
       record({ uid, kind: 'chat', model: route.model, platform: platform || route.provider, ok: false, err: msg, ms: Date.now() - t0, src, status: res.status });
       throw new UpstreamError(msg, res.status);
@@ -177,7 +177,7 @@ export async function chat({ uid, model = 'auto', messages, onDelta, onMeta, sig
     const tok = exact && Number.isFinite(usage.total_tokens) ? usage.total_tokens : pt + ct;
     settle({ exact, pt, ct, tok, outcome: 'ok' });
     record({ uid, kind: 'chat', model: route.model, platform: platform || route.provider, pt, ct, tokens: tok, estimated: !exact, ms: Date.now() - t0, src });
-    return { content, reasoning, routedVia, platform, model: route.model, provider: route.provider, usage: { prompt: pt, completion: ct, total: tok }, exact, estimated: !exact, ms: Date.now() - t0 };
+    return { content, reasoning, routedVia, platform, model: route.model, provider: route.provider, ...(route.redirectedFrom ? { redirectedFrom: route.redirectedFrom } : {}), usage: { prompt: pt, completion: ct, total: tok }, exact, estimated: !exact, ms: Date.now() - t0 };
   } catch (err) {
     if (!settled) {
       if (content || reasoning) {

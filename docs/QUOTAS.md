@@ -86,17 +86,30 @@ exécution est conservée dans `data/verifications.jsonl`.
 ## Capacité réelle estimée (page Tokens)
 
 Le pool mensuel (10 M par défaut) est un **plafond interne**, pas une capacité fournisseur. La page Tokens affiche à côté une
-**capacité réelle estimée**, calculée pour chaque modèle de chat OVH :
+**capacité réelle estimée** pour chaque modèle de chat OVH (accès anonyme : 2 requêtes **lancées** par minute, par modèle et par IP ;
+aucun quota de tokens publié) :
 
-- limite publiée par OVH (accès anonyme) : 2 req/min par modèle et par IP, aucun quota de tokens publié ;
-- req/min réelle = min(2, 60 s / latence moyenne mesurée) × (1 − taux d'erreur mesuré) ;
-- tokens/min = req/min réelle × tokens moyens par réponse mesurés ;
-- modèle pas encore mesuré : moyennes des modèles mesurés (estimation prudente).
+- **req/min = 2 × (1 − taux d'erreur mesuré)**. OVH compte les requêtes lancées, pas les requêtes simultanées : la latence
+  n'entre pas dans le calcul, elle est affichée pour information.
+- Le Studio **ne sérialise pas** les appels : jusqu'à 2 appels en parallèle par modèle (la limite est comptée au lancement).
+- **tokens/min = req/min × tokens moyens par réponse**, mesurés ce mois-ci. Modèle sans mesure : « non mesuré », ou
+  « estimé » (clairement marqué) avec la moyenne tokens/réponse des modèles mesurés. Taux d'erreur d'un modèle non mesuré : non copié.
+- Nombre de mesures **n** affiché par modèle ; **n < 10 → « fiabilité faible »**.
+- **Équivalent 30 jours = min(capacité OVH × 30 j en continu, limite interne/jour × 30, pool restant)**, avec la limite qui bloque en premier.
 
-Exemple mesuré : gpt-oss-120b, 63 s de latence, ~4 300 tokens/réponse, 1 erreur sur 6 → ~0,8 req/min, ~3 400 tokens/min.
+Exemple mesuré : gpt-oss-120b, 63 s de latence (info), ~4 300 tokens/réponse, 1 erreur sur 6 (n = 6, fiabilité faible)
+→ 2 × 5/6 ≈ 1,67 req/min, ≈ 7 200 tokens/min.
 
 ## Routage chat OVH
 
-- Seuls les modèles de chat texte sont routés : les modèles **Guard** (modération) et **VL** (vision) sont exclus ; les VL ne servent qu'aux messages avec image.
-- **Répartition** : chaque requête part vers le modèle le moins chargé sur la dernière minute. Un modèle choisi à la main mais déjà à 2 req/min (ou en pause après un 429) bascule sur un autre modèle libre. Si tous sont pleins : refus local, sans appel à OVH.
+- Seuls les modèles de chat texte sont routés : **Guard** (modération) et **VL** (vision) exclus ; les VL ne servent qu'aux messages avec image.
+- **Charge** : requêtes lancées sur les 60 dernières secondes, requêtes en cours incluses (comptées au lancement).
+- **Après un 429** : modèle en pause **60 s minimum** (plus si OVH envoie un Retry-After plus long).
+- **Niveaux** : haut = gpt-oss-120b, Qwen3.5-397B-A17B, Meta-Llama-3_3-70B-Instruct ; moyen = Qwen3.6-27B, Qwen3.8-27B,
+  Mistral-Small-3.2-24B, gpt-oss-20b ; bas = Qwen3.5-9B ; les autres modèles forment un dernier niveau.
+- **Bascule** : un modèle choisi à la main mais saturé ou en pause bascule vers le modèle le moins chargé **du même niveau** ;
+  on ne descend d'un niveau que si tout le niveau est plein (niveaux supérieurs en dernier recours). « Automatique » commence au
+  niveau haut (« rapide » : niveau moyen) et répartit sur le moins chargé.
+- La conversation affiche **« Réponse fournie par X (Y était saturé) »** quand il y a eu bascule.
+- Tous les modèles pleins : refus local (429) sans appel à OVH.
 - **Usage commercial de l'accès anonyme OVH : non vérifié** (avertissement affiché sur la page Tokens).

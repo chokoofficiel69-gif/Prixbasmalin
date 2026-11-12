@@ -15,7 +15,7 @@ import { loadUsage, record, guard, summary, perUser, costOf } from './usage.js';
 import { API_BASE, isConfigured, upstream, errorText, listModels, chat, UpstreamError, setLedger } from './llm.js';
 import { Ledger } from './quota.js';
 import {
-  PROVIDER_FACTS, OVH_BASE, listOvhModels, ovhChatModels, ovhExcludedModels, ovhCapacityNow, ovhSlot, ovhTake, ovhCooldown,
+  PROVIDER_FACTS, OVH_BASE, listOvhModels, ovhChatModels, ovhExcludedModels, ovhRealCapacity, ovhCapacityNow, ovhSlot, ovhTake, ovhCooldown,
   verifyGateway, gatewayState, gatewayMediaAllowed, platformAllowed,
 } from './providers.js';
 import { runAgents } from './agents.js';
@@ -447,7 +447,7 @@ route('POST', '/api/chat', async (req, res, p, user) => {
       uid: user.id, model: body.model || getSettings().defaultModel || 'auto', messages: full, temperature: body.temperature, signal: ctrl.signal,
       onMeta: (m) => emit({ type: 'meta', ...m }), onDelta: (d) => emit({ type: 'delta', ...d }),
     });
-    emit({ type: 'done', routedVia: r.routedVia, model: r.model, platform: r.platform, usage: r.usage, estimated: r.estimated, ms: r.ms });
+    emit({ type: 'done', routedVia: r.routedVia, model: r.model, redirectedFrom: r.redirectedFrom || null, platform: r.platform, usage: r.usage, estimated: r.estimated, ms: r.ms });
   } catch (err) { emit({ type: 'error', error: err.message, status: err.status || 502 }); }
   res.end();
 });
@@ -460,7 +460,7 @@ route('POST', '/api/complete', async (req, res, p, user) => {
       ...(body.messages || [{ role: 'user', content: String(body.prompt || '') }]),
     ];
     const r = await chat({ uid: user.id, model: body.model || 'auto', messages, temperature: body.temperature, src: body.src || 'outil', extra: body.json ? { response_format: { type: 'json_object' } } : {} });
-    ok(res, { content: r.content, routedVia: r.routedVia, usage: r.usage });
+    ok(res, { content: r.content, routedVia: r.routedVia, redirectedFrom: r.redirectedFrom || null, usage: r.usage });
   } catch (err) { fail(res, err.status || 502, err.message); }
 });
 
@@ -803,43 +803,6 @@ route('GET', '/api/usage', async (req, res, p, user) => {
   }
 });
 
-/**
- * Capacité RÉELLE estimée d'OVH (accès anonyme), à partir :
- *  - de la limite fournisseur (2 req/min par modèle et par IP),
- *  - de la latence moyenne mesurée (une requête à la fois par modèle : 60 s / latence),
- *  - du taux d'erreur mesuré,
- *  - des tokens moyens par réponse mesurés.
- * Un modèle sans mesure prend les moyennes des modèles mesurés (prudent), marqué « non mesuré ».
- */
-function ovhRealCapacity(chatModels, opsModels, pool) {
-  const rpm = Math.max(1, Number(getSettings().ovhRpmPerModel) || 2);
-  const stats = Object.fromEntries((opsModels || []).filter(m => m.platform === 'ovh' && (m.kind || 'chat') === 'chat').map(m => [m.model, m]));
-  const all = Object.values(stats), okReq = all.reduce((a, m) => a + m.requests - m.errors, 0);
-  const globalTok = okReq ? all.reduce((a, m) => a + m.tokens, 0) / okReq : null;
-  const allReq = all.reduce((a, m) => a + m.requests, 0);
-  const globalLat = allReq ? all.reduce((a, m) => a + m.ms, 0) / allReq / 1000 : null;
-  const globalErr = allReq ? all.reduce((a, m) => a + m.errors, 0) / allReq : 0;
-  const models = chatModels.map(model => {
-    const st = stats[model], ok = st ? st.requests - st.errors : 0;
-    // sans mesure propre : moyennes des autres modèles OVH (prudent), sinon la limite fournisseur
-    const latencyS = st && st.requests ? st.ms / st.requests / 1000 : globalLat;
-    const errorRate = st && st.requests ? st.errors / st.requests : globalErr;
-    const tokPerReply = ok ? st.tokens / ok : globalTok;
-    const byLatency = latencyS ? 60 / latencyS : rpm;
-    const realRpm = Math.min(rpm, byLatency) * (1 - errorRate);
-    return { model, limitRpm: rpm, latencyS, errorRate, tokPerReply, realRpm, tokensPerMin: tokPerReply != null ? realRpm * tokPerReply : null,
-      measured: !!(st && st.requests), samples: st?.requests || 0, limitedBy: latencyS && byLatency < rpm ? 'latence' : 'limite OVH' };
-  });
-  const realRpm = models.reduce((a, m) => a + m.realRpm, 0);
-  const tokensPerMin = models.every(m => m.tokensPerMin == null) ? null : models.reduce((a, m) => a + (m.tokensPerMin || 0), 0);
-  return {
-    models, theoreticalRpm: chatModels.length * rpm, realRpm, tokensPerMin,
-    tokensPerMonthContinuous: tokensPerMin != null ? Math.round(tokensPerMin * 60 * 24 * 30) : null, pool,
-    measuredModels: models.filter(m => m.measured).length,
-    note: 'Estimation, non garantie : limite publiée par OVH (2 req/min/modèle/IP, accès anonyme, aucun quota de tokens publié) × latence et erreurs mesurées sur ce Studio ce mois-ci, en enchaînant une requête à la fois par modèle. OVH peut appliquer des limites plus strictes. Le pool interne n’est qu’un plafond fixé par le Studio.',
-  };
-}
-
 // Capacité réellement confirmée chez les fournisseurs (séparée du quota interne)
 route('GET', '/api/providers', async (req, res) => {
   const force = req.url.includes('refresh');
@@ -861,7 +824,8 @@ route('GET', '/api/providers', async (req, res) => {
       models: ovh.list || [], chatModels, listError: ovh.error, verifiedAt: ovh.verifiedAt || null,
       capacityNow: ovhCapacityNow(chatModels),
       excluded: ovhExcludedModels(ovh.list || []),
-      real: ovhRealCapacity(chatModels, ops.models, getSettings().poolMonthlyTokens),
+      real: (() => { const st = getSettings(); const snap = ledger.snapshot(getUsers().map(u => u.id));
+        return ovhRealCapacity(chatModels, ops.models, { rpm: st.ovhRpmPerModel || 2, pool: st.poolMonthlyTokens, remaining: snap.remaining, dailyCap: st.dailyTokenCap || 0 }); })(),
       theoretical: {
         requestsPerMinute: chatModels.length * (getSettings().ovhRpmPerModel || 2),
         note: 'Maximum théorique (modèles de chat texte uniquement, Guard et VL exclus) pour TOUT le Studio (une seule adresse IP de serveur), si chaque modèle est utilisé au maximum. Non garanti : OVH indique pouvoir appliquer des limites plus strictes.',

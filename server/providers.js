@@ -98,7 +98,83 @@ export function pickOvhModel(candidates) {
   return { model: best, soonest };
 }
 export function ovhTake(model) { const w = windows.get(model) || []; w.push(Date.now()); windows.set(model, w); }
-export function ovhCooldown(model, sec = 60) { cooldown.set(model, Date.now() + sec * 1000); }
+/** Après un 429 : pause d'au moins 60 s (ou plus si OVH le demande via Retry-After). */
+export function ovhCooldown(model, sec = 60) { cooldown.set(model, Date.now() + Math.max(60, Number(sec) || 0) * 1000); }
+
+// ---------------------------------------------------------------------------
+// Niveaux de modèles : une bascule reste d'abord dans le même niveau, puis descend d'un niveau.
+// ---------------------------------------------------------------------------
+export const OVH_TIERS = [
+  { id: 'haut', models: ['gpt-oss-120b', 'Qwen3.5-397B-A17B', 'Meta-Llama-3_3-70B-Instruct'] },
+  { id: 'moyen', models: ['Qwen3.6-27B', 'Qwen3.8-27B', 'Mistral-Small-3.2-24B', 'gpt-oss-20b'] },
+  { id: 'bas', models: ['Qwen3.5-9B'] },
+];
+/** Rang du niveau d'un modèle (0 = haut). Les modèles hors liste forment un dernier niveau « autres ». */
+export function ovhTierOf(id) {
+  const x = String(id).toLowerCase();
+  const i = OVH_TIERS.findIndex(t => t.models.some(m => x === m.toLowerCase() || x.startsWith(m.toLowerCase() + '-')));
+  return i < 0 ? OVH_TIERS.length : i;
+}
+/**
+ * Ordre de recherche : niveau de départ, puis les niveaux inférieurs un par un,
+ * puis (dernier recours) les niveaux supérieurs. Dans chaque niveau : le moins chargé.
+ */
+export function pickByTier(chat, startTier = 0, prefer = null) {
+  const n = OVH_TIERS.length + 1;
+  const order = [...Array(n).keys()].filter(t => t >= startTier).concat([...Array(startTier).keys()].reverse());
+  let soonest = 60;
+  for (const t of order) {
+    const group = chat.filter(m => ovhTierOf(m) === t);
+    if (!group.length) continue;
+    const { model, soonest: s2 } = pickOvhModel(prefer && group.includes(prefer) ? [prefer, ...group.filter(m => m !== prefer)] : group);
+    if (model) return { model, tier: t, soonest: 0 };
+    soonest = Math.min(soonest, s2);
+  }
+  return { model: null, soonest };
+}
+
+/**
+ * Capacité RÉELLE estimée d'OVH (accès anonyme).
+ * OVH compte les requêtes LANCÉES par minute (2/min/modèle/IP), pas les requêtes simultanées :
+ *   req/min = limite × (1 − taux d'erreur mesuré). La latence est une simple information.
+ * Le Studio ne sérialise pas les appels : jusqu'à 2 appels en parallèle par modèle (limite comptée au lancement).
+ * Modèle sans mesure : tokens/min « non mesuré », ou estimé (marqué) avec la moyenne tokens/réponse des modèles mesurés.
+ */
+export function ovhRealCapacity(chatModels, opsModels, { rpm = 2, pool = null, remaining = null, dailyCap = 0 } = {}) {
+  rpm = Math.max(1, Number(rpm) || 2);
+  const stats = Object.fromEntries((opsModels || []).filter(m => m.platform === 'ovh' && (m.kind || 'chat') === 'chat').map(m => [m.model, m]));
+  const all = Object.values(stats), okReq = all.reduce((a, m) => a + m.requests - m.errors, 0);
+  const globalTok = okReq ? all.reduce((a, m) => a + m.tokens, 0) / okReq : null;
+  const models = chatModels.map(model => {
+    const st = stats[model], n = st?.requests || 0, ok = n - (st?.errors || 0);
+    const errorRate = n ? st.errors / n : 0;
+    const realRpm = rpm * (1 - errorRate);
+    const tokPerReply = ok ? st.tokens / ok : null;
+    const tokensPerMin = tokPerReply != null ? realRpm * tokPerReply : (globalTok != null ? realRpm * globalTok : null);
+    return {
+      model, tier: OVH_TIERS[ovhTierOf(model)]?.id || 'autres', limitRpm: rpm, n, latencyS: n ? st.ms / n / 1000 : null,
+      errorRate: n ? errorRate : null, tokPerReply, realRpm, tokensPerMin,
+      tokensStatus: tokPerReply != null ? 'mesuré' : tokensPerMin != null ? 'estimé' : 'non mesuré',
+      reliability: n >= 10 ? 'normale' : 'faible',
+    };
+  });
+  const realRpm = models.reduce((a, m) => a + m.realRpm, 0);
+  const known = models.filter(m => m.tokensPerMin != null);
+  const tokensPerMin = known.length ? known.reduce((a, m) => a + m.tokensPerMin, 0) : null;
+  // Équivalent 30 jours : la plus petite des trois limites, en indiquant laquelle bloque
+  const limits = [];
+  if (tokensPerMin != null) limits.push({ id: 'ovh', label: 'capacité OVH × 30 j (en continu)', tokens: Math.round(tokensPerMin * 60 * 24 * 30) });
+  if (dailyCap > 0) limits.push({ id: 'daily', label: 'limite interne par jour × 30', tokens: dailyCap * 30 });
+  if (remaining != null) limits.push({ id: 'pool', label: 'pool interne restant', tokens: Math.max(0, remaining) });
+  const binding = limits.length ? limits.reduce((a, b) => (b.tokens < a.tokens ? b : a)) : null;
+  return {
+    models, theoreticalRpm: chatModels.length * rpm, realRpm, tokensPerMin, pool,
+    month30: binding ? { tokens: binding.tokens, blockedBy: binding, limits } : null,
+    measuredModels: models.filter(m => m.n > 0).length,
+    parallel: `Appels non sérialisés : jusqu’à ${rpm} appels en parallèle par modèle (la limite est comptée au lancement, requêtes en cours incluses).`,
+    note: 'Estimation, non garantie : limite publiée par OVH (2 requêtes lancées par minute, par modèle et par IP, accès anonyme, aucun quota de tokens publié) × (1 − taux d’erreur mesuré ce mois-ci). La latence n’entre pas dans le calcul. OVH peut appliquer des limites plus strictes.',
+  };
+}
 export function ovhCapacityNow(models) {
   return (models || []).map(m => ({ model: m, ...ovhSlot(m), usedLastMinute: (windows.get(m) || []).filter(t => Date.now() - t < 60_000).length }));
 }
@@ -137,11 +213,6 @@ export function gatewayState() { return gatewayMap; }
 export class RouteError extends Error {
   constructor(message, status = 503, retryIn) { super(message); this.status = status; this.retryIn = retryIn; }
 }
-const PREFERRED = {
-  auto: ['gpt-oss-120b', 'Meta-Llama-3_3-70B-Instruct', 'Qwen3-32B', 'Mistral-Small-3.2-24B-Instruct-2506', 'gpt-oss-20b'],
-  'auto:smart': ['gpt-oss-120b', 'Qwen3-32B', 'Meta-Llama-3_3-70B-Instruct', 'Mistral-Small-3.2-24B-Instruct-2506'],
-  'auto:fast': ['gpt-oss-20b', 'Mistral-Small-3.2-24B-Instruct-2506', 'Llama-3.1-8B-Instruct', 'Mistral-Nemo-Instruct-2407', 'gpt-oss-120b'],
-};
 export function platformAllowed(platform) {
   const s = getSettings();
   const p = String(platform || '').toLowerCase();
@@ -168,28 +239,33 @@ export async function resolveChatRoute(requested = 'auto', { vision = false } = 
     const { list } = await listOvhModels();
     const chat = vision ? ovhVisionModels(list || []) : ovhChatModels(list || ['gpt-oss-120b']);
     const excluded = ovhExcludedModels(list || []).find(x => x.id.toLowerCase() === req.toLowerCase());
-    let candidates, redirectedFrom = null;
-    if (isAuto) {
-      const pref = PREFERRED[req] || PREFERRED.auto;
-      candidates = [...pref.filter(m => chat.includes(m)), ...chat.filter(m => !pref.includes(m))];
-    } else if (excluded && !vision) {
+    if (!isAuto && excluded && !vision) {
       throw new RouteError(`« ${excluded.id} » est exclu du chat texte (${excluded.reason}). Choisissez un autre modèle ou « Automatique ».`, 400);
+    }
+    let picked;
+    if (!chat.length) {
+      picked = null; // aucun modèle adapté chez OVH : passerelle ci-dessous
+    } else if (vision) {
+      picked = pickOvhModel(chat);
+    } else if (isAuto) {
+      // auto / auto:smart : niveau haut d'abord ; auto:fast : niveau moyen d'abord
+      picked = pickByTier(chat, req === 'auto:fast' ? 1 : 0);
     } else {
-      candidates = chat.filter(m => m.toLowerCase() === req.toLowerCase());
-      // Modèle choisi à la main mais déjà à sa limite : bascule sur le modèle le moins chargé (évite le 429)
-      if (candidates.length && !ovhSlot(candidates[0]).ok) {
-        redirectedFrom = candidates[0];
-        candidates = [candidates[0], ...chat.filter(m => m !== redirectedFrom)];
+      const wanted = chat.find(m => m.toLowerCase() === req.toLowerCase());
+      if (!wanted) {
+        if (wantProvider === 'ovh') throw new RouteError(`Le modèle « ${req} » n’existe pas (ou plus) chez OVH.`, 404);
+        picked = null;
+      } else if (ovhSlot(wanted).ok) {
+        return { provider: 'ovh', model: wanted, label: `ovh/${wanted}` };
+      } else {
+        // saturé ou en pause : bascule d'abord dans le même niveau, puis niveau inférieur
+        picked = pickByTier(chat.filter(m => m !== wanted), ovhTierOf(wanted));
+        if (picked.model) return { provider: 'ovh', model: picked.model, label: `ovh/${picked.model}`, redirectedFrom: wanted };
       }
     }
-    if (candidates.length) {
-      const { model: m, soonest } = pickOvhModel(candidates);
-      if (m) return { provider: 'ovh', model: m, label: `ovh/${m}`, ...(redirectedFrom && m !== redirectedFrom ? { redirectedFrom } : {}) };
-      if (wantProvider === 'ovh' || !isAuto || !s.gatewayForAuto) {
-        throw new RouteError(`Capacité gratuite d’OVH momentanément atteinte sur tous les modèles (2 requêtes par minute et par modèle, limite fixée par OVH pour l’accès anonyme). Réessayez dans ${soonest} s.`, 429, soonest);
-      }
-    } else if (wantProvider === 'ovh') {
-      throw new RouteError(`Le modèle « ${req} » n’existe pas (ou plus) chez OVH.`, 404);
+    if (picked?.model) return { provider: 'ovh', model: picked.model, label: `ovh/${picked.model}` };
+    if (picked && (wantProvider === 'ovh' || !isAuto || !s.gatewayForAuto)) {
+      throw new RouteError(`Capacité gratuite d’OVH momentanément atteinte sur tous les modèles (2 requêtes par minute et par modèle, limite fixée par OVH pour l’accès anonyme). Réessayez dans ${picked.soonest} s.`, 429, picked.soonest);
     }
   }
 

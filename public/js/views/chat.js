@@ -167,7 +167,7 @@ export async function render(el, { params }) {
       meta.innerHTML = '';
       if (m.role === 'assistant' && !m.streaming && !m.error) {
         meta.append(
-          h('span', m.routedVia ? `via ${m.routedVia}` : ''),
+          m.redirectedFrom ? h('span.warn-t', `Réponse fournie par ${m.model || m.routedVia} (${m.redirectedFrom} était saturé)`) : h('span', m.routedVia ? `via ${m.routedVia}` : ''),
           m.usage ? h('span', { title: m.estimated ? 'Le fournisseur n’a pas donné la mesure : estimation prudente' : 'Mesure exacte renvoyée par le fournisseur' }, `${fmtNum(m.usage.total)} tokens ${m.estimated ? '(estimés)' : '(réels)'}`) : '',
           m.ms ? h('span', `${(m.ms / 1000).toFixed(1)} s`) : '',
           h('button.btn.ghost', { onclick: () => navigator.clipboard?.writeText(m.content).then(() => toast('Copié')) }, 'Copier'),
@@ -201,13 +201,13 @@ export async function render(el, { params }) {
     target.streaming = true;
     try {
       await sse('/api/chat', { projectId: state.projectId, model, messages: apiMessages(messages) }, (ev) => {
-        if (ev.type === 'meta') target.routedVia = ev.routedVia;
+        if (ev.type === 'meta') { target.routedVia = ev.routedVia; target.redirectedFrom = ev.redirectedFrom || null; target.model = ev.model; }
         if (ev.type === 'delta') {
           if (ev.content) target.content += ev.content;
           if (ev.reasoning) target.reasoning = (target.reasoning || '') + ev.reasoning;
           raf ||= requestAnimationFrame(paint);
         }
-        if (ev.type === 'done') Object.assign(target, { routedVia: ev.routedVia, usage: ev.usage, estimated: ev.estimated, ms: ev.ms, model: ev.model });
+        if (ev.type === 'done') Object.assign(target, { routedVia: ev.routedVia, redirectedFrom: ev.redirectedFrom || target.redirectedFrom || null, usage: ev.usage, estimated: ev.estimated, ms: ev.ms, model: ev.model });
         if (ev.type === 'error') target.error = ev.error;
       }, controller?.signal);
     } catch (e) {
