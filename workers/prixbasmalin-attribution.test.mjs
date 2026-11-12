@@ -43,7 +43,7 @@ test("rejette les corps trop volumineux",async()=>{
   assert.equal(env.writes.length,0);
 });
 
-test("limite à 60 requêtes par minute et par IP dans un isolate",async()=>{
+test("limite à 60 requêtes par minute et par identifiant visiteur dans un isolate",async()=>{
   const env=makeEnv();
   let accepted=0,limited=0;
   for(let i=0;i<61;i++){
