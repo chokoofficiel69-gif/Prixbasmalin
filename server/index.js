@@ -194,7 +194,12 @@ function serveStatic(req, res, pathname) {
   fs.stat(file, (err, st) => {
     if (err || !st.isFile()) return serveStatic(req, res, '/index.html');
     const ext = path.extname(file);
-    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=300', 'Content-Length': st.size });
+    // Code de l'interface (HTML/JS/CSS) : toujours revalidé, pour qu'une mise à jour soit visible
+    // immédiatement (sinon un ancien module JS en cache lit un format de données qui a changé).
+    const etag = `"${st.size.toString(36)}-${Math.floor(st.mtimeMs).toString(36)}"`;
+    const revalidate = ['.html', '.js', '.css', '.webmanifest', '.json'].includes(ext);
+    if (revalidate && req.headers['if-none-match'] === etag) { res.writeHead(304, { ETag: etag, 'Cache-Control': 'no-cache' }); return res.end(); }
+    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': revalidate ? 'no-cache' : 'public, max-age=300', ETag: etag, 'Content-Length': st.size });
     fs.createReadStream(file).pipe(res);
   });
 }
