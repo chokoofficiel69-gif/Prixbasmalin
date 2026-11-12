@@ -66,6 +66,46 @@ export async function detectPitch(buffer, onProgress) {
   return { f0: clean, conf, rate: SRD / hop };
 }
 
+// ---------- Accords de l'instru (pour des harmonies qui suivent le beat) ----------
+function fftMag(re) {
+  const n = re.length, im = new Float32Array(n);
+  for (let i = 1, j = 0; i < n; i++) { let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { [re[i], re[j]] = [re[j], re[i]]; } }
+  for (let len = 2; len <= n; len <<= 1) {
+    const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a);
+    for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let j = 0; j < len / 2; j++) {
+      const ur = re[i + j], ui = im[i + j], vr = re[i + j + len / 2] * cr - im[i + j + len / 2] * ci, vi = re[i + j + len / 2] * ci + im[i + j + len / 2] * cr;
+      re[i + j] = ur + vr; im[i + j] = ui + vi; re[i + j + len / 2] = ur - vr; im[i + j + len / 2] = ui - vi;
+      const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t; } }
+  }
+  const m = new Float32Array(n / 2); for (let i = 0; i < n / 2; i++) m[i] = Math.hypot(re[i], im[i]); return m;
+}
+export async function detectChords(buffer, step = 0.5) {
+  const SRD = 11025, N = 4096;
+  const off = new OfflineAudioContext(1, Math.ceil(buffer.duration * SRD), SRD);
+  const src = off.createBufferSource(); src.buffer = buffer; src.connect(off.destination); src.start();
+  const x = (await off.startRendering()).getChannelData(0);
+  const hop = Math.round(step * SRD), out = [];
+  const tpl = []; for (let r = 0; r < 12; r++) { tpl.push({ root: r, minor: false, pcs: [r, (r + 4) % 12, (r + 7) % 12] }); tpl.push({ root: r, minor: true, pcs: [r, (r + 3) % 12, (r + 7) % 12] }); }
+  for (let o = 0; o + N <= x.length; o += hop) {
+    const fr = new Float32Array(N); for (let i = 0; i < N; i++) fr[i] = x[o + i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / N));
+    const mag = fftMag(fr), chroma = new Array(12).fill(0);
+    for (let b = 1; b < N / 2; b++) { const f = b * SRD / N; if (f < 60 || f > 2000) continue; const pc = ((Math.round(69 + 12 * Math.log2(f / 440)) % 12) + 12) % 12; chroma[pc] += mag[b] * mag[b]; }
+    let best = null, bs = -1;
+    for (const t of tpl) { const sc = t.pcs.reduce((a, pc) => a + chroma[pc], 0) - 0.5 * chroma[(t.root + (t.minor ? 4 : 3)) % 12]; if (sc > bs) { bs = sc; best = t; } }
+    out.push({ t: o / SRD, ...best });
+  }
+  for (let i = 1; i < out.length - 1; i++) if (out[i - 1].root === out[i + 1].root && out[i - 1].minor === out[i + 1].minor) Object.assign(out[i], { root: out[i - 1].root, minor: out[i - 1].minor, pcs: out[i - 1].pcs });
+  return out;
+}
+const chordAt = (chords, t) => { if (!chords?.length) return null; let lo = 0, hi = chords.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (chords[m].t <= t) lo = m; else hi = m - 1; } return chords[lo]; };
+function chordTone(note, chord, steps) {
+  const tones = []; for (let o = 2; o <= 8; o++) for (const pc of chord.pcs) tones.push(o * 12 + pc);
+  tones.sort((a, b) => a - b);
+  if (steps > 0) { const i = tones.findIndex(n => n > note + 0.5); return tones[Math.min(tones.length - 1, (i < 0 ? tones.length - 1 : i) + steps - 1)]; }
+  let j = -1; for (let k = 0; k < tones.length; k++) if (tones[k] < note - 0.5) j = k;
+  return tones[Math.max(0, j + steps + 1)];
+}
+
 // ---------- Tonalité ----------
 const KMAJ = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
 const KMIN = [6.33, 2.68, 3.52, 5.38, 2.6, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
@@ -100,7 +140,7 @@ function scaleStep(note, key, steps) {
 }
 
 // Courbe de correction (en demi-tons, une valeur par trame) selon le réglage autotune.
-function correctionCurve(pitch, key, { strength = 1, speed = 0, scale, extra = 0, harmonySteps = 0 }) {
+function correctionCurve(pitch, key, { strength = 1, speed = 0, scale, extra = 0, harmonySteps = 0, chords = null }) {
   const n = pitch.f0.length, out = new Float32Array(n);
   const alpha = speed > 0 ? Math.exp(-1 / (pitch.rate * speed / 1000)) : 0;
   let tgt = null;
@@ -109,7 +149,7 @@ function correctionCurve(pitch, key, { strength = 1, speed = 0, scale, extra = 0
     if (!f) { out[i] = extra; tgt = null; continue; }
     const m = 69 + 12 * Math.log2(f / 440);
     let t = snap(m, key, scale);
-    if (harmonySteps) t = scaleStep(t, key, harmonySteps);
+    if (harmonySteps) { const ch = chordAt(chords, i / pitch.rate); t = ch ? chordTone(t, ch, harmonySteps) : scaleStep(t, key, harmonySteps); }
     tgt = tgt === null || alpha === 0 ? t : alpha * tgt + (1 - alpha) * t;
     out[i] = (harmonySteps ? (tgt - m) : strength * (tgt - m)) + extra;
   }
@@ -117,7 +157,8 @@ function correctionCurve(pitch, key, { strength = 1, speed = 0, scale, extra = 0
 }
 
 // ---------- TD-PSOLA : change la hauteur en gardant le timbre ----------
-export async function psola(buffer, pitch, semis, onProgress) {
+export async function psola(buffer, pitch, semis, onProgress, formant = 0) {
+  const fa = 2 ** (formant / 12); // > 1 : formants plus aigus (voix plus « petite »), < 1 : plus graves
   const sr = buffer.sampleRate, x = mono(buffer), N = x.length;
   const per = (t) => { const i = Math.min(pitch.f0.length - 1, Math.max(0, Math.round(t / sr * pitch.rate))); const f = pitch.f0[i]; return f ? sr / f : 0; };
   const semAt = (t) => { const i = Math.min(semis.length - 1, Math.max(0, Math.round(t / sr * pitch.rate))); return typeof semis === 'number' ? semis : semis[i]; };
@@ -139,11 +180,15 @@ export async function psola(buffer, pitch, semis, onProgress) {
     const m = marks[mi];
     const L = Math.round(m.unv ? sr * 0.01 : m.P);
     const ratio = m.unv ? 1 : 2 ** (semAt(m.t) / 12);
-    for (let k = -L; k < L; k++) {
-      const src = m.t + k, dst = Math.round(s) + k;
-      if (src < 0 || src >= N || dst < 0 || dst >= N) continue;
-      const w = 0.5 + 0.5 * Math.cos(Math.PI * k / L);
-      y[dst] += x[src] * w; wsum[dst] += w;
+    // le grain est lu plus vite (fa > 1) ou plus lentement : ça déplace les formants sans changer la note
+    const f = m.unv ? 1 : fa, Lo = Math.max(2, Math.round(L / f));
+    for (let k = -Lo; k < Lo; k++) {
+      const srcF = m.t + k * f, dst = Math.round(s) + k;
+      const i0 = Math.floor(srcF);
+      if (i0 < 0 || i0 + 1 >= N || dst < 0 || dst >= N) continue;
+      const fr = srcF - i0, v = x[i0] * (1 - fr) + x[i0 + 1] * fr;
+      const w = 0.5 + 0.5 * Math.cos(Math.PI * k / Lo);
+      y[dst] += v * w; wsum[dst] += w;
     }
     s += m.unv ? sr * 0.005 : m.P / ratio;
     if (++cnt % 4000 === 0) { onProgress?.(s / N); await tick(); }
@@ -208,6 +253,12 @@ function fx(kind, o = {}) {
       case 'band': src.connect(filt('highpass', o.lo || 300)).connect(filt('lowpass', o.hi || 3400)).connect(o.drive ? shaper(o.drive) : g(1)).connect(out); break;
       case 'distort': src.connect(shaper(o.amt || 4)).connect(filt('lowpass', o.tone || 9000)).connect(g(0.8)).connect(out); break;
       case 'underwater': src.connect(filt('lowpass', 500, 4)).connect(out); break;
+      case 'peak': src.connect(filt('peaking', o.f || 1600, o.q || 10, o.gain ?? 10)).connect(g(0.7)).connect(out); break;
+      case 'tube': src.connect(filt('lowshelf', 220, 0.7, 3)).connect(shaper(o.amt || 1.6)).connect(filt('highshelf', 9000, 0.7, -2)).connect(out); break;
+      case 'tape': src.connect(shaper(o.amt || 1.3)).connect(filt('lowpass', 12000)).connect(filt('peaking', 120, 0.8, 2)).connect(out); break;
+      case 'exciter': { src.connect(out); src.connect(filt('highpass', 4000)).connect(shaper(3)).connect(g(o.mix ?? 0.25)).connect(out); break; }
+      case 'air': src.connect(filt('highshelf', 10000, 0.7, o.gain ?? 6)).connect(filt('peaking', 3500, 1, 2)).connect(out); break;
+      case 'warm': src.connect(filt('peaking', 300, 0.9, 3)).connect(filt('highshelf', 8000, 0.7, -2)).connect(shaper(1.2)).connect(out); break;
       case 'reverb': case 'delay': case 'pingpong': case 'chorus': case 'flanger': case 'tremolo': case 'ring': {
         src.connect(g(o.dry ?? 1)).connect(out);
         if (kind === 'reverb') { const cv = ctx.createConvolver(); cv.buffer = impulse(ctx, o.size || 2, o.decay || 3); src.connect(filt('highpass', 200)).connect(cv).connect(g(o.mix ?? 0.35)).connect(out); }
@@ -269,9 +320,9 @@ export async function applyChain(buffer, chain, opts = {}) {
   for (const s of chain) {
     if (s.t === 'tune') {
       tuneCurve = correctionCurve(pitch, key, { strength: s.strength ?? 1, speed: s.speed ?? 0, scale: s.scale, extra: s.extra || 0 });
-      say('Autotune…'); cur = await psola(buffer, pitch, tuneCurve, p => say(`Autotune ${Math.round(p * 100)} %`));
+      say('Autotune…'); cur = await psola(buffer, pitch, tuneCurve, p => say(`Autotune ${Math.round(p * 100)} %`), s.formant || 0);
     } else if (s.t === 'shift') {
-      say('Changement de timbre…'); cur = await psola(cur === buffer ? buffer : cur, pitch, s.semi, p => say(`Changement de voix ${Math.round(p * 100)} %`));
+      say('Changement de voix…'); cur = await psola(buffer, pitch, s.semi || 0, p => say(`Changement de voix ${Math.round(p * 100)} %`), s.formant || 0);
     } else if (s.t === 'resample') {
       const r = 2 ** (s.semi / 12), sr = cur.sampleRate;
       const ctx = new OfflineAudioContext(cur.numberOfChannels, Math.ceil(cur.length / r), sr);
@@ -288,8 +339,10 @@ export async function applyChain(buffer, chain, opts = {}) {
       for (const [i, step] of (s.steps || [0]).entries()) {
         const curve = s.t === 'double'
           ? correctionCurve(pitch, key, { strength: tuneCurve ? 1 : 0, speed: tuneCurve ? 0 : 0, extra: (i % 2 ? -0.12 : 0.12) + (step || 0) })
-          : correctionCurve(pitch, key, { harmonySteps: step });
-        const layer = await psola(buffer, pitch, curve, () => {});
+          : s.chordSteps && opts.chords?.length
+            ? correctionCurve(pitch, key, { harmonySteps: step, chords: opts.chords })
+            : correctionCurve(pitch, key, { harmonySteps: s.chordSteps ? step * 2 : step }); // sans instru : tierce/quinte de la gamme
+        const layer = await psola(buffer, pitch, curve, () => {}, s.formant || 0);
         layers.push([layer, s.gain ?? 0.55, i % 2 ? -0.6 : 0.6]);
       }
       cur = mixBuffers(layers, cur.sampleRate);
@@ -361,5 +414,55 @@ const AMB = [
 ];
 for (const [n, o] of AMB) PRESETS.push({ cat: '🌆 Ambiances et effets', name: n, chain: [{ t: 'fx', ...o }] });
 for (const [n, o] of AMB.slice(5, 14)) PRESETS.push({ cat: '🌆 Ambiances et effets', name: `Autotune trap + ${n.toLowerCase()}`, chain: [{ t: 'tune', strength: 1, speed: 15 }, { t: 'fx', ...o }] });
+// Vraies voix différentes : hauteur + formants (le timbre bouge aussi, pas seulement la note)
+const VOIX = [
+  ['Voix féminine réaliste', 5, 3], ['Voix féminine douce', 4, 2], ['Voix féminine aiguë', 7, 4], ['Voix de femme grave', 3, 1.5],
+  ['Voix masculine grave', -5, -2], ['Voix d’homme mûr', -3, -1.5], ['Voix de baryton', -7, -3], ['Voix d’enfant réaliste', 8, 5],
+  ['Voix d’ado', 3, 2], ['Voix de géant', -12, -5], ['Voix de monstre', -9, -6], ['Voix d’elfe', 6, 6],
+  ['Timbre plus jeune', 0, 2], ['Timbre plus mûr', 0, -2], ['Voix fine', 0, 3.5], ['Voix épaisse', 0, -3.5], ['Voix nasillarde', 0, 5], ['Voix d’ogre', 0, -5],
+];
+for (const [n, semi, formant] of VOIX) {
+  PRESETS.push({ cat: '🧑 Vraies voix (timbre + hauteur)', name: n, chain: [{ t: 'shift', semi, formant }] });
+  PRESETS.push({ cat: '🧑 Vraies voix (timbre + hauteur)', name: n + ' + autotune', chain: [{ t: 'tune', strength: 1, speed: 25, extra: semi, formant }] });
+}
+for (let st = -12; st <= 12; st++) if (st) PRESETS.push({ cat: '🎚️ Transposer (timbre gardé)', name: `${st > 0 ? '+' : ''}${st} demi-ton${Math.abs(st) > 1 ? 's' : ''}`, chain: [{ t: 'shift', semi: st, formant: 0 }] });
+PRESETS.push(
+  { cat: '🎶 Harmoniseur', name: 'Harmonies 3 voix (suivent les accords de l’instru)', chain: [{ t: 'tune', strength: 1, speed: 30 }, { t: 'harmony', steps: [1, 2], gain: 0.5, chordSteps: true }], chords: true },
+  { cat: '🎶 Harmoniseur', name: 'Harmonie haute (accords de l’instru)', chain: [{ t: 'tune', strength: 1, speed: 30 }, { t: 'harmony', steps: [1], gain: 0.55, chordSteps: true }], chords: true },
+  { cat: '🎶 Harmoniseur', name: 'Harmonie basse (accords de l’instru)', chain: [{ t: 'tune', strength: 1, speed: 30 }, { t: 'harmony', steps: [-1], gain: 0.55, chordSteps: true }], chords: true },
+  { cat: '🎶 Harmoniseur', name: 'Chœur gospel 4 voix (accords)', chain: [{ t: 'tune', strength: 1, speed: 40 }, { t: 'harmony', steps: [-1, 1, 2], gain: 0.42, chordSteps: true }, { t: 'fx', kind: 'reverb', size: 2.5, mix: 0.3 }], chords: true },
+  { cat: '🎶 Harmoniseur', name: 'Harmonies hard-tune (accords)', chain: [{ t: 'tune', strength: 1, speed: 0 }, { t: 'harmony', steps: [1, 2], gain: 0.5, chordSteps: true }], chords: true },
+  { cat: '🎶 Harmoniseur', name: 'Octave basse + harmonie haute', chain: [{ t: 'tune', strength: 1, speed: 30 }, { t: 'double', steps: [-12], gain: 0.45 }, { t: 'harmony', steps: [1], gain: 0.45, chordSteps: true }], chords: true },
+  { cat: '🎶 Harmoniseur', name: 'Chant diphonique (gorge)', chain: [{ t: 'double', steps: [-12], gain: 0.8 }, { t: 'fx', kind: 'peak', f: 1500, q: 14, gain: 14 }] },
+  { cat: '🎶 Harmoniseur', name: 'Chant diphonique aigu', chain: [{ t: 'double', steps: [-12], gain: 0.7 }, { t: 'fx', kind: 'peak', f: 2400, q: 16, gain: 15 }] },
+);
+const FLAVORS = [['Chaleur lampe', { kind: 'tube' }], ['Bande magnétique', { kind: 'tape' }], ['Brillance (exciter)', { kind: 'exciter' }], ['Air studio', { kind: 'air' }], ['Chaleur des médiums', { kind: 'warm' }], ['Grain', { kind: 'distort', amt: 2.5, tone: 9000 }], ['Crunch', { kind: 'distort', amt: 6, tone: 7000 }], ['Fuzz', { kind: 'distort', amt: 14, tone: 5000 }]];
+for (const [n, o] of FLAVORS) {
+  PRESETS.push({ cat: '🎨 Flavor (couleur de voix)', name: n, chain: [{ t: 'fx', ...o }] });
+  PRESETS.push({ cat: '🎨 Flavor (couleur de voix)', name: `${n} + autotune naturel`, chain: [{ t: 'tune', strength: 0.9, speed: 80 }, { t: 'fx', ...o }] });
+}
+// Les chaînes les plus utilisées en ce moment (rap mélodique, trap, rage, R&B…)
+const STYLES = [
+  ['Rap mélodique (autotune 15-25 + chaleur)', [{ t: 'tune', strength: 1, speed: 20 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'delay', time: 0.32, fb: 0.25, mix: 0.18 }]],
+  ['Trap autotune à 0 (effet assumé)', [{ t: 'tune', strength: 1, speed: 0 }, { t: 'fx', kind: 'air', gain: 4 }, { t: 'fx', kind: 'reverb', size: 1.8, mix: 0.22 }]],
+  ['Trap sombre (saturé, grosse réverbe)', [{ t: 'tune', strength: 1, speed: 45 }, { t: 'fx', kind: 'tape', amt: 2 }, { t: 'fx', kind: 'reverb', size: 3.5, mix: 0.45 }]],
+  ['Rage distordu + slap', [{ t: 'tune', strength: 1, speed: 5 }, { t: 'fx', kind: 'distort', amt: 7, tone: 7000 }, { t: 'fx', kind: 'delay', time: 0.11, fb: 0.2, mix: 0.35 }]],
+  ['R&B glacé cinéma', [{ t: 'tune', strength: 1, speed: 40 }, { t: 'fx', kind: 'chorus', mix: 0.35 }, { t: 'fx', kind: 'reverb', size: 4, mix: 0.4 }]],
+  ['Voix large doublée', [{ t: 'tune', strength: 1, speed: 25 }, { t: 'double', steps: [0, 0], gain: 0.6 }, { t: 'fx', kind: 'warm' }]],
+  ['Drill sombre', [{ t: 'tune', strength: 0.8, speed: 60 }, { t: 'fx', kind: 'band', lo: 150, hi: 9000, drive: 2 }, { t: 'fx', kind: 'delay', time: 0.21, fb: 0.3, mix: 0.2 }]],
+  ['Trap latino saturé', [{ t: 'tune', strength: 1, speed: 15 }, { t: 'fx', kind: 'distort', amt: 3, tone: 8000 }, { t: 'fx', kind: 'reverb', size: 1.5, mix: 0.2 }]],
+  ['Hyperpop', [{ t: 'tune', strength: 1, speed: 0, extra: 3, formant: 2 }, { t: 'fx', kind: 'lofi', bits: 7, hi: 9000 }, { t: 'fx', kind: 'chorus', mix: 0.3 }]],
+  ['Ad-libs radio', [{ t: 'fx', kind: 'band', lo: 600, hi: 3000, drive: 4 }, { t: 'fx', kind: 'pingpong', time: 0.25, mix: 0.3 }]],
+  ['Ad-libs octave grave', [{ t: 'shift', semi: -12, formant: -3 }, { t: 'fx', kind: 'distort', amt: 2 }]],
+  ['Ad-libs lointains', [{ t: 'fx', kind: 'band', lo: 400, hi: 5000 }, { t: 'fx', kind: 'delay', time: 0.5, fb: 0.45, mix: 0.45 }, { t: 'fx', kind: 'reverb', size: 3, mix: 0.5 }]],
+  ['Pop propre radio', [{ t: 'tune', strength: 1, speed: 50 }, { t: 'fx', kind: 'exciter' }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.18 }]],
+];
+for (const [n, chain] of STYLES) PRESETS.push({ cat: '🔥 Styles du moment', name: n, chain });
+PRESETS.push(
+  { cat: '🤖 Vocodeur / talkbox / robot', name: 'Synthé vocal carré', chain: [{ t: 'vocoder', bands: 20, q: 6, voices: [0, -12] }] },
+  { cat: '🤖 Vocodeur / talkbox / robot', name: 'Synthé vocal supersaw', chain: [{ t: 'vocoder', bands: 22, q: 6, voices: [-0.15, 0, 0.15, 12] }, { t: 'fx', kind: 'chorus', mix: 0.4 }] },
+  { cat: '🤖 Vocodeur / talkbox / robot', name: 'Robot funky (vocodeur + chorus)', chain: [{ t: 'vocoder', bands: 18, q: 5, voices: [0, 12] }, { t: 'fx', kind: 'chorus', mix: 0.5 }] },
+  { cat: '🤖 Vocodeur / talkbox / robot', name: 'Talkbox G-funk', chain: [{ t: 'vocoder', bands: 10, q: 3.5, voices: [0, 7, 12] }, { t: 'fx', kind: 'band', lo: 250, hi: 4500 }] },
+);
 export const PRESET_CATS = [...new Set(PRESETS.map(p => p.cat))];
 export const KEY_CHOICES = [{ v: '', label: 'Tonalité : détection auto' }, ...['majeur', 'mineur'].flatMap(mode => NOTE_FR.map((n, root) => ({ v: `${root}|${mode}`, label: `${n} ${mode}` })))];
