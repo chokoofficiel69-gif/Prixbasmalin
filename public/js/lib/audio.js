@@ -134,6 +134,37 @@ export async function denoise(buffer, amount = 0.6, onProgress) {
   return out;
 }
 
+/**
+ * Anti-pop : repère les « P », « B » et souffles dans le micro (bouffée de graves
+ * soudaine, beaucoup plus forte que le reste de la voix) et n'atténue que ces graves-là,
+ * le temps du pop. Le reste de la voix n'est pas touché.
+ */
+export function antipop(buffer, amount = 0.8) {
+  const out = cloneBuffer(buffer), sr = buffer.sampleRate;
+  const aLP = 1 - Math.exp(-2 * Math.PI * 160 / sr);
+  const att = 1 - Math.exp(-1 / (0.002 * sr)), rel = 1 - Math.exp(-1 / (0.06 * sr));
+  const gAtt = 1 - Math.exp(-1 / (0.001 * sr)), gRel = 1 - Math.exp(-1 / (0.05 * sr));
+  const ratio = 2.2 - 1.2 * amount; // un pop = graves > ratio × médiums/aigus
+  for (let c = 0; c < out.numberOfChannels; c++) {
+    const d = out.getChannelData(c);
+    // graves sans décalage de phase (filtre aller-retour) : le complément est exact
+    const L = new Float32Array(d.length); let s = 0;
+    for (let pass = 0; pass < 2; pass++) {
+      s = 0; for (let i = 0; i < d.length; i++) { s += aLP * ((pass ? L[i] : d[i]) - s); L[i] = s; }
+      s = 0; for (let i = d.length - 1; i >= 0; i--) { s += aLP * (L[i] - s); L[i] = s; }
+    }
+    let eL = 0, eH = 0, g = 1;
+    for (let i = 0; i < d.length; i++) {
+      const lo = L[i], hi = d[i] - lo, al = Math.abs(lo), ah = Math.abs(hi);
+      eL += (al > eL ? att : rel) * (al - eL); eH += (ah > eH ? att : rel) * (ah - eH);
+      const target = eL > 0.02 && eL > ratio * eH ? Math.max(0.05, (ratio * eH) / eL) : 1;
+      g += (target < g ? gAtt : gRel) * (target - g);
+      d[i] = hi + lo * Math.pow(g, 0.5 + amount);
+    }
+  }
+  return out;
+}
+
 /** Porte de bruit : coupe ce qui reste sous le seuil entre les phrases. */
 export function gate(buffer, thresholdDb = -45, floorDb = -30) {
   const out = cloneBuffer(buffer);

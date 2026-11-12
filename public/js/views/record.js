@@ -1,6 +1,6 @@
 import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal } from '../lib/core.js';
 import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords } from '../lib/voicefx.js';
-import { decodeBlob, encodeWav, denoise, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
+import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -206,6 +206,15 @@ export async function render(el, { params }) {
       return r.buffer;
     });
   };
+  const QUICK_TUNE = [['🎤 Léger', 'Naturel'], ['🎤 Moyen (Drake)', 'Rap mélodique (autotune 15-25 + chaleur)'], ['🤖 Fort (T-Pain)', 'Trap autotune à 0 (effet assumé)']];
+  const quickTune = (label, name) => {
+    const p = VFX.find(x => x.name === name); if (!p) return toast('Préréglage introuvable : ' + name, 'bad');
+    work(`Autotune ${label.replace(/^\S+ /, '')}…`, async (b, tr) => {
+      const r = await runList(b, [p], tr, 0, (m) => { busy.innerHTML = `<span class="spinner"></span> ${m}`; });
+      tr.fxDone = [...(tr.fxDone || []), p.name];
+      return r.buffer;
+    });
+  };
   const fxFav = () => {
     const item = resolve(fxSel.value); if (!item || String(fxSel.value).startsWith('mine:')) return;
     const fav = lsGet('studio_vfx_fav', []); const i = fav.indexOf(item.name);
@@ -258,11 +267,15 @@ export async function render(el, { params }) {
       h('h3', '🧹 Nettoyer'),
       h('div.row', h('label.f.grow', 'Intensité du débruitage', nrAmount),
         h('button.btn.small', { onclick: () => work('Débruitage…', (b) => denoise(b, Number(nrAmount.value), (p) => { busy.innerHTML = `<span class="spinner"></span> Débruitage ${Math.round(p * 100)} %`; })) }, '🧹 Réduire le bruit de fond'),
+        h('button.btn.small', { onclick: () => work('Anti-pop…', async (b) => antipop(b, 0.8)) }, '💨 Anti-pop (P, B, souffles)'),
         h('button.btn.small', { onclick: () => work('Porte de bruit…', async (b) => gate(b, -45, -30)) }, '🚪 Couper les blancs')),
       h('p.tiny.muted', 'Le débruitage apprend le bruit sur les passages les plus calmes : laissez 1 à 2 secondes de silence au début de la prise.'),
       h('h3', '✨ Améliorer la voix'),
       h('div.row', h('div.grow', presetSel), h('button.btn.small.primary', { onclick: () => work('Traitement voix…', (b) => voiceChain(b, vc)) }, '✨ Appliquer')),
       vcBox,
+      h('h3', '🎤 Autotune chanté en 1 clic'),
+      h('div.row', ...QUICK_TUNE.map(([label, name]) => h('button.btn.small', { onclick: () => quickTune(label, name) }, label))),
+      h('p.tiny.muted', 'Léger = voix juste et naturelle · Moyen = rap mélodique façon Drake · Fort = effet robot T-Pain. La tonalité est trouvée toute seule (ou choisie ci-dessous). « Revenir à l’original » annule.'),
       h('h3', '🎛️ Effets voix & autotune'),
       h('div.row', h('div.grow', fxCat), h('div.grow', fxKey)),
       h('div.row', h('div.grow', fxSel),
@@ -329,6 +342,7 @@ export async function render(el, { params }) {
         t.buffer = t.original;
         say(`Débruitage${n}…`);
         t.buffer = await denoise(t.buffer, 0.55, (p) => say(`Débruitage ${Math.round(p * 100)} %${n}`));
+        say(`Anti-pop${n}…`); t.buffer = antipop(t.buffer, 0.8);
         say(`Coupe des blancs${n}…`); t.buffer = gate(t.buffer, -45, -30);
         say(`Traitement voix rap${n}…`); t.buffer = await voiceChain(t.buffer, VOICE_PRESETS.rap);
         if (beat) { say(`Calage sur le beat${n}…`); await alignTrack(t, beat); }
