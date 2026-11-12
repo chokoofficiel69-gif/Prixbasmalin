@@ -75,5 +75,27 @@ class AiGuidesTest(unittest.TestCase):
         self.assertNotIn("Conseils avant d’acheter", seo.product_page(p, data["products"], data["dataset_period"]))
 
 
+
+    def test_empty_or_missing_model_content_is_a_recoverable_value_error(self):
+        import io
+        import os
+        from unittest.mock import patch
+
+        g = load("generate_ai_guides")
+        provider = ("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", "example:free")
+        product = {"name": "Produit test", "brand": "Marque test", "category_label": "Audio", "offer_count": 1}
+        payloads = [
+            {"choices": [{"message": {"content": None}}]},
+            {"choices": [{"message": {"content": ""}}]},
+            {"choices": []},
+            None,
+        ]
+        for payload in payloads:
+            with self.subTest(payload=payload), patch.dict(os.environ, {"OPENROUTER_API_KEY": "test"}):
+                response = io.BytesIO(json.dumps(payload).encode("utf-8"))
+                with patch.object(g.urllib.request, "urlopen", return_value=response):
+                    with self.assertRaisesRegex(ValueError, "sans contenu textuel exploitable"):
+                        g.call(provider, product)
+
 if __name__ == "__main__":
     unittest.main()
