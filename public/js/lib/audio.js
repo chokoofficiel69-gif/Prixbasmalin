@@ -354,6 +354,56 @@ export async function detectBeats(buffer) {
   return { bpm: Math.round((6000 / bestLag) * 10) / 10, beats };
 }
 
+
+/** Force des attaques (début de syllabe, coup de batterie), une valeur toutes les 5 ms. */
+export async function onsetStrength(buffer, { low = 250, high = 4000 } = {}) {
+  const sr = buffer.sampleRate;
+  const ctx = new OfflineAudioContext(1, buffer.length, sr);
+  const src = ctx.createBufferSource(); src.buffer = buffer;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = low;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = high;
+  src.connect(hp).connect(lp).connect(ctx.destination); src.start();
+  const x = (await ctx.startRendering()).getChannelData(0);
+  const rate = 200, hop = Math.floor(sr / rate);
+  const n = Math.floor(x.length / hop);
+  const flux = new Float32Array(n);
+  let prev = -14;
+  for (let i = 0; i < n; i++) {
+    let s = 0; for (let j = 0; j < hop; j++) { const v = x[i * hop + j]; s += v * v; }
+    const e = Math.log(1e-6 + Math.sqrt(s / hop));
+    flux[i] = Math.max(0, e - prev); prev = e;
+  }
+  return { flux, rate };
+}
+
+/** Pics d'attaque nets (maxima locaux au-dessus du bruit), en secondes, avec leur force. */
+export function onsetPeaks({ flux, rate }, k = 1.5) {
+  let m = 0; for (const v of flux) m += v; m /= flux.length || 1;
+  let sd = 0; for (const v of flux) sd += (v - m) ** 2; sd = Math.sqrt(sd / (flux.length || 1));
+  const thr = m + k * sd, out = [];
+  for (let i = 2; i < flux.length - 2; i++) {
+    const v = flux[i];
+    if (v > thr && v >= flux[i - 1] && v >= flux[i + 1] && v >= flux[i - 2] && v >= flux[i + 2]) out.push({ t: i / rate, w: v });
+  }
+  return out;
+}
+
+/**
+ * Calage fin d'une voix sur une instru : cherche le petit décalage (± range s) qui fait tomber
+ * les attaques de la voix au plus près des frappes de l'instru (caisse claire, charley, kick).
+ * Renvoie { shift, gain } : shift à ajouter au décalage actuel, gain = amélioration du score.
+ */
+export function bestAlignShift(voicePeaks, beatPeaks, offset, range = 0.09) {
+  const grid = beatPeaks.map(p => p.t).sort((a, b) => a - b);
+  if (!grid.length || !voicePeaks.length) return { shift: 0, gain: 1 };
+  const near = (t) => { let lo = 0, hi = grid.length - 1; while (lo < hi) { const mid = (lo + hi) >> 1; if (grid[mid] < t) lo = mid + 1; else hi = mid; } return Math.min(Math.abs(grid[lo] - t), lo > 0 ? Math.abs(grid[lo - 1] - t) : Infinity); };
+  const score = (d) => { let s = 0; for (const p of voicePeaks) { const dist = near(offset + d + p.t); s += p.w * Math.exp(-(dist * dist) / (2 * 0.012 * 0.012)); } return s; };
+  const base = score(0);
+  let best = 0, bestScore = base;
+  for (let d = -range; d <= range + 1e-9; d += 0.0025) { const sc = score(d); if (sc > bestScore) { bestScore = sc; best = d; } }
+  return { shift: Math.round(best * 10000) / 10000, gain: base > 0 ? bestScore / base : 1 };
+}
+
 /** Dessin de forme d'onde. */
 export function drawWave(canvas, buffer, { sel, playhead, color } = {}) {
   const dpr = window.devicePixelRatio || 1;

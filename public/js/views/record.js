@@ -1,5 +1,5 @@
 import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal } from '../lib/core.js';
-import { decodeBlob, encodeWav, denoise, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer } from '../lib/audio.js';
+import { decodeBlob, encodeWav, denoise, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -13,7 +13,7 @@ export async function render(el, { params }) {
   let selected = -1;
   let sel = null;          // [début, fin] en secondes sur la piste sélectionnée
   let masterResult = null;
-  let recorder = null, beatSrc = null;
+  let recorder = null, beatSrc = null, recLatency = null;
 
   const list = h('div.stack');
   const editBox = h('div.stack');
@@ -24,15 +24,15 @@ export async function render(el, { params }) {
   const player = bufferPlayer((t, ended) => { posLbl.textContent = fmtTime(t); redrawSelected(t); if (ended) playSelBtn.textContent = '▶ Piste'; });
   const posLbl = h('span.small.muted', '0:00');
 
-  async function addTrack(buffer, name, kind = 'voix', fileId) {
-    tracks.push({ name, buffer, original: buffer, gainDb: kind === 'instru' ? -4 : 0, pan: 0, offset: 0, mute: false, kind, fileId });
+  async function addTrack(buffer, name, kind = 'voix', fileId, offset = 0) {
+    tracks.push({ name, buffer, original: buffer, gainDb: kind === 'instru' ? -4 : 0, pan: 0, offset, mute: false, kind, fileId });
     selected = tracks.length - 1; sel = null; masterResult = null;
     drawList(); drawEdit();
   }
-  async function addBlob(blob, name, kind, fileId) {
+  async function addBlob(blob, name, kind, fileId, offset = 0) {
     try {
       toast(`Décodage de « ${name} »…`);
-      await addTrack(await decodeBlob(blob), name, kind || (/instru|beat|\.wav$/i.test(name) && tracks.length === 0 ? 'instru' : 'voix'), fileId);
+      await addTrack(await decodeBlob(blob), name, kind || (/instru|beat|\.wav$/i.test(name) && tracks.length === 0 ? 'instru' : 'voix'), fileId, offset);
     } catch (e) { toast(`Format audio non lisible par ce navigateur : ${name}`, 'bad'); }
   }
 
@@ -50,18 +50,29 @@ export async function render(el, { params }) {
       try { beatSrc?.stop(); } catch {} beatSrc = null;
       recBtn.textContent = '⏺ Enregistrer'; meter.firstChild.style.width = '0';
       const blob = await r.stop();
-      await addBlob(blob, `Prise ${tracks.filter(t => t.kind === 'voix').length + 1}`, 'voix');
+      // Calage automatique : la prise commence avant l'instru (temps de démarrage) et arrive en retard
+      // (latence du casque + du micro). On replace la voix sur l'instru, puis on affine sur le beat.
+      const lat = recLatency; recLatency = null;
+      await addBlob(blob, `Prise ${tracks.filter(t => t.kind === 'voix').length + 1}`, 'voix', null, lat ? -lat : 0);
+      if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
       return;
     }
     try {
       const constraints = rawMode.checked ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
       const beat = tracks.find(t => t.kind === 'instru' && !t.mute);
       recorder = await startRecorder({ constraints, onLevel: (l) => { meter.firstChild.style.width = Math.min(100, l * 300) + '%'; } });
+      const recT0 = performance.now();
+      recLatency = null;
       if (withBeat.checked && beat) {
         const ctx = audioCtx();
         beatSrc = ctx.createBufferSource(); beatSrc.buffer = beat.buffer;
         const g = ctx.createGain(); g.gain.value = 10 ** (beat.gainDb / 20);
         beatSrc.connect(g).connect(ctx.destination); beatSrc.start();
+        const beatT0 = performance.now();
+        const outLat = (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
+        const inLat = Number(recorder.stream.getAudioTracks()[0]?.getSettings?.().latency) || 0.02;
+        // + décalage de l'instru elle-même sur la timeline
+        recLatency = (beatT0 - recT0) / 1000 + outLat + inLat - (beat.offset || 0);
         toast('Instru lancée : utilisez un casque pour qu’elle ne s’entende pas dans la prise.');
       }
       recBtn.textContent = '⏹ Arrêter';
@@ -146,6 +157,9 @@ export async function render(el, { params }) {
         h('button.btn.small', { onclick: () => work('Fondus…', async (b) => { const o = cloneBuffer(b); const n = Math.min(o.length / 2, Math.floor(0.03 * o.sampleRate)); for (let c = 0; c < o.numberOfChannels; c++) { const d = o.getChannelData(c); for (let i = 0; i < n; i++) { d[i] *= i / n; d[d.length - 1 - i] *= i / n; } } return o; }) }, 'Fondus début/fin'),
         h('button.btn.small', { onclick: () => work('Normalisation…', async (b) => normalize(cloneBuffer(b), -1)) }, 'Normaliser'),
         h('button.btn.small.ghost', { onclick: () => work('Restauration…', async (b, tr) => tr.original) }, '↺ Revenir à l’original')),
+      h('h3', '🎯 Caler sur le beat'),
+      h('div.row', h('button.btn.small', { onclick: () => alignSelected() }, '🎯 Caler cette voix sur l’instru'), alignInfo),
+      h('p.tiny.muted', 'Les prises enregistrées ici sur l’instru sont recalées automatiquement (latence du casque et du micro). Ce bouton affine au milliseconde près en alignant tes attaques sur les frappes de l’instru ; le curseur « Décalage » permet de corriger à la main.'),
       h('h3', '🧹 Nettoyer'),
       h('div.row', h('label.f.grow', 'Intensité du débruitage', nrAmount),
         h('button.btn.small', { onclick: () => work('Débruitage…', (b) => denoise(b, Number(nrAmount.value), (p) => { busy.innerHTML = `<span class="spinner"></span> Débruitage ${Math.round(p * 100)} %`; })) }, '🧹 Réduire le bruit de fond'),
@@ -171,6 +185,59 @@ export async function render(el, { params }) {
     requestAnimationFrame(() => redrawSelected());
   }
 
+  // ---------- Calage automatique sur le beat ----------
+  const alignInfo = h('span.small.muted');
+  const beatCache = new WeakMap();
+  async function alignTrack(t, beat) {
+    let bp = beatCache.get(beat.buffer);
+    if (!bp) { bp = onsetPeaks(await onsetStrength(beat.buffer, { low: 60, high: 12000 }), 1.2).map(p => ({ t: p.t + (beat.offset || 0), w: p.w })); beatCache.set(beat.buffer, bp); }
+    const vp = onsetPeaks(await onsetStrength(t.buffer), 1.5);
+    if (vp.length < 4) return null;
+    const r = bestAlignShift(vp, bp, t.offset || 0);
+    if (r.gain < 1.03) return { shift: 0, gain: r.gain };
+    t.offset = (t.offset || 0) + r.shift;
+    return r;
+  }
+  async function alignSelected(quiet = false) {
+    const t = tracks[selected];
+    const beat = tracks.find(x => x.kind === 'instru' && x !== t);
+    if (!t || t.kind === 'instru') { if (!quiet) toast('Sélectionnez une piste de voix.'); return; }
+    if (!beat) { if (!quiet) toast('Ajoutez d’abord l’instru (piste de type « Instru »).'); return; }
+    alignInfo.innerHTML = '<span class="spinner"></span> Calage sur le beat…';
+    try {
+      const r = await alignTrack(t, beat);
+      masterResult = null; drawList();
+      alignInfo.textContent = !r ? 'Pas assez d’attaques dans la voix pour caler automatiquement.'
+        : r.shift === 0 ? `✓ Déjà calé (décalage ${Math.round(t.offset * 1000)} ms).`
+        : `✓ Calé : ${r.shift > 0 ? '+' : ''}${Math.round(r.shift * 1000)} ms (décalage total ${Math.round(t.offset * 1000)} ms).`;
+    } catch (e) { alignInfo.textContent = ''; toastErr(e); }
+  }
+  async function doEverything(btn) {
+    const voices = tracks.filter(t => t.kind === 'voix' && !t.mute);
+    const beat = tracks.find(t => t.kind === 'instru' && !t.mute);
+    if (!voices.length) return toast('Enregistrez ou importez au moins une voix.');
+    btn.disabled = true;
+    const say = (m) => { masterInfo.innerHTML = `<span class="spinner"></span> ${m}`; };
+    try {
+      player.stop();
+      for (const [i, t] of voices.entries()) {
+        const n = voices.length > 1 ? ` (voix ${i + 1}/${voices.length})` : '';
+        t.buffer = t.original;
+        say(`Débruitage${n}…`);
+        t.buffer = await denoise(t.buffer, 0.55, (p) => say(`Débruitage ${Math.round(p * 100)} %${n}`));
+        say(`Coupe des blancs${n}…`); t.buffer = gate(t.buffer, -45, -30);
+        say(`Traitement voix rap${n}…`); t.buffer = await voiceChain(t.buffer, VOICE_PRESETS.rap);
+        if (beat) { say(`Calage sur le beat${n}…`); await alignTrack(t, beat); }
+        t.gainDb = 0;
+      }
+      if (beat) beat.gainDb = Math.min(beat.gainDb, -4);
+      drawList(); drawEdit();
+      await doMaster();
+      toast('Morceau nettoyé, calé, mixé et masterisé ✓', 'ok');
+    } catch (e) { masterInfo.textContent = ''; toastErr(e); }
+    btn.disabled = false;
+  }
+
   // ---------- Mix & master ----------
   const masterSel = h('select', Object.entries(MASTER_PRESETS).map(([k, p]) => h('option', { value: k }, p.label)));
   const masterInfo = h('div.small');
@@ -189,6 +256,31 @@ export async function render(el, { params }) {
       mixPlayerEl.innerHTML = '';
       mixPlayerEl.append(h('audio', { controls: true, src: URL.createObjectURL(encodeWav(r.buffer)) }));
     } catch (e) { masterInfo.textContent = ''; toastErr(e); }
+  }
+  const compareBox = h('div.stack');
+  async function compareMasters(btn) {
+    if (!tracks.length) return toast('Ajoute ton morceau (ou tes pistes) d’abord.');
+    btn.disabled = true; compareBox.innerHTML = '';
+    try {
+      const minOff = Math.min(0, ...tracks.map(t => t.offset));
+      const mixed = await mix(tracks.map(t => ({ ...t, offset: t.offset - minOff })));
+      for (const [k, preset] of Object.entries(MASTER_PRESETS)) {
+        masterInfo.innerHTML = `<span class="spinner"></span> Version « ${preset.label} »…`;
+        const r = await master(mixed, k, () => {});
+        const url = URL.createObjectURL(encodeWav(r.buffer));
+        compareBox.append(h('div.card.stack', { style: { padding: '10px' } },
+          h('div.row', h('strong.grow', preset.label), h('span.tiny.muted', `${r.after.toFixed(1)} LUFS`)),
+          h('audio', { controls: true, src: url, style: { width: '100%' } }),
+          h('button.btn.small', { onclick: (ev) => {
+            masterResult = r; masterSel.value = k;
+            masterInfo.textContent = `✓ Version choisie : ${preset.label}. Tu peux la télécharger ou l’enregistrer ci-dessous.`;
+            compareBox.querySelectorAll('.card').forEach(c => { c.style.outline = ''; });
+            ev.target.closest('.card').style.outline = '2px solid var(--accent)';
+          } }, '✅ Je prends celle-là')));
+      }
+      masterInfo.textContent = 'Écoute les versions et choisis celle qui te plaît.';
+    } catch (e) { masterInfo.textContent = ''; toastErr(e); }
+    btn.disabled = false;
   }
   const exportName = () => (tracks.find(t => t.kind === 'voix')?.name || 'morceau').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-');
 
@@ -212,8 +304,12 @@ export async function render(el, { params }) {
       h('div.card.stack',
         h('h3', '🎛️ Mixage et mastering'),
         h('p.small.muted', 'Toutes les pistes non muettes sont mixées (volume, panoramique, décalage), puis masterisées : égalisation, compression de bus, largeur stéréo, sonie cible et limiteur à −1 dBFS.'),
-        h('div.row', h('div.grow', masterSel), h('button.btn.primary', { onclick: doMaster }, '🎛️ Mixer + masteriser')),
-        masterInfo, mixPlayerEl,
+        h('button.btn.primary', { onclick: (e) => doEverything(e.target) }, '⚡ Tout faire : nettoyer, caler, mixer, masteriser'),
+        h('p.tiny.muted', 'En un clic : débruitage, coupe des blancs, voix rap claire, calage sur le beat, volumes, mix et master. Tu peux ensuite retoucher piste par piste.'),
+        h('div.row', h('div.grow', masterSel), h('button.btn', { onclick: doMaster }, '🎛️ Mixer + masteriser')),
+        h('div.row', h('button.btn', { onclick: (e) => compareMasters(e.target) }, '🎧 Faire plusieurs versions et choisir'),
+          h('span.tiny.muted', 'Un morceau déjà fini ? Importe-le seul : il sera remasterisé en plusieurs styles.')),
+        masterInfo, mixPlayerEl, compareBox,
         h('div.row', bitSel,
           h('button.btn.small', { onclick: async () => { if (!masterResult) await doMaster(); if (masterResult) downloadBlob(encodeWav(masterResult.buffer, Number(bitSel.value)), `${exportName()}-master.wav`); } }, '⬇️ Télécharger le master'),
           h('button.btn.small', { onclick: async () => { if (!masterResult) await doMaster(); if (masterResult) uploadFile(encodeWav(masterResult.buffer, Number(bitSel.value)), { name: `${exportName()}-master.wav`, source: 'master' }).then(() => toast('Master enregistré dans Fichiers', 'ok')).catch(toastErr); } }, '💾 Enregistrer le master'),
