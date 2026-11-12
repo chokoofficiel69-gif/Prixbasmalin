@@ -82,3 +82,21 @@ uniquement à partir de ce journal.
 `node --test --test-concurrency=1 test/quota.test.mjs` : 13 tests (dont les 9 tests demandés). Une vérification réelle
 (OVH + comparaison avec FreeLLMAPI `/v1/usage`) est disponible pour l'administrateur dans Suivi des tokens ; chaque
 exécution est conservée dans `data/verifications.jsonl`.
+
+## Capacité réelle estimée (page Tokens)
+
+Le pool mensuel (10 M par défaut) est un **plafond interne**, pas une capacité fournisseur. La page Tokens affiche à côté une
+**capacité réelle estimée**, calculée pour chaque modèle de chat OVH :
+
+- limite publiée par OVH (accès anonyme) : 2 req/min par modèle et par IP, aucun quota de tokens publié ;
+- req/min réelle = min(2, 60 s / latence moyenne mesurée) × (1 − taux d'erreur mesuré) ;
+- tokens/min = req/min réelle × tokens moyens par réponse mesurés ;
+- modèle pas encore mesuré : moyennes des modèles mesurés (estimation prudente).
+
+Exemple mesuré : gpt-oss-120b, 63 s de latence, ~4 300 tokens/réponse, 1 erreur sur 6 → ~0,8 req/min, ~3 400 tokens/min.
+
+## Routage chat OVH
+
+- Seuls les modèles de chat texte sont routés : les modèles **Guard** (modération) et **VL** (vision) sont exclus ; les VL ne servent qu'aux messages avec image.
+- **Répartition** : chaque requête part vers le modèle le moins chargé sur la dernière minute. Un modèle choisi à la main mais déjà à 2 req/min (ou en pause après un 429) bascule sur un autre modèle libre. Si tous sont pleins : refus local, sans appel à OVH.
+- **Usage commercial de l'accès anonyme OVH : non vérifié** (avertissement affiché sur la page Tokens).

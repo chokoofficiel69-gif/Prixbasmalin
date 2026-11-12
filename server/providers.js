@@ -43,6 +43,10 @@ export const PROVIDER_FACTS = {
 // ---------------------------------------------------------------------------
 let ovhModels = { t: 0, list: null, error: null };
 const NON_CHAT = /whisper|embed|bge|tts|stable-diffusion|sdxl|rerank|flux|parakeet/i;
+// Modèles exclus du routage chat texte : modération (Guard) et vision (VL, réservés aux messages avec image)
+const NOT_TEXT_CHAT = /guard/i;
+const isVisionModel = (id) => /VL|vision|llava|pixtral|gemma-3/i.test(id); // capables de lire une image
+const VISION_ONLY = /(^|[-_.])VL([-_.]|$)|vision|llava|pixtral/i; // modèles vision exclus du chat texte
 export async function listOvhModels(force = false) {
   if (!force && ovhModels.list && Date.now() - ovhModels.t < 10 * 60_000) return ovhModels;
   try {
@@ -56,7 +60,13 @@ export async function listOvhModels(force = false) {
   }
   return ovhModels;
 }
-export const ovhChatModels = (list) => (list || []).filter(id => !NON_CHAT.test(id));
+/** Modèles OVH utiles pour le chat texte (sans Guard ni VL). */
+export const ovhChatModels = (list) => (list || []).filter(id => !NON_CHAT.test(id) && !NOT_TEXT_CHAT.test(id) && !VISION_ONLY.test(id));
+/** Modèles OVH capables de lire une image (utilisés seulement pour les messages avec image). */
+export const ovhVisionModels = (list) => (list || []).filter(id => !NON_CHAT.test(id) && !NOT_TEXT_CHAT.test(id) && isVisionModel(id));
+/** Modèles OVH écartés du chat, avec la raison (affichage). */
+export const ovhExcludedModels = (list) => (list || []).filter(id => !NON_CHAT.test(id) && (NOT_TEXT_CHAT.test(id) || VISION_ONLY.test(id)))
+  .map(id => ({ id, reason: NOT_TEXT_CHAT.test(id) ? 'modèle de modération (Guard)' : 'modèle vision (VL) : seulement pour les messages avec image' }));
 
 const windows = new Map(); // modèle -> horodatages des 60 dernières secondes
 const cooldown = new Map(); // modèle -> fin de pause après un 429
@@ -69,6 +79,23 @@ export function ovhSlot(model) {
   if (cd > now) return { ok: false, retryIn: Math.ceil((cd - now) / 1000) };
   if (w.length >= rpm) return { ok: false, retryIn: Math.ceil((60_000 - (now - w[0])) / 1000) };
   return { ok: true };
+}
+/** Requêtes envoyées à ce modèle dans les 60 dernières secondes (depuis notre IP). */
+export function ovhLoad(model) { return (windows.get(model) || []).filter(t => Date.now() - t < 60_000).length; }
+/**
+ * Répartition : parmi les candidats disponibles, prend le moins chargé sur la dernière minute
+ * (à charge égale, l'ordre de préférence). Un modèle qui approche 2 req/min n'est donc choisi
+ * que si tous les autres sont au moins aussi chargés. Renvoie null si aucun n'est libre.
+ */
+export function pickOvhModel(candidates) {
+  let best = null, bestLoad = Infinity, soonest = 60;
+  for (const m of candidates) {
+    const slot = ovhSlot(m);
+    if (!slot.ok) { soonest = Math.min(soonest, slot.retryIn); continue; }
+    const load = ovhLoad(m);
+    if (load < bestLoad) { best = m; bestLoad = load; }
+  }
+  return { model: best, soonest };
 }
 export function ovhTake(model) { const w = windows.get(model) || []; w.push(Date.now()); windows.set(model, w); }
 export function ovhCooldown(model, sec = 60) { cooldown.set(model, Date.now() + sec * 1000); }
@@ -115,8 +142,6 @@ const PREFERRED = {
   'auto:smart': ['gpt-oss-120b', 'Qwen3-32B', 'Meta-Llama-3_3-70B-Instruct', 'Mistral-Small-3.2-24B-Instruct-2506'],
   'auto:fast': ['gpt-oss-20b', 'Mistral-Small-3.2-24B-Instruct-2506', 'Llama-3.1-8B-Instruct', 'Mistral-Nemo-Instruct-2407', 'gpt-oss-120b'],
 };
-const isVisionModel = (id) => /VL|vision|llava|pixtral|gemma-3/i.test(id);
-
 export function platformAllowed(platform) {
   const s = getSettings();
   const p = String(platform || '').toLowerCase();
@@ -141,27 +166,30 @@ export async function resolveChatRoute(requested = 'auto', { vision = false } = 
   // 1) OVH direct
   if ((wantProvider === null || wantProvider === 'ovh') && platformAllowed('ovh')) {
     const { list } = await listOvhModels();
-    const chat = ovhChatModels(list || ['gpt-oss-120b']);
-    let candidates;
+    const chat = vision ? ovhVisionModels(list || []) : ovhChatModels(list || ['gpt-oss-120b']);
+    const excluded = ovhExcludedModels(list || []).find(x => x.id.toLowerCase() === req.toLowerCase());
+    let candidates, redirectedFrom = null;
     if (isAuto) {
       const pref = PREFERRED[req] || PREFERRED.auto;
       candidates = [...pref.filter(m => chat.includes(m)), ...chat.filter(m => !pref.includes(m))];
-      if (vision) candidates = candidates.filter(isVisionModel);
-    } else candidates = chat.filter(m => m === req || m.toLowerCase() === req.toLowerCase());
-    if (candidates.length) {
-      let soonest = 60;
-      for (const m of candidates) {
-        const slot = ovhSlot(m);
-        if (slot.ok) return { provider: 'ovh', model: m, label: `ovh/${m}` };
-        soonest = Math.min(soonest, slot.retryIn);
+    } else if (excluded && !vision) {
+      throw new RouteError(`« ${excluded.id} » est exclu du chat texte (${excluded.reason}). Choisissez un autre modèle ou « Automatique ».`, 400);
+    } else {
+      candidates = chat.filter(m => m.toLowerCase() === req.toLowerCase());
+      // Modèle choisi à la main mais déjà à sa limite : bascule sur le modèle le moins chargé (évite le 429)
+      if (candidates.length && !ovhSlot(candidates[0]).ok) {
+        redirectedFrom = candidates[0];
+        candidates = [candidates[0], ...chat.filter(m => m !== redirectedFrom)];
       }
+    }
+    if (candidates.length) {
+      const { model: m, soonest } = pickOvhModel(candidates);
+      if (m) return { provider: 'ovh', model: m, label: `ovh/${m}`, ...(redirectedFrom && m !== redirectedFrom ? { redirectedFrom } : {}) };
       if (wantProvider === 'ovh' || !isAuto || !s.gatewayForAuto) {
-        throw new RouteError(`Capacité gratuite d’OVH momentanément atteinte (2 requêtes par minute et par modèle, limite fixée par OVH pour l’accès anonyme). Réessayez dans ${soonest} s.`, 429, soonest);
+        throw new RouteError(`Capacité gratuite d’OVH momentanément atteinte sur tous les modèles (2 requêtes par minute et par modèle, limite fixée par OVH pour l’accès anonyme). Réessayez dans ${soonest} s.`, 429, soonest);
       }
     } else if (wantProvider === 'ovh') {
       throw new RouteError(`Le modèle « ${req} » n’existe pas (ou plus) chez OVH.`, 404);
-    } else if (vision && isAuto) {
-      // pas de modèle vision OVH : on tente la passerelle ci-dessous
     }
   }
 

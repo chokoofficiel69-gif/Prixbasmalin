@@ -31,6 +31,7 @@ export async function render(el) {
       kpi('Aujourd’hui', tok(I.today.consumed), `${tok(I.today.exact)} réels · ${tok(I.today.estimated)} estimés${I.today.cap ? ` · limite ${tok(I.today.cap)}/jour` : ''}`),
       kpi('Attribués aux comptes', tok(I.allocated), `non attribués : ${tok(I.unallocated)}`),
     ),
+    realCapacityStrip(prov, I.pool),
   );
   const alerts = u.alerts.length ? h('div.stack', u.alerts.map(a => h('div.notice' + (a.level === 'danger' ? '.bad' : '.warn'), a.t ? `${fmtDate(a.t)} — ${a.message}` : a.message))) : null;
 
@@ -159,6 +160,23 @@ async function editQuota(x, I) {
   } catch (e) { toastErr(e); return false; }
 }
 
+// ---------------- Capacité réelle estimée (à côté du pool interne) ----------------
+const n1 = (x) => (Math.round(x * 10) / 10).toLocaleString('fr-FR');
+function realCapacityStrip(prov, pool) {
+  const r = prov?.ovh?.real;
+  if (!r) return h('div.notice.warn', 'Capacité réelle des fournisseurs indisponible pour l’instant.');
+  const month = r.tokensPerMonthContinuous;
+  return h('div.stack',
+    h('div.notice.warn', h('b', '⚠️ Le pool de ', tok(pool), ' est un plafond INTERNE, pas une capacité réelle. '),
+      'Ce que les fournisseurs peuvent réellement servir est estimé ci-dessous.'),
+    h('div.grid',
+      kpi('Capacité réelle estimée', `${n1(r.realRpm)} req/min`, `théorique : ${r.theoreticalRpm} req/min (${r.models.length} modèles × ${r.models[0]?.limitRpm ?? 2}) · non garanti`),
+      kpi('Débit réel estimé', r.tokensPerMin != null ? `${fmtNum(Math.round(r.tokensPerMin))} tokens/min` : 'pas encore mesuré', r.tokensPerMin != null ? `${r.measuredModels}/${r.models.length} modèles mesurés ce mois-ci` : 'faites quelques requêtes pour mesurer'),
+      kpi('Si utilisé 24 h/24 pendant 30 j', month != null ? tok(month) : '—', month != null ? (month < pool ? `moins que le pool interne : le pool ne sera jamais le facteur limitant` : `plus que le pool interne`) : ''),
+    ),
+    h('div.tiny.muted', r.note));
+}
+
 // ---------------- Capacité réelle des fournisseurs ----------------
 function providersPanel(p, rerender) {
   if (p.error) return h('div.card.notice.bad', `Capacité fournisseurs indisponible : ${p.error}`);
@@ -172,11 +190,20 @@ function providersPanel(p, rerender) {
         h('div.small', h('b', 'Quota mensuel : '), o.monthlyQuota),
         h('div.small', h('b', 'Facturation : '), o.facts.billing.note),
         h('ul.small', o.facts.limits.map(l => h('li', l.text, h('div.tiny.muted', `Source : ${l.source}`)))),
-        h('div.small', h('b', 'Usage commercial : '), h('span.warn-t', o.facts.commercialUse)),
+        h('div.notice.bad', h('b', '⚠️ Usage commercial non vérifié : '), 'l’accès anonyme OVH (sans clé) n’a pas été validé pour un service commercial ou payant. ', o.facts.commercialUse),
         h('div.small', h('b', 'Débit théorique maximal (tout le Studio) : '), `${o.theoretical.requestsPerMinute} requêtes/min`, h('div.tiny.muted', o.theoretical.note)),
         o.listError ? h('div.notice.warn', o.listError) : h('div.small', h('b', `Modèles de chat disponibles (${o.chatModels.length}) : `), o.chatModels.join(', ') || '—', h('div.tiny.muted', o.verifiedAt ? `liste vérifiée en direct le ${fmtDate(o.verifiedAt)}` : '')),
         table(['Modèle', 'Requêtes (60 s)', 'Disponible'], o.capacityNow.map(c => h('tr', h('td', c.model), h('td', `${c.usedLastMinute}`), h('td', c.ok ? h('span.ok-t', 'oui') : h('span.warn-t', `dans ${c.retryIn} s`))))),
-        h('div.small', `Refus 429 récents : ${o.recent429}`)),
+        h('div.small', `Refus 429 récents : ${o.recent429}`),
+        h('div.small', h('b', 'Répartition automatique : '), 'chaque requête part vers le modèle de chat le moins chargé sur la dernière minute ; un modèle choisi à la main mais déjà à 2 req/min bascule sur un autre au lieu de renvoyer une erreur 429.'),
+        o.real ? table(['Modèle', 'Latence moy.', 'Tokens/réponse', 'Erreurs', 'Req/min réelle', 'Tokens/min'], o.real.models.map(m => h('tr',
+          h('td', m.model, m.measured ? null : h('div.tiny.muted', 'non mesuré : moyennes des autres')),
+          h('td', m.latencyS != null ? `${Math.round(m.latencyS)} s` : '—'),
+          h('td', m.tokPerReply != null ? fmtNum(Math.round(m.tokPerReply)) : '—'),
+          h('td', m.measured ? `${Math.round(m.errorRate * 100)} %` : '—'),
+          h('td', `${n1(m.realRpm)}`, h('div.tiny.muted', `limité par : ${m.limitedBy}`)),
+          h('td', m.tokensPerMin != null ? fmtNum(Math.round(m.tokensPerMin)) : '—')))) : null,
+        o.excluded?.length ? h('div.small', h('b', 'Exclus du chat texte : '), o.excluded.map(x => `${x.id} (${x.reason})`).join(' · ')) : null),
       h('div.stack',
         h('h3', 'FreeLLMAPI (passerelle)', f.verification.ok ? h('span.badge.ok', 'fournisseurs vérifiables') : h('span.badge.bad', 'non vérifiable')),
         h('div.small', h('b', 'Quota mensuel : '), f.monthlyQuota),

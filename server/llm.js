@@ -137,7 +137,7 @@ export async function chat({ uid, model = 'auto', messages, onDelta, onMeta, sig
       record({ uid, kind: 'chat', model: route.model, platform: platform || route.provider, ok: false, err: msg, ms: Date.now() - t0, src, status: res.status });
       throw new UpstreamError(msg, res.status);
     }
-    onMeta?.({ routedVia, platform, model: route.model, provider: route.provider });
+    onMeta?.({ routedVia, platform, model: route.model, provider: route.provider, ...(route.redirectedFrom ? { redirectedFrom: route.redirectedFrom } : {}) });
 
     if (!stream) {
       const j = await res.json();

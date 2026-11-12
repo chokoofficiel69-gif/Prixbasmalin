@@ -274,10 +274,17 @@ describe('Studio (intégration)', () => {
       assert.equal(ev.tok, 0); assert.equal(ev.outcome, 'échec-http-429');
       const u = (await call(ctx.s, 'admin', 'GET', '/api/usage')).json;
       assert.equal(u.internal.reserved, 0); assert.equal(u.internal.consumed, 0);
-      // le modèle est mis en pause localement : pas de nouvel appel immédiat chez OVH
-      const before = callsTo(ctx.mock, 'ovh');
+      // le modèle est mis en pause localement : il n'est plus rappelé ; la requête suivante bascule
+      // sur un autre modèle de chat libre (répartition anti-429)
+      const paused = () => ctx.mock.st.calls.filter(c => c.provider === 'ovh' && c.model === 'gpt-oss-120b').length;
+      const before = paused();
       const again = await chat(ctx.s, 'admin', 'y', 'ovh/gpt-oss-120b');
-      assert.equal(again.error.status, 429); assert.equal(callsTo(ctx.mock, 'ovh'), before);
+      assert.equal(again.error.status, 429); assert.equal(paused(), before);
+      assert.equal(ctx.mock.st.calls.at(-1).model, 'Meta-Llama-3_3-70B-Instruct');
+      // quand tous les modèles de chat sont en pause : refus local, aucun appel chez OVH
+      const all = callsTo(ctx.mock, 'ovh');
+      const third = await chat(ctx.s, 'admin', 'z', 'ovh/gpt-oss-120b');
+      assert.equal(third.error.status, 429); assert.equal(callsTo(ctx.mock, 'ovh'), all);
     } finally { await teardown(ctx); }
   });
 
