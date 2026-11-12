@@ -33,12 +33,13 @@ function database({ migrated = true } = {}) {
   return db;
 }
 
-function request(method, path, { body, origin = ORIGIN, ua = SAFARI, lang = "fr-FR,fr;q=0.9", auth, cf = { country: "FR", asOrganization: "Orange" } } = {}) {
+function request(method, path, { body, origin = ORIGIN, ua = SAFARI, lang = "fr-FR,fr;q=0.9", auth, ip, cf = { country: "FR", asOrganization: "Orange" } } = {}) {
   const headers = new Headers();
   if (origin) headers.set("Origin", origin);
   if (ua) headers.set("User-Agent", ua);
   if (lang) headers.set("Accept-Language", lang);
   if (auth) headers.set("Authorization", auth);
+  if (ip) headers.set("CF-Connecting-IP", ip);
   const text = body === undefined ? "" : JSON.stringify(body);
   if (body !== undefined) { headers.set("Content-Type", "application/json"); headers.set("Content-Length", String(Buffer.byteLength(text))); }
   return { method, url: "https://prixbasmalin-clicks.example.workers.dev" + path, headers, cf, json: async () => JSON.parse(text) };
@@ -172,4 +173,26 @@ test("les commandes ne viennent que d'un rapport Amazon importé", async () => {
   const official = (await stats(env)).commercial.amazon_official;
   assert.equal(official.ordered_items, 1);
   assert.equal(official.earnings_eur, 1.5);
+});
+
+test("un flot d'événements depuis une même IP est limité (anti-gonflage des compteurs)", async () => {
+  const db = database(); const env = { CLICKS: d1(db) };
+  const ip = "203.0.113.7";
+  let ok = 0, limited = 0;
+  for (let i = 0; i < 95; i++) {
+    const res = await worker.fetch(request("POST", "/view", { body: view(5000 + i), ip }), env);
+    if (res.status === 204) ok++;
+    else if (res.status === 429) limited++;
+  }
+  assert.equal(ok, 90, "90 événements acceptés par minute et par IP");
+  assert.equal(limited, 5, "au-delà, réponse 429 sans écriture");
+  assert.equal(db.prepare("SELECT COUNT(*) AS n FROM page_views").get().n, 90, "rien n'est écrit après la limite");
+});
+
+test("les réponses portent les en-têtes de sécurité (nosniff, anti-iframe)", async () => {
+  const db = database(); const env = { CLICKS: d1(db) };
+  const res = await worker.fetch(request("POST", "/view", { body: view(6000), ip: "203.0.113.8" }), env);
+  assert.equal(res.headers.get("X-Content-Type-Options"), "nosniff");
+  assert.equal(res.headers.get("X-Frame-Options"), "DENY");
+  assert.equal(res.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin");
 });

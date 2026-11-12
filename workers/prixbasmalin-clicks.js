@@ -24,6 +24,31 @@ const EVENT_ID_RE = /^[a-zA-Z0-9-]{16,64}$/;
 const VISITOR_ID_RE = /^[a-zA-Z0-9-]{12,80}$/;
 const LINK_KINDS = new Set(["product", "search", "deals", "partner", "other"]);
 
+// En-têtes de sécurité ajoutés à toute réponse (défense en profondeur côté API).
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+};
+
+// Limiteur de débit par IP pour l'écriture des événements : empêche qu'un script
+// extérieur ne gonfle artificiellement les compteurs. Fenêtre glissante d'une minute.
+// Limite large (une page légitime émet une vue + quelques clics) pour ne jamais
+// perdre de vraie mesure. Le cas échéant, le worker renvoie 429 sans écrire.
+const RATE_LIMIT_PER_MINUTE = 90;
+const rateBuckets = new Map();
+function isRateLimited(key, now = Date.now()) {
+  const windowMs = 60000;
+  let bucket = rateBuckets.get(key);
+  if (!bucket || now - bucket.start >= windowMs) bucket = { start: now, count: 0 };
+  bucket.count++;
+  rateBuckets.set(key, bucket);
+  if (rateBuckets.size > 5000) {
+    for (const [k, v] of rateBuckets) if (now - v.start >= windowMs) rateBuckets.delete(k);
+  }
+  return bucket.count > RATE_LIMIT_PER_MINUTE;
+}
+
 function corsHeaders(origin) {
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "https://prixbasmalin.fr",
@@ -261,13 +286,15 @@ export default {
     const origin = request.headers.get("Origin") || "";
     const cors = corsHeaders(origin);
     const url = new URL(request.url);
-    const json = (data, status = 200) => Response.json(data, { status, headers: { ...cors, "Cache-Control": "no-store" } });
+    const json = (data, status = 200) => Response.json(data, { status, headers: { ...cors, ...SECURITY_HEADERS, "Cache-Control": "no-store" } });
 
     if (request.method === "OPTIONS") return ALLOWED_ORIGINS.has(origin) ? new Response(null, { status: 204, headers: cors }) : new Response(null, { status: 403 });
     if (request.method === "GET" && url.pathname === "/health") return json({ ok: true, service: "prixbasmalin-analytics", schema_version: SCHEMA_VERSION });
 
     if (request.method === "POST" && (url.pathname === "/track" || url.pathname === "/view")) {
       if (!ALLOWED_ORIGINS.has(origin)) return json({ error: "Origin not allowed" }, 403);
+      const clientIp = request.headers.get("CF-Connecting-IP") || "unknown";
+      if (isRateLimited(clientIp)) return json({ error: "Too many requests" }, 429);
       const length = Number(request.headers.get("Content-Length") || 0);
       if (length > 2048) return json({ error: "Payload too large" }, 413);
       let body;
@@ -280,7 +307,7 @@ export default {
       try {
         const result = url.pathname === "/view" ? await recordView(env, request, body) : await recordClick(env, request, body);
         if (result.error) return json({ error: result.error }, result.status);
-        return new Response(null, { status: 204, headers: { ...cors, "Cache-Control": "no-store" } });
+        return new Response(null, { status: 204, headers: { ...cors, ...SECURITY_HEADERS, "Cache-Control": "no-store" } });
       } catch (error) {
         console.error(JSON.stringify({ svc: "prixbasmalin-clicks", event: "write_error", path: url.pathname, message: String(error && error.message || error).slice(0, 160) }));
         return json({ error: "Storage error" }, 500);
