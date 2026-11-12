@@ -610,6 +610,32 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <a class="pm-partner pm-partner-ecovacs" data-partner="ecovacs" data-href="https://www.awin1.com/cread.php?awinmid=131716&amp;awinaffid=3137386" target="_blank" rel="sponsored nofollow noopener" hidden><img class="pm-partner-logo pm-logo-white" src="/assets/partenaires/ecovacs.png" alt="Ecovacs" width="372" height="110" loading="lazy"><span>Robots aspirateurs</span></a>
     <a class="pm-partner pm-partner-mibro" data-partner="mibro" data-href="https://www.awin1.com/cread.php?awinmid=131783&amp;awinaffid=3137386" target="_blank" rel="sponsored nofollow noopener" hidden><img class="pm-partner-logo pm-logo-white" src="/assets/partenaires/mibro.png" alt="Mibro" width="371" height="110" loading="lazy"><span>Montres connectées</span></a>
   </div>
+  <div class="pm-pending-list" aria-labelledby="pm-pending-title">
+    <h3 id="pm-pending-title" class="pm-pending-title">Nouveaux programmes Awin en attente</h3>
+    <p class="pm-pending-description">Ces cinq annonceurs apparaissent dans les invitations en attente de validation Awin. Les logos sont présentés à titre informatif : aucun lien affilié n’est activé avant acceptation.</p>
+    <div class="pm-partners-grid pm-pending-grid">
+      <article class="pm-partner pm-partner-pending" aria-label="Fiido : invitation Awin en attente">
+        <img class="pm-partner-logo pm-logo-fiido" src="/assets/partenaires/fiido.webp" alt="Fiido" width="220" height="220" loading="lazy" decoding="async">
+        <span>Vélos électriques</span><small>En attente de validation Awin</small>
+      </article>
+      <article class="pm-partner pm-partner-pending" aria-label="ANITA & ZAHA : invitation Awin en attente">
+        <b class="pm-pending-wordmark">ANITA &amp; ZAHA</b>
+        <span>Programme annonceur</span><small>En attente de validation Awin</small>
+      </article>
+      <article class="pm-partner pm-partner-pending" aria-label="Jowissa : invitation Awin en attente">
+        <img class="pm-partner-logo pm-logo-jowissa" src="/assets/partenaires/jowissa.webp" alt="Jowissa" width="220" height="220" loading="lazy" decoding="async">
+        <span>Montres</span><small>En attente de validation Awin</small>
+      </article>
+      <article class="pm-partner pm-partner-pending" aria-label="Lusini FR : invitation Awin en attente">
+        <img class="pm-partner-logo pm-logo-lusini" src="/assets/partenaires/lusini.webp" alt="Lusini" width="220" height="220" loading="lazy" decoding="async">
+        <span>Équipement professionnel</span><small>En attente de validation Awin</small>
+      </article>
+      <article class="pm-partner pm-partner-pending" aria-label="Imou FR : invitation Awin en attente">
+        <img class="pm-partner-logo pm-logo-imou" src="/assets/partenaires/imou.webp" alt="Imou" width="220" height="220" loading="lazy" decoding="async">
+        <span>Programme annonceur</span><small>En attente de validation Awin</small>
+      </article>
+    </div>
+  </div>
   <p class="pm-hp-note">Liens partenaires affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
 </section>
 <section id="pm-partner-deals" class="pm-hp-section" aria-labelledby="pm-partner-deals-title" hidden>
@@ -1713,6 +1739,17 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 .pm-partner-ecovacs{--pm-brand:#1f6fd1;--pm-brand-text:#6fb0ff}
 .pm-partner-mibro{--pm-brand:#ff6a2b;--pm-brand-text:#ff9a6b}
 .pm-logo-white{background:#fff}
+/* Programmes Awin en attente : visibles à titre informatif, sans lien actif. */
+.pm-pending-list{margin-top:15px;padding-top:13px;border-top:1px solid #2d3a49}
+.pm-pending-title{margin:0 0 4px;color:#fff;font-size:16px;font-weight:900}
+.pm-pending-description{margin:0 0 10px;color:#aab6c5;font-size:12px;line-height:1.45}
+.pm-partner-pending{cursor:default;--pm-brand:#778397;--pm-brand-text:#fff}
+.pm-partner-pending::after{content:none}
+.pm-partner-pending:hover{transform:none;border-color:#3e4a59}
+.pm-partner-pending small{display:inline-flex;align-self:flex-start;padding:2px 7px;border-radius:999px;background:#283647;color:#ffc18e;font-size:10px;line-height:1.4;font-weight:800}
+.pm-logo-fiido,.pm-logo-jowissa,.pm-logo-lusini{width:42px;height:42px;object-fit:contain;background:#fff;padding:3px;border-radius:8px}
+.pm-logo-imou{width:120px;height:32px;object-fit:cover;object-position:center;background:#fff;padding:0 4px;border-radius:8px}
+.pm-pending-wordmark{display:inline-block;align-self:flex-start;background:#fff;color:#161616;border-radius:8px;padding:0 7px;line-height:32px;font-family:Georgia,"Times New Roman",serif;font-size:21px;letter-spacing:.4px}
 @media(min-width:760px){.pm-partners-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:760px){.pm-hp-rail{grid-auto-columns:230px}}
 /* Accueil resserré : blocs enchaînés sans grands espaces noirs. */
