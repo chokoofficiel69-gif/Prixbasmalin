@@ -26,7 +26,7 @@ export function sanitizeChain(chain) {
   const out = [];
   for (const s of Array.isArray(chain) ? chain.slice(0, 6) : []) {
     if (!s || typeof s !== 'object') continue;
-    if (s.t === 'tune') out.push({ t: 'tune', strength: clampN(s.strength, [0, 1], 1), speed: clampN(s.speed, [0, 200], 30) });
+    if (s.t === 'tune') out.push(s.mode === 'notes' ? { t: 'tune', mode: 'notes', strength: clampN(s.strength, [0, 1], 1), keep: clampN(s.keep, [0, 0.8], 0.2), glide: clampN(s.glide, [0, 200], 30) } : { t: 'tune', strength: clampN(s.strength, [0, 1], 1), speed: clampN(s.speed, [0, 200], 30) });
     else if (s.t === 'shift') out.push({ t: 'shift', semi: Math.round(clampN(s.semi, [-12, 12], 0)), formant: clampN(s.formant, [-4, 4], 0) });
     else if (s.t === 'double') out.push({ t: 'double', steps: (Array.isArray(s.steps) ? s.steps : [0, 0]).slice(0, 2).map(x => [-12, 0, 12].includes(+x) ? +x : 0), gain: clampN(s.gain, [0.2, 0.8], 0.55) });
     else if (s.t === 'harmony') { const st = (Array.isArray(s.steps) ? s.steps : [2]).slice(0, 2).map(x => Math.round(clampN(x, [-4, 4], 2))).filter(Boolean); if (st.length) out.push({ t: 'harmony', steps: st, gain: clampN(s.gain, [0.2, 0.7], 0.45) }); }
@@ -627,6 +627,24 @@ export async function render(el, { params }) {
   const fxApply = () => { const item = resolve(fxSel.value); if (item) applyItem(item); };
   const QUICK_TUNE = [['🎯 Juste parfait', 'Justesse parfaite (note par note)'], ['🎤 Léger', 'Justesse naturelle (note par note)'], ['🎤 Moyen (Drake)', 'Rap mélodique note par note'], ['🤖 Fort (T-Pain)', 'Hard-tune note par note'], ['✨ Belle voix chantée', 'Belle voix chantée (juste + douce)']];
   const tunePrev = makePreview();
+  // ---------- Mon autotune sur mesure : je règle moi-même et je garde mes réglages ----------
+  const MT = Object.assign({ glide: 30, keep: 0.2, strength: 1 }, (() => { try { return JSON.parse(localStorage.getItem('studio.mytune')) || {}; } catch { return {}; } })());
+  const mtSlider = (label, key, min, max, step, fmt, help) => { const b = h('b', fmt(MT[key])); return h('label', { title: help }, h('span', label + ' ', b), h('input', { type: 'range', min, max, step, value: MT[key], oninput: (e) => { MT[key] = Number(e.target.value); b.textContent = fmt(MT[key]); try { localStorage.setItem('studio.mytune', JSON.stringify(MT)); } catch {} } })); };
+  const myTuneItem = () => ({ name: `Mon autotune (vitesse ${MT.glide} ms, naturel ${Math.round(MT.keep * 100)} %, force ${Math.round(MT.strength * 100)} %)`, list: [{ name: 'Mon autotune', chain: [{ t: 'tune', mode: 'notes', strength: MT.strength, keep: MT.keep, glide: MT.glide }] }] });
+  const myTuneBox = h('div.stack',
+    h('div.sliders',
+      mtSlider('⚡ Vitesse de correction', 'glide', 0, 150, 1, (v) => v <= 5 ? `${v} ms (robot)` : v < 25 ? `${v} ms (rap mélodique)` : v < 70 ? `${v} ms (naturel)` : `${v} ms (très doux)`, 'Plus c’est bas, plus la note est collée tout de suite (effet T-Pain à 0)'),
+      mtSlider('🌿 Naturel (garde ton vibrato)', 'keep', 0, 0.7, 0.05, (v) => `${Math.round(v * 100)} %`, '0 % = notes parfaitement plates ; plus haut = on garde tes glissés et ton vibrato'),
+      mtSlider('🎯 Force', 'strength', 0, 1, 0.05, (v) => `${Math.round(v * 100)} %`, 'À quel point la note est ramenée vers la note juste')),
+    h('div.row',
+      h('button.btn.small', { onclick: () => { const it = myTuneItem(); tunePrev.run('Mon autotune', async (part, t, st, say) => { const r = await runList(part, it.list, t, st, say); return { buffer: r.buffer, note: r.key ? `tonalité ${keyName(r.key)}` : '' }; }, () => applyItem(it)); } }, '▶ Écouter'),
+      h('button.btn.small.primary', { onclick: () => applyItem(myTuneItem()) }, '✅ Appliquer'),
+      h('button.btn.small.ghost', { onclick: async () => {
+        const name = await promptBox('Nom de ton réglage d’autotune', 'Mon autotune'); if (!name) return;
+        const mine = lsGet('studio_vfx_mine', []); mine.push({ name, steps: [], custom: { chain: [{ t: 'tune', mode: 'notes', strength: MT.strength, keep: MT.keep, glide: MT.glide }], voice: null } }); lsSet('studio_vfx_mine', mine);
+        fillCats(); toast(`« ${name} » gardé dans 💾 Mes réglages (menu Effets voix)`, 'ok');
+      } }, '💾 Garder ce réglage')),
+    h('p.tiny.muted', 'Règle, écoute (A/B), puis applique. La tonalité vient de ton instru (ou du menu « Tonalité » plus bas). Tes réglages gardés se retrouvent dans « 🎛️ Effets voix & autotune » → « 💾 Mes réglages ».'));
   const quickTune = (label, name) => {
     const p = VFX.find(x => x.name === name); if (!p) return toast('Préréglage introuvable : ' + name, 'bad');
     const item = { name: `Autotune ${label.replace(/^\S+ /, '')}`, list: [p] };
@@ -731,6 +749,8 @@ export async function render(el, { params }) {
       h('h3', '🎤 Autotune chanté en 1 clic'),
       h('div.row', ...QUICK_TUNE.map(([label, name]) => h('button.btn.small', { onclick: () => quickTune(label, name) }, label))),
       tunePrev.box,
+      h('h3', '🎛️ Mon autotune sur mesure'),
+      myTuneBox,
       h('p.tiny.muted', 'Touche un bouton : tu écoutes d’abord 15 s de ta voix (A = avant, B = après). Rien n’est modifié tant que tu ne touches pas « ✅ Appliquer à toute la piste ». Corrigé note par note, dans la tonalité de ton instru (importe-la d’abord) : « Juste parfait » = toutes les notes justes en gardant ta voix · Léger = naturel · Moyen = façon Drake · Fort = robot T-Pain · Belle voix = juste, doublée, douce.'),
       h('h3', '🪄 Décris le son que tu veux'),
       aiDesc,
