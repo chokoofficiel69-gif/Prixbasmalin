@@ -140,21 +140,55 @@ export async function render(el, { params }) {
   const syncVoice = () => { const has = tracks.some(t => t.kind === 'voix'); micVol.disabled = !has; micLbl.textContent = has ? `${micDb} dB` : '(pas encore de voix enregistrée)'; };
   const syncInstru = () => { syncVoice(); const b = tracks.find(t => t.kind === 'instru'); instruVol.disabled = !b; if (b) { instruVol.value = b.gainDb; instruLbl.textContent = `${b.gainDb} dB`; } else instruLbl.textContent = '(pas d’instru)'; };
   instruVol.oninput = () => { const b = tracks.find(t => t.kind === 'instru'); if (!b) return; b.gainDb = Number(instruVol.value); instruLbl.textContent = `${b.gainDb} dB`; if (beatGainNode) beatGainNode.gain.value = 10 ** (b.gainDb / 20); liveGain(b); masterResult = null; drawList(); };
+  // ---------- Vumètres en direct (on voit quand ça sature) ----------
+  function makeMeter(label) {
+    const bar = h('i', { style: { display: 'block', height: '100%', width: '0%', background: 'linear-gradient(90deg,#22c55e 0%,#22c55e 70%,#eab308 85%,#ef4444 100%)', backgroundSize: '100% 100%', transition: 'width 60ms linear' } });
+    const peakMark = h('i', { style: { position: 'absolute', top: 0, bottom: 0, width: '2px', background: '#fff', left: '0%' } });
+    const val = h('b.small', '—');
+    const clip = h('span.small', { style: { fontWeight: 700, color: '#ef4444', visibility: 'hidden' } }, '● SATURE');
+    const track = h('div', { style: { position: 'relative', height: '12px', borderRadius: '6px', overflow: 'hidden', background: 'rgba(127,127,127,.25)' } }, bar, peakMark);
+    const el = h('div.stack', { style: { gap: '2px' } }, h('div.row', h('span.small.grow', label), val, clip), track);
+    let an = null, srcNode = null, raf = 0, hold = -90, holdT = 0, clipT = 0;
+    const pct = (db) => Math.max(0, Math.min(100, (db + 60) / 60 * 100)); // échelle −60 → 0 dBFS
+    function loop() {
+      if (!an) return;
+      const d = new Float32Array(an.fftSize); an.getFloatTimeDomainData(d);
+      let pk = 0, sum = 0; for (const x of d) { const a = Math.abs(x); if (a > pk) pk = a; sum += x * x; }
+      const db = 20 * Math.log10(pk + 1e-9), rms = 20 * Math.log10(Math.sqrt(sum / d.length) + 1e-9), now = performance.now();
+      if (db > hold || now - holdT > 1500) { hold = db; holdT = now; }
+      if (db >= -0.5) clipT = now;
+      bar.style.width = pct(db) + '%'; peakMark.style.left = `calc(${pct(hold)}% - 2px)`;
+      val.textContent = `${db < -59 ? '−∞' : db.toFixed(1)} dB`;
+      val.style.color = db >= -0.5 ? '#ef4444' : db > -6 ? '#eab308' : '';
+      clip.style.visibility = now - clipT < 1500 ? 'visible' : 'hidden';
+      raf = requestAnimationFrame(loop);
+    }
+    return {
+      el,
+      attachNode(node) { this.detach(); const ctx = audioCtx(); an = ctx.createAnalyser(); an.fftSize = 2048; node.connect(an); srcNode = node; loop(); },
+      attachStream(stream) { this.detach(); const ctx = audioCtx(); const src = ctx.createMediaStreamSource(stream); an = ctx.createAnalyser(); an.fftSize = 2048; src.connect(an); srcNode = src; loop(); },
+      detach() { cancelAnimationFrame(raf); try { srcNode?.disconnect(an); } catch {} an = null; srcNode = null; bar.style.width = '0%'; val.textContent = '—'; clip.style.visibility = 'hidden'; hold = -90; },
+    };
+  }
+  const micMeter = makeMeter('🎤 Micro (ce qui est enregistré)');
+  const outMeter = makeMeter('🔊 Sortie (instru + voix)');
+
   // ---------- Écoute du mix EN DIRECT : chaque curseur de volume agit pendant la lecture ----------
   const live = { srcs: [], gains: new Map(), timer: null };
   const liveBtn = h('button.btn.small.primary', '▶ Écouter tout (volumes en direct)');
   function liveGain(t) { const g = live.gains.get(t); if (g) g.gain.setTargetAtTime(t.mute ? 0 : 10 ** (t.gainDb / 20), audioCtx().currentTime, 0.02); }
-  function stopLive() { live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; }
+  function stopLive() { outMeter.detach(); live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; }
   function playLive() {
     stopLive(); player.stop();
     if (!tracks.length) return toast('Aucune piste à écouter.');
     const ctx = audioCtx(), minOff = Math.min(0, ...tracks.map(t => t.offset || 0)), t0 = ctx.currentTime + 0.05;
+    const bus = ctx.createGain(); bus.connect(ctx.destination); outMeter.attachNode(bus);
     let end = 0;
     for (const t of tracks) {
       const src = ctx.createBufferSource(); src.buffer = t.buffer;
       const g = ctx.createGain(); g.gain.value = t.mute ? 0 : 10 ** (t.gainDb / 20);
       const pan = ctx.createStereoPanner(); pan.pan.value = t.pan || 0;
-      src.connect(g).connect(pan).connect(ctx.destination);
+      src.connect(g).connect(pan).connect(bus);
       const off = (t.offset || 0) - minOff; src.start(t0 + off);
       live.srcs.push(src); live.gains.set(t, g); end = Math.max(end, off + t.buffer.duration);
     }
@@ -176,7 +210,7 @@ export async function render(el, { params }) {
     if (monTestStream || recorder) return;
     try {
       monTestStream = await navigator.mediaDevices.getUserMedia({ audio: { ...micConstraints(), echoCancellation: false } });
-      startMonitor(monTestStream); monTestBtn.textContent = '⏹ Arrêter le test';
+      startMonitor(monTestStream); micMeter.attachStream(monTestStream); monTestBtn.textContent = '⏹ Arrêter le test';
       toast('🎧 Tu t’entends dans le casque. Règle « Ma voix dans le casque ». (Casque filaire conseillé.)');
     } catch (e) { monOn.checked = false; toast('Micro inaccessible : ' + e.message, 'bad'); }
   }
@@ -209,7 +243,7 @@ export async function render(el, { params }) {
   function stopMonitor(keepTest = false) {
     try { monitor?.src.disconnect(); monitor?.out.disconnect(); } catch {}
     monitor = null;
-    if (!keepTest && monTestStream) { monTestStream.getTracks().forEach(t => t.stop()); monTestStream = null; monTestBtn.textContent = '🎧 Tester le retour'; }
+    if (!keepTest && monTestStream) { micMeter.detach(); monTestStream.getTracks().forEach(t => t.stop()); monTestStream = null; monTestBtn.textContent = '🎧 Tester le retour'; }
   }
   const micConstraints = () => {
     const base = rawMode.checked ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
@@ -221,7 +255,7 @@ export async function render(el, { params }) {
     if (monTestStream) { stopMonitor(); return; }
     try {
       monTestStream = await navigator.mediaDevices.getUserMedia({ audio: { ...micConstraints(), echoCancellation: false } });
-      startMonitor(monTestStream); monTestBtn.textContent = '⏹ Arrêter le test';
+      startMonitor(monTestStream); micMeter.attachStream(monTestStream); monTestBtn.textContent = '⏹ Arrêter le test';
       toast('Parle : tu t’entends dans le casque. Casque filaire conseillé (le Bluetooth ajoute du retard).');
     } catch (e) { toast('Micro inaccessible : ' + e.message, 'bad'); }
   };
@@ -236,8 +270,9 @@ export async function render(el, { params }) {
       clearInterval(timer);
       stopMonitor();
       const r = recorder; recorder = null;
-      try { beatSrc?.stop(); } catch {} beatSrc = null;
+      try { beatSrc?.stop(); } catch {} beatSrc = null; outMeter.detach();
       recBtn.textContent = '⏺ Enregistrer'; meter.firstChild.style.width = '0';
+      micMeter.detach();
       const blob = await r.stop();
       delItem(PKEY).catch(() => {});
       // Calage automatique : la prise commence avant l'instru (temps de démarrage) et arrive en retard
@@ -274,13 +309,14 @@ export async function render(el, { params }) {
         else if (a.spoke && now - a.last > a.sil * 1000) { recAuto = null; toast(`Silence de ${a.sil} s : prise arrêtée.`); stopRec(); }
       } });
       if (monOn.checked) startMonitor(recorder.stream);
+      micMeter.attachStream(recorder.stream);
       const recT0 = performance.now();
       recLatency = null;
       if (withBeat.checked && beat) {
         const ctx = audioCtx();
         beatSrc = ctx.createBufferSource(); beatSrc.buffer = beat.buffer;
         const g = ctx.createGain(); g.gain.value = 10 ** (beat.gainDb / 20); beatGainNode = g;
-        beatSrc.connect(g).connect(ctx.destination); beatSrc.start();
+        beatSrc.connect(g).connect(ctx.destination); outMeter.attachNode(g); beatSrc.start();
         if (autoStopBeat) beatSrc.onended = () => { if (recorder) { toast('Fin de l’instru : prise arrêtée.'); stopRec(); } };
         const beatT0 = performance.now();
         const outLat = (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
@@ -754,7 +790,9 @@ export async function render(el, { params }) {
       h('label', h('span', '🥁 Instru ', instruLbl), instruVol),
       h('label', h('span', '🎤 Ma voix enregistrée ', micLbl), micVol),
       h('label', h('span', '🎧 Ma voix en direct dans le casque ', monVolLbl), monVol)),
-    h('label.chk.small', monOn, 'M’entendre en direct dans le casque pendant que j’enregistre'));
+    h('label.chk.small', monOn, 'M’entendre en direct dans le casque pendant que j’enregistre'),
+    micMeter.el, outMeter.el,
+    h('p.tiny.muted', 'Micro : vise le jaune (−12 à −6 dB) quand tu rappes fort. Si « ● SATURE » s’allume, recule du micro ou baisse le gain du micro dans Windows (Paramètres → Son → Entrée). Le micro s’affiche quand tu enregistres ou quand « M’entendre en direct » est coché.'));
   const S = {
     mixer,
     isRecording: () => !!recorder,
