@@ -19,6 +19,15 @@ function reply(messages, model) {
   if (/réalisateur de clips/.test(sys)) return JSON.stringify({ titre: 'Clip test', personnage: 'young man, short beard, black tracksuit', plans: [
     { debut: 0, fin: 1.5, paroles: 'Bonjour le studio.', type: 'performance', scene: 'Il rappe face caméra', camera: 'plan serré, travelling avant', image_prompt: 'young man rapping, photorealistic', video_prompt: 'young man rapping to camera' },
     { debut: 1.5, fin: 3, paroles: 'Deuxième phrase.', type: 'histoire', scene: 'Il roule à moto la nuit', camera: 'plan large', image_prompt: 'young man on a motorbike at night', video_prompt: 'motorbike ride at night' }] });
+  if (/assistant d'un studio d'enregistrement/.test(sys)) {
+    const said = (text.match(/L'artiste dit : « (.*) »/) || [])[1] || '';
+    if (/enregistre/.test(said)) return JSON.stringify({ reponse: 'Vas-y, je lance.', actions: [{ a: 'record' }, { a: 'clean', level: 0.5 }, { a: 'voice', preset: 'rap' }] });
+    if (/nettoie/.test(said)) return JSON.stringify({ reponse: 'Je nettoie et je cale.', actions: [{ a: 'clean', level: 0.5 }, { a: 'align' }, { a: 'voice', preset: 'rap' }] });
+    if (/réverbe/.test(said)) return JSON.stringify({ reponse: 'Un peu plus de réverbe.', actions: [{ a: 'effect', name: 'Réverbe +', chain: [{ t: 'fx', kind: 'reverb', size: 1.6, mix: 0.15 }] }] });
+    if (/coupe/.test(said)) return JSON.stringify({ reponse: 'Je coupe.', actions: [{ a: 'cut', from: 0, to: 0.5 }] });
+    if (/masterise/.test(said)) return JSON.stringify({ reponse: 'Master Spotify.', actions: [{ a: 'master', preset: 'streaming' }, { a: 'save' }] });
+    return JSON.stringify({ reponse: 'Salut, on enregistre ?', actions: [] });
+  }
   if (/ingénieur du son/.test(sys)) return JSON.stringify({ propositions: [
     { nom: 'Drake chaud discret', pourquoi: 'Justesse douce et chaleur.', chaine: [{ t: 'tune', strength: 0.9, speed: 30 }, { t: 'fx', kind: 'warm' }], voix: { highpass: 90, presence: 3, air: 2, comp: 0.6, reverb: 0.08 } },
     { nom: 'Drake écho', pourquoi: 'Plus d’ampleur.', chaine: [{ t: 'tune', strength: 1, speed: 20 }, { t: 'fx', kind: 'delay', time: 0.3, fb: 0.3, mix: 0.2 }, { t: 'fx', kind: 'inconnu' }] },

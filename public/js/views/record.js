@@ -1,4 +1,5 @@
 import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose } from '../lib/core.js';
+import { mountAssistant } from './assistant.js';
 import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords } from '../lib/voicefx.js';
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
 
@@ -144,8 +145,13 @@ export async function render(el, { params }) {
     } catch (e) { toast('Micro inaccessible : ' + e.message, 'bad'); }
   };
   let timer;
-  recBtn.onclick = async () => {
-    if (recorder) {
+  let ast = null, recAuto = null;
+  const stopping = { p: null };
+  recBtn.onclick = () => (recorder ? stopRec() : startRec().catch(() => {}));
+  async function stopRec() {
+    if (!recorder) return stopping.p;
+    stopping.p = (async () => {
+      recAuto = null;
       clearInterval(timer);
       stopMonitor();
       const r = recorder; recorder = null;
@@ -157,13 +163,26 @@ export async function render(el, { params }) {
       const lat = recLatency; recLatency = null;
       await addBlob(blob, `Prise ${tracks.filter(t => t.kind === 'voix').length + 1}`, 'voix', null, lat ? -lat : 0);
       if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
-      return;
-    }
+      stopping.p = null;
+      ast?.onRecordStopped();
+    })();
+    return stopping.p;
+  }
+  async function startRec({ autoStopSilence = 0, autoStopBeat = false } = {}) {
+    if (recorder) return;
     try {
       stopMonitor();
       const constraints = micConstraints();
       const beat = tracks.find(t => t.kind === 'instru' && !t.mute);
-      recorder = await startRecorder({ constraints, onLevel: (l) => { meter.firstChild.style.width = Math.min(100, l * 300) + '%'; } });
+      recAuto = { sil: autoStopSilence, spoke: false, last: performance.now() };
+      recorder = await startRecorder({ constraints, onLevel: (l) => {
+        meter.firstChild.style.width = Math.min(100, l * 300) + '%';
+        // arrêt automatique après X s de silence (mode mains libres), une fois que la voix a commencé
+        const a = recAuto; if (!a?.sil || !recorder) return;
+        const now = performance.now();
+        if (l > 0.025) { a.spoke = true; a.last = now; }
+        else if (a.spoke && now - a.last > a.sil * 1000) { recAuto = null; toast(`Silence de ${a.sil} s : prise arrêtée.`); stopRec(); }
+      } });
       if (monOn.checked) startMonitor(recorder.stream);
       const recT0 = performance.now();
       recLatency = null;
@@ -172,6 +191,7 @@ export async function render(el, { params }) {
         beatSrc = ctx.createBufferSource(); beatSrc.buffer = beat.buffer;
         const g = ctx.createGain(); g.gain.value = 10 ** (beat.gainDb / 20);
         beatSrc.connect(g).connect(ctx.destination); beatSrc.start();
+        if (autoStopBeat) beatSrc.onended = () => { if (recorder) { toast('Fin de l’instru : prise arrêtée.'); stopRec(); } };
         const beatT0 = performance.now();
         const outLat = (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
         const inLat = Number(recorder.stream.getAudioTracks()[0]?.getSettings?.().latency) || 0.02;
@@ -181,8 +201,9 @@ export async function render(el, { params }) {
       }
       recBtn.textContent = '⏹ Arrêter';
       timer = setInterval(() => { recTime.textContent = fmtTime(recorder?.duration); }, 200);
-    } catch (e) { recorder = null; toast('Micro inaccessible : ' + e.message, 'bad'); }
-  };
+      ast?.onRecordStarted();
+    } catch (e) { recorder = null; recAuto = null; toast('Micro inaccessible : ' + e.message, 'bad'); throw e; }
+  }
 
   // ---------- Liste des pistes ----------
   function drawList() {
@@ -612,10 +633,70 @@ export async function render(el, { params }) {
     } catch (e) { masterInfo.textContent = ''; toastErr(e); }
     btn.disabled = false;
   }
+  // ---------- Commandes de l'assistant vocal ----------
+  const voiceTrack = () => { const t = tracks[selected]; if (t && t.kind !== 'instru') return t; const i = tracks.map(x => x.kind).lastIndexOf('voix'); if (i < 0) throw new Error('aucune voix enregistrée pour l’instant'); selected = i; drawList(); drawEdit(); return tracks[i]; };
+  const trackAt = (n) => { const i = n === -1 || n === undefined ? tracks.length - 1 : Number(n) - 1; if (!tracks[i]) throw new Error(`il n’y a pas de piste ${n}`); return i; };
+  const secs = (v, d) => { const n = Number(v); return Number.isFinite(n) ? Math.max(0, n) : d; };
+  function removeRange(b, a, c) {
+    const x = sliceBuffer(b, 0, a), y = sliceBuffer(b, c, b.duration);
+    const out = makeBuffer(b.numberOfChannels, x.length + y.length, b.sampleRate);
+    for (let ch = 0; ch < b.numberOfChannels; ch++) { out.copyToChannel(x.getChannelData(ch), ch, 0); out.copyToChannel(y.getChannelData(ch), ch, x.length); }
+    return out;
+  }
+  function trimSilence(b) {
+    const d = b.getChannelData(0), th = 0.01, pad = Math.floor(0.15 * b.sampleRate);
+    let a = 0, z = d.length - 1; while (a < d.length && Math.abs(d[a]) < th) a++; while (z > a && Math.abs(d[z]) < th) z--;
+    return sliceBuffer(b, Math.max(0, a - pad) / b.sampleRate, Math.min(d.length, z + pad) / b.sampleRate);
+  }
+  const masterKey = (p) => { const keys = Object.keys(MASTER_PRESETS); const n = norm2(p); return keys.find(k => k === p) || keys.find(k => norm2(MASTER_PRESETS[k].label).includes(n)) || (/(rap|trap|punch)/.test(n) ? keys.find(k => /rap/i.test(MASTER_PRESETS[k].label)) : /club|fort/.test(n) ? keys.find(k => /club/i.test(MASTER_PRESETS[k].label)) : /doux|acous/.test(n) ? keys.find(k => /doux/i.test(MASTER_PRESETS[k].label)) : keys[0]); };
+  const norm2 = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const fakeBtn = () => ({ disabled: false });
+  const S = {
+    isRecording: () => !!recorder,
+    record: (o) => startRec({ autoStopSilence: o?.autoStopSilence || 0, autoStopBeat: true }),
+    snapshot: () => ({
+      enregistrement_en_cours: !!recorder,
+      pistes: tracks.map((t, i) => ({ n: i + 1, nom: t.name, type: t.kind, duree_s: Math.round(t.buffer.duration * 10) / 10, volume_db: t.gainDb, muet: t.mute, effets_appliques: t.fxDone || [], etapes_annulables: (t.undo || []).map(u => u.label) })),
+      piste_selectionnee: selected + 1, master_pret: !!masterResult, instru_presente: tracks.some(t => t.kind === 'instru'),
+    }),
+    do: {
+      stop: async () => { if (recorder) return stopRec(); player.stop(); el.querySelectorAll('audio').forEach(a => a.pause()); },
+      pause: async () => { player.pause(); el.querySelectorAll('audio').forEach(a => a.pause()); },
+      play: async (x) => {
+        if (x.what === 'master' || (!tracks[selected] && masterResult)) { if (!masterResult) await doMaster(); const a = mixPlayerEl.querySelector('audio'); a?.play(); a?.scrollIntoView({ block: 'center' }); return; }
+        const t = tracks[selected] || voiceTrack(); player.load(t.buffer); player.play(0); playSelBtn.textContent = '⏸';
+      },
+      select: async (x) => { selected = trackAt(x.track); sel = null; drawList(); drawEdit(); },
+      clean: async (x) => { voiceTrack(); const lv = Math.min(0.9, Math.max(0.2, Number(x.level) || 0.55)); await work('Nettoyage…', async (b) => gate(antipop(await denoise(b, lv), 0.8), -45, -30)); },
+      align: async () => { voiceTrack(); if (!tracks.some(t => t.kind === 'instru')) throw new Error('il faut d’abord une instru'); await alignSelected(); },
+      voice: async (x) => { voiceTrack(); const v = x.params ? sanitizeVoice(x.params) : { ...(VOICE_PRESETS[x.preset] || VOICE_PRESETS.rap) }; await work('Traitement voix…', (b) => voiceChain(b, v)); },
+      tune: async (x) => { voiceTrack(); const k = norm2(x.level); const [label, name] = QUICK_TUNE[/fort|robot|t.?pain/.test(k) ? 2 : /moyen|drake|melod/.test(k) ? 1 : 0]; const p = VFX.find(y => y.name === name); await applyItem({ name: `Autotune ${label.replace(/^\S+ /, '')}`, list: [p] }); },
+      effect: async (x) => { voiceTrack(); const chain = sanitizeChain(x.chain), voice = x.voice ? sanitizeVoice(x.voice) : null; if (!chain.length && !voice) throw new Error('effet non reconnu'); const name = String(x.name || 'Effet').slice(0, 40); await applyItem({ name, list: [{ name, chain, voice }] }); },
+      cut: async (x) => { const t = voiceTrack(); const a = secs(x.from, 0), c = Math.min(t.buffer.duration, secs(x.to, t.buffer.duration)); if (c <= a) throw new Error('passage invalide'); await work(`Coupe ${a}-${c} s…`, async (b) => removeRange(b, a, c)); },
+      keep: async (x) => { const t = voiceTrack(); const a = secs(x.from, 0), c = Math.min(t.buffer.duration, secs(x.to, t.buffer.duration)); if (c <= a) throw new Error('passage invalide'); await work('Rognage…', async (b) => sliceBuffer(b, a, c)); },
+      trim: async () => { voiceTrack(); await work('Coupe des silences…', async (b) => trimSilence(b)); },
+      fades: async () => { voiceTrack(); await work('Fondus…', async (b) => { const o = cloneBuffer(b); const n = Math.min(o.length / 2, Math.floor(0.03 * o.sampleRate)); for (let c = 0; c < o.numberOfChannels; c++) { const d = o.getChannelData(c); for (let i = 0; i < n; i++) { d[i] *= i / n; d[d.length - 1 - i] *= i / n; } } return o; }); },
+      normalize: async () => { voiceTrack(); await work('Normalisation…', async (b) => normalize(cloneBuffer(b), -1)); },
+      undo: async () => { if (!tracks[selected]?.undo?.length) throw new Error('rien à annuler'); stepHistory('undo', 'redo'); },
+      redo: async () => { if (!tracks[selected]?.redo?.length) throw new Error('rien à rétablir'); stepHistory('redo', 'undo'); },
+      original: async () => { voiceTrack(); await work('Retour à l’original…', async (b, tr) => tr.original); },
+      volume: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks[i].gainDb = Math.max(-30, Math.min(12, Number(x.db) || 0)); masterResult = null; drawList(); },
+      mute: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks[i].mute = x.on !== false; masterResult = null; drawList(); },
+      delete: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
+      all: async () => doEverything(fakeBtn()),
+      master: async (x) => { if (x.preset) masterSel.value = masterKey(x.preset); await doMaster(); mixPlayerEl.querySelector('audio')?.play(); },
+      versions: async () => compareMasters(fakeBtn()),
+      save: async () => { if (!masterResult) await doMaster(); await uploadFile(encodeWav(masterResult.buffer, Number(bitSel.value)), { name: `${exportName()}-master.wav`, source: 'master' }); toast('Master enregistré dans tes fichiers', 'ok'); },
+      download: async () => { if (!masterResult) await doMaster(); downloadBlob(encodeWav(masterResult.buffer, Number(bitSel.value)), `${exportName()}-master.wav`); },
+    },
+  };
+  ast = mountAssistant(S);
+
   const exportName = () => (tracks.find(t => t.kind === 'voix')?.name || 'morceau').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-');
 
   el.append(h('div.grid.two',
     h('div.stack',
+      ast.card,
       h('div.card.stack',
         h('h3', '🎙️ Enregistrer'),
         h('div.row', recBtn, recTime, h('div.grow', meter)),
@@ -663,5 +744,5 @@ export async function render(el, { params }) {
       } catch (e) { toastErr(e); }
     }
   }
-  return () => { player.stop(); stopMonitor(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
+  return () => { ast?.destroy(); player.stop(); stopMonitor(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
 }
