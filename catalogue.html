@@ -646,10 +646,11 @@ const verifiedProductsEl=document.getElementById("verifiedProducts");
 let pmBaseVerifiedProducts=[];
 let pmAwinVerifiedProducts=[];
 let pmRakutenVerifiedProducts=[];
+let pmGtinComparisonProducts=[];
 Promise.all([fetch("/data/prices.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),fetch("/data/featured-prices.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null)])
   .then(([verified,featured])=>{
     pmBaseVerifiedProducts=[...(verified?.products||[]),...(featured?.products||[])];
-    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts]);
+    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts,...pmGtinComparisonProducts]);
   })
   .catch(()=>{});
 const productData=[
@@ -5864,7 +5865,7 @@ async function pmLoadAwinCatalogue(){
         })
       };
     });
-    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts]);
+    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts,...pmGtinComparisonProducts]);
   }catch(error){
     setStatus("Flux marchand momentanément indisponible ; les dernières données fiables ne sont pas remplacées.");
     console.warn("Le flux de produits autorisés est momentanément indisponible.");
@@ -7037,9 +7038,28 @@ function pmRakutenIsValidGtin(value){
     });
     render();
     pmRakutenVerifiedProducts=exactComparisons;
-    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts]);
+    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts,...pmGtinComparisonProducts]);
   }catch(error){
     console.warn("Import d’un flux partenaire indisponible ; le catalogue principal reste accessible.");
+  }
+})();
+</script>
+
+<script id="pm-gtin-comparisons-loader">
+/* Comparaisons multi-marchands par GTIN (data/gtin-comparisons.json, construit par scripts/build_gtin_comparisons.py).
+   Chaque offre garde le prix, la livraison, la disponibilité, la date et le statut TVA de sa source ;
+   renderVerifiedProducts n'affiche que les offres actuelles selon isCurrentVerifiedOffer. */
+(async function pmLoadGtinComparisons(){
+  try{
+    const response=await fetch("/data/gtin-comparisons.json",{cache:"no-cache"});
+    if(!response.ok)return;
+    const feed=await response.json();
+    if(feed?.status!=="ok"||!Array.isArray(feed.products))return;
+    pmGtinComparisonProducts=feed.products.filter(p=>p&&p.id&&p.name&&p.gtin&&Array.isArray(p.offers)&&p.offers.length>1);
+    if(!pmGtinComparisonProducts.length)return;
+    renderVerifiedProducts([...pmBaseVerifiedProducts,...pmAwinVerifiedProducts,...pmRakutenVerifiedProducts,...pmGtinComparisonProducts]);
+  }catch(error){
+    console.warn("Comparaisons multi-marchands momentanément indisponibles.");
   }
 })();
 </script>
