@@ -2,6 +2,7 @@ import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFile
 import { mountAssistant } from './assistant.js';
 import { createTimeline } from './timeline.js';
 import { knob } from '../lib/knob.js';
+import { createNoteEditor } from './notes.js';
 import { putItem, getItem, delItem, packBuffer, unpackBuffer } from '../lib/session.js';
 import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords, keyFromChords, detectPitch, detectKey } from '../lib/voicefx.js';
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift, detectBeats } from '../lib/audio.js';
@@ -509,7 +510,7 @@ export async function render(el, { params }) {
     try {
       const before = { buffer: t.buffer, fxDone: (t.fxDone || []).slice(), label: label.replace('…', '') };
       // Effet sur le seul passage sélectionné (avec un fondu enchaîné aux bords pour ne pas « claquer »)
-      const region = onlySel.checked && sel && timeline?.selTrack() === t && !/Suppression|Rognage|Silence|Retour|Coupe|Fondus|Restauration/.test(label);
+      const region = onlySel.checked && sel && timeline?.selTrack() === t && !/Suppression|Rognage|Silence|Retour|Coupe|Fondus|Restauration|Enlever/.test(label);
       const out = region ? await processRegion(t.buffer, sel, (part) => fn(part, t)) : await fn(t.buffer, t);
       if (out && out !== t.buffer) { pushUndo(t, before); t.buffer = out; }
       masterResult = null; drawList(); redrawSelected(); updUndo();
@@ -566,6 +567,8 @@ export async function render(el, { params }) {
     for (let i = 0; i < d.length; i += 512) if (Math.abs(d[i]) > 0.02) return Math.max(0, i / t.buffer.sampleRate - 0.2);
     return 0;
   }
+  const previewLen = h('select', { onchange: () => localStorage.setItem('studio.prevLen', previewLen.value) },
+    ...[['15', 'Écouter 15 s'], ['30', 'Écouter 30 s'], ['60', 'Écouter 1 min'], ['0', 'Écouter toute la piste']].map(([v, l]) => h('option', { value: v, selected: (localStorage.getItem('studio.prevLen') || '30') === v }, l)));
   function makePreview() {
     const info = h('span.small.muted');
     const audio = h('audio', { controls: true, style: { width: '100%', display: 'none' } });
@@ -582,14 +585,17 @@ export async function render(el, { params }) {
       const say = (m) => { info.innerHTML = `<span class="spinner"></span> ${m}`; };
       say('Préparation de l’extrait de 15 s…'); player.stop();
       try {
-        const st = voiceStart(t);
-        const part = sliceBuffer(t.buffer, st, Math.min(t.buffer.duration, st + 15));
+        // passage sélectionné sur cette piste ? on écoute exactement celui-là ; sinon la durée choisie
+        const useSel = sel && timeline?.selTrack() === t && sel[1] - sel[0] > 0.3;
+        const len = Number(previewLen.value) || t.buffer.duration;
+        const st = useSel ? sel[0] : len >= t.buffer.duration ? 0 : voiceStart(t);
+        const part = sliceBuffer(t.buffer, st, useSel ? sel[1] : Math.min(t.buffer.duration, st + len));
         const r = await process(part, t, st, say);
         if (urls) Object.values(urls).forEach(u => URL.revokeObjectURL(u));
         urls = { a: URL.createObjectURL(encodeWav(part)), b: URL.createObjectURL(encodeWav(r.buffer || r)) };
         audio.src = urls.b; audio.style.display = ''; bar.style.display = ''; audio.play().catch(() => {});
         applyFn = onApply; applyBtn.style.display = onApply ? '' : 'none';
-        info.textContent = `▶ Aperçu « ${label} »${r.note ? ' · ' + r.note : ''} — compare A/B puis applique si ça te plaît.`;
+        info.textContent = `▶ Aperçu « ${label} » (${fmtTime(part.duration)})${r.note ? ' · ' + r.note : ''} — compare A/B puis applique si ça te plaît.`;
         return r;
       } catch (e) { info.textContent = ''; toastErr(e); }
     }
@@ -672,6 +678,13 @@ export async function render(el, { params }) {
   const fxApply = () => { const item = resolve(fxSel.value); if (item) applyItem(item); };
   const QUICK_TUNE = [['🎯 Juste parfait', 'Justesse parfaite (note par note)'], ['🎤 Léger', 'Justesse naturelle (note par note)'], ['🎤 Moyen (Drake)', 'Rap mélodique note par note'], ['🤖 Fort (T-Pain)', 'Hard-tune note par note'], ['✨ Belle voix chantée', 'Belle voix chantée (juste + douce)']];
   const tunePrev = makePreview();
+  const noteEd = createNoteEditor({
+    track: () => tracks[selected],
+    chords: async (t) => { try { return await chordsFor(t, 0, () => {}); } catch { return null; } },
+    keyOpt: () => fxKeyOpt(),
+    apply: (t, b, label) => { selected = tracks.indexOf(t); return work(label + '…', async () => b); },
+    preview: (b) => { const t = tracks[selected]; if (!t) return; const old = t.buffer; t.buffer = b; playLive(seekPos); t.buffer = old; },
+  });
   // ---------- Mon autotune sur mesure : je règle moi-même et je garde mes réglages ----------
   const MT = Object.assign({ glide: 30, keep: 0.2, strength: 1 }, (() => { try { return JSON.parse(localStorage.getItem('studio.mytune')) || {}; } catch { return {}; } })());
   const mtSlider = (label, key, min, max, step, fmt, help) => { const b = h('b', fmt(MT[key])); return h('label', { title: help }, h('span', label + ' ', b), h('input', { type: 'range', min, max, step, value: MT[key], oninput: (e) => { MT[key] = Number(e.target.value); b.textContent = fmt(MT[key]); try { localStorage.setItem('studio.mytune', JSON.stringify(MT)); } catch {} } })); };
@@ -794,8 +807,11 @@ export async function render(el, { params }) {
       h('h3', '🎤 Autotune chanté en 1 clic'),
       h('div.row', ...QUICK_TUNE.map(([label, name]) => h('button.btn.small', { onclick: () => quickTune(label, name) }, label))),
       tunePrev.box,
+      h('h3', '🎼 Mes notes (correction note par note)'),
+      noteEd.el,
       h('h3', '🎛️ Mon autotune sur mesure'),
       myTuneBox,
+      h('div.row', h('span.small', 'Durée des écoutes :'), previewLen),
       h('p.tiny.muted', 'Touche un bouton : tu écoutes d’abord 15 s de ta voix (A = avant, B = après). Rien n’est modifié tant que tu ne touches pas « ✅ Appliquer à toute la piste ». Corrigé note par note, dans la tonalité de ton instru (importe-la d’abord) : « Juste parfait » = toutes les notes justes en gardant ta voix · Léger = naturel · Moyen = façon Drake · Fort = robot T-Pain · Belle voix = juste, doublée, douce.'),
       h('h3', '🪄 Décris le son que tu veux'),
       aiDesc,

@@ -194,12 +194,12 @@ export function noteSegments(pitch) {
   }
   return { m, segs };
 }
-function noteCurve(pitch, key, { strength = 1, keep = 0.2, glide = 40, scale, extra = 0, chords = null }) {
-  const { m, segs } = noteSegments(pitch), n = m.length, out = new Float32Array(n);
+function noteCurve(pitch, key, { strength = 1, keep = 0.2, glide = 40, scale, extra = 0, chords = null, fixed = null }) {
+  const { m, segs } = fixed || noteSegments(pitch), n = m.length, out = new Float32Array(n);
   const sc = SCALES[scale || key.mode] || SCALES.chromatique;
   const minLen = Math.round(pitch.rate * 0.06);
   let prevT = null;
-  for (const sg of segs) {
+  if (!fixed) for (const sg of segs) {
     const ch = chordAt(chords, ((sg.a + sg.b) / 2) / pitch.rate);
     let best = Math.round(sg.med), bd = 99;
     for (let o = -1; o <= 1; o++) for (const st of sc) {
@@ -226,6 +226,30 @@ function noteCurve(pitch, key, { strength = 1, keep = 0.2, glide = 40, scale, ex
   }
   return out;
 }
+
+// ---------- Éditeur de notes (façon Melodyne) ----------
+// analyse : notes chantées + meilleure note proposée pour chacune (gamme / accords de l'instru)
+export async function analyzeNotes(buffer, { key = null, chords = null, onProgress } = {}) {
+  const pitch = await detectPitch(buffer, onProgress);
+  key = key || keyFromChords(chords) || detectKey(pitch);
+  const seg = noteSegments(pitch);
+  const tmp = { m: seg.m, segs: seg.segs.filter(x => x.b - x.a >= 3).map(x => ({ ...x })) };
+  const sc = SCALES[key.mode] || SCALES.chromatique, minLen = Math.round(pitch.rate * 0.06); let prevT = null;
+  for (const sg of tmp.segs) {
+    const ch = chordAt(chords, ((sg.a + sg.b) / 2) / pitch.rate);
+    let best = Math.round(sg.med), bd = 99;
+    for (let o = -1; o <= 1; o++) for (const st of sc) { const cand = Math.floor(sg.med / 12) * 12 + o * 12 + ((key.root + st) % 12); let d = Math.abs(cand - sg.med); if (ch?.pcs.includes(((cand % 12) + 12) % 12)) d -= 0.3; if (d < bd) { bd = d; best = cand; } }
+    if (sg.b - sg.a < minLen && prevT !== null && Math.abs(best - prevT) <= 2) best = prevT;
+    sg.t = best; sg.auto = best; prevT = best;
+  }
+  return { pitch, key, notes: tmp, rate: pitch.rate };
+}
+// rendu avec les notes choisies (une cible par note)
+export async function renderNotes(buffer, an, { keep = 0.2, glide = 30, strength = 1, onProgress } = {}) {
+  const curve = noteCurve(an.pitch, an.key, { keep, glide, strength, fixed: an.notes });
+  return psola(buffer, an.pitch, curve, onProgress);
+}
+export const midiName = (m) => `${NOTE_FR[((Math.round(m) % 12) + 12) % 12]}${Math.floor(Math.round(m) / 12) - 1}`;
 
 // ---------- TD-PSOLA : change la hauteur en gardant le timbre ----------
 export async function psola(buffer, pitch, semis, onProgress, formant = 0) {
