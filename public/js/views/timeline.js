@@ -2,12 +2,15 @@
 // Clic = placer la tête de lecture · outil ✋ = déplacer une prise · outil ⬚ = sélectionner un passage.
 import { h, fmtTime } from '../lib/core.js';
 import { drawWave } from '../lib/audio.js';
+import { colorForTrack, snapToGrid } from '../lib/daw.js';
 
-const HEAD = 236, ROW = 84;
+const HEAD = 236;
 const fmtPos = (t) => `${fmtTime(t)}.${String(Math.floor((Math.max(0, t) % 1) * 10))}`;
 
 export function createTimeline(o) {
   let pps = Number(localStorage.getItem('studio.tl.pps')) || 30; // pixels par seconde
+  let ROW = Number(localStorage.getItem('studio.tl.row')) || 84;  // hauteur d'une piste (zoom vertical)
+  let snap = localStorage.getItem('studio.tl.snap') === '1';      // aimantation sur la grille (BPM)
   let tool = 'select';
   let selTrack = null; // piste de la sélection
   const scroller = h('div', { style: { overflowX: 'auto', overflowY: 'hidden', position: 'relative', border: '1px solid var(--line, rgba(127,127,127,.25))', borderRadius: '10px', background: 'var(--bg)' } });
@@ -22,9 +25,13 @@ export function createTimeline(o) {
   toolBtns.move = h('button.btn.small', { onclick: () => setTool('move'), title: 'Glisser une prise vers la gauche ou la droite pour la caler' }, '✋ Déplacer');
   setTool('select');
   const zoom = (f) => { pps = Math.max(4, Math.min(400, pps * f)); localStorage.setItem('studio.tl.pps', pps); render(); };
+  const vzoom = (f) => { ROW = Math.max(44, Math.min(200, Math.round(ROW * f))); localStorage.setItem('studio.tl.row', ROW); render(); };
   const fit = () => { const tot = total(); if (tot > 0) { pps = Math.max(4, Math.min(400, (scroller.clientWidth - HEAD - 30) / tot)); render(); } };
-  const tools = h('div.row', { style: { gap: '6px', flexWrap: 'wrap' } }, toolBtns.select, toolBtns.move,
-    h('button.btn.small.ghost', { onclick: () => zoom(1 / 1.5), title: 'Dézoomer' }, '🔍−'), h('button.btn.small.ghost', { onclick: () => zoom(1.5), title: 'Zoomer' }, '🔍+'), h('button.btn.small.ghost', { onclick: fit }, '↔ Tout voir'));
+  const snapBtn = h('button.btn.small' + (snap ? '.primary' : '.ghost'), { title: 'Aimanter les prises sur la grille du tempo', onclick: (e) => { snap = !snap; localStorage.setItem('studio.tl.snap', snap ? '1' : '0'); e.currentTarget.classList.toggle('primary', snap); e.currentTarget.classList.toggle('ghost', !snap); } }, '🧲 Aimant');
+  const tools = h('div.row', { style: { gap: '6px', flexWrap: 'wrap' } }, toolBtns.select, toolBtns.move, snapBtn,
+    h('button.btn.small.ghost', { onclick: () => zoom(1 / 1.5), title: 'Dézoomer (horizontal)' }, '🔍−'), h('button.btn.small.ghost', { onclick: () => zoom(1.5), title: 'Zoomer (horizontal)' }, '🔍+'),
+    h('button.btn.small.ghost', { onclick: () => vzoom(1 / 1.3), title: 'Pistes plus fines' }, '↕−'), h('button.btn.small.ghost', { onclick: () => vzoom(1.3), title: 'Pistes plus hautes' }, '↕+'),
+    h('button.btn.small.ghost', { onclick: fit }, '↔ Tout voir'));
 
   const minOff = () => Math.min(0, ...o.tracks.map(t => t.offset || 0));
   const total = () => Math.max(10, ...o.tracks.map(t => (t.offset || 0) - minOff() + t.buffer.duration));
@@ -52,13 +59,14 @@ export function createTimeline(o) {
 
   function lane(t, i, minO) {
     const g0 = (t.offset || 0) - minO, w = Math.max(2, t.buffer.duration * pps);
+    const col = colorForTrack(t);
     const cv = h('canvas', { style: { width: '100%', height: '100%', display: 'block' } });
     const clip = h('div', { title: tool === 'move' ? 'Glisse pour déplacer la prise' : 'Glisse pour sélectionner un passage', style: { position: 'absolute', top: '6px', bottom: '6px', left: g0 * pps + 'px', width: w + 'px', borderRadius: '6px', overflow: 'hidden', touchAction: 'none',
-      background: t.kind === 'instru' ? 'rgba(245,158,11,.22)' : 'rgba(99,102,241,.22)', border: `1px solid ${t.kind === 'instru' ? '#f59e0b' : 'var(--accent, #6366f1)'}`, opacity: o.effMute(t) ? 0.35 : 1, cursor: tool === 'move' ? 'grab' : 'text' } },
+      background: col + '38', border: `1px solid ${col}`, opacity: o.effMute(t) ? 0.35 : 1, cursor: tool === 'move' ? 'grab' : 'text' } },
       h('span.tiny', { style: { position: 'absolute', top: '2px', left: '6px', pointerEvents: 'none', fontWeight: 600, textShadow: '0 0 3px var(--bg)' } }, t.name), cv);
     const laneEl = h('div', { style: { position: 'relative', height: ROW + 'px', width: Math.max(total() * pps + 200, 200) + 'px', borderBottom: '1px solid rgba(127,127,127,.2)' } },
       t.empty ? h('span.small.muted', { style: { position: 'absolute', left: g0 * pps + 8 + 'px', top: '30px' } }, t.armed ? '● Piste vide armée : place la tête de lecture et appuie sur ⏺ Enregistrer' : 'Piste vide : arme-la (●) pour enregistrer dedans') : clip);
-    const draw = () => { drawWave(cv, t.buffer, { sel: selTrack === t ? o.getSel() : null, color: t.kind === 'instru' ? '#f59e0b' : undefined }); };
+    const draw = () => { drawWave(cv, t.buffer, { sel: selTrack === t ? o.getSel() : null, color: col }); };
     requestAnimationFrame(draw);
     let start = null;
     clip.addEventListener('pointerdown', (e) => {
@@ -70,7 +78,7 @@ export function createTimeline(o) {
     clip.addEventListener('pointermove', (e) => {
       if (!start) return;
       const dx = e.clientX - start.x; if (Math.abs(dx) > 4) start.moved = true; if (!start.moved) return;
-      if (tool === 'move') { t.offset = start.off + dx / pps; clip.style.left = ((t.offset || 0) - minO) * pps + 'px'; o.moving?.(t); }
+      if (tool === 'move') { let no = start.off + dx / pps; if (snap && o.bpm?.() > 0) no = snapToGrid(no, o.bpm(), 1); t.offset = no; clip.style.left = ((t.offset || 0) - minO) * pps + 'px'; o.moving?.(t); }
       else { const b = Math.max(0, Math.min(t.buffer.duration, start.local + dx / pps)); selTrack = t; o.setSel([Math.min(start.local, b), Math.max(start.local, b)]); draw(); showSel(); }
     });
     clip.addEventListener('pointerup', () => {

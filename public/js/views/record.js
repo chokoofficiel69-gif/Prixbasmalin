@@ -9,6 +9,7 @@ import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master,
 import { ROLES, ROLE_ORDER, proposeRole, adlibPan, roleChain, micAdvice, justesse, buildReport, tipsPrompt, fallbackTips, mergePrefs, peakDbOf, rmsDbOf, noiseFloorDb } from '../lib/ingesong.js';
 import { VOICE_TYPES, VOICE_TYPE_ORDER, PRO_PRESETS, PRO_PRESET_ORDER, DEFAULT_PRO, clampPro, buildTuneStep, applyPreset, formantForVoice, proName } from '../lib/autotunepro.js';
 import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes } from '../lib/daw.js';
+import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -448,6 +449,23 @@ export async function render(el, { params }) {
       micMeter.detach();
       const blob = await r.stop();
       delItem(PKEY).catch(() => {});
+      // Punch-in : on ne crée pas de nouvelle piste, on remplace le passage sélectionné (prise d'avant gardée).
+      if (punch) {
+        const p = punch; punch = null;
+        try {
+          const rec = await decodeBlob(blob); const tk = p.track, sr = tk.buffer.sampleRate;
+          const base = tk.buffer.getChannelData(0); const inS = Math.floor(p.in * sr), outS = Math.floor(p.out * sr);
+          const patch = new Float32Array(base.length), rc = rec.getChannelData(0);
+          for (let i = 0; i < rc.length && inS + i < patch.length; i++) patch[inS + i] = rc[i];
+          const out = punchInMono(base, patch, inS, outS, Math.floor(0.01 * sr));
+          addTake(tk, tk.buffer, 'Avant punch'); pushUndo(tk, { buffer: tk.buffer, fxDone: (tk.fxDone || []).slice(), label: 'Punch-in' });
+          tk.buffer = monoToBuffer(out, sr); tk.original = tk.buffer; masterResult = null;
+          selected = tracks.indexOf(tk); drawList(); drawEdit(); updUndo();
+          toast('Punch appliqué : passage réenregistré (fondu de 10 ms) ✓', 'ok');
+        } catch (e) { toastErr(e); }
+        if (monOn.checked) openLiveMonitor();
+        stopping.p = null; ast?.onRecordStopped(); return;
+      }
       // Calage automatique : la prise commence avant l'instru (temps de démarrage) et arrive en retard
       // (latence du casque + du micro). On replace la voix sur l'instru, puis on affine sur le beat.
       const lat = recLatency; recLatency = null;
@@ -457,7 +475,11 @@ export async function render(el, { params }) {
       if (take && armed && take !== armed) {
         tracks.pop();
         if (armed.empty) { Object.assign(armed, { buffer: take.buffer, original: take.buffer, offset: take.offset, empty: false }); selected = tracks.indexOf(armed); }
-        else { take.name = `${armed.name} ${tracks.filter(t => t.name.startsWith(armed.name)).length + 1}`; take.kind = armed.kind; tracks.splice(tracks.indexOf(armed) + 1, 0, take); selected = tracks.indexOf(take); }
+        else { // piste déjà enregistrée et armée : on EMPILE une nouvelle prise (comping)
+          ensureTakes(armed); armed.takes.push({ name: `Prise ${armed.takes.length + 1}`, buffer: take.buffer });
+          armed.activeTake = armed.takes.length - 1; armed.buffer = take.buffer; armed.original = take.buffer;
+          selected = tracks.indexOf(armed);
+        }
         drawList(); drawEdit();
       }
       if (tracks[selected]?.kind === 'voix' && !armed) tracks[selected].gainDb = voiceBusDb;
@@ -849,6 +871,7 @@ export async function render(el, { params }) {
         h('button.btn.small', { onclick: () => work('Fondus…', async (b) => { const o = cloneBuffer(b); const n = Math.min(o.length / 2, Math.floor(0.03 * o.sampleRate)); for (let c = 0; c < o.numberOfChannels; c++) { const d = o.getChannelData(c); for (let i = 0; i < n; i++) { d[i] *= i / n; d[d.length - 1 - i] *= i / n; } } return o; }) }, 'Fondus début/fin'),
         h('button.btn.small', { onclick: () => work('Normalisation…', async (b) => normalize(cloneBuffer(b), -1)) }, 'Normaliser'),
         h('button.btn.small.ghost', { onclick: () => work('Retour à l’original…', async (b, tr) => tr.original) }, '↺ Revenir à l’original')),
+      ...(t.kind === 'voix' ? takesSection(t) : []),
       h('h3', '🎯 Caler sur le beat'),
       h('div.row', h('button.btn.small', { onclick: () => alignSelected() }, '🎯 Caler cette voix sur l’instru'), alignInfo),
       h('p.tiny.muted', 'Les prises enregistrées ici sur l’instru sont recalées automatiquement (latence du casque et du micro). Ce bouton affine au milliseconde près en alignant tes attaques sur les frappes de l’instru ; le curseur « Décalage » permet de corriger à la main.'),
@@ -1065,6 +1088,7 @@ export async function render(el, { params }) {
   let timelineRemove = () => {};
   timeline = createTimeline({
     tracks, effMute,
+    bpm: () => transport.bpm,
     getSelected: () => selected,
     select: (i, quiet) => { if (selected !== i) { selected = i; drawEdit(); knobSel = tracks[i]; renderKnobs(); } if (!quiet) timeline.render(); },
     changed: (kind, t) => {
@@ -1314,6 +1338,66 @@ export async function render(el, { params }) {
     else if (g.tips?.length) ingeReport.append(h('div.card.stack', { style: { padding: '8px' } }, h('strong.small', `💡 Conseils pour la prochaine prise${g.tipsSource === 'règles' ? ' (hors ligne)' : ''}`), ...g.tips.map(x => h('div.small', '• ' + x))));
   }
 
+  // ======================= Prises, comping, punch-in, boucle =======================
+  let punch = null;
+  const monoToBuffer = (arr, sr) => { const b = makeBuffer(1, arr.length, sr); b.copyToChannel(arr, 0, 0); return b; };
+  function ensureTakes(t) { if (!t.takes) { t.takes = [{ name: 'Prise 1', buffer: t.original || t.buffer }]; t.activeTake = 0; } return t.takes; }
+  function addTake(t, buf, name) { ensureTakes(t); t.takes.push({ name: name || `Prise ${t.takes.length + 1}`, buffer: buf }); }
+  function setActiveTake(t, i) { ensureTakes(t); if (!t.takes[i]) return; pushUndo(t, { buffer: t.buffer, fxDone: (t.fxDone || []).slice(), label: 'Changer de prise' }); t.activeTake = i; t.buffer = t.takes[i].buffer; t.original = t.takes[i].buffer; masterResult = null; drawList(); drawEdit(); updUndo(); }
+  function splitIntoTakes(t) {
+    const sr = t.buffer.sampleRate;
+    const loopSec = (sel && timeline.selTrack() === t && sel[1] - sel[0] > 0.3) ? sel[1] - sel[0] : t.buffer.duration;
+    const pieces = splitLoopTakes(t.buffer.length, Math.floor(loopSec * sr));
+    if (pieces.length < 2) return toast('Pour découper en prises : sélectionne d’abord la longueur d’un tour de boucle sur la piste.');
+    t.takes = pieces.map((p, i) => ({ name: `Tour ${i + 1}`, buffer: sliceBuffer(t.buffer, p.a / sr, p.b / sr) }));
+    t.activeTake = 0; setActiveTake(t, 0);
+    toast(`Enregistrement découpé en ${pieces.length} prises (un tour chacune) ✓`, 'ok');
+  }
+  function addCompChoice(t) {
+    if (!sel || timeline.selTrack() !== t) return toast('Sélectionne d’abord un passage sur cette piste (outil ⬚).');
+    ensureTakes(t); (t.compChoices ||= []).push({ a: sel[0], b: sel[1], take: t.activeTake || 0 });
+    toast(`Passage ${fmtTime(sel[0])}–${fmtTime(sel[1])} → ${t.takes[t.activeTake || 0].name}`); drawEdit();
+  }
+  function doComp(t) {
+    const takes = ensureTakes(t); if (takes.length < 2) return toast('Il faut au moins 2 prises pour comper.');
+    const sr = t.buffer.sampleRate, total = Math.max(...takes.map(k => k.buffer.length));
+    const mono = takes.map(k => { const d = k.buffer.getChannelData(0); if (d.length === total) return d; const e = new Float32Array(total); e.set(d.subarray(0, total)); return e; });
+    const segs = planComp(total, (t.compChoices || []).map(c => ({ a: c.a * sr, b: c.b * sr, take: c.take })), t.activeTake || 0);
+    const out = stitchMono(mono, segs, total, Math.floor(0.01 * sr));
+    work('Comping (fusion)…', async () => monoToBuffer(out, sr));
+    toast('Prises fusionnées en une piste ✓ (annulable)', 'ok');
+  }
+  async function startPunch() {
+    const t = tracks[selected];
+    if (!t || t.kind !== 'voix') return toast('Sélectionne une piste de voix.');
+    if (!sel || timeline.selTrack() !== t || sel[1] - sel[0] < 0.1) return toast('Sélectionne d’abord le passage à refaire (outil ⬚).');
+    punch = { track: t, in: sel[0], out: sel[1] };
+    toast('🎯 Punch : re-chante le passage sélectionné…');
+    await startRec().catch(() => { punch = null; });
+  }
+  function takesSection(t) {
+    const takes = t.takes || [];
+    const nodes = [
+      h('h3', '🎚️ Prises & comping'),
+      h('p.tiny.muted', 'Enregistre plusieurs fois dans la MÊME piste (arme-la ●) pour empiler des prises, ou enregistre un long passage en boucle (🔁) puis « Découper ». Choisis ensuite le meilleur bout de chaque prise (comping, fondus de 10 ms).'),
+      h('div.row',
+        h('button.btn.small', { onclick: () => splitIntoTakes(t) }, '✂️ Découper l’enregistrement en prises'),
+        h('button.btn.small', { onclick: () => startPunch() }, '🎯 Punch-in (refaire le passage)')),
+    ];
+    if (takes.length) {
+      nodes.push(h('div.stack', { style: { gap: '4px' } }, takes.map((k, i) => h('div.row', { style: { gap: '6px', alignItems: 'center' } },
+        h('button.btn.small' + (i === (t.activeTake || 0) ? '.primary' : '.ghost'), { onclick: () => setActiveTake(t, i) }, (i === (t.activeTake || 0) ? '✓ ' : '') + k.name),
+        h('span.tiny.muted', fmtTime(k.buffer.duration)),
+        h('button.btn.small.ghost', { title: 'Écouter cette prise', onclick: () => { player.stop(); player.load(k.buffer); player.play(0); } }, '▶'),
+        h('button.btn.small.ghost', { title: 'Supprimer cette prise', onclick: () => { if (takes.length <= 1) return toast('Il faut garder au moins une prise.'); takes.splice(i, 1); if ((t.activeTake || 0) >= takes.length) t.activeTake = takes.length - 1; setActiveTake(t, t.activeTake || 0); } }, '✕')))));
+      nodes.push(h('div.row',
+        h('button.btn.small', { onclick: () => addCompChoice(t) }, '➕ Mettre la prise active sur le passage'),
+        h('button.btn.small.primary', { onclick: () => doComp(t) }, '🧩 Fusionner en une piste'),
+        h('button.btn.small.ghost', { onclick: () => { t.compChoices = []; drawEdit(); } }, 'Vider les choix')));
+      if (t.compChoices?.length) nodes.push(h('div.small.muted', 'Choix de comping : ' + t.compChoices.map(c => `${fmtTime(c.a)}–${fmtTime(c.b)} → ${(t.takes[c.take] || {}).name || '?'}`).join(' · ')));
+    }
+    return nodes;
+  }
   const stopBtn = h('button.btn', { title: 'Stop (revient là où tu avais lancé la lecture)', onclick: () => { if (recorder) return stopRec(); const back = live.srcs.length ? live.from : seekPos; stopLive(false); player.stop(); seekPos = back; } }, '⏹');
   const homeBtn = h('button.btn', { title: 'Revenir au début', onclick: () => { seekPos = 0; if (live.srcs.length) playLive(0); } }, '⏮');
   // ---------- Barre de transport : mesures:temps, BPM, tonalité, métronome, décompte, boucle ----------

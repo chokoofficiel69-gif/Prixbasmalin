@@ -17,16 +17,23 @@ Helpers purs et testés : `public/js/lib/daw.js` (mesures:temps, durée de déco
 métronome, aimantation, région de punch, fondu de comping, couleur par rôle) — voir
 `test/daw.test.mjs` (`npm test`).
 
-## À venir (étape suivante, plus lourde)
-Ces points demandent de retoucher le modèle de prises et la ligne de temps ; ils ne sont pas
-encore faits et ne sont donc pas annoncés comme tels :
-- **Punch-in/out** : réenregistrer seulement le passage sélectionné, avec pré-roll de 2 s
-  (helper `punchRegion` déjà prêt dans `daw.js`).
-- **Boucle d'enregistrement** : plusieurs prises d'affilée empilées sous la piste.
-- **Comping** : choisir le meilleur morceau de chaque prise avec fondus de 10 ms, puis
-  « Fusionner en une piste » (helper `crossfadeSamples` prêt).
-- **Aimantation (snap)** on/off et **zoom vertical**, **couleur par rôle** dans la ligne de
-  temps (helper `colorForTrack` prêt).
+## Prises, comping, punch, grille (fait)
+- **Prises empilées** : enregistre plusieurs fois dans la même piste **armée (●)** → chaque
+  prise s'ajoute sous la piste (section « 🎚️ Prises & comping » de l'éditeur). On choisit la
+  prise active (✓), on l'écoute (▶), on en supprime (✕).
+- **Boucle d'enregistrement** : active 🔁, enregistre plusieurs tours en continu, puis
+  **« ✂️ Découper l'enregistrement en prises »** (un tour = une prise ; longueur = le passage
+  sélectionné). `splitLoopTakes` dans `comp.js`.
+- **Comping** : sélectionne un passage, **« ➕ Mettre la prise active sur le passage »**, répète
+  pour d'autres passages/prises, puis **« 🧩 Fusionner en une piste »** (fondus enchaînés de
+  10 ms, puissance constante). `planComp` + `stitchMono` dans `comp.js`.
+- **Punch-in** : sélectionne le passage à refaire, **« 🎯 Punch-in »**, re-chante : seul ce
+  passage est remplacé (fondu 10 ms), la version d'avant est gardée en prise. `punchInMono`.
+- **Grille** : **🧲 Aimant** (aimante les prises déplacées sur la grille du tempo),
+  **zoom horizontal** (🔍) et **zoom vertical** (↕), **couleur par rôle** des prises
+  (Lead/Double/Backs/Ad-lib/instru). `snapToGrid` + `colorForTrack` dans `daw.js`.
+
+Logique pure et testée : `public/js/lib/comp.js` (+ `test/comp.test.mjs`).
 
 ## Code
 - Interface + métronome + décompte : `public/js/views/record.js`.
