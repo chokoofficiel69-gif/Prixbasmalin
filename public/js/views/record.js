@@ -234,7 +234,7 @@ export async function render(el, { params }) {
     }
     live.ctxStart = t0; live.from = from; live.end = until ?? end;
     liveBtn.textContent = '⏹ Arrêter l’écoute'; playBtn.textContent = '⏸ Pause';
-    live.timer = setTimeout(() => { stopLive(false); seekPos = until !== null ? from : 0; onEnd?.(); }, ((until ?? end) - from) * 1000 + 300);
+    live.timer = setTimeout(() => { stopLive(false); seekPos = from; onEnd?.(); }, ((until ?? end) - from) * 1000 + 300);
   }
   const playBtn = h('button.btn.primary', { onclick: () => (live.srcs.length ? stopLive() : playLive()) }, '▶ Lecture');
   liveBtn.onclick = () => (live.srcs.length ? stopLive() : playLive());
@@ -901,7 +901,7 @@ export async function render(el, { params }) {
     seek: (g) => { seekPos = Math.max(0, g); if (live.srcs.length) playLive(seekPos); },
     position: () => live.srcs.length ? livePos() : player.playing && tracks[selected] ? (tracks[selected].offset || 0) - minOffNow() + player.position : seekPos,
     isPlaying: () => !!live.srcs.length || player.playing,
-    remove: timelineRemove = async (i) => { if (!(await confirmBox(`Supprimer la piste « ${tracks[i].name} » ?`, 'Supprimer', true))) return; tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
+    remove: timelineRemove = async (i) => { if (!(await confirmBox(`Supprimer la piste « ${tracks[i].name} » ? (tu pourras la récupérer avec ♻️)`, 'Supprimer', true))) return; trash.push(tracks.splice(i, 1)[0]); updTrash(); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
     edit: async (kind) => {
       const t = timeline.selTrack(), r = sel; if (!t || !r) return;
       selected = tracks.indexOf(t); drawEdit();
@@ -973,10 +973,11 @@ export async function render(el, { params }) {
         tracks[i].gainDb = Math.max(-30, Math.min(12, g)); liveGain(tracks[i]); masterResult = null; drawList();
       },
       mute: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks[i].mute = x.on !== false; masterResult = null; drawList(); },
-      delete: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
+      delete: async (x) => { const i = trackAt(x.track ?? selected + 1); if (!(await confirmBox(`Supprimer la piste « ${tracks[i].name} » ?`, 'Supprimer', true))) throw new Error('suppression annulée'); trash.push(tracks.splice(i, 1)[0]); updTrash(); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
       all: async () => doEverything(fakeBtn()),
       importInstru: async () => { for (const f of await pickLocalFiles('audio/*,video/*', false)) await addBlob(f, f.name, 'instru'); },
-      dropLastVoice: async () => { const i = tracks.map(t => t.kind).lastIndexOf('voix'); if (i >= 0) { tracks.splice(i, 1); selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); } },
+      // « on refait » : l'ancienne prise n'est JAMAIS effacée, elle est juste coupée (M) et renommée
+      dropLastVoice: async () => { const i = tracks.map(t => t.kind).lastIndexOf('voix'); if (i >= 0) { const t = tracks[i]; t.mute = true; if (!/ancienne/.test(t.name)) t.name += ' (ancienne)'; masterResult = null; liveGain(); drawList(); } },
       master: async (x) => { if (x.preset) masterSel.value = masterKey(x.preset); await doMaster(); mixPlayerEl.querySelector('audio')?.play(); },
       versions: async () => compareMasters(fakeBtn()),
       save: async () => { if (!masterResult) await doMaster(); await uploadFile(encodeWav(masterResult.buffer, Number(bitSel.value)), { name: `${exportName()}-master.wav`, source: 'master' }); toast('Master enregistré dans tes fichiers', 'ok'); },
@@ -987,6 +988,9 @@ export async function render(el, { params }) {
 
   const exportName = () => (tracks.find(t => t.kind === 'voix')?.name || 'morceau').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-');
 
+  const trash = [];
+  const trashBtn = h('button.btn.small.ghost', { style: { display: 'none' }, onclick: () => { const t = trash.pop(); if (!t) return; tracks.push(t); selected = tracks.length - 1; updTrash(); drawList(); drawEdit(); toast(`« ${t.name} » récupérée ✓`, 'ok'); } }, '♻️ Récupérer la piste supprimée');
+  function updTrash() { trashBtn.style.display = trash.length ? '' : 'none'; trashBtn.textContent = `♻️ Récupérer « ${trash[trash.length - 1]?.name || ''} »`; }
   async function addEmptyTrack(name) {
     name = name || (await promptBox('Nom de la nouvelle piste (ex. : Backs, Refrain, Ad-libs, Chœurs)', `Piste ${tracks.length + 1}`));
     if (!name) return;
@@ -1132,7 +1136,7 @@ export async function render(el, { params }) {
     else if (g.tips?.length) ingeReport.append(h('div.card.stack', { style: { padding: '8px' } }, h('strong.small', `💡 Conseils pour la prochaine prise${g.tipsSource === 'règles' ? ' (hors ligne)' : ''}`), ...g.tips.map(x => h('div.small', '• ' + x))));
   }
 
-  const stopBtn = h('button.btn', { title: 'Stop (revient au début)', onclick: () => { if (recorder) return stopRec(); stopLive(false); player.stop(); seekPos = 0; } }, '⏹');
+  const stopBtn = h('button.btn', { title: 'Stop (revient là où tu avais lancé la lecture)', onclick: () => { if (recorder) return stopRec(); const back = live.srcs.length ? live.from : seekPos; stopLive(false); player.stop(); seekPos = back; } }, '⏹');
   const homeBtn = h('button.btn', { title: 'Revenir au début', onclick: () => { seekPos = 0; if (live.srcs.length) playLive(0); } }, '⏮');
   el.append(
     h('div.card.stack', { style: { marginBottom: '14px' } },
@@ -1142,7 +1146,7 @@ export async function render(el, { params }) {
         h('button.btn.small.primary', { onclick: () => addEmptyTrack() }, '➕ Ajouter une piste'),
         h('button.btn.small', { onclick: async () => { for (const f of await pickLocalFiles('audio/*,video/*')) await addBlob(f, f.name); } }, '📥 Importer (instru, voix…)'),
         h('button.btn.small', { onclick: async () => { for (const f of await pickFromLibrary({ kinds: ['audio', 'video'] })) await addBlob(await fetchFileBlob(f.id), f.name, null, f.id); } }, '📚 Mes fichiers'),
-        h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet'), saveLbl),
+        trashBtn, h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet'), saveLbl),
       micMeter.proxEl,
       timeline.el, timeline.selBar,
       h('p.tiny.muted', '⌨️ Raccourcis : Espace = lecture / pause (stop pendant une prise) · R = enregistrer · E ou Suppr = effacer le passage sélectionné (sinon la piste) · Ctrl+Z = annuler · Ctrl+Y = rétablir · M = muet · S = solo · A = armer ● · N = nouvelle piste · ↑ ↓ = changer de piste · ← → = reculer / avancer de 5 s · Maj + ← → = décaler la piste de 10 ms pour la caler · F = tout voir · Entrée = début · Échap = stop.'),
@@ -1237,7 +1241,7 @@ export async function render(el, { params }) {
     if (e.code === 'Space') { e.preventDefault(); tg?.blur?.(); if (recorder) stopRec(); else if (live.srcs.length) stopLive(); else playLive(); }
     else if (k === 'r') { e.preventDefault(); recorder ? stopRec() : startRec().catch(() => {}); }
     else if (e.code === 'Home' || e.code === 'Enter' && tag !== 'button') { e.preventDefault(); seekPos = 0; if (live.srcs.length) playLive(0); }
-    else if (e.code === 'Escape') { if (recorder) stopRec(); else { stopLive(false); player.stop(); seekPos = 0; } }
+    else if (e.code === 'Escape') { if (recorder) stopRec(); else { const back = live.srcs.length ? live.from : seekPos; stopLive(false); player.stop(); seekPos = back; } }
   };
   document.addEventListener('keydown', onKey);
 
