@@ -88,12 +88,14 @@ function categoryFor(row, merchantName = "") {
   if (/imou/.test(merchant) && metadataCategory === "other") {
     const title = norm([row.product_name, row.title, row.name].join(" "));
     if (/\b(?:rv\d+|robot vacuum|vacuum|aspirateur)\b/.test(title)) return "home";
-    if (/\b(?:aov|ranger|cruiser|bullet|cell|cue|doorbell|camera|cam|smart lock|smart doorbell|smart sensor|sensor|capteur|smart plug|smart hub|nvr)\b/.test(title)) return "tech";
+    if (/\b(?:aov|ranger|cruiser|bullet|cell|cue|doorbell|camera|cam|smart lock|smart doorbell|smart sensor|sensor|capteur|smart plug|smart hub|nvr|micro sd|sd card|memory card|carte memoire|carte micro sd)\b/.test(title)) return "tech";
   }
+  // Le catalogue officiel Fiido est consacré aux vélos électriques et à leurs pièces/accessoires.
+  if (/fiido technology development/.test(merchant) && metadataCategory === "other") return "sport";
   if (/prm coupons couture/.test(merchant) && metadataCategory === "other") {
     const title = norm([row.product_name, row.title, row.name].join(" "));
     if (/\b(?:ameublement|rideau|coussin|linge de maison|nappe|decoration|tissu d ameublement)\b/.test(title)) return "home";
-    if (/\b(?:jersey|denim|doublure|popeline|maille|viscose|molleton|drap de laine|mousseline|tulle|lycra|elastane|patron|blouse|veste|robe|pantalon|chemise|jupe|couture|agrafe|agrafes|crochet|crochets|aiguille|aiguilles|fil|fils|fermeture|fermetures|bouton|boutons|ciseaux|canette|canettes|bobine|bobines|mercerie|broderie|machine a coudre|pied presseur|tirette|zip|rivet|oeillet|biais|ruban|passepoil)\b/.test(title)) return "fashion";
+    if (/\b(?:jersey|denim|doublure|popeline|maille|viscose|molleton|drap de laine|mousseline|tulle|lycra|elastane|patron|blouse|veste|robe|pantalon|chemise|jupe|couture|agrafe|agrafes|crochet|crochets|aiguille|aiguilles|fil|fils|fermeture|fermetures|bouton|boutons|ciseaux|canette|canettes|bobine|bobines|mercerie|broderie|machine a coudre|pied presseur|tirette|zip|rivet|oeillet|biais|ruban|passepoil|epingle|epingles|aimant en acier|baleine(?:s)? de col|bouclette de laine)\b/.test(title)) return "fashion";
   }
   if (metadataCategory !== "other") return metadataCategory;
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
@@ -1012,6 +1014,11 @@ async function runSelfTests() {
     [{ title: "PRM référence inconnue 123" }, "other", "PRM Coupons Couture FR"],
     [{ title: "Aiguilles à coudre Bohin longues A1F" }, "fashion", "PRM Coupons Couture FR"],
     [{ title: "Agrafes métalliques de fermeture pour maillot de bain" }, "fashion", "PRM Coupons Couture FR"],
+    [{ title: "Aimant en acier BOHIN" }, "fashion", "PRM Coupons Couture FR"],
+    [{ title: "Assortiment d'épingles de sûreté à ressort Nina BOHIN" }, "fashion", "PRM Coupons Couture FR"],
+    [{ title: "Baleines de col BOHIN" }, "fashion", "PRM Coupons Couture FR"],
+    [{ title: "_Gift_ 32GB Micro SD Memory Card-UK - 32GB" }, "tech", "Imou FR"],
+    [{ title: "Accélérateur de pouce Fiido-Q1/Q1S" }, "sport", "Fiido Technology Development Co., Ltd"],
     [{ title: "Lot de chaussettes unisexes" }, "fashion", "Chaussettes-en-ligne.fr/ (FR)"],
     [{ title: "2 Bâtons de randonnée pliables AlpineFlex" }, "sport", "SODEAL CH"],
     [{ title: "Adaptateur de Scie Sauteuse pour Perceuse" }, "home", "SODEAL CH"],
