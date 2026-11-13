@@ -149,9 +149,13 @@ export function mountAssistant(S) {
   function listen() {
     if (!on || !R || speaking || rec) return;
     if (S.isRecording() && IS_ANDROID) { status.textContent = '⏺ J’enregistre… (arrêt : fin de l’instru, silence ou bouton ⏹)'; return; }
-    rec = new R(); rec.lang = 'fr-FR'; rec.continuous = true; rec.interimResults = false;
+    rec = new R(); rec.lang = 'fr-FR'; rec.continuous = true; rec.interimResults = true;
     rec.onresult = (e) => {
-      for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) heard(e.results[i][0].transcript);
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const txt = e.results[i][0].transcript;
+        if (e.results[i].isFinal) { clearTimeout(interimT); if (fired && norm(txt).startsWith(fired)) { const rest = norm(txt).slice(fired.length).replace(/^(et|puis|apres|ensuite)\s+/, '').trim(); fired = null; if (rest) heard(rest); continue; } fired = null; heard(txt); }
+        else interim(txt);
+      }
     };
     rec.onerror = (e) => { if (e.error === 'not-allowed') { status.textContent = 'Micro refusé pour la reconnaissance vocale.'; on = false; toggle.textContent = '🎙️ Mains libres'; } };
     rec.onend = () => { rec = null; if (on && !speaking) setTimeout(listen, 250); };
@@ -165,6 +169,17 @@ export function mountAssistant(S) {
     else { stopListening(); stopSpeaking(); status.textContent = 'Mains libres coupées.'; }
   };
 
+  // Réactivité : un ordre court reconnu est exécuté dès qu'on le comprend (sans attendre la fin de la phrase)
+  let interimT = null, fired = null;
+  function interim(txt) {
+    if (speaking || fired) return;
+    const n = norm(txt); clearTimeout(interimT);
+    if (S.isRecording()) { if (words(n) <= 3 && STOP_RE.test(n)) { fired = n; heard(txt); } return; }
+    if (words(n) > 6) return;
+    const cmd = parseLocal(n);
+    if (!cmd || cmd[0]?.a === 'record' && /\b(une|un|deux|trois|\d+)$/.test(n)) return; // « enregistre une… » : on attend la durée
+    interimT = setTimeout(() => { fired = n; heard(txt); }, 350);
+  }
   function heard(text) {
     if (speaking || !text.trim()) return;
     if (S.isRecording()) {
@@ -274,6 +289,7 @@ export function mountAssistant(S) {
     h('div.row', h('h3.grow', '🤖 Assistant vocal'), toggle),
     status,
     h('div.row', h('div.grow', input), h('button.btn.small', { onclick: () => { if (input.value.trim()) { const t = input.value; input.value = ''; handle(t); } } }, 'Envoyer')),
+    S.mixer || '',
     h('div.row', h('label.chk.small', voiceOut, 'Réponses à voix haute'), h('div.grow', voiceSel), h('div.grow', silSel)),
     sugg,
     log,

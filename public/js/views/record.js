@@ -712,7 +712,18 @@ export async function render(el, { params }) {
   const masterKey = (p) => { const keys = Object.keys(MASTER_PRESETS); const n = norm2(p); return keys.find(k => k === p) || keys.find(k => norm2(MASTER_PRESETS[k].label).includes(n)) || (/(rap|trap|punch)/.test(n) ? keys.find(k => /rap/i.test(MASTER_PRESETS[k].label)) : /club|fort/.test(n) ? keys.find(k => /club/i.test(MASTER_PRESETS[k].label)) : /doux|acous/.test(n) ? keys.find(k => /doux/i.test(MASTER_PRESETS[k].label)) : keys[0]); };
   const norm2 = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const fakeBtn = () => ({ disabled: false });
+  // Console de volumes toujours sous la main, dans la carte de l'assistant (réglable pendant qu'on lui parle / qu'on enregistre)
+  const monVolLbl = h('b', `${Math.round(Number(monVol.value) * 100)} %`);
+  monVol.addEventListener('input', () => { monVolLbl.textContent = `${Math.round(Number(monVol.value) * 100)} %`; });
+  const mixer = h('div.stack', { style: { background: 'var(--bg)', borderRadius: '10px', padding: '8px 10px' } },
+    h('strong.small', '🎚️ Volumes du casque (en direct)'),
+    h('div.sliders',
+      h('label', h('span', '🥁 Instru ', instruLbl), instruVol),
+      h('label', h('span', '🎤 Ma voix (mix) ', micLbl), micVol),
+      h('label', h('span', '🎧 Ma voix dans le casque ', monVolLbl), monVol)),
+    h('label.chk.small', monOn, 'M’entendre en direct dans le casque pendant que j’enregistre'));
   const S = {
+    mixer,
     isRecording: () => !!recorder,
     record: (o) => startRec({ autoStopSilence: o?.seconds ? 0 : (o?.autoStopSilence || 0), autoStopBeat: !o?.seconds, seconds: Math.min(600, Math.max(0, Number(o?.seconds) || 0)) }),
     snapshot: () => ({
@@ -768,14 +779,9 @@ export async function render(el, { params }) {
       h('div.card.stack',
         h('h3', '🎙️ Enregistrer'),
         h('div.row', recBtn, recTime, h('div.grow', meter)),
-        h('div.sliders',
-          h('label', h('span', '🥁 Volume de l’instru ', instruLbl), instruVol),
-          h('label', h('span', '🎤 Volume de ma voix ', micLbl), micVol)),
-        h('p.tiny.muted', 'Tu peux bouger ces curseurs pendant l’enregistrement (l’instru change tout de suite dans le casque) ou dire « baisse l’instru » / « monte ma voix ».'),
         h('label.chk.small', withBeat, 'Lancer l’instru pendant l’enregistrement (casque conseillé)'),
         h('label.chk.small', rawMode, 'Mode studio : désactiver les filtres automatiques du téléphone (meilleur son, à nettoyer ensuite)'),
-        h('label.chk.small', monOn, '🎧 M’entendre en direct dans le casque pendant l’enregistrement'),
-        h('div.row', h('div.grow', monStyle), h('label.f.grow.small', 'Volume du retour', monVol), monTestBtn),
+        h('div.row', h('span.small', '🎧 Retour casque :'), h('div.grow', monStyle), monTestBtn),
         h('p.tiny.muted', 'Retour en direct : casque filaire conseillé (en Bluetooth ta voix arrive en retard). L’autotune ne s’entend pas en direct : il se calcule après, écoute-le avec « ▶ Écouter ».'),
         prompter,
         h('div.row',
