@@ -1,6 +1,6 @@
 import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose } from '../lib/core.js';
 import { mountAssistant } from './assistant.js';
-import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords } from '../lib/voicefx.js';
+import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords, keyFromChords } from '../lib/voicefx.js';
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
 
 const VOICE_PRESETS = {
@@ -363,7 +363,9 @@ export async function render(el, { params }) {
     let key = fxKeyOpt(), cur = buf;
     for (const p of list) {
       if (p.chain?.length) {
-        const chords = p.chords ? await chordsFor(t, startInTrack, say) : null;
+        // l'instru donne la tonalité et les accords : l'autotune vise les bonnes notes même si la voix est fausse
+        const chords = (p.chords || p.chain.some(s => s.t === 'tune' || s.t === 'harmony')) ? await chordsFor(t, startInTrack, say) : null;
+        if (!key && chords?.length) key = keyFromChords(chords);
         const r = await applyChain(cur, p.chain, { key, chords, onProgress: say });
         cur = r.buffer; key = key || r.key;
       }
@@ -390,7 +392,7 @@ export async function render(el, { params }) {
     return r.buffer;
   });
   const fxApply = () => { const item = resolve(fxSel.value); if (item) applyItem(item); };
-  const QUICK_TUNE = [['🎤 Léger', 'Naturel'], ['🎤 Moyen (Drake)', 'Rap mélodique (autotune 15-25 + chaleur)'], ['🤖 Fort (T-Pain)', 'Trap autotune à 0 (effet assumé)']];
+  const QUICK_TUNE = [['🎯 Juste parfait', 'Justesse parfaite (note par note)'], ['🎤 Léger', 'Justesse naturelle (note par note)'], ['🎤 Moyen (Drake)', 'Rap mélodique note par note'], ['🤖 Fort (T-Pain)', 'Hard-tune note par note'], ['✨ Belle voix chantée', 'Belle voix chantée (juste + douce)']];
   const tunePrev = makePreview();
   const quickTune = (label, name) => {
     const p = VFX.find(x => x.name === name); if (!p) return toast('Préréglage introuvable : ' + name, 'bad');
@@ -502,7 +504,7 @@ export async function render(el, { params }) {
       h('h3', '🎤 Autotune chanté en 1 clic'),
       h('div.row', ...QUICK_TUNE.map(([label, name]) => h('button.btn.small', { onclick: () => quickTune(label, name) }, label))),
       tunePrev.box,
-      h('p.tiny.muted', 'Touche un bouton : tu écoutes d’abord 15 s de ta voix (A = avant, B = après). Rien n’est modifié tant que tu ne touches pas « ✅ Appliquer à toute la piste ». Léger = naturel · Moyen = façon Drake · Fort = robot T-Pain.'),
+      h('p.tiny.muted', 'Touche un bouton : tu écoutes d’abord 15 s de ta voix (A = avant, B = après). Rien n’est modifié tant que tu ne touches pas « ✅ Appliquer à toute la piste ». Corrigé note par note, dans la tonalité de ton instru (importe-la d’abord) : « Juste parfait » = toutes les notes justes en gardant ta voix · Léger = naturel · Moyen = façon Drake · Fort = robot T-Pain · Belle voix = juste, doublée, douce.'),
       h('h3', '🪄 Décris le son que tu veux'),
       aiDesc,
       h('div.row', h('button.btn.small.primary', { onclick: (e) => aiPropose(e.target) }, '🪄 Proposer 3 réglages'), aiInfo),
@@ -670,7 +672,7 @@ export async function render(el, { params }) {
       clean: async (x) => { voiceTrack(); const lv = Math.min(0.9, Math.max(0.2, Number(x.level) || 0.55)); await work('Nettoyage…', async (b) => gate(antipop(await denoise(b, lv), 0.8), -45, -30)); },
       align: async () => { voiceTrack(); if (!tracks.some(t => t.kind === 'instru')) throw new Error('il faut d’abord une instru'); await alignSelected(); },
       voice: async (x) => { voiceTrack(); const v = x.params ? sanitizeVoice(x.params) : { ...(VOICE_PRESETS[x.preset] || VOICE_PRESETS.rap) }; await work('Traitement voix…', (b) => voiceChain(b, v)); },
-      tune: async (x) => { voiceTrack(); const k = norm2(x.level); const [label, name] = QUICK_TUNE[/fort|robot|t.?pain/.test(k) ? 2 : /moyen|drake|melod/.test(k) ? 1 : 0]; const p = VFX.find(y => y.name === name); await applyItem({ name: `Autotune ${label.replace(/^\S+ /, '')}`, list: [p] }); },
+      tune: async (x) => { voiceTrack(); const k = norm2(x.level); const [label, name] = QUICK_TUNE[/fort|robot|t.?pain/.test(k) ? 3 : /moyen|drake|melod/.test(k) ? 2 : /leger|naturel/.test(k) ? 1 : /belle|chant|douce/.test(k) ? 4 : 0]; const p = VFX.find(y => y.name === name); await applyItem({ name: `Autotune ${label.replace(/^\S+ /, '')}`, list: [p] }); },
       effect: async (x) => { voiceTrack(); const chain = sanitizeChain(x.chain), voice = x.voice ? sanitizeVoice(x.voice) : null; if (!chain.length && !voice) throw new Error('effet non reconnu'); const name = String(x.name || 'Effet').slice(0, 40); await applyItem({ name, list: [{ name, chain, voice }] }); },
       cut: async (x) => { const t = voiceTrack(); const a = secs(x.from, 0), c = Math.min(t.buffer.duration, secs(x.to, t.buffer.duration)); if (c <= a) throw new Error('passage invalide'); await work(`Coupe ${a}-${c} s…`, async (b) => removeRange(b, a, c)); },
       keep: async (x) => { const t = voiceTrack(); const a = secs(x.from, 0), c = Math.min(t.buffer.duration, secs(x.to, t.buffer.duration)); if (c <= a) throw new Error('passage invalide'); await work('Rognage…', async (b) => sliceBuffer(b, a, c)); },

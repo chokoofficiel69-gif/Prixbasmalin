@@ -16,7 +16,7 @@ Actions possibles (exécutées dans l'ordre, sur la piste sélectionnée sauf in
 {"a":"clean","level":0.3-0.9} débruitage + anti-pop + coupe des blancs
 {"a":"align"} caler la voix sur le beat de l'instru
 {"a":"voice","preset":"rap|chant|podcast|brut"} ou {"a":"voice","params":{"highpass":40-200,"low":-6..6,"presence":-4..8,"air":-4..8,"deess":0-10,"comp":0-1,"reverb":0-0.5}} traitement de la voix (EQ, compression, réverbe)
-{"a":"tune","level":"leger|moyen|fort"} autotune (moyen = rap mélodique façon Drake, fort = robot T-Pain)
+{"a":"tune","level":"parfait|leger|moyen|fort|belle"} justesse note par note dans la tonalité de l'instru (parfait = toutes les notes justes en gardant la voix naturelle, moyen = rap mélodique façon Drake, fort = robot T-Pain, belle = voix chantée juste, doublée et douce)
 {"a":"effect","name":"court","chain":[...]} effets sur mesure ; briques : {"t":"tune","strength":0-1,"speed":0-200}, {"t":"shift","semi":-12..12,"formant":-4..4}, {"t":"double","steps":[0,0],"gain":0.2-0.8}, {"t":"harmony","steps":[2],"gain":0.2-0.7}, {"t":"fx","kind":"reverb","size":0.3-5,"mix":0-0.6}, {"t":"fx","kind":"delay","time":0.05-0.8,"fb":0-0.6,"mix":0-0.5}, {"t":"fx","kind":"pingpong","time":0.1-0.6,"mix":0-0.5}, {"t":"fx","kind":"chorus","mix":0-0.7}, {"t":"fx","kind":"warm"}, {"t":"fx","kind":"tube","amt":1-3}, {"t":"fx","kind":"exciter","mix":0-0.5}, {"t":"fx","kind":"air","gain":0-6}, {"t":"fx","kind":"peak","f":40-12000,"q":0.4-4,"gain":-8..8}, {"t":"fx","kind":"distort","amt":1-10}, {"t":"fx","kind":"band","lo":100-1000,"hi":2000-10000,"drive":0-8}, {"t":"fx","kind":"lofi","bits":4-10}
 {"a":"cut","from":s,"to":s} supprimer un passage (secondes) · {"a":"keep","from":s,"to":s} ne garder que ce passage
 {"a":"trim"} couper les silences du début et de la fin · {"a":"fades"} fondus · {"a":"normalize"}
@@ -25,7 +25,7 @@ Actions possibles (exécutées dans l'ordre, sur la piste sélectionnée sauf in
 {"a":"all"} tout faire (nettoyer, caler, voix rap, mix, master)
 {"a":"master","preset":"streaming|rap|club|doux"} mixer et masteriser
 {"a":"versions"} préparer plusieurs versions du master · {"a":"save"} enregistrer le master dans ses fichiers · {"a":"download"} télécharger le master
-Règles : « moins de réverbe / c'était mieux avant » → undo. « Plus de réverbe » → effect avec une réverbe légère (mix 0.12-0.2). Un style musical (rap, drill, trap, RnB, mélodique, kickage…) → combine voice + tune/effect adaptés, sans exagérer. N'invente jamais une piste qui n'existe pas : si aucune voix n'est enregistrée, propose d'enregistrer. Si la demande n'est pas une commande (bonjour, question), réponds sans action. Phrase de réponse : 1 phrase, 15 mots max.`;
+Règles : « chante juste / corrige mes fausses notes / la plus belle voix possible » → tune parfait (ou belle si c'est du chant), jamais deux autotunes l'un sur l'autre (undo d'abord si un autotune est déjà appliqué). « moins de réverbe / c'était mieux avant » → undo. « Plus de réverbe » → effect avec une réverbe légère (mix 0.12-0.2). Un style musical (rap, drill, trap, RnB, mélodique, kickage…) → combine voice + tune/effect adaptés, sans exagérer. N'invente jamais une piste qui n'existe pas : si aucune voix n'est enregistrée, propose d'enregistrer. Si la demande n'est pas une commande (bonjour, question), réponds sans action. Phrase de réponse : 1 phrase, 15 mots max.`;
 
 export function mountAssistant(S) {
   const R = window.SpeechRecognition || window.webkitSpeechRecognition;

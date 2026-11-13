@@ -156,6 +156,77 @@ function correctionCurve(pitch, key, { strength = 1, speed = 0, scale, extra = 0
   return out;
 }
 
+// Tonalité à partir des accords de l'instru (bien plus fiable que la voix quand on chante un peu faux)
+export function keyFromChords(chords) {
+  if (!chords?.length) return null;
+  const hist = new Array(12).fill(0);
+  for (const c of chords) { hist[c.root] += 2; for (const pc of c.pcs) hist[pc] += 1; }
+  const corr = (prof, r) => { let s = 0; for (let i = 0; i < 12; i++) s += hist[(i + r) % 12] * prof[i]; return s; };
+  let best = { root: 0, mode: 'mineur', s: -1 };
+  for (let r = 0; r < 12; r++) {
+    const a = corr(KMAJ, r), b = corr(KMIN, r);
+    if (a > best.s) best = { root: r, mode: 'majeur', s: a };
+    if (b > best.s) best = { root: r, mode: 'mineur', s: b };
+  }
+  return { root: best.root, mode: best.mode };
+}
+
+// Correction NOTE PAR NOTE (façon Melodyne) : on découpe le chant en notes, on prend la hauteur médiane
+// de chaque note, on la cale sur la note juste (gamme de l'instru, accord en cours privilégié),
+// puis on garde une part du vibrato/de l'expression (keep). Fini les notes qui « hésitent » entre deux.
+function median(a) { const b = Array.from(a).sort((x, y) => x - y); return b[b.length >> 1]; }
+export function noteSegments(pitch) {
+  const n = pitch.f0.length, m = new Float32Array(n), segs = [];
+  for (let i = 0; i < n; i++) m[i] = pitch.f0[i] ? 69 + 12 * Math.log2(pitch.f0[i] / 440) : 0;
+  const need = Math.max(3, Math.round(pitch.rate * 0.035)); // 35 ms d'écart soutenu = nouvelle note
+  let i = 0;
+  while (i < n) {
+    if (!m[i]) { i++; continue; }
+    let a = i, vals = [m[i]], med = m[i], off = 0; i++;
+    while (i < n && m[i]) {
+      if (Math.abs(m[i] - med) > 0.8) { if (++off >= need) { i -= off - 1; break; } }
+      else off = 0;
+      vals.push(m[i]); if (vals.length % 4 === 0) med = median(vals.slice(-40));
+      i++;
+    }
+    const b = Math.min(i, n); if (off >= need) vals.length = Math.max(1, vals.length - (off - 1));
+    segs.push({ a, b, med: median(m.slice(a, b).filter(Boolean)) });
+  }
+  return { m, segs };
+}
+function noteCurve(pitch, key, { strength = 1, keep = 0.2, glide = 40, scale, extra = 0, chords = null }) {
+  const { m, segs } = noteSegments(pitch), n = m.length, out = new Float32Array(n);
+  const sc = SCALES[scale || key.mode] || SCALES.chromatique;
+  const minLen = Math.round(pitch.rate * 0.06);
+  let prevT = null;
+  for (const sg of segs) {
+    const ch = chordAt(chords, ((sg.a + sg.b) / 2) / pitch.rate);
+    let best = Math.round(sg.med), bd = 99;
+    for (let o = -1; o <= 1; o++) for (const st of sc) {
+      const cand = Math.floor(sg.med / 12) * 12 + o * 12 + ((key.root + st) % 12);
+      let d = Math.abs(cand - sg.med);
+      if (ch?.pcs.includes(((cand % 12) + 12) % 12)) d -= 0.3; // préfère les notes de l'accord de l'instru
+      if (d < bd) { bd = d; best = cand; }
+    }
+    // une note très courte collée à la précédente : on la laisse suivre (évite les « bips »)
+    if (sg.b - sg.a < minLen && prevT !== null && Math.abs(best - prevT) <= 2) best = prevT;
+    sg.t = best; prevT = best;
+  }
+  const alpha = glide > 0 ? Math.exp(-1 / (pitch.rate * glide / 1000)) : 0;
+  let k = 0, cur = null;
+  for (let i = 0; i < n; i++) {
+    while (k < segs.length - 1 && segs[k].b <= i) k++;
+    const sg = segs[k];
+    if (!m[i] || !sg || i < sg.a || i >= sg.b) { out[i] = extra; cur = null; continue; }
+    // expression gardée = mouvement lent (vibrato, glissés), sans le tremblement trame à trame
+    let acc = 0, c = 0; for (let j = Math.max(sg.a, i - 4); j <= Math.min(sg.b - 1, i + 4); j++) if (m[j]) { acc += m[j]; c++; }
+    const want = sg.t + keep * (acc / c - sg.med);
+    cur = cur === null || alpha === 0 ? want : alpha * cur + (1 - alpha) * want;
+    out[i] = strength * (cur - m[i]) + extra;
+  }
+  return out;
+}
+
 // ---------- TD-PSOLA : change la hauteur en gardant le timbre ----------
 export async function psola(buffer, pitch, semis, onProgress, formant = 0) {
   const fa = 2 ** (formant / 12); // > 1 : formants plus aigus (voix plus « petite »), < 1 : plus graves
@@ -315,11 +386,13 @@ export async function applyChain(buffer, chain, opts = {}) {
   const say = opts.onProgress || (() => {});
   let pitch = null, key = opts.key || null;
   const needPitch = chain.some(s => ['tune', 'shift', 'vocoder', 'harmony', 'double'].includes(s.t));
-  if (needPitch) { say('Analyse des notes…'); pitch = await detectPitch(buffer, p => say(`Analyse des notes ${Math.round(p * 100)} %`)); if (!key) key = detectKey(pitch); }
+  if (needPitch) { say('Analyse des notes…'); pitch = await detectPitch(buffer, p => say(`Analyse des notes ${Math.round(p * 100)} %`)); if (!key) key = keyFromChords(opts.chords) || detectKey(pitch); }
   let cur = buffer, tuneCurve = null;
   for (const s of chain) {
     if (s.t === 'tune') {
-      tuneCurve = correctionCurve(pitch, key, { strength: s.strength ?? 1, speed: s.speed ?? 0, scale: s.scale, extra: s.extra || 0 });
+      tuneCurve = s.mode === 'notes'
+        ? noteCurve(pitch, key, { strength: s.strength ?? 1, keep: s.keep ?? 0.2, glide: s.glide ?? 40, scale: s.scale, extra: s.extra || 0, chords: opts.chords })
+        : correctionCurve(pitch, key, { strength: s.strength ?? 1, speed: s.speed ?? 0, scale: s.scale, extra: s.extra || 0 });
       say('Autotune…'); cur = await psola(buffer, pitch, tuneCurve, p => say(`Autotune ${Math.round(p * 100)} %`), s.formant || 0);
     } else if (s.t === 'shift') {
       say('Changement de voix…'); cur = await psola(buffer, pitch, s.semi || 0, p => say(`Changement de voix ${Math.round(p * 100)} %`), s.formant || 0);
@@ -337,8 +410,9 @@ export async function applyChain(buffer, chain, opts = {}) {
       say(s.t === 'double' ? 'Doublage…' : 'Harmonies…');
       const layers = [[cur, 1, 0]];
       for (const [i, step] of (s.steps || [0]).entries()) {
+        const det = (i % 2 ? -0.12 : 0.12) + (step || 0);
         const curve = s.t === 'double'
-          ? correctionCurve(pitch, key, { strength: tuneCurve ? 1 : 0, speed: tuneCurve ? 0 : 0, extra: (i % 2 ? -0.12 : 0.12) + (step || 0) })
+          ? (tuneCurve ? tuneCurve.map(v => v + det) : correctionCurve(pitch, key, { strength: 0, extra: det }))
           : s.chordSteps && opts.chords?.length
             ? correctionCurve(pitch, key, { harmonySteps: step, chords: opts.chords })
             : correctionCurve(pitch, key, { harmonySteps: s.chordSteps ? step * 2 : step }); // sans instru : tierce/quinte de la gamme
@@ -465,6 +539,14 @@ PRESETS.push(
   { cat: '🤖 Vocodeur / talkbox / robot', name: 'Talkbox G-funk', chain: [{ t: 'vocoder', bands: 10, q: 3.5, voices: [0, 7, 12] }, { t: 'fx', kind: 'band', lo: 250, hi: 4500 }] },
 );
 // Réglages tirés des mesures des références (basses/sub, médiums, présence, largeur, justesse)
+const NOTE_CAT = '🎯 Justesse note par note';
+PRESETS.push(
+  { cat: NOTE_CAT, name: 'Justesse parfaite (note par note)', chain: [{ t: 'tune', mode: 'notes', keep: 0.1, glide: 30 }] },
+  { cat: NOTE_CAT, name: 'Justesse naturelle (note par note)', chain: [{ t: 'tune', mode: 'notes', keep: 0.45, glide: 60 }] },
+  { cat: NOTE_CAT, name: 'Rap mélodique note par note', chain: [{ t: 'tune', mode: 'notes', keep: 0.15, glide: 22 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'delay', time: 0.32, fb: 0.25, mix: 0.16 }] },
+  { cat: NOTE_CAT, name: 'Hard-tune note par note', chain: [{ t: 'tune', mode: 'notes', keep: 0, glide: 4 }, { t: 'fx', kind: 'air', gain: 4 }, { t: 'fx', kind: 'reverb', size: 1.8, mix: 0.2 }] },
+  { cat: NOTE_CAT, name: 'Belle voix chantée (juste + douce)', chain: [{ t: 'tune', mode: 'notes', keep: 0.2, glide: 35 }, { t: 'double', steps: [0, 0], gain: 0.3 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'reverb', size: 1.8, mix: 0.18 }], voice: { highpass: 85, low: 1, presence: 2.5, air: 3, deess: 4, comp: 0.6, reverb: 0 } },
+);
 const REF_CAT = '🎯 Calés sur mes références';
 PRESETS.push(
   { cat: REF_CAT, name: 'Basses et sub (type Naza / d_j_-vu)', chain: [{ t: 'fx', kind: 'peak', f: 70, q: 0.8, gain: 5 }, { t: 'fx', kind: 'peak', f: 140, q: 1, gain: 3 }] },
@@ -473,8 +555,8 @@ PRESETS.push(
   { cat: REF_CAT, name: 'Voix large (type Vacra)', chain: [{ t: 'fx', kind: 'chorus', mix: 0.22 }, { t: 'fx', kind: 'reverb', size: 1.4, mix: 0.15 }] },
   { cat: REF_CAT, name: 'Justesse naturelle (type Nada / Vacra)', chain: [{ t: 'tune', strength: 1, speed: 35 }, { t: 'fx', kind: 'warm' }] },
   // Type LJK (« Dolce Vita ») : mesures du morceau (≈130 BPM, voix brillante vers 4,5-6,5 kHz, médiums chauds, pas d'air en excès)
-  { cat: REF_CAT, name: 'Type LJK naturel (calé sur Dolce Vita)', chain: [{ t: 'tune', strength: 0.6, speed: 110 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'peak', f: 5500, q: 1, gain: 3 }, { t: 'fx', kind: 'delay', time: 0.23, fb: 0.22, mix: 0.12 }, { t: 'fx', kind: 'reverb', size: 1.3, mix: 0.1 }], voice: { highpass: 90, low: 0, presence: 2, air: 0, deess: 4, comp: 0.7, reverb: 0 } },
-  { cat: REF_CAT, name: 'Type LJK mélodique (calé sur Dolce Vita)', chain: [{ t: 'tune', strength: 1, speed: 25 }, { t: 'double', steps: [0, 0], gain: 0.35 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'peak', f: 5500, q: 1, gain: 3 }, { t: 'fx', kind: 'delay', time: 0.23, fb: 0.28, mix: 0.16 }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.14 }], voice: { highpass: 90, low: 0, presence: 2, air: 0, deess: 4, comp: 0.75, reverb: 0 } },
+  { cat: REF_CAT, name: 'Type LJK naturel (calé sur Dolce Vita)', chain: [{ t: 'tune', mode: 'notes', keep: 0.4, glide: 55 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'peak', f: 5500, q: 1, gain: 3 }, { t: 'fx', kind: 'delay', time: 0.23, fb: 0.22, mix: 0.12 }, { t: 'fx', kind: 'reverb', size: 1.3, mix: 0.1 }], voice: { highpass: 90, low: 0, presence: 2, air: 0, deess: 4, comp: 0.7, reverb: 0 } },
+  { cat: REF_CAT, name: 'Type LJK mélodique (calé sur Dolce Vita)', chain: [{ t: 'tune', mode: 'notes', keep: 0.15, glide: 25 }, { t: 'double', steps: [0, 0], gain: 0.35 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'peak', f: 5500, q: 1, gain: 3 }, { t: 'fx', kind: 'delay', time: 0.23, fb: 0.28, mix: 0.16 }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.14 }], voice: { highpass: 90, low: 0, presence: 2, air: 0, deess: 4, comp: 0.75, reverb: 0 } },
   { cat: REF_CAT, name: 'Pack 8 références (basses, présence, justesse)', chain: [{ t: 'tune', strength: 0.9, speed: 35 }, { t: 'fx', kind: 'peak', f: 70, q: 0.8, gain: 4 }, { t: 'fx', kind: 'peak', f: 4000, q: 1, gain: 2.5 }, { t: 'fx', kind: 'air', gain: 3 }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.14 }] },
 );
 export const PRESET_CATS = [...new Set(PRESETS.map(p => p.cat))];
