@@ -154,7 +154,7 @@ export async function render(el, { params }) {
   let beatGainNode = null, micDb = Number(localStorage.getItem('studio.micDb') || 0);
   const instruLbl = h('b', '');
   const instruVol = h('input', { type: 'range', min: -30, max: 6, step: 0.5, value: -4 });
-  const syncVoice = () => { const has = tracks.some(t => t.kind === 'voix'); micVol.disabled = !has; micLbl.textContent = has ? `${micDb} dB` : '(pas encore de voix enregistrée)'; };
+  const syncVoice = () => { const has = tracks.some(t => t.kind !== 'instru'); micVol.disabled = !has; if (!has) micLbl.textContent = '(pas encore de voix enregistrée)'; else if (micLbl.textContent.startsWith('(')) micLbl.textContent = `${voiceBusDb > 0 ? '+' : ''}${voiceBusDb} dB`; };
   const syncInstru = () => { syncVoice(); const b = tracks.find(t => t.kind === 'instru'); instruVol.disabled = !b; if (b) { instruVol.value = b.gainDb; instruLbl.textContent = `${b.gainDb} dB`; } else instruLbl.textContent = '(pas d’instru)'; };
   instruVol.oninput = () => { const b = tracks.find(t => t.kind === 'instru'); if (!b) return; b.gainDb = Number(instruVol.value); instruLbl.textContent = `${b.gainDb} dB`; if (beatGainNode) beatGainNode.gain.value = 10 ** (b.gainDb / 20); liveGain(b); masterResult = null; drawList(); };
   // ---------- Vumètres en direct (on voit quand ça sature) ----------
@@ -246,8 +246,15 @@ export async function render(el, { params }) {
     recorder?.setGainDb?.(inGainDb);
     if (monitor?.inG && !(recorder && monitor.stream === recorder.stream)) monitor.inG.gain.setTargetAtTime(10 ** (inGainDb / 20), audioCtx().currentTime, 0.02);
   } });
-  const micLbl = h('b', `${micDb} dB`);
-  const micVol = h('input', { type: 'range', min: -20, max: 12, step: 0.5, value: micDb, oninput: () => { micDb = Number(micVol.value); micLbl.textContent = `${micDb} dB`; localStorage.setItem('studio.micDb', micDb); const v = tracks[selected] && tracks[selected].kind !== 'instru' ? tracks[selected] : tracks[tracks.map(t => t.kind).lastIndexOf('voix')]; if (v) { v.gainDb = micDb; liveGain(v); masterResult = null; drawList(); } } });
+  const micLbl = h('b', '0 dB');
+  // Volume de TOUTES mes voix d'un coup (décale chaque piste voix du même nombre de dB) : plus simple que piste par piste
+  let voiceBusDb = 0;
+  const micVol = h('input', { type: 'range', min: -20, max: 12, step: 0.5, value: 0, oninput: () => {
+    const nv = Number(micVol.value), d = nv - voiceBusDb; voiceBusDb = nv;
+    micLbl.textContent = `${nv > 0 ? '+' : ''}${nv} dB`;
+    for (const t of tracks) if (t.kind !== 'instru') t.gainDb = Math.max(-40, Math.min(12, Math.round((t.gainDb + d) * 2) / 2));
+    liveGain(); masterResult = null; saveSoon(); timeline?.render();
+  } });
   // ---------- Retour casque en direct (s'entendre pendant qu'on enregistre) ----------
   const monOn = h('input', { type: 'checkbox', checked: localStorage.getItem('studio.mon') === '1' });
   const MON_STYLES = { propre: 'Voix propre', rap: 'Voix rap (présence)', reverb: 'Voix + réverbe', echo: 'Voix + écho' };
@@ -260,39 +267,79 @@ export async function render(el, { params }) {
     if (monTestStream || recorder) return;
     try {
       monTestStream = await navigator.mediaDevices.getUserMedia({ audio: { ...micConstraints(), echoCancellation: false } });
-      startMonitor(monTestStream); micMeter.attachNode(monitor.inG); monTestBtn.textContent = '⏹ Arrêter le test';
+      await startMonitor(monTestStream); micMeter.attachNode(monitor.inG); monTestBtn.textContent = '⏹ Arrêter le test';
       toast('🎧 Tu t’entends dans le casque. Règle « Ma voix dans le casque ». (Casque filaire conseillé.)');
     } catch (e) { monOn.checked = false; toast('Micro inaccessible : ' + e.message, 'bad'); }
   }
-  monStyle.onchange = () => { localStorage.setItem('studio.mon.style', monStyle.value); const st = monitor?.stream; if (st) { stopMonitor(true); startMonitor(st); } };
   monVol.oninput = () => { localStorage.setItem('studio.mon.vol', monVol.value); if (monitor) monitor.out.gain.value = Number(monVol.value); };
-  function startMonitor(stream) {
+  // Réglages du retour casque, tous modifiables EN DIRECT pendant qu'on chante
+  const MF = Object.assign({ bright: 3, reverb: 0.12, echo: 0, tune: 'off' }, (() => { try { return JSON.parse(localStorage.getItem('studio.monfx')) || {}; } catch { return {}; } })());
+  const saveMF = () => { try { localStorage.setItem('studio.monfx', JSON.stringify(MF)); } catch {} };
+  let workletReady = null;
+  async function startMonitor(stream) {
     stopMonitor(true);
     const ctx = audioCtx();
     const src0 = ctx.createMediaStreamSource(stream);
     // le flux de la prise a déjà le gain micro ; le flux de test non : on l'applique ici
     const inG = ctx.createGain(); inG.gain.value = recorder && stream === recorder.stream ? 1 : 10 ** (inGainDb / 20);
-    const src = src0.connect(inG);
+    src0.connect(inG);
     const f = (type, freq, gain = 0, q = 0.8) => { const n = ctx.createBiquadFilter(); n.type = type; n.frequency.value = freq; n.gain.value = gain; n.Q.value = q; return n; };
+    const hp = f('highpass', 90), pres = f('peaking', 3200, MF.bright, 0.9), air = f('highshelf', 10000, MF.bright * 0.7);
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -22; comp.ratio.value = 3; comp.attack.value = 0.004; comp.release.value = 0.12;
     const out = ctx.createGain(); out.gain.value = Number(monVol.value);
-    const st = monStyle.value;
-    let last = src.connect(f('highpass', 90));
-    if (st !== 'propre') last = last.connect(f('peaking', 3200, 4)).connect(f('highshelf', 10000, 3));
-    last = last.connect(comp);
-    last.connect(out);
-    if (st === 'reverb') {
-      const cv = ctx.createConvolver(); const len = Math.floor(ctx.sampleRate * 1.6); const ir = ctx.createBuffer(2, len, ctx.sampleRate);
-      for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3; }
-      cv.buffer = ir; const wet = ctx.createGain(); wet.gain.value = 0.3; last.connect(cv).connect(wet).connect(out);
+    let head = inG;
+    let tune = null;
+    if (MF.tune !== 'off' && ctx.audioWorklet) {
+      try {
+        workletReady ||= ctx.audioWorklet.addModule('/js/lib/livetune-worklet.js');
+        await workletReady;
+        tune = new AudioWorkletNode(ctx, 'live-tune', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] });
+        tune.port.postMessage({ strength: MF.tune === 'fort' ? 1 : 0.8, speed: MF.tune === 'fort' ? 1 : 0.12, scale: liveScale() });
+        head = inG.connect(tune);
+        computeLiveKey().then(() => tune.port.postMessage({ scale: liveScale() }));
+      } catch (e) { tune = null; toast('Autotune en direct indisponible sur ce navigateur.', 'bad'); }
     }
-    if (st === 'echo') {
-      const d = ctx.createDelay(1); d.delayTime.value = 0.3; const fb = ctx.createGain(); fb.gain.value = 0.3; const wet = ctx.createGain(); wet.gain.value = 0.3;
-      last.connect(d); d.connect(fb).connect(d); d.connect(wet).connect(out);
-    }
+    const dry = head.connect(hp).connect(pres).connect(air).connect(comp);
+    dry.connect(out);
+    const cv = ctx.createConvolver(); const len = Math.floor(ctx.sampleRate * 1.6); const ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3; }
+    cv.buffer = ir; const revG = ctx.createGain(); revG.gain.value = MF.reverb; dry.connect(cv).connect(revG).connect(out);
+    const dl = ctx.createDelay(1); dl.delayTime.value = Math.min(0.9, 60 / (Number(localStorage.getItem('studio.bpm')) || 90) / 2); const fb = ctx.createGain(); fb.gain.value = 0.28; const echoG = ctx.createGain(); echoG.gain.value = MF.echo;
+    dry.connect(dl); dl.connect(fb).connect(dl); dl.connect(echoG).connect(out);
     out.connect(ctx.destination);
-    monitor = { src: src0, inG, out, stream };
+    monitor = { src: src0, inG, out, stream, pres, air, revG, echoG, tune };
+    showLatency();
   }
+  // gamme pour l'autotune en direct : celle de l'instru si on la connaît, sinon chromatique
+  function liveScale() {
+    try {
+      const k = fxKeyOpt() || liveKey; if (!k) return null;
+      const steps = k.mode === 'majeur' ? [0, 2, 4, 5, 7, 9, 11] : [0, 2, 3, 5, 7, 8, 10];
+      const sc = new Array(12).fill(false); steps.forEach(st => { sc[(k.root + st) % 12] = true; }); return sc;
+    } catch { return null; }
+  }
+  let liveKey = null;
+  let liveKeyBuf = null;
+  async function computeLiveKey() { try { const b = tracks.find(t => t.kind === 'instru'); if (b && b.buffer !== liveKeyBuf) { liveKeyBuf = b.buffer; liveKey = keyFromChords(await detectChords(b.buffer)); } } catch {} }
+  const latLbl = h('span.tiny.muted', '');
+  function showLatency() {
+    const ctx = audioCtx(), ms = Math.round(((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000 + (MF.tune !== 'off' ? 22 : 0) + 10);
+    latLbl.textContent = `Retard estimé du retour : ~${ms} ms${ms > 60 ? ' (élevé : casque filaire et « Mode studio » conseillés)' : ' ✓'}`;
+  }
+  const mfSlider = (label, key, min, max, step, apply, fmt) => {
+    const lbl = h('b', fmt(MF[key]));
+    return h('label', h('span', label + ' ', lbl), h('input', { type: 'range', min, max, step, value: MF[key], oninput: (e) => { MF[key] = Number(e.target.value); lbl.textContent = fmt(MF[key]); saveMF(); if (monitor) apply(monitor); } }));
+  };
+  const tuneSel = h('select', { onchange: () => { MF.tune = tuneSel.value; saveMF(); if (monitor) startMonitor(monitor.stream); else showLatency(); } },
+    ...[['off', 'Autotune casque : non'], ['leger', 'Autotune casque : léger (naturel)'], ['fort', 'Autotune casque : fort (effet)']].map(([v, l]) => h('option', { value: v, selected: MF.tune === v }, l)));
+  const monFxBox = h('div.stack', { style: { gap: '4px' } },
+    h('div.sliders',
+      mfSlider('✨ Brillance', 'bright', -4, 8, 0.5, (m) => { const t = audioCtx().currentTime; m.pres.gain.setTargetAtTime(MF.bright, t, 0.03); m.air.gain.setTargetAtTime(MF.bright * 0.7, t, 0.03); }, (v) => `${v} dB`),
+      mfSlider('🌫️ Réverbe', 'reverb', 0, 0.6, 0.02, (m) => m.revG.gain.setTargetAtTime(MF.reverb, audioCtx().currentTime, 0.03), (v) => `${Math.round(v / 0.6 * 100)} %`),
+      mfSlider('🔁 Écho', 'echo', 0, 0.5, 0.02, (m) => m.echoG.gain.setTargetAtTime(MF.echo, audioCtx().currentTime, 0.03), (v) => v ? `${Math.round(v / 0.5 * 100)} %` : 'aucun')),
+    h('div.row', h('div.grow', tuneSel), latLbl),
+    h('p.tiny.muted', 'Ces réglages changent ce que tu entends dans le casque, en direct. La prise, elle, reste propre (tu appliques les vrais effets ensuite). L’autotune casque est un modèle rapide : il ajoute ~20 ms.'));
+
   function stopMonitor(keepTest = false) {
     try { monitor?.src.disconnect(); monitor?.out.disconnect(); } catch {}
     monitor = null;
@@ -301,14 +348,14 @@ export async function render(el, { params }) {
   const micConstraints = () => {
     const base = rawMode.checked ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
     // Avec le retour casque, l'annulation d'écho coupe ou déforme sa propre voix : on la désactive (casque obligatoire)
-    return monOn.checked ? { ...base, echoCancellation: false } : base;
+    return monOn.checked ? { ...base, echoCancellation: false, latency: 0 } : base;
   };
   const monTestBtn = h('button.btn.small.ghost', '🎧 Tester le retour');
   monTestBtn.onclick = async () => {
     if (monTestStream) { stopMonitor(); return; }
     try {
       monTestStream = await navigator.mediaDevices.getUserMedia({ audio: { ...micConstraints(), echoCancellation: false } });
-      startMonitor(monTestStream); micMeter.attachNode(monitor.inG); monTestBtn.textContent = '⏹ Arrêter le test';
+      await startMonitor(monTestStream); micMeter.attachNode(monitor.inG); monTestBtn.textContent = '⏹ Arrêter le test';
       toast('Parle : tu t’entends dans le casque. Casque filaire conseillé (le Bluetooth ajoute du retard).');
     } catch (e) { toast('Micro inaccessible : ' + e.message, 'bad'); }
   };
@@ -340,7 +387,7 @@ export async function render(el, { params }) {
         else { take.name = `${armed.name} ${tracks.filter(t => t.name.startsWith(armed.name)).length + 1}`; take.kind = armed.kind; tracks.splice(tracks.indexOf(armed) + 1, 0, take); selected = tracks.indexOf(take); }
         drawList(); drawEdit();
       }
-      if (tracks[selected]?.kind === 'voix' && !armed) tracks[selected].gainDb = micDb;
+      if (tracks[selected]?.kind === 'voix' && !armed) tracks[selected].gainDb = voiceBusDb;
       beatGainNode = null; saveSoon(true);
       if (monOn.checked) openLiveMonitor();
       if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
@@ -880,9 +927,10 @@ export async function render(el, { params }) {
     h('div.sliders',
       h('label', h('span', '🎙️ Gain du micro (enregistrement) ', inGainLbl), inGain),
       h('label', h('span', '🥁 Instru ', instruLbl), instruVol),
-      h('label', h('span', '🎤 Ma voix enregistrée ', micLbl), micVol),
+      h('label', h('span', '🎤 Toutes mes voix enregistrées ', micLbl), micVol),
       h('label', h('span', '🎧 Ma voix en direct dans le casque ', monVolLbl), monVol)),
     h('label.chk.small', monOn, 'M’entendre en direct dans le casque pendant que j’enregistre'),
+    monFxBox,
     h('p.tiny.muted', '🎙️ Gain du micro : baisse-le si le vumètre micro est souvent dans le rouge. Si « SATURE » reste allumé même à −20 dB, c’est le micro lui-même qui sature : baisse son niveau dans Windows (Paramètres → Son → Entrée → Volume) ou décoche le réglage automatique, puis recule un peu.'),
     micMeter.el, outMeter.el,
     h('p.tiny.muted', 'Micro : vise le jaune (−12 à −6 dB) quand tu rappes fort. Si « ● SATURE » s’allume, recule du micro ou baisse le gain du micro dans Windows (Paramètres → Son → Entrée). Le micro s’affiche quand tu enregistres ou quand « M’entendre en direct » est coché.'));
@@ -1106,7 +1154,7 @@ export async function render(el, { params }) {
         h('h3', '⚙️ Réglages d’enregistrement'),
         h('label.chk.small', withBeat, 'Lancer l’instru pendant l’enregistrement (casque conseillé)'),
         h('label.chk.small', rawMode, 'Mode studio : désactiver les filtres automatiques du micro (meilleur son, à nettoyer ensuite)'),
-        h('div.row', h('span.small', '🎧 Retour casque :'), h('div.grow', monStyle), monTestBtn),
+        h('div.row', h('span.small', '🎧 Retour casque :'), monTestBtn),
         h('p.tiny.muted', 'Retour en direct : casque filaire conseillé (en Bluetooth ta voix arrive en retard). L’autotune ne s’entend pas en direct : il se calcule après.'),
         prompter,
         h('button.btn.small.ghost', { onclick: () => { localStorage.removeItem('studio.prompter'); prompter.style.display = 'none'; } }, 'Masquer le texte'),
