@@ -37,6 +37,12 @@ PRICE_BANDS = [(0, 30, "moins-30"), (30, 60, "30-60"), (60, 100, "60-100"), (100
 
 def gift_family(product):
     text = " ".join(str(product.get(k) or "") for k in ("desc", "name", "category"))
+    merchant = str(product.get("merchant") or "").casefold()
+    if "prm coupons couture" in merchant:
+        if re.search(r"ameublement|rideau|coussin|linge de maison|nappe|d[eé]coration|tissu d.?ameublement", text, re.I):
+            return "maison", "Maison"
+        if re.search(r"patron|blouse|veste|robe|pantalon|chemise|jupe|jersey|denim|doublure|popeline|maille|viscose|molleton|drap de laine|mousseline|tulle|lycra|élasthanne|couture", text, re.I):
+            return "mode", "Mode"
     for key, label, pattern in GIFT_FAMILIES:
         if pattern.search(text):
             return key, label
