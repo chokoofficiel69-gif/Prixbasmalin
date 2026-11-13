@@ -1,0 +1,28 @@
+name: Contrôle production ponctuel (temporaire)
+on:
+  push:
+    branches: [claude/prod-check-2026-11-13]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - shell: bash
+        run: |
+          set -euo pipefail
+          B=https://prixbasmalin.fr
+          ts=$(date +%s)
+          for path in / /catalogue.html /data/gtin-comparisons.json /data/rakuten-products.json /data/rakuten-home.json /data/awin-products.json; do
+            printf '%s ' "$path"; curl -sS -o /dev/null -w '%{http_code} %{size_download}o\n' "$B$path?v=$ts"
+          done
+          curl -sS "$B/catalogue.html?v=$ts" -o cat.html
+          grep -c 'pm-gtin-comparisons-loader' cat.html | sed 's/^/catalogue: chargeur comparaisons GTIN présent x/'
+          grep -c 'pmGtinComparisonProducts\]' cat.html | sed 's/^/catalogue: appels de rendu incluant les comparaisons x/'
+          grep -q 'if(!offer||offer.stale||offer.currency!=="EUR"||offer.price_tax_status!=="included")return false;' cat.html && echo "catalogue: filtre offres actuelles + TTC confirmé inchangé"
+          curl -sS "$B/?v=$ts" -o home.html
+          grep -q 'feed.priceTaxStatusVerified!==true' home.html && echo "accueil: bloc Prix TTC conditionné à la TVA confirmée"
+          curl -sS "$B/data/gtin-comparisons.json?v=$ts" | python3 -c 'import json,sys;d=json.load(sys.stdin);print("gtin-comparisons:",d["status"],d["generated_at"],json.dumps(d["counts"],ensure_ascii=False))'
+          curl -sS "$B/data/awin-products.json?v=$ts" | python3 -c 'import json,sys;d=json.load(sys.stdin);p=d["products"];print("awin:",d["fetched_at"],len(p),"produits;",sum(1 for x in p if x.get("feedUpdatedAt")),"avec date de flux marchand")'
+          curl -sS "$B/data/rakuten-products.json?v=$ts" | python3 -c 'import json,sys;d=json.load(sys.stdin);print("rakuten:",d["generated_at"],len(d["products"]),"produits; TVA vérifiée:",d.get("priceTaxStatusVerified"))'
