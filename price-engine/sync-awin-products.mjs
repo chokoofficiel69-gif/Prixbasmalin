@@ -1263,7 +1263,7 @@ async function runSelfTests() {
         standardOnly[1].brand !== "AudioBrand" || standardOnly[1].mpn !== "AB-1" ||
         standardOnly[1].price_eur !== 49.9 || standardOnly[1].shipping_price_eur !== 4.99 ||
         standardOnly[1].price_tax_status !== "unspecified" || standardOnly[1].merchant_updated_at !== null ||
-        standardOnly[1].feed_updated_at !== "2026-11-08T10:00:00Z") {
+        standardOnly[1].feed_updated_at !== "2026-11-08 10:00:00") {
       throw new Error("TEST ÉCHEC : le flux Awin doit conserver séparément la date d'import du flux et la date produit absente, sans inventer le TTC.");
     }
   } finally {
