@@ -10,7 +10,7 @@ import { ROLES, ROLE_ORDER, proposeRole, adlibPan, roleChain, micAdvice, justess
 import { VOICE_TYPES, VOICE_TYPE_ORDER, PRO_PRESETS, PRO_PRESET_ORDER, DEFAULT_PRO, clampPro, buildTuneStep, applyPreset, formantForVoice, proName } from '../lib/autotunepro.js';
 import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes } from '../lib/daw.js';
 import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.js';
-import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt } from '../lib/ingexpert.js';
+import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult } from '../lib/ingexpert.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -1321,6 +1321,34 @@ export async function render(el, { params }) {
     drawInge();
   }
 
+  function openConsult() {
+    const csel = h('select', CONSULTATIONS.map(c => h('option', { value: c.id }, c.label)));
+    const fieldsBox = h('div.stack');
+    const inputs = {};
+    const answer = h('div.small', { style: { whiteSpace: 'pre-wrap', maxHeight: '42vh', overflow: 'auto', background: 'var(--bg)', padding: '8px', borderRadius: '10px' } });
+    const info = h('span.small.muted');
+    const buildFields = () => {
+      fieldsBox.innerHTML = ''; for (const k in inputs) delete inputs[k];
+      const c = CONSULTATIONS.find(x => x.id === csel.value); if (!c) return;
+      for (const f of c.fields) {
+        const inp = f.type === 'select' ? h('select', (f.options || []).map(o => h('option', { value: o }, o))) : h('input', { type: 'text', placeholder: f.placeholder || '', value: f.value || '' });
+        inputs[f.name] = inp;
+        fieldsBox.append(h('label.f', { style: { display: 'block' } }, h('span.small', f.label + ' '), inp));
+      }
+    };
+    csel.onchange = buildFields; buildFields();
+    const askBtn = h('button.btn.small.primary', { onclick: async (e) => {
+      const values = {}; for (const k in inputs) values[k] = inputs[k].value;
+      const q = buildConsult(csel.value, values); if (!q) return;
+      e.target.disabled = true; info.innerHTML = '<span class="spinner"></span> L’ingé son réfléchit…'; answer.textContent = '';
+      try { const r = await api('/api/complete', { method: 'POST', body: { system: q.system, prompt: q.prompt, src: 'inge-expert', model: 'auto:smart', temperature: 0.4 } }); answer.textContent = String(r.content || '').trim() || 'Pas de réponse.'; info.textContent = `via ${r.routedVia || 'IA'}`; }
+      catch (err) { info.textContent = ''; toastErr(err); }
+      e.target.disabled = false;
+    } }, '🎛️ Demander à l’ingé son');
+    modal('💬 Consultation — ingé son expert', h('div.stack',
+      h('p.small.muted', 'Choisis un sujet, remplis les cases, reçois une réponse chiffrée (chaîne, fréquences, ratios, LUFS…). Conseils à partir de ta description — aucun audio n’est envoyé.'),
+      csel, fieldsBox, h('div.row', askBtn, info), answer));
+  }
   function abIng(track, which) {
     try { track._abUrls && track._abUrls.forEach(u => URL.revokeObjectURL(u)); } catch {}
     const a = URL.createObjectURL(encodeWav(track.original)), b = URL.createObjectURL(encodeWav(track.buffer));
@@ -1470,6 +1498,7 @@ export async function render(el, { params }) {
         h('label.chk.small', ingeAuto, 'Traiter chaque prise automatiquement dès la fin de l’enregistrement'),
         h('label.chk.small', ingeExpert, '🎓 Mode expert : analyse poussée (dynamique, sifflantes, résonance, clipping, LUFS), de-esser + EQ anti-résonance, voix calée au-dessus de l’instru, conseils d’ingé pro'),
         h('div.row', h('span.small', '🎚️ Style :'), h('div.grow', ingeStyle)),
+        h('div.row', h('button.btn.small', { onclick: () => openConsult() }, '💬 Consulter l’ingé son (voix, basses, mastering, référence)')),
         h('div.row', h('button.btn.small', { onclick: (e) => micTest(e.target) }, '🎤 Test micro (5 s)'), h('button.btn.small', { onclick: (e) => analyzeInstru(e.target) }, '🎵 Analyser l’instru (tonalité + BPM)')),
         micInfo, instruInfo,
         h('p.tiny.muted', 'Après chaque prise : rôle proposé (Lead, Double, Backs, Ad-lib), chaîne selon les mesures (débruitage dosé, anti-pop, gate, calage, autotune dans la tonalité, chaîne voix et volume/panoramique du rôle, écho au tempo), rapport chiffré, conseils (mesures seules, aucun audio envoyé), A/B. Vu-mètre et alerte « SATURE » dans « Mes pistes ».'),

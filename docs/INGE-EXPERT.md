@@ -34,6 +34,21 @@ FabFilter/UAD/Waves/Ozone), avec 4 règles : diagnostic chirurgical, réglages *
 Rapport détaillé en français (crête, niveau, dynamique, clipping, sonie, sifflantes,
 résonance, respirations, traitement appliqué) — `expertReport`.
 
+## Consultations prêtes à l'emploi (4 fiches)
+Bouton **« 💬 Consulter l'ingé son »** (carte Ingé son IA) → modale où l'on choisit un sujet,
+remplit les cases, et reçoit une réponse chiffrée et structurée. Fiches (`CONSULTATIONS` +
+`buildConsult`) :
+1. **Chirurgie voix** (caractère de voix + style) → chaîne vocale complète, fréquences,
+   compresseurs (ratio/attaque/relâchement), sends reverb/delay.
+2. **Crash-test des basses** (style) → kick vs 808/sub : sidechain, EQ chirurgical, phase,
+   saturation, audibilité sur petit haut-parleur.
+3. **Mastering streaming & club** (style + headroom) → chaîne de mastering, LUFS, True Peak,
+   plage dynamique.
+4. **Audit & référence** (titre + artiste) → analyse d'une signature sonore et réglages pour
+   s'en approcher.
+Le prompt système est le même persona (`EXPERT_SYSTEM_CORE`) ; la demande est construite à
+partir de la description de l'utilisateur (texte), **aucun audio n'est envoyé**.
+
 ## Code et tests
 - Logique pure : `public/js/lib/ingexpert.js` (analyse, FFT résonance, chaîne, duck, rapport,
   prompt) — testée par `test/ingexpert.test.mjs` (`npm test`).

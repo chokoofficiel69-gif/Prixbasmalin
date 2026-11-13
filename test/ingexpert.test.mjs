@@ -2,7 +2,7 @@
 // Lancer : node --test test/ingexpert.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { analyzeSamples, findResonance, STYLES, STYLE_ORDER, deessFor, antipopFor, expertChain, instruDuckDb, expertReport, expertTipsPrompt } from '../public/js/lib/ingexpert.js';
+import { analyzeSamples, findResonance, STYLES, STYLE_ORDER, deessFor, antipopFor, expertChain, instruDuckDb, expertReport, expertTipsPrompt, EXPERT_SYSTEM_CORE, CONSULTATIONS, buildConsult } from '../public/js/lib/ingexpert.js';
 
 const sine = (hz, sec, sr = 44100, amp = 0.5) => { const n = Math.floor(sec * sr), a = new Float32Array(n); for (let i = 0; i < n; i++) a[i] = amp * Math.sin(2 * Math.PI * hz * i / sr); return a; };
 
@@ -78,4 +78,19 @@ test('invite LLM experte : nombres seulement, aucun audio', () => {
 test('styles disponibles', () => {
   assert.deepEqual(STYLE_ORDER, ['rap', 'chant', 'drill', 'rnb']);
   for (const k of STYLE_ORDER) assert.ok(STYLES[k].master && STYLES[k].voicePreset);
+});
+
+test('consultations : 4 fiches, persona partagé, variables remplies', () => {
+  assert.equal(CONSULTATIONS.length, 4);
+  assert.deepEqual(CONSULTATIONS.map(c => c.id), ['voix', 'basses', 'master', 'reference']);
+  assert.match(EXPERT_SYSTEM_CORE, /professionnel exp/i);
+  const voix = buildConsult('voix', { voix: 'grave', style: 'Trap sombre' });
+  assert.match(voix.system, /professionnel exp/i);
+  assert.match(voix.system, /étapes numérotées/);
+  assert.match(voix.prompt, /grave/); assert.match(voix.prompt, /Trap sombre/);
+  const ref = buildConsult('reference', { morceau: 'SICKO MODE', artiste: 'Travis Scott' });
+  assert.match(ref.prompt, /SICKO MODE/); assert.match(ref.prompt, /Travis Scott/);
+  const master = buildConsult('master', { style: 'Trap', headroom: '-6' });
+  assert.match(master.prompt, /-6 dB/); assert.match(master.prompt, /LUFS|True Peak|dBTP/);
+  assert.equal(buildConsult('inconnu'), null);
 });

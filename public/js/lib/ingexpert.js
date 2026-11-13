@@ -129,6 +129,16 @@ export function expertReport(m = {}) {
   return lines.join('\n');
 }
 
+// Persona partagé (conseils de prise ET consultations) — identité + règles de réponse.
+export const EXPERT_SYSTEM_CORE = [
+  'Tu es un ingénieur du son professionnel expérimenté : 30 ans de studio (prise de son, mixage, mastering), référence dans tous les genres (Rap/Hip-Hop/Trap/Drill, Électro/House/EDM, Pop, R&B, Afrobeat, Rock, Acoustique). Tu connais le matériel légendaire (SSL, Neve, API, 1176, LA-2A, Distressor, Pultec) et les plugins modernes (FabFilter, UAD, Waves, Soundtoys, Valhalla, iZotope Ozone), mais tu ne nommes une marque que si ça aide vraiment.',
+  'Règles de réponse :',
+  '1. Diagnostic chirurgical : nomme la cause exacte (conflit de fréquences, phase, dynamique mal gérée, manque de headroom, écrêtage, résonance…).',
+  '2. Réglages ultra-précis et chiffrés : fréquences en Hz, valeurs de Q, ratios de compression, attaque/relâchement en ms, niveaux en dB, cibles LUFS. Jamais de conseil vague.',
+  '3. Adapte la chaîne au genre/style indiqué. Ex. : saturation harmonique + compression parallèle pour Rap/Électro ; transparence et profondeur pour l’acoustique.',
+  '4. Relie toujours le réglage à l’émotion, au groove et à l’impact sur tous les systèmes (club, voiture, smartphone, casque).',
+].join('\n');
+
 /** Invite LLM experte — SEULEMENT des nombres (aucun audio). */
 export function expertTipsPrompt(m = {}) {
   const facts = {
@@ -138,15 +148,40 @@ export function expertTipsPrompt(m = {}) {
     de_esser: m.deess ?? null, duck_instru_dB: m.instruDuck ?? null,
     justesse_avant_pct: m.justesseBefore ?? null, justesse_apres_pct: m.justesseAfter ?? null,
   };
-  const system = [
-    'Tu es un ingénieur du son professionnel expérimenté : 30 ans de studio (prise de son, mixage, mastering), référence dans tous les genres (Rap/Hip-Hop/Trap/Drill, Électro/House/EDM, Pop, R&B, Afrobeat, Rock, Acoustique). Tu connais le matériel légendaire (SSL, Neve, API, 1176, LA-2A, Distressor, Pultec) et les plugins modernes (FabFilter, UAD, Waves, Soundtoys, Valhalla, iZotope Ozone), mais tu ne nommes une marque que si ça aide vraiment.',
-    'Règles de réponse :',
-    '1. Diagnostic chirurgical : nomme la cause exacte (conflit de fréquences, phase, dynamique mal gérée, manque de headroom, écrêtage, résonance…).',
-    '2. Réglages ultra-précis et chiffrés : fréquences en Hz, valeurs de Q, ratios de compression, attaque/relâchement en ms, niveaux en dB, cibles LUFS. Jamais de conseil vague.',
-    '3. Adapte la chaîne au genre indiqué (champ "style"). Ex. : saturation harmonique + compression parallèle pour Rap/Électro ; transparence et profondeur pour l’acoustique.',
-    '4. Relie toujours le réglage à l’émotion, au groove et à l’impact sur tous les systèmes (club, voiture, smartphone, casque).',
-    'IMPORTANT : tu n’as pas l’audio, seulement les mesures chiffrées ci-dessous. N’invente aucune mesure non fournie. Réponds en français, 2 à 3 conseils maximum, une puce par conseil, priorisés.',
-  ].join('\n');
+  const system = EXPERT_SYSTEM_CORE + '\nIMPORTANT : tu n’as pas l’audio, seulement les mesures chiffrées ci-dessous. N’invente aucune mesure non fournie. Réponds en français, 2 à 3 conseils maximum, une puce par conseil, priorisés.';
   const prompt = 'Mesures de la voix/prise (chiffres uniquement, aucun son) :\n' + JSON.stringify(facts, null, 2) + '\n\nDonne 2 à 3 conseils experts, chiffrés et priorisés.';
   return { system, prompt, facts };
+}
+
+const field = (name, label, type, opts) => ({ name, label, type, ...(opts || {}) });
+// Consultations prêtes à l'emploi (les 4 fiches). `build(v)` renvoie le texte de la demande.
+export const CONSULTATIONS = [
+  {
+    id: 'voix', label: '🎤 Chirurgie voix (chaîne vocale sur mesure)',
+    fields: [field('voix', 'Caractère de ta voix', 'select', { options: ['grave', 'aiguë', 'nasillarde', 'agressive', 'posée'] }), field('style', 'Style du morceau', 'text', { placeholder: 'ex. Trap sombre, Boom Bap, Afro-Pop, Électro' })],
+    build: (v) => `Voici les caractéristiques de ma voix (${v.voix || 'non précisé'}) et le style du morceau (${v.style || 'non précisé'}). Construis-moi ma chaîne complète de traitement vocal étape par étape dans l'ordre exact (nettoyage, compression, égalisation, saturation, effets temporels). Donne-moi les fréquences exactes à couper ou booster, les réglages précis de mes compresseurs (ratio, attaque, relâchement) et le dosage des envois (sends) de reverb et delay pour que ma voix perce le mix sans être agressive.`,
+  },
+  {
+    id: 'basses', label: '🔊 Crash-test des basses (Kick & 808 / Sub)',
+    fields: [field('style', 'Style', 'text', { placeholder: 'ex. Drill, Techno, House, Trap' })],
+    build: (v) => `J'ai un problème de gestion des basses sur mon morceau [${v.style || 'style non précisé'}]. Mon kick et ma basse/808 manquent de puissance ou se masquent mutuellement. Donne-moi une méthode d'ingénieur du son étape par étape pour les faire cohabiter parfaitement : réglage du sidechain (fréquences ciblées, temps de relâchement), découpage fréquentiel chirurgical (EQ), gestion de la phase et saturation harmonique pour que la basse soit audible même sur un petit haut-parleur de téléphone.`,
+  },
+  {
+    id: 'master', label: '💽 Mastering streaming & club',
+    fields: [field('style', 'Style', 'text', { placeholder: 'ex. Trap, House…' }), field('headroom', 'Marge (headroom) en dB', 'text', { placeholder: '-6', value: '-6' })],
+    build: (v) => `Mon mixage est terminé avec une marge (headroom) de ${v.headroom || '-6'} dB. Je veux faire le mastering de ce titre [${v.style || 'style non précisé'}] pour qu'il rivalise avec les sorties commerciales actuelles sur Spotify, Apple Music et en club. Détaille-moi la chaîne de mastering idéale (EQ de correction, compression de bus/glue, élargissement stéréo Mid/Side, saturation et limiteur final). Indique-moi les valeurs cibles précises en LUFS intégrés, True Peak (dBTP) et la plage dynamique à respecter pour éviter que les plateformes de streaming n'écrasent mon son.`,
+  },
+  {
+    id: 'reference', label: '🎯 Audit & référence (viser le son d’un hit)',
+    fields: [field('morceau', 'Titre de référence', 'text', { placeholder: 'ex. SICKO MODE' }), field('artiste', 'Artiste', 'text', { placeholder: 'ex. Travis Scott' })],
+    build: (v) => `Je veux que mon morceau se rapproche de la couleur sonore et de la dynamique du titre '${v.morceau || '?'}' de '${v.artiste || '?'}'. Analyse ce titre en tant qu'ingénieur du son : décris-moi l'équilibre fréquentiel (graves, médiums, aigus), le placement des éléments dans l'espace stéréo, la texture des voix et l'impact de la batterie. Donne-moi ensuite les astuces concrètes et les réglages à appliquer sur mon propre mix pour obtenir cette même signature sonore.`,
+  },
+];
+
+/** Construit {system, prompt} pour une consultation. Le système = persona + consigne de forme. */
+export function buildConsult(id, values = {}) {
+  const c = CONSULTATIONS.find(x => x.id === id);
+  if (!c) return null;
+  const system = EXPERT_SYSTEM_CORE + '\nRéponds en français, structuré en étapes numérotées dans l’ordre d’application, avec des valeurs chiffrées (Hz, Q, ratios, ms, dB, LUFS, dBTP). Reste concret et actionnable.';
+  return { system, prompt: c.build(values), consult: c.id };
 }
