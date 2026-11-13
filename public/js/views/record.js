@@ -1,6 +1,7 @@
 import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose, confirmBox, promptBox } from '../lib/core.js';
 import { mountAssistant } from './assistant.js';
 import { createTimeline } from './timeline.js';
+import { knob } from '../lib/knob.js';
 import { putItem, getItem, delItem, packBuffer, unpackBuffer } from '../lib/session.js';
 import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords, keyFromChords, detectPitch, detectKey } from '../lib/voicefx.js';
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift, detectBeats } from '../lib/audio.js';
@@ -66,7 +67,7 @@ export async function render(el, { params }) {
   let selected = -1;
   let sel = null;          // [début, fin] en secondes sur la piste sélectionnée
   let masterResult = null;
-  let recorder = null, beatSrc = null, recLatency = null, timeline = null, recFrom = 0, recMinOff = 0;
+  let recorder = null, beatSrc = null, recLatency = null, timeline = null, recFrom = 0, recMinOff = 0, knobSel;
 
   const list = h('div.stack');
   const editBox = h('div.stack');
@@ -86,7 +87,7 @@ export async function render(el, { params }) {
     clearTimeout(saveT);
     saveT = setTimeout(async () => {
       try {
-        await putItem(SKEY, { v: 1, at: Date.now(), selected, tracks: tracks.map(t => ({ name: t.name, kind: t.kind, gainDb: t.gainDb, pan: t.pan, offset: t.offset, mute: t.mute, solo: !!t.solo, armed: !!t.armed, empty: !!t.empty, fxDone: t.fxDone || [], fileId: t.fileId,
+        await putItem(SKEY, { v: 1, at: Date.now(), selected, tracks: tracks.map(t => ({ name: t.name, kind: t.kind, gainDb: t.gainDb, pan: t.pan, offset: t.offset, mute: t.mute, solo: !!t.solo, armed: !!t.armed, empty: !!t.empty, fxDone: t.fxDone || [], fx: t.fx || null, fileId: t.fileId,
           buf: packBuffer(t.buffer), orig: t.original === t.buffer ? null : packBuffer(t.original) })) });
         saveLbl.textContent = `💾 Sauvegardé automatiquement à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
       } catch (e) { saveLbl.textContent = '⚠️ Sauvegarde auto impossible (mémoire du navigateur pleine ?)'; }
@@ -204,15 +205,58 @@ export async function render(el, { params }) {
   const micMeter = makeMeter('🎤 Micro (ce qui est enregistré)');
   const outMeter = makeMeter('🔊 Sortie (instru + voix)');
 
+  // ---------- Réglages EN DIRECT par piste (non destructifs) : on tourne une molette, on entend tout de suite ----------
+  const FX_DEF = { low: 0, mid: 0, pres: 0, air: 0, comp: 0, reverb: 0, echo: 0, tune: 0 };
+  const fxOf = (t) => Object.assign({}, FX_DEF, t.fx || {});
+  const fxActive = (t) => !!t.fx && Object.keys(FX_DEF).some(k => Number(t.fx[k] || 0) !== FX_DEF[k]);
+  let tuneModule = null;
+  const loadTune = (ctx) => { try { return ctx.audioWorklet.addModule('/js/lib/livetune-worklet.js'); } catch { return Promise.reject(); } };
+  try { tuneModule = loadTune(audioCtx()).then(() => true, () => false); } catch {}
+  let tuneReady = false; tuneModule?.then(ok => { tuneReady = ok; });
+  const bpmNow = () => Number(localStorage.getItem('studio.bpm')) || 90;
+  function revIR(ctx, sec = 1.8) { const len = Math.floor(ctx.sampleRate * sec), ir = ctx.createBuffer(2, len, ctx.sampleRate); for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3; } return ir; }
+  function buildFx(ctx, input, fx, withTune) {
+    const f = (type, freq, gain, q = 0.8) => { const n = ctx.createBiquadFilter(); n.type = type; n.frequency.value = freq; n.gain.value = gain; n.Q.value = q; return n; };
+    let head = input, tune = null;
+    if (withTune && fx.tune > 0) { tune = new AudioWorkletNode(ctx, 'live-tune', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] }); tune.port.postMessage({ strength: Math.min(1, fx.tune), speed: fx.tune > 0.85 ? 1 : 0.1 + fx.tune * 0.3, scale: liveScale() }); head = input.connect(tune); }
+    const low = f('lowshelf', 180, fx.low), mid = f('peaking', 700, fx.mid, 0.8), pres = f('peaking', 3200, fx.pres, 0.9), air = f('highshelf', 10000, fx.air);
+    const comp = ctx.createDynamicsCompressor(); comp.attack.value = 0.005; comp.release.value = 0.12; comp.knee.value = 6;
+    const make = ctx.createGain();
+    const setComp = (c) => { comp.threshold.value = -6 - c * 26; comp.ratio.value = 1 + c * 5; make.gain.value = 10 ** (c * 7 / 20); };
+    setComp(fx.comp);
+    const sum = ctx.createGain();
+    head.connect(low).connect(mid).connect(pres).connect(air).connect(comp).connect(make).connect(sum);
+    const cv = ctx.createConvolver(); cv.buffer = revIR(ctx); const revG = ctx.createGain(); revG.gain.value = fx.reverb;
+    make.connect(cv).connect(revG).connect(sum);
+    const dl = ctx.createDelay(2); dl.delayTime.value = Math.min(1.5, 60 / bpmNow() / 2); const fb = ctx.createGain(); fb.gain.value = 0.3; const echoG = ctx.createGain(); echoG.gain.value = fx.echo;
+    make.connect(dl); dl.connect(fb).connect(dl); dl.connect(echoG).connect(sum);
+    return { out: sum, low, mid, pres, air, setComp, revG, echoG, tune };
+  }
+  // pour le mix/master : on « grave » les réglages en direct dans une copie de la piste (l'original n'est pas touché)
+  async function renderFx(t) {
+    if (!fxActive(t)) return t.buffer;
+    const fx = fxOf(t), tail = (fx.reverb > 0 || fx.echo > 0) ? 2 : 0;
+    const off = new OfflineAudioContext(2, Math.ceil((t.buffer.duration + tail) * t.buffer.sampleRate), t.buffer.sampleRate);
+    let withTune = false; if (fx.tune > 0) { try { await off.audioWorklet.addModule('/js/lib/livetune-worklet.js'); withTune = true; } catch {} }
+    const src = off.createBufferSource(); src.buffer = t.buffer;
+    const g = buildFx(off, src, fx, withTune); g.out.connect(off.destination); src.start();
+    return off.startRendering();
+  }
+  async function mixInput(minOff) {
+    const out = [];
+    for (const t of tracks) { if (t.empty) continue; out.push({ ...t, buffer: await renderFx(t), mute: effMute(t), offset: t.offset - minOff }); }
+    return out;
+  }
+
   // ---------- Écoute du mix EN DIRECT : chaque curseur de volume agit pendant la lecture ----------
-  const live = { srcs: [], gains: new Map(), timer: null, ctxStart: 0, from: 0, end: 0 };
+  const live = { srcs: [], gains: new Map(), fx: new Map(), timer: null, ctxStart: 0, from: 0, end: 0 };
   let seekPos = 0; // tête de lecture (secondes depuis le début de la ligne de temps)
   const liveBtn = h('button.btn.small.primary', '▶ Écouter tout (volumes en direct)');
   const effMute = (t) => t.mute || (tracks.some(x => x.solo) && !t.solo);
   const gainOf = (t) => effMute(t) ? 0 : 10 ** (t.gainDb / 20);
   function liveGain() { const now = audioCtx().currentTime; for (const [t, g] of live.gains) g.gain.setTargetAtTime(gainOf(t), now, 0.02); }
   function livePos() { return live.srcs.length ? Math.min(live.end, audioCtx().currentTime - live.ctxStart + live.from) : seekPos; }
-  function stopLive(keepPos = true) { if (live.srcs.length && keepPos) seekPos = livePos(); outMeter.detach(); live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; playBtn.textContent = '▶ Lecture'; }
+  function stopLive(keepPos = true) { if (live.srcs.length && keepPos) seekPos = livePos(); outMeter.detach(); live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); live.fx.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; playBtn.textContent = '▶ Lecture'; }
   function playLive(from = seekPos, until = null, onEnd = null) {
     stopLive(false); player.stop();
     if (!tracks.length) return toast('Aucune piste à écouter.');
@@ -226,7 +270,8 @@ export async function render(el, { params }) {
       const src = ctx.createBufferSource(); src.buffer = t.buffer;
       const g = ctx.createGain(); g.gain.value = gainOf(t);
       const pan = ctx.createStereoPanner(); pan.pan.value = t.pan || 0;
-      src.connect(g).connect(pan).connect(bus);
+      const fxn = buildFx(ctx, src, fxOf(t), tuneReady);
+      fxn.out.connect(g).connect(pan).connect(bus); live.fx.set(t, fxn);
       const off = (t.offset || 0) - minOff - from;
       if (off >= 0) src.start(t0 + off); else if (-off < t.buffer.duration) src.start(t0, -off); else continue;
       if (until !== null) src.stop(t0 + (until - from));
@@ -445,7 +490,7 @@ export async function render(el, { params }) {
   // ---------- Liste des pistes ----------
   function drawList() {
     saveSoon(); syncInstru?.();
-    timeline?.render();
+    timeline?.render(); if (typeof renderKnobs === 'function' && knobSel !== tracks[selected]) { knobSel = tracks[selected]; renderKnobs(); }
   }
 
   // ---------- Édition de la piste sélectionnée ----------
@@ -850,7 +895,7 @@ export async function render(el, { params }) {
     masterInfo.innerHTML = '<span class="spinner"></span> Mixage…';
     try {
       const minOff = Math.min(0, ...tracks.map(t => t.offset));
-      const mixed = await mix(tracks.map(t => ({ ...t, mute: effMute(t), offset: t.offset - minOff })));
+      const mixed = await mix(await mixInput(minOff));
       const r = await master(mixed, masterSel.value, (s) => { masterInfo.innerHTML = `<span class="spinner"></span> ${s}`; });
       masterResult = r;
       masterInfo.innerHTML = '';
@@ -865,7 +910,7 @@ export async function render(el, { params }) {
     btn.disabled = true; compareBox.innerHTML = '';
     try {
       const minOff = Math.min(0, ...tracks.map(t => t.offset));
-      const mixed = await mix(tracks.map(t => ({ ...t, mute: effMute(t), offset: t.offset - minOff })));
+      const mixed = await mix(await mixInput(minOff));
       for (const [k, preset] of Object.entries(MASTER_PRESETS)) {
         masterInfo.innerHTML = `<span class="spinner"></span> Version « ${preset.label} »…`;
         const r = await master(mixed, k, () => {});
@@ -902,13 +947,50 @@ export async function render(el, { params }) {
   const masterKey = (p) => { const keys = Object.keys(MASTER_PRESETS); const n = norm2(p); return keys.find(k => k === p) || keys.find(k => norm2(MASTER_PRESETS[k].label).includes(n)) || (/(rap|trap|punch)/.test(n) ? keys.find(k => /rap/i.test(MASTER_PRESETS[k].label)) : /club|fort/.test(n) ? keys.find(k => /club/i.test(MASTER_PRESETS[k].label)) : /doux|acous/.test(n) ? keys.find(k => /doux/i.test(MASTER_PRESETS[k].label)) : keys[0]); };
   const norm2 = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const fakeBtn = () => ({ disabled: false });
+  // ---------- Panneau de molettes (piste sélectionnée) ----------
+  const knobBox = h('div.card.stack', { style: { padding: '10px', background: 'var(--bg)' } });
+  const KN = [
+    ['low', '🔈 Grave', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['mid', '🎚️ Médium', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['pres', '🗣️ Présence', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['air', '✨ Brillance', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['comp', '🗜️ Compression', 0, 1, 0.02, (v) => `${Math.round(v * 100)} %`],
+    ['reverb', '🌫️ Réverbe', 0, 0.7, 0.01, (v) => `${Math.round(v / 0.7 * 100)} %`],
+    ['echo', '🔁 Écho', 0, 0.6, 0.01, (v) => `${Math.round(v / 0.6 * 100)} %`],
+    ['tune', '🎤 Autotune', 0, 1, 0.05, (v) => v ? `${Math.round(v * 100)} %` : 'non'],
+  ];
+  function applyLiveFx(t, k) {
+    const n = live.fx.get(t); if (!n) return;
+    const fx = fxOf(t), now = audioCtx().currentTime;
+    if (k === 'tune') { if (!!n.tune !== fx.tune > 0) { playLive(livePos()); } else n.tune?.port.postMessage({ strength: Math.min(1, fx.tune), speed: fx.tune > 0.85 ? 1 : 0.1 + fx.tune * 0.3 }); return; }
+    if (k === 'comp') return n.setComp(fx.comp);
+    if (k === 'reverb') return n.revG.gain.setTargetAtTime(fx.reverb, now, 0.03);
+    if (k === 'echo') return n.echoG.gain.setTargetAtTime(fx.echo, now, 0.03);
+    n[k]?.gain.setTargetAtTime(fx[k], now, 0.03);
+  }
+  function renderKnobs() {
+    knobBox.innerHTML = '';
+    const t = tracks[selected];
+    if (!t || t.empty) { knobBox.append(h('p.small.muted', 'Clique sur une piste pour la régler en direct avec les molettes.')); return; }
+    const row = h('div.row', { style: { flexWrap: 'wrap', gap: '10px', justifyContent: 'space-around' } });
+    const knobs = KN.map(([k, label, min, max, step, fmt]) => knob({ label, min, max, step, value: fxOf(t)[k], def: FX_DEF[k], fmt, onInput: (v) => { t.fx = { ...fxOf(t), [k]: v }; masterResult = null; applyLiveFx(t, k); saveSoon(); } }));
+    knobs.forEach(kn => row.append(kn.el));
+    knobBox.append(
+      h('div.row', h('strong.grow', `🎛️ Réglages en direct : ${t.kind === 'instru' ? '🥁' : '🎤'} ${t.name}`),
+        h('button.btn.small', { onclick: () => (live.srcs.length ? stopLive() : playLive()) }, '▶ / ⏸ Écouter'),
+        h('button.btn.small.ghost', { onclick: () => { t.fx = null; masterResult = null; renderKnobs(); if (live.srcs.length) playLive(livePos()); saveSoon(); } }, '↺ Molettes à zéro'),
+        h('button.btn.small', { title: 'Enlève les molettes ET tous les effets appliqués (autotune, nettoyage…) : retour à la prise brute. Annulable avec Ctrl+Z.', onclick: async () => { t.fx = null; renderKnobs(); await work('Enlever tous les effets…', async (b, tr) => tr.original); if (live.srcs.length) playLive(livePos()); } }, '🧽 Enlever tous les effets')),
+      row,
+      h('p.tiny.muted', 'Lance la lecture (Espace) puis tourne les molettes : glisse vers le haut / le bas, ou molette de la souris (double-clic = zéro). Tu entends le changement tout de suite. Rien n’est abîmé : ta prise reste intacte, les réglages sont appliqués au moment du mix / master.'));
+  }
+
   // ---------- Ligne de temps (toutes les pistes au même endroit) ----------
   const minOffNow = () => Math.min(0, ...tracks.map(t => t.offset || 0));
   let timelineRemove = () => {};
   timeline = createTimeline({
     tracks, effMute,
     getSelected: () => selected,
-    select: (i, quiet) => { if (selected !== i) { selected = i; drawEdit(); } if (!quiet) timeline.render(); },
+    select: (i, quiet) => { if (selected !== i) { selected = i; drawEdit(); knobSel = tracks[i]; renderKnobs(); } if (!quiet) timeline.render(); },
     changed: (kind, t) => {
       masterResult = null;
       if (kind === 'gain') { liveGain(); syncInstru(); saveSoon(); return; }
@@ -1168,7 +1250,7 @@ export async function render(el, { params }) {
         h('button.btn.small', { onclick: async () => { for (const f of await pickFromLibrary({ kinds: ['audio', 'video'] })) await addBlob(await fetchFileBlob(f.id), f.name, null, f.id); } }, '📚 Mes fichiers'),
         trashBtn, h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet'), saveLbl),
       micMeter.proxEl,
-      timeline.el, timeline.selBar,
+      timeline.el, timeline.selBar, knobBox,
       h('p.tiny.muted', '⌨️ Raccourcis : Espace = lecture / pause (stop pendant une prise) · R = enregistrer · E ou Suppr = effacer le passage sélectionné (sinon la piste) · Ctrl+Z = annuler · Ctrl+Y = rétablir · M = muet · S = solo · A = armer ● · N = nouvelle piste · ↑ ↓ = changer de piste · ← → = reculer / avancer de 5 s · Maj + ← → = décaler la piste de 10 ms pour la caler · F = tout voir · Entrée = début · Échap = stop.'),
       h('p.tiny.muted', '➕ Ajouter une piste (backs, refrain…) puis ⏺ : la prise va dans la piste armée ● et l’enregistrement démarre là où est la tête de lecture, en jouant tout le reste. Clique sur la ligne de temps pour placer la lecture · ⬚ Sélectionner : glisse sur une prise pour choisir un passage à couper · ✋ Déplacer : glisse une prise pour la caler · M = muet, S = solo, Vol = volume, G/D = gauche/droite.')),
     h('div.grid.two',
