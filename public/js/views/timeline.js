@@ -123,10 +123,23 @@ export function createTimeline(o) {
     const minO = minOff();
     inner.innerHTML = '';
     inner.style.width = (HEAD + total() * pps + 200) + 'px';
+    // Grille de mesures calée au tempo (lignes de mesure + temps)
+    const bpmV = o.bpm?.() || 0, bpb = 4;
+    if (bpmV > 0) {
+      const barPx = Math.max(6, (60 / bpmV * bpb) * pps), beatPx = barPx / bpb;
+      inner.style.backgroundImage = `repeating-linear-gradient(90deg, color-mix(in srgb, var(--line) 85%, transparent) 0 1px, transparent 1px ${barPx}px), repeating-linear-gradient(90deg, color-mix(in srgb, var(--line) 28%, transparent) 0 1px, transparent 1px ${beatPx}px)`;
+      inner.style.backgroundPosition = `${HEAD}px 0`; inner.style.backgroundRepeat = 'repeat';
+    } else { inner.style.backgroundImage = 'none'; }
     inner.append(ruler(minO));
     if (!o.tracks.length) inner.append(h('p.muted.small', { style: { padding: '12px' } }, 'Aucune piste. Importe ton instru (📥) puis enregistre (⏺), ou dis-le à l’assistant.'));
     o.tracks.forEach((t, i) => inner.append(h('div', { style: { display: 'flex' } }, header(t, i), lane(t, i, minO))));
     inner.append(playhead);
+    for (const [mi, m] of (o.markers?.() || []).entries()) {
+      const x = gx(m.t);
+      inner.append(h('div', { title: m.name + ' — clic : aller · double-clic : renommer / supprimer', style: { position: 'absolute', left: x + 'px', top: 0, bottom: 0, width: '2px', background: 'var(--accent2)', zIndex: 4, cursor: 'pointer' },
+        onclick: (e) => { e.stopPropagation(); o.seek(m.t); }, ondblclick: (e) => { e.stopPropagation(); o.editMarker?.(mi); } },
+        h('span', { style: { position: 'absolute', top: 0, left: '2px', fontSize: '10px', fontWeight: 700, background: 'var(--accent2)', color: '#06121f', padding: '0 4px', borderRadius: '0 4px 4px 0', whiteSpace: 'nowrap' } }, '🚩 ' + m.name)));
+    }
     if (selTrack && !o.tracks.includes(selTrack)) { selTrack = null; o.setSel(null); }
     showSel();
   }

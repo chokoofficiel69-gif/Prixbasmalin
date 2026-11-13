@@ -1140,10 +1140,19 @@ export async function render(el, { params }) {
 
   // ---------- Ligne de temps (toutes les pistes au même endroit) ----------
   const minOffNow = () => Math.min(0, ...tracks.map(t => t.offset || 0));
+  // Marqueurs nommés (par projet)
+  const MKEY = `studio.markers:${state.projectId || 'perso'}`;
+  let markers = (() => { try { return JSON.parse(localStorage.getItem(MKEY)) || []; } catch { return []; } })();
+  const saveMarkers = () => { try { localStorage.setItem(MKEY, JSON.stringify(markers)); } catch {} };
+  const markerPos = () => live.srcs.length ? livePos() : (player.playing && tracks[selected] ? (tracks[selected].offset || 0) - minOffNow() + player.position : seekPos);
+  function addMarker() { markers.push({ t: Math.max(0, markerPos()), name: `M${markers.length + 1}` }); markers.sort((a, b) => a.t - b.t); saveMarkers(); timeline?.render(); toast('Marqueur ajouté 🚩'); }
+  async function editMarker(i) { const m = markers[i]; if (!m) return; const name = await promptBox('Nom du marqueur (laisse vide pour supprimer)', m.name); if (name === null) return; if (!name.trim()) markers.splice(i, 1); else m.name = name.trim(); saveMarkers(); timeline?.render(); }
   let timelineRemove = () => {};
   timeline = createTimeline({
     tracks, effMute,
     bpm: () => transport.bpm,
+    markers: () => markers,
+    editMarker: (i) => editMarker(i),
     getSelected: () => selected,
     select: (i, quiet) => { if (selected !== i) { selected = i; drawEdit(); knobSel = tracks[i]; renderKnobs(); } if (!quiet) timeline.render(); },
     changed: (kind, t) => {
@@ -1511,7 +1520,8 @@ export async function render(el, { params }) {
   const transportRow = h('div.row', { style: { flexWrap: 'wrap', gap: '8px', alignItems: 'center' } },
     loopBtn, h('span.small.muted', 'Mesure'), barsLbl,
     h('span.small.muted', 'BPM'), bpmInput, keyLbl,
-    metroBtn, h('span.small.muted', '🔊'), metroVol, countSel);
+    metroBtn, h('span.small.muted', '🔊'), metroVol, countSel,
+    h('button.btn.small.ghost', { title: 'Poser un marqueur à la tête de lecture (double-clic sur le drapeau pour renommer/supprimer)', onclick: addMarker }, '🚩 Marqueur'));
   el.append(
     h('div.card.stack', { style: { marginBottom: '14px' } },
       h('div.row', { style: { flexWrap: 'wrap', gap: '8px', alignItems: 'center' } },
