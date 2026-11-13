@@ -89,6 +89,11 @@ function categoryFor(row, merchantName = "") {
     if (/\b(?:rv\d+|robot vacuum|vacuum|aspirateur)\b/.test(title)) return "home";
     if (/\b(?:aov|ranger|cruiser|bullet|cell|cue|doorbell|camera|cam|smart lock|smart doorbell|smart sensor|sensor|capteur|smart plug|smart hub|nvr)\b/.test(title)) return "tech";
   }
+  if (/prm coupons couture/.test(merchant) && metadataCategory === "other") {
+    const title = norm([row.product_name, row.title, row.name].join(" "));
+    if (/\b(?:ameublement|rideau|coussin|linge de maison|nappe|decoration|tissu d ameublement)\b/.test(title)) return "home";
+    if (/\b(?:jersey|denim|doublure|popeline|maille|viscose|molleton|drap de laine|mousseline|tulle|lycra|elastane|patron|blouse|veste|robe|pantalon|chemise|jupe|couture)\b/.test(title)) return "fashion";
+  }
   if (metadataCategory !== "other") return metadataCategory;
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
   const titleCategory = classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
@@ -947,6 +952,9 @@ async function runSelfTests() {
     [{ title: "Doorbell 3 Kit" }, "tech", "Imou FR"],
     [{ title: "RV3 Ultra" }, "home", "Imou FR"],
     [{ title: "Imou ZXQ-123" }, "other", "Imou FR"],
+    [{ title: "Jersey coton & élasthanne - Noir" }, "fashion", "PRM Coupons Couture FR"],
+    [{ title: "Tissu d'ameublement - Velours" }, "home", "PRM Coupons Couture FR"],
+    [{ title: "PRM référence inconnue 123" }, "other", "PRM Coupons Couture FR"],
     [{ title: "Lot de chaussettes unisexes" }, "fashion", "Chaussettes-en-ligne.fr/ (FR)"],
     [{ title: "2 Bâtons de randonnée pliables AlpineFlex" }, "sport", "SODEAL CH"],
     [{ title: "Adaptateur de Scie Sauteuse pour Perceuse" }, "home", "SODEAL CH"],
