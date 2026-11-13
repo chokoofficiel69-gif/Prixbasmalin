@@ -5,7 +5,7 @@ on:
   schedule:
     - cron: "27 4 * * *"
   push:
-    branches: [main, awin-direct-feed-fix-2026-11-04, fix/awin-gtin-mpn-aliases, fix/awin-feed-import-freshness-2026-11-13]
+    branches: [main, awin-direct-feed-fix-2026-11-04, fix/awin-gtin-mpn-aliases, fix/awin-feed-import-freshness-2026-11-13, fix/awin-feed-timestamp-self-test]
     paths:
       - "price-engine/sync-awin-products.mjs"
       - "scripts/build_home_deals.py"
