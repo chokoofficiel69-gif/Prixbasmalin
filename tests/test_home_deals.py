@@ -34,6 +34,15 @@ class HomeDealsTests(unittest.TestCase):
         self.assertEqual(gifts[0]["price_date_kind"], "missing")
         self.assertEqual(gifts[0]["band"], "a-confirmer")
 
+    def test_prm_coupons_couture_gift_families_use_product_type(self):
+        fashion = product("Patron Know Me n°2137 – Blouse & veste stylée", "PRM Coupons Couture FR", 30,
+                          desc="Patron de couture")
+        home = product("Tissu d'ameublement velours", "PRM Coupons Couture FR", 30, desc="Tissu")
+        unknown = product("PRM référence 123", "PRM Coupons Couture FR", 30, desc="")
+        self.assertEqual(deals.gift_family(fashion)[0], "mode")
+        self.assertEqual(deals.gift_family(home)[0], "maison")
+        self.assertEqual(deals.gift_family(unknown)[0], "autre")
+
     def test_gifts_exclude_known_placeholder_image_urls(self):
         awin = {"products": [
             product("Produit sans visuel", "Milk Bar Babystore", 30, desc="Mode",
