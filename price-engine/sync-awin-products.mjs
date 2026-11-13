@@ -95,7 +95,7 @@ function categoryFor(row, merchantName = "") {
   if (/prm coupons couture/.test(merchant) && metadataCategory === "other") {
     const title = norm([row.product_name, row.title, row.name].join(" "));
     if (/\b(?:ameublement|rideau|coussin|linge de maison|nappe|decoration|tissu d ameublement)\b/.test(title)) return "home";
-    if (/\b(?:jersey|denim|doublure|popeline|maille|viscose|molleton|drap de laine|mousseline|tulle|lycra|elastane|patron|blouse|veste|robe|pantalon|chemise|jupe|couture|agrafe|agrafes|crochet|crochets|aiguille|aiguilles|fil|fils|fermeture|fermetures|bouton|boutons|ciseaux|canette|canettes|bobine|bobines|mercerie|broderie|machine a coudre|pied presseur|tirette|zip|rivet|oeillet|biais|ruban|passepoil|epingle|epingles|baleine de col|bouclette de laine)\b/.test(title)) return "fashion";
+    if (/\b(?:jersey|denim|doublure|popeline|maille|viscose|molleton|drap de laine|mousseline|tulle|lycra|elastane|patron|blouse|veste|robe|pantalon|chemise|jupe|couture|agrafe|agrafes|crochet|crochets|aiguille|aiguilles|fil|fils|fermeture|fermetures|bouton|boutons|ciseaux|canette|canettes|bobine|bobines|mercerie|broderie|machine a coudre|pied presseur|tirette|zip|rivet|oeillet|biais|ruban|passepoil|epingle|epingles|baleine(?:s)? de col|bouclette de laine)\b/.test(title)) return "fashion";
   }
   if (metadataCategory !== "other") return metadataCategory;
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
