@@ -2,7 +2,16 @@
 // Lancer : node --test test/daw.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes, snapToGrid, punchRegion, crossfadeSamples, colorForTrack, ROLE_COLORS } from '../public/js/lib/daw.js';
+import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes, snapToGrid, punchRegion, crossfadeSamples, colorForTrack, ROLE_COLORS, dbToMeterPct } from '../public/js/lib/daw.js';
+
+test('dbToMeterPct : échelle vu-mètre', () => {
+  assert.equal(dbToMeterPct(0), 100);
+  assert.equal(dbToMeterPct(-60), 0);
+  assert.equal(dbToMeterPct(-30), 50);
+  assert.equal(dbToMeterPct(6), 100, 'écrêté à 100');
+  assert.equal(dbToMeterPct(-120), 0, 'écrêté à 0');
+  assert.equal(dbToMeterPct(NaN), 0);
+});
 
 test('clampBpm borne et tolère les valeurs absurdes', () => {
   assert.equal(clampBpm(120), 120);

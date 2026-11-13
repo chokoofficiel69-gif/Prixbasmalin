@@ -50,11 +50,21 @@ export function crossfadeSamples(sr = 44100, fadeSec = 0.01) {
   return Math.max(1, Math.round(Math.max(0, fadeSec) * sr));
 }
 
+/** Position (0–100 %) d'un niveau en dBFS sur un vu-mètre (plancher par défaut −60 dB). */
+export function dbToMeterPct(db, floor = -60) {
+  if (!Number.isFinite(db)) return 0;
+  return clamp((db - floor) / (0 - floor) * 100, 0, 100);
+}
+
 /** Couleur par rôle (pour la ligne de temps). */
 export const ROLE_COLORS = {
   lead: '#3b82f6', double: '#22c55e', backL: '#a855f7', backR: '#ec4899', adlib: '#f59e0b',
   instru: '#64748b', voix: '#0ea5e9', autre: '#94a3b8',
 };
-export function colorForTrack(t = {}) {
+// Palette vive façon arrangement DAW : une couleur distincte par piste.
+export const CLIP_COLORS = ['#3b82f6', '#22c55e', '#a855f7', '#ec4899', '#f59e0b', '#06b6d4', '#ef4444', '#84cc16', '#eab308', '#8b5cf6'];
+export function colorForTrack(t = {}, i) {
+  if (t.kind === 'instru') return ROLE_COLORS.instru;
+  if (Number.isFinite(i)) return CLIP_COLORS[((i % CLIP_COLORS.length) + CLIP_COLORS.length) % CLIP_COLORS.length];
   return ROLE_COLORS[t.role] || ROLE_COLORS[t.kind] || ROLE_COLORS.autre;
 }

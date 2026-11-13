@@ -8,7 +8,7 @@ import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyNa
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift, detectBeats } from '../lib/audio.js';
 import { ROLES, ROLE_ORDER, proposeRole, adlibPan, roleChain, micAdvice, justesse, buildReport, tipsPrompt, fallbackTips, mergePrefs, peakDbOf, rmsDbOf, noiseFloorDb } from '../lib/ingesong.js';
 import { VOICE_TYPES, VOICE_TYPE_ORDER, PRO_PRESETS, PRO_PRESET_ORDER, DEFAULT_PRO, clampPro, buildTuneStep, applyPreset, formantForVoice, proName } from '../lib/autotunepro.js';
-import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes } from '../lib/daw.js';
+import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes, colorForTrack, dbToMeterPct } from '../lib/daw.js';
 import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.js';
 import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult } from '../lib/ingexpert.js';
 
@@ -285,19 +285,20 @@ export async function render(el, { params }) {
   }
 
   // ---------- Écoute du mix EN DIRECT : chaque curseur de volume agit pendant la lecture ----------
-  const live = { srcs: [], gains: new Map(), fx: new Map(), timer: null, ctxStart: 0, from: 0, end: 0 };
+  const live = { srcs: [], gains: new Map(), fx: new Map(), an: new Map(), bus: null, busAn: null, timer: null, ctxStart: 0, from: 0, end: 0 };
   let seekPos = 0; // tête de lecture (secondes depuis le début de la ligne de temps)
   const liveBtn = h('button.btn.small.primary', '▶ Écouter tout (volumes en direct)');
   const effMute = (t) => t.mute || (tracks.some(x => x.solo) && !t.solo);
   const gainOf = (t) => effMute(t) ? 0 : 10 ** (t.gainDb / 20);
   function liveGain() { const now = audioCtx().currentTime; for (const [t, g] of live.gains) g.gain.setTargetAtTime(gainOf(t), now, 0.02); }
   function livePos() { return live.srcs.length ? Math.min(live.end, audioCtx().currentTime - live.ctxStart + live.from) : seekPos; }
-  function stopLive(keepPos = true) { if (live.srcs.length && keepPos) seekPos = livePos(); outMeter.detach(); live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); live.fx.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; playBtn.textContent = '▶ Lecture'; }
+  function stopLive(keepPos = true) { if (live.srcs.length && keepPos) seekPos = livePos(); outMeter.detach(); live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); live.fx.clear(); live.an.clear(); live.bus = null; live.busAn = null; clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; playBtn.textContent = '▶ Lecture'; }
   function playLive(from = seekPos, until = null, onEnd = null) {
     stopLive(false); player.stop();
     if (!tracks.length) return toast('Aucune piste à écouter.');
     const ctx = audioCtx(), minOff = Math.min(0, ...tracks.map(t => t.offset || 0)), t0 = ctx.currentTime + 0.05;
     const bus = ctx.createGain(); bus.connect(ctx.destination); outMeter.attachNode(bus);
+    live.bus = bus; live.busAn = ctx.createAnalyser(); live.busAn.fftSize = 1024; live.busAn.smoothingTimeConstant = 0.82; bus.connect(live.busAn);
     let end = 0;
     for (const t of tracks) end = Math.max(end, (t.offset || 0) - minOff + t.buffer.duration);
     if (from >= end - 0.05) from = 0;
@@ -308,6 +309,7 @@ export async function render(el, { params }) {
       const pan = ctx.createStereoPanner(); pan.pan.value = t.pan || 0;
       const fxn = buildFx(ctx, src, fxOf(t), tuneReady);
       fxn.out.connect(g).connect(pan).connect(bus); live.fx.set(t, fxn);
+      const an = ctx.createAnalyser(); an.fftSize = 256; pan.connect(an); live.an.set(t, an);
       const off = (t.offset || 0) - minOff - from;
       if (off >= 0) src.start(t0 + off); else if (-off < t.buffer.duration) src.start(t0, -off); else continue;
       if (until !== null) src.stop(t0 + (until - from));
@@ -550,6 +552,7 @@ export async function render(el, { params }) {
   function drawList() {
     saveSoon(); syncInstru?.();
     timeline?.render(); if (typeof renderKnobs === 'function' && knobSel !== tracks[selected]) { knobSel = tracks[selected]; renderKnobs(); }
+    if (typeof renderMixer === 'function') renderMixer();
   }
 
   // ---------- Édition de la piste sélectionnée ----------
@@ -1090,6 +1093,51 @@ export async function render(el, { params }) {
       h('p.tiny.muted', 'Lance la lecture (Espace) puis tourne les molettes : glisse vers le haut / le bas, ou molette de la souris (double-clic = zéro). Tu entends le changement tout de suite. Rien n’est abîmé : ta prise reste intacte, les réglages sont appliqués au moment du mix / master.'));
   }
 
+  // ---------- Console de mixage (P4) ----------
+  const mixerStrips = h('div.mixer');
+  const mixerSpectrum = h('canvas.spectrum', { width: 460, height: 120, style: { width: '100%', height: '120px' } });
+  const masterLufsLbl = h('div.tiny.muted', { style: { textAlign: 'center' } }, 'LUFS : —');
+  let mixerVUs = [];
+  function renderMixer() {
+    mixerStrips.innerHTML = ''; mixerVUs = [];
+    const list = tracks.filter(t => !t.empty);
+    if (!list.length) mixerStrips.append(h('p.small.muted', { style: { padding: '10px' } }, 'Aucune piste. Enregistre ou importe une instru pour voir la console.'));
+    for (const [i, t] of list.entries()) {
+      const col = colorForTrack(t, i);
+      const vu = h('canvas.vu', { width: 12, height: 120 }); mixerVUs.push({ t, vu });
+      const dbl = h('b.tiny', `${t.gainDb} dB`);
+      const fader = h('input.fader', { type: 'range', min: -30, max: 12, step: 0.5, value: t.gainDb, oninput: (e) => { t.gainDb = Number(e.target.value); dbl.textContent = `${t.gainDb} dB`; liveGain(); masterResult = null; timeline?.render(); saveSoon(); } });
+      const pan = h('input', { type: 'range', min: -1, max: 1, step: 0.05, value: t.pan || 0, title: 'Panoramique', oninput: (e) => { t.pan = Number(e.target.value); masterResult = null; timeline?.render(); saveSoon(); } });
+      const mBtn = h('button.btn.small' + (t.mute ? '.danger' : '.ghost'), { style: { padding: '2px 8px' }, onclick: () => { t.mute = !t.mute; liveGain(); renderMixer(); timeline?.render(); } }, 'M');
+      const sBtn = h('button.btn.small' + (t.solo ? '.primary' : '.ghost'), { style: { padding: '2px 8px' }, onclick: () => { t.solo = !t.solo; liveGain(); renderMixer(); timeline?.render(); } }, 'S');
+      const ins = h('button.btn.small.ghost', { title: 'Inserts : molettes EQ / compression / réverbe / écho / autotune', onclick: () => { selected = tracks.indexOf(t); knobSel = t; drawEdit(); renderKnobs(); knobBox.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }, '⚙︎ Inserts');
+      mixerStrips.append(h('div.strip', { style: { borderTopColor: col } },
+        h('div.strip-name', { title: t.name }, (t.kind === 'instru' ? '🥁 ' : '🎤 ') + t.name),
+        h('div.strip-body', vu, h('div.col', fader, dbl)),
+        h('div.row', { style: { gap: '4px', justifyContent: 'center' } }, mBtn, sBtn),
+        h('span.tiny.muted', { style: { textAlign: 'center' } }, 'Pan'), pan, ins));
+    }
+    masterLufsLbl.textContent = masterResult ? `LUFS ${masterResult.after.toFixed(1)} · crête ${masterResult.peakDb.toFixed(1)} dB` : 'LUFS : — (mixe pour mesurer)';
+    mixerStrips.append(h('div.strip.master', { style: { borderTopColor: 'var(--accent)' } },
+      h('div.strip-name', '🎚️ MASTER'),
+      mixerSpectrum,
+      h('div.row', { style: { gap: '4px' } }, h('div.grow', masterSel), h('button.btn.small.primary', { title: 'Mixer + masteriser', onclick: () => doMaster().then(renderMixer) }, '🎛️')),
+      masterLufsLbl));
+  }
+  let mixerRAF = 0; const _vuBuf = new Float32Array(256);
+  function mixerLoop() {
+    for (const { t, vu } of mixerVUs) {
+      const an = live.an.get(t), c = vu.getContext('2d'); c.clearRect(0, 0, vu.width, vu.height);
+      let db = -90; if (an) { an.getFloatTimeDomainData(_vuBuf); let pk = 0; for (const x of _vuBuf) { const a = Math.abs(x); if (a > pk) pk = a; } db = 20 * Math.log10(pk + 1e-9); }
+      const hh = vu.height * dbToMeterPct(db) / 100; const g = c.createLinearGradient(0, vu.height, 0, 0);
+      g.addColorStop(0, '#22c55e'); g.addColorStop(.7, '#22c55e'); g.addColorStop(.85, '#eab308'); g.addColorStop(1, '#ef4444');
+      c.fillStyle = g; c.fillRect(0, vu.height - hh, vu.width, hh);
+    }
+    const c = mixerSpectrum.getContext('2d'), W = mixerSpectrum.width, H = mixerSpectrum.height; c.clearRect(0, 0, W, H);
+    if (live.busAn) { const n = live.busAn.frequencyBinCount, d = new Uint8Array(n); live.busAn.getByteFrequencyData(d); const bars = 64; for (let i = 0; i < bars; i++) { const idx = Math.min(n - 1, Math.floor(Math.pow(i / bars, 2) * n)); const v = d[idx] / 255; const x = i / bars * W, bw = W / bars - 1, bh = v * H; c.fillStyle = `hsl(${250 - v * 90},90%,${40 + v * 25}%)`; c.fillRect(x, H - bh, bw, bh); } }
+    mixerRAF = requestAnimationFrame(mixerLoop);
+  }
+
   // ---------- Ligne de temps (toutes les pistes au même endroit) ----------
   const minOffNow = () => Math.min(0, ...tracks.map(t => t.offset || 0));
   let timelineRemove = () => {};
@@ -1478,6 +1526,9 @@ export async function render(el, { params }) {
       timeline.el, timeline.selBar, knobBox,
       h('p.tiny.muted', '⌨️ Raccourcis : Espace = lecture / pause (stop pendant une prise) · R = enregistrer · E ou Suppr = effacer le passage sélectionné (sinon la piste) · Ctrl+Z = annuler · Ctrl+Y = rétablir · M = muet · S = solo · A = armer ● · N = nouvelle piste · ↑ ↓ = changer de piste · ← → = reculer / avancer de 5 s · Maj + ← → = décaler la piste de 10 ms pour la caler · F = tout voir · Entrée = début · Échap = stop.'),
       h('p.tiny.muted', '➕ Ajouter une piste (backs, refrain…) puis ⏺ : la prise va dans la piste armée ● et l’enregistrement démarre là où est la tête de lecture, en jouant tout le reste. Clique sur la ligne de temps pour placer la lecture · ⬚ Sélectionner : glisse sur une prise pour choisir un passage à couper · ✋ Déplacer : glisse une prise pour la caler · M = muet, S = solo, Vol = volume, G/D = gauche/droite.')),
+    h('div.card.stack', { style: { marginBottom: '14px' } },
+      h('div.row', h('h3', { style: { margin: 0 } }, '🎚️ Console de mixage'), h('span.tiny.muted', 'Faders, panoramique, M/S, inserts par piste · master avec analyseur de spectre et sonie. Lance la lecture (▶) pour voir les vu-mètres bouger.')),
+      mixerStrips),
     h('div.grid.two',
     h('div.stack',
       ast.card,
@@ -1575,6 +1626,7 @@ export async function render(el, { params }) {
     else if (e.code === 'Escape') { if (recorder) stopRec(); else { const back = live.srcs.length ? live.from : seekPos; stopLive(false); player.stop(); seekPos = back; } }
   };
   document.addEventListener('keydown', onKey);
+  renderMixer(); mixerLoop();
 
-  return () => { document.removeEventListener('keydown', onKey); ast?.destroy(); stopLive(); player.stop(); stopMonitor(); metro.stop(); clearInterval(barsTimer); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
+  return () => { document.removeEventListener('keydown', onKey); ast?.destroy(); stopLive(); player.stop(); stopMonitor(); metro.stop(); clearInterval(barsTimer); cancelAnimationFrame(mixerRAF); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
 }

@@ -59,7 +59,7 @@ export function createTimeline(o) {
 
   function lane(t, i, minO) {
     const g0 = (t.offset || 0) - minO, w = Math.max(2, t.buffer.duration * pps);
-    const col = colorForTrack(t);
+    const col = colorForTrack(t, i);
     const cv = h('canvas', { style: { width: '100%', height: '100%', display: 'block' } });
     const clip = h('div', { title: tool === 'move' ? 'Glisse pour déplacer la prise' : 'Glisse pour sélectionner un passage', style: { position: 'absolute', top: '6px', bottom: '6px', left: g0 * pps + 'px', width: w + 'px', borderRadius: '6px', overflow: 'hidden', touchAction: 'none',
       background: col + '38', border: `1px solid ${col}`, opacity: o.effMute(t) ? 0.35 : 1, cursor: tool === 'move' ? 'grab' : 'text' } },
