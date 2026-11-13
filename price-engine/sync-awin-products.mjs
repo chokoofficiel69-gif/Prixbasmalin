@@ -1144,8 +1144,9 @@ async function runSelfTests() {
     product_shipping: { shipping: [{ country: "FR", price: "4.99 EUR" }] }
   });
   const parsedEnhanced = parseEnhancedJsonl(validEnhancedLine + "\n");
-  if (parsedEnhanced.length !== 1 || parsedEnhanced[0].id !== "enhanced-1") {
-    throw new Error("TEST ÉCHEC : un flux Enhanced JSONL valide doit être parsé ligne par ligne.");
+  const flattenedEnhanced = parsedEnhanced.length === 1 ? flattenEnhancedProduct(parsedEnhanced[0]) : {};
+  if (parsedEnhanced.length !== 1 || flattenedEnhanced.id !== "enhanced-1" || flattenedEnhanced.title !== "AOV PT camera") {
+    throw new Error("TEST ÉCHEC : un flux Enhanced JSONL imbriqué doit être parsé et aplati.");
   }
   let incompleteEnhancedRejected = false;
   try { parseEnhancedJsonl(validEnhancedLine + "\n" + JSON.stringify({ error: "download incomplete" })); }
