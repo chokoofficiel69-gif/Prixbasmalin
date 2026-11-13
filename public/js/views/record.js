@@ -10,6 +10,7 @@ import { ROLES, ROLE_ORDER, proposeRole, adlibPan, roleChain, micAdvice, justess
 import { VOICE_TYPES, VOICE_TYPE_ORDER, PRO_PRESETS, PRO_PRESET_ORDER, DEFAULT_PRO, clampPro, buildTuneStep, applyPreset, formantForVoice, proName } from '../lib/autotunepro.js';
 import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes } from '../lib/daw.js';
 import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.js';
+import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt } from '../lib/ingexpert.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -143,12 +144,18 @@ export async function render(el, { params }) {
 
   // ---------- Ingé son IA : préférences, session (tonalité + BPM de l'instru), éléments ----------
   const ingePrefs = mergePrefs((() => { try { return JSON.parse(localStorage.getItem('studio_inge')); } catch { return null; } })());
+  if (typeof ingePrefs.expert !== 'boolean') ingePrefs.expert = false;
+  if (!STYLES[ingePrefs.style]) ingePrefs.style = 'rap';
   const saveIngePrefs = () => { try { localStorage.setItem('studio_inge', JSON.stringify(ingePrefs)); } catch {} };
   const ingeSession = { key: null, keyLabel: null, bpm: null };
   const ingeOn = h('input', { type: 'checkbox', checked: ingePrefs.enabled });
   const ingeAuto = h('input', { type: 'checkbox', checked: ingePrefs.autoProcess });
+  const ingeExpert = h('input', { type: 'checkbox', checked: ingePrefs.expert });
+  const ingeStyle = h('select', STYLE_ORDER.map(s => h('option', { value: s, selected: s === ingePrefs.style }, STYLES[s].label)));
   ingeOn.onchange = () => { ingePrefs.enabled = ingeOn.checked; saveIngePrefs(); drawInge(); };
   ingeAuto.onchange = () => { ingePrefs.autoProcess = ingeAuto.checked; saveIngePrefs(); };
+  ingeExpert.onchange = () => { ingePrefs.expert = ingeExpert.checked; saveIngePrefs(); };
+  ingeStyle.onchange = () => { ingePrefs.style = ingeStyle.value; saveIngePrefs(); };
   const micInfo = h('div.small.muted');
   const instruInfo = h('div.small.muted');
   const ingeReport = h('div.stack');
@@ -1255,6 +1262,9 @@ export async function render(el, { params }) {
     if (role === 'adlib') track.adlibIndex = tracks.filter(x => x.kind === 'voix' && x.role === 'adlib' && x !== track).length;
     track.role = role;
     const plan = roleChain(role, { noiseDb, bpm: ingeSession.bpm });
+    const expert = ingePrefs.expert;
+    let ex = null, analysis = null;
+    if (expert) { say('Analyse experte…'); analysis = analyzeSamples(ch, raw.sampleRate); ex = expertChain(plan.voice, ingePrefs.style, analysis); }
     say('Analyse de la voix…');
     const pitchBefore = await detectPitch(raw);
     const key = ingeSession.key || detectKey(pitchBefore);
@@ -1263,13 +1273,15 @@ export async function render(el, { params }) {
     track.buffer = raw; track.fxDone = [];
     const stepBuf = async (label, fn) => { say(label + '…'); pushUndo(track, { buffer: track.buffer, fxDone: (track.fxDone || []).slice(), label }); track.buffer = await fn(track.buffer); track.fxDone = [...(track.fxDone || []), label]; };
     await stepBuf(`Débruitage ${Math.round(plan.denoise * 100)} %`, (b) => denoise(b, plan.denoise, (p) => say(`Débruitage ${Math.round(p * 100)} %`)));
-    await stepBuf('Anti-pop', (b) => antipop(b, 0.8));
+    await stepBuf('Anti-pop', (b) => antipop(b, expert ? ex.steps.antipop : 0.8));
     await stepBuf('Coupe des blancs', (b) => gate(b, plan.gate.threshold, plan.gate.floor));
     let alignMs = 0;
     const beat = tracks.find(x => x.kind === 'instru' && x !== track);
     if (beat) { const before = track.offset || 0; say('Calage sur l’instru'); await alignTrack(track, beat); alignMs = ((track.offset || 0) - before) * 1000; }
-    await stepBuf(`Autotune (${keyName(key)})`, async (b) => (await applyChain(b, [{ t: 'tune', strength: plan.autotune.strength, speed: plan.autotune.speed }], { key })).buffer);
-    await stepBuf('Chaîne voix', (b) => voiceChain(b, plan.voice));
+    const tune = expert ? ex.tune : plan.autotune;
+    await stepBuf(`Autotune (${keyName(key)})`, async (b) => (await applyChain(b, [{ t: 'tune', strength: tune.strength, speed: tune.speed }], { key })).buffer);
+    await stepBuf('Chaîne voix', (b) => voiceChain(b, expert ? ex.voice : plan.voice));
+    if (expert && ex.steps.notchHz) await stepBuf(`EQ anti-résonance ${ex.steps.notchHz} Hz`, async (b) => (await applyChain(b, [{ t: 'fx', kind: 'peak', f: ex.steps.notchHz, q: 2.5, gain: ex.steps.notchGain }])).buffer);
     if (plan.sends.delay) await stepBuf('Écho au tempo', async (b) => (await applyChain(b, [{ t: 'fx', ...plan.sends.delay }])).buffer);
     track.gainDb = plan.gainDb;
     track.pan = role === 'adlib' ? adlibPan(track.adlibIndex || 0) : plan.pan;
@@ -1283,13 +1295,23 @@ export async function render(el, { params }) {
       denoise: plan.denoise, alignMs, gainDb: track.gainDb,
       justesseBefore: jBefore.pct, justesseAfter: jAfter.pct,
       seconds: Math.round((performance.now() - t0) / 100) / 10, tips: null, tipsSource: null,
+      expert: false, reportText: null, em: null,
     };
+    if (expert) {
+      say('Sonie et équilibre voix/instru…');
+      let lufs = null, instruDuck = 0;
+      try { lufs = Math.round((await loudness(track.buffer)) * 10) / 10; } catch {}
+      if (beat) { try { const il = Math.round((await loudness(beat.buffer)) * 10) / 10; instruDuck = instruDuckDb(lufs, il); if (instruDuck < 0) { beat.gainDb = Math.max(-30, beat.gainDb + instruDuck); } } catch {} }
+      if (STYLES[ingePrefs.style]) masterSel.value = STYLES[ingePrefs.style].master;
+      const em = { style: ingePrefs.style, peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, crestDb: analysis.crestDb, clipPct: analysis.clipPct, lufs, brightness: analysis.brightness, resonanceHz: analysis.resonanceHz, breathPct: analysis.breathPct, deess: ex.voice.deess, notchHz: ex.steps.notchHz, instruDuck, justesseBefore: jBefore.pct, justesseAfter: jAfter.pct };
+      track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em);
+    }
     drawList(); drawEdit(); updUndo();
     fetchTips(track);     // conseils du LLM à partir des SEULES mesures (aucun audio envoyé)
   }
 
   async function fetchTips(track) {
-    const { system, prompt } = tipsPrompt(track.inge);
+    const { system, prompt } = track.inge.expert ? expertTipsPrompt(track.inge.em) : tipsPrompt(track.inge);
     try {
       const r = await api('/api/complete', { method: 'POST', body: { system, prompt, src: 'inge-son', model: 'auto:fast', temperature: 0.3 } });
       const lines = String(r.content || '').split('\n').map(s => s.replace(/^[-*•\d.)\s]+/, '').trim()).filter(Boolean).slice(0, 3);
@@ -1330,7 +1352,7 @@ export async function render(el, { params }) {
     roleSel.onchange = async () => { t.role = roleSel.value; if (t.role === 'adlib') t.adlibIndex = tracks.filter(x => x.kind === 'voix' && x.role === 'adlib' && x !== t).length; try { await processTake(t); } catch (e) { toastErr(e); } };
     ingeReport.append(
       h('div.row', h('span.small', 'Rôle :'), h('div.grow', roleSel), h('span.tiny.muted', g.seconds != null ? `traité en ${g.seconds} s` : '')),
-      h('pre.small', { style: { whiteSpace: 'pre-wrap', background: 'var(--bg)', padding: '8px', borderRadius: '10px', margin: 0 } }, buildReport(g)),
+      h('pre.small', { style: { whiteSpace: 'pre-wrap', background: 'var(--bg)', padding: '8px', borderRadius: '10px', margin: 0 } }, g.reportText || buildReport(g)),
       h('div.row', h('button.btn.small', { onclick: () => abIng(t, 'a') }, 'A · prise brute'), h('button.btn.small.primary', { onclick: () => abIng(t, 'b') }, 'B · traitée')),
       ingeAudio,
       h('p.tiny.muted', 'La prise brute est conservée. « ↩ Annuler » (en haut des effets) revient étape par étape ; « ↺ Revenir à l’original » repart de la prise brute.'));
@@ -1446,6 +1468,8 @@ export async function render(el, { params }) {
         h('h3', '🎚️ Ingé son IA'),
         h('label.chk.small', ingeOn, 'Activer — analyse, autotune et mix automatiques (100 % en local, gratuit)'),
         h('label.chk.small', ingeAuto, 'Traiter chaque prise automatiquement dès la fin de l’enregistrement'),
+        h('label.chk.small', ingeExpert, '🎓 Mode expert : analyse poussée (dynamique, sifflantes, résonance, clipping, LUFS), de-esser + EQ anti-résonance, voix calée au-dessus de l’instru, conseils d’ingé pro'),
+        h('div.row', h('span.small', '🎚️ Style :'), h('div.grow', ingeStyle)),
         h('div.row', h('button.btn.small', { onclick: (e) => micTest(e.target) }, '🎤 Test micro (5 s)'), h('button.btn.small', { onclick: (e) => analyzeInstru(e.target) }, '🎵 Analyser l’instru (tonalité + BPM)')),
         micInfo, instruInfo,
         h('p.tiny.muted', 'Après chaque prise : rôle proposé (Lead, Double, Backs, Ad-lib), chaîne selon les mesures (débruitage dosé, anti-pop, gate, calage, autotune dans la tonalité, chaîne voix et volume/panoramique du rôle, écho au tempo), rapport chiffré, conseils (mesures seules, aucun audio envoyé), A/B. Vu-mètre et alerte « SATURE » dans « Mes pistes ».'),
