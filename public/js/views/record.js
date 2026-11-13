@@ -1,5 +1,6 @@
 import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose, confirmBox } from '../lib/core.js';
 import { mountAssistant } from './assistant.js';
+import { createTimeline } from './timeline.js';
 import { putItem, getItem, delItem, packBuffer, unpackBuffer } from '../lib/session.js';
 import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords, keyFromChords } from '../lib/voicefx.js';
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
@@ -64,7 +65,7 @@ export async function render(el, { params }) {
   let selected = -1;
   let sel = null;          // [début, fin] en secondes sur la piste sélectionnée
   let masterResult = null;
-  let recorder = null, beatSrc = null, recLatency = null;
+  let recorder = null, beatSrc = null, recLatency = null, timeline = null;
 
   const list = h('div.stack');
   const editBox = h('div.stack');
@@ -72,7 +73,7 @@ export async function render(el, { params }) {
   const pText = localStorage.getItem('studio.prompter');
   if (pText) prompter.textContent = pText; else prompter.style.display = 'none';
 
-  const player = bufferPlayer((t, ended) => { posLbl.textContent = fmtTime(t); redrawSelected(t); if (ended) playSelBtn.textContent = '▶ Piste'; });
+  const player = bufferPlayer((t, ended) => { if (ended) playSelBtn.textContent = '▶ Piste'; });
   const posLbl = h('span.small.muted', '0:00');
 
   // ---------- Sauvegarde automatique (survit au rafraîchissement, à la batterie vide, à la fermeture) ----------
@@ -148,7 +149,14 @@ export async function render(el, { params }) {
     const clip = h('span.small', { style: { fontWeight: 700, color: '#ef4444', visibility: 'hidden' } }, '● SATURE');
     const track = h('div', { style: { position: 'relative', height: '12px', borderRadius: '6px', overflow: 'hidden', background: 'rgba(127,127,127,.25)' } }, bar, peakMark);
     const el = h('div.stack', { style: { gap: '2px' } }, h('div.row', h('span.small.grow', label), val, clip), track);
-    let an = null, srcNode = null, raf = 0, hold = -90, holdT = 0, clipT = 0;
+    let an = null, srcNode = null, raf = 0, hold = -90, holdT = 0, clipT = 0, ema = null;
+    // Jauge « distance au micro » : trop loin ← bonne distance → trop près (calculée sur le niveau moyen de la voix)
+    const needle = h('i', { style: { position: 'absolute', top: '-3px', bottom: '-3px', width: '4px', borderRadius: '2px', background: 'var(--text, #111)', left: '50%', transition: 'left 120ms linear', boxShadow: '0 0 0 2px var(--bg)' } });
+    const proxTxt = h('b.small', 'Parle pour mesurer…');
+    const proxEl = h('div.stack', { style: { gap: '4px' } },
+      h('div.row', h('span.small.grow', '📏 Distance au micro'), proxTxt),
+      h('div', { style: { position: 'relative', height: '14px', borderRadius: '7px', background: 'linear-gradient(90deg,#60a5fa 0%,#60a5fa 22%,#22c55e 35%,#22c55e 68%,#f97316 80%,#ef4444 100%)' } }, needle),
+      h('div.row.tiny.muted', h('span.grow', '← trop loin'), h('span.grow', { style: { textAlign: 'center' } }, 'bonne distance'), h('span', 'trop près →')));
     const pct = (db) => Math.max(0, Math.min(100, (db + 60) / 60 * 100)); // échelle −60 → 0 dBFS
     function loop() {
       if (!an) return;
@@ -161,40 +169,57 @@ export async function render(el, { params }) {
       val.textContent = `${db < -59 ? '−∞' : db.toFixed(1)} dB`;
       val.style.color = db >= -0.5 ? '#ef4444' : db > -6 ? '#eab308' : '';
       clip.style.visibility = now - clipT < 1500 ? 'visible' : 'hidden';
+      if (rms > -50) {
+        ema = ema === null ? rms : ema * 0.9 + rms * 0.1;
+        const v = now - clipT < 800 ? 0 : ema; // une saturation = trop près
+        needle.style.left = `calc(${Math.max(0, Math.min(100, (v + 42) / 38 * 100))}% - 2px)`;
+        const [txt, col] = now - clipT < 800 || v > -8 ? ['📢 Trop près / trop fort : recule un peu', '#ef4444'] : v > -13 ? ['Un peu près', '#f97316'] : v > -30 ? ['✅ Bonne distance', '#16a34a'] : v > -36 ? ['Un peu loin', '#3b82f6'] : ['🔈 Trop loin : rapproche-toi', '#3b82f6'];
+        proxTxt.textContent = txt; proxTxt.style.color = col;
+      }
       raf = requestAnimationFrame(loop);
     }
     return {
-      el,
+      el, proxEl,
       attachNode(node) { this.detach(); const ctx = audioCtx(); an = ctx.createAnalyser(); an.fftSize = 2048; node.connect(an); srcNode = node; loop(); },
       attachStream(stream) { this.detach(); const ctx = audioCtx(); const src = ctx.createMediaStreamSource(stream); an = ctx.createAnalyser(); an.fftSize = 2048; src.connect(an); srcNode = src; loop(); },
-      detach() { cancelAnimationFrame(raf); try { srcNode?.disconnect(an); } catch {} an = null; srcNode = null; bar.style.width = '0%'; val.textContent = '—'; clip.style.visibility = 'hidden'; hold = -90; },
+      detach() { cancelAnimationFrame(raf); try { srcNode?.disconnect(an); } catch {} an = null; srcNode = null; bar.style.width = '0%'; val.textContent = '—'; clip.style.visibility = 'hidden'; hold = -90; ema = null; proxTxt.textContent = 'Parle pour mesurer…'; proxTxt.style.color = ''; needle.style.left = '50%'; },
     };
   }
   const micMeter = makeMeter('🎤 Micro (ce qui est enregistré)');
   const outMeter = makeMeter('🔊 Sortie (instru + voix)');
 
   // ---------- Écoute du mix EN DIRECT : chaque curseur de volume agit pendant la lecture ----------
-  const live = { srcs: [], gains: new Map(), timer: null };
+  const live = { srcs: [], gains: new Map(), timer: null, ctxStart: 0, from: 0, end: 0 };
+  let seekPos = 0; // tête de lecture (secondes depuis le début de la ligne de temps)
   const liveBtn = h('button.btn.small.primary', '▶ Écouter tout (volumes en direct)');
-  function liveGain(t) { const g = live.gains.get(t); if (g) g.gain.setTargetAtTime(t.mute ? 0 : 10 ** (t.gainDb / 20), audioCtx().currentTime, 0.02); }
-  function stopLive() { outMeter.detach(); live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; }
-  function playLive() {
-    stopLive(); player.stop();
+  const effMute = (t) => t.mute || (tracks.some(x => x.solo) && !t.solo);
+  const gainOf = (t) => effMute(t) ? 0 : 10 ** (t.gainDb / 20);
+  function liveGain() { const now = audioCtx().currentTime; for (const [t, g] of live.gains) g.gain.setTargetAtTime(gainOf(t), now, 0.02); }
+  function livePos() { return live.srcs.length ? Math.min(live.end, audioCtx().currentTime - live.ctxStart + live.from) : seekPos; }
+  function stopLive(keepPos = true) { if (live.srcs.length && keepPos) seekPos = livePos(); outMeter.detach(); live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; playBtn.textContent = '▶ Lecture'; }
+  function playLive(from = seekPos, until = null) {
+    stopLive(false); player.stop();
     if (!tracks.length) return toast('Aucune piste à écouter.');
     const ctx = audioCtx(), minOff = Math.min(0, ...tracks.map(t => t.offset || 0)), t0 = ctx.currentTime + 0.05;
     const bus = ctx.createGain(); bus.connect(ctx.destination); outMeter.attachNode(bus);
     let end = 0;
+    for (const t of tracks) end = Math.max(end, (t.offset || 0) - minOff + t.buffer.duration);
+    if (from >= end - 0.05) from = 0;
     for (const t of tracks) {
       const src = ctx.createBufferSource(); src.buffer = t.buffer;
-      const g = ctx.createGain(); g.gain.value = t.mute ? 0 : 10 ** (t.gainDb / 20);
+      const g = ctx.createGain(); g.gain.value = gainOf(t);
       const pan = ctx.createStereoPanner(); pan.pan.value = t.pan || 0;
       src.connect(g).connect(pan).connect(bus);
-      const off = (t.offset || 0) - minOff; src.start(t0 + off);
-      live.srcs.push(src); live.gains.set(t, g); end = Math.max(end, off + t.buffer.duration);
+      const off = (t.offset || 0) - minOff - from;
+      if (off >= 0) src.start(t0 + off); else if (-off < t.buffer.duration) src.start(t0, -off); else continue;
+      if (until !== null) src.stop(t0 + (until - from));
+      live.srcs.push(src); live.gains.set(t, g);
     }
-    liveBtn.textContent = '⏹ Arrêter l’écoute';
-    live.timer = setTimeout(stopLive, end * 1000 + 300);
+    live.ctxStart = t0; live.from = from; live.end = until ?? end;
+    liveBtn.textContent = '⏹ Arrêter l’écoute'; playBtn.textContent = '⏸ Pause';
+    live.timer = setTimeout(() => { stopLive(false); seekPos = until !== null ? from : 0; }, ((until ?? end) - from) * 1000 + 300);
   }
+  const playBtn = h('button.btn.primary', { onclick: () => (live.srcs.length ? stopLive() : playLive()) }, '▶ Lecture');
   liveBtn.onclick = () => (live.srcs.length ? stopLive() : playLive());
   const micLbl = h('b', `${micDb} dB`);
   const micVol = h('input', { type: 'range', min: -20, max: 12, step: 0.5, value: micDb, oninput: () => { micDb = Number(micVol.value); micLbl.textContent = `${micDb} dB`; localStorage.setItem('studio.micDb', micDb); const v = tracks[selected] && tracks[selected].kind !== 'instru' ? tracks[selected] : tracks[tracks.map(t => t.kind).lastIndexOf('voix')]; if (v) { v.gainDb = micDb; liveGain(v); masterResult = null; drawList(); } } });
@@ -335,40 +360,16 @@ export async function render(el, { params }) {
   // ---------- Liste des pistes ----------
   function drawList() {
     saveSoon(); syncInstru?.();
-    list.innerHTML = '';
-    if (!tracks.length) list.append(h('p.muted.small', 'Aucune piste. Enregistrez votre voix ou importez un fichier (instru, voix, son).'));
-    tracks.forEach((t, i) => {
-      const c = h('canvas.wave', { style: { height: '46px', cursor: 'pointer' }, onclick: () => { selected = i; sel = null; player.stop(); drawList(); drawEdit(); } });
-      const gl = h('b', t.gainDb);
-      list.append(h('div.card' + (i === selected ? '.sel' : ''), { style: { padding: '10px', outline: i === selected ? '2px solid var(--accent)' : '' } },
-        h('div.row', h('strong', (t.kind === 'instru' ? '🥁 ' : '🎤 ') + t.name), h('span.small.muted', fmtTime(t.buffer.duration)),
-          h('select', { onchange: (e) => { t.kind = e.target.value; drawList(); } }, h('option', { value: 'voix', selected: t.kind === 'voix' }, 'Voix'), h('option', { value: 'instru', selected: t.kind === 'instru' }, 'Instru'), h('option', { value: 'autre', selected: t.kind === 'autre' }, 'Autre')),
-          h('label.chk.small', h('input', { type: 'checkbox', checked: t.mute, onchange: (e) => { t.mute = e.target.checked; liveGain(t); masterResult = null; } }), 'Muet'),
-          h('span.grow'),
-          h('button.btn.ghost.small', { onclick: () => { tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); } }, '✕')),
-        c,
-        h('div.sliders',
-          h('label', h('span', 'Volume (dB) ', gl), h('input', { type: 'range', min: -30, max: 12, step: 0.5, value: t.gainDb, oninput: (e) => { t.gainDb = Number(e.target.value); gl.textContent = t.gainDb; liveGain(t); syncInstru(); masterResult = null; } })),
-          h('label', h('span', 'Panoramique'), h('input', { type: 'range', min: -1, max: 1, step: 0.05, value: t.pan, oninput: (e) => { t.pan = Number(e.target.value); masterResult = null; } })),
-          h('label', h('span', 'Décalage (ms) ', h('b', Math.round(t.offset * 1000))), h('input', { type: 'range', min: -500, max: 3000, step: 5, value: t.offset * 1000, oninput: (e) => { t.offset = Number(e.target.value) / 1000; e.target.previousSibling.lastChild.textContent = e.target.value; masterResult = null; } })))));
-      requestAnimationFrame(() => drawWave(c, t.buffer));
-    });
+    timeline?.render();
   }
 
   // ---------- Édition de la piste sélectionnée ----------
-  const wave = h('canvas.wave', { style: { height: '110px', touchAction: 'none' } });
-  let dragFrom = null;
-  const tAt = (e) => { const r = wave.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (tracks[selected]?.buffer.duration || 0); };
-  wave.addEventListener('pointerdown', (e) => { if (selected < 0) return; dragFrom = tAt(e); sel = null; wave.setPointerCapture(e.pointerId); });
-  wave.addEventListener('pointermove', (e) => { if (dragFrom === null) return; const t = tAt(e); sel = [Math.min(dragFrom, t), Math.max(dragFrom, t)]; redrawSelected(); });
-  wave.addEventListener('pointerup', (e) => { const t = tAt(e); if (dragFrom !== null && Math.abs(t - dragFrom) < 0.05) { sel = null; player.seek(t); } dragFrom = null; redrawSelected(); selLbl.textContent = sel ? `Sélection : ${fmtTime(sel[0])} → ${fmtTime(sel[1])} (${(sel[1] - sel[0]).toFixed(1)} s)` : 'Glissez sur la forme d’onde pour sélectionner un passage.'; });
-  const selLbl = h('span.small.muted', 'Glissez sur la forme d’onde pour sélectionner un passage.');
-  function redrawSelected(playhead) { const t = tracks[selected]; if (t) drawWave(wave, t.buffer, { sel, playhead: playhead ?? player.position }); }
+  function redrawSelected() { timeline?.render(); }
   const playSelBtn = h('button.btn.small', '▶ Piste');
   playSelBtn.onclick = () => {
     const t = tracks[selected]; if (!t) return;
     if (player.playing) { player.pause(); playSelBtn.textContent = '▶ Piste'; return; }
-    player.load(t.buffer); player.play(sel ? sel[0] : 0); playSelBtn.textContent = '⏸';
+    stopLive(); player.load(t.buffer); player.play(sel && timeline?.selTrack() === t ? sel[0] : 0); playSelBtn.textContent = '⏸';
   };
   const busy = h('span.small.muted');
   async function work(label, fn) {
@@ -600,17 +601,10 @@ export async function render(el, { params }) {
     const t = tracks[selected];
     if (!t) { editBox.append(h('p.muted.small', 'Sélectionnez une piste pour l’éditer.')); return; }
     editBox.append(
-      h('div.row', h('h3.grow', `✂️ Éditer : ${t.name}`), playSelBtn, posLbl),
-      wave, selLbl,
+      h('div.row', h('h3.grow', `🎛️ Effets sur : ${t.kind === 'instru' ? '🥁' : '🎤'} ${t.name}`), playSelBtn),
+      h('p.tiny.muted', 'Choisis la piste en cliquant dessus dans « Mes pistes ». Pour couper un passage : outil ⬚ Sélectionner, glisse sur la prise, puis « Supprimer ce passage ».'),
       h('div.row.undo-bar', { style: { position: 'sticky', bottom: '0', zIndex: 5, background: 'var(--card, var(--bg))', padding: '6px 0' } }, undoBtn, redoBtn, h('div.grow', busy)),
       h('div.row',
-        h('button.btn.small', { onclick: () => sel ? work('Rognage…', async (b) => sliceBuffer(b, sel[0], sel[1])).then(() => (sel = null)) : toast('Sélectionnez d’abord un passage.') }, 'Garder la sélection'),
-        h('button.btn.small', { onclick: () => sel ? work('Suppression…', async (b) => {
-          const a = sliceBuffer(b, 0, sel[0]), c = sliceBuffer(b, sel[1], b.duration);
-          const out = makeBuffer(b.numberOfChannels, a.length + c.length, b.sampleRate);
-          for (let ch = 0; ch < b.numberOfChannels; ch++) { out.copyToChannel(a.getChannelData(ch), ch, 0); out.copyToChannel(c.getChannelData(ch), ch, a.length); }
-          return out;
-        }).then(() => (sel = null)) : toast('Sélectionnez d’abord un passage.') }, 'Supprimer la sélection'),
         h('button.btn.small', { onclick: () => work('Fondus…', async (b) => { const o = cloneBuffer(b); const n = Math.min(o.length / 2, Math.floor(0.03 * o.sampleRate)); for (let c = 0; c < o.numberOfChannels; c++) { const d = o.getChannelData(c); for (let i = 0; i < n; i++) { d[i] *= i / n; d[d.length - 1 - i] *= i / n; } } return o; }) }, 'Fondus début/fin'),
         h('button.btn.small', { onclick: () => work('Normalisation…', async (b) => normalize(cloneBuffer(b), -1)) }, 'Normaliser'),
         h('button.btn.small.ghost', { onclick: () => work('Retour à l’original…', async (b, tr) => tr.original) }, '↺ Revenir à l’original')),
@@ -661,7 +655,6 @@ export async function render(el, { params }) {
       } }, '📝 Transcrire cette piste')),
     );
     updUndo();
-    requestAnimationFrame(() => redrawSelected());
   }
 
   // ---------- Calage automatique sur le beat ----------
@@ -729,7 +722,7 @@ export async function render(el, { params }) {
     masterInfo.innerHTML = '<span class="spinner"></span> Mixage…';
     try {
       const minOff = Math.min(0, ...tracks.map(t => t.offset));
-      const mixed = await mix(tracks.map(t => ({ ...t, offset: t.offset - minOff })));
+      const mixed = await mix(tracks.map(t => ({ ...t, mute: effMute(t), offset: t.offset - minOff })));
       const r = await master(mixed, masterSel.value, (s) => { masterInfo.innerHTML = `<span class="spinner"></span> ${s}`; });
       masterResult = r;
       masterInfo.innerHTML = '';
@@ -744,7 +737,7 @@ export async function render(el, { params }) {
     btn.disabled = true; compareBox.innerHTML = '';
     try {
       const minOff = Math.min(0, ...tracks.map(t => t.offset));
-      const mixed = await mix(tracks.map(t => ({ ...t, offset: t.offset - minOff })));
+      const mixed = await mix(tracks.map(t => ({ ...t, mute: effMute(t), offset: t.offset - minOff })));
       for (const [k, preset] of Object.entries(MASTER_PRESETS)) {
         masterInfo.innerHTML = `<span class="spinner"></span> Version « ${preset.label} »…`;
         const r = await master(mixed, k, () => {});
@@ -781,6 +774,42 @@ export async function render(el, { params }) {
   const masterKey = (p) => { const keys = Object.keys(MASTER_PRESETS); const n = norm2(p); return keys.find(k => k === p) || keys.find(k => norm2(MASTER_PRESETS[k].label).includes(n)) || (/(rap|trap|punch)/.test(n) ? keys.find(k => /rap/i.test(MASTER_PRESETS[k].label)) : /club|fort/.test(n) ? keys.find(k => /club/i.test(MASTER_PRESETS[k].label)) : /doux|acous/.test(n) ? keys.find(k => /doux/i.test(MASTER_PRESETS[k].label)) : keys[0]); };
   const norm2 = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const fakeBtn = () => ({ disabled: false });
+  // ---------- Ligne de temps (toutes les pistes au même endroit) ----------
+  const minOffNow = () => Math.min(0, ...tracks.map(t => t.offset || 0));
+  timeline = createTimeline({
+    tracks, effMute,
+    getSelected: () => selected,
+    select: (i, quiet) => { if (selected !== i) { selected = i; drawEdit(); } if (!quiet) timeline.render(); },
+    changed: (kind, t) => {
+      masterResult = null;
+      if (kind === 'gain') { liveGain(); syncInstru(); saveSoon(); return; }
+      if (kind === 'pan') { saveSoon(); return; }
+      if (kind === 'mute' || kind === 'solo') liveGain();
+      if (kind === 'kind' || kind === 'name') drawEdit();
+      drawList();
+    },
+    getSel: () => sel, setSel: (v) => { sel = v; },
+    seek: (g) => { seekPos = Math.max(0, g); if (live.srcs.length) playLive(seekPos); },
+    position: () => live.srcs.length ? livePos() : player.playing && tracks[selected] ? (tracks[selected].offset || 0) - minOffNow() + player.position : seekPos,
+    isPlaying: () => !!live.srcs.length || player.playing,
+    remove: async (i) => { if (!(await confirmBox(`Supprimer la piste « ${tracks[i].name} » ?`, 'Supprimer', true))) return; tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
+    edit: async (kind) => {
+      const t = timeline.selTrack(), r = sel; if (!t || !r) return;
+      selected = tracks.indexOf(t); drawEdit();
+      if (kind === 'play') { const g0 = (t.offset || 0) - minOffNow(); return playLive(g0 + r[0], g0 + r[1]); }
+      const label = { delete: 'Suppression du passage…', keep: 'Rognage…', silence: 'Silence…' }[kind];
+      await work(label, async (b) => {
+        if (kind === 'keep') return sliceBuffer(b, r[0], r[1]);
+        if (kind === 'delete') return removeRange(b, r[0], r[1]);
+        const o2 = cloneBuffer(b), a = Math.floor(r[0] * b.sampleRate), z = Math.min(b.length, Math.floor(r[1] * b.sampleRate)), f = Math.floor(0.01 * b.sampleRate);
+        for (let c = 0; c < o2.numberOfChannels; c++) { const d = o2.getChannelData(c); for (let i = a; i < z; i++) { const k = Math.min(1, (i - a) / f, (z - i) / f); d[i] *= 1 - k; } }
+        return o2;
+      });
+      if (kind === 'keep') t.offset = (t.offset || 0) + r[0];
+      timeline.clearSel(); drawList();
+    },
+  });
+
   // Console de volumes toujours sous la main, dans la carte de l'assistant (réglable pendant qu'on lui parle / qu'on enregistre)
   const monVolLbl = h('b', `${Math.round(Number(monVol.value) * 100)} %`);
   monVol.addEventListener('input', () => { monVolLbl.textContent = `${Math.round(Number(monVol.value) * 100)} %`; });
@@ -806,6 +835,7 @@ export async function render(el, { params }) {
       stop: async () => { if (recorder) return stopRec(); stopLive(); player.stop(); el.querySelectorAll('audio').forEach(a => a.pause()); },
       pause: async () => { stopLive(); player.pause(); el.querySelectorAll('audio').forEach(a => a.pause()); },
       play: async (x) => {
+        if (x.what !== 'master' && x.what !== 'voix') { playLive(0); return; }
         if (x.what === 'master' || (!tracks[selected] && masterResult)) { if (!masterResult) await doMaster(); const a = mixPlayerEl.querySelector('audio'); a?.play(); a?.scrollIntoView({ block: 'center' }); return; }
         if (x.what === 'voix') { const t = voiceTrack(); stopLive(); player.load(t.buffer); player.play(0); playSelBtn.textContent = '⏸'; return; }
         playLive();
@@ -845,23 +875,31 @@ export async function render(el, { params }) {
 
   const exportName = () => (tracks.find(t => t.kind === 'voix')?.name || 'morceau').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-');
 
-  el.append(h('div.grid.two',
+  const stopBtn = h('button.btn', { title: 'Stop (revient au début)', onclick: () => { if (recorder) return stopRec(); stopLive(false); player.stop(); seekPos = 0; } }, '⏹');
+  const homeBtn = h('button.btn', { title: 'Revenir au début', onclick: () => { seekPos = 0; if (live.srcs.length) playLive(0); } }, '⏮');
+  el.append(
+    h('div.card.stack', { style: { marginBottom: '14px' } },
+      h('div.row', { style: { flexWrap: 'wrap', gap: '8px', alignItems: 'center' } },
+        h('h3', { style: { margin: 0 } }, '🎚️ Mes pistes'), homeBtn, playBtn, stopBtn, recBtn, recTime, timeline.posLbl, h('div.grow', { style: { minWidth: '120px' } }, meter)),
+      h('div.row', { style: { flexWrap: 'wrap', gap: '6px' } }, timeline.tools,
+        h('button.btn.small', { onclick: async () => { for (const f of await pickLocalFiles('audio/*,video/*')) await addBlob(f, f.name); } }, '📥 Importer (instru, voix…)'),
+        h('button.btn.small', { onclick: async () => { for (const f of await pickFromLibrary({ kinds: ['audio', 'video'] })) await addBlob(await fetchFileBlob(f.id), f.name, null, f.id); } }, '📚 Mes fichiers'),
+        h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet'), saveLbl),
+      micMeter.proxEl,
+      timeline.el, timeline.selBar,
+      h('p.tiny.muted', 'Clique sur la ligne de temps pour placer la lecture · ⬚ Sélectionner : glisse sur une prise pour choisir un passage à couper · ✋ Déplacer : glisse une prise pour la caler · M = muet, S = solo, Vol = volume, G/D = gauche/droite.')),
+    h('div.grid.two',
     h('div.stack',
       ast.card,
       h('div.card.stack',
-        h('h3', '🎙️ Enregistrer'),
-        h('div.row', recBtn, recTime, h('div.grow', meter)),
+        h('h3', '⚙️ Réglages d’enregistrement'),
         h('label.chk.small', withBeat, 'Lancer l’instru pendant l’enregistrement (casque conseillé)'),
-        h('label.chk.small', rawMode, 'Mode studio : désactiver les filtres automatiques du téléphone (meilleur son, à nettoyer ensuite)'),
+        h('label.chk.small', rawMode, 'Mode studio : désactiver les filtres automatiques du micro (meilleur son, à nettoyer ensuite)'),
         h('div.row', h('span.small', '🎧 Retour casque :'), h('div.grow', monStyle), monTestBtn),
-        h('p.tiny.muted', 'Retour en direct : casque filaire conseillé (en Bluetooth ta voix arrive en retard). L’autotune ne s’entend pas en direct : il se calcule après, écoute-le avec « ▶ Écouter ».'),
+        h('p.tiny.muted', 'Retour en direct : casque filaire conseillé (en Bluetooth ta voix arrive en retard). L’autotune ne s’entend pas en direct : il se calcule après.'),
         prompter,
-        h('div.row',
-          h('button.btn.small', { onclick: async () => { for (const f of await pickLocalFiles('audio/*,video/*')) await addBlob(f, f.name); } }, '📱 Importer'),
-          h('button.btn.small', { onclick: async () => { for (const f of await pickFromLibrary({ kinds: ['audio', 'video'] })) await addBlob(await fetchFileBlob(f.id), f.name, null, f.id); } }, '📚 Depuis mes fichiers'),
-          h('button.btn.small.ghost', { onclick: () => { localStorage.removeItem('studio.prompter'); prompter.style.display = 'none'; } }, 'Masquer le texte')),
+        h('button.btn.small.ghost', { onclick: () => { localStorage.removeItem('studio.prompter'); prompter.style.display = 'none'; } }, 'Masquer le texte'),
       ),
-      h('div.card.stack', h('div.row', h('h3.grow', '🎚️ Pistes'), h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet')), saveLbl, list),
     ),
     h('div.stack',
       h('div.card.stack', editBox),
