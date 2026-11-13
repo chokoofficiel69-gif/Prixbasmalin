@@ -1,7 +1,7 @@
 {
  "version": 1,
  "generated_from": "data/prixtracker-prices.json",
- "source_generated_at": "2026-11-13T04:51:31.290Z",
+ "source_generated_at": "2026-11-13T13:21:18.457Z",
  "dataset_period": {
   "from": "2026-10-09",
   "to": "2026-11-12"
