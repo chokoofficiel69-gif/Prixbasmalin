@@ -194,7 +194,8 @@ export function noteSegments(pitch) {
   }
   return { m, segs };
 }
-function noteCurve(pitch, key, { strength = 1, keep = 0.2, glide = 40, scale, extra = 0, chords = null, fixed = null }) {
+function noteCurve(pitch, key, { strength = 1, keep = 0.2, glide = 40, scale, extra = 0, chords = null, fixed = null, humanize = 0 }) {
+  const frac = (x) => x - Math.floor(x);
   const { m, segs } = fixed || noteSegments(pitch), n = m.length, out = new Float32Array(n);
   const sc = SCALES[scale || key.mode] || SCALES.chromatique;
   const minLen = Math.round(pitch.rate * 0.06);
@@ -211,6 +212,8 @@ function noteCurve(pitch, key, { strength = 1, keep = 0.2, glide = 40, scale, ex
     // une note très courte collée à la précédente : on la laisse suivre (évite les « bips »)
     if (sg.b - sg.a < minLen && prevT !== null && Math.abs(best - prevT) <= 2) best = prevT;
     sg.t = best; prevT = best;
+    // humanize : petit écart stable par note (jusqu'à ±30 cents) pour éviter un centrage robotique
+    sg.j = humanize ? (frac(Math.sin((sg.a + 1) * 12.9898) * 43758.5453) * 2 - 1) * 0.3 * humanize : 0;
   }
   const alpha = glide > 0 ? Math.exp(-1 / (pitch.rate * glide / 1000)) : 0;
   let k = 0, cur = null;
@@ -220,7 +223,7 @@ function noteCurve(pitch, key, { strength = 1, keep = 0.2, glide = 40, scale, ex
     if (!m[i] || !sg || i < sg.a || i >= sg.b) { out[i] = extra; cur = null; continue; }
     // expression gardée = mouvement lent (vibrato, glissés), sans le tremblement trame à trame
     let acc = 0, c = 0; for (let j = Math.max(sg.a, i - 4); j <= Math.min(sg.b - 1, i + 4); j++) if (m[j]) { acc += m[j]; c++; }
-    const want = sg.t + keep * (acc / c - sg.med);
+    const want = sg.t + (sg.j || 0) + keep * (acc / c - sg.med);
     cur = cur === null || alpha === 0 ? want : alpha * cur + (1 - alpha) * want;
     out[i] = strength * (cur - m[i]) + extra;
   }
@@ -415,7 +418,7 @@ export async function applyChain(buffer, chain, opts = {}) {
   for (const s of chain) {
     if (s.t === 'tune') {
       tuneCurve = s.mode === 'notes'
-        ? noteCurve(pitch, key, { strength: s.strength ?? 1, keep: s.keep ?? 0.2, glide: s.glide ?? 40, scale: s.scale, extra: s.extra || 0, chords: opts.chords })
+        ? noteCurve(pitch, key, { strength: s.strength ?? 1, keep: s.keep ?? 0.2, glide: s.glide ?? 40, scale: s.scale, extra: s.extra || 0, chords: opts.chords, humanize: s.humanize || 0 })
         : correctionCurve(pitch, key, { strength: s.strength ?? 1, speed: s.speed ?? 0, scale: s.scale, extra: s.extra || 0 });
       say('Autotune…'); cur = await psola(buffer, pitch, tuneCurve, p => say(`Autotune ${Math.round(p * 100)} %`), s.formant || 0);
     } else if (s.t === 'shift') {
