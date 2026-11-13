@@ -17,6 +17,8 @@ function parseClause(c) {
     const k = m ? (Number(m[1]) || NUM[m[1]]) * (/^m/.test(m[2]) ? 60 : 1) : 0;
     return [{ a: 'record', seconds: k }];
   }
+  if (/(refais la prise|on refait|refaire la prise|recommence la prise|je la refais)/.test(n)) return [{ a: 'dropLastVoice' }, { a: 'record' }];
+  if (/(importe|ajoute|charge).*(instru|beat|prod)/.test(n)) return [{ a: 'importInstru' }];
   if (STOP_RE.test(n)) return [{ a: 'stop' }];
   if (/^pause\b/.test(n)) return [{ a: 'pause' }];
   if (/(annule|reviens en arriere|retour arriere|c etait mieux avant|enleve ca|moins de reverb|moins d echo)/.test(n)) return [{ a: 'undo' }];
@@ -41,8 +43,8 @@ function parseClause(c) {
   if (/(sauvegarde|garde le|mets le dans mes fichiers|enregistre le dans|dans mes fichiers)/.test(n)) return [{ a: 'save' }];
   if (/(baisse|moins fort).*(instru|beat|prod)/.test(n)) return [{ a: 'volume', track: 'instru', delta: -3 }];
   if (/(monte|plus fort).*(instru|beat|prod)/.test(n)) return [{ a: 'volume', track: 'instru', delta: 3 }];
-  if (/(baisse|moins fort).*(voix)/.test(n)) return [{ a: 'volume', track: 'voix', delta: -3 }];
-  if (/(monte|plus fort).*(voix)/.test(n)) return [{ a: 'volume', track: 'voix', delta: 3 }];
+  if (/(baisse|moins fort).*(voix|micro)/.test(n)) return [{ a: 'volume', track: 'voix', delta: -3 }];
+  if (/(monte|plus fort).*(voix|micro)/.test(n)) return [{ a: 'volume', track: 'voix', delta: 3 }];
   return null;
 }
 function parseLocal(text) {
@@ -52,7 +54,7 @@ function parseLocal(text) {
   for (const p of parts) { const r = parseClause(p); if (r === null) return null; out.push(...r); }
   return out.length ? out : null;
 }
-const ACK = { record: '', stop: '', pause: '', play: '', undo: 'Annulé.', redo: 'Rétabli.', original: 'Retour à la prise brute.', all: 'Je fais tout.', clean: 'Je nettoie.', align: 'Je cale.', tune: 'Je corrige les notes.', effect: 'Ok.', voice: 'Ok.', cut: 'Je coupe.', trim: 'Je coupe les blancs.', master: 'Je masterise.', versions: 'Je prépare les versions.', download: 'Je télécharge.', save: 'Je sauvegarde.', volume: 'Ok.' };
+const ACK = { importInstru: 'Choisis ton instru.', dropLastVoice: '', record: '', stop: '', pause: '', play: '', undo: 'Annulé.', redo: 'Rétabli.', original: 'Retour à la prise brute.', all: 'Je fais tout.', clean: 'Je nettoie.', align: 'Je cale.', tune: 'Je corrige les notes.', effect: 'Ok.', voice: 'Ok.', cut: 'Je coupe.', trim: 'Je coupe les blancs.', master: 'Je masterise.', versions: 'Je prépare les versions.', download: 'Je télécharge.', save: 'Je sauvegarde.', volume: 'Ok.' };
 const words = (s) => norm(s).split(' ').filter(Boolean).length;
 const IS_ANDROID = /Android/i.test(navigator.userAgent);
 const STOP_RE = /^(ok |bon |vas y |c est )?(stop|stoppe|arrete|arrete toi|coupe l enregistrement|c est bon|termine|fini|j ai fini)\b/;
@@ -80,6 +82,8 @@ Règles : « chante juste / corrige mes fausses notes / la plus belle voix possi
 
 export function mountAssistant(S) {
   const R = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SERVER_VOICES = ['nova', 'shimmer', 'alloy', 'onyx', 'echo', 'fable'];
+  const audioCache = new Map(); let serverBlocked = false;
   let on = false, rec = null, speaking = false, busy = false, afterStop = [], silTimer = null;
   const log = h('div.stack.small', { style: { maxHeight: '180px', overflow: 'auto' } });
   const status = h('span.small.muted', R ? 'Touche « Mains libres » puis parle.' : 'La reconnaissance vocale n’est pas disponible dans ce navigateur : écris tes demandes ci-dessous (Chrome conseillé).');
@@ -97,16 +101,32 @@ export function mountAssistant(S) {
   };
   // Voix de réponse : on prend la plus naturelle disponible (Google / « Natural » / « Online ») plutôt que la voix robot de Windows
   const voiceSel = h('select', { onchange: () => localStorage.setItem('studio.ast.voiceName', voiceSel.value) });
-  const frVoices = () => (window.speechSynthesis?.getVoices() || []).filter(v => /^fr/i.test(v.lang));
+  const frVoices = () => { try { return (window.speechSynthesis?.getVoices() || []).filter(v => /^fr/i.test(v.lang)); } catch { return []; } };
   const rank = (v) => (/natural|neural/i.test(v.name) ? 0 : /google/i.test(v.name) ? 1 : /online/i.test(v.name) ? 2 : 5) + (/fr-FR/i.test(v.lang) ? 0 : 0.5);
   function fillVoices() {
-    const vs = frVoices().sort((a, b) => rank(a) - rank(b)); if (!vs.length) return;
+    const vs = frVoices().sort((a, b) => rank(a) - rank(b));
     const saved = localStorage.getItem('studio.ast.voiceName');
-    voiceSel.innerHTML = ''; vs.forEach(v => voiceSel.append(h('option', { value: v.name, selected: v.name === saved }, `🗣️ ${v.name.replace(/Microsoft |Google /, '')}`)));
-    if (!saved || !vs.some(v => v.name === saved)) voiceSel.value = vs[0].name;
+    voiceSel.innerHTML = '';
+    SERVER_VOICES.forEach(v => voiceSel.append(h('option', { value: 'srv:' + v, selected: saved === 'srv:' + v }, `✨ Voix IA ${v[0].toUpperCase() + v.slice(1)} (naturelle)`)));
+    vs.forEach(v => voiceSel.append(h('option', { value: v.name, selected: v.name === saved }, `🗣️ ${v.name.replace(/Microsoft |Google /, '')} (navigateur)`)));
+    if (!saved || ![...voiceSel.options].some(o => o.value === saved)) voiceSel.value = vs.find(v => /natural|neural/i.test(v.name))?.name || 'srv:nova';
   }
-  try { fillVoices(); speechSynthesis.onvoiceschanged = fillVoices; } catch {}
-  function talk(text) {
+  fillVoices(); try { speechSynthesis.onvoiceschanged = fillVoices; } catch {}
+  async function talkServer(text, voice) {
+    let url = audioCache.get(voice + '|' + text);
+    if (!url) {
+      const r = await fetch('/api/speech', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Studio': '1' }, body: JSON.stringify({ input: text, voice }) });
+      if (!r.ok) { if (r.status === 403 && !serverBlocked) { serverBlocked = true; toast('Voix IA bloquée par le mode gratuit : autorise « voix » dans Suivi des tokens → Garde-fous. En attendant, voix du navigateur.', 'bad'); } throw new Error('tts'); }
+      url = URL.createObjectURL(await r.blob()); audioCache.set(voice + '|' + text, url);
+    }
+    await new Promise((resolve) => { const a = new Audio(url); a.onended = resolve; a.onerror = resolve; a.play().catch(resolve); });
+  }
+  async function talk(text) {
+    const v = voiceSel.value;
+    if (v.startsWith('srv:') && !serverBlocked) { try { return await talkServer(text, v.slice(4)); } catch {} }
+    return talkBrowser(text);
+  }
+  function talkBrowser(text) {
     return new Promise((resolve) => {
       try {
         speechSynthesis.cancel();
@@ -155,6 +175,28 @@ export function mountAssistant(S) {
     handle(text);
   }
 
+  // ---------- Propositions : l'assistant propose la suite sans attendre ----------
+  const sugg = h('div.row', { style: { flexWrap: 'wrap', gap: '6px' } });
+  function proposals(last) {
+    const st = S.snapshot(), voices = st.pistes.filter(p => p.type === 'voix');
+    const P = [];
+    if (!voices.length) { P.push(['🎙️ Enregistre', 'enregistre']); if (!st.instru_presente) P.push(['📥 Importer mon instru', 'importe l instru']); P.push(['⏱️ Enregistre 1 minute', 'enregistre une minute']); return P; }
+    if (last === 'master' || last === 'versions') return [['▶ Écoute le master', 'écoute le master'], ['💾 Sauvegarde', 'sauvegarde'], ['⬇️ Télécharge', 'télécharge'], ['🎧 Plusieurs versions', 'versions'], ['↩ Annule', 'annule']];
+    if (last === 'record' || last === 'stop') { P.push(['🧹 Nettoie', 'nettoie']); if (st.instru_presente) P.push(['🎯 Cale sur le beat', 'cale']); P.push(['🎤 Corrige mes notes', 'corrige mes fausses notes'], ['▶ Écoute', 'écoute'], ['🔁 Refais la prise', 'refais la prise']); }
+    else { P.push(['▶ Écoute', 'écoute'], ['↩ Annule', 'annule']); const done = voices.flatMap(v => v.effets_appliques).join(' ') + ' ' + voices.flatMap(v => v.etapes_annulables).join(' ');
+      if (!/Nettoyage|Tout faire/.test(done)) P.push(['🧹 Nettoie', 'nettoie']);
+      if (!/Justesse|Autotune|tune/i.test(done)) P.push(['🎤 Corrige mes notes', 'corrige mes fausses notes'], ['✨ Belle voix', 'belle voix']);
+      P.push(['🌫️ Un peu de réverbe', 'plus de reverb'], ['🔁 Un peu d’écho', 'plus d echo'], ['🎛️ Masterise', 'masterise']); }
+    if (!st.instru_presente) P.push(['📥 Importer mon instru', 'importe l instru']);
+    return P.slice(0, 7);
+  }
+  function showProposals(last) {
+    const P = proposals(last); sugg.innerHTML = '';
+    P.forEach(([label, cmd]) => sugg.append(h('button.btn.small', { onclick: () => handle(cmd) }, label)));
+    return P;
+  }
+  const spokenNext = (P) => P.length >= 2 ? ` Je peux ${P[0][0].replace(/^\S+ /, '').toLowerCase()}, ou ${P[1][0].replace(/^\S+ /, '').toLowerCase()}.` : '';
+
   // ---------- Compréhension ----------
   const queue = [];
   async function handle(text) {
@@ -202,7 +244,9 @@ export function mountAssistant(S) {
     }
     if (reply) say(reply);
     await exec(actions);
-    if (actions.some(x => !['stop', 'pause', 'play', 'undo', 'redo', 'volume'].includes(x.a))) say('C’est fait.');
+    const last = [...actions].reverse().find(x => x?.a)?.a;
+    const P = showProposals(last);
+    if (actions.some(x => !['stop', 'pause', 'play', 'undo', 'redo', 'volume', 'importInstru'].includes(x.a))) say('C’est fait.' + spokenNext(P));
   }
   async function exec(actions, side = false) {
     if (!side) busy = true;
@@ -220,8 +264,8 @@ export function mountAssistant(S) {
   // appelé par le studio quand une prise se termine (bouton, « stop », silence ou fin de l'instru)
   async function onRecordStopped() {
     const next = afterStop; afterStop = [];
-    if (next.length) { say('Prise terminée, je m’en occupe.'); await exec(next); await say('C’est prêt, dis écoute.'); }
-    else if (on) await say('Prise enregistrée.');
+    if (next.length) { say('Prise terminée, je m’en occupe.'); await exec(next); const P = showProposals(next[next.length - 1]?.a); await say('C’est prêt.' + spokenNext(P)); }
+    else { const P = showProposals('record'); if (on) await say('Prise enregistrée.' + spokenNext(P)); }
     listen();
   }
 
@@ -231,9 +275,11 @@ export function mountAssistant(S) {
     status,
     h('div.row', h('div.grow', input), h('button.btn.small', { onclick: () => { if (input.value.trim()) { const t = input.value; input.value = ''; handle(t); } } }, 'Envoyer')),
     h('div.row', h('label.chk.small', voiceOut, 'Réponses à voix haute'), h('div.grow', voiceSel), h('div.grow', silSel)),
+    sugg,
     log,
     h('p.tiny.muted', `Exemples : « enregistre » … « stop » · « nettoie et cale sur le beat » · « style rap mélodique » · « un peu plus de réverbe » · « annule » · « coupe de 0 à 3 secondes » · « masterise pour Spotify » · « enregistre-le dans mes fichiers ». ${IS_ANDROID ? 'Sur Android, pendant la prise le micro sert à l’enregistrement : elle s’arrête à la fin de l’instru, après le silence choisi, ou avec le bouton ⏹.' : 'Pendant la prise, dis simplement « stop ».'} Casque conseillé.`));
-  return { card, onRecordStopped, onRecordStarted: () => { if (IS_ANDROID) stopListening(); else listen(); }, destroy: () => { on = false; stopListening(); stopSpeaking(); clearTimeout(silTimer); } };
+  setTimeout(() => showProposals(), 0);
+  return { card, refresh: () => showProposals(), onRecordStopped, onRecordStarted: () => { if (IS_ANDROID) stopListening(); else listen(); }, destroy: () => { on = false; stopListening(); stopSpeaking(); clearTimeout(silTimer); } };
 }
 
 const LABELS = { stop: 'Arrêt', play: 'Lecture', clean: 'Nettoyage', align: 'Calage sur le beat', voice: 'Traitement voix', tune: 'Autotune', effect: 'Effet', cut: 'Coupe', keep: 'Rognage', trim: 'Coupe des silences', fades: 'Fondus', normalize: 'Normalisation', undo: 'Annulation', redo: 'Rétablissement', original: 'Retour à l’original', volume: 'Volume', mute: 'Muet', delete: 'Suppression', all: 'Tout faire', master: 'Mix et master', versions: 'Versions du master', save: 'Enregistrement', download: 'Téléchargement', select: 'Sélection' };

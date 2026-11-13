@@ -290,12 +290,12 @@ export async function speak(text, { preferBrowser = false } = {}) {
 }
 
 /** Enregistreur micro simple. */
-export async function startRecorder({ onLevel, constraints } = {}) {
+export async function startRecorder({ onLevel, constraints, onChunk } = {}) {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: constraints || { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
   const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].find(m => window.MediaRecorder?.isTypeSupported?.(m)) || '';
   const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
   const chunks = [];
-  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  rec.ondataavailable = (e) => { if (e.data.size) { chunks.push(e.data); onChunk?.(chunks); } };
   let raf, analyser;
   if (onLevel) {
     const ctx = audioCtx();

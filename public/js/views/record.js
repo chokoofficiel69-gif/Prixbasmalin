@@ -1,5 +1,6 @@
-import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose } from '../lib/core.js';
+import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose, confirmBox } from '../lib/core.js';
 import { mountAssistant } from './assistant.js';
+import { putItem, getItem, delItem, packBuffer, unpackBuffer } from '../lib/session.js';
 import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords, keyFromChords } from '../lib/voicefx.js';
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
 
@@ -74,6 +75,46 @@ export async function render(el, { params }) {
   const player = bufferPlayer((t, ended) => { posLbl.textContent = fmtTime(t); redrawSelected(t); if (ended) playSelBtn.textContent = '▶ Piste'; });
   const posLbl = h('span.small.muted', '0:00');
 
+  // ---------- Sauvegarde automatique (survit au rafraîchissement, à la batterie vide, à la fermeture) ----------
+  const SKEY = `rec:${state.projectId || 'perso'}`, PKEY = `recpending:${state.projectId || 'perso'}`;
+  let saveT = null, restoring = true;
+  const saveLbl = h('span.tiny.muted', '');
+  function saveSoon(now = false) {
+    if (restoring) return;
+    clearTimeout(saveT);
+    saveT = setTimeout(async () => {
+      try {
+        await putItem(SKEY, { v: 1, at: Date.now(), selected, tracks: tracks.map(t => ({ name: t.name, kind: t.kind, gainDb: t.gainDb, pan: t.pan, offset: t.offset, mute: t.mute, fxDone: t.fxDone || [], fileId: t.fileId,
+          buf: packBuffer(t.buffer), orig: t.original === t.buffer ? null : packBuffer(t.original) })) });
+        saveLbl.textContent = `💾 Sauvegardé automatiquement à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+      } catch (e) { saveLbl.textContent = '⚠️ Sauvegarde auto impossible (mémoire du navigateur pleine ?)'; }
+    }, now === true ? 0 : 400);
+  }
+  el.addEventListener('input', saveSoon); el.addEventListener('change', saveSoon);
+  async function restoreSession() {
+    try {
+      const s = await getItem(SKEY);
+      for (const t of s?.tracks || []) {
+        const buffer = unpackBuffer(t.buf); if (!buffer) continue;
+        tracks.push({ ...t, buf: undefined, orig: undefined, buffer, original: unpackBuffer(t.orig) || buffer });
+      }
+      if (tracks.length) { selected = Math.min(tracks.length - 1, Math.max(0, s.selected ?? 0)); toast(`Projet restauré : ${tracks.length} piste(s) ✓`, 'ok'); }
+      // prise coupée en plein enregistrement (rafraîchissement, batterie…) : on la récupère
+      const pend = await getItem(PKEY);
+      if (pend?.chunks?.length) {
+        try { const b = await decodeBlob(new Blob(pend.chunks, { type: pend.type || 'audio/webm' })); tracks.push({ name: 'Prise récupérée', kind: 'voix', buffer: b, original: b, gainDb: 0, pan: 0, offset: pend.offset || 0, mute: false }); selected = tracks.length - 1; toast('Une prise interrompue a été récupérée ✓', 'ok'); }
+        catch {}
+        await delItem(PKEY);
+      }
+    } catch {}
+    restoring = false;
+    if (tracks.length) saveSoon();
+  }
+  async function newProject() {
+    if (tracks.length && !(await confirmBox('Vider le projet en cours ? Les pistes non enregistrées dans Fichiers seront supprimées.', 'Vider', true))) return;
+    tracks.length = 0; selected = -1; masterResult = null; await delItem(SKEY).catch(() => {}); drawList(); drawEdit(); saveLbl.textContent = 'Nouveau projet';
+  }
+
   async function addTrack(buffer, name, kind = 'voix', fileId, offset = 0) {
     tracks.push({ name, buffer, original: buffer, gainDb: kind === 'instru' ? -4 : 0, pan: 0, offset, mute: false, kind, fileId });
     selected = tracks.length - 1; sel = null; masterResult = null;
@@ -92,6 +133,14 @@ export async function render(el, { params }) {
   const rawMode = h('input', { type: 'checkbox' });
   const withBeat = h('input', { type: 'checkbox', checked: true });
   const recBtn = h('button.btn.rec', '⏺ Enregistrer');
+  // Volumes rapides : instru dans le casque (et dans le mix) · niveau de la voix enregistrée
+  let beatGainNode = null, micDb = Number(localStorage.getItem('studio.micDb') || 0);
+  const instruLbl = h('b', '');
+  const instruVol = h('input', { type: 'range', min: -30, max: 6, step: 0.5, value: -4 });
+  const syncInstru = () => { const b = tracks.find(t => t.kind === 'instru'); instruVol.disabled = !b; if (b) { instruVol.value = b.gainDb; instruLbl.textContent = `${b.gainDb} dB`; } else instruLbl.textContent = '(pas d’instru)'; };
+  instruVol.oninput = () => { const b = tracks.find(t => t.kind === 'instru'); if (!b) return; b.gainDb = Number(instruVol.value); instruLbl.textContent = `${b.gainDb} dB`; if (beatGainNode) beatGainNode.gain.value = 10 ** (b.gainDb / 20); masterResult = null; drawList(); };
+  const micLbl = h('b', `${micDb} dB`);
+  const micVol = h('input', { type: 'range', min: -20, max: 12, step: 0.5, value: micDb, oninput: () => { micDb = Number(micVol.value); micLbl.textContent = `${micDb} dB`; localStorage.setItem('studio.micDb', micDb); const v = tracks[selected]; if (v && v.kind !== 'instru') { v.gainDb = micDb; masterResult = null; drawList(); } } });
   // ---------- Retour casque en direct (s'entendre pendant qu'on enregistre) ----------
   const monOn = h('input', { type: 'checkbox', checked: localStorage.getItem('studio.mon') === '1' });
   const MON_STYLES = { propre: 'Voix propre', rap: 'Voix rap (présence)', reverb: 'Voix + réverbe', echo: 'Voix + écho' };
@@ -158,10 +207,13 @@ export async function render(el, { params }) {
       try { beatSrc?.stop(); } catch {} beatSrc = null;
       recBtn.textContent = '⏺ Enregistrer'; meter.firstChild.style.width = '0';
       const blob = await r.stop();
+      delItem(PKEY).catch(() => {});
       // Calage automatique : la prise commence avant l'instru (temps de démarrage) et arrive en retard
       // (latence du casque + du micro). On replace la voix sur l'instru, puis on affine sur le beat.
       const lat = recLatency; recLatency = null;
       await addBlob(blob, `Prise ${tracks.filter(t => t.kind === 'voix').length + 1}`, 'voix', null, lat ? -lat : 0);
+      if (tracks[selected]?.kind === 'voix') tracks[selected].gainDb = micDb;
+      beatGainNode = null; saveSoon(true);
       if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
       stopping.p = null;
       ast?.onRecordStopped();
@@ -175,7 +227,12 @@ export async function render(el, { params }) {
       const constraints = micConstraints();
       const beat = tracks.find(t => t.kind === 'instru' && !t.mute);
       recAuto = { sil: autoStopSilence, spoke: false, last: performance.now() };
-      recorder = await startRecorder({ constraints, onLevel: (l) => {
+      let lastPend = 0;
+      const pendOffset = 0;
+      recorder = await startRecorder({ constraints, onChunk: (chunks) => {
+        const now = performance.now(); if (now - lastPend < 2000) return; lastPend = now;
+        putItem(PKEY, { chunks: chunks.slice(), type: chunks[0]?.type, offset: pendOffset }).catch(() => {});
+      }, onLevel: (l) => {
         meter.firstChild.style.width = Math.min(100, l * 300) + '%';
         // arrêt automatique après X s de silence (mode mains libres), une fois que la voix a commencé
         const a = recAuto; if (!a?.sil || !recorder) return;
@@ -189,7 +246,7 @@ export async function render(el, { params }) {
       if (withBeat.checked && beat) {
         const ctx = audioCtx();
         beatSrc = ctx.createBufferSource(); beatSrc.buffer = beat.buffer;
-        const g = ctx.createGain(); g.gain.value = 10 ** (beat.gainDb / 20);
+        const g = ctx.createGain(); g.gain.value = 10 ** (beat.gainDb / 20); beatGainNode = g;
         beatSrc.connect(g).connect(ctx.destination); beatSrc.start();
         if (autoStopBeat) beatSrc.onended = () => { if (recorder) { toast('Fin de l’instru : prise arrêtée.'); stopRec(); } };
         const beatT0 = performance.now();
@@ -208,6 +265,7 @@ export async function render(el, { params }) {
 
   // ---------- Liste des pistes ----------
   function drawList() {
+    saveSoon(); syncInstru?.();
     list.innerHTML = '';
     if (!tracks.length) list.append(h('p.muted.small', 'Aucune piste. Enregistrez votre voix ou importez un fichier (instru, voix, son).'));
     tracks.forEach((t, i) => {
@@ -692,6 +750,8 @@ export async function render(el, { params }) {
       mute: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks[i].mute = x.on !== false; masterResult = null; drawList(); },
       delete: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
       all: async () => doEverything(fakeBtn()),
+      importInstru: async () => { for (const f of await pickLocalFiles('audio/*,video/*', false)) await addBlob(f, f.name, 'instru'); },
+      dropLastVoice: async () => { const i = tracks.map(t => t.kind).lastIndexOf('voix'); if (i >= 0) { tracks.splice(i, 1); selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); } },
       master: async (x) => { if (x.preset) masterSel.value = masterKey(x.preset); await doMaster(); mixPlayerEl.querySelector('audio')?.play(); },
       versions: async () => compareMasters(fakeBtn()),
       save: async () => { if (!masterResult) await doMaster(); await uploadFile(encodeWav(masterResult.buffer, Number(bitSel.value)), { name: `${exportName()}-master.wav`, source: 'master' }); toast('Master enregistré dans tes fichiers', 'ok'); },
@@ -708,6 +768,10 @@ export async function render(el, { params }) {
       h('div.card.stack',
         h('h3', '🎙️ Enregistrer'),
         h('div.row', recBtn, recTime, h('div.grow', meter)),
+        h('div.sliders',
+          h('label', h('span', '🥁 Volume de l’instru ', instruLbl), instruVol),
+          h('label', h('span', '🎤 Volume de ma voix ', micLbl), micVol)),
+        h('p.tiny.muted', 'Tu peux bouger ces curseurs pendant l’enregistrement (l’instru change tout de suite dans le casque) ou dire « baisse l’instru » / « monte ma voix ».'),
         h('label.chk.small', withBeat, 'Lancer l’instru pendant l’enregistrement (casque conseillé)'),
         h('label.chk.small', rawMode, 'Mode studio : désactiver les filtres automatiques du téléphone (meilleur son, à nettoyer ensuite)'),
         h('label.chk.small', monOn, '🎧 M’entendre en direct dans le casque pendant l’enregistrement'),
@@ -719,7 +783,7 @@ export async function render(el, { params }) {
           h('button.btn.small', { onclick: async () => { for (const f of await pickFromLibrary({ kinds: ['audio', 'video'] })) await addBlob(await fetchFileBlob(f.id), f.name, null, f.id); } }, '📚 Depuis mes fichiers'),
           h('button.btn.small.ghost', { onclick: () => { localStorage.removeItem('studio.prompter'); prompter.style.display = 'none'; } }, 'Masquer le texte')),
       ),
-      h('div.card.stack', h('h3', '🎚️ Pistes'), list),
+      h('div.card.stack', h('div.row', h('h3.grow', '🎚️ Pistes'), h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet')), saveLbl, list),
     ),
     h('div.stack',
       h('div.card.stack', editBox),
@@ -740,7 +804,8 @@ export async function render(el, { params }) {
       ),
     ),
   ));
-  drawList(); drawEdit();
+  await restoreSession();
+  drawList(); drawEdit(); ast?.refresh();
 
   // Chargements depuis d'autres sections
   for (const [key, kind] of [['beat', 'instru'], ['file', null]]) {
