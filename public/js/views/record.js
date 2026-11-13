@@ -137,7 +137,8 @@ export async function render(el, { params }) {
   let beatGainNode = null, micDb = Number(localStorage.getItem('studio.micDb') || 0);
   const instruLbl = h('b', '');
   const instruVol = h('input', { type: 'range', min: -30, max: 6, step: 0.5, value: -4 });
-  const syncInstru = () => { const b = tracks.find(t => t.kind === 'instru'); instruVol.disabled = !b; if (b) { instruVol.value = b.gainDb; instruLbl.textContent = `${b.gainDb} dB`; } else instruLbl.textContent = '(pas d’instru)'; };
+  const syncVoice = () => { const has = tracks.some(t => t.kind === 'voix'); micVol.disabled = !has; micLbl.textContent = has ? `${micDb} dB` : '(pas encore de voix enregistrée)'; };
+  const syncInstru = () => { syncVoice(); const b = tracks.find(t => t.kind === 'instru'); instruVol.disabled = !b; if (b) { instruVol.value = b.gainDb; instruLbl.textContent = `${b.gainDb} dB`; } else instruLbl.textContent = '(pas d’instru)'; };
   instruVol.oninput = () => { const b = tracks.find(t => t.kind === 'instru'); if (!b) return; b.gainDb = Number(instruVol.value); instruLbl.textContent = `${b.gainDb} dB`; if (beatGainNode) beatGainNode.gain.value = 10 ** (b.gainDb / 20); liveGain(b); masterResult = null; drawList(); };
   // ---------- Écoute du mix EN DIRECT : chaque curseur de volume agit pendant la lecture ----------
   const live = { srcs: [], gains: new Map(), timer: null };
@@ -169,7 +170,16 @@ export async function render(el, { params }) {
   const monStyle = h('select', Object.entries(MON_STYLES).map(([k, l]) => h('option', { value: k, selected: localStorage.getItem('studio.mon.style') === k }, l)));
   const monVol = h('input', { type: 'range', min: 0, max: 2, step: 0.05, value: localStorage.getItem('studio.mon.vol') || 1 });
   let monitor = null, monTestStream = null;
-  monOn.onchange = () => { localStorage.setItem('studio.mon', monOn.checked ? '1' : '0'); if (!monOn.checked) stopMonitor(); else if (recorder) startMonitor(recorder.stream); };
+  // Cocher = on s'entend tout de suite dans le casque (même sans enregistrer) ; décocher = on coupe
+  monOn.onchange = () => { localStorage.setItem('studio.mon', monOn.checked ? '1' : '0'); if (!monOn.checked) stopMonitor(); else if (recorder) startMonitor(recorder.stream); else openLiveMonitor(); };
+  async function openLiveMonitor() {
+    if (monTestStream || recorder) return;
+    try {
+      monTestStream = await navigator.mediaDevices.getUserMedia({ audio: { ...micConstraints(), echoCancellation: false } });
+      startMonitor(monTestStream); monTestBtn.textContent = '⏹ Arrêter le test';
+      toast('🎧 Tu t’entends dans le casque. Règle « Ma voix dans le casque ». (Casque filaire conseillé.)');
+    } catch (e) { monOn.checked = false; toast('Micro inaccessible : ' + e.message, 'bad'); }
+  }
   monStyle.onchange = () => { localStorage.setItem('studio.mon.style', monStyle.value); const st = monitor?.stream; if (st) { stopMonitor(true); startMonitor(st); } };
   monVol.oninput = () => { localStorage.setItem('studio.mon.vol', monVol.value); if (monitor) monitor.out.gain.value = Number(monVol.value); };
   function startMonitor(stream) {
@@ -236,6 +246,7 @@ export async function render(el, { params }) {
       await addBlob(blob, `Prise ${tracks.filter(t => t.kind === 'voix').length + 1}`, 'voix', null, lat ? -lat : 0);
       if (tracks[selected]?.kind === 'voix') tracks[selected].gainDb = micDb;
       beatGainNode = null; saveSoon(true);
+      if (monOn.checked) openLiveMonitor();
       if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
       stopping.p = null;
       ast?.onRecordStopped();
@@ -741,8 +752,8 @@ export async function render(el, { params }) {
     h('div.row', h('strong.small.grow', '🎚️ Volumes du casque (en direct)'), liveBtn),
     h('div.sliders',
       h('label', h('span', '🥁 Instru ', instruLbl), instruVol),
-      h('label', h('span', '🎤 Ma voix (mix) ', micLbl), micVol),
-      h('label', h('span', '🎧 Ma voix dans le casque ', monVolLbl), monVol)),
+      h('label', h('span', '🎤 Ma voix enregistrée ', micLbl), micVol),
+      h('label', h('span', '🎧 Ma voix en direct dans le casque ', monVolLbl), monVol)),
     h('label.chk.small', monOn, 'M’entendre en direct dans le casque pendant que j’enregistre'));
   const S = {
     mixer,
