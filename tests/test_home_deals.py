@@ -39,9 +39,11 @@ class HomeDealsTests(unittest.TestCase):
                           desc="Patron de couture")
         home = product("Tissu d'ameublement velours", "PRM Coupons Couture FR", 30, desc="Tissu")
         unknown = product("PRM référence 123", "PRM Coupons Couture FR", 30, desc="")
+        sewing = product("Aiguilles à coudre Bohin longues A1F", "PRM Coupons Couture FR", 30, desc="Mercerie")
         self.assertEqual(deals.gift_family(fashion)[0], "mode")
         self.assertEqual(deals.gift_family(home)[0], "maison")
         self.assertEqual(deals.gift_family(unknown)[0], "autre")
+        self.assertEqual(deals.gift_family(sewing)[0], "mode")
 
     def test_gifts_exclude_known_placeholder_image_urls(self):
         awin = {"products": [

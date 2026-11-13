@@ -41,7 +41,7 @@ def gift_family(product):
     if "prm coupons couture" in merchant:
         if re.search(r"ameublement|rideau|coussin|linge de maison|nappe|d[eé]coration|tissu d.?ameublement", text, re.I):
             return "maison", "Maison"
-        if re.search(r"patron|blouse|veste|robe|pantalon|chemise|jupe|jersey|denim|doublure|popeline|maille|viscose|molleton|drap de laine|mousseline|tulle|lycra|élasthanne|couture", text, re.I):
+        if re.search(r"patron|blouse|veste|robe|pantalon|chemise|jupe|jersey|denim|doublure|popeline|maille|viscose|molleton|drap de laine|mousseline|tulle|lycra|élasthanne|couture|agrafe|crochet|aiguille|fil|fermeture|bouton|ciseaux|canette|bobine|mercerie|broderie|machine a coudre|pied presseur|tirette|zip|rivet|oeillet|biais|ruban|passepoil", text, re.I):
             return "mode", "Mode"
     for key, label, pattern in GIFT_FAMILIES:
         if pattern.search(text):
