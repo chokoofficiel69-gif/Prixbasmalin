@@ -17,11 +17,14 @@ const $ = (id) => document.getElementById(id);
 let cleanup = null;
 let renderToken = 0;
 
-function applyTheme(t) {
+function applyTheme(t, persist = true) {
   document.documentElement.dataset.theme = t;
-  localStorage.setItem('studio.theme', t);
+  if (persist) localStorage.setItem('studio.theme', t);
 }
-applyTheme(localStorage.getItem('studio.theme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
+// Studio = interface façon DAW : thème SOMBRE par défaut. Migration unique : on bascule tout
+// le monde en sombre une fois (identité DAW), puis les changements manuels sont respectés.
+if (!localStorage.getItem('studio.theme.v2')) { try { localStorage.setItem('studio.theme', 'dark'); localStorage.setItem('studio.theme.v2', '1'); } catch {} }
+applyTheme(localStorage.getItem('studio.theme') || 'dark', false);
 
 function buildNav() {
   const nav = $('nav');
