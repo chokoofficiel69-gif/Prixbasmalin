@@ -5,7 +5,7 @@ import worker from "./prixbasmalin-attribution.js";
 const ORIGIN="https://prixbasmalin.fr";
 function makeEnv() {
   const writes=[];
-  return {writes,CLICKS:{prepare(sql){return {bind(...values){return {run:async()=>{writes.push({sql,values});return {success:true};}}};}}}};
+  return {writes,CLICKS:{prepare(sql){return {bind(...values){return {run:async()=>{writes.push({sql,values});return {success:true};}};}};}}};
 }
 function req({origin=ORIGIN,ip="198.51.100.10",body={page_path:"/",visitor_id:"visitor-12345678"},contentType="application/json"}={}) {
   return new Request("https://worker.example/view",{method:"POST",headers:{Origin:origin,"CF-Connecting-IP":ip,"Content-Type":contentType},body:JSON.stringify(body)});
@@ -47,7 +47,7 @@ test("limite à 60 requêtes par minute et par identifiant visiteur dans un isol
   const env=makeEnv();
   let accepted=0,limited=0;
   for(let i=0;i<61;i++){
-    const response=await worker.fetch(req({ip:"203.0.113.222",body:{page_path:"/",visitor_id:"visitor-12345678",campaign:String(i)}}),env);
+    const response=await worker.fetch(req({ip:"203.0.113.222",body:{page_path:"/",visitor_id:"visitor-ratelimit-0001",campaign:String(i)}}),env);
     if(response.status===204) accepted++;
     if(response.status===429) limited++;
   }
