@@ -18,6 +18,7 @@ const MAX_PROGRAMMES = 100;
 const MAX_PRODUCTS = 25000;
 const MAX_PER_ADVERTISER = 3000;
 const CONCURRENCY = 3;
+const ENHANCED_FEED_INTERVAL_MS = 12000; // Awin: maximum 5 téléchargements Enhanced par minute.
 const TIMEOUT_MS = 45000;
 
 function log(message) { console.log("[Awin catalogue] " + message); }
@@ -146,6 +147,47 @@ function parseJsonl(body) {
     }
   }
   return rows;
+}
+function safeAwinErrorDetail(value) {
+  return String(value || "")
+    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/((?:api[_-]?)?key|token|password)\s*[:=]\s*[^,\s]+/gi, "$1=[redacted]")
+    .replace(/\s+/g, " ")
+    .slice(0, 180);
+}
+function parseEnhancedJsonl(body) {
+  const lines = String(body || "").split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const rows = lines.map((line, index) => {
+    let row;
+    try { row = JSON.parse(line); }
+    catch { throw new Error("Flux Enhanced Awin JSONL invalide (ligne " + (index + 1) + ")."); }
+    if (!row || typeof row !== "object" || Array.isArray(row)) {
+      throw new Error("Flux Enhanced Awin JSONL invalide (objet attendu ligne " + (index + 1) + ").");
+    }
+    return row;
+  });
+  const last = rows.at(-1);
+  if (last && !firstField(last, ["id", "title", "product_name", "product_details"]) &&
+      (last.error || last.errors || last.message || last.status === "error")) {
+    throw new Error("Flux Enhanced Awin incomplet : " + safeAwinErrorDetail(last.error || last.errors || last.message || last.status));
+  }
+  return rows;
+}
+async function downloadEnhancedFeed(url, token) {
+  const response = await fetch(url, {
+    // L'exemple officiel Awin n'envoie pas d'Accept ; ne pas négocier application/json pour un flux JSONL.
+    headers: { Authorization: "Bearer " + token },
+    signal: AbortSignal.timeout(TIMEOUT_MS)
+  });
+  const body = await response.text();
+  if (!response.ok) {
+    const contentType = response.headers?.get?.("content-type") || "inconnu";
+    const error = new Error("Awin HTTP " + response.status + " (" + contentType + ")" +
+      (body ? " : " + safeAwinErrorDetail(body) : ""));
+    error.status = response.status;
+    throw error;
+  }
+  return parseEnhancedJsonl(body);
 }
 async function request(url, label, token = TOKEN) {
   let lastError;
@@ -704,7 +746,11 @@ async function fetchProgrammes(relationship, token) {
   return Array.isArray(programmes) ? programmes : [];
 }
 
-async function loadEnhancedAwinFeeds(rawOffers, { optional = false, token = TOKEN } = {}) {
+async function loadEnhancedAwinFeeds(rawOffers, {
+  optional = false,
+  token = TOKEN,
+  minIntervalMs = ENHANCED_FEED_INTERVAL_MS
+} = {}) {
   const initialCount = rawOffers.length;
   let joinedCount = null;
   let pendingCount = null;
@@ -732,32 +778,32 @@ async function loadEnhancedAwinFeeds(rawOffers, { optional = false, token = TOKE
       log(joinedCount + " partenariat(s) Awin rejoint(s) à examiner.");
 
       const statusCounts = {};
-      let cursor = 0;
-      async function worker() {
-        while (cursor < eligible.length && rawOffers.length < MAX_PRODUCTS) {
-          const item = eligible[cursor++];
-          const url = "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) +
-            "/awinfeeds/download/" + encodeURIComponent(item.id + "-retail-" + LOCALE + ".jsonl");
-          try {
-            const response = await request(url, "Flux annonceur " + item.id, token);
-            statusCounts[response.status] = (statusCounts[response.status] || 0) + 1;
-            if (!response.ok) continue;
-            const rows = parseJsonl(await response.text());
-            let accepted = 0;
-            for (const row of rows) {
-              const offer = offerFromRow(row, item.program, item.id);
-              if (!offer) continue;
-              rawOffers.push(offer);
-              accepted++;
-              if (accepted >= MAX_PER_ADVERTISER || rawOffers.length >= MAX_PRODUCTS) break;
-            }
-            if (accepted) log((item.program?.name || "Annonceur " + item.id) + " : " + accepted + " offre(s) avec image, prix EUR, stock et lien.");
-          } catch (error) {
-            log("Flux " + item.id + " ignoré (" + String(error.message || "erreur").slice(0, 120) + ").");
+      let lastRequestAt = 0;
+      for (const item of eligible) {
+        if (rawOffers.length >= MAX_PRODUCTS) break;
+        const waitMs = lastRequestAt ? Math.max(0, minIntervalMs - (Date.now() - lastRequestAt)) : 0;
+        if (waitMs) await new Promise(resolve => setTimeout(resolve, waitMs));
+        lastRequestAt = Date.now();
+
+        const url = "https://api.awin.com/publishers/" + encodeURIComponent(PUBLISHER_ID) +
+          "/awinfeeds/download/" + encodeURIComponent(item.id + "-retail-" + LOCALE + ".jsonl");
+        try {
+          const rows = await downloadEnhancedFeed(url, token);
+          statusCounts[200] = (statusCounts[200] || 0) + 1;
+          let accepted = 0;
+          for (const row of rows) {
+            const offer = offerFromRow(row, item.program, item.id);
+            if (!offer) continue;
+            rawOffers.push(offer);
+            accepted++;
+            if (accepted >= MAX_PER_ADVERTISER || rawOffers.length >= MAX_PRODUCTS) break;
           }
+          if (accepted) log((item.program?.name || "Annonceur " + item.id) + " : " + accepted + " offre(s) Enhanced avec image, prix EUR et lien.");
+        } catch (error) {
+          if (error.status) statusCounts[error.status] = (statusCounts[error.status] || 0) + 1;
+          log("Flux Enhanced " + item.id + " ignoré (" + String(error.message || "erreur").slice(0, 240) + ").");
         }
       }
-      await Promise.all(Array.from({ length: Math.min(CONCURRENCY, eligible.length) }, worker));
       if (Object.keys(statusCounts).length) log("Codes HTTP des flux Enhanced Awin : " + JSON.stringify(statusCounts));
       if (!eligible.length) log("Aucun programme rejoint : les demandes en attente ne sont pas utilisées comme autorisation.");
     } else {
@@ -792,7 +838,6 @@ async function loadEnhancedAwinFeeds(rawOffers, { optional = false, token = TOKE
   }
   return { joinedCount, pendingCount, importedOffers };
 }
-
 function buildSyncStatus({ fetchedAt, source, joinedCount, pendingCount, additionalOffers, counts }) {
   const programmesCheckStatus = joinedCount === null && pendingCount === null
     ? "not_verified"
@@ -1079,6 +1124,24 @@ async function runSelfTests() {
   if (extractAwinDataFeedKey(feedListUrl) !== "test-key") {
     throw new Error("TEST ÉCHEC : l'URL feedList Awin doit être reconnue comme une clé de flux standard, pas comme un flux CSV direct.");
   }
+  const validEnhancedLine = JSON.stringify({
+    id: "enhanced-1", title: "AOV PT camera", description: "Camera", link: "https://shop.example/aov",
+    image_link: "https://cdn.example/aov.jpg", price: "99.90 EUR", brand: "Imou",
+    gtin: "4006381333931", mpn: "AOV-1", availability: "in_stock",
+    shipping: [{ country: "FR", price: "4.99 EUR" }]
+  });
+  const parsedEnhanced = parseEnhancedJsonl(validEnhancedLine + "\n");
+  if (parsedEnhanced.length !== 1 || parsedEnhanced[0].id !== "enhanced-1") {
+    throw new Error("TEST ÉCHEC : un flux Enhanced JSONL valide doit être parsé ligne par ligne.");
+  }
+  let incompleteEnhancedRejected = false;
+  try { parseEnhancedJsonl(validEnhancedLine + "\n" + JSON.stringify({ error: "download incomplete" })); }
+  catch { incompleteEnhancedRejected = true; }
+  if (!incompleteEnhancedRejected) throw new Error("TEST ÉCHEC : une dernière ligne d'erreur doit invalider le flux Enhanced.");
+  let invalidEnhancedRejected = false;
+  try { parseEnhancedJsonl(validEnhancedLine + "\nnot-json"); }
+  catch { invalidEnhancedRejected = true; }
+  if (!invalidEnhancedRejected) throw new Error("TEST ÉCHEC : une ligne JSONL invalide ne doit pas être ignorée.");
   const originalFetch = globalThis.fetch;
   const originalStandardKey = process.env.AWIN_PRODUCT_DATA_API_KEY;
   const originalDirectFeedUrl = process.env.AWIN_PRODUCT_DATA_FEED_URL;
@@ -1090,6 +1153,35 @@ async function runSelfTests() {
   }
   try {
     delete process.env.AWIN_PRODUCT_DATA_API_KEY;
+    delete process.env.AWIN_PRODUCT_DATA_FEED_URL;
+    let enhancedHeaders = null;
+    globalThis.fetch = async (url, options = {}) => {
+      const value = String(url);
+      if (value.includes("relationship=joined")) return new Response('[{"id":123,"name":"Imou"}]', { status: 200 });
+      if (value.includes("relationship=pending")) return new Response("[]", { status: 200 });
+      if (value.includes("/awinfeeds/download/123-retail-" + LOCALE + ".jsonl")) {
+        enhancedHeaders = options.headers || {};
+        return new Response(validEnhancedLine + "\n", { status: 200, headers: { "content-type": "application/x-ndjson" } });
+      }
+      throw new Error("URL inattendue dans le test Enhanced Awin : " + value);
+    };
+    const enhancedOffers = [{ id: "direct-feed-enhanced" }];
+    const enhancedStatus = await loadEnhancedAwinFeeds(enhancedOffers, { optional: true, token: "test-token", minIntervalMs: 0 });
+    if (enhancedStatus.joinedCount !== 1 || enhancedStatus.pendingCount !== 0 || enhancedStatus.importedOffers !== 1 ||
+        enhancedOffers.length !== 2 || enhancedOffers[1].gtin !== "4006381333931" ||
+        enhancedHeaders?.Authorization !== "Bearer test-token" || Object.keys(enhancedHeaders).length !== 1) {
+      throw new Error("TEST ÉCHEC : téléchargement Enhanced doit utiliser Bearer seul et parser JSONL sans négociation JSON.");
+    }
+    globalThis.fetch = async () => new Response("Not acceptable token=secret-test-value", {
+      status: 406, headers: { "content-type": "text/plain" }
+    });
+    let enhanced406 = "";
+    try { await downloadEnhancedFeed("https://api.awin.com/test.jsonl", "test-token"); }
+    catch (error) { enhanced406 = String(error.message || error); }
+    if (!enhanced406.includes("HTTP 406") || enhanced406.includes("secret-test-value")) {
+      throw new Error("TEST ÉCHEC : le diagnostic HTTP 406 doit être utile sans exposer de valeur sensible.");
+    }
+
     const requested = [];
     globalThis.fetch = async (url, options = {}) => {
       requested.push({ url: String(url), authorization: options.headers?.Authorization });
