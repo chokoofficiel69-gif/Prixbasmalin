@@ -133,5 +133,5 @@ export function createTimeline(o) {
   };
   loop();
 
-  return { el: scroller, tools, selBar, posLbl, render, fit, setSelTrack: (t) => { selTrack = t; }, clearSel: () => { selTrack = null; o.setSel(null); showSel(); }, selTrack: () => selTrack, destroy: () => cancelAnimationFrame(raf) };
+  return { el: scroller, tools, selBar, posLbl, render, fit, edit: (k) => o.edit(k), setSelTrack: (t) => { selTrack = t; }, clearSel: () => { selTrack = null; o.setSel(null); showSel(); }, selTrack: () => selTrack, destroy: () => cancelAnimationFrame(raf) };
 }

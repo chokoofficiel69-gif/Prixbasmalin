@@ -806,6 +806,7 @@ export async function render(el, { params }) {
   const fakeBtn = () => ({ disabled: false });
   // ---------- Ligne de temps (toutes les pistes au même endroit) ----------
   const minOffNow = () => Math.min(0, ...tracks.map(t => t.offset || 0));
+  let timelineRemove = () => {};
   timeline = createTimeline({
     tracks, effMute,
     getSelected: () => selected,
@@ -822,7 +823,7 @@ export async function render(el, { params }) {
     seek: (g) => { seekPos = Math.max(0, g); if (live.srcs.length) playLive(seekPos); },
     position: () => live.srcs.length ? livePos() : player.playing && tracks[selected] ? (tracks[selected].offset || 0) - minOffNow() + player.position : seekPos,
     isPlaying: () => !!live.srcs.length || player.playing,
-    remove: async (i) => { if (!(await confirmBox(`Supprimer la piste « ${tracks[i].name} » ?`, 'Supprimer', true))) return; tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
+    remove: timelineRemove = async (i) => { if (!(await confirmBox(`Supprimer la piste « ${tracks[i].name} » ?`, 'Supprimer', true))) return; tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
     edit: async (kind) => {
       const t = timeline.selTrack(), r = sel; if (!t || !r) return;
       selected = tracks.indexOf(t); drawEdit();
@@ -1063,6 +1064,7 @@ export async function render(el, { params }) {
         h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet'), saveLbl),
       micMeter.proxEl,
       timeline.el, timeline.selBar,
+      h('p.tiny.muted', '⌨️ Raccourcis : Espace = lecture / pause (stop pendant une prise) · R = enregistrer · E ou Suppr = effacer le passage sélectionné (sinon la piste) · Ctrl+Z = annuler · Ctrl+Y = rétablir · M = muet · S = solo · A = armer ● · N = nouvelle piste · ↑ ↓ = changer de piste · ← → = reculer / avancer de 5 s · F = tout voir · Entrée = début · Échap = stop.'),
       h('p.tiny.muted', '➕ Ajouter une piste (backs, refrain…) puis ⏺ : la prise va dans la piste armée ● et l’enregistrement démarre là où est la tête de lecture, en jouant tout le reste. Clique sur la ligne de temps pour placer la lecture · ⬚ Sélectionner : glisse sur une prise pour choisir un passage à couper · ✋ Déplacer : glisse une prise pour la caler · M = muet, S = solo, Vol = volume, G/D = gauche/droite.')),
     h('div.grid.two',
     h('div.stack',
@@ -1119,5 +1121,38 @@ export async function render(el, { params }) {
       } catch (e) { toastErr(e); }
     }
   }
-  return () => { ast?.destroy(); stopLive(); player.stop(); stopMonitor(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
+  // ---------- Raccourcis clavier (comme dans un logiciel de studio) ----------
+  // Espace = lecture / pause (ou stop pendant une prise) · R = enregistrer · Entrée/Début = revenir au début · Échap = stop
+  const onKey = (e) => {
+    if (e.altKey || e.repeat) return;
+    const tg = e.target, tag = (tg?.tagName || '').toLowerCase();
+    const typing = tg?.isContentEditable || tag === 'textarea' || (tag === 'input' && !['range', 'checkbox', 'radio', 'button'].includes(tg.type)) || tag === 'select';
+    if (typing || document.querySelector('.modal, dialog[open]')) return;
+    if (e.ctrlKey || e.metaKey) {
+      if (e.code === 'KeyZ' && !e.shiftKey) { e.preventDefault(); undoBtn.click(); }
+      else if (e.code === 'KeyY' || (e.code === 'KeyZ' && e.shiftKey)) { e.preventDefault(); redoBtn.click(); }
+      return;
+    }
+    const cur = tracks[selected];
+    if (e.code === 'KeyE' || e.code === 'Delete' || e.code === 'Backspace') {
+      e.preventDefault();
+      if (sel && timeline?.selTrack()) timeline.edit?.('delete');
+      else if (cur) timelineRemove(selected);
+      return;
+    }
+    if (e.code === 'KeyM' && cur) { cur.mute = !cur.mute; liveGain(); drawList(); return; }
+    if (e.code === 'KeyS' && cur) { cur.solo = !cur.solo; liveGain(); drawList(); return; }
+    if (e.code === 'KeyA' && cur) { const on = !cur.armed; tracks.forEach(x => { x.armed = false; }); cur.armed = on; drawList(); return; }
+    if (e.code === 'KeyN') { e.preventDefault(); addEmptyTrack(); return; }
+    if (e.code === 'KeyF') { timeline?.fit(); return; }
+    if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') { e.preventDefault(); seekPos = Math.max(0, (live.srcs.length ? livePos() : seekPos) + (e.code === 'ArrowRight' ? 5 : -5)); if (live.srcs.length) playLive(seekPos); return; }
+    if (e.code === 'ArrowUp' || e.code === 'ArrowDown') { if (!tracks.length) return; e.preventDefault(); selected = Math.max(0, Math.min(tracks.length - 1, selected + (e.code === 'ArrowDown' ? 1 : -1))); drawList(); drawEdit(); return; }
+    if (e.code === 'Space') { e.preventDefault(); tg?.blur?.(); if (recorder) stopRec(); else if (live.srcs.length) stopLive(); else playLive(); }
+    else if (e.code === 'KeyR') { e.preventDefault(); recorder ? stopRec() : startRec().catch(() => {}); }
+    else if (e.code === 'Home' || e.code === 'Enter' && tag !== 'button') { e.preventDefault(); seekPos = 0; if (live.srcs.length) playLive(0); }
+    else if (e.code === 'Escape') { if (recorder) stopRec(); else { stopLive(false); player.stop(); seekPos = 0; } }
+  };
+  document.addEventListener('keydown', onKey);
+
+  return () => { document.removeEventListener('keydown', onKey); ast?.destroy(); stopLive(); player.stop(); stopMonitor(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
 }
