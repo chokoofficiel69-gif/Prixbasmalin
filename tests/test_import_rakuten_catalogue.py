@@ -328,5 +328,25 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIn("feed.priceTaxStatusVerified!==true", loader)
 
 
+    def test_products_shared_with_other_sources_are_published_first(self):
+        rows = [
+            {"id": "a", "category": "beauty", "priceValue": 10.0, "regularPriceValue": 20.0, "gtin": "4006381333931"},
+            {"id": "b", "category": "beauty", "priceValue": 10.0, "regularPriceValue": None, "gtin": "0652638010168"},
+            {"id": "c", "category": "beauty", "priceValue": 10.0, "regularPriceValue": 15.0, "gtin": ""},
+        ]
+        priority = {MODULE.gtin14("652638010168")}
+        selected, count = MODULE.select_with_priority(rows, 2, priority)
+        self.assertEqual([row["id"] for row in selected], ["b", "a"])
+        self.assertEqual(count, 1)
+
+    def test_priority_gtins_are_read_from_awin_feed(self):
+        import json
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "awin.json"
+            path.write_text(json.dumps({"products": [{"gtin": "652638010168"}, {"gtin": "123"}, {"offers": [{"gtin": "4006381333931"}]}]}), encoding="utf-8")
+            gtins = MODULE.load_priority_gtins([str(path)])
+        self.assertEqual(gtins, {"00652638010168", "04006381333931"})
+
+
 if __name__ == "__main__":
     unittest.main()

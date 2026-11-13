@@ -307,6 +307,36 @@ def parse_feed(path, merchant, slug, date_format, now=None, max_age_hours=48, pr
     return rows, source_created, stats
 
 
+def gtin14(value):
+    """Forme canonique GTIN-14 pour comparer des GTIN-8/12/13/14 entre sources."""
+    digits = normalize_gtin(value)
+    return digits.zfill(14) if digits else ""
+
+
+def load_priority_gtins(paths):
+    """GTIN valides présents dans d'autres flux autorisés (ex. Awin) : candidats à une comparaison exacte."""
+    gtins = set()
+    for path in paths:
+        try:
+            with open(path, encoding="utf-8") as stream:
+                feed = json.load(stream)
+        except (OSError, ValueError):
+            print("Liste de GTIN prioritaires ignorée (illisible) : " + path)
+            continue
+        for product in feed.get("products") or []:
+            values = [product.get("gtin")] + [offer.get("gtin") for offer in product.get("offers") or [] if isinstance(offer, dict)]
+            gtins.update(g for g in map(gtin14, values) if g)
+    return gtins
+
+
+def select_with_priority(rows, limit, priority_gtins):
+    """Publie d'abord les produits dont le GTIN existe chez un autre marchand, puis la sélection équilibrée."""
+    priority = [row for row in rows if row["gtin"] and gtin14(row["gtin"]) in priority_gtins][:limit]
+    chosen = {row["id"] for row in priority}
+    rest = select_balanced([row for row in rows if row["id"] not in chosen], limit - len(priority))
+    return priority + rest, len(priority)
+
+
 def select_balanced(rows, limit):
     # Les promotions (prix barré fourni par le marchand) passent en premier, la plus forte remise d'abord.
     def discount(row):
@@ -317,7 +347,7 @@ def select_balanced(rows, limit):
     for row in rows:
         by_category[row["category"]].append(row)
     categories = sorted(by_category, key=lambda key: (-len(by_category[key]), key))
-    if not categories:
+    if not categories or limit <= 0:
         return []
     per_category = max(1, limit // len(categories))
     selected = []
@@ -369,6 +399,8 @@ def main():
     parser.add_argument("--price-tax-status-verified", choices=("true", "false"), default=os.environ.get("RAKUTEN_PRICE_TAX_STATUS_VERIFIED", "false"))
     parser.add_argument("--decathlon-limit", type=int, default=1500)
     parser.add_argument("--nicchia-limit", type=int, default=1500)
+    parser.add_argument("--priority-gtins-from", action="append", default=[],
+                        help="Flux JSON d'autres sources autorisées : leurs GTIN sont publiés en priorité.")
     parser.add_argument("--allow-partial", choices=("true", "false"), default="false",
                         help="Autoriser la perte d'un marchand ou d'une grande partie d'un flux par rapport au snapshot précédent.")
     args = parser.parse_args()
@@ -385,6 +417,7 @@ def main():
         raise SystemExit(str(error))
 
     now = dt.datetime.now(UTC)
+    priority_gtins = load_priority_gtins(args.priority_gtins_from)
     all_products = []
     source_stats = {}
     source_dates = []
@@ -405,10 +438,12 @@ def main():
             print("Source ignorée (" + filename + ") : " + str(error))
             continue
         limit = args.decathlon_limit if slug == "decathlon" else args.nicchia_limit
-        selected = select_balanced(rows, limit)
+        selected, priority_count = select_with_priority(rows, limit, priority_gtins)
         all_products.extend(selected)
         source_dates.append(source_created)
         stats["published_products"] = len(selected)
+        stats["gtin_shared_with_other_sources"] = sum(1 for row in rows if row["gtin"] and gtin14(row["gtin"]) in priority_gtins)
+        stats["published_priority_gtin"] = priority_count
         source_stats[merchant] = stats
         loaded_slugs.add(slug)
 

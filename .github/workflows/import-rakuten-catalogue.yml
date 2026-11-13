@@ -219,7 +219,8 @@ jobs:
             --price-tax-status "${RAKUTEN_PRICE_TAX_STATUS:-unspecified}" \
             --price-tax-status-verified "${RAKUTEN_PRICE_TAX_STATUS_VERIFIED:-false}" \
             --decathlon-limit 1500 \
-            --nicchia-limit 1500 | tee /tmp/rakuten-import-report.json
+            --nicchia-limit 1500 \
+            --priority-gtins-from data/awin-products.json | tee /tmp/rakuten-import-report.json
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
           report = json.loads(open("/tmp/rakuten-import-report.json", encoding="utf-8").read().strip().splitlines()[-1])
@@ -229,7 +230,8 @@ jobs:
           for merchant, stats in report["sources"].items():
               print(f"- {merchant} : fichier {stats['file']}, créé le {stats['created_on_raw']} (lu {stats['date_format_detected']}), "
                     f"{stats['raw_products']} bruts, {stats['eligible_products']} validés, {stats['with_gtin']} GTIN, "
-                    f"{stats['with_brand_and_mpn']} marque+MPN, {stats['with_shipping']} livraison, {stats['published_products']} publiés, rejets {stats['skipped']}")
+                    f"{stats['with_brand_and_mpn']} marque+MPN, {stats['with_shipping']} livraison, {stats['published_products']} publiés "
+                    f"(dont {stats['published_priority_gtin']} GTIN aussi présents chez Awin), rejets {stats['skipped']}")
           PY
       - name: Publier le snapshot validé sans écraser les données précédentes en cas d'échec
         if: steps.config.outputs.ready == 'true'
