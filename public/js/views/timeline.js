@@ -38,6 +38,7 @@ export function createTimeline(o) {
       h('div.row', { style: { gap: '4px', flexWrap: 'nowrap' } },
         h('span', t.kind === 'instru' ? '🥁' : t.kind === 'voix' ? '🎤' : '🔊'),
         h('input', { value: t.name, title: 'Renommer', style: { flex: 1, minWidth: 0, padding: '2px 6px', fontSize: '.85em', fontWeight: 600 }, onclick: (e) => e.stopPropagation(), onchange: (e) => { t.name = e.target.value || t.name; o.changed('name'); } }),
+        h('button.btn.small', { title: 'Armer : la prochaine prise ira dans cette piste', style: { padding: '2px 7px', color: t.armed ? '#fff' : '#ef4444', background: t.armed ? '#ef4444' : '' }, onclick: (e) => { e.stopPropagation(); const on = !t.armed; o.tracks.forEach(x => { x.armed = false; }); t.armed = on; o.changed('arm', t); } }, '●'),
         btn('M', t.mute, 'Muet', () => { t.mute = !t.mute; o.changed('mute', t); }),
         btn('S', t.solo, 'Solo (n’écouter que cette piste)', () => { t.solo = !t.solo; o.changed('solo', t); }),
         btn('✕', false, 'Supprimer la piste', () => o.remove(i))),
@@ -55,7 +56,8 @@ export function createTimeline(o) {
     const clip = h('div', { title: tool === 'move' ? 'Glisse pour déplacer la prise' : 'Glisse pour sélectionner un passage', style: { position: 'absolute', top: '6px', bottom: '6px', left: g0 * pps + 'px', width: w + 'px', borderRadius: '6px', overflow: 'hidden', touchAction: 'none',
       background: t.kind === 'instru' ? 'rgba(245,158,11,.22)' : 'rgba(99,102,241,.22)', border: `1px solid ${t.kind === 'instru' ? '#f59e0b' : 'var(--accent, #6366f1)'}`, opacity: o.effMute(t) ? 0.35 : 1, cursor: tool === 'move' ? 'grab' : 'text' } },
       h('span.tiny', { style: { position: 'absolute', top: '2px', left: '6px', pointerEvents: 'none', fontWeight: 600, textShadow: '0 0 3px var(--bg)' } }, t.name), cv);
-    const laneEl = h('div', { style: { position: 'relative', height: ROW + 'px', width: Math.max(total() * pps + 200, 200) + 'px', borderBottom: '1px solid rgba(127,127,127,.2)' } }, clip);
+    const laneEl = h('div', { style: { position: 'relative', height: ROW + 'px', width: Math.max(total() * pps + 200, 200) + 'px', borderBottom: '1px solid rgba(127,127,127,.2)' } },
+      t.empty ? h('span.small.muted', { style: { position: 'absolute', left: g0 * pps + 8 + 'px', top: '30px' } }, t.armed ? '● Piste vide armée : place la tête de lecture et appuie sur ⏺ Enregistrer' : 'Piste vide : arme-la (●) pour enregistrer dedans') : clip);
     const draw = () => { drawWave(cv, t.buffer, { sel: selTrack === t ? o.getSel() : null, color: t.kind === 'instru' ? '#f59e0b' : undefined }); };
     requestAnimationFrame(draw);
     let start = null;

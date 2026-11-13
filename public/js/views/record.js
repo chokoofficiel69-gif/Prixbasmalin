@@ -1,4 +1,4 @@
-import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose, confirmBox } from '../lib/core.js';
+import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose, confirmBox, promptBox } from '../lib/core.js';
 import { mountAssistant } from './assistant.js';
 import { createTimeline } from './timeline.js';
 import { putItem, getItem, delItem, packBuffer, unpackBuffer } from '../lib/session.js';
@@ -65,7 +65,7 @@ export async function render(el, { params }) {
   let selected = -1;
   let sel = null;          // [début, fin] en secondes sur la piste sélectionnée
   let masterResult = null;
-  let recorder = null, beatSrc = null, recLatency = null, timeline = null;
+  let recorder = null, beatSrc = null, recLatency = null, timeline = null, recFrom = 0, recMinOff = 0;
 
   const list = h('div.stack');
   const editBox = h('div.stack');
@@ -85,7 +85,7 @@ export async function render(el, { params }) {
     clearTimeout(saveT);
     saveT = setTimeout(async () => {
       try {
-        await putItem(SKEY, { v: 1, at: Date.now(), selected, tracks: tracks.map(t => ({ name: t.name, kind: t.kind, gainDb: t.gainDb, pan: t.pan, offset: t.offset, mute: t.mute, fxDone: t.fxDone || [], fileId: t.fileId,
+        await putItem(SKEY, { v: 1, at: Date.now(), selected, tracks: tracks.map(t => ({ name: t.name, kind: t.kind, gainDb: t.gainDb, pan: t.pan, offset: t.offset, mute: t.mute, solo: !!t.solo, armed: !!t.armed, empty: !!t.empty, fxDone: t.fxDone || [], fileId: t.fileId,
           buf: packBuffer(t.buffer), orig: t.original === t.buffer ? null : packBuffer(t.original) })) });
         saveLbl.textContent = `💾 Sauvegardé automatiquement à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
       } catch (e) { saveLbl.textContent = '⚠️ Sauvegarde auto impossible (mémoire du navigateur pleine ?)'; }
@@ -197,7 +197,7 @@ export async function render(el, { params }) {
   function liveGain() { const now = audioCtx().currentTime; for (const [t, g] of live.gains) g.gain.setTargetAtTime(gainOf(t), now, 0.02); }
   function livePos() { return live.srcs.length ? Math.min(live.end, audioCtx().currentTime - live.ctxStart + live.from) : seekPos; }
   function stopLive(keepPos = true) { if (live.srcs.length && keepPos) seekPos = livePos(); outMeter.detach(); live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; playBtn.textContent = '▶ Lecture'; }
-  function playLive(from = seekPos, until = null) {
+  function playLive(from = seekPos, until = null, onEnd = null) {
     stopLive(false); player.stop();
     if (!tracks.length) return toast('Aucune piste à écouter.');
     const ctx = audioCtx(), minOff = Math.min(0, ...tracks.map(t => t.offset || 0)), t0 = ctx.currentTime + 0.05;
@@ -206,6 +206,7 @@ export async function render(el, { params }) {
     for (const t of tracks) end = Math.max(end, (t.offset || 0) - minOff + t.buffer.duration);
     if (from >= end - 0.05) from = 0;
     for (const t of tracks) {
+      if (t.empty) continue;
       const src = ctx.createBufferSource(); src.buffer = t.buffer;
       const g = ctx.createGain(); g.gain.value = gainOf(t);
       const pan = ctx.createStereoPanner(); pan.pan.value = t.pan || 0;
@@ -217,7 +218,7 @@ export async function render(el, { params }) {
     }
     live.ctxStart = t0; live.from = from; live.end = until ?? end;
     liveBtn.textContent = '⏹ Arrêter l’écoute'; playBtn.textContent = '⏸ Pause';
-    live.timer = setTimeout(() => { stopLive(false); seekPos = until !== null ? from : 0; }, ((until ?? end) - from) * 1000 + 300);
+    live.timer = setTimeout(() => { stopLive(false); seekPos = until !== null ? from : 0; onEnd?.(); }, ((until ?? end) - from) * 1000 + 300);
   }
   const playBtn = h('button.btn.primary', { onclick: () => (live.srcs.length ? stopLive() : playLive()) }, '▶ Lecture');
   liveBtn.onclick = () => (live.srcs.length ? stopLive() : playLive());
@@ -295,7 +296,7 @@ export async function render(el, { params }) {
       clearInterval(timer);
       stopMonitor();
       const r = recorder; recorder = null;
-      try { beatSrc?.stop(); } catch {} beatSrc = null; outMeter.detach();
+      try { beatSrc?.stop(); } catch {} beatSrc = null; stopLive(false); seekPos = recFrom; outMeter.detach();
       recBtn.textContent = '⏺ Enregistrer'; meter.firstChild.style.width = '0';
       micMeter.detach();
       const blob = await r.stop();
@@ -303,8 +304,16 @@ export async function render(el, { params }) {
       // Calage automatique : la prise commence avant l'instru (temps de démarrage) et arrive en retard
       // (latence du casque + du micro). On replace la voix sur l'instru, puis on affine sur le beat.
       const lat = recLatency; recLatency = null;
-      await addBlob(blob, `Prise ${tracks.filter(t => t.kind === 'voix').length + 1}`, 'voix', null, lat ? -lat : 0);
-      if (tracks[selected]?.kind === 'voix') tracks[selected].gainDb = micDb;
+      const armed = tracks.find(t => t.armed);
+      await addBlob(blob, armed ? armed.name : `Prise ${tracks.filter(t => t.kind === 'voix').length + 1}`, 'voix', null, recFrom - (lat || 0) + recMinOff);
+      const take = tracks[tracks.length - 1];
+      if (take && armed && take !== armed) {
+        tracks.pop();
+        if (armed.empty) { Object.assign(armed, { buffer: take.buffer, original: take.buffer, offset: take.offset, empty: false }); selected = tracks.indexOf(armed); }
+        else { take.name = `${armed.name} ${tracks.filter(t => t.name.startsWith(armed.name)).length + 1}`; take.kind = armed.kind; tracks.splice(tracks.indexOf(armed) + 1, 0, take); selected = tracks.indexOf(take); }
+        drawList(); drawEdit();
+      }
+      if (tracks[selected]?.kind === 'voix' && !armed) tracks[selected].gainDb = micDb;
       beatGainNode = null; saveSoon(true);
       if (monOn.checked) openLiveMonitor();
       if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
@@ -324,7 +333,7 @@ export async function render(el, { params }) {
       const pendOffset = 0;
       recorder = await startRecorder({ constraints, onChunk: (chunks) => {
         const now = performance.now(); if (now - lastPend < 2000) return; lastPend = now;
-        putItem(PKEY, { chunks: chunks.slice(), type: chunks[0]?.type, offset: pendOffset }).catch(() => {});
+        putItem(PKEY, { chunks: chunks.slice(), type: chunks[0]?.type, offset: pendOffset }).catch((e) => console.warn('prise en cours non sauvegardée', String(e)));
       }, onLevel: (l) => {
         meter.firstChild.style.width = Math.min(100, l * 300) + '%';
         // arrêt automatique après X s de silence (mode mains libres), une fois que la voix a commencé
@@ -337,18 +346,17 @@ export async function render(el, { params }) {
       micMeter.attachStream(recorder.stream);
       const recT0 = performance.now();
       recLatency = null;
-      if (withBeat.checked && beat) {
+      recFrom = seekPos; recMinOff = minOffNow();
+      if (withBeat.checked && tracks.some(t => !t.empty && !effMute(t))) {
+        // on joue TOUT le projet (instru + autres voix) depuis la tête de lecture : on peut poser des backs sur sa voix
         const ctx = audioCtx();
-        beatSrc = ctx.createBufferSource(); beatSrc.buffer = beat.buffer;
-        const g = ctx.createGain(); g.gain.value = 10 ** (beat.gainDb / 20); beatGainNode = g;
-        beatSrc.connect(g).connect(ctx.destination); outMeter.attachNode(g); beatSrc.start();
-        if (autoStopBeat) beatSrc.onended = () => { if (recorder) { toast('Fin de l’instru : prise arrêtée.'); stopRec(); } };
-        const beatT0 = performance.now();
+        playLive(seekPos, null, autoStopBeat && beat ? () => { if (recorder) { toast('Fin du morceau : prise arrêtée.'); stopRec(); } } : null);
+        const beatT0 = performance.now() + (live.ctxStart - ctx.currentTime) * 1000;
         const outLat = (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
         const inLat = Number(recorder.stream.getAudioTracks()[0]?.getSettings?.().latency) || 0.02;
-        // + décalage de l'instru elle-même sur la timeline
-        recLatency = (beatT0 - recT0) / 1000 + outLat + inLat - (beat.offset || 0);
-        toast('Instru lancée : utilisez un casque pour qu’elle ne s’entende pas dans la prise.');
+        recFrom = live.from;
+        recLatency = (beatT0 - recT0) / 1000 + outLat + inLat;
+        if (beat) toast('Instru lancée : casque conseillé pour qu’elle ne s’entende pas dans la prise.');
       }
       recBtn.textContent = '⏹ Arrêter';
       timer = setInterval(() => { recTime.textContent = fmtTime(recorder?.duration); }, 200);
@@ -875,6 +883,15 @@ export async function render(el, { params }) {
 
   const exportName = () => (tracks.find(t => t.kind === 'voix')?.name || 'morceau').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-');
 
+  async function addEmptyTrack(name) {
+    name = name || (await promptBox('Nom de la nouvelle piste (ex. : Backs, Refrain, Ad-libs, Chœurs)', `Piste ${tracks.length + 1}`));
+    if (!name) return;
+    tracks.forEach(t => { t.armed = false; });
+    tracks.push({ name, kind: 'voix', buffer: makeBuffer(1, 4410, 44100), original: null, gainDb: 0, pan: 0, offset: seekPos + minOffNow(), mute: false, empty: true, armed: true });
+    tracks[tracks.length - 1].original = tracks[tracks.length - 1].buffer;
+    selected = tracks.length - 1; drawList(); drawEdit();
+    toast(`Piste « ${name} » ajoutée et armée (●) : la prochaine prise ira dedans.`, 'ok');
+  }
   const stopBtn = h('button.btn', { title: 'Stop (revient au début)', onclick: () => { if (recorder) return stopRec(); stopLive(false); player.stop(); seekPos = 0; } }, '⏹');
   const homeBtn = h('button.btn', { title: 'Revenir au début', onclick: () => { seekPos = 0; if (live.srcs.length) playLive(0); } }, '⏮');
   el.append(
@@ -882,12 +899,13 @@ export async function render(el, { params }) {
       h('div.row', { style: { flexWrap: 'wrap', gap: '8px', alignItems: 'center' } },
         h('h3', { style: { margin: 0 } }, '🎚️ Mes pistes'), homeBtn, playBtn, stopBtn, recBtn, recTime, timeline.posLbl, h('div.grow', { style: { minWidth: '120px' } }, meter)),
       h('div.row', { style: { flexWrap: 'wrap', gap: '6px' } }, timeline.tools,
+        h('button.btn.small.primary', { onclick: () => addEmptyTrack() }, '➕ Ajouter une piste'),
         h('button.btn.small', { onclick: async () => { for (const f of await pickLocalFiles('audio/*,video/*')) await addBlob(f, f.name); } }, '📥 Importer (instru, voix…)'),
         h('button.btn.small', { onclick: async () => { for (const f of await pickFromLibrary({ kinds: ['audio', 'video'] })) await addBlob(await fetchFileBlob(f.id), f.name, null, f.id); } }, '📚 Mes fichiers'),
         h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet'), saveLbl),
       micMeter.proxEl,
       timeline.el, timeline.selBar,
-      h('p.tiny.muted', 'Clique sur la ligne de temps pour placer la lecture · ⬚ Sélectionner : glisse sur une prise pour choisir un passage à couper · ✋ Déplacer : glisse une prise pour la caler · M = muet, S = solo, Vol = volume, G/D = gauche/droite.')),
+      h('p.tiny.muted', '➕ Ajouter une piste (backs, refrain…) puis ⏺ : la prise va dans la piste armée ● et l’enregistrement démarre là où est la tête de lecture, en jouant tout le reste. Clique sur la ligne de temps pour placer la lecture · ⬚ Sélectionner : glisse sur une prise pour choisir un passage à couper · ✋ Déplacer : glisse une prise pour la caler · M = muet, S = solo, Vol = volume, G/D = gauche/droite.')),
     h('div.grid.two',
     h('div.stack',
       ast.card,
