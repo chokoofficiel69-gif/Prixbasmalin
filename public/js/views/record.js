@@ -138,9 +138,31 @@ export async function render(el, { params }) {
   const instruLbl = h('b', '');
   const instruVol = h('input', { type: 'range', min: -30, max: 6, step: 0.5, value: -4 });
   const syncInstru = () => { const b = tracks.find(t => t.kind === 'instru'); instruVol.disabled = !b; if (b) { instruVol.value = b.gainDb; instruLbl.textContent = `${b.gainDb} dB`; } else instruLbl.textContent = '(pas d’instru)'; };
-  instruVol.oninput = () => { const b = tracks.find(t => t.kind === 'instru'); if (!b) return; b.gainDb = Number(instruVol.value); instruLbl.textContent = `${b.gainDb} dB`; if (beatGainNode) beatGainNode.gain.value = 10 ** (b.gainDb / 20); masterResult = null; drawList(); };
+  instruVol.oninput = () => { const b = tracks.find(t => t.kind === 'instru'); if (!b) return; b.gainDb = Number(instruVol.value); instruLbl.textContent = `${b.gainDb} dB`; if (beatGainNode) beatGainNode.gain.value = 10 ** (b.gainDb / 20); liveGain(b); masterResult = null; drawList(); };
+  // ---------- Écoute du mix EN DIRECT : chaque curseur de volume agit pendant la lecture ----------
+  const live = { srcs: [], gains: new Map(), timer: null };
+  const liveBtn = h('button.btn.small.primary', '▶ Écouter tout (volumes en direct)');
+  function liveGain(t) { const g = live.gains.get(t); if (g) g.gain.setTargetAtTime(t.mute ? 0 : 10 ** (t.gainDb / 20), audioCtx().currentTime, 0.02); }
+  function stopLive() { live.srcs.forEach(s => { try { s.stop(); } catch {} }); live.srcs = []; live.gains.clear(); clearTimeout(live.timer); liveBtn.textContent = '▶ Écouter tout (volumes en direct)'; }
+  function playLive() {
+    stopLive(); player.stop();
+    if (!tracks.length) return toast('Aucune piste à écouter.');
+    const ctx = audioCtx(), minOff = Math.min(0, ...tracks.map(t => t.offset || 0)), t0 = ctx.currentTime + 0.05;
+    let end = 0;
+    for (const t of tracks) {
+      const src = ctx.createBufferSource(); src.buffer = t.buffer;
+      const g = ctx.createGain(); g.gain.value = t.mute ? 0 : 10 ** (t.gainDb / 20);
+      const pan = ctx.createStereoPanner(); pan.pan.value = t.pan || 0;
+      src.connect(g).connect(pan).connect(ctx.destination);
+      const off = (t.offset || 0) - minOff; src.start(t0 + off);
+      live.srcs.push(src); live.gains.set(t, g); end = Math.max(end, off + t.buffer.duration);
+    }
+    liveBtn.textContent = '⏹ Arrêter l’écoute';
+    live.timer = setTimeout(stopLive, end * 1000 + 300);
+  }
+  liveBtn.onclick = () => (live.srcs.length ? stopLive() : playLive());
   const micLbl = h('b', `${micDb} dB`);
-  const micVol = h('input', { type: 'range', min: -20, max: 12, step: 0.5, value: micDb, oninput: () => { micDb = Number(micVol.value); micLbl.textContent = `${micDb} dB`; localStorage.setItem('studio.micDb', micDb); const v = tracks[selected]; if (v && v.kind !== 'instru') { v.gainDb = micDb; masterResult = null; drawList(); } } });
+  const micVol = h('input', { type: 'range', min: -20, max: 12, step: 0.5, value: micDb, oninput: () => { micDb = Number(micVol.value); micLbl.textContent = `${micDb} dB`; localStorage.setItem('studio.micDb', micDb); const v = tracks[selected] && tracks[selected].kind !== 'instru' ? tracks[selected] : tracks[tracks.map(t => t.kind).lastIndexOf('voix')]; if (v) { v.gainDb = micDb; liveGain(v); masterResult = null; drawList(); } } });
   // ---------- Retour casque en direct (s'entendre pendant qu'on enregistre) ----------
   const monOn = h('input', { type: 'checkbox', checked: localStorage.getItem('studio.mon') === '1' });
   const MON_STYLES = { propre: 'Voix propre', rap: 'Voix rap (présence)', reverb: 'Voix + réverbe', echo: 'Voix + écho' };
@@ -274,12 +296,12 @@ export async function render(el, { params }) {
       list.append(h('div.card' + (i === selected ? '.sel' : ''), { style: { padding: '10px', outline: i === selected ? '2px solid var(--accent)' : '' } },
         h('div.row', h('strong', (t.kind === 'instru' ? '🥁 ' : '🎤 ') + t.name), h('span.small.muted', fmtTime(t.buffer.duration)),
           h('select', { onchange: (e) => { t.kind = e.target.value; drawList(); } }, h('option', { value: 'voix', selected: t.kind === 'voix' }, 'Voix'), h('option', { value: 'instru', selected: t.kind === 'instru' }, 'Instru'), h('option', { value: 'autre', selected: t.kind === 'autre' }, 'Autre')),
-          h('label.chk.small', h('input', { type: 'checkbox', checked: t.mute, onchange: (e) => { t.mute = e.target.checked; masterResult = null; } }), 'Muet'),
+          h('label.chk.small', h('input', { type: 'checkbox', checked: t.mute, onchange: (e) => { t.mute = e.target.checked; liveGain(t); masterResult = null; } }), 'Muet'),
           h('span.grow'),
           h('button.btn.ghost.small', { onclick: () => { tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); } }, '✕')),
         c,
         h('div.sliders',
-          h('label', h('span', 'Volume (dB) ', gl), h('input', { type: 'range', min: -30, max: 12, step: 0.5, value: t.gainDb, oninput: (e) => { t.gainDb = Number(e.target.value); gl.textContent = t.gainDb; masterResult = null; } })),
+          h('label', h('span', 'Volume (dB) ', gl), h('input', { type: 'range', min: -30, max: 12, step: 0.5, value: t.gainDb, oninput: (e) => { t.gainDb = Number(e.target.value); gl.textContent = t.gainDb; liveGain(t); syncInstru(); masterResult = null; } })),
           h('label', h('span', 'Panoramique'), h('input', { type: 'range', min: -1, max: 1, step: 0.05, value: t.pan, oninput: (e) => { t.pan = Number(e.target.value); masterResult = null; } })),
           h('label', h('span', 'Décalage (ms) ', h('b', Math.round(t.offset * 1000))), h('input', { type: 'range', min: -500, max: 3000, step: 5, value: t.offset * 1000, oninput: (e) => { t.offset = Number(e.target.value) / 1000; e.target.previousSibling.lastChild.textContent = e.target.value; masterResult = null; } })))));
       requestAnimationFrame(() => drawWave(c, t.buffer));
@@ -716,7 +738,7 @@ export async function render(el, { params }) {
   const monVolLbl = h('b', `${Math.round(Number(monVol.value) * 100)} %`);
   monVol.addEventListener('input', () => { monVolLbl.textContent = `${Math.round(Number(monVol.value) * 100)} %`; });
   const mixer = h('div.stack', { style: { background: 'var(--bg)', borderRadius: '10px', padding: '8px 10px' } },
-    h('strong.small', '🎚️ Volumes du casque (en direct)'),
+    h('div.row', h('strong.small.grow', '🎚️ Volumes du casque (en direct)'), liveBtn),
     h('div.sliders',
       h('label', h('span', '🥁 Instru ', instruLbl), instruVol),
       h('label', h('span', '🎤 Ma voix (mix) ', micLbl), micVol),
@@ -732,11 +754,12 @@ export async function render(el, { params }) {
       piste_selectionnee: selected + 1, master_pret: !!masterResult, instru_presente: tracks.some(t => t.kind === 'instru'),
     }),
     do: {
-      stop: async () => { if (recorder) return stopRec(); player.stop(); el.querySelectorAll('audio').forEach(a => a.pause()); },
-      pause: async () => { player.pause(); el.querySelectorAll('audio').forEach(a => a.pause()); },
+      stop: async () => { if (recorder) return stopRec(); stopLive(); player.stop(); el.querySelectorAll('audio').forEach(a => a.pause()); },
+      pause: async () => { stopLive(); player.pause(); el.querySelectorAll('audio').forEach(a => a.pause()); },
       play: async (x) => {
         if (x.what === 'master' || (!tracks[selected] && masterResult)) { if (!masterResult) await doMaster(); const a = mixPlayerEl.querySelector('audio'); a?.play(); a?.scrollIntoView({ block: 'center' }); return; }
-        const t = tracks[selected] || voiceTrack(); player.load(t.buffer); player.play(0); playSelBtn.textContent = '⏸';
+        if (x.what === 'voix') { const t = voiceTrack(); stopLive(); player.load(t.buffer); player.play(0); playSelBtn.textContent = '⏸'; return; }
+        playLive();
       },
       select: async (x) => { selected = trackAt(x.track); sel = null; drawList(); drawEdit(); },
       clean: async (x) => { voiceTrack(); const lv = Math.min(0.9, Math.max(0.2, Number(x.level) || 0.55)); await work('Nettoyage…', async (b) => gate(antipop(await denoise(b, lv), 0.8), -45, -30)); },
@@ -756,7 +779,7 @@ export async function render(el, { params }) {
         const i = x.track === 'instru' ? tracks.findIndex(t => t.kind === 'instru') : x.track === 'voix' ? tracks.map(t => t.kind).lastIndexOf('voix') : trackAt(x.track ?? selected + 1);
         if (i < 0) throw new Error(`pas de piste ${x.track}`);
         const g = x.delta !== undefined ? tracks[i].gainDb + Number(x.delta) : Number(x.db) || 0;
-        tracks[i].gainDb = Math.max(-30, Math.min(12, g)); masterResult = null; drawList();
+        tracks[i].gainDb = Math.max(-30, Math.min(12, g)); liveGain(tracks[i]); masterResult = null; drawList();
       },
       mute: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks[i].mute = x.on !== false; masterResult = null; drawList(); },
       delete: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
@@ -823,5 +846,5 @@ export async function render(el, { params }) {
       } catch (e) { toastErr(e); }
     }
   }
-  return () => { ast?.destroy(); player.stop(); stopMonitor(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
+  return () => { ast?.destroy(); stopLive(); player.stop(); stopMonitor(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
 }

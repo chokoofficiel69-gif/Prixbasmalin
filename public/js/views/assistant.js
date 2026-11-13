@@ -24,7 +24,7 @@ function parseClause(c) {
   if (/(annule|reviens en arriere|retour arriere|c etait mieux avant|enleve ca|moins de reverb|moins d echo)/.test(n)) return [{ a: 'undo' }];
   if (/(retablis|remets le)/.test(n)) return [{ a: 'redo' }];
   if (/(original|prise brute|recommence a zero)/.test(n)) return [{ a: 'original' }];
-  if (/(ecoute|fais moi ecouter|joue|lance la lecture|relis|que je l entende)/.test(n)) return [{ a: 'play', what: /(master|morceau|final|mix|tout)/.test(n) ? 'master' : 'piste' }];
+  if (/(ecoute|fais moi ecouter|joue|lance la lecture|relis|que je l entende)/.test(n)) return [{ a: 'play', what: /(master|final|masterise)/.test(n) ? 'master' : /(voix seule|ma voix|juste la voix|sans l instru)/.test(n) ? 'voix' : 'tout' }];
   if (/(fais tout|tout faire|tout en un)/.test(n)) return [{ a: 'all' }];
   if (/(nettoie|nettoyer|nettoyage|enleve le bruit|debruit|bruit de fond|souffle)/.test(n)) return [{ a: 'clean', level: /(fort|beaucoup|bien)/.test(n) ? 0.75 : 0.55 }];
   if (/(cale|caler|calage|aligne|sur le beat|dans le temps|en rythme)/.test(n)) return [{ a: 'align' }];
@@ -64,7 +64,7 @@ Tu réponds UNIQUEMENT avec un objet JSON : {"reponse":"phrase courte et naturel
 Actions possibles (exécutées dans l'ordre, sur la piste sélectionnée sauf indication) :
 {"a":"record","seconds":N} lancer l'enregistrement ; seconds facultatif = durée voulue (« une piste d'1 minute » → 60), sinon il s'arrête quand il dit stop ; les actions suivantes s'exécutent après la prise
 {"a":"stop"} arrêter l'enregistrement ou la lecture
-{"a":"play","what":"piste|master"} écouter · {"a":"pause"}
+{"a":"play","what":"tout|voix|master"} écouter (tout = toutes les pistes avec volumes réglables en direct) · {"a":"pause"}
 {"a":"select","track":N} choisir la piste N (1 = première ; -1 = dernière prise)
 {"a":"clean","level":0.3-0.9} débruitage + anti-pop + coupe des blancs
 {"a":"align"} caler la voix sur le beat de l'instru
