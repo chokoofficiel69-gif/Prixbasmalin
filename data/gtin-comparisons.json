@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "status": "ok",
- "generated_at": "2026-11-13T13:38:44.140896Z",
+ "generated_at": "2026-11-13T13:40:29.428730Z",
  "freshness_max_age_hours": 48,
  "method": "GTIN valide commun à au moins deux marchands ; marque, contenance et nom contrôlés pour refuser les faux rapprochements.",
  "counts": {
@@ -9,7 +9,7 @@
   "comparisons": 36,
   "comparisons_with_two_current_offers": 0,
   "offers": 72,
-  "offers_stale_or_undated": 72,
+  "offers_stale_or_undated": 36,
   "offers_tax_confirmed": 0,
   "rejected": {
    "name_mismatch": 7,
@@ -57,12 +57,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011556&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -103,12 +103,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010722&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -149,12 +149,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011296&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -195,12 +195,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=42967200313&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -241,12 +241,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41436994935&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -273,12 +273,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010721&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     },
     {
      "merchant": "Nicchia Luxury",
@@ -333,12 +333,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41436994940&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -379,12 +379,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=40965549114&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -425,12 +425,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41474260804&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -457,12 +457,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41090259806&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     },
     {
      "merchant": "Nicchia Luxury",
@@ -503,12 +503,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41484300607&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     },
     {
      "merchant": "Nicchia Luxury",
@@ -563,12 +563,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41090259814&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -595,12 +595,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=42813651398&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     },
     {
      "merchant": "Nicchia Luxury",
@@ -641,12 +641,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41090259805&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     },
     {
      "merchant": "Nicchia Luxury",
@@ -701,12 +701,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=44423524941&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -747,12 +747,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41618525531&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -793,12 +793,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011244&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -839,12 +839,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010735&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -885,12 +885,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41474260818&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -931,12 +931,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41517730789&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -977,12 +977,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011945&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1023,12 +1023,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011947&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1069,12 +1069,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011948&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1115,12 +1115,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011949&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1161,12 +1161,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=46418890246&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1207,12 +1207,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011952&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1253,12 +1253,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010246&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1299,12 +1299,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010247&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1345,12 +1345,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010248&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1391,12 +1391,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010249&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1437,12 +1437,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010251&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1483,12 +1483,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=44079959413&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1529,12 +1529,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010253&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1575,12 +1575,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010254&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1621,12 +1621,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010255&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   },
@@ -1667,12 +1667,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010256&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": true
+     "stale": false
     }
    ]
   }
