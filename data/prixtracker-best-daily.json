@@ -4,7 +4,7 @@
   "source_url": "https://prixtracker.fr/donnees/meilleur-prix-du-jour.csv",
   "license": "Licence Ouverte 2.0",
   "attribution": "Source : PrixTracker (prixtracker.fr/donnees), réutilisé sous Licence Ouverte 2.0 via data.gouv.fr.",
-  "generated_at": "2026-11-13T04:20:27.413Z",
+  "generated_at": "2026-11-13T04:23:29.873Z",
   "dataset_period": {
     "from": "2025-12-11",
     "to": "2026-11-12"
