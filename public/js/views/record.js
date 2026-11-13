@@ -683,7 +683,12 @@ export async function render(el, { params }) {
       undo: async () => { if (!tracks[selected]?.undo?.length) throw new Error('rien à annuler'); stepHistory('undo', 'redo'); },
       redo: async () => { if (!tracks[selected]?.redo?.length) throw new Error('rien à rétablir'); stepHistory('redo', 'undo'); },
       original: async () => { voiceTrack(); await work('Retour à l’original…', async (b, tr) => tr.original); },
-      volume: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks[i].gainDb = Math.max(-30, Math.min(12, Number(x.db) || 0)); masterResult = null; drawList(); },
+      volume: async (x) => {
+        const i = x.track === 'instru' ? tracks.findIndex(t => t.kind === 'instru') : x.track === 'voix' ? tracks.map(t => t.kind).lastIndexOf('voix') : trackAt(x.track ?? selected + 1);
+        if (i < 0) throw new Error(`pas de piste ${x.track}`);
+        const g = x.delta !== undefined ? tracks[i].gainDb + Number(x.delta) : Number(x.db) || 0;
+        tracks[i].gainDb = Math.max(-30, Math.min(12, g)); masterResult = null; drawList();
+      },
       mute: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks[i].mute = x.on !== false; masterResult = null; drawList(); },
       delete: async (x) => { const i = trackAt(x.track ?? selected + 1); tracks.splice(i, 1); if (selected >= tracks.length) selected = tracks.length - 1; masterResult = null; drawList(); drawEdit(); },
       all: async () => doEverything(fakeBtn()),

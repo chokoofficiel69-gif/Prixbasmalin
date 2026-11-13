@@ -1,7 +1,58 @@
 // Assistant vocal « mains libres » de l'enregistrement : on parle, il agit.
-import { api, h, state, toast, speak, stopSpeaking, parseJsonLoose } from '../lib/core.js';
+import { api, h, state, toast, stopSpeaking, parseJsonLoose } from '../lib/core.js';
 
-const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/[^\w\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’'-]/g, ' ').replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+const NUM = { une: 1, un: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, dix: 10, quinze: 15, vingt: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60 };
+
+// Compréhension locale, instantanée (sans IA en ligne) des demandes courantes.
+// Une phrase est découpée en étapes (« enregistre une minute puis nettoie et cale ») ; si une étape
+// n'est pas reconnue, on passe la main à l'IA.
+function parseClause(c) {
+  const n = c.replace(/^(ok|bon|allez|alors|stp|s il te plait|steuplait|vas y|maintenant|aussi|et|puis|apres|ensuite|ensuite tu|tu peux|peux tu|est ce que tu peux|je veux que tu|il faut)( |$)/g, '').trim();
+  if (!n) return [];
+  if (/^(salut|bonjour|hey|wesh|coucou|yo)\b/.test(n) && n.split(' ').length <= 3) return [{ a: 'hello' }];
+  let m;
+  if (/(enregistre|enregistrer|lance l enregistrement|on enregistre|record|on y va)/.test(n) && !/(fichier|sauvegard|garde|master)/.test(n)) {
+    m = n.match(/(\d+|une|un|deux|trois|quatre|cinq|dix|quinze|vingt|trente|quarante|cinquante|soixante)\s*(minutes?|min|secondes?|sec|s)\b/);
+    const k = m ? (Number(m[1]) || NUM[m[1]]) * (/^m/.test(m[2]) ? 60 : 1) : 0;
+    return [{ a: 'record', seconds: k }];
+  }
+  if (STOP_RE.test(n)) return [{ a: 'stop' }];
+  if (/^pause\b/.test(n)) return [{ a: 'pause' }];
+  if (/(annule|reviens en arriere|retour arriere|c etait mieux avant|enleve ca|moins de reverb|moins d echo)/.test(n)) return [{ a: 'undo' }];
+  if (/(retablis|remets le)/.test(n)) return [{ a: 'redo' }];
+  if (/(original|prise brute|recommence a zero)/.test(n)) return [{ a: 'original' }];
+  if (/(ecoute|fais moi ecouter|joue|lance la lecture|relis|que je l entende)/.test(n)) return [{ a: 'play', what: /(master|morceau|final|mix|tout)/.test(n) ? 'master' : 'piste' }];
+  if (/(fais tout|tout faire|tout en un)/.test(n)) return [{ a: 'all' }];
+  if (/(nettoie|nettoyer|nettoyage|enleve le bruit|debruit|bruit de fond|souffle)/.test(n)) return [{ a: 'clean', level: /(fort|beaucoup|bien)/.test(n) ? 0.75 : 0.55 }];
+  if (/(cale|caler|calage|aligne|sur le beat|dans le temps|en rythme)/.test(n)) return [{ a: 'align' }];
+  if (/(fausse|faux|juste|corrige les notes|corrige mes notes|bonnes notes|justesse)/.test(n)) return [{ a: 'tune', level: 'parfait' }];
+  if (/(belle voix|plus belle|voix chantee|chant doux)/.test(n)) return [{ a: 'tune', level: 'belle' }];
+  if (/(autotune|auto tune)/.test(n)) return [{ a: 'tune', level: /(fort|robot|t pain|tpain|a fond)/.test(n) ? 'fort' : /(drake|moyen|melodique)/.test(n) ? 'moyen' : /(leger|naturel|discret|un peu)/.test(n) ? 'leger' : 'parfait' }];
+  if (/(plus de reverb|ajoute de la reverb|mets de la reverb|reverb)/.test(n)) return [{ a: 'effect', name: 'Réverbe +', chain: [{ t: 'fx', kind: 'reverb', size: 1.6, mix: /(beaucoup|grosse|plein)/.test(n) ? 0.3 : 0.16 }] }];
+  if (/(echo|delay)/.test(n)) return [{ a: 'effect', name: 'Écho +', chain: [{ t: 'fx', kind: 'delay', time: 0.3, fb: 0.28, mix: /(beaucoup|gros)/.test(n) ? 0.3 : 0.18 }] }];
+  if (/(double|doubler|plus large|plus epais)/.test(n)) return [{ a: 'effect', name: 'Doublage', chain: [{ t: 'double', steps: [0, 0], gain: 0.4 }] }];
+  if (/(voix rap|style rap|claire|presente|plus de presence)/.test(n)) return [{ a: 'voice', preset: 'rap' }];
+  if ((m = n.match(/coupe (?:de |a partir de )?(\d+(?:[.,]\d+)?) ?(?:s|secondes?)? (?:a|jusqu a) (\d+(?:[.,]\d+)?)/))) return [{ a: 'cut', from: +m[1].replace(',', '.'), to: +m[2].replace(',', '.') }];
+  if (/(coupe les blancs|coupe les silences|enleve les silences|coupe le debut et la fin)/.test(n)) return [{ a: 'trim' }];
+  if (/(masterise|mastering|mixe|mix et master|finalise)/.test(n)) return [{ a: 'master', preset: /(club|fort|boite)/.test(n) ? 'club' : /(rap|trap|punch)/.test(n) ? 'rap' : /(doux|calme)/.test(n) ? 'doux' : 'streaming' }];
+  if (/(versions)/.test(n)) return [{ a: 'versions' }];
+  if (/(telecharge)/.test(n)) return [{ a: 'download' }];
+  if (/(sauvegarde|garde le|mets le dans mes fichiers|enregistre le dans|dans mes fichiers)/.test(n)) return [{ a: 'save' }];
+  if (/(baisse|moins fort).*(instru|beat|prod)/.test(n)) return [{ a: 'volume', track: 'instru', delta: -3 }];
+  if (/(monte|plus fort).*(instru|beat|prod)/.test(n)) return [{ a: 'volume', track: 'instru', delta: 3 }];
+  if (/(baisse|moins fort).*(voix)/.test(n)) return [{ a: 'volume', track: 'voix', delta: -3 }];
+  if (/(monte|plus fort).*(voix)/.test(n)) return [{ a: 'volume', track: 'voix', delta: 3 }];
+  return null;
+}
+function parseLocal(text) {
+  const n = norm(text);
+  const parts = n.split(/\b(?:puis|ensuite|et apres|apres ca|apres|et puis|et)\b/).map(x => x.trim()).filter(Boolean);
+  const out = [];
+  for (const p of parts) { const r = parseClause(p); if (r === null) return null; out.push(...r); }
+  return out.length ? out : null;
+}
+const ACK = { record: '', stop: '', pause: '', play: '', undo: 'Annulé.', redo: 'Rétabli.', original: 'Retour à la prise brute.', all: 'Je fais tout.', clean: 'Je nettoie.', align: 'Je cale.', tune: 'Je corrige les notes.', effect: 'Ok.', voice: 'Ok.', cut: 'Je coupe.', trim: 'Je coupe les blancs.', master: 'Je masterise.', versions: 'Je prépare les versions.', download: 'Je télécharge.', save: 'Je sauvegarde.', volume: 'Ok.' };
 const words = (s) => norm(s).split(' ').filter(Boolean).length;
 const IS_ANDROID = /Android/i.test(navigator.userAgent);
 const STOP_RE = /^(ok |bon |vas y |c est )?(stop|stoppe|arrete|arrete toi|coupe l enregistrement|c est bon|termine|fini|j ai fini)\b/;
@@ -44,12 +95,33 @@ export function mountAssistant(S) {
     while (log.children.length > 12) log.firstChild.remove();
     log.scrollTop = log.scrollHeight;
   };
+  // Voix de réponse : on prend la plus naturelle disponible (Google / « Natural » / « Online ») plutôt que la voix robot de Windows
+  const voiceSel = h('select', { onchange: () => localStorage.setItem('studio.ast.voiceName', voiceSel.value) });
+  const frVoices = () => (window.speechSynthesis?.getVoices() || []).filter(v => /^fr/i.test(v.lang));
+  const rank = (v) => (/natural|neural/i.test(v.name) ? 0 : /google/i.test(v.name) ? 1 : /online/i.test(v.name) ? 2 : 5) + (/fr-FR/i.test(v.lang) ? 0 : 0.5);
+  function fillVoices() {
+    const vs = frVoices().sort((a, b) => rank(a) - rank(b)); if (!vs.length) return;
+    const saved = localStorage.getItem('studio.ast.voiceName');
+    voiceSel.innerHTML = ''; vs.forEach(v => voiceSel.append(h('option', { value: v.name, selected: v.name === saved }, `🗣️ ${v.name.replace(/Microsoft |Google /, '')}`)));
+    if (!saved || !vs.some(v => v.name === saved)) voiceSel.value = vs[0].name;
+  }
+  try { fillVoices(); speechSynthesis.onvoiceschanged = fillVoices; } catch {}
+  function talk(text) {
+    return new Promise((resolve) => {
+      try {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text); u.lang = 'fr-FR'; u.rate = 1.12;
+        const v = frVoices().find(x => x.name === voiceSel.value); if (v) u.voice = v;
+        u.onend = resolve; u.onerror = resolve; speechSynthesis.speak(u);
+      } catch { resolve(); }
+    });
+  }
   async function say(text) {
     add('ia', text);
-    if (!voiceOut.checked) return;
+    if (!voiceOut.checked || !text) return;
     speaking = true; try { rec?.abort(); } catch {}
-    // garde-fou : certaines voix du téléphone ne signalent jamais la fin
-    await Promise.race([speak(text, { preferBrowser: true }), new Promise(r => setTimeout(r, 2500 + text.length * 90))]);
+    // garde-fou : certaines voix ne signalent jamais la fin
+    await Promise.race([talk(text), new Promise(r => setTimeout(r, 1500 + text.length * 80))]);
     speaking = false; listen();
   }
 
@@ -84,30 +156,34 @@ export function mountAssistant(S) {
   }
 
   // ---------- Compréhension ----------
-  function quick(t) {
-    const n = norm(t), w = words(t);
-    if (w <= 5 && /^(ok |bon |allez )?(vas y )?(enregistre|on enregistre|lance l enregistrement|go enregistre|record)\b/.test(n) && !/(puis|et |ensuite|apres)/.test(n)) return [{ a: 'record' }];
-    if (w <= 4 && STOP_RE.test(n)) return [{ a: 'stop' }];
-    if (w <= 4 && /^(annule|reviens en arriere|retour arriere|annuler)\b/.test(n)) return [{ a: 'undo' }];
-    if (w <= 4 && /^(retablis|refais)\b/.test(n)) return [{ a: 'redo' }];
-    if (w <= 5 && /^(ecoute|fais moi ecouter|joue|lis la piste|relis)\b/.test(n) && !/master|morceau|final/.test(n)) return [{ a: 'play', what: 'piste' }];
-    if (w <= 3 && /^pause\b/.test(n)) return [{ a: 'pause' }];
-    return null;
-  }
+  const queue = [];
   async function handle(text) {
     add('moi', text);
-    const q = quick(text);
-    if (q) return run(q);
-    if (busy) return say('Attends, je termine ce que je fais.');
+    const local = parseLocal(text);
+    if (local) {
+      if (local[0]?.a === 'hello') return say('Salut ! Dis-moi : enregistre, nettoie, corrige les notes, masterise…');
+      // stop / pause / écoute passent tout de suite, même pendant un traitement
+      if (busy && local.every(x => ['stop', 'pause', 'play'].includes(x.a))) return exec(local, true);
+      if (busy) { queue.push(local); return say('Ok, juste après.'); }
+      const ack = local.length > 1 ? 'Ok, c’est parti.' : ACK[local[0].a];
+      return run(local, ack);
+    }
+    if (busy) { queue.push(text); return say('Ok, juste après.'); }
     busy = true; status.innerHTML = '<span class="spinner"></span> Je réfléchis…';
     try {
-      const r = await api('/api/complete', { method: 'POST', body: { src: 'musique', projectId: state.projectId, temperature: 0.3, json: true, system: SYSTEM,
+      const r = await api('/api/complete', { method: 'POST', body: { src: 'musique', projectId: state.projectId, temperature: 0.3, json: true, max_tokens: 400, system: SYSTEM,
         prompt: `État du studio : ${JSON.stringify(S.snapshot())}\nL'artiste dit : « ${text} »` } });
       const j = parseJsonLoose(r.content);
       if (!j) throw new Error('réponse illisible');
       busy = false;
       await run(Array.isArray(j.actions) ? j.actions.slice(0, 8) : [], j.reponse);
-    } catch (e) { busy = false; status.textContent = on ? '👂 Je t’écoute…' : ''; await say(/quota|429|limite|attendre/i.test(e?.message || '') ? 'Les IA gratuites sont saturées, réessaie dans une minute.' : 'Je n’ai pas réussi à comprendre, tu peux répéter autrement ?'); }
+    } catch (e) { busy = false; status.textContent = on ? '👂 Je t’écoute…' : ''; await say(/quota|429|limite|attendre/i.test(e?.message || '') ? 'Les IA gratuites sont saturées, réessaie dans une minute.' : 'Je n’ai pas compris, redis-le plus simplement.'); }
+    drain();
+  }
+  function drain() {
+    if (busy || !queue.length) return;
+    const next = queue.shift();
+    if (typeof next === 'string') { log.lastChild?.remove(); handle(next); } else run(next, '');
   }
 
   // ---------- Exécution ----------
@@ -117,7 +193,8 @@ export function mountAssistant(S) {
       afterStop = actions.slice(i + 1);
       const before = actions.slice(0, i);
       if (before.length) await exec(before);
-      if (reply) await say(reply); else await say('J’enregistre. Dis stop quand tu as fini.');
+      const sec = Number(actions[i].seconds) || 0;
+      await say(reply && reply.length > 2 ? reply : sec ? `J’enregistre ${sec >= 60 && sec % 60 === 0 ? sec / 60 + ' minute' + (sec > 60 ? 's' : '') : sec + ' secondes'}. Vas-y.` : 'J’enregistre, dis stop quand tu as fini.');
       stopListening();
       await S.record({ autoStopSilence: Number(silSel.value), seconds: Number(actions[i].seconds) || 0 });
       listen();
@@ -125,23 +202,26 @@ export function mountAssistant(S) {
     }
     if (reply) say(reply);
     await exec(actions);
+    if (actions.some(x => !['stop', 'pause', 'play', 'undo', 'redo', 'volume'].includes(x.a))) say('C’est fait.');
   }
-  async function exec(actions) {
-    busy = true;
+  async function exec(actions, side = false) {
+    if (!side) busy = true;
     for (const x of actions) {
       if (!x?.a || !S.do[x.a]) continue;
       status.innerHTML = `<span class="spinner"></span> ${LABELS[x.a] || x.a}…`;
       try { await S.do[x.a](x); }
-      catch (e) { busy = false; status.textContent = ''; await say(`Problème : ${e.message || e}`.slice(0, 140)); return; }
+      catch (e) { if (!side) busy = false; status.textContent = ''; await say(`Problème : ${e.message || e}`.slice(0, 140)); drain(); return; }
     }
+    if (side) return;
     busy = false;
     status.textContent = on ? '👂 Je t’écoute…' : '✓ Fait';
+    drain();
   }
   // appelé par le studio quand une prise se termine (bouton, « stop », silence ou fin de l'instru)
   async function onRecordStopped() {
     const next = afterStop; afterStop = [];
-    if (next.length) { await say('Prise terminée, je m’en occupe.'); await exec(next); await say('C’est prêt, écoute.'); }
-    else if (on) await say('Prise enregistrée. Je nettoie, je cale, ou on refait ?');
+    if (next.length) { say('Prise terminée, je m’en occupe.'); await exec(next); await say('C’est prêt, dis écoute.'); }
+    else if (on) await say('Prise enregistrée.');
     listen();
   }
 
@@ -150,7 +230,7 @@ export function mountAssistant(S) {
     h('div.row', h('h3.grow', '🤖 Assistant vocal'), toggle),
     status,
     h('div.row', h('div.grow', input), h('button.btn.small', { onclick: () => { if (input.value.trim()) { const t = input.value; input.value = ''; handle(t); } } }, 'Envoyer')),
-    h('div.row', h('label.chk.small', voiceOut, 'Réponses à voix haute'), h('div.grow', silSel)),
+    h('div.row', h('label.chk.small', voiceOut, 'Réponses à voix haute'), h('div.grow', voiceSel), h('div.grow', silSel)),
     log,
     h('p.tiny.muted', `Exemples : « enregistre » … « stop » · « nettoie et cale sur le beat » · « style rap mélodique » · « un peu plus de réverbe » · « annule » · « coupe de 0 à 3 secondes » · « masterise pour Spotify » · « enregistre-le dans mes fichiers ». ${IS_ANDROID ? 'Sur Android, pendant la prise le micro sert à l’enregistrement : elle s’arrête à la fin de l’instru, après le silence choisi, ou avec le bouton ⏹.' : 'Pendant la prise, dis simplement « stop ».'} Casque conseillé.`));
   return { card, onRecordStopped, onRecordStarted: () => { if (IS_ANDROID) stopListening(); else listen(); }, destroy: () => { on = false; stopListening(); stopSpeaking(); clearTimeout(silTimer); } };
