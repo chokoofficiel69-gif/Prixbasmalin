@@ -23,9 +23,10 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn('#verifiedShelf,.pm-feed-status', source)
         self.assertNotIn('#verifiedShelf,', source)
 
-    def test_comparison_requires_eur_ttc_and_recent_merchant_date(self):
+    def test_comparison_requires_eur_and_recent_merchant_date_with_tax_warning(self):
         source = CATALOGUE.read_text(encoding="utf-8")
-        self.assertIn('offer.currency!=="EUR"||offer.price_tax_status!=="included"', source)
+        self.assertIn('if(!offer||offer.stale||offer.currency!=="EUR")return false;', source)
+        self.assertIn('TVA non confirmée', source)
         self.assertIn('age<=maxAgeHours*60*60*1000', source)
 
     def test_each_comparison_has_a_direct_merchant_link_and_availability(self):
@@ -44,7 +45,8 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn("Aucune comparaison multi-marchands exacte avec prix TTC confirmé", workflow)
         self.assertIn("grep -Fq 'id=\"verifiedShelf\" class=\"verified-shelf\" aria-live=\"polite\" hidden'", workflow)
         self.assertIn("grep -Fq 'verifiedShelf.hidden=true;'", workflow)
-        self.assertIn('grep -Fq \'offer.currency!=="EUR"||offer.price_tax_status!=="included"\'', workflow)
+        self.assertIn('grep -Fq \'offer.currency!=="EUR")return false;\'', workflow)
+        self.assertIn("grep -Fq 'TVA non confirmée'", workflow)
         self.assertIn("grep -Fq 'age<=maxAgeHours*60*60*1000'", workflow)
 
     def test_merchant_offers_are_horizontal_and_scrollable(self):

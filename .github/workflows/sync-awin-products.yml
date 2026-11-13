@@ -5,7 +5,7 @@ on:
   schedule:
     - cron: "27 4 * * *"
   push:
-    branches: [main, awin-direct-feed-fix-2026-11-04, fix/awin-gtin-mpn-aliases]
+    branches: [main, awin-direct-feed-fix-2026-11-04, fix/awin-gtin-mpn-aliases, fix/awin-price-engine-bridge]
     paths:
       - "price-engine/sync-awin-products.mjs"
       - "scripts/build_home_deals.py"
@@ -14,6 +14,7 @@ on:
       - "tests/test_home_deals.py"
       - "tests/test_awin_gift_images.py"
       - "index.html"
+      - "catalogue.html"
       - "tests/test_seo_pages.py"
       - ".github/workflows/sync-awin-products.yml"
 
@@ -203,9 +204,10 @@ jobs:
                 fi
                 grep -Fq 'id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden' /tmp/catalogue-public.html
                 grep -Fq 'verifiedShelf.hidden=true;' /tmp/catalogue-public.html
-                grep -Fq 'offer.currency!=="EUR"||offer.price_tax_status!=="included"' /tmp/catalogue-public.html
+                grep -Fq 'offer.currency!=="EUR")return false;' /tmp/catalogue-public.html
+                grep -Fq 'TVA non confirmée' /tmp/catalogue-public.html
                 grep -Fq 'age<=maxAgeHours*60*60*1000' /tmp/catalogue-public.html
-                echo "Interface publique vérifiée : comparaisons masquées sans offre exacte, fraîche et TTC ; aucun diagnostic technique exposé."
+                echo "Interface publique vérifiée : offres récentes affichées avec statut TVA explicite ; aucun diagnostic technique exposé."
                 exit 0
               fi
             fi

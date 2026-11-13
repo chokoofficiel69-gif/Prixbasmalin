@@ -6432,7 +6432,7 @@ function verifiedPriceBreakdown(offer){
 }
 
 function isCurrentVerifiedOffer(offer){
-  if(!offer||offer.stale||offer.currency!=="EUR"||offer.price_tax_status!=="included")return false;
+  if(!offer||offer.stale||offer.currency!=="EUR")return false;
   const base=Number(offer.price_eur);
   if(!Number.isFinite(base)||base<=0)return false;
   const checkedAt=Date.parse(offer.checked_at||"");
@@ -6520,9 +6520,10 @@ function renderVerifiedProducts(products){
     name.textContent=p.name;
     const price=document.createElement("div");
     price.className="price";
-    price.textContent=shippingKnown(best)
-      ?"Total TTC avec livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice)
-      :"Prix TTC du produit : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice) +" • frais de livraison non renseignés";
+    const bestTaxConfirmed=best.price_tax_status==="included";
+    price.textContent=bestTaxConfirmed
+      ?(shippingKnown(best)?"Total TTC avec livraison : ":"Prix TTC du produit : ")+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice)+(shippingKnown(best)?"":" • frais de livraison non renseignés")
+      :(shippingKnown(best)?"Prix affiché + livraison : ":"Prix affiché : ")+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(bestComparablePrice)+" • TVA non confirmée"+(shippingKnown(best)?"":" • livraison à vérifier");
     const original=Number(p.original_price_eur||p.regular_price_eur||0);
     if(original>bestComparablePrice){
       const old=document.createElement("div");old.className="verified-original";
@@ -6536,7 +6537,7 @@ function renderVerifiedProducts(products){
     if(isHistorical){
       meta.textContent="Dernier prix connu — actualisation à vérifier. Aucun tarif actuel confirmé.";
     }else{
-      meta.textContent=fresh.length+" offre(s) actuelle(s) lue(s)"+(stale.length?" • "+stale.length+" offre(s) historique(s) à vérifier":"");
+      meta.textContent=fresh.length+" offre(s) marchandes récentes lue(s)"+(fresh.some(o=>o.price_tax_status!=="included")?" • certaines TVA non confirmée":"")+(stale.length?" • "+stale.length+" offre(s) historique(s) à vérifier":"");
     }
     const list=document.createElement("div");
     list.className="verified-offers";
@@ -6553,14 +6554,14 @@ function renderVerifiedProducts(products){
       const availability=offerData.availability||"unknown";
       const availabilityLabel=availability==="in_stock"?"stock indiqué":availability==="out_of_stock"?"rupture indiquée":"disponibilité non fournie";
       storeState.textContent=offerIsCurrent
-        ?"Relevé "+new Date(offerData.checked_at).toLocaleString("fr-FR")+" • "+availabilityLabel
+        ?"Relevé "+new Date(offerData.checked_at).toLocaleString("fr-FR")+" • "+availabilityLabel+(offerData.price_tax_status==="included"?" • TTC confirmé":" • TVA non confirmée")
         :"Dernier relevé disponible · consulter la boutique pour le tarif actuel";
       const priceBox=document.createElement("div");
       priceBox.className="verified-offer-price";
       const offerPrice=document.createElement("strong");
       offerPrice.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(verifiedComparablePrice(offerData));
       const breakdown=document.createElement("span");
-      breakdown.textContent=verifiedPriceBreakdown(offerData);
+      breakdown.textContent=offerData.price_tax_status==="included"?verifiedPriceBreakdown(offerData):"Prix source affiché"+(offerData.shipping_price_eur!==null&&offerData.shipping_price_eur!==undefined?" + livraison":" • livraison à vérifier")+" • TVA non confirmée";
       breakdown.style.cssText="display:block;margin-top:3px;font-size:10px;line-height:1.3;color:#777;text-align:right";
       const merchantLink=document.createElement("a");
       merchantLink.href=offerData.url||offerData.product_url;
