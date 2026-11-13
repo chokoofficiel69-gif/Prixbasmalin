@@ -147,6 +147,8 @@ export function expertTipsPrompt(m = {}) {
     resonance_Hz: m.resonanceHz ?? null, respirations_pct: m.breathPct ?? null,
     de_esser: m.deess ?? null, duck_instru_dB: m.instruDuck ?? null,
     justesse_avant_pct: m.justesseBefore ?? null, justesse_apres_pct: m.justesseAfter ?? null,
+    analyse_spectrale_DSP: m.dsp ?? null,
+    controles_DSP: m.dspRecommendations ?? [],
   };
   const system = EXPERT_SYSTEM_CORE + '\nIMPORTANT : tu n’as pas l’audio, seulement les mesures chiffrées ci-dessous. N’invente aucune mesure non fournie. Réponds en français, 2 à 3 conseils maximum, une puce par conseil, priorisés.';
   const prompt = 'Mesures de la voix/prise (chiffres uniquement, aucun son) :\n' + JSON.stringify(facts, null, 2) + '\n\nDonne 2 à 3 conseils experts, chiffrés et priorisés.';
