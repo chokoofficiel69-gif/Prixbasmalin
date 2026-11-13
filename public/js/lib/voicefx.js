@@ -472,6 +472,9 @@ PRESETS.push(
   { cat: REF_CAT, name: 'Voix centrée, médiums ouverts (type Nada)', chain: [{ t: 'fx', kind: 'peak', f: 2800, q: 1.2, gain: 2.5 }, { t: 'fx', kind: 'warm' }] },
   { cat: REF_CAT, name: 'Voix large (type Vacra)', chain: [{ t: 'fx', kind: 'chorus', mix: 0.22 }, { t: 'fx', kind: 'reverb', size: 1.4, mix: 0.15 }] },
   { cat: REF_CAT, name: 'Justesse naturelle (type Nada / Vacra)', chain: [{ t: 'tune', strength: 1, speed: 35 }, { t: 'fx', kind: 'warm' }] },
+  // Type LJK (« Dolce Vita ») : mesures du morceau (≈130 BPM, voix brillante vers 4,5-6,5 kHz, médiums chauds, pas d'air en excès)
+  { cat: REF_CAT, name: 'Type LJK naturel (calé sur Dolce Vita)', chain: [{ t: 'tune', strength: 0.6, speed: 110 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'peak', f: 5500, q: 1, gain: 3 }, { t: 'fx', kind: 'delay', time: 0.23, fb: 0.22, mix: 0.12 }, { t: 'fx', kind: 'reverb', size: 1.3, mix: 0.1 }], voice: { highpass: 90, low: 0, presence: 2, air: 0, deess: 4, comp: 0.7, reverb: 0 } },
+  { cat: REF_CAT, name: 'Type LJK mélodique (calé sur Dolce Vita)', chain: [{ t: 'tune', strength: 1, speed: 25 }, { t: 'double', steps: [0, 0], gain: 0.35 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'peak', f: 5500, q: 1, gain: 3 }, { t: 'fx', kind: 'delay', time: 0.23, fb: 0.28, mix: 0.16 }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.14 }], voice: { highpass: 90, low: 0, presence: 2, air: 0, deess: 4, comp: 0.75, reverb: 0 } },
   { cat: REF_CAT, name: 'Pack 8 références (basses, présence, justesse)', chain: [{ t: 'tune', strength: 0.9, speed: 35 }, { t: 'fx', kind: 'peak', f: 70, q: 0.8, gain: 4 }, { t: 'fx', kind: 'peak', f: 4000, q: 1, gain: 2.5 }, { t: 'fx', kind: 'air', gain: 3 }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.14 }] },
 );
 export const PRESET_CATS = [...new Set(PRESETS.map(p => p.cat))];
