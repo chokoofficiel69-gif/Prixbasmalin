@@ -12,6 +12,7 @@ import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes, colorForTrack,
 import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.js';
 import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult } from '../lib/ingexpert.js';
 import { analyzeMaster, compareToRef } from '../lib/meters.js';
+import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -1357,8 +1358,13 @@ export async function render(el, { params }) {
     track.role = role;
     const plan = roleChain(role, { noiseDb, bpm: ingeSession.bpm });
     const expert = ingePrefs.expert;
-    let ex = null, analysis = null;
-    if (expert) { say('Analyse experte…'); analysis = analyzeSamples(ch, raw.sampleRate); ex = expertChain(plan.voice, ingePrefs.style, analysis); }
+    let ex = null, analysis = null, dspAnalysis = null;
+    if (expert) {
+      say('Analyse experte (dynamique + spectre)…');
+      analysis = analyzeSamples(ch, raw.sampleRate);
+      dspAnalysis = analyzeVoiceDsp(ch, raw.sampleRate);
+      ex = expertChain(plan.voice, ingePrefs.style, analysis);
+    }
     say('Analyse de la voix…');
     const pitchBefore = await detectPitch(raw);
     const key = ingeSession.key || detectKey(pitchBefore);
@@ -1397,7 +1403,9 @@ export async function render(el, { params }) {
       try { lufs = Math.round((await loudness(track.buffer)) * 10) / 10; } catch {}
       if (beat) { try { const il = Math.round((await loudness(beat.buffer)) * 10) / 10; instruDuck = instruDuckDb(lufs, il); if (instruDuck < 0) { beat.gainDb = Math.max(-30, beat.gainDb + instruDuck); } } catch {} }
       if (STYLES[ingePrefs.style]) masterSel.value = STYLES[ingePrefs.style].master;
-      const em = { style: ingePrefs.style, peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, crestDb: analysis.crestDb, clipPct: analysis.clipPct, lufs, brightness: analysis.brightness, resonanceHz: analysis.resonanceHz, breathPct: analysis.breathPct, deess: ex.voice.deess, notchHz: ex.steps.notchHz, instruDuck, justesseBefore: jBefore.pct, justesseAfter: jAfter.pct };
+      const em = { style: ingePrefs.style, peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, crestDb: analysis.crestDb, clipPct: analysis.clipPct, lufs, brightness: analysis.brightness, resonanceHz: analysis.resonanceHz, breathPct: analysis.breathPct, deess: ex.voice.deess, notchHz: ex.steps.notchHz, instruDuck, justesseBefore: jBefore.pct, justesseAfter: jAfter.pct,
+        dsp: dspAnalysis?.valid ? { peakDbfs: dspAnalysis.peakDbfs, rmsDbfs: dspAnalysis.rmsDbfs, noiseFloorEstimateDbfs: dspAnalysis.noiseFloorEstimateDbfs, crestDb: dspAnalysis.crestDb, spectralCentroidHz: dspAnalysis.spectralCentroidHz, bandEnergy: dspAnalysis.bandEnergy, sibilanceRatio: dspAnalysis.sibilanceRatio, lowRatio: dspAnalysis.lowRatio, highRatio: dspAnalysis.highRatio, confidence: dspAnalysis.confidence } : null,
+        dspRecommendations: voiceDspRecommendations(dspAnalysis || {}) };
       track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em);
     }
     drawList(); drawEdit(); updUndo();

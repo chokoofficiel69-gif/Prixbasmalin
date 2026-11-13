@@ -120,6 +120,13 @@ export function expertReport(m = {}) {
   if (Number.isFinite(m.brightness)) add('sifflantes (estim.)', m.brightness > 0.6 ? 'fortes' : m.brightness > 0.35 ? 'moyennes' : 'faibles');
   if (m.resonanceHz) add('résonance grave-médium', `vers ${m.resonanceHz} Hz (atténuée)`);
   if (Number.isFinite(m.breathPct)) add('respirations/blancs', `${m.breathPct} %`);
+  if (m.dsp) {
+    add('centre spectral', `${m.dsp.spectralCentroidHz} Hz (analyse DSP)`);
+    add('énergie 5–10 kHz', `${(m.dsp.sibilanceRatio * 100).toFixed(1)} % (indicateur, pas détection phonétique)`);
+    add('estimation bruit', `${m.dsp.noiseFloorEstimateDbfs} dBFS (à confirmer sur un passage sans voix)`);
+    add('confiance spectrale', `${Math.round(m.dsp.confidence * 100)} %`);
+  }
+  for (const tip of (m.dspRecommendations || []).slice(0, 3)) lines.push('• Contrôle DSP : ' + tip);
   const done = [];
   if (m.deess) done.push(`de-esser ${m.deess}`);
   if (m.notchHz) done.push(`EQ anti-résonance à ${m.notchHz} Hz`);
@@ -147,6 +154,8 @@ export function expertTipsPrompt(m = {}) {
     resonance_Hz: m.resonanceHz ?? null, respirations_pct: m.breathPct ?? null,
     de_esser: m.deess ?? null, duck_instru_dB: m.instruDuck ?? null,
     justesse_avant_pct: m.justesseBefore ?? null, justesse_apres_pct: m.justesseAfter ?? null,
+    analyse_spectrale_DSP: m.dsp ?? null,
+    controles_DSP: m.dspRecommendations ?? [],
   };
   const system = EXPERT_SYSTEM_CORE + '\nIMPORTANT : tu n’as pas l’audio, seulement les mesures chiffrées ci-dessous. N’invente aucune mesure non fournie. Réponds en français, 2 à 3 conseils maximum, une puce par conseil, priorisés.';
   const prompt = 'Mesures de la voix/prise (chiffres uniquement, aucun son) :\n' + JSON.stringify(facts, null, 2) + '\n\nDonne 2 à 3 conseils experts, chiffrés et priorisés.';
