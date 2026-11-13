@@ -8,6 +8,7 @@ import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyNa
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift, detectBeats } from '../lib/audio.js';
 import { ROLES, ROLE_ORDER, proposeRole, adlibPan, roleChain, micAdvice, justesse, buildReport, tipsPrompt, fallbackTips, mergePrefs, peakDbOf, rmsDbOf, noiseFloorDb } from '../lib/ingesong.js';
 import { VOICE_TYPES, VOICE_TYPE_ORDER, PRO_PRESETS, PRO_PRESET_ORDER, DEFAULT_PRO, clampPro, buildTuneStep, applyPreset, formantForVoice, proName } from '../lib/autotunepro.js';
+import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes } from '../lib/daw.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -216,6 +217,31 @@ export async function render(el, { params }) {
   try { tuneModule = loadTune(audioCtx()).then(() => true, () => false); } catch {}
   let tuneReady = false; tuneModule?.then(ok => { tuneReady = ok; });
   const bpmNow = () => Number(localStorage.getItem('studio.bpm')) || 90;
+
+  // ---------- Transport pro : BPM, tonalité, métronome, décompte ----------
+  const transport = Object.assign({ bpm: bpmNow(), countIn: 1, metro: false, metroVol: 0.6, bpb: 4, loop: false },
+    (() => { try { return JSON.parse(localStorage.getItem('studio.transport')) || {}; } catch { return {}; } })());
+  transport.bpm = clampBpm(transport.bpm);
+  const saveTransport = () => { try { localStorage.setItem('studio.transport', JSON.stringify(transport)); localStorage.setItem('studio.bpm', String(transport.bpm)); } catch {} };
+  function clickAt(ctx, t, accent) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = accent ? 1600 : 1000;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, transport.metroVol), t + 0.001); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.06);
+  }
+  const metro = {
+    timer: null, i: 0,
+    start() { this.stop(); const ctx = audioCtx(); const spb = 60 / transport.bpm; const t0 = ctx.currentTime + 0.1; let i = 0;
+      const sched = () => { const ahead = ctx.currentTime + 0.3; while (t0 + i * spb < ahead) { clickAt(ctx, t0 + i * spb, (i % transport.bpb) === 0); i++; } this.timer = setTimeout(sched, 100); }; sched(); },
+    stop() { clearTimeout(this.timer); this.timer = null; },
+  };
+  async function playCountIn() {
+    const n = transport.countIn; if (!(n > 0) || !(transport.bpm > 0)) return;
+    const ctx = audioCtx(); const dur = countInDuration(n, transport.bpm, transport.bpb); const t0 = ctx.currentTime + 0.12;
+    for (const c of beatClickTimes(dur, transport.bpm, transport.bpb)) clickAt(ctx, t0 + c.t, c.accent);
+    await new Promise(r => setTimeout(r, (t0 - ctx.currentTime + dur) * 1000));
+  }
+
   function revIR(ctx, sec = 1.8) { const len = Math.floor(ctx.sampleRate * sec), ir = ctx.createBuffer(2, len, ctx.sampleRate); for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3; } return ir; }
   function buildFx(ctx, input, fx, withTune) {
     const f = (type, freq, gain, q = 0.8) => { const n = ctx.createBiquadFilter(); n.type = type; n.frequency.value = freq; n.gain.value = gain; n.Q.value = q; return n; };
@@ -281,7 +307,7 @@ export async function render(el, { params }) {
     }
     live.ctxStart = t0; live.from = from; live.end = until ?? end;
     liveBtn.textContent = '⏹ Arrêter l’écoute'; playBtn.textContent = '⏸ Pause';
-    live.timer = setTimeout(() => { stopLive(false); seekPos = from; onEnd?.(); }, ((until ?? end) - from) * 1000 + 300);
+    live.timer = setTimeout(() => { if (transport.loop && !onEnd && !recorder) { playLive(from, until); return; } stopLive(false); seekPos = from; onEnd?.(); }, ((until ?? end) - from) * 1000 + 300);
   }
   const playBtn = h('button.btn.primary', { onclick: () => (live.srcs.length ? stopLive() : playLive()) }, '▶ Lecture');
   liveBtn.onclick = () => (live.srcs.length ? stopLive() : playLive());
@@ -415,7 +441,7 @@ export async function render(el, { params }) {
     stopping.p = (async () => {
       recAuto = null;
       clearInterval(timer);
-      stopMonitor();
+      stopMonitor(); metro.stop();
       const r = recorder; recorder = null;
       try { beatSrc?.stop(); } catch {} beatSrc = null; stopLive(false); seekPos = recFrom; outMeter.detach();
       recBtn.textContent = '⏺ Enregistrer'; meter.firstChild.style.width = '0';
@@ -450,6 +476,7 @@ export async function render(el, { params }) {
     if (recorder) return;
     try {
       stopMonitor();
+      if (transport.countIn > 0) { recBtn.textContent = '① Décompte…'; await playCountIn(); }
       const constraints = micConstraints();
       const beat = tracks.find(t => t.kind === 'instru' && !t.mute);
       recAuto = { sil: autoStopSilence, spoke: false, last: performance.now() };
@@ -483,6 +510,7 @@ export async function render(el, { params }) {
         if (beat) toast('Instru lancée : casque conseillé pour qu’elle ne s’entende pas dans la prise.');
       }
       recBtn.textContent = '⏹ Arrêter';
+      if (transport.metro) metro.start();
       timer = setInterval(() => { recTime.textContent = fmtTime(recorder?.duration); }, 200);
       if (seconds > 0) { const r0 = recorder; setTimeout(() => { if (recorder === r0) { toast(`${seconds} s enregistrées : prise arrêtée.`); stopRec(); } }, seconds * 1000); }
       ast?.onRecordStarted();
@@ -1288,10 +1316,25 @@ export async function render(el, { params }) {
 
   const stopBtn = h('button.btn', { title: 'Stop (revient là où tu avais lancé la lecture)', onclick: () => { if (recorder) return stopRec(); const back = live.srcs.length ? live.from : seekPos; stopLive(false); player.stop(); seekPos = back; } }, '⏹');
   const homeBtn = h('button.btn', { title: 'Revenir au début', onclick: () => { seekPos = 0; if (live.srcs.length) playLive(0); } }, '⏮');
+  // ---------- Barre de transport : mesures:temps, BPM, tonalité, métronome, décompte, boucle ----------
+  const barsLbl = h('span.kpi', fmtBarsBeats(0, transport.bpm, transport.bpb));
+  const bpmInput = h('input', { type: 'number', min: 40, max: 300, value: transport.bpm, style: { width: '68px' }, title: 'Tempo (BPM)', onchange: (e) => { transport.bpm = clampBpm(e.target.value); e.target.value = transport.bpm; saveTransport(); } });
+  const keyLbl = h('span.small.muted', '');
+  const metroBtn = h('button.btn.small' + (transport.metro ? '.primary' : ''), { title: 'Métronome', onclick: (e) => { transport.metro = !transport.metro; e.currentTarget.classList.toggle('primary', transport.metro); saveTransport(); if (transport.metro && recorder) metro.start(); if (!transport.metro) metro.stop(); } }, '🥁 Métronome');
+  const metroVol = h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: transport.metroVol, style: { width: '68px' }, title: 'Volume du métronome', oninput: (e) => { transport.metroVol = Number(e.target.value); saveTransport(); } });
+  const countSel = h('select', { title: 'Décompte avant la prise' }, [0, 1, 2].map(n => h('option', { value: n, selected: n === transport.countIn }, n === 0 ? 'Décompte : non' : `Décompte : ${n} mesure${n > 1 ? 's' : ''}`)));
+  countSel.onchange = () => { transport.countIn = Number(countSel.value); saveTransport(); };
+  const loopBtn = h('button.btn.small' + (transport.loop ? '.primary' : ''), { title: 'Boucle de lecture', onclick: (e) => { transport.loop = !transport.loop; e.currentTarget.classList.toggle('primary', transport.loop); saveTransport(); } }, '🔁 Boucle');
+  const barsTimer = setInterval(() => { try { const pos = live.srcs.length ? livePos() : (player.playing && tracks[selected] ? (tracks[selected].offset || 0) - minOffNow() + player.position : seekPos); barsLbl.textContent = fmtBarsBeats(pos, transport.bpm, transport.bpb); keyLbl.textContent = ingeSession.keyLabel ? `🎵 ${ingeSession.keyLabel}` : ''; } catch {} }, 150);
+  const transportRow = h('div.row', { style: { flexWrap: 'wrap', gap: '8px', alignItems: 'center' } },
+    loopBtn, h('span.small.muted', 'Mesure'), barsLbl,
+    h('span.small.muted', 'BPM'), bpmInput, keyLbl,
+    metroBtn, h('span.small.muted', '🔊'), metroVol, countSel);
   el.append(
     h('div.card.stack', { style: { marginBottom: '14px' } },
       h('div.row', { style: { flexWrap: 'wrap', gap: '8px', alignItems: 'center' } },
         h('h3', { style: { margin: 0 } }, '🎚️ Mes pistes'), homeBtn, playBtn, stopBtn, recBtn, recTime, timeline.posLbl, h('div.grow', { style: { minWidth: '120px' } }, meter)),
+      transportRow,
       h('div.row', { style: { flexWrap: 'wrap', gap: '6px' } }, timeline.tools,
         h('button.btn.small.primary', { onclick: () => addEmptyTrack() }, '➕ Ajouter une piste'),
         h('button.btn.small', { onclick: async () => { for (const f of await pickLocalFiles('audio/*,video/*')) await addBlob(f, f.name); } }, '📥 Importer (instru, voix…)'),
@@ -1381,6 +1424,7 @@ export async function render(el, { params }) {
     if (k === 'a' && cur) { const on = !cur.armed; tracks.forEach(x => { x.armed = false; }); cur.armed = on; drawList(); return; }
     if (k === 'n') { e.preventDefault(); addEmptyTrack(); return; }
     if (k === 'f') { timeline?.fit(); return; }
+    if (k === 'l') { loopBtn.click(); return; }
     if ((e.code === 'ArrowRight' || e.code === 'ArrowLeft') && e.shiftKey && cur) {
       // Maj + ← → : décaler la piste de 10 ms pour la caler au poil
       e.preventDefault(); const d = (e.code === 'ArrowRight' ? 1 : -1) * 0.01;
@@ -1395,5 +1439,5 @@ export async function render(el, { params }) {
   };
   document.addEventListener('keydown', onKey);
 
-  return () => { document.removeEventListener('keydown', onKey); ast?.destroy(); stopLive(); player.stop(); stopMonitor(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
+  return () => { document.removeEventListener('keydown', onKey); ast?.destroy(); stopLive(); player.stop(); stopMonitor(); metro.stop(); clearInterval(barsTimer); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
 }
