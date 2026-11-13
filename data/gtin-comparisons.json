@@ -1,0 +1,1680 @@
+{
+ "schema_version": 1,
+ "status": "ok",
+ "generated_at": "2026-11-13T13:40:29.428730Z",
+ "freshness_max_age_hours": 48,
+ "method": "GTIN valide commun à au moins deux marchands ; marque, contenance et nom contrôlés pour refuser les faux rapprochements.",
+ "counts": {
+  "gtins_with_two_merchants": 53,
+  "comparisons": 36,
+  "comparisons_with_two_current_offers": 0,
+  "offers": 72,
+  "offers_stale_or_undated": 36,
+  "offers_tax_confirmed": 0,
+  "rejected": {
+   "name_mismatch": 7,
+   "brand_mismatch": 10
+  },
+  "merchant_pairs": {
+   "Nicchia Luxury / Perfumeria Comas FR": 36
+  }
+ },
+ "products": [
+  {
+   "id": "gtin-00635346315954",
+   "gtin": "00635346315954",
+   "name": "Malbrum Wildfire Extrait de Parfum 30 ml",
+   "brand": "Malbrum",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000104440043-01.jpg?v=1758200081",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 115.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430610910313007533748361&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fmalbrum-wildfire-extrait-de-parfum-unisex%3Fvariant%3D56535562224000",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 128.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011556&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-00652638004327",
+   "gtin": "00652638004327",
+   "name": "Clive Christian VII Queen Anne Cosmos Flower Noble Collection Parfum 50 ml",
+   "brand": "Clive Christian",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000405690043-01.jpg?v=1758189422",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 565.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430615484568862252725598&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-vii-queen-anne-cosmos-flower-noble-collection-parfum-for-women%3Fvariant%3D56535405691264",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 565.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010722&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-00652638008929",
+   "gtin": "00652638008929",
+   "name": "Clive Christian Crab Apple Blossom Est 1872 Crown Collection Parfum 50 ml",
+   "brand": "Clive Christian",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000405570043-01.jpg?v=1758189339",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 465.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069252174453351111793&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-crab-apple-blossom-est-1872-crown-collection-parfum-unisex%3Fvariant%3D56535404609920",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 465.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011296&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-00652638010168",
+   "gtin": "00652638010168",
+   "name": "Clive Christian 1872 Feminine Original Collection Parfum 50 ml",
+   "brand": "Clive Christian",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000405550043-01.jpg?v=1758189293",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 360.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543065250092687402757692&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-1872-feminine-original-collection-parfum-for-women%3Fvariant%3D56535404282240",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 360.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=42967200313&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-00652638010182",
+   "gtin": "00652638010182",
+   "name": "Clive Christian X Feminine Original Collection Parfum 50 ml",
+   "brand": "Clive Christian",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000405790043-01.jpg?v=1758189449",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 360.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430617858523071098452173&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-x-feminine-original-collection-parfum-for-women%3Fvariant%3D56535405887872",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 360.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41436994935&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-00652638010281",
+   "gtin": "00652638010281",
+   "name": "Clive Christian I Woody Floral Feminine Private Collection Parfum 50 ml",
+   "brand": "CLIVE CHRISTIAN",
+   "image": "https://perfumeriacomas.com/cdnassets/products/115864-1_s.webp",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 350.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010721&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    },
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 410.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061915015135718461222&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-i-woody-floral-feminine-private-collection-parfum-for-women%3Fvariant%3D56535404773760",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    }
+   ]
+  },
+  {
+   "id": "gtin-00652638012278",
+   "gtin": "00652638012278",
+   "name": "Clive Christian Town & Country Est 1872 Crown Collection Parfum 50 ml",
+   "brand": "Clive Christian",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000405630043-01.jpg?v=1758189352",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 465.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430612413971712305890008&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-town-country-est-1872-crown-collection-parfum-unisex%3Fvariant%3D56535404708224",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 465.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41436994940&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-00652638012858",
+   "gtin": "00652638012858",
+   "name": "Clive Christian L Red Tea Vetiver Private Collection Parfum 50 ml",
+   "brand": "Clive Christian",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001317350043-01.jpg?v=1758189382",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 410.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430616631805668290453676&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-l-red-tea-vetiver-private-collection-parfum-for-men%3Fvariant%3D56535405265280",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 410.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=40965549114&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-00711658401506",
+   "gtin": "00711658401506",
+   "name": "Houbigant Paris Ambre des Abysses Eau de Parfum 100 ml",
+   "brand": "Houbigant Paris",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000502470043-01.jpg?v=1758197089",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 200.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543063830117774763016130&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fhoubigant-paris-ambre-des-abysses-eau-de-parfum-for-men%3Fvariant%3D56535500587392",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 200.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41474260804&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03596930001097",
+   "gtin": "03596930001097",
+   "name": "Reminiscence Le Patchouli Élixir Eau de Parfum 50 ml",
+   "brand": "REMINISCENCE",
+   "image": "https://perfumeriacomas.com/cdnassets/products/136765-1_s.webp",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 64.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41090259806&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    },
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 88.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430612477576128407929957&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-le-patchouli-elixir-eau-de-parfum-unisex%3Fvariant%3D56535901733248",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    }
+   ]
+  },
+  {
+   "id": "gtin-03596930001134",
+   "gtin": "03596930001134",
+   "name": "Reminiscence Dolce Riviera Eau de Parfum 50 ml",
+   "brand": "REMINISCENCE",
+   "image": "https://perfumeriacomas.com/cdnassets/products/136771-1_s.webp",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 64.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41484300607&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    },
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 88.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430615618341401453958798&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-dolce-riviera-eau-de-parfum-unisex%3Fvariant%3D56535901340032",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    }
+   ]
+  },
+  {
+   "id": "gtin-03596930001165",
+   "gtin": "03596930001165",
+   "name": "Reminiscence Fleur de Délice Eau de Parfum 50 ml",
+   "brand": "Reminiscence",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001120680043-01.jpg?v=1758207964",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 88.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430613644678543941543624&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-fleur-de-delice-eau-de-parfum-unisex%3Fvariant%3D56535901438336",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 89.9,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41090259814&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03596930001219",
+   "gtin": "03596930001219",
+   "name": "Reminiscence Souffle Ambré Intense Eau de Toilette 50 ml",
+   "brand": "REMINISCENCE",
+   "image": "https://perfumeriacomas.com/cdnassets/products/136779-1_s.webp",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 54.9,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=42813651398&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    },
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 77.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061353880123860802776&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-souffle-ambre-intense-eau-de-toilette-unisex%3Fvariant%3D56535902617984",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    }
+   ]
+  },
+  {
+   "id": "gtin-03596930001257",
+   "gtin": "03596930001257",
+   "name": "Reminiscence Musc Charnel Eau de Parfum 50 ml",
+   "brand": "REMINISCENCE",
+   "image": "https://perfumeriacomas.com/cdnassets/products/136762-1_s.webp",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 62.5,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41090259805&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    },
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 88.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543063148840293273445480&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-musc-charnel-eau-de-parfum-unisex%3Fvariant%3D56535902355840",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    }
+   ]
+  },
+  {
+   "id": "gtin-03701123005664",
+   "gtin": "03701123005664",
+   "name": "Floraïku Paris And Your Lips Eau de Parfum 50+10 ml",
+   "brand": "Floraïku Paris",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000821330043-01.jpg?v=1758191279",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 295.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543067324257527617008343&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Ffloraiku-paris-and-your-lips-eau-de-parfum-unisex%3Fvariant%3D56535447667072",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 295.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=44423524941&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03701415901346",
+   "gtin": "03701415901346",
+   "name": "Initio Parfums Privés Absolute Aphrodisiac Eau de Parfum 90 ml",
+   "brand": "Initio Parfums Privés",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000292920043-01.jpg?v=1758197294",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 280.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430611224838672562420286&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-absolute-aphrodisiac-eau-de-parfum-unisex%3Fvariant%3D56535504126336",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 280.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41618525531&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03701415901384",
+   "gtin": "03701415901384",
+   "name": "Initio Parfums Privés Oud for Happiness Eau de Parfum 90 ml",
+   "brand": "Initio Parfums Privés",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000292850043-01.jpg?v=1758197395",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 320.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543068090704228354716087&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-oud-for-happiness-eau-de-parfum-unisex%3Fvariant%3D56535505043840",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 320.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011244&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03701415901407",
+   "gtin": "03701415901407",
+   "name": "Initio Parfums Privés High Frequency Eau de Parfum 90 ml",
+   "brand": "Initio Parfums Privés",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000292980043-01.jpg?v=1758197332",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 280.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543067758624838591775560&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-high-frequency-eau-de-parfum-unisex%3Fvariant%3D56535504683392",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 280.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010735&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03701415903432",
+   "gtin": "03701415903432",
+   "name": "Initio Parfums Privés Power Self Extrait de Parfum 90 ml",
+   "brand": "Initio Parfums Privés",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001415430043-01.jpg?v=1758197407",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 290.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069147915704127254315&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-power-self-extrait-de-parfum-unisex%3Fvariant%3D56535505109376",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 290.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41474260818&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03760156770215",
+   "gtin": "03760156770215",
+   "name": "Jeroboam Miksado Extrait de Parfum 30 ml",
+   "brand": "Jeroboam",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000740680043-01.jpg?v=1758197864",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 100.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543067530850119204880617&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-miksado-extrait-de-parfum-unisex%3Fvariant%3D56535513563520",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 100.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41517730789&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03760156770253",
+   "gtin": "03760156770253",
+   "name": "Jeroboam Origino Extrait de Parfum 30 ml",
+   "brand": "Jeroboam",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000740690043-01.jpg?v=1758197876",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 100.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069659329295429277043&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-origino-extrait-de-parfum-unisex%3Fvariant%3D56535513858432",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 100.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011945&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03760156770277",
+   "gtin": "03760156770277",
+   "name": "Jeroboam Vespero Extrait de Parfum 30 ml",
+   "brand": "Jeroboam",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000740730043-01.jpg?v=1758197887",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 100.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430617499725415233216080&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-vespero-extrait-de-parfum-for-men%3Fvariant%3D56535514055040",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 100.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011947&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03760156770284",
+   "gtin": "03760156770284",
+   "name": "Jeroboam Boha Extrait de Parfum 30 ml",
+   "brand": "Jeroboam",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000740610043-01.jpg?v=1758197822",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 100.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430615914929499673951961&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-boha-extrait-de-parfum-for-women%3Fvariant%3D56535512482176",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 100.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011948&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03760156770291",
+   "gtin": "03760156770291",
+   "name": "Jeroboam Ligno Extrait de Parfum 30 ml",
+   "brand": "Jeroboam",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000740670043-01.jpg?v=1758197859",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 100.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069961334844409122793&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-ligno-extrait-de-parfum-unisex%3Fvariant%3D56535513465216",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 100.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011949&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03760156771045",
+   "gtin": "03760156771045",
+   "name": "Jeroboam Gozo Extrait de Parfum 30 ml",
+   "brand": "Jeroboam",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000740640043-01.jpg?v=1758197836",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 110.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430617144978009881084100&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-gozo-extrait-de-parfum-unisex%3Fvariant%3D56535513235840",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 110.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=46418890246&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-03760156771052",
+   "gtin": "03760156771052",
+   "name": "Jeroboam Unue Extrait de Parfum 30 ml",
+   "brand": "Jeroboam",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000740720043-01.jpg?v=1758197881",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 100.0,
+     "shipping_price_eur": 12.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061713450501071961237&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-unue-extrait-de-parfum-unisex%3Fvariant%3D56535513923968",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 100.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011952&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840009",
+   "gtin": "08717774840009",
+   "name": "Nasomatto Duro Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000261770057-01.jpg?v=1758201373",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430610281583193283202203&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-duro-extrait-de-parfum-for-men%3Fvariant%3D56535790846336",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010246&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840016",
+   "gtin": "08717774840016",
+   "name": "Nasomatto Narcotic V. Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000262050078-01.jpg?v=1758201385",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543064031857943847989821&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-narcotic-v-extrait-de-parfum-for-women%3Fvariant%3D56535791305088",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010247&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840023",
+   "gtin": "08717774840023",
+   "name": "Nasomatto Silver Musk Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000259790043-01.jpg?v=1758201406",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.54306145991959580140319&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-silver-musk-extrait-de-parfum-unisex%3Fvariant%3D56535792189824",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010248&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840047",
+   "gtin": "08717774840047",
+   "name": "Nasomatto Absinth Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000261690057-01.jpg?v=1758201347",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061659367951624268476&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-absinth-extrait-de-parfum-unisex%3Fvariant%3D56535789830528",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010249&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840061",
+   "gtin": "08717774840061",
+   "name": "Nasomatto Black Afgano Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000261710067-01.jpg?v=1758201358",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430613219464005789074313&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-black-afgano-extrait-de-parfum-unisex%3Fvariant%3D56535790190976",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010251&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840290",
+   "gtin": "08717774840290",
+   "name": "Nasomatto Pardon Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000262070057-01.jpg?v=1758201396",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543065639663353997585214&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-pardon-extrait-de-parfum-for-men%3Fvariant%3D56535791665536",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=44079959413&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840313",
+   "gtin": "08717774840313",
+   "name": "Nasomatto Blamage Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000261720064-01.jpg?v=1758201364",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430613176498862800728877&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-blamage-extrait-de-parfum-unisex%3Fvariant%3D56535790420352",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010253&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840320",
+   "gtin": "08717774840320",
+   "name": "Nasomatto Baraonda Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000261700057-01.jpg?v=1758201352",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543064256098095113448884&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-baraonda-extrait-de-parfum-unisex%3Fvariant%3D56535789896064",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010254&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840337",
+   "gtin": "08717774840337",
+   "name": "Nasomatto Nudiflorum Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000262060043-01.jpg?v=1758201390",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061294527454276738958&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-nudiflorum-extrait-de-parfum-unisex%3Fvariant%3D56535791567232",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010255&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  },
+  {
+   "id": "gtin-08717774840344",
+   "gtin": "08717774840344",
+   "name": "Nasomatto Fantomas Extrait de Parfum 30 ml",
+   "brand": "Nasomatto",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000259760043-01.jpg?v=1758201379",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543068814477109130796727&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-fantomas-extrait-de-parfum-unisex%3Fvariant%3D56535791108480",
+     "checked_at": "2026-11-07T03:05:36Z",
+     "checked_at_basis": "merchant_feed_creation",
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 130.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010256&a=3137386&m=105475",
+     "checked_at": "2026-11-13T00:11:12Z",
+     "checked_at_basis": "merchant_feed_update",
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": false
+    }
+   ]
+  }
+ ]
+}

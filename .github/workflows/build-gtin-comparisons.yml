@@ -1,0 +1,71 @@
+name: Construire les comparaisons multi-marchands par GTIN
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Synchroniser le catalogue produits Awin autorisé"
+      - "Importer les catalogues Rakuten autorisés"
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build_gtin_comparisons.py"
+      - "tests/test_build_gtin_comparisons.py"
+      - ".github/workflows/build-gtin-comparisons.yml"
+  pull_request:
+    paths:
+      - "scripts/build_gtin_comparisons.py"
+      - "tests/test_build_gtin_comparisons.py"
+      - ".github/workflows/build-gtin-comparisons.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gtin-comparisons
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le dépôt (main à jour)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
+      - name: Tester le rapprochement strict par GTIN
+        run: python3 -m unittest discover -s tests -p 'test_build_gtin_comparisons.py' -v
+      - name: Construire les comparaisons à partir des flux autorisés déjà importés
+        run: python3 scripts/build_gtin_comparisons.py
+      - name: Publier seulement si les comparaisons ont changé
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # generated_at change à chaque exécution : on ne compare que le contenu utile.
+          strip() { python3 -c 'import json,sys;d=json.load(sys.stdin);d.pop("generated_at",None);print(json.dumps(d,sort_keys=True))'; }
+          if git cat-file -e HEAD:data/gtin-comparisons.json 2>/dev/null && \
+             [[ "$(git show HEAD:data/gtin-comparisons.json | strip)" == "$(strip < data/gtin-comparisons.json)" ]]; then
+            echo "Comparaisons inchangées ; aucun commit."
+            exit 0
+          fi
+          python3 -c 'import json;c=json.load(open("data/gtin-comparisons.json"))["counts"];print("### Comparaisons GTIN");[print(f"- {k} : {v}") for k,v in c.items()]' >> "$GITHUB_STEP_SUMMARY"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/gtin-comparisons.json
+          git commit -m "data: comparaisons multi-marchands par GTIN"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::Conflit sur data/gtin-comparisons.json ; fichier précédent conservé."
+              exit 1
+            fi
+            if git push origin HEAD:main; then exit 0; fi
+            echo "main a avancé pendant la publication (tentative ${attempt}/3)."
+          done
+          echo "::error::Publication impossible après trois tentatives."
+          exit 1
