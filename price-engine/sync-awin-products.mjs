@@ -350,7 +350,8 @@ function parseDirectFeedRow(row) {
     aw_deep_link: row.aw_deep_link || "",
     shipping_price_eur: shippingPrice,
     price_tax_status: explicitPriceTaxStatus(row),
-    last_updated: row.last_updated || ""
+    last_updated: row.last_updated || "",
+    feed_last_imported: row.feed_last_imported || ""
   };
   return offerFromRow(normalized, program, advertiser, { allowUnknownAvailability: true });
 }
@@ -551,10 +552,11 @@ async function loadStandardAwinFeeds(rawOffers) {
           ? temporalFields.map(field => field.field + "=" + field.populated + "/" + field.total).join(", ")
           : "aucune colonne temporelle";
         const lastUpdatedColumn = Object.prototype.hasOwnProperty.call(rows[0] || {}, "last_updated") ? "présente" : "absente";
-        log(program.name + " (flux standard) : champs temporels : " + temporalSummary + " ; last_updated " + lastUpdatedColumn + ".");
+        const feedLastImported = String(row.last_imported || row.last_imported_at || row.last_imported_date || "").trim();
+        log(program.name + " (flux standard) : champs temporels : " + temporalSummary + " ; last_updated produit " + lastUpdatedColumn + " ; dernier import du flux " + (feedLastImported || "non fourni") + ".");
         let count = 0;
         for (const productRow of rows) {
-          const offer = parseFeedRow(productRow,program,advertiser);
+          const offer = parseFeedRow({ ...productRow, feed_last_imported: feedLastImported },program,advertiser);
           if (!offer) continue;
           rawOffers.push(offer);
           imported++;
@@ -653,6 +655,7 @@ function offerFromRow(row, program, advertiser, { allowUnknownAvailability = fal
     shipping_price_eur: Number.isFinite(row.shipping_price_eur) ? row.shipping_price_eur : null,
     price_tax_status: explicitPriceTaxStatus(row),
     merchant_updated_at: row.last_updated || null,
+    feed_updated_at: row.feed_last_imported || null,
     url: link
   };
 }
@@ -704,6 +707,7 @@ function aggregateOffers(rawOffers, fetchedAt) {
       priceTaxStatus: best.price_tax_status || "unspecified",
       shippingPriceValue: best.shipping_price_eur,
       merchantUpdatedAt: best.merchant_updated_at,
+      feedUpdatedAt: best.feed_updated_at,
       gtin: first.gtin,
       mpn: first.mpn,
       identityType: group.identity.startsWith("gtin:") ? "gtin" : group.identity.startsWith("mpn:") ? "brand_mpn" : "merchant_product",
@@ -728,7 +732,8 @@ function aggregateOffers(rawOffers, fetchedAt) {
         shippingPriceValue: item.shipping_price_eur,
         availability: item.availability,
         priceTaxStatus: item.price_tax_status || "unspecified",
-        merchantUpdatedAt: item.merchant_updated_at
+        merchantUpdatedAt: item.merchant_updated_at,
+        feedUpdatedAt: item.feed_updated_at
       })),
       isAwinProduct: true,
       priceSource: "Awin — flux marchand autorisé",
@@ -1243,8 +1248,8 @@ async function runSelfTests() {
       }
       if (value === "https://productdata.awin.com/datafeed/download/apikey/test.csv") {
         return new Response(
-          "product_id,product_name,price,currency,brand_name,ean,mpn,deep_link,image_url,in_stock,delivery_cost,last_updated\n" +
-          "sku-1,Casque test,49.90,EUR,AudioBrand,4006381333931,AB-1,https://shop.example/casque,https://cdn.example/casque.jpg,1,4.99,2026-11-08T10:00:00Z\n",
+          "product_id,product_name,price,currency,brand_name,ean,mpn,deep_link,image_url,in_stock,delivery_cost\n" +
+          "sku-1,Casque test,49.90,EUR,AudioBrand,4006381333931,AB-1,https://shop.example/casque,https://cdn.example/casque.jpg,1,4.99\n",
           { status: 200 }
         );
       }
@@ -1256,8 +1261,9 @@ async function runSelfTests() {
         standardOnly.length !== 2 || standardOnly[1].gtin !== "4006381333931" ||
         standardOnly[1].brand !== "AudioBrand" || standardOnly[1].mpn !== "AB-1" ||
         standardOnly[1].price_eur !== 49.9 || standardOnly[1].shipping_price_eur !== 4.99 ||
-        standardOnly[1].price_tax_status !== "unspecified" || standardOnly[1].merchant_updated_at !== "2026-11-08T10:00:00Z") {
-      throw new Error("TEST ÉCHEC : le flux Awin actuel (active/French) doit importer EAN, marque, MPN, prix, livraison et date sans inventer le TTC.");
+        standardOnly[1].price_tax_status !== "unspecified" || standardOnly[1].merchant_updated_at !== null ||
+        standardOnly[1].feed_updated_at !== "2026-11-08T10:00:00Z") {
+      throw new Error("TEST ÉCHEC : le flux Awin doit conserver séparément la date d'import du flux et la date produit absente, sans inventer le TTC.");
     }
   } finally {
     globalThis.fetch = originalFetch;
