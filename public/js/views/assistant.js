@@ -9,7 +9,7 @@ const STOP_RE = /^(ok |bon |vas y |c est )?(stop|stoppe|arrete|arrete toi|coupe 
 const SYSTEM = `Tu es l'assistant d'un studio d'enregistrement de rap sur téléphone. L'artiste te parle à voix haute (transcription parfois approximative) et tu pilotes le studio à sa place.
 Tu réponds UNIQUEMENT avec un objet JSON : {"reponse":"phrase courte et naturelle à dire à voix haute (tutoiement)","actions":[...]}
 Actions possibles (exécutées dans l'ordre, sur la piste sélectionnée sauf indication) :
-{"a":"record"} lancer l'enregistrement (les actions suivantes s'exécutent quand il dit stop)
+{"a":"record","seconds":N} lancer l'enregistrement ; seconds facultatif = durée voulue (« une piste d'1 minute » → 60), sinon il s'arrête quand il dit stop ; les actions suivantes s'exécutent après la prise
 {"a":"stop"} arrêter l'enregistrement ou la lecture
 {"a":"play","what":"piste|master"} écouter · {"a":"pause"}
 {"a":"select","track":N} choisir la piste N (1 = première ; -1 = dernière prise)
@@ -119,7 +119,7 @@ export function mountAssistant(S) {
       if (before.length) await exec(before);
       if (reply) await say(reply); else await say('J’enregistre. Dis stop quand tu as fini.');
       stopListening();
-      await S.record({ autoStopSilence: Number(silSel.value) });
+      await S.record({ autoStopSilence: Number(silSel.value), seconds: Number(actions[i].seconds) || 0 });
       listen();
       return;
     }

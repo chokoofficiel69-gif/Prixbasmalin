@@ -168,7 +168,7 @@ export async function render(el, { params }) {
     })();
     return stopping.p;
   }
-  async function startRec({ autoStopSilence = 0, autoStopBeat = false } = {}) {
+  async function startRec({ autoStopSilence = 0, autoStopBeat = false, seconds = 0 } = {}) {
     if (recorder) return;
     try {
       stopMonitor();
@@ -201,6 +201,7 @@ export async function render(el, { params }) {
       }
       recBtn.textContent = '⏹ Arrêter';
       timer = setInterval(() => { recTime.textContent = fmtTime(recorder?.duration); }, 200);
+      if (seconds > 0) { const r0 = recorder; setTimeout(() => { if (recorder === r0) { toast(`${seconds} s enregistrées : prise arrêtée.`); stopRec(); } }, seconds * 1000); }
       ast?.onRecordStarted();
     } catch (e) { recorder = null; recAuto = null; toast('Micro inaccessible : ' + e.message, 'bad'); throw e; }
   }
@@ -655,7 +656,7 @@ export async function render(el, { params }) {
   const fakeBtn = () => ({ disabled: false });
   const S = {
     isRecording: () => !!recorder,
-    record: (o) => startRec({ autoStopSilence: o?.autoStopSilence || 0, autoStopBeat: true }),
+    record: (o) => startRec({ autoStopSilence: o?.seconds ? 0 : (o?.autoStopSilence || 0), autoStopBeat: !o?.seconds, seconds: Math.min(600, Math.max(0, Number(o?.seconds) || 0)) }),
     snapshot: () => ({
       enregistrement_en_cours: !!recorder,
       pistes: tracks.map((t, i) => ({ n: i + 1, nom: t.name, type: t.kind, duree_s: Math.round(t.buffer.duration * 10) / 10, volume_db: t.gainDb, muet: t.mute, effets_appliques: t.fxDone || [], etapes_annulables: (t.undo || []).map(u => u.label) })),
