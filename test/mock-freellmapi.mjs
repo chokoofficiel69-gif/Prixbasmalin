@@ -19,6 +19,10 @@ function reply(messages, model) {
   if (/réalisateur de clips/.test(sys)) return JSON.stringify({ titre: 'Clip test', personnage: 'young man, short beard, black tracksuit', plans: [
     { debut: 0, fin: 1.5, paroles: 'Bonjour le studio.', type: 'performance', scene: 'Il rappe face caméra', camera: 'plan serré, travelling avant', image_prompt: 'young man rapping, photorealistic', video_prompt: 'young man rapping to camera' },
     { debut: 1.5, fin: 3, paroles: 'Deuxième phrase.', type: 'histoire', scene: 'Il roule à moto la nuit', camera: 'plan large', image_prompt: 'young man on a motorbike at night', video_prompt: 'motorbike ride at night' }] });
+  if (/ingénieur du son/.test(sys)) return JSON.stringify({ propositions: [
+    { nom: 'Drake chaud discret', pourquoi: 'Justesse douce et chaleur.', chaine: [{ t: 'tune', strength: 0.9, speed: 30 }, { t: 'fx', kind: 'warm' }], voix: { highpass: 90, presence: 3, air: 2, comp: 0.6, reverb: 0.08 } },
+    { nom: 'Drake écho', pourquoi: 'Plus d’ampleur.', chaine: [{ t: 'tune', strength: 1, speed: 20 }, { t: 'fx', kind: 'delay', time: 0.3, fb: 0.3, mix: 0.2 }, { t: 'fx', kind: 'inconnu' }] },
+    { nom: 'Invalide', chaine: [{ t: 'rm -rf' }] }] });
   if (/UNIQUEMENT un objet JSON/.test(sys) || /JSON attendu|Réponds UNIQUEMENT avec du JSON|"etapes"/.test(text)) {
     if (/"etapes"/.test(text)) return '```json\n{"etapes":[{"agent":"Architecte","consigne":"Plan"},{"agent":"Développeur","consigne":"Code"}]}\n```';
     if (/plans/.test(text)) return '{"titre":"Mon été","plans":[{"media":1,"duree_secondes":2,"transition":"zoom","effet":"zoomin","texte":"Souvenirs"},{"media":0,"duree_secondes":2,"transition":"fondu","effet":"panG","texte":""}],"look":"vintage"}';

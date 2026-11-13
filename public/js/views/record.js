@@ -1,4 +1,4 @@
-import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal } from '../lib/core.js';
+import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFiles, pickFromLibrary, fetchFileBlob, fmtTime, startRecorder, audioCtx, transcribe, fileUrl, modal, parseJsonLoose } from '../lib/core.js';
 import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords } from '../lib/voicefx.js';
 import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
 
@@ -8,6 +8,54 @@ const VOICE_PRESETS = {
   podcast: { label: 'Parole / podcast', highpass: 85, low: 1.5, presence: 3, air: 1, deess: 3, comp: 0.7, reverb: 0 },
   brut: { label: 'Neutre (juste compresser)', highpass: 60, low: 0, presence: 0, air: 0, deess: 0, comp: 0.4, reverb: 0 },
 };
+
+// ---------- Réglages sur mesure décrits en français (IA) ----------
+const FX_KINDS = {
+  reverb: { size: [0.3, 5], mix: [0, 0.6], decay: [1, 5] }, delay: { time: [0.05, 0.8], fb: [0, 0.6], mix: [0, 0.5] },
+  pingpong: { time: [0.08, 0.6], mix: [0, 0.5] }, chorus: { mix: [0, 0.7] }, flanger: { mix: [0, 0.7] },
+  warm: {}, tube: { amt: [1, 3] }, tape: { amt: [1, 3] }, exciter: { mix: [0, 0.5] }, air: { gain: [0, 6] },
+  peak: { f: [40, 12000], q: [0.4, 4], gain: [-8, 8] }, distort: { amt: [1, 10], tone: [3000, 12000] },
+  band: { lo: [100, 1000], hi: [2000, 10000], drive: [0, 8] }, lofi: { bits: [4, 10], hi: [3000, 10000] },
+};
+const clampN = (v, [a, b], d) => { const n = Number(v); return Number.isFinite(n) ? Math.min(b, Math.max(a, n)) : d; };
+export function sanitizeChain(chain) {
+  const out = [];
+  for (const s of Array.isArray(chain) ? chain.slice(0, 6) : []) {
+    if (!s || typeof s !== 'object') continue;
+    if (s.t === 'tune') out.push({ t: 'tune', strength: clampN(s.strength, [0, 1], 1), speed: clampN(s.speed, [0, 200], 30) });
+    else if (s.t === 'shift') out.push({ t: 'shift', semi: Math.round(clampN(s.semi, [-12, 12], 0)), formant: clampN(s.formant, [-4, 4], 0) });
+    else if (s.t === 'double') out.push({ t: 'double', steps: (Array.isArray(s.steps) ? s.steps : [0, 0]).slice(0, 2).map(x => [-12, 0, 12].includes(+x) ? +x : 0), gain: clampN(s.gain, [0.2, 0.8], 0.55) });
+    else if (s.t === 'harmony') { const st = (Array.isArray(s.steps) ? s.steps : [2]).slice(0, 2).map(x => Math.round(clampN(x, [-4, 4], 2))).filter(Boolean); if (st.length) out.push({ t: 'harmony', steps: st, gain: clampN(s.gain, [0.2, 0.7], 0.45) }); }
+    else if (s.t === 'fx' && FX_KINDS[s.kind]) {
+      const o = { t: 'fx', kind: s.kind };
+      for (const [k, range] of Object.entries(FX_KINDS[s.kind])) if (s[k] !== undefined) o[k] = clampN(s[k], range, range[0]);
+      out.push(o);
+    }
+  }
+  // l'autotune / le changement de voix d'abord (ils repartent de la voix sèche), un seul des deux
+  const pitchStep = out.find(s => s.t === 'tune') || out.find(s => s.t === 'shift');
+  return [...(pitchStep ? [pitchStep] : []), ...out.filter(s => s.t !== 'tune' && s.t !== 'shift')];
+}
+export function sanitizeVoice(v) {
+  if (!v || typeof v !== 'object') return null;
+  const R = { highpass: [40, 200, 90], low: [-6, 6, 0], presence: [-4, 8, 3], air: [-4, 8, 2], deess: [0, 10, 3], comp: [0, 1, 0.6], reverb: [0, 0.5, 0.1] };
+  const o = {}; for (const [k, [a, b, d]] of Object.entries(R)) o[k] = clampN(v[k], [a, b], d);
+  return o;
+}
+function describeChain(p) {
+  const parts = p.chain.map(s => s.t === 'tune' ? `autotune ${s.speed <= 10 ? 'fort' : s.speed <= 40 ? 'moyen' : 'léger'}` : s.t === 'shift' ? `voix ${s.semi > 0 ? '+' : ''}${s.semi} demi-tons` : s.t === 'double' ? 'doublage' : s.t === 'harmony' ? 'harmonies' : ({ reverb: 'réverbe', delay: 'écho', pingpong: 'écho ping-pong', chorus: 'chorus', flanger: 'flanger', warm: 'chaleur', tube: 'lampe', tape: 'bande', exciter: 'brillance', air: 'air', peak: 'égaliseur', distort: 'saturation', band: 'filtre radio', lofi: 'lo-fi' }[s.kind] || s.kind));
+  if (p.voice) parts.push(`voix : présence ${p.voice.presence} dB, brillance ${p.voice.air} dB, compression ${p.voice.comp}`);
+  return parts.join(' · ');
+}
+const VFX_AI_PROMPT = `Tu es ingénieur du son spécialisé rap/RnB (FR et US). L'artiste décrit en français le rendu de voix qu'il veut. Tu proposes 3 réglages proches mais différents (du plus discret au plus marqué), construits avec ces briques uniquement :
+- {"t":"tune","strength":0-1,"speed":0-200} autotune (speed en ms : 0 = robot T-Pain, 10-25 = rap mélodique type Drake/Travis, 35-60 = pop propre, 120-200 = naturel)
+- {"t":"shift","semi":-12..12,"formant":-4..4} hauteur/timbre (n'utilise pas avec tune)
+- {"t":"double","steps":[0,0],"gain":0.2-0.8} doublage (steps -12 = octave grave, 12 = octave aiguë)
+- {"t":"harmony","steps":[2],"gain":0.2-0.7} harmonies (2 = tierce, 4 = quinte)
+- {"t":"fx","kind":K,...} avec K parmi : reverb(size 0.3-5, mix 0-0.6), delay(time 0.05-0.8, fb 0-0.6, mix 0-0.5), pingpong(time, mix), chorus(mix), flanger(mix), warm, tube(amt 1-3), tape(amt 1-3), exciter(mix), air(gain 0-6), peak(f Hz, q 0.4-4, gain -8..8), distort(amt 1-10, tone Hz), band(lo, hi, drive), lofi(bits 4-10, hi)
+Et une chaîne voix "voix" (EQ + compression, appliquée en dernier) : {"highpass":40-200,"low":-6..6,"presence":-4..8,"air":-4..8,"deess":0-10,"comp":0-1,"reverb":0-0.5}.
+Reste subtil : peu d'effets bien dosés, pas de grosse réverbe sauf si demandé. Si l'artiste cite un rappeur, traduis son rendu typique (justesse, brillance, ampleur, écho) sans prétendre copier sa voix.
+Réponds UNIQUEMENT avec ce JSON : {"propositions":[{"nom":"court","pourquoi":"1 phrase","chaine":[...],"voix":{...}}]}`;
 
 export async function render(el, { params }) {
   const tracks = [];       // {name, buffer, original, gainDb, pan, offset, mute, kind}
@@ -43,10 +91,63 @@ export async function render(el, { params }) {
   const rawMode = h('input', { type: 'checkbox' });
   const withBeat = h('input', { type: 'checkbox', checked: true });
   const recBtn = h('button.btn.rec', '⏺ Enregistrer');
+  // ---------- Retour casque en direct (s'entendre pendant qu'on enregistre) ----------
+  const monOn = h('input', { type: 'checkbox', checked: localStorage.getItem('studio.mon') === '1' });
+  const MON_STYLES = { propre: 'Voix propre', rap: 'Voix rap (présence)', reverb: 'Voix + réverbe', echo: 'Voix + écho' };
+  const monStyle = h('select', Object.entries(MON_STYLES).map(([k, l]) => h('option', { value: k, selected: localStorage.getItem('studio.mon.style') === k }, l)));
+  const monVol = h('input', { type: 'range', min: 0, max: 2, step: 0.05, value: localStorage.getItem('studio.mon.vol') || 1 });
+  let monitor = null, monTestStream = null;
+  monOn.onchange = () => { localStorage.setItem('studio.mon', monOn.checked ? '1' : '0'); if (!monOn.checked) stopMonitor(); else if (recorder) startMonitor(recorder.stream); };
+  monStyle.onchange = () => { localStorage.setItem('studio.mon.style', monStyle.value); const st = monitor?.stream; if (st) { stopMonitor(true); startMonitor(st); } };
+  monVol.oninput = () => { localStorage.setItem('studio.mon.vol', monVol.value); if (monitor) monitor.out.gain.value = Number(monVol.value); };
+  function startMonitor(stream) {
+    stopMonitor(true);
+    const ctx = audioCtx();
+    const src = ctx.createMediaStreamSource(stream);
+    const f = (type, freq, gain = 0, q = 0.8) => { const n = ctx.createBiquadFilter(); n.type = type; n.frequency.value = freq; n.gain.value = gain; n.Q.value = q; return n; };
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -22; comp.ratio.value = 3; comp.attack.value = 0.004; comp.release.value = 0.12;
+    const out = ctx.createGain(); out.gain.value = Number(monVol.value);
+    const st = monStyle.value;
+    let last = src.connect(f('highpass', 90));
+    if (st !== 'propre') last = last.connect(f('peaking', 3200, 4)).connect(f('highshelf', 10000, 3));
+    last = last.connect(comp);
+    last.connect(out);
+    if (st === 'reverb') {
+      const cv = ctx.createConvolver(); const len = Math.floor(ctx.sampleRate * 1.6); const ir = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3; }
+      cv.buffer = ir; const wet = ctx.createGain(); wet.gain.value = 0.3; last.connect(cv).connect(wet).connect(out);
+    }
+    if (st === 'echo') {
+      const d = ctx.createDelay(1); d.delayTime.value = 0.3; const fb = ctx.createGain(); fb.gain.value = 0.3; const wet = ctx.createGain(); wet.gain.value = 0.3;
+      last.connect(d); d.connect(fb).connect(d); d.connect(wet).connect(out);
+    }
+    out.connect(ctx.destination);
+    monitor = { src, out, stream };
+  }
+  function stopMonitor(keepTest = false) {
+    try { monitor?.src.disconnect(); monitor?.out.disconnect(); } catch {}
+    monitor = null;
+    if (!keepTest && monTestStream) { monTestStream.getTracks().forEach(t => t.stop()); monTestStream = null; monTestBtn.textContent = '🎧 Tester le retour'; }
+  }
+  const micConstraints = () => {
+    const base = rawMode.checked ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+    // Avec le retour casque, l'annulation d'écho coupe ou déforme sa propre voix : on la désactive (casque obligatoire)
+    return monOn.checked ? { ...base, echoCancellation: false } : base;
+  };
+  const monTestBtn = h('button.btn.small.ghost', '🎧 Tester le retour');
+  monTestBtn.onclick = async () => {
+    if (monTestStream) { stopMonitor(); return; }
+    try {
+      monTestStream = await navigator.mediaDevices.getUserMedia({ audio: { ...micConstraints(), echoCancellation: false } });
+      startMonitor(monTestStream); monTestBtn.textContent = '⏹ Arrêter le test';
+      toast('Parle : tu t’entends dans le casque. Casque filaire conseillé (le Bluetooth ajoute du retard).');
+    } catch (e) { toast('Micro inaccessible : ' + e.message, 'bad'); }
+  };
   let timer;
   recBtn.onclick = async () => {
     if (recorder) {
       clearInterval(timer);
+      stopMonitor();
       const r = recorder; recorder = null;
       try { beatSrc?.stop(); } catch {} beatSrc = null;
       recBtn.textContent = '⏺ Enregistrer'; meter.firstChild.style.width = '0';
@@ -59,9 +160,11 @@ export async function render(el, { params }) {
       return;
     }
     try {
-      const constraints = rawMode.checked ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } : { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+      stopMonitor();
+      const constraints = micConstraints();
       const beat = tracks.find(t => t.kind === 'instru' && !t.mute);
       recorder = await startRecorder({ constraints, onLevel: (l) => { meter.firstChild.style.width = Math.min(100, l * 300) + '%'; } });
+      if (monOn.checked) startMonitor(recorder.stream);
       const recT0 = performance.now();
       recLatency = null;
       if (withBeat.checked && beat) {
@@ -123,8 +226,75 @@ export async function render(el, { params }) {
     const t = tracks[selected]; if (!t) return;
     busy.innerHTML = `<span class="spinner"></span> ${label}`;
     player.stop();
-    try { t.buffer = await fn(t.buffer, t); masterResult = null; drawList(); redrawSelected(); busy.textContent = `✓ ${label.replace('…', '')} terminé`; }
+    try {
+      const before = { buffer: t.buffer, fxDone: (t.fxDone || []).slice(), label: label.replace('…', '') };
+      const out = await fn(t.buffer, t);
+      if (out && out !== t.buffer) { pushUndo(t, before); t.buffer = out; }
+      masterResult = null; drawList(); redrawSelected(); updUndo();
+      busy.textContent = `✓ ${label.replace('…', '')} terminé · « ↩ Annuler » pour revenir en arrière`;
+    }
     catch (e) { busy.textContent = ''; toastErr(e); }
+  }
+  // ---------- Historique : annuler / rétablir à chaque étape ----------
+  const UNDO_MAX = 8;
+  function pushUndo(t, snap) {
+    (t.undo ||= []).push(snap); if (t.undo.length > UNDO_MAX) t.undo.shift();
+    t.redo = [];
+  }
+  const undoBtn = h('button.btn.small', '↩ Annuler');
+  const redoBtn = h('button.btn.small.ghost', '↪ Rétablir');
+  function updUndo() {
+    const t = tracks[selected];
+    const u = t?.undo?.length || 0, r = t?.redo?.length || 0;
+    undoBtn.disabled = !u; redoBtn.disabled = !r;
+    undoBtn.textContent = u ? `↩ Annuler « ${t.undo[u - 1].label} »` : '↩ Annuler';
+    redoBtn.textContent = r ? `↪ Rétablir « ${t.redo[r - 1].label} »` : '↪ Rétablir';
+  }
+  function stepHistory(fromKey, toKey) {
+    const t = tracks[selected]; const snap = t?.[fromKey]?.pop(); if (!snap) return;
+    player.stop();
+    (t[toKey] ||= []).push({ buffer: t.buffer, fxDone: (t.fxDone || []).slice(), label: snap.label });
+    t.buffer = snap.buffer; t.fxDone = snap.fxDone; masterResult = null;
+    drawList(); redrawSelected(); updUndo();
+    busy.textContent = fromKey === 'undo' ? `↩ « ${snap.label} » annulé` : `↪ « ${snap.label} » rétabli`;
+  }
+  undoBtn.onclick = () => stepHistory('undo', 'redo');
+  redoBtn.onclick = () => stepHistory('redo', 'undo');
+
+  // ---------- Aperçu : écouter 15 s avant d'appliquer à toute la piste ----------
+  function voiceStart(t) {
+    const d = t.buffer.getChannelData(0);
+    for (let i = 0; i < d.length; i += 512) if (Math.abs(d[i]) > 0.02) return Math.max(0, i / t.buffer.sampleRate - 0.2);
+    return 0;
+  }
+  function makePreview() {
+    const info = h('span.small.muted');
+    const audio = h('audio', { controls: true, style: { width: '100%', display: 'none' } });
+    let urls = null, applyFn = null;
+    const ab = (which) => { if (!urls) return; const ti = audio.currentTime; audio.src = urls[which]; audio.currentTime = ti; audio.play().catch(() => {}); };
+    const applyBtn = h('button.btn.small.primary', { onclick: () => applyFn?.() }, '✅ Appliquer à toute la piste');
+    const bar = h('div.row', { style: { display: 'none' } },
+      h('button.btn.small', { onclick: () => ab('a') }, 'A · avant'),
+      h('button.btn.small', { onclick: () => ab('b') }, 'B · après'),
+      applyBtn);
+    const box = h('div.stack', info, audio, bar);
+    async function run(label, process, onApply) {
+      const t = tracks[selected]; if (!t) return toast('Sélectionne une piste de voix.');
+      const say = (m) => { info.innerHTML = `<span class="spinner"></span> ${m}`; };
+      say('Préparation de l’extrait de 15 s…'); player.stop();
+      try {
+        const st = voiceStart(t);
+        const part = sliceBuffer(t.buffer, st, Math.min(t.buffer.duration, st + 15));
+        const r = await process(part, t, st, say);
+        if (urls) Object.values(urls).forEach(u => URL.revokeObjectURL(u));
+        urls = { a: URL.createObjectURL(encodeWav(part)), b: URL.createObjectURL(encodeWav(r.buffer || r)) };
+        audio.src = urls.b; audio.style.display = ''; bar.style.display = ''; audio.play().catch(() => {});
+        applyFn = onApply; applyBtn.style.display = onApply ? '' : 'none';
+        info.textContent = `▶ Aperçu « ${label} »${r.note ? ' · ' + r.note : ''} — compare A/B puis applique si ça te plaît.`;
+        return r;
+      } catch (e) { info.textContent = ''; toastErr(e); }
+    }
+    return { box, run, info, audio, bar };
   }
   // ---------- Effets voix & autotune ----------
   const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
@@ -141,21 +311,18 @@ export async function render(el, { params }) {
   };
   const fxSel = h('select');
   const fxKey = h('select', KEY_CHOICES.map(k => h('option', { value: k.v }, k.label)));
-  const fxInfo = h('span.small.muted');
-  const fxAudio = h('audio', { controls: true, style: { width: '100%', display: 'none' } });
-  let abUrls = null;
-  const fxAB = h('div.row', { style: { display: 'none' } },
-    h('button.btn.small', { onclick: () => abPlay('a') }, 'A · sans effet'),
-    h('button.btn.small.primary', { onclick: () => abPlay('b') }, 'B · avec effet'));
-  function abPlay(which) { if (!abUrls) return; const t = fxAudio.currentTime; fxAudio.src = abUrls[which]; fxAudio.currentTime = t; fxAudio.play().catch(() => {}); }
   // une entrée = { name, steps: [noms de préréglages appliqués l'un après l'autre] }
   const resolve = (val) => {
-    if (String(val).startsWith('mine:')) { const m = lsGet('studio_vfx_mine', [])[+val.slice(5)]; return m && { name: m.name, list: m.steps.map(n => VFX.find(p => p.name === n)).filter(Boolean) }; }
+    if (String(val).startsWith('mine:')) {
+      const m = lsGet('studio_vfx_mine', [])[+val.slice(5)]; if (!m) return null;
+      if (m.custom) return { name: m.name, list: [{ name: m.name, chain: sanitizeChain(m.custom.chain), voice: sanitizeVoice(m.custom.voice) }] };
+      return { name: m.name, list: m.steps.map(n => VFX.find(p => p.name === n)).filter(Boolean) };
+    }
     const p = VFX[+val]; return p && { name: p.name, list: [p] };
   };
   const fillFx = () => {
     fxSel.innerHTML = '';
-    if (fxCat.value === MINE) lsGet('studio_vfx_mine', []).forEach((m, i) => fxSel.append(h('option', { value: `mine:${i}` }, `${m.name} (${m.steps.length} effets)`)));
+    if (fxCat.value === MINE) lsGet('studio_vfx_mine', []).forEach((m, i) => fxSel.append(h('option', { value: `mine:${i}` }, m.custom ? `${m.name} (sur mesure)` : `${m.name} (${m.steps.length} effets)`)));
     else if (fxCat.value === FAV) { const fav = lsGet('studio_vfx_fav', []); VFX.forEach((p, i) => { if (fav.includes(p.name)) fxSel.append(h('option', { value: i }, p.name)); }); }
     else VFX.forEach((p, i) => { if (p.cat === fxCat.value) fxSel.append(h('option', { value: i }, p.name)); });
   };
@@ -174,46 +341,43 @@ export async function render(el, { params }) {
   async function runList(buf, list, t, startInTrack, say) {
     let key = fxKeyOpt(), cur = buf;
     for (const p of list) {
-      const chords = p.chords ? await chordsFor(t, startInTrack, say) : null;
-      const r = await applyChain(cur, p.chain, { key, chords, onProgress: say });
-      cur = r.buffer; key = key || r.key;
+      if (p.chain?.length) {
+        const chords = p.chords ? await chordsFor(t, startInTrack, say) : null;
+        const r = await applyChain(cur, p.chain, { key, chords, onProgress: say });
+        cur = r.buffer; key = key || r.key;
+      }
+      // EQ / compression / réverbe de la voix après l'autotune (la justesse est analysée sur la voix sèche)
+      if (p.voice) { say('Traitement voix…'); cur = await voiceChain(cur, p.voice); }
     }
     return { buffer: cur, key };
   }
+  const fxPrev = makePreview();
   async function fxPreview(btn, next = false) {
-    const t = tracks[selected]; if (!t) return toast('Sélectionne une piste de voix.');
     if (next && fxSel.options.length) fxSel.selectedIndex = (fxSel.selectedIndex + 1) % fxSel.options.length;
     const item = resolve(fxSel.value); if (!item) return;
-    btn.disabled = true; const say = (m) => { fxInfo.innerHTML = `<span class="spinner"></span> ${m}`; }; say('Préparation de l’extrait…');
-    try {
-      // extrait de 15 s qui commence là où la voix démarre
-      const d = t.buffer.getChannelData(0); let st = 0; for (let i = 0; i < d.length; i += 512) if (Math.abs(d[i]) > 0.02) { st = Math.max(0, i / t.buffer.sampleRate - 0.2); break; }
-      const part = sliceBuffer(t.buffer, st, Math.min(t.buffer.duration, st + 15));
+    btn.disabled = true;
+    await fxPrev.run(item.name, async (part, t, st, say) => {
       const r = await runList(part, item.list, t, st, say);
-      if (abUrls) Object.values(abUrls).forEach(u => URL.revokeObjectURL(u));
-      abUrls = { a: URL.createObjectURL(encodeWav(part)), b: URL.createObjectURL(encodeWav(r.buffer)) };
-      fxAudio.src = abUrls.b; fxAudio.style.display = ''; fxAB.style.display = ''; fxAudio.play().catch(() => {});
       const noInstru = item.list.some(p => p.chords) && !tracks.some(x => x.kind === 'instru' && x !== t);
-      fxInfo.textContent = `▶ « ${item.name} »${r.key ? ` · tonalité ${keyName(r.key)}` : ''}${noInstru ? ' · sans instru : harmonies sur la gamme' : ''}`;
-    } catch (e) { fxInfo.textContent = ''; toastErr(e); }
+      return { buffer: r.buffer, note: `${r.key ? `tonalité ${keyName(r.key)}` : ''}${noInstru ? ' · sans instru : harmonies sur la gamme' : ''}` };
+    }, () => applyItem(item));
     btn.disabled = false;
   }
-  const fxApply = () => {
-    const item = resolve(fxSel.value); if (!item) return;
-    work(`Effet « ${item.name} »…`, async (b, tr) => {
-      const r = await runList(b, item.list, tr, 0, (m) => { busy.innerHTML = `<span class="spinner"></span> ${m}`; });
-      tr.fxDone = [...(tr.fxDone || []), ...item.list.map(p => p.name)];
-      return r.buffer;
-    });
-  };
+  const applyItem = (item) => work(`Effet « ${item.name} »…`, async (b, tr) => {
+    const r = await runList(b, item.list, tr, 0, (m) => { busy.innerHTML = `<span class="spinner"></span> ${m}`; });
+    tr.fxDone = [...(tr.fxDone || []), ...item.list.map(p => p.name)];
+    return r.buffer;
+  });
+  const fxApply = () => { const item = resolve(fxSel.value); if (item) applyItem(item); };
   const QUICK_TUNE = [['🎤 Léger', 'Naturel'], ['🎤 Moyen (Drake)', 'Rap mélodique (autotune 15-25 + chaleur)'], ['🤖 Fort (T-Pain)', 'Trap autotune à 0 (effet assumé)']];
+  const tunePrev = makePreview();
   const quickTune = (label, name) => {
     const p = VFX.find(x => x.name === name); if (!p) return toast('Préréglage introuvable : ' + name, 'bad');
-    work(`Autotune ${label.replace(/^\S+ /, '')}…`, async (b, tr) => {
-      const r = await runList(b, [p], tr, 0, (m) => { busy.innerHTML = `<span class="spinner"></span> ${m}`; });
-      tr.fxDone = [...(tr.fxDone || []), p.name];
-      return r.buffer;
-    });
+    const item = { name: `Autotune ${label.replace(/^\S+ /, '')}`, list: [p] };
+    tunePrev.run(item.name, async (part, t, st, say) => {
+      const r = await runList(part, item.list, t, st, say);
+      return { buffer: r.buffer, note: r.key ? `tonalité ${keyName(r.key)}` : '' };
+    }, () => applyItem(item));
   };
   const fxFav = () => {
     const item = resolve(fxSel.value); if (!item || String(fxSel.value).startsWith('mine:')) return;
@@ -242,6 +406,43 @@ export async function render(el, { params }) {
   };
   presetSel.onchange = () => { Object.assign(vc, VOICE_PRESETS[presetSel.value]); drawVc(); };
   drawVc();
+  const vcPrev = makePreview();
+  const vcItem = () => ({ name: presetSel.options[presetSel.selectedIndex]?.text || 'Voix', list: [{ name: 'Traitement voix', voice: { ...vc } }] });
+
+  // ---------- 🪄 Décris ta voix : l'IA propose des réglages à écouter ----------
+  const aiDesc = h('textarea', { rows: 3, placeholder: 'Ex. : voix Drake chaude et posée, autotune léger, un peu d’écho · ou : voix de JUL bien aiguë et brillante · ou : refrain mélodique avec harmonies' });
+  aiDesc.value = localStorage.getItem('studio.vfx.desc') || '';
+  const aiInfo = h('span.small.muted');
+  const aiList = h('div.stack');
+  const aiPrev = makePreview();
+  async function aiPropose(btn) {
+    const desc = aiDesc.value.trim();
+    if (!desc) return toast('Décris d’abord le son que tu veux.');
+    localStorage.setItem('studio.vfx.desc', desc);
+    btn.disabled = true; aiInfo.innerHTML = '<span class="spinner"></span> L’IA prépare 3 réglages…'; aiList.innerHTML = '';
+    try {
+      const r = await api('/api/complete', { method: 'POST', body: { src: 'musique', projectId: state.projectId, temperature: 0.7, json: true, system: VFX_AI_PROMPT, prompt: `Son voulu : ${desc}` } });
+      const j = parseJsonLoose(r.content);
+      const props = (j?.propositions || []).map(p => ({ name: String(p.nom || 'Réglage').slice(0, 60), why: String(p.pourquoi || '').slice(0, 200), chain: sanitizeChain(p.chaine), voice: sanitizeVoice(p.voix) }))
+        .filter(p => p.chain.length || p.voice).slice(0, 4);
+      if (!props.length) throw new Error('L’IA n’a pas renvoyé de réglage utilisable. Réessaie (ou reformule).');
+      aiInfo.textContent = `${props.length} réglages proposés (via ${r.routedVia || 'IA'}). Écoute-les sur ta voix, applique celui que tu préfères.`;
+      for (const p of props) {
+        const item = { name: p.name, list: [{ name: p.name, chain: p.chain, voice: p.voice }] };
+        aiList.append(h('div.card.stack', { style: { padding: '10px' } },
+          h('strong', '🪄 ' + p.name), p.why ? h('span.small.muted', p.why) : '',
+          h('span.tiny.muted', describeChain(p)),
+          h('div.row',
+            h('button.btn.small', { onclick: () => aiPrev.run(p.name, async (part, t, st, say) => { const x = await runList(part, item.list, t, st, say); return { buffer: x.buffer, note: x.key ? `tonalité ${keyName(x.key)}` : '' }; }, () => applyItem(item)) }, '▶ Écouter'),
+            h('button.btn.small.primary', { onclick: () => applyItem(item) }, '✅ Appliquer'),
+            h('button.btn.small.ghost', { onclick: () => {
+              const mine = lsGet('studio_vfx_mine', []); mine.push({ name: p.name, steps: [], custom: { chain: p.chain, voice: p.voice }, desc }); lsSet('studio_vfx_mine', mine);
+              fillCats(); toast(`« ${p.name} » ajouté à 💾 Mes réglages`, 'ok');
+            } }, '💾 Garder'))));
+      }
+    } catch (e) { aiInfo.textContent = ''; toastErr(e); }
+    btn.disabled = false;
+  }
 
   function drawEdit() {
     editBox.innerHTML = '';
@@ -250,6 +451,7 @@ export async function render(el, { params }) {
     editBox.append(
       h('div.row', h('h3.grow', `✂️ Éditer : ${t.name}`), playSelBtn, posLbl),
       wave, selLbl,
+      h('div.row.undo-bar', { style: { position: 'sticky', bottom: '0', zIndex: 5, background: 'var(--card, var(--bg))', padding: '6px 0' } }, undoBtn, redoBtn, h('div.grow', busy)),
       h('div.row',
         h('button.btn.small', { onclick: () => sel ? work('Rognage…', async (b) => sliceBuffer(b, sel[0], sel[1])).then(() => (sel = null)) : toast('Sélectionnez d’abord un passage.') }, 'Garder la sélection'),
         h('button.btn.small', { onclick: () => sel ? work('Suppression…', async (b) => {
@@ -260,7 +462,7 @@ export async function render(el, { params }) {
         }).then(() => (sel = null)) : toast('Sélectionnez d’abord un passage.') }, 'Supprimer la sélection'),
         h('button.btn.small', { onclick: () => work('Fondus…', async (b) => { const o = cloneBuffer(b); const n = Math.min(o.length / 2, Math.floor(0.03 * o.sampleRate)); for (let c = 0; c < o.numberOfChannels; c++) { const d = o.getChannelData(c); for (let i = 0; i < n; i++) { d[i] *= i / n; d[d.length - 1 - i] *= i / n; } } return o; }) }, 'Fondus début/fin'),
         h('button.btn.small', { onclick: () => work('Normalisation…', async (b) => normalize(cloneBuffer(b), -1)) }, 'Normaliser'),
-        h('button.btn.small.ghost', { onclick: () => work('Restauration…', async (b, tr) => tr.original) }, '↺ Revenir à l’original')),
+        h('button.btn.small.ghost', { onclick: () => work('Retour à l’original…', async (b, tr) => tr.original) }, '↺ Revenir à l’original')),
       h('h3', '🎯 Caler sur le beat'),
       h('div.row', h('button.btn.small', { onclick: () => alignSelected() }, '🎯 Caler cette voix sur l’instru'), alignInfo),
       h('p.tiny.muted', 'Les prises enregistrées ici sur l’instru sont recalées automatiquement (latence du casque et du micro). Ce bouton affine au milliseconde près en alignant tes attaques sur les frappes de l’instru ; le curseur « Décalage » permet de corriger à la main.'),
@@ -271,11 +473,20 @@ export async function render(el, { params }) {
         h('button.btn.small', { onclick: () => work('Porte de bruit…', async (b) => gate(b, -45, -30)) }, '🚪 Couper les blancs')),
       h('p.tiny.muted', 'Le débruitage apprend le bruit sur les passages les plus calmes : laissez 1 à 2 secondes de silence au début de la prise.'),
       h('h3', '✨ Améliorer la voix'),
-      h('div.row', h('div.grow', presetSel), h('button.btn.small.primary', { onclick: () => work('Traitement voix…', (b) => voiceChain(b, vc)) }, '✨ Appliquer')),
-      vcBox,
+      h('div.row', h('div.grow', presetSel),
+        h('button.btn.small', { onclick: () => { const it = vcItem(); vcPrev.run(it.name, async (part) => voiceChain(part, it.list[0].voice), () => work('Traitement voix…', (b) => voiceChain(b, it.list[0].voice))); } }, '▶ Écouter'),
+        h('button.btn.small.primary', { onclick: () => work('Traitement voix…', (b) => voiceChain(b, { ...vc })) }, '✨ Appliquer')),
+      vcBox, vcPrev.box,
+      h('p.tiny.muted', 'Si tu as déjà fait « ⚡ Tout faire », la voix est déjà traitée : réappliquer en rajoute une couche. Écoute d’abord, et « ↩ Annuler » si ce n’est pas mieux.'),
       h('h3', '🎤 Autotune chanté en 1 clic'),
       h('div.row', ...QUICK_TUNE.map(([label, name]) => h('button.btn.small', { onclick: () => quickTune(label, name) }, label))),
-      h('p.tiny.muted', 'Léger = voix juste et naturelle · Moyen = rap mélodique façon Drake · Fort = effet robot T-Pain. La tonalité est trouvée toute seule (ou choisie ci-dessous). « Revenir à l’original » annule.'),
+      tunePrev.box,
+      h('p.tiny.muted', 'Touche un bouton : tu écoutes d’abord 15 s de ta voix (A = avant, B = après). Rien n’est modifié tant que tu ne touches pas « ✅ Appliquer à toute la piste ». Léger = naturel · Moyen = façon Drake · Fort = robot T-Pain.'),
+      h('h3', '🪄 Décris le son que tu veux'),
+      aiDesc,
+      h('div.row', h('button.btn.small.primary', { onclick: (e) => aiPropose(e.target) }, '🪄 Proposer 3 réglages'), aiInfo),
+      aiList, aiPrev.box,
+      h('p.tiny.muted', 'L’IA traduit ta description en réglages (autotune, EQ, écho, réverbe…). Écoute, applique, ou « 💾 Garder » pour le retrouver dans « Mes réglages ». Plus tu es précis (rappeur, ambiance, refrain ou couplet), plus c’est proche.'),
       h('h3', '🎛️ Effets voix & autotune'),
       h('div.row', h('div.grow', fxCat), h('div.grow', fxKey)),
       h('div.row', h('div.grow', fxSel),
@@ -283,8 +494,8 @@ export async function render(el, { params }) {
         h('button.btn.small', { onclick: (e) => fxPreview(e.target, true) }, '⏭ Suivant'),
         h('button.btn.small.primary', { onclick: fxApply }, '✅ Appliquer')),
       h('div.row', h('button.btn.small.ghost', { onclick: fxFav }, '⭐ Favori'), h('button.btn.small.ghost', { onclick: fxSave }, '💾 Sauver ma combinaison')),
-      fxInfo, fxAudio, fxAB,
-      h('p.tiny.muted', 'Écoute chaque effet sur 15 s de ta voix (A/B pour comparer), puis applique-le. Tu peux en enchaîner plusieurs puis « Sauver ma combinaison ». La tonalité est détectée toute seule ; les harmonies suivent les accords de l’instru si elle est dans tes pistes. « Revenir à l’original » annule tout.'),
+      fxPrev.box,
+      h('p.tiny.muted', 'Écoute chaque effet sur 15 s de ta voix (A/B pour comparer), puis applique-le. Tu peux en enchaîner plusieurs puis « Sauver ma combinaison ». La tonalité est détectée toute seule ; les harmonies suivent les accords de l’instru si elle est dans tes pistes. « ↩ Annuler » revient d’une étape, « Revenir à l’original » repart de la prise brute.'),
       h('h3', '📝 Transcrire'),
       h('div.row', h('button.btn.small', { onclick: async (e) => {
         e.target.disabled = true;
@@ -297,8 +508,8 @@ export async function render(el, { params }) {
         } catch (err) { toastErr(err); }
         e.target.disabled = false;
       } }, '📝 Transcrire cette piste')),
-      busy,
     );
+    updUndo();
     requestAnimationFrame(() => redrawSelected());
   }
 
@@ -339,7 +550,8 @@ export async function render(el, { params }) {
       player.stop();
       for (const [i, t] of voices.entries()) {
         const n = voices.length > 1 ? ` (voix ${i + 1}/${voices.length})` : '';
-        t.buffer = t.original;
+        pushUndo(t, { buffer: t.buffer, fxDone: (t.fxDone || []).slice(), label: 'Tout faire' });
+        t.buffer = t.original; t.fxDone = [];
         say(`Débruitage${n}…`);
         t.buffer = await denoise(t.buffer, 0.55, (p) => say(`Débruitage ${Math.round(p * 100)} %${n}`));
         say(`Anti-pop${n}…`); t.buffer = antipop(t.buffer, 0.8);
@@ -409,6 +621,9 @@ export async function render(el, { params }) {
         h('div.row', recBtn, recTime, h('div.grow', meter)),
         h('label.chk.small', withBeat, 'Lancer l’instru pendant l’enregistrement (casque conseillé)'),
         h('label.chk.small', rawMode, 'Mode studio : désactiver les filtres automatiques du téléphone (meilleur son, à nettoyer ensuite)'),
+        h('label.chk.small', monOn, '🎧 M’entendre en direct dans le casque pendant l’enregistrement'),
+        h('div.row', h('div.grow', monStyle), h('label.f.grow.small', 'Volume du retour', monVol), monTestBtn),
+        h('p.tiny.muted', 'Retour en direct : casque filaire conseillé (en Bluetooth ta voix arrive en retard). L’autotune ne s’entend pas en direct : il se calcule après, écoute-le avec « ▶ Écouter ».'),
         prompter,
         h('div.row',
           h('button.btn.small', { onclick: async () => { for (const f of await pickLocalFiles('audio/*,video/*')) await addBlob(f, f.name); } }, '📱 Importer'),
@@ -448,5 +663,5 @@ export async function render(el, { params }) {
       } catch (e) { toastErr(e); }
     }
   }
-  return () => { player.stop(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
+  return () => { player.stop(); stopMonitor(); try { beatSrc?.stop(); } catch {} recorder?.stop(); clearInterval(timer); };
 }
