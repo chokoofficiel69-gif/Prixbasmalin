@@ -82,6 +82,13 @@ function categoryFor(row, merchantName = "") {
   if (/perfumeria comas|boucleme/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "beauty";
   // Jowissa est une maison horlogère : ses montres, bijoux et bracelets relèvent de la mode.
   if (/jowissa/.test(merchant) && metadataCategory === "other") return "fashion";
+  // Le flux Imou FR omet la catégorie source. Ne classer que les familles produit
+  // identifiables dans son catalogue officiel ; les modèles inconnus restent "other".
+  if (/imou/.test(merchant) && metadataCategory === "other") {
+    const title = norm([row.product_name, row.title, row.name].join(" "));
+    if (/\b(?:rv\d+|robot vacuum|vacuum|aspirateur)\b/.test(title)) return "home";
+    if (/\b(?:aov|ranger|cruiser|bullet|cell|cue|doorbell|camera|cam|smart lock|smart doorbell|smart sensor|sensor|capteur|smart plug|smart hub|nvr)\b/.test(title)) return "tech";
+  }
   if (metadataCategory !== "other") return metadataCategory;
   // Certains flux Awin placent le nom dans "title" après normalisation CSV.
   const titleCategory = classifyCategory(norm([row.product_name, row.title, row.name].join(" ")));
@@ -936,6 +943,10 @@ async function runSelfTests() {
     [{ title: "Wooden Cot" }, "kids", "Milk Bar Babystore"],
     [{ title: "Adventure BackPack" }, "sport", "Bodycross (FR)"],
     [{ title: "Mibro GS Pro2" }, "tech", "Mibro FR"],
+    [{ title: "AOV PT 3K 5MP 4G LTE & 2.4GHz Wi-Fi" }, "tech", "Imou FR"],
+    [{ title: "Doorbell 3 Kit" }, "tech", "Imou FR"],
+    [{ title: "RV3 Ultra" }, "home", "Imou FR"],
+    [{ title: "Imou ZXQ-123" }, "other", "Imou FR"],
     [{ title: "Lot de chaussettes unisexes" }, "fashion", "Chaussettes-en-ligne.fr/ (FR)"],
     [{ title: "2 Bâtons de randonnée pliables AlpineFlex" }, "sport", "SODEAL CH"],
     [{ title: "Adaptateur de Scie Sauteuse pour Perceuse" }, "home", "SODEAL CH"],
