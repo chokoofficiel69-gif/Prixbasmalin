@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-13T04:14:19.067Z",
+  "fetched_at": "2026-11-13T04:19:28.396Z",
   "source": "Awin Publisher Enhanced/standard feeds autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
@@ -24,7 +24,7 @@
     "offers_with_shipping": 14575,
     "offers_with_availability": 15342,
     "offers_with_tax_included": 0,
-    "products_other_category": 1377,
+    "products_other_category": 722,
     "offers_fresh_last_48h": 0,
     "offers_missing_timestamp": 17027,
     "offers_stale": 3000,
