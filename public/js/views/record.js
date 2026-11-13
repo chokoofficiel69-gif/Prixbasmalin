@@ -11,6 +11,7 @@ import { VOICE_TYPES, VOICE_TYPE_ORDER, PRO_PRESETS, PRO_PRESET_ORDER, DEFAULT_P
 import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes, colorForTrack, dbToMeterPct } from '../lib/daw.js';
 import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.js';
 import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult } from '../lib/ingexpert.js';
+import { analyzeMaster, compareToRef } from '../lib/meters.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -998,7 +999,42 @@ export async function render(el, { params }) {
   masterSel.addEventListener('change', () => { ingePrefs.masterPreset = masterSel.value; saveIngePrefs(); });
   const masterInfo = h('div.small');
   const mixPlayerEl = h('div');
+  const masterMeters = h('div.stack');
+  const refBox = h('div.stack');
+  let lastMasterMeasures = null;
   const bitSel = h('select', h('option', { value: 16 }, 'WAV 16 bits'), h('option', { value: 24 }, 'WAV 24 bits'));
+  const bandBar = (label, v) => h('div', { style: { flex: 1, minWidth: '72px' } }, h('div.tiny.muted', `${label} ${Math.round(v * 100)} %`), h('div.bar', h('i', { style: { width: (v * 100) + '%' } })));
+  const meterCell = (label, val, good) => h('div', { style: { minWidth: '92px' } }, h('div.tiny.muted', label), h('b.small', { style: { color: good === false ? 'var(--bad)' : good === true ? 'var(--ok)' : '' } }, val));
+  function renderMasterMeters(buf, lufs) {
+    masterMeters.innerHTML = '';
+    const L = buf.getChannelData(0), R = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null;
+    const a = analyzeMaster(L, R, buf.sampleRate);
+    lastMasterMeasures = { lufs, peakDb: a.peakDb, truePeakDb: a.truePeakDb, crestDb: a.crestDb, phase: a.phase, width: a.width, bands: a.bands };
+    masterMeters.append(
+      h('div.row', { style: { gap: '14px', flexWrap: 'wrap' } },
+        meterCell('Sonie intégrée', `${lufs.toFixed(1)} LUFS`),
+        meterCell('True Peak', `${a.truePeakDb.toFixed(1)} dBTP`, a.truePeakDb <= -1),
+        meterCell('Crête', `${a.peakDb.toFixed(1)} dBFS`),
+        meterCell('Dynamique', `${a.crestDb.toFixed(1)} dB`),
+        meterCell('Phase', `${a.phase.toFixed(2)}`, a.phase >= 0),
+        meterCell('Largeur', `${a.width} %`)),
+      h('div.row', { style: { gap: '8px', alignItems: 'flex-end' } }, h('span.tiny.muted', 'Balance'), bandBar('Grave', a.bands.low), bandBar('Médium', a.bands.mid), bandBar('Aigu', a.bands.high)),
+      a.truePeakDb > -1 ? h('p.tiny', { style: { color: 'var(--warn)' } }, `⚠️ True Peak ${a.truePeakDb.toFixed(1)} dBTP > −1 : risque d’écrêtage à l’encodage (vise −1 dBTP).`) : '');
+  }
+  async function analyzeReference(btn) {
+    const files = await pickLocalFiles('audio/*,video/*', false); if (!files.length) return;
+    btn.disabled = true; refBox.innerHTML = '<span class="spinner"></span> Analyse de la référence…';
+    try {
+      const buf = await decodeBlob(files[0]), L = buf.getChannelData(0), R = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null;
+      const a = analyzeMaster(L, R, buf.sampleRate), lufs = Math.round((await loudness(buf)) * 10) / 10;
+      const ref = { lufs, peakDb: a.peakDb, truePeakDb: a.truePeakDb, crestDb: a.crestDb, phase: a.phase, width: a.width, bands: a.bands };
+      refBox.innerHTML = '';
+      refBox.append(h('div.small', `Référence « ${files[0].name} » : ${lufs} LUFS · TP ${a.truePeakDb} dBTP · dynamique ${a.crestDb} dB · largeur ${a.width} % · balance ${Math.round(a.bands.low * 100)}/${Math.round(a.bands.mid * 100)}/${Math.round(a.bands.high * 100)} (grave/médium/aigu)`));
+      if (lastMasterMeasures) refBox.append(h('div.card.stack', { style: { padding: '8px' } }, h('strong.small', '🎯 Pour rapprocher ton mix de la référence :'), ...compareToRef(lastMasterMeasures, ref).map(t => h('div.small', '• ' + t))));
+      else refBox.append(h('p.tiny.muted', 'Fais d’abord « Mixer + masteriser » pour comparer ton mix à cette référence.'));
+    } catch (e) { refBox.innerHTML = ''; toastErr(e); }
+    btn.disabled = false;
+  }
   async function doMaster() {
     if (!tracks.length) return toast('Ajoutez au moins une piste.');
     masterInfo.innerHTML = '<span class="spinner"></span> Mixage…';
@@ -1011,6 +1047,7 @@ export async function render(el, { params }) {
       masterInfo.append(h('div', `Sonie : ${r.before.toFixed(1)} → ${r.after.toFixed(1)} LUFS (cible ${r.target}) · crête ${r.peakDb.toFixed(1)} dBFS · durée ${fmtTime(r.buffer.duration)}`));
       mixPlayerEl.innerHTML = '';
       mixPlayerEl.append(h('audio', { controls: true, src: URL.createObjectURL(encodeWav(r.buffer)) }));
+      renderMasterMeters(r.buffer, r.after);
     } catch (e) { masterInfo.textContent = ''; toastErr(e); }
   }
   const compareBox = h('div.stack');
@@ -1575,7 +1612,9 @@ export async function render(el, { params }) {
         h('div.row', h('div.grow', masterSel), h('button.btn', { onclick: doMaster }, '🎛️ Mixer + masteriser')),
         h('div.row', h('button.btn', { onclick: (e) => compareMasters(e.target) }, '🎧 Faire plusieurs versions et choisir'),
           h('span.tiny.muted', 'Un morceau déjà fini ? Importe-le seul : il sera remasterisé en plusieurs styles.')),
-        masterInfo, mixPlayerEl, compareBox,
+        masterInfo, masterMeters, mixPlayerEl,
+        h('div.row', h('button.btn.small', { onclick: (e) => analyzeReference(e.target) }, '📊 Analyser une référence (comparer mon mix)'), h('span.tiny.muted', 'Importe un morceau pro : je compare sonie, balance et stéréo et je te dis quoi ajuster.')),
+        refBox, compareBox,
         h('div.row', bitSel,
           h('button.btn.small', { onclick: async () => { if (!masterResult) await doMaster(); if (masterResult) downloadBlob(encodeWav(masterResult.buffer, Number(bitSel.value)), `${exportName()}-master.wav`); } }, '⬇️ Télécharger le master'),
           h('button.btn.small', { onclick: async () => { if (!masterResult) await doMaster(); if (masterResult) uploadFile(encodeWav(masterResult.buffer, Number(bitSel.value)), { name: `${exportName()}-master.wav`, source: 'master' }).then(() => toast('Master enregistré dans Fichiers', 'ok')).catch(toastErr); } }, '💾 Enregistrer le master'),
