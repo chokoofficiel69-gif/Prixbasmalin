@@ -40,10 +40,16 @@ class HomeDealsTests(unittest.TestCase):
         home = product("Tissu d'ameublement velours", "PRM Coupons Couture FR", 30, desc="Tissu")
         unknown = product("PRM référence 123", "PRM Coupons Couture FR", 30, desc="")
         sewing = product("Aiguilles à coudre Bohin longues A1F", "PRM Coupons Couture FR", 30, desc="Mercerie")
+        pins = product("Assortiment d'épingles de sûreté à ressort Nina BOHIN", "PRM Coupons Couture FR", 30, desc="Mercerie")
+        imou = product("_Gift_ 32GB Micro SD Memory Card-UK - 32GB", "Imou FR", 30, desc="")
+        fiido = product("Accélérateur de pouce Fiido-Q1/Q1S", "Fiido Technology Development Co., Ltd", 30, desc="")
         self.assertEqual(deals.gift_family(fashion)[0], "mode")
         self.assertEqual(deals.gift_family(home)[0], "maison")
         self.assertEqual(deals.gift_family(unknown)[0], "autre")
         self.assertEqual(deals.gift_family(sewing)[0], "mode")
+        self.assertEqual(deals.gift_family(pins)[0], "mode")
+        self.assertEqual(deals.gift_family(imou)[0], "tech")
+        self.assertEqual(deals.gift_family(fiido)[0], "tech")
 
     def test_gifts_exclude_known_placeholder_image_urls(self):
         awin = {"products": [
