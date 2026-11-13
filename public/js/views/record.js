@@ -238,6 +238,14 @@ export async function render(el, { params }) {
   }
   const playBtn = h('button.btn.primary', { onclick: () => (live.srcs.length ? stopLive() : playLive()) }, '▶ Lecture');
   liveBtn.onclick = () => (live.srcs.length ? stopLive() : playLive());
+  // Gain d'entrée du micro (ce qui part dans l'enregistrement), réglable en direct
+  let inGainDb = Number(localStorage.getItem('studio.inGainDb') || 0);
+  const inGainLbl = h('b', `${inGainDb > 0 ? '+' : ''}${inGainDb} dB`);
+  const inGain = h('input', { type: 'range', min: -24, max: 12, step: 0.5, value: inGainDb, oninput: () => {
+    inGainDb = Number(inGain.value); inGainLbl.textContent = `${inGainDb > 0 ? '+' : ''}${inGainDb} dB`; localStorage.setItem('studio.inGainDb', inGainDb);
+    recorder?.setGainDb?.(inGainDb);
+    if (monitor?.inG && !(recorder && monitor.stream === recorder.stream)) monitor.inG.gain.setTargetAtTime(10 ** (inGainDb / 20), audioCtx().currentTime, 0.02);
+  } });
   const micLbl = h('b', `${micDb} dB`);
   const micVol = h('input', { type: 'range', min: -20, max: 12, step: 0.5, value: micDb, oninput: () => { micDb = Number(micVol.value); micLbl.textContent = `${micDb} dB`; localStorage.setItem('studio.micDb', micDb); const v = tracks[selected] && tracks[selected].kind !== 'instru' ? tracks[selected] : tracks[tracks.map(t => t.kind).lastIndexOf('voix')]; if (v) { v.gainDb = micDb; liveGain(v); masterResult = null; drawList(); } } });
   // ---------- Retour casque en direct (s'entendre pendant qu'on enregistre) ----------
@@ -252,7 +260,7 @@ export async function render(el, { params }) {
     if (monTestStream || recorder) return;
     try {
       monTestStream = await navigator.mediaDevices.getUserMedia({ audio: { ...micConstraints(), echoCancellation: false } });
-      startMonitor(monTestStream); micMeter.attachStream(monTestStream); monTestBtn.textContent = '⏹ Arrêter le test';
+      startMonitor(monTestStream); micMeter.attachNode(monitor.inG); monTestBtn.textContent = '⏹ Arrêter le test';
       toast('🎧 Tu t’entends dans le casque. Règle « Ma voix dans le casque ». (Casque filaire conseillé.)');
     } catch (e) { monOn.checked = false; toast('Micro inaccessible : ' + e.message, 'bad'); }
   }
@@ -261,7 +269,10 @@ export async function render(el, { params }) {
   function startMonitor(stream) {
     stopMonitor(true);
     const ctx = audioCtx();
-    const src = ctx.createMediaStreamSource(stream);
+    const src0 = ctx.createMediaStreamSource(stream);
+    // le flux de la prise a déjà le gain micro ; le flux de test non : on l'applique ici
+    const inG = ctx.createGain(); inG.gain.value = recorder && stream === recorder.stream ? 1 : 10 ** (inGainDb / 20);
+    const src = src0.connect(inG);
     const f = (type, freq, gain = 0, q = 0.8) => { const n = ctx.createBiquadFilter(); n.type = type; n.frequency.value = freq; n.gain.value = gain; n.Q.value = q; return n; };
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -22; comp.ratio.value = 3; comp.attack.value = 0.004; comp.release.value = 0.12;
     const out = ctx.createGain(); out.gain.value = Number(monVol.value);
@@ -280,7 +291,7 @@ export async function render(el, { params }) {
       last.connect(d); d.connect(fb).connect(d); d.connect(wet).connect(out);
     }
     out.connect(ctx.destination);
-    monitor = { src, out, stream };
+    monitor = { src: src0, inG, out, stream };
   }
   function stopMonitor(keepTest = false) {
     try { monitor?.src.disconnect(); monitor?.out.disconnect(); } catch {}
@@ -297,7 +308,7 @@ export async function render(el, { params }) {
     if (monTestStream) { stopMonitor(); return; }
     try {
       monTestStream = await navigator.mediaDevices.getUserMedia({ audio: { ...micConstraints(), echoCancellation: false } });
-      startMonitor(monTestStream); micMeter.attachStream(monTestStream); monTestBtn.textContent = '⏹ Arrêter le test';
+      startMonitor(monTestStream); micMeter.attachNode(monitor.inG); monTestBtn.textContent = '⏹ Arrêter le test';
       toast('Parle : tu t’entends dans le casque. Casque filaire conseillé (le Bluetooth ajoute du retard).');
     } catch (e) { toast('Micro inaccessible : ' + e.message, 'bad'); }
   };
@@ -350,7 +361,7 @@ export async function render(el, { params }) {
       recAuto = { sil: autoStopSilence, spoke: false, last: performance.now() };
       let lastPend = 0;
       const pendOffset = 0;
-      recorder = await startRecorder({ constraints, onChunk: (chunks) => {
+      recorder = await startRecorder({ constraints, gainDb: inGainDb, onChunk: (chunks) => {
         const now = performance.now(); if (now - lastPend < 2000) return; lastPend = now;
         putItem(PKEY, { chunks: chunks.slice(), type: chunks[0]?.type, offset: pendOffset }).catch((e) => console.warn('prise en cours non sauvegardée', String(e)));
       }, onLevel: (l) => {
@@ -372,7 +383,7 @@ export async function render(el, { params }) {
         playLive(seekPos, null, autoStopBeat && beat ? () => { if (recorder) { toast('Fin du morceau : prise arrêtée.'); stopRec(); } } : null);
         const beatT0 = performance.now() + (live.ctxStart - ctx.currentTime) * 1000;
         const outLat = (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
-        const inLat = Number(recorder.stream.getAudioTracks()[0]?.getSettings?.().latency) || 0.02;
+        const inLat = Number((recorder.raw || recorder.stream).getAudioTracks()[0]?.getSettings?.().latency) || 0.02;
         recFrom = live.from;
         recLatency = (beatT0 - recT0) / 1000 + outLat + inLat;
         if (beat) toast('Instru lancée : casque conseillé pour qu’elle ne s’entende pas dans la prise.');
@@ -867,10 +878,12 @@ export async function render(el, { params }) {
   const mixer = h('div.stack', { style: { background: 'var(--bg)', borderRadius: '10px', padding: '8px 10px' } },
     h('div.row', h('strong.small.grow', '🎚️ Volumes du casque (en direct)'), liveBtn),
     h('div.sliders',
+      h('label', h('span', '🎙️ Gain du micro (enregistrement) ', inGainLbl), inGain),
       h('label', h('span', '🥁 Instru ', instruLbl), instruVol),
       h('label', h('span', '🎤 Ma voix enregistrée ', micLbl), micVol),
       h('label', h('span', '🎧 Ma voix en direct dans le casque ', monVolLbl), monVol)),
     h('label.chk.small', monOn, 'M’entendre en direct dans le casque pendant que j’enregistre'),
+    h('p.tiny.muted', '🎙️ Gain du micro : baisse-le si le vumètre micro est souvent dans le rouge. Si « SATURE » reste allumé même à −20 dB, c’est le micro lui-même qui sature : baisse son niveau dans Windows (Paramètres → Son → Entrée → Volume) ou décoche le réglage automatique, puis recule un peu.'),
     micMeter.el, outMeter.el,
     h('p.tiny.muted', 'Micro : vise le jaune (−12 à −6 dB) quand tu rappes fort. Si « ● SATURE » s’allume, recule du micro ou baisse le gain du micro dans Windows (Paramètres → Son → Entrée). Le micro s’affiche quand tu enregistres ou quand « M’entendre en direct » est coché.'));
   const S = {

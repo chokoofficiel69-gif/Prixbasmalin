@@ -290,8 +290,17 @@ export async function speak(text, { preferBrowser = false } = {}) {
 }
 
 /** Enregistreur micro simple. */
-export async function startRecorder({ onLevel, constraints, onChunk } = {}) {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: constraints || { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+export async function startRecorder({ onLevel, constraints, onChunk, gainDb = null } = {}) {
+  const raw = await navigator.mediaDevices.getUserMedia({ audio: constraints || { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+  // Gain du micro réglable en direct : micro → gain → enregistrement (et vumètre / retour casque)
+  let stream = raw, gainNode = null;
+  if (gainDb !== null) {
+    try {
+      const ctx = audioCtx(), src = ctx.createMediaStreamSource(raw), dest = ctx.createMediaStreamDestination();
+      gainNode = ctx.createGain(); gainNode.gain.value = 10 ** (gainDb / 20);
+      src.connect(gainNode).connect(dest); stream = dest.stream;
+    } catch { stream = raw; gainNode = null; }
+  }
   const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].find(m => window.MediaRecorder?.isTypeSupported?.(m)) || '';
   const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
   const chunks = [];
@@ -315,12 +324,13 @@ export async function startRecorder({ onLevel, constraints, onChunk } = {}) {
   rec.start(250);
   const started = Date.now();
   return {
-    stream, rec,
+    stream, raw, rec, gainNode,
+    setGainDb(db) { if (gainNode) gainNode.gain.setTargetAtTime(10 ** (db / 20), audioCtx().currentTime, 0.02); },
     get duration() { return (Date.now() - started) / 1000; },
     stop: () => new Promise((resolve) => {
       rec.onstop = () => {
         cancelAnimationFrame(raf);
-        stream.getTracks().forEach(t => t.stop());
+        raw.getTracks().forEach(t => t.stop()); stream.getTracks().forEach(t => t.stop());
         resolve(new Blob(chunks, { type: rec.mimeType || 'audio/webm' }));
       };
       rec.state !== 'inactive' ? rec.stop() : rec.onstop();
