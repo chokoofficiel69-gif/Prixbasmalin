@@ -120,6 +120,13 @@ export function expertReport(m = {}) {
   if (Number.isFinite(m.brightness)) add('sifflantes (estim.)', m.brightness > 0.6 ? 'fortes' : m.brightness > 0.35 ? 'moyennes' : 'faibles');
   if (m.resonanceHz) add('résonance grave-médium', `vers ${m.resonanceHz} Hz (atténuée)`);
   if (Number.isFinite(m.breathPct)) add('respirations/blancs', `${m.breathPct} %`);
+  if (m.dsp) {
+    add('centre spectral', `${m.dsp.spectralCentroidHz} Hz (analyse DSP)`);
+    add('énergie 5–10 kHz', `${(m.dsp.sibilanceRatio * 100).toFixed(1)} % (indicateur, pas détection phonétique)`);
+    add('estimation bruit', `${m.dsp.noiseFloorEstimateDbfs} dBFS (à confirmer sur un passage sans voix)`);
+    add('confiance spectrale', `${Math.round(m.dsp.confidence * 100)} %`);
+  }
+  for (const tip of (m.dspRecommendations || []).slice(0, 3)) lines.push('• Contrôle DSP : ' + tip);
   const done = [];
   if (m.deess) done.push(`de-esser ${m.deess}`);
   if (m.notchHz) done.push(`EQ anti-résonance à ${m.notchHz} Hz`);
