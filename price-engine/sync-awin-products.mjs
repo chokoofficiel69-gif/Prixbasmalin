@@ -472,7 +472,8 @@ function parseFeedRow(row, program, advertiser) {
     aw_deep_link: row.aw_deep_link || row.deep_link || row.merchant_deep_link || row.purl,
     shipping_price_eur: parseFeedMoney(row.delivery_cost || row.shipping, currency, true),
     price_tax_status: explicitPriceTaxStatus(row),
-    last_updated: row.last_updated || ""
+    last_updated: row.last_updated || "",
+    feed_last_imported: row.feed_last_imported || ""
   };
   return offerFromRow(normalized,program,advertiser,{ allowUnknownAvailability: true });
 }
