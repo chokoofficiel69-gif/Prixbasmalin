@@ -152,6 +152,8 @@ function safeAwinErrorDetail(value) {
   return String(value || "")
     .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
     .replace(/((?:api[_-]?)?key|token|password)\s*[:=]\s*[^,\s]+/gi, "$1=[redacted]")
+    .replace(/(["']?(?:api[_-]?)?key["']?\s*:\s*["']?)[^"',\s}]+/gi, "$1[redacted]")
+    .replace(/(["']?(?:token|password)["']?\s*:\s*["']?)[^"',\s}]+/gi, "$1[redacted]")
     .replace(/\s+/g, " ")
     .slice(0, 180);
 }
@@ -1172,8 +1174,8 @@ async function runSelfTests() {
         enhancedHeaders?.Authorization !== "Bearer test-token" || Object.keys(enhancedHeaders).length !== 1) {
       throw new Error("TEST ÉCHEC : téléchargement Enhanced doit utiliser Bearer seul et parser JSONL sans négociation JSON.");
     }
-    globalThis.fetch = async () => new Response("Not acceptable token=secret-test-value", {
-      status: 406, headers: { "content-type": "text/plain" }
+    globalThis.fetch = async () => new Response('{"message":"Not acceptable","token":"secret-test-value"}', {
+      status: 406, headers: { "content-type": "application/json" }
     });
     let enhanced406 = "";
     try { await downloadEnhancedFeed("https://api.awin.com/test.jsonl", "test-token"); }
