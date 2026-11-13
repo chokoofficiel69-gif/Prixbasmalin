@@ -946,7 +946,7 @@ async function runSelfTests() {
     [{ title: "AOV PT 3K 5MP 4G LTE & 2.4GHz Wi-Fi" }, "tech", "Imou FR"],
     [{ title: "Doorbell 3 Kit" }, "tech", "Imou FR"],
     [{ title: "RV3 Ultra" }, "home", "Imou FR"],
-    [{ title: "Référence Imou sans modèle descriptif" }, "other", "Imou FR"],
+    [{ title: "Imou ZXQ-123" }, "other", "Imou FR"],
     [{ title: "Lot de chaussettes unisexes" }, "fashion", "Chaussettes-en-ligne.fr/ (FR)"],
     [{ title: "2 Bâtons de randonnée pliables AlpineFlex" }, "sport", "SODEAL CH"],
     [{ title: "Adaptateur de Scie Sauteuse pour Perceuse" }, "home", "SODEAL CH"],
