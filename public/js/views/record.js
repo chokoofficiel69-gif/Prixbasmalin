@@ -2,8 +2,9 @@ import { api, h, state, toast, toastErr, uploadFile, downloadBlob, pickLocalFile
 import { mountAssistant } from './assistant.js';
 import { createTimeline } from './timeline.js';
 import { putItem, getItem, delItem, packBuffer, unpackBuffer } from '../lib/session.js';
-import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords, keyFromChords } from '../lib/voicefx.js';
-import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift } from '../lib/audio.js';
+import { PRESETS as VFX, PRESET_CATS as VFX_CATS, KEY_CHOICES, applyChain, keyName, detectChords, keyFromChords, detectPitch, detectKey } from '../lib/voicefx.js';
+import { decodeBlob, encodeWav, denoise, antipop, gate, voiceChain, mix, master, MASTER_PRESETS, drawWave, bufferPlayer, sliceBuffer, cloneBuffer, normalize, loudness, makeBuffer, onsetStrength, onsetPeaks, bestAlignShift, detectBeats } from '../lib/audio.js';
+import { ROLES, ROLE_ORDER, proposeRole, adlibPan, roleChain, micAdvice, justesse, buildReport, tipsPrompt, fallbackTips, mergePrefs, peakDbOf, rmsDbOf, noiseFloorDb } from '../lib/ingesong.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -134,6 +135,21 @@ export async function render(el, { params }) {
   const rawMode = h('input', { type: 'checkbox' });
   const withBeat = h('input', { type: 'checkbox', checked: true });
   const recBtn = h('button.btn.rec', '⏺ Enregistrer');
+
+  // ---------- Ingé son IA : préférences, session (tonalité + BPM de l'instru), éléments ----------
+  const ingePrefs = mergePrefs((() => { try { return JSON.parse(localStorage.getItem('studio_inge')); } catch { return null; } })());
+  const saveIngePrefs = () => { try { localStorage.setItem('studio_inge', JSON.stringify(ingePrefs)); } catch {} };
+  const ingeSession = { key: null, keyLabel: null, bpm: null };
+  const ingeOn = h('input', { type: 'checkbox', checked: ingePrefs.enabled });
+  const ingeAuto = h('input', { type: 'checkbox', checked: ingePrefs.autoProcess });
+  ingeOn.onchange = () => { ingePrefs.enabled = ingeOn.checked; saveIngePrefs(); drawInge(); };
+  ingeAuto.onchange = () => { ingePrefs.autoProcess = ingeAuto.checked; saveIngePrefs(); };
+  const micInfo = h('div.small.muted');
+  const instruInfo = h('div.small.muted');
+  const ingeReport = h('div.stack');
+  const ingeAudio = h('audio', { controls: true, style: { width: '100%' } });
+  rawMode.checked = ingePrefs.rawMic;
+  rawMode.addEventListener('change', () => { ingePrefs.rawMic = rawMode.checked; saveIngePrefs(); });
   // Volumes rapides : instru dans le casque (et dans le mix) · niveau de la voix enregistrée
   let beatGainNode = null, micDb = Number(localStorage.getItem('studio.micDb') || 0);
   const instruLbl = h('b', '');
@@ -317,6 +333,9 @@ export async function render(el, { params }) {
       beatGainNode = null; saveSoon(true);
       if (monOn.checked) openLiveMonitor();
       if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
+      // Ingé son IA : traitement automatique de la prise (en local), si activé.
+      const ingeTake = tracks[selected];
+      if (ingePrefs.enabled && ingePrefs.autoProcess && ingeTake && ingeTake.kind === 'voix') { try { await processTake(ingeTake); } catch (e) { toastErr(e); } }
       stopping.p = null;
       ast?.onRecordStopped();
     })();
@@ -663,6 +682,7 @@ export async function render(el, { params }) {
       } }, '📝 Transcrire cette piste')),
     );
     updUndo();
+    drawInge();
   }
 
   // ---------- Calage automatique sur le beat ----------
@@ -722,6 +742,8 @@ export async function render(el, { params }) {
 
   // ---------- Mix & master ----------
   const masterSel = h('select', Object.entries(MASTER_PRESETS).map(([k, p]) => h('option', { value: k }, p.label)));
+  if (MASTER_PRESETS[ingePrefs.masterPreset]) masterSel.value = ingePrefs.masterPreset;
+  masterSel.addEventListener('change', () => { ingePrefs.masterPreset = masterSel.value; saveIngePrefs(); });
   const masterInfo = h('div.small');
   const mixPlayerEl = h('div');
   const bitSel = h('select', h('option', { value: 16 }, 'WAV 16 bits'), h('option', { value: 24 }, 'WAV 24 bits'));
@@ -892,6 +914,142 @@ export async function render(el, { params }) {
     selected = tracks.length - 1; drawList(); drawEdit();
     toast(`Piste « ${name} » ajoutée et armée (●) : la prochaine prise ira dedans.`, 'ok');
   }
+
+  // ======================= Ingé son IA =======================
+  // Test micro 5 s : mesure niveau + bruit de fond, puis conseils.
+  async function micTest(btn) {
+    btn.disabled = true;
+    micInfo.innerHTML = '<span class="spinner"></span> Test du micro (5 s)… parle normalement.';
+    try {
+      const rec = await startRecorder({ constraints: micConstraints() });
+      micMeter.attachStream(rec.stream);
+      await new Promise(r => setTimeout(r, 5000));
+      const buf = await decodeBlob(await rec.stop());
+      micMeter.detach();
+      const ch = buf.getChannelData(0);
+      const peakDb = peakDbOf(ch), rmsDb = rmsDbOf(ch), noiseDb = noiseFloorDb(ch, buf.sampleRate);
+      const a = micAdvice({ peakDb, rmsDb, noiseDb });
+      micInfo.innerHTML = '';
+      micInfo.append(
+        h('div', `Niveau crête ${peakDb.toFixed(1)} dBFS · voix ${rmsDb.toFixed(1)} dBFS · bruit de fond ${noiseDb.toFixed(1)} dBFS${a.snrDb != null ? ` · signal/bruit ${a.snrDb} dB` : ''}`),
+        ...a.tips.map(t => h('div', '• ' + t)));
+    } catch (e) { micInfo.textContent = ''; toast('Micro inaccessible : ' + e.message, 'bad'); }
+    btn.disabled = false;
+  }
+
+  // Analyse de l'instru : tonalité + BPM, mémorisés pour l'autotune et le delay.
+  async function analyzeInstru(btn) {
+    const beat = tracks.find(t => t.kind === 'instru');
+    if (!beat) return toast('Ajoute d’abord l’instru (piste de type « Instru »).');
+    btn.disabled = true;
+    instruInfo.innerHTML = '<span class="spinner"></span> Analyse de l’instru (tonalité et tempo)…';
+    try {
+      const { bpm } = await detectBeats(beat.buffer);
+      const key = detectKey(await detectPitch(beat.buffer));
+      ingeSession.bpm = bpm; ingeSession.key = key; ingeSession.keyLabel = keyName(key);
+      instruInfo.textContent = `🎵 Tonalité ${ingeSession.keyLabel} · tempo ${bpm} BPM (mémorisés pour l’autotune et le delay).`;
+      drawInge();
+    } catch (e) { instruInfo.textContent = ''; toastErr(e); }
+    btn.disabled = false;
+  }
+
+  // Traitement automatique d'une prise selon les mesures (chaîne + rapport).
+  async function processTake(track) {
+    if (!track || track.kind !== 'voix') return;
+    const t0 = performance.now();
+    const say = (m) => { ingeReport.innerHTML = ''; ingeReport.append(h('div.small', h('span.spinner'), ' ' + m)); };
+    player.stop();
+    track.original = track.original || track.buffer;
+    const raw = track.original, ch = raw.getChannelData(0);
+    const levelDb = peakDbOf(ch), noiseDb = noiseFloorDb(ch, raw.sampleRate), rmsDb = rmsDbOf(ch);
+    const voiceIdx = tracks.filter(x => x.kind === 'voix').indexOf(track);
+    const role = track.role || proposeRole(voiceIdx);
+    if (role === 'adlib') track.adlibIndex = tracks.filter(x => x.kind === 'voix' && x.role === 'adlib' && x !== track).length;
+    track.role = role;
+    const plan = roleChain(role, { noiseDb, bpm: ingeSession.bpm });
+    say('Analyse de la voix…');
+    const pitchBefore = await detectPitch(raw);
+    const key = ingeSession.key || detectKey(pitchBefore);
+    const jBefore = justesse(pitchBefore.f0, key);
+    // on repart de la prise brute ; chaque étape est annulable (historique partagé)
+    track.buffer = raw; track.fxDone = [];
+    const stepBuf = async (label, fn) => { say(label + '…'); pushUndo(track, { buffer: track.buffer, fxDone: (track.fxDone || []).slice(), label }); track.buffer = await fn(track.buffer); track.fxDone = [...(track.fxDone || []), label]; };
+    await stepBuf(`Débruitage ${Math.round(plan.denoise * 100)} %`, (b) => denoise(b, plan.denoise, (p) => say(`Débruitage ${Math.round(p * 100)} %`)));
+    await stepBuf('Anti-pop', (b) => antipop(b, 0.8));
+    await stepBuf('Coupe des blancs', (b) => gate(b, plan.gate.threshold, plan.gate.floor));
+    let alignMs = 0;
+    const beat = tracks.find(x => x.kind === 'instru' && x !== track);
+    if (beat) { const before = track.offset || 0; say('Calage sur l’instru'); await alignTrack(track, beat); alignMs = ((track.offset || 0) - before) * 1000; }
+    await stepBuf(`Autotune (${keyName(key)})`, async (b) => (await applyChain(b, [{ t: 'tune', strength: plan.autotune.strength, speed: plan.autotune.speed }], { key })).buffer);
+    await stepBuf('Chaîne voix', (b) => voiceChain(b, plan.voice));
+    if (plan.sends.delay) await stepBuf('Écho au tempo', async (b) => (await applyChain(b, [{ t: 'fx', ...plan.sends.delay }])).buffer);
+    track.gainDb = plan.gainDb;
+    track.pan = role === 'adlib' ? adlibPan(track.adlibIndex || 0) : plan.pan;
+    track._abUrls && track._abUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch {} }); track._abUrls = null;
+    masterResult = null;
+    say('Mesure de la justesse après traitement…');
+    const jAfter = justesse((await detectPitch(track.buffer)).f0, key);
+    track.inge = {
+      role, key: keyName(key), bpm: ingeSession.bpm, levelDb, noiseDb, peakDb: levelDb,
+      snrDb: Math.round((rmsDb - noiseDb) * 10) / 10,
+      denoise: plan.denoise, alignMs, gainDb: track.gainDb,
+      justesseBefore: jBefore.pct, justesseAfter: jAfter.pct,
+      seconds: Math.round((performance.now() - t0) / 100) / 10, tips: null, tipsSource: null,
+    };
+    drawList(); drawEdit(); updUndo();
+    fetchTips(track);     // conseils du LLM à partir des SEULES mesures (aucun audio envoyé)
+  }
+
+  async function fetchTips(track) {
+    const { system, prompt } = tipsPrompt(track.inge);
+    try {
+      const r = await api('/api/complete', { method: 'POST', body: { system, prompt, src: 'inge-son', model: 'auto:fast', temperature: 0.3 } });
+      const lines = String(r.content || '').split('\n').map(s => s.replace(/^[-*•\d.)\s]+/, '').trim()).filter(Boolean).slice(0, 3);
+      track.inge.tips = lines.length ? lines : fallbackTips(track.inge);
+      track.inge.tipsSource = lines.length ? 'IA' : 'règles';
+    } catch { track.inge.tips = fallbackTips(track.inge); track.inge.tipsSource = 'règles'; }
+    drawInge();
+  }
+
+  function abIng(track, which) {
+    try { track._abUrls && track._abUrls.forEach(u => URL.revokeObjectURL(u)); } catch {}
+    const a = URL.createObjectURL(encodeWav(track.original)), b = URL.createObjectURL(encodeWav(track.buffer));
+    track._abUrls = [a, b];
+    ingeAudio.src = which === 'a' ? a : b; ingeAudio.play().catch(() => {});
+  }
+
+  async function balanceAndMaster(btn) {
+    if (!tracks.length) return toast('Ajoute au moins une piste.');
+    btn.disabled = true;
+    try {
+      const beat = tracks.find(t => t.kind === 'instru'); if (beat) beat.gainDb = Math.min(beat.gainDb, -4);
+      if (MASTER_PRESETS[ingePrefs.masterPreset]) masterSel.value = ingePrefs.masterPreset;
+      drawList();
+      await doMaster();
+      toast('Toutes les pistes équilibrées et masterisées ✓', 'ok');
+    } catch (e) { toastErr(e); }
+    btn.disabled = false;
+  }
+
+  function drawInge() {
+    if (!ingeReport) return;
+    ingeReport.innerHTML = '';
+    if (!ingePrefs.enabled) { ingeReport.append(h('p.small.muted', 'Mode Ingé son désactivé. Active-le pour le test micro, l’analyse de l’instru, l’autotune et le rapport automatiques.')); return; }
+    const t = tracks[selected];
+    if (!t || t.kind !== 'voix' || !t.inge) { ingeReport.append(h('p.small.muted', 'Enregistre une prise (ou sélectionne une voix déjà traitée) : le rôle, la chaîne et le rapport s’affichent ici.')); return; }
+    const g = t.inge;
+    const roleSel = h('select', ROLE_ORDER.map(r => h('option', { value: r, selected: r === g.role }, ROLES[r].label)));
+    roleSel.onchange = async () => { t.role = roleSel.value; if (t.role === 'adlib') t.adlibIndex = tracks.filter(x => x.kind === 'voix' && x.role === 'adlib' && x !== t).length; try { await processTake(t); } catch (e) { toastErr(e); } };
+    ingeReport.append(
+      h('div.row', h('span.small', 'Rôle :'), h('div.grow', roleSel), h('span.tiny.muted', g.seconds != null ? `traité en ${g.seconds} s` : '')),
+      h('pre.small', { style: { whiteSpace: 'pre-wrap', background: 'var(--bg)', padding: '8px', borderRadius: '10px', margin: 0 } }, buildReport(g)),
+      h('div.row', h('button.btn.small', { onclick: () => abIng(t, 'a') }, 'A · prise brute'), h('button.btn.small.primary', { onclick: () => abIng(t, 'b') }, 'B · traitée')),
+      ingeAudio,
+      h('p.tiny.muted', 'La prise brute est conservée. « ↩ Annuler » (en haut des effets) revient étape par étape ; « ↺ Revenir à l’original » repart de la prise brute.'));
+    if (g.tips === null) ingeReport.append(h('div.small.muted', h('span.spinner'), ' Conseils de l’ingé son…'));
+    else if (g.tips?.length) ingeReport.append(h('div.card.stack', { style: { padding: '8px' } }, h('strong.small', `💡 Conseils pour la prochaine prise${g.tipsSource === 'règles' ? ' (hors ligne)' : ''}`), ...g.tips.map(x => h('div.small', '• ' + x))));
+  }
+
   const stopBtn = h('button.btn', { title: 'Stop (revient au début)', onclick: () => { if (recorder) return stopRec(); stopLive(false); player.stop(); seekPos = 0; } }, '⏹');
   const homeBtn = h('button.btn', { title: 'Revenir au début', onclick: () => { seekPos = 0; if (live.srcs.length) playLive(0); } }, '⏮');
   el.append(
@@ -920,12 +1078,22 @@ export async function render(el, { params }) {
       ),
     ),
     h('div.stack',
+      h('div.card.stack',
+        h('h3', '🎚️ Ingé son IA'),
+        h('label.chk.small', ingeOn, 'Activer — analyse, autotune et mix automatiques (100 % en local, gratuit)'),
+        h('label.chk.small', ingeAuto, 'Traiter chaque prise automatiquement dès la fin de l’enregistrement'),
+        h('div.row', h('button.btn.small', { onclick: (e) => micTest(e.target) }, '🎤 Test micro (5 s)'), h('button.btn.small', { onclick: (e) => analyzeInstru(e.target) }, '🎵 Analyser l’instru (tonalité + BPM)')),
+        micInfo, instruInfo,
+        h('p.tiny.muted', 'Après chaque prise : rôle proposé (Lead, Double, Backs, Ad-lib), chaîne selon les mesures (débruitage dosé, anti-pop, gate, calage, autotune dans la tonalité, chaîne voix et volume/panoramique du rôle, écho au tempo), rapport chiffré, conseils (mesures seules, aucun audio envoyé), A/B. Vu-mètre et alerte « SATURE » dans « Mes pistes ».'),
+        ingeReport),
       h('div.card.stack', editBox),
       h('div.card.stack',
         h('h3', '🎛️ Mixage et mastering'),
         h('p.small.muted', 'Toutes les pistes non muettes sont mixées (volume, panoramique, décalage), puis masterisées : égalisation, compression de bus, largeur stéréo, sonie cible et limiteur à −1 dBFS.'),
         h('button.btn.primary', { onclick: (e) => doEverything(e.target) }, '⚡ Tout faire : nettoyer, caler, mixer, masteriser'),
         h('p.tiny.muted', 'En un clic : débruitage, coupe des blancs, voix rap claire, calage sur le beat, volumes, mix et master. Tu peux ensuite retoucher piste par piste.'),
+        h('button.btn.primary', { onclick: (e) => balanceAndMaster(e.target) }, '🎚️ Mixer et masteriser tout (Ingé son)'),
+        h('p.tiny.muted', 'Équilibre toutes les pistes selon leur rôle (volumes et panoramiques déjà posés) puis masterise avec ton preset préféré (mémorisé).'),
         h('div.row', h('div.grow', masterSel), h('button.btn', { onclick: doMaster }, '🎛️ Mixer + masteriser')),
         h('div.row', h('button.btn', { onclick: (e) => compareMasters(e.target) }, '🎧 Faire plusieurs versions et choisir'),
           h('span.tiny.muted', 'Un morceau déjà fini ? Importe-le seul : il sera remasterisé en plusieurs styles.')),
