@@ -175,6 +175,14 @@ function parseEnhancedJsonl(body) {
   }
   return rows;
 }
+function flattenEnhancedProduct(row) {
+  const flat = { ...(row || {}) };
+  for (const [section, value] of Object.entries(row || {})) {
+    if (!section.startsWith("product_") || !value || typeof value !== "object" || Array.isArray(value)) continue;
+    Object.assign(flat, value);
+  }
+  return flat;
+}
 async function downloadEnhancedFeed(url, token) {
   const response = await fetch(url, {
     // L'exemple officiel Awin n'envoie pas d'Accept ; ne pas négocier application/json pour un flux JSONL.
@@ -794,7 +802,7 @@ async function loadEnhancedAwinFeeds(rawOffers, {
           statusCounts[200] = (statusCounts[200] || 0) + 1;
           let accepted = 0;
           for (const row of rows) {
-            const offer = offerFromRow(row, item.program, item.id);
+            const offer = offerFromRow(flattenEnhancedProduct(row), item.program, item.id);
             if (!offer) continue;
             rawOffers.push(offer);
             accepted++;
@@ -1127,10 +1135,13 @@ async function runSelfTests() {
     throw new Error("TEST ÉCHEC : l'URL feedList Awin doit être reconnue comme une clé de flux standard, pas comme un flux CSV direct.");
   }
   const validEnhancedLine = JSON.stringify({
-    id: "enhanced-1", title: "AOV PT camera", description: "Camera", link: "https://shop.example/aov",
-    image_link: "https://cdn.example/aov.jpg", price: "99.90 EUR", brand: "Imou",
-    gtin: "4006381333931", mpn: "AOV-1", availability: "in_stock",
-    shipping: [{ country: "FR", price: "4.99 EUR" }]
+    meta: { advertiser_id: "123", advertiser_name: "Imou" },
+    product_basic: { id: "enhanced-1", title: "AOV PT camera", description: "Camera", link: "https://shop.example/aov", brand: "Imou" },
+    product_identifiers: { gtin: "4006381333931", mpn: "AOV-1" },
+    product_price: { price: "99.90 EUR" },
+    product_images: { image_link: "https://cdn.example/aov.jpg" },
+    product_availability: { availability: "in_stock" },
+    product_shipping: { shipping: [{ country: "FR", price: "4.99 EUR" }] }
   });
   const parsedEnhanced = parseEnhancedJsonl(validEnhancedLine + "\n");
   if (parsedEnhanced.length !== 1 || parsedEnhanced[0].id !== "enhanced-1") {
