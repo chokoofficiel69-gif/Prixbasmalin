@@ -11,11 +11,16 @@ test('quantification PCM 16/24 bits respecte les bornes signées', () => {
   }
 });
 
-test('dither TPDF reste borné et ne décale pas un signal constant en moyenne', () => {
-  const vals = [0.1, 0.2, 0.3, 0.4]; let i = 0;
-  const random = () => vals[(i++) % vals.length];
-  const q = quantizePcmSample(0, 16, random, true);
-  assert.ok(q >= -1 && q <= 1);
+test('dither TPDF reste borné et conserve une erreur moyenne proche de zéro', () => {
+  let seed = 123456789;
+  const random = () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 2 ** 32; };
+  let sum = 0, min = Infinity, max = -Infinity;
+  for (let i = 0; i < 20000; i++) {
+    const q = quantizePcmSample(0, 16, random, true);
+    sum += q; min = Math.min(min, q); max = Math.max(max, q);
+  }
+  assert.ok(Math.abs(sum / 20000) < 0.03, 'le dither ne doit pas introduire de biais DC');
+  assert.ok(min >= -1 && max <= 1, 'le bruit reste dans les limites de quantification du silence');
   assert.equal(quantizePcmSample(0.25, 16, () => 0.5, true), quantizePcmSample(0.25, 16, () => 0.5, false));
 });
 
