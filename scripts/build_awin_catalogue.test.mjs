@@ -12,12 +12,6 @@ const validProduct = () => ({
   color: "noir",
   size: "standard",
   image: "https://merchant.example/image.jpg",
-  images: [
-    "https://merchant.example/image.jpg",
-    "https://merchant.example/image-2.jpg",
-    "https://merchant.example/image-3.jpg",
-    "https://merchant.example/image-4.jpg"
-  ],
   imageSource: "https://merchant.example/product",
   imageSourceName: "Marchand",
   imageKind: "merchant_feed",
@@ -25,10 +19,8 @@ const validProduct = () => ({
   merchant: "Marchand",
   priceValue: 42.5,
   price: "42,50 €",
-  regularPriceValue: null,
   sourceUrl: "https://www.awin1.com/pclick.php?id=1",
   merchantUpdatedAt: null,
-  feedUpdatedAt: "2026-11-13T00:00:00Z",
   priceTaxStatus: "unspecified",
   shippingPriceValue: 4.9,
   availability: "unknown",
@@ -36,21 +28,25 @@ const validProduct = () => ({
   mpn: "MODEL-1",
   identityType: "gtin",
   isAwinProduct: true,
-  priceSource: "Awin — flux marchand autorisé",
-  fetchedAt: "2026-11-13T13:49:11Z",
   internalRawPayload: "NE DOIT PAS ÊTRE COPIÉ",
   offers: [{
     merchant: "Marchand",
     priceValue: 42.5,
-    price: "42,50 €",
     url: "https://www.awin1.com/pclick.php?id=1",
     shippingPriceValue: 4.9,
     availability: "unknown",
     priceTaxStatus: "unspecified",
     merchantUpdatedAt: null,
-    feedUpdatedAt: "2026-11-13T00:00:00Z",
     internalRawPayload: "NE DOIT PAS ÊTRE COPIÉ",
     images: ["https://merchant.example/image.jpg"]
+  }, {
+    merchant: "Marchand B",
+    priceValue: 43.5,
+    url: "https://www.awin1.com/pclick.php?id=2",
+    shippingPriceValue: 0,
+    availability: "in_stock",
+    priceTaxStatus: "included",
+    merchantUpdatedAt: "2026-11-13T10:00:00Z"
   }]
 });
 
@@ -60,7 +56,7 @@ const feed = products => ({
   products
 });
 
-test("conserve les champs utiles catalogue, l'identité et les offres sans les réécrire", () => {
+test("conserve les champs utiles, l'identité et les vraies offres multi-marchands", () => {
   const result = buildCompactFeed(feed([validProduct()]));
   assert.equal(result.products.length, 1);
   const product = result.products[0];
@@ -69,15 +65,25 @@ test("conserve les champs utiles catalogue, l'identité et les offres sans les r
   assert.equal(product.priceTaxStatus, "unspecified");
   assert.equal(product.merchantUpdatedAt, null);
   assert.equal(product.gtin, "4006381333931");
+  assert.equal(product.offers.length, 2);
   assert.equal(product.offers[0].shippingPriceValue, 4.9);
   assert.equal(product.offers[0].priceTaxStatus, "unspecified");
   assert.equal("internalRawPayload" in product, false);
   assert.equal("internalRawPayload" in product.offers[0], false);
+  assert.equal("images" in product, false);
   assert.equal("images" in product.offers[0], false);
-  assert.equal(product.images.length, 3);
 });
 
-test("exclut exactement les visuels que le catalogue public ne doit pas montrer", () => {
+test("n'ajoute pas un tableau redondant pour une seule offre marchande", () => {
+  const product = validProduct();
+  product.offers = [product.offers[0]];
+  const compact = buildCompactFeed(feed([product])).products[0];
+  assert.equal("offers" in compact, false);
+  assert.equal(compact.merchant, "Marchand");
+  assert.equal(compact.priceValue, 42.5);
+});
+
+test("exclut les visuels génériques, illustratifs, non HTTPS ou non vérifiés", () => {
   const generic = validProduct();
   generic.imageStatus = "generic_category_visual";
   const illustration = validProduct();
