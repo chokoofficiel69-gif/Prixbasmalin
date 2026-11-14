@@ -107,9 +107,15 @@ class HomeDealsTests(unittest.TestCase):
         self.assertTrue(all(gift["shipping_eur"] is None and gift["band"] == "a-confirmer" for gift in gifts))
 
     def test_gifts_alternate_merchants(self):
-        awin = {"products": [product(f"Parfum {i}", m, 20 + i) for m in ("A", "B") for i in range(3)]}
-        merchants = [g["merchant"] for g in deals.build_gifts(awin)]
+        awin = {"products": [
+            product(f"Parfum {i}", merchant, 20 + i,
+                    image=f"https://img.example/{merchant.lower()}-{i}.webp")
+            for merchant in ("A", "B") for i in range(3)
+        ]}
+        gifts = deals.build_gifts(awin)
+        merchants = [gift["merchant"] for gift in gifts]
         self.assertEqual(merchants[:4], ["A", "B", "A", "B"])
+        self.assertEqual(len({gift["image"] for gift in gifts}), len(gifts))
 
     def test_top_has_no_misleading_gap_percent(self):
         data = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
