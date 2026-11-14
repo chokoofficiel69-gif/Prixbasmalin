@@ -5788,7 +5788,7 @@ async function pmLoadAwinCatalogue(){
     const feedProducts=feed.products.filter(product=>
       product&&product.id&&product.name&&
       (compactFeed
-        ? /^https:\/\//i.test(String(product.image||""))&&!/unsplash\\.com/i.test(String(product.image||""))
+        ? /^https:\/\//i.test(String(product.image||""))&&!/unsplash\.com/i.test(String(product.image||""))
         : pmHasRealProductImage(product))&&
       /^https:\/\//i.test(String(product.sourceUrl||""))&&String(product.merchant||"").trim()
     );
