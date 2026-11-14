@@ -1733,6 +1733,7 @@ export async function render(el, { params }) {
   // Tableau de bord professionnel : accès direct aux zones de travail déjà présentes.
   const studioSections = [
     ['🎙️ Enregistrement', 'Réglages d’enregistrement'],
+    ['🎛️ Effets voix', 'Effets voix & autotune'],
     ['🎚️ Console', 'Console de mixage'],
     ['🧠 Ingénieur son IA', 'Ingé son IA'],
     ['🎛️ Mix & mastering', 'Mixage et mastering'],
