@@ -8,12 +8,14 @@ on:
       - "scripts/build_awin_catalogue.mjs"
       - "scripts/build_awin_catalogue.test.mjs"
       - ".github/workflows/test-compact-awin-catalogue.yml"
+      - ".github/workflows/sync-awin-products.yml"
   pull_request:
     paths:
       - "catalogue.html"
       - "scripts/build_awin_catalogue.mjs"
       - "scripts/build_awin_catalogue.test.mjs"
       - ".github/workflows/test-compact-awin-catalogue.yml"
+      - ".github/workflows/sync-awin-products.yml"
 
 permissions:
   contents: read
