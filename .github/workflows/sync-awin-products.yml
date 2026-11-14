@@ -240,10 +240,21 @@ jobs:
             ["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"].includes(p.imageStatus) &&
             p.imageKind !== "illustration"
           );
+          const byId = new Map(verified.map(p => [String(p.id), p]));
+          const seen = new Set();
           if (data.status !== "ok" || data.schema_version !== 1 || data.image_policy !== "authorized_feed_images_only" ||
               data.fetched_at !== process.env.EXPECTED_FETCHED_AT ||
               data.products.length !== verified.length || data.source_product_count !== source.products.length) {
             throw new Error("Le flux catalogue léger ne correspond pas au flux Awin complet.");
+          }
+          for (const product of data.products) {
+            const id = String(product.id);
+            const original = byId.get(id);
+            if (!original || seen.has(id)) throw new Error("Identité produit absente ou dupliquée dans le flux compact.");
+            seen.add(id);
+            for (const field of ["name","image","sourceUrl","merchant","priceValue","priceTaxStatus","merchantUpdatedAt","shippingPriceValue","availability","gtin","mpn","category","brand","product_type"]) {
+              if (product[field] !== original[field]) throw new Error("Champ source modifié : " + field + " (" + id + ").");
+            }
           }
           const bytes = Buffer.byteLength(raw, "utf8");
           if (bytes > 16 * 1024 * 1024) throw new Error("Le flux catalogue léger dépasse 16 Mio.");
