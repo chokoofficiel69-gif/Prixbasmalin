@@ -5,15 +5,12 @@ import { buildCompactFeed, isCatalogueImage, serializeCompactFeed } from "./buil
 const validProduct = () => ({
   id: "awin-product-1",
   name: "Produit exact",
-  desc: "Marque • variante",
-  query: "Produit exact Marque",
   category: "tech",
   brand: "Marque",
   color: "noir",
   size: "standard",
+  product_type: "Casque Bluetooth",
   image: "https://merchant.example/image.jpg",
-  imageSource: "https://merchant.example/product",
-  imageSourceName: "Marchand",
   imageKind: "merchant_feed",
   imageStatus: "authorized_feed_image",
   merchant: "Marchand",
@@ -65,12 +62,18 @@ test("conserve les champs utiles, l'identité et les vraies offres multi-marchan
   assert.equal(product.priceTaxStatus, "unspecified");
   assert.equal(product.merchantUpdatedAt, null);
   assert.equal(product.gtin, "4006381333931");
+  assert.equal(product.product_type, "Casque Bluetooth");
+  assert.equal(result.image_policy, "authorized_feed_images_only");
   assert.equal(product.offers.length, 2);
   assert.equal(product.offers[0].shippingPriceValue, 4.9);
   assert.equal(product.offers[0].priceTaxStatus, "unspecified");
   assert.equal("internalRawPayload" in product, false);
   assert.equal("internalRawPayload" in product.offers[0], false);
   assert.equal("images" in product, false);
+  assert.equal("desc" in product, false);
+  assert.equal("query" in product, false);
+  assert.equal("imageSource" in product, false);
+  assert.equal("imageSourceName" in product, false);
   assert.equal("images" in product.offers[0], false);
 });
 
