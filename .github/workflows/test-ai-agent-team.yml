@@ -1,0 +1,31 @@
+name: Tester l'équipe IA expérimentale Prix Malin
+
+on:
+  push:
+    branches: [feat/pm-ai-agent-team-draft]
+    paths:
+      - "workers/prixbasmalin-agent-team.js"
+      - "workers/prixbasmalin-agent-team.test.mjs"
+      - ".github/workflows/test-ai-agent-team.yml"
+  pull_request:
+    paths:
+      - "workers/prixbasmalin-agent-team.js"
+      - "workers/prixbasmalin-agent-team.test.mjs"
+      - ".github/workflows/test-ai-agent-team.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test-agent-team:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vérifier la syntaxe
+        run: node --check workers/prixbasmalin-agent-team.js
+      - name: Tester les trois rôles, les entrées et les erreurs
+        run: node --test workers/prixbasmalin-agent-team.test.mjs
