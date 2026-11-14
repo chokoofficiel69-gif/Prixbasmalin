@@ -1767,8 +1767,8 @@ export async function render(el, { params }) {
     try { localStorage.setItem('studio.expertWorkspace', enabled ? '1' : '0'); } catch {}
   }
   expertToggle.onclick = () => setExpertWorkspace(!el.classList.contains('studio-expert-active'));
-  if (localStorage.getItem('studio.expertWorkspace') === '1') setExpertWorkspace(true);
   el.prepend(studioHeader);
+  if (localStorage.getItem('studio.expertWorkspace') === '1') setExpertWorkspace(true);
 
   await restoreSession();
   drawList(); drawEdit(); ast?.refresh();
