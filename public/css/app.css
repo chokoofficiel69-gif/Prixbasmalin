@@ -317,3 +317,31 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
   .studio-hero { padding: 12px !important; }
   .studio-ai-identity { gap: 11px; }
 }
+
+
+/* ===== Studio IA : véritable espace de travail Expert ===== */
+.studio-expert-workspace { display:none; color:#e6edf7; background:#0b1018; border:1px solid #27364a; border-radius:14px; padding:12px; margin:0 0 18px; box-shadow:0 18px 48px rgba(0,0,0,.28); }
+.studio-expert-workspace.is-visible { display:grid; gap:12px; }
+.studio-expert-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 14px; border:1px solid #263d58; border-radius:9px; background:linear-gradient(110deg,#121d2c,#101722 65%,#1b1420); }
+.studio-expert-title { display:grid; gap:3px; }
+.studio-expert-title strong { font-size:19px; color:#f4f8ff; letter-spacing:.01em; }
+.studio-expert-kicker { font-size:9px; font-weight:800; letter-spacing:.2em; color:#69bfff; }
+.studio-expert-live { display:flex; align-items:center; gap:7px; color:#83d9bc; font-size:9px; font-weight:800; letter-spacing:.12em; }
+.studio-expert-live i { width:7px; height:7px; border-radius:50%; background:#4ad7a1; box-shadow:0 0 12px #4ad7a1; }
+.studio-expert-panel { min-width:0; min-height:0; border:1px solid #28384d; border-radius:9px; padding:9px; background:linear-gradient(180deg,#141d2a,#101722); box-shadow:inset 0 1px rgba(255,255,255,.035); }
+.studio-expert-panel-title { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:3px 2px 9px; margin-bottom:8px; border-bottom:1px solid #2b3b50; color:#9bcfff; font-size:10px; font-weight:850; letter-spacing:.11em; }
+.studio-expert-status { color:#6b8aa9; font-size:8px; letter-spacing:.12em; }
+.studio-expert-grid { display:grid; grid-template-columns:minmax(230px,.92fr) minmax(300px,1.12fr) minmax(290px,1fr); gap:10px; align-items:start; }
+.studio-expert-column { display:grid; gap:10px; min-width:0; }
+.studio-expert-workspace .card { background:#151e2b; border:0; box-shadow:none; padding:9px; color:#dce7f5; }
+.studio-expert-workspace .muted,.studio-expert-workspace .tiny { color:#91a3ba; }
+.studio-expert-workspace h3 { color:#f0f6ff; font-size:14px; }
+.studio-expert-workspace input:not([type=checkbox]),.studio-expert-workspace select { background:#0d1521; border-color:#34465e; color:#e6edf7; }
+.studio-expert-workspace .btn { border-color:#344c69; }
+.studio-expert-workspace .btn.primary,.studio-hero .btn.expert-active { background:linear-gradient(110deg,#176dc5,#278fc4); color:#fff; border-color:#53b9f4; }
+.studio-expert-workspace .mixer { gap:7px; }
+.studio-expert-workspace .strip { min-width:82px; }
+.studio-expert-active .studio-hero { margin-bottom:10px !important; }
+.studio-hero .expert-active { background:linear-gradient(110deg,#176dc5,#278fc4); color:white; border-color:#53b9f4; }
+@media(max-width:1100px) { .studio-expert-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:720px) { .studio-expert-grid { grid-template-columns:1fr; } .studio-expert-toolbar { align-items:flex-start; flex-direction:column; } }
