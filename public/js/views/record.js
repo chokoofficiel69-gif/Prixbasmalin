@@ -13,6 +13,7 @@ import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.j
 import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult, buildVoiceProposals } from '../lib/ingexpert.js';
 import { analyzeMaster, compareToRef } from '../lib/meters.js';
 import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
+import { evaluateExpertPass, expertAgentSummary } from '../lib/expert-agent.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -1387,8 +1388,24 @@ export async function render(el, { params }) {
     track.pan = role === 'adlib' ? adlibPan(track.adlibIndex || 0) : plan.pan;
     track._abUrls && track._abUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch {} }); track._abUrls = null;
     masterResult = null;
-    say('Mesure de la justesse après traitement…');
-    const jAfter = justesse((await detectPitch(track.buffer)).f0, key);
+    say('Contrôle qualité du traitement (avant / après)…');
+    let agentQA = null;
+    if (expert && analysis && dspAnalysis?.valid) {
+      const afterSamples = track.buffer.getChannelData(0);
+      const afterBasic = analyzeSamples(afterSamples, track.buffer.sampleRate);
+      const afterDsp = analyzeVoiceDsp(afterSamples, track.buffer.sampleRate);
+      agentQA = evaluateExpertPass(
+        { peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, clipPct: analysis.clipPct, sibilanceRatio: dspAnalysis.sibilanceRatio },
+        { peakDb: afterBasic.peakDb, rmsDb: afterBasic.rmsDb, clipPct: afterBasic.clipPct, sibilanceRatio: afterDsp?.valid ? afterDsp.sibilanceRatio : null }
+      );
+      if (agentQA.verdict === 'rollback') {
+        track.buffer = raw;
+        track.fxDone = [];
+        track.gainDb = 0;
+        track.pan = 0;
+      }
+    }
+    const jAfter = agentQA?.verdict === 'rollback' ? jBefore : justesse((await detectPitch(track.buffer)).f0, key);
     track.inge = {
       role, key: keyName(key), bpm: ingeSession.bpm, levelDb, noiseDb, peakDb: levelDb,
       snrDb: Math.round((rmsDb - noiseDb) * 10) / 10,
@@ -1406,7 +1423,7 @@ export async function render(el, { params }) {
       const em = { style: ingePrefs.style, peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, crestDb: analysis.crestDb, clipPct: analysis.clipPct, lufs, brightness: analysis.brightness, resonanceHz: analysis.resonanceHz, breathPct: analysis.breathPct, deess: ex.voice.deess, notchHz: ex.steps.notchHz, instruDuck, justesseBefore: jBefore.pct, justesseAfter: jAfter.pct,
         dsp: dspAnalysis?.valid ? { peakDbfs: dspAnalysis.peakDbfs, rmsDbfs: dspAnalysis.rmsDbfs, noiseFloorEstimateDbfs: dspAnalysis.noiseFloorEstimateDbfs, crestDb: dspAnalysis.crestDb, spectralCentroidHz: dspAnalysis.spectralCentroidHz, bandEnergy: dspAnalysis.bandEnergy, sibilanceRatio: dspAnalysis.sibilanceRatio, lowRatio: dspAnalysis.lowRatio, highRatio: dspAnalysis.highRatio, confidence: dspAnalysis.confidence } : null,
         dspRecommendations: voiceDspRecommendations(dspAnalysis || {}) };
-      track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em);
+      track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em) + (agentQA ? String.fromCharCode(10, 10) + expertAgentSummary(agentQA) : '');
     }
     drawList(); drawEdit(); updUndo();
     fetchTips(track);     // conseils du LLM à partir des SEULES mesures (aucun audio envoyé)
