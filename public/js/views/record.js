@@ -162,6 +162,7 @@ export async function render(el, { params }) {
   const micInfo = h('div.small.muted');
   const instruInfo = h('div.small.muted');
   const ingeReport = h('div.stack');
+  const alternativesBox = h('div.stack');
   const ingeAudio = h('audio', { controls: true, style: { width: '100%' } });
   rawMode.checked = ingePrefs.rawMic;
   rawMode.addEventListener('change', () => { ingePrefs.rawMic = rawMode.checked; saveIngePrefs(); });
@@ -1489,6 +1490,94 @@ export async function render(el, { params }) {
     btn.disabled = false;
   }
 
+  async function renderExpertOption(track, option, card, status) {
+    const source = track.original || track.buffer;
+    const chain = [
+      { t: 'tune', strength: option.strength, speed: option.speed },
+      ...(option.eqGain > 0 ? [{ t: 'fx', kind: 'peak', f: 3200, q: 1.1, gain: option.eqGain }] : []),
+      ...(option.delayMix > 0 ? [{ t: 'fx', kind: 'delay', time: 0.28, fb: 0.22, mix: option.delayMix }] : []),
+      ...(option.reverbMix > 0 ? [{ t: 'fx', kind: 'reverb', size: 1.6, mix: option.reverbMix }] : []),
+    ];
+    status.textContent = 'Rendu audio en cours…';
+    const result = await applyChain(source, chain, { key: option.key });
+    const out = result.buffer;
+    const dsp = analyzeVoiceDsp(out.getChannelData(0), out.sampleRate);
+    const basic = analyzeSamples(out.getChannelData(0), out.sampleRate);
+    if (basic.clipPct > 0.01 || basic.peakDb > -0.1) {
+      status.textContent = 'Rendu à risque : écrêtage détecté. Réduis les réglages ou conserve la prise brute.';
+      option.buffer = null;
+      return;
+    }
+    try { if (option.url) URL.revokeObjectURL(option.url); } catch {}
+    option.buffer = out;
+    option.dsp = dsp;
+    option.url = URL.createObjectURL(encodeWav(out));
+    const audio = card.querySelector('audio');
+    audio.src = option.url;
+    status.textContent = `Rendu prêt · crête ${basic.peakDb.toFixed(1)} dBFS · RMS ${basic.rmsDb.toFixed(1)} dBFS`;
+  }
+
+  async function generateExpertOptions(btn) {
+    const track = tracks[selected];
+    if (!track || track.kind !== 'voix') return toast('Sélectionne une piste voix.');
+    const source = track.original || track.buffer;
+    if (!source || source.duration < 2) return toast('Source trop courte : il faut au moins 2 secondes de voix.');
+    btn.disabled = true;
+    alternativesBox.innerHTML = '';
+    try {
+      const srcDsp = analyzeVoiceDsp(source.getChannelData(0), source.sampleRate);
+      const srcBasic = analyzeSamples(source.getChannelData(0), source.sampleRate);
+      if (!srcDsp.valid || srcDsp.confidence < 0.35) throw new Error('Signal trop faible ou trop court pour produire trois propositions fiables.');
+      if (srcBasic.peakDb > -0.05 || srcBasic.clipPct > 1) throw new Error('La source semble déjà écrêtée. Reprends l’enregistrement avec davantage de marge avant de générer des versions.');
+      const pitch = await detectPitch(source);
+      const voiced = pitch.f0.filter(v => v > 0).length / Math.max(1, pitch.f0.length);
+      if (voiced < 0.08) throw new Error('Je ne détecte pas assez de hauteur vocale stable pour proposer trois corrections de justesse fiables.');
+      const key = ingeSession.key || detectKey(pitch);
+      const defs = [
+        { id:'natural', name:'1 · Naturel', explanation:'Correction douce, conserve les glissés et le caractère de la prise.', strength:0.55, speed:160, eqGain:0, delayMix:0, reverbMix:0.05, key },
+        { id:'rap', name:'2 · Rap précis', explanation:'Correction plus ferme et présence légère, sans effet robot extrême.', strength:0.88, speed:65, eqGain:1.2, delayMix:0.08, reverbMix:0.04, key },
+        { id:'melodic', name:'3 · Mélodique', explanation:'Correction fluide, petit écho et espace modéré pour une voix chantée.', strength:0.78, speed:115, eqGain:0.5, delayMix:0.18, reverbMix:0.16, key },
+      ];
+      for (const option of defs) {
+        const card = h('div.card.stack', { style:{padding:'10px'} });
+        const status = h('p.tiny.muted','En attente du rendu…');
+        const audio = h('audio',{controls:true,style:{width:'100%'}});
+        const strength = h('input',{type:'range',min:0,max:1,step:0.05,value:option.strength});
+        const speed = h('input',{type:'range',min:0,max:200,step:5,value:option.speed});
+        const reverb = h('input',{type:'range',min:0,max:0.35,step:0.01,value:option.reverbMix});
+        const delay = h('input',{type:'range',min:0,max:0.3,step:0.01,value:option.delayMix});
+        const labels = h('div.stack',
+          h('label.small','Autotune · intensité ',strength),
+          h('label.small','Vitesse de correction (ms) ',speed),
+          h('label.small','Réverbération · mix ',reverb),
+          h('label.small','Écho · mix ',delay));
+        const apply = h('button.btn.small.primary',{onclick:()=>{
+          if(!option.buffer) return toast('Génère d’abord le rendu sans écrêtage.');
+          pushUndo(track,{buffer:track.buffer,fxDone:(track.fxDone||[]).slice(),label:'Choisir proposition IA'});
+          track.buffer=option.buffer; track.fxDone=[...(track.fxDone||[]),'Proposition IA : '+option.name];
+          masterResult=null; drawList(); drawEdit(); updUndo(); toast(option.name+' appliquée à la piste.','ok');
+        }},'Utiliser cette version');
+        const rerender = h('button.btn.small',{onclick:async()=>{
+          option.strength=Number(strength.value); option.speed=Number(speed.value);
+          option.reverbMix=Number(reverb.value); option.delayMix=Number(delay.value);
+          rerender.disabled=true;
+          try{await renderExpertOption(track,option,card,status);}catch(e){status.textContent='Rendu impossible : '+e.message;}
+          rerender.disabled=false;
+        }},'Recalculer ce rendu');
+        card.append(h('strong.small',option.name),h('p.small',option.explanation),
+          h('p.tiny.muted','Plugins : Autotune PSOLA'+(option.eqGain?' · EQ paramétrique':'')+(option.delayMix?' · Delay':'')+(option.reverbMix?' · Réverbération':'')+'. Réglages modifiables ci-dessous.'),
+          labels,h('div.row',rerender,apply),audio,status);
+        alternativesBox.append(card);
+        option.card=card;
+        await renderExpertOption(track,option,card,status);
+      }
+      toast('Trois rendus audio distincts sont prêts à comparer.','ok');
+    } catch(e) {
+      alternativesBox.append(h('p.small.muted','Aucune proposition produite : '+e.message));
+      toast('Analyse interrompue : '+e.message);
+    } finally { btn.disabled=false; }
+  }
+
   function drawInge() {
     if (!ingeReport) return;
     ingeReport.innerHTML = '';
@@ -1634,6 +1723,8 @@ export async function render(el, { params }) {
         } }, '🧠 Lancer l’agent Expert sur la piste sélectionnée'),
         h('div.row', h('button.btn.small', { onclick: (e) => micTest(e.target) }, '🎤 Test micro (5 s)'), h('button.btn.small', { onclick: (e) => analyzeInstru(e.target) }, '🎵 Analyser l’instru (tonalité + BPM)')),
         micInfo, instruInfo,
+        h('button.btn.primary', { onclick:(e)=>generateExpertOptions(e.currentTarget) }, '🎧 Générer 3 propositions audio IA'),
+        alternativesBox,
         h('p.tiny.muted', 'Après chaque prise : rôle proposé (Lead, Double, Backs, Ad-lib), chaîne selon les mesures (débruitage dosé, anti-pop, gate, calage, autotune dans la tonalité, chaîne voix et volume/panoramique du rôle, écho au tempo), rapport chiffré, conseils (mesures seules, aucun audio envoyé), A/B. Vu-mètre et alerte « SATURE » dans « Mes pistes ».'),
         ingeReport),
       h('div.card.stack', editBox),
