@@ -345,3 +345,12 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 .studio-hero .expert-active { background:linear-gradient(110deg,#176dc5,#278fc4); color:white; border-color:#53b9f4; }
 @media(max-width:1100px) { .studio-expert-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:720px) { .studio-expert-grid { grid-template-columns:1fr; } .studio-expert-toolbar { align-items:flex-start; flex-direction:column; } }
+
+/* Régie Expert libre : panneaux en grille, déplaçables et redimensionnables */
+.studio-expert-workspace.is-visible { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); align-items:start; }
+.studio-expert-workspace > .studio-expert-toolbar { grid-column:1/-1; }
+.studio-expert-workspace > .studio-expert-panel { min-width:280px; min-height:180px; max-width:100%; resize:both; overflow:auto; }
+.studio-expert-panel-title { cursor:grab; user-select:none; }
+.studio-expert-panel-title:active { cursor:grabbing; }
+.studio-expert-panel.is-dragging { opacity:.45; outline:2px dashed var(--accent); }
+@media(max-width:720px) { .studio-expert-workspace.is-visible { grid-template-columns:1fr; } .studio-expert-workspace > .studio-expert-panel { min-width:0; width:100%; resize:vertical; } }
