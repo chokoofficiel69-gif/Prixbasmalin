@@ -266,7 +266,7 @@ export async function render(el, { params }) {
     const sum = ctx.createGain();
     head.connect(sub).connect(low).connect(lowmid).connect(mid).connect(pres).connect(highmid).connect(air).connect(comp).connect(make);
     const shaper = ctx.createWaveShaper(); shaper.oversample = '4x';
-    const setSat = (v) => { const amount = Math.max(0, Math.min(1, Number(v) || 0)); const curve = new Float32Array(2048); const k = 1 + amount * 18, norm = Math.tanh(k); for (let i = 0; i < curve.length; i++) { const x = i * 2 / (curve.length - 1) - 1; curve[i] = Math.tanh(x * k) / norm; } shaper.curve = curve; };
+    const setSat = (v) => { const amount = Math.max(0, Math.min(1, Number(v) || 0)); const curve = new Float32Array(2048); const k = 1 + amount * 18, norm = Math.tanh(k); for (let i = 0; i < curve.length; i++) { const x = i * 2 / (curve.length - 1) - 1; curve[i] = amount === 0 ? x : Math.tanh(x * k) / norm; } shaper.curve = curve; };
     setSat(fx.sat); make.connect(shaper).connect(sum);
     const chorusDelay = ctx.createDelay(0.06); chorusDelay.delayTime.value = 0.018;
     const chorusG = ctx.createGain(); chorusG.gain.value = fx.chorus;
