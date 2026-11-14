@@ -100,6 +100,24 @@ export function expertChain(baseVoice, style, analysis = {}) {
   return { style, voice, steps, tune, master: st.master };
 }
 
+/** Construit quatre directions vocales distinctes à partir des mesures réelles. Les réglages restent des propositions à écouter, jamais des corrections prétendument universelles. */
+export function buildVoiceProposals(m = {}, style = 'rap') {
+  const bright = clamp(Number(m.brightness) || 0, 0, 1);
+  const low = clamp(Number(m.lowRatio) || 0, 0, 1);
+  const crest = Number.isFinite(m.crestDb) ? m.crestDb : 12;
+  const resonance = Number.isFinite(m.resonanceHz) ? m.resonanceHz : null;
+  const hp = Math.round(clamp(65 + low * 65, 65, 125));
+  const deess = round(clamp(1.5 + bright * 8, 1.5, 8), 1);
+  const presence = round(clamp(3.2 - bright * 2.2 - (resonance && resonance > 250 ? 0.5 : 0), 0, 3.2), 1);
+  const compBase = clamp(0.48 + Math.max(0, crest - 10) * 0.025, 0.42, 0.78);
+  return [
+    { id: 'premium', name: 'Studio Premium', objective: 'Voix dense, présente et maîtrisée', settings: { highpass: hp, low: low > 0.58 ? -1.5 : -0.5, presence, air: bright > 0.58 ? 0.8 : 2.5, deess, comp: compBase, reverb: 0.10 } },
+    { id: 'broadcast', name: 'Radio / Broadcast', objective: 'Intelligibilité et niveau régulier, sans réverbération', settings: { highpass: Math.max(75, hp), low: low > 0.58 ? -1 : 0.5, presence: round(clamp(presence + 0.8, 0, 4), 1), air: bright > 0.58 ? 0.5 : 1.5, deess: deess + 0.5, comp: clamp(compBase + 0.12, 0.55, 0.88), reverb: 0 } },
+    { id: 'modern', name: 'Commercial Moderne', objective: 'Voix plus ferme et brillante, effets discrets', settings: { highpass: hp, low: low > 0.62 ? -2 : 0, presence: round(clamp(presence + 0.4, 0, 4), 1), air: bright > 0.62 ? 1 : 3.5, deess: deess + 0.8, comp: clamp(compBase + 0.16, 0.58, 0.9), reverb: 0.07 } },
+    { id: 'natural', name: 'Naturelle Hi-Fi', objective: 'Correction minimale et respect du timbre original', settings: { highpass: Math.max(55, Math.min(95, hp - 15)), low: 0, presence: round(clamp(presence * 0.35, 0, 1.2), 1), air: bright > 0.65 ? 0 : 0.8, deess: round(deess * 0.35, 1), comp: clamp(compBase * 0.58, 0.25, 0.48), reverb: 0 } },
+  ].map(p => ({ ...p, settings: { ...p.settings, gainDb: 0 } }));
+}
+
 /** Gain de calage de l'instru sous la voix (duck), selon la sonie voix/instru. */
 export function instruDuckDb(voiceLufs, instruLufs) {
   if (!Number.isFinite(voiceLufs) || !Number.isFinite(instruLufs)) return 0;
