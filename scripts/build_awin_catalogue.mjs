@@ -19,14 +19,12 @@ const PRODUCT_FIELDS = [
   "color", "size", "availability", "priceTaxStatus", "shippingPriceValue",
   "merchantUpdatedAt", "feedUpdatedAt", "gtin", "mpn", "identityType",
   "image", "imageSource", "imageSourceName", "imageKind", "imageStatus",
-  "merchant", "priceValue", "price", "regularPriceValue", "sourceUrl",
-  "isAwinProduct", "priceSource", "fetchedAt"
+  "merchant", "priceValue", "price", "sourceUrl", "isAwinProduct"
 ];
 
 const OFFER_FIELDS = [
-  "merchant", "priceValue", "price", "url", "shippingPriceValue",
-  "availability", "priceTaxStatus", "merchantUpdatedAt", "feedUpdatedAt",
-  "checked_at"
+  "merchant", "priceValue", "url", "shippingPriceValue",
+  "availability", "priceTaxStatus", "merchantUpdatedAt", "checked_at"
 ];
 
 function pick(source, fields) {
@@ -63,13 +61,17 @@ function compactProduct(product) {
   }
 
   const output = pick(product, PRODUCT_FIELDS);
-  if (Array.isArray(product.images)) {
-    output.images = product.images.filter(isHttps).slice(0, 3);
-  }
   if (Array.isArray(product.offers)) {
-    output.offers = product.offers.slice(0, 12)
-      .filter(offer => offer && typeof offer === "object")
-      .map(offer => pick(offer, OFFER_FIELDS));
+    const distinctMerchants = new Set(product.offers
+      .map(offer => String(offer?.merchant || "").trim().toLowerCase())
+      .filter(Boolean));
+    // Une offre unique est déjà représentée au niveau produit ; conserver le tableau
+    // détaillé uniquement lorsqu'il apporte réellement plusieurs marchands.
+    if (distinctMerchants.size > 1) {
+      output.offers = product.offers.slice(0, 12)
+        .filter(offer => offer && typeof offer === "object")
+        .map(offer => pick(offer, OFFER_FIELDS));
+    }
   }
   return output;
 }
