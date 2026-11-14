@@ -220,7 +220,7 @@ export async function render(el, { params }) {
   const outMeter = makeMeter('🔊 Sortie (instru + voix)');
 
   // ---------- Réglages EN DIRECT par piste (non destructifs) : on tourne une molette, on entend tout de suite ----------
-  const FX_DEF = { low: 0, mid: 0, pres: 0, air: 0, comp: 0, reverb: 0, echo: 0, tune: 0 };
+  const FX_DEF = { sub: 0, low: 0, lowmid: 0, mid: 0, pres: 0, highmid: 0, air: 0, comp: 0, sat: 0, chorus: 0, reverb: 0, echo: 0, tune: 0 };
   const fxOf = (t) => Object.assign({}, FX_DEF, t.fx || {});
   const fxActive = (t) => !!t.fx && Object.keys(FX_DEF).some(k => Number(t.fx[k] || 0) !== FX_DEF[k]);
   let tuneModule = null;
@@ -258,18 +258,26 @@ export async function render(el, { params }) {
     const f = (type, freq, gain, q = 0.8) => { const n = ctx.createBiquadFilter(); n.type = type; n.frequency.value = freq; n.gain.value = gain; n.Q.value = q; return n; };
     let head = input, tune = null;
     if (withTune && fx.tune > 0) { tune = new AudioWorkletNode(ctx, 'live-tune', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] }); tune.port.postMessage({ strength: Math.min(1, fx.tune), speed: fx.tune > 0.85 ? 1 : 0.1 + fx.tune * 0.3, scale: liveScale() }); head = input.connect(tune); }
-    const low = f('lowshelf', 180, fx.low), mid = f('peaking', 700, fx.mid, 0.8), pres = f('peaking', 3200, fx.pres, 0.9), air = f('highshelf', 10000, fx.air);
+    const sub = f('lowshelf', 80, fx.sub), low = f('lowshelf', 180, fx.low), lowmid = f('peaking', 300, fx.lowmid, 1), mid = f('peaking', 700, fx.mid, 0.8), pres = f('peaking', 3200, fx.pres, 0.9), highmid = f('peaking', 5200, fx.highmid, 1), air = f('highshelf', 10000, fx.air);
     const comp = ctx.createDynamicsCompressor(); comp.attack.value = 0.005; comp.release.value = 0.12; comp.knee.value = 6;
     const make = ctx.createGain();
     const setComp = (c) => { comp.threshold.value = -6 - c * 26; comp.ratio.value = 1 + c * 5; make.gain.value = 10 ** (c * 7 / 20); };
     setComp(fx.comp);
     const sum = ctx.createGain();
-    head.connect(low).connect(mid).connect(pres).connect(air).connect(comp).connect(make).connect(sum);
+    head.connect(sub).connect(low).connect(lowmid).connect(mid).connect(pres).connect(highmid).connect(air).connect(comp).connect(make);
+    const shaper = ctx.createWaveShaper(); shaper.oversample = '4x';
+    const setSat = (v) => { const amount = Math.max(0, Math.min(1, Number(v) || 0)); const curve = new Float32Array(2048); const k = 1 + amount * 18, norm = Math.tanh(k); for (let i = 0; i < curve.length; i++) { const x = i * 2 / (curve.length - 1) - 1; curve[i] = amount === 0 ? x : Math.tanh(x * k) / norm; } shaper.curve = curve; };
+    setSat(fx.sat); make.connect(shaper).connect(sum);
+    const chorusDelay = ctx.createDelay(0.06); chorusDelay.delayTime.value = 0.018;
+    const chorusG = ctx.createGain(); chorusG.gain.value = fx.chorus;
+    const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.8;
+    const lfoDepth = ctx.createGain(); lfoDepth.gain.value = 0.004;
+    lfo.connect(lfoDepth).connect(chorusDelay.delayTime); make.connect(chorusDelay).connect(chorusG).connect(sum); lfo.start();
     const cv = ctx.createConvolver(); cv.buffer = revIR(ctx); const revG = ctx.createGain(); revG.gain.value = fx.reverb;
     make.connect(cv).connect(revG).connect(sum);
     const dl = ctx.createDelay(2); dl.delayTime.value = Math.min(1.5, 60 / bpmNow() / 2); const fb = ctx.createGain(); fb.gain.value = 0.3; const echoG = ctx.createGain(); echoG.gain.value = fx.echo;
     make.connect(dl); dl.connect(fb).connect(dl); dl.connect(echoG).connect(sum);
-    return { out: sum, low, mid, pres, air, setComp, revG, echoG, tune };
+    return { out: sum, sub, low, lowmid, mid, pres, highmid, air, setComp, setSat, setChorus: (v) => chorusG.gain.setTargetAtTime(Math.max(0, Math.min(0.7, Number(v) || 0)), ctx.currentTime, 0.03), chorusG, revG, echoG, tune };
   }
   // pour le mix/master : on « grave » les réglages en direct dans une copie de la piste (l'original n'est pas touché)
   async function renderFx(t) {
@@ -1126,11 +1134,16 @@ export async function render(el, { params }) {
   // ---------- Panneau de molettes (piste sélectionnée) ----------
   const knobBox = h('div.card.stack', { style: { padding: '10px', background: 'var(--bg)' } });
   const KN = [
+    ['sub', '🫧 Sub 80 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
     ['low', '🔈 Grave', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['lowmid', '🟤 Bas-médium', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
     ['mid', '🎚️ Médium', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
     ['pres', '🗣️ Présence', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['highmid', '💎 Haut-médium', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
     ['air', '✨ Brillance', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
     ['comp', '🗜️ Compression', 0, 1, 0.02, (v) => `${Math.round(v * 100)} %`],
+    ['sat', '🔥 Saturation', 0, 1, 0.02, (v) => `${Math.round(v * 100)} %`],
+    ['chorus', '🌊 Chorus', 0, 0.7, 0.01, (v) => `${Math.round(v / 0.7 * 100)} %`],
     ['reverb', '🌫️ Réverbe', 0, 0.7, 0.01, (v) => `${Math.round(v / 0.7 * 100)} %`],
     ['echo', '🔁 Écho', 0, 0.6, 0.01, (v) => `${Math.round(v / 0.6 * 100)} %`],
     ['tune', '🎤 Autotune', 0, 1, 0.05, (v) => v ? `${Math.round(v * 100)} %` : 'non'],
@@ -1140,6 +1153,8 @@ export async function render(el, { params }) {
     const fx = fxOf(t), now = audioCtx().currentTime;
     if (k === 'tune') { if (!!n.tune !== fx.tune > 0) { playLive(livePos()); } else n.tune?.port.postMessage({ strength: Math.min(1, fx.tune), speed: fx.tune > 0.85 ? 1 : 0.1 + fx.tune * 0.3 }); return; }
     if (k === 'comp') return n.setComp(fx.comp);
+    if (k === 'sat') return n.setSat(fx.sat);
+    if (k === 'chorus') return n.setChorus(fx.chorus);
     if (k === 'reverb') return n.revG.gain.setTargetAtTime(fx.reverb, now, 0.03);
     if (k === 'echo') return n.echoG.gain.setTargetAtTime(fx.echo, now, 0.03);
     n[k]?.gain.setTargetAtTime(fx[k], now, 0.03);
