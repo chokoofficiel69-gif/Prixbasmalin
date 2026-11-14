@@ -1710,6 +1710,64 @@ export async function render(el, { params }) {
       } }, label))),
     h('p.tiny.studio-guidance', { style: { margin: 0 } }, 'Ordre de travail : 1. Ingénieur du son · 2. Autotune professionnel · 3. Enregistrement · 4. Mixage et mastering. Les outils existants restent accessibles et pilotables.')
   );
+  const expertToggle = h('button.btn.primary', { type: 'button' }, '🎛️ Ouvrir la régie Expert');
+  studioHeader.append(expertToggle);
+  let expertWorkspace = null, expertMoves = [];
+  function setExpertWorkspace(enabled) {
+    if (enabled && !expertWorkspace) {
+      const findCard = (label) => [...el.querySelectorAll('h3')].find(x => x.textContent.includes(label))?.closest('.card');
+      const nodes = {
+        tracks: findCard('Mes pistes'),
+        mixer: findCard('Console de mixage'),
+        settings: findCard('Réglages d’enregistrement'),
+        engineer: findCard('Ingé son IA'),
+        editor: editBox.closest('.card'),
+        master: findCard('Mixage et mastering'),
+        assistant: ast?.card || null,
+      };
+      const unique = [...new Set(Object.values(nodes).filter(Boolean))];
+      expertMoves = unique.map(node => {
+        const marker = document.createComment('studio-expert-return');
+        node.parentNode.insertBefore(marker, node);
+        return { node, marker };
+      });
+      const panel = (name, label, node) => {
+        const section = h('section.studio-expert-panel');
+        section.append(h('div.studio-expert-panel-title', h('span', label), h('span.studio-expert-status', 'LOCAL DSP')));
+        if (node) section.append(node);
+        else section.append(h('p.small.muted', 'Ce module sera disponible lorsqu’une piste ou une prise sera chargée.'));
+        return section;
+      };
+      expertWorkspace = h('div.studio-expert-workspace',
+        h('div.studio-expert-toolbar',
+          h('div.studio-expert-title', h('span.studio-expert-kicker', 'STUDIO IA / PROFESSIONAL WORKSPACE'), h('strong', 'Régie de production')),
+          h('div.studio-expert-live', h('i'), 'MOTEUR AUDIO LOCAL')),
+        panel('tracks', '01 / SESSION & TIMELINE', nodes.tracks),
+        h('div.studio-expert-grid',
+          h('div.studio-expert-column', panel('settings', '02 / PRISE DE SON', nodes.settings), panel('assistant', 'ASSISTANT DE SESSION', nodes.assistant)),
+          h('div.studio-expert-column', panel('engineer', '03 / HEAD AUDIO ENGINEER', nodes.engineer), panel('editor', '04 / ÉDITION & TRAITEMENT', nodes.editor)),
+          h('div.studio-expert-column', panel('master', '05 / MIX BUS & MASTER', nodes.master))),
+        panel('mixer', '06 / CONSOLE MULTIPISTE', nodes.mixer));
+      studioHeader.after(expertWorkspace);
+    }
+    if (enabled) {
+      el.classList.add('studio-expert-active');
+      expertToggle.textContent = '↩ Quitter le mode Expert';
+      expertToggle.classList.add('expert-active');
+      expertWorkspace?.classList.add('is-visible');
+      expertWorkspace?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    } else {
+      el.classList.remove('studio-expert-active');
+      expertToggle.textContent = '🎛️ Ouvrir la régie Expert';
+      expertToggle.classList.remove('expert-active');
+      if (expertWorkspace) expertWorkspace.remove();
+      for (const { node, marker } of expertMoves) { marker.parentNode?.insertBefore(node, marker); marker.remove(); }
+      expertMoves = []; expertWorkspace = null;
+    }
+    try { localStorage.setItem('studio.expertWorkspace', enabled ? '1' : '0'); } catch {}
+  }
+  expertToggle.onclick = () => setExpertWorkspace(!el.classList.contains('studio-expert-active'));
+  if (localStorage.getItem('studio.expertWorkspace') === '1') setExpertWorkspace(true);
   el.prepend(studioHeader);
 
   await restoreSession();
