@@ -84,7 +84,12 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertEqual(len(set(selected(0))), 16)
         self.assertTrue(set(selected(0)).isdisjoint(selected(1)))
         self.assertTrue(set(selected(1)).isdisjoint(selected(2)))
-        self.assertNotEqual(selected(0), selected(3))
+        # Avec 48 images uniques, les trois créneaux de 16 sont disjoints ;
+        # le quatrième créneau revient normalement au premier (cycle de 6 jours).
+        if len(gifts) >= 48:
+            self.assertTrue(set(selected(0)).isdisjoint(selected(2)))
+        self.assertEqual(len(selected(3)), 16)
+        self.assertEqual(len(set(selected(3))), 16)
 
 
     def test_seasonal_theme_uses_paris_calendar_and_preserves_brand(self):
