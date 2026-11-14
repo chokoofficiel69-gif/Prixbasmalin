@@ -1,6 +1,7 @@
 // Traitement audio dans le navigateur : décodage, export WAV, débruitage spectral,
 // chaîne voix, mixage, mastering (loudness BS.1770 approchée + limiteur), détection du tempo.
 import { audioCtx } from './core.js';
+import { truePeakCeilingGainDb } from './meters.js';
 
 export const SR = 44100;
 
@@ -337,8 +338,12 @@ export async function master(buffer, presetKey = 'streaming', onStep) {
   applyGain(out, 10 ** (gainDb / 20));
   onStep?.('Limiteur…');
   out = limit(out, -1);
+  // Le limiteur protège la crête échantillon ; cette seconde passe corrige aussi
+  // les dépassements inter-échantillons estimés avant l'export/encodage.
+  const truePeakGainDb = truePeakCeilingGainDb(out.getChannelData(0), out.numberOfChannels > 1 ? out.getChannelData(1) : null, -1);
+  if (truePeakGainDb < 0) applyGain(out, 10 ** (truePeakGainDb / 20));
   const finalLufs = await loudness(out);
-  return { buffer: out, before: lufs, after: finalLufs, target: p.lufs, peakDb: 20 * Math.log10(peak(out) || 1e-9) };
+  return { buffer: out, before: lufs, after: finalLufs, target: p.lufs, peakDb: 20 * Math.log10(peak(out) || 1e-9), truePeakGainDb };
 }
 
 /** Mixage de plusieurs pistes (gain en dB, décalage en secondes, panoramique). */
