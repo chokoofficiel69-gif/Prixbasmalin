@@ -723,7 +723,7 @@ export async function render(el, { params }) {
   const fxPrev = makePreview();
   async function fxPreview(btn, next = false) {
     if (next && fxSel.options.length) fxSel.selectedIndex = (fxSel.selectedIndex + 1) % fxSel.options.length;
-    const item = resolve(fxSel.value); if (!item) return;
+    const item = editableFxItem(); if (!item) return;
     btn.disabled = true;
     await fxPrev.run(item.name, async (part, t, st, say) => {
       const r = await runList(part, item.list, t, st, say);
@@ -737,7 +737,7 @@ export async function render(el, { params }) {
     tr.fxDone = [...(tr.fxDone || []), ...item.list.map(p => p.name)];
     return r.buffer;
   });
-  const fxApply = () => { const item = resolve(fxSel.value); if (item) applyItem(item); };
+  const fxApply = () => { const item = editableFxItem(); if (item) applyItem(item); };
   const QUICK_TUNE = [['🎯 Juste parfait', 'Justesse parfaite (note par note)'], ['🎤 Léger', 'Justesse naturelle (note par note)'], ['🎤 Moyen (Drake)', 'Rap mélodique note par note'], ['🤖 Fort (T-Pain)', 'Hard-tune note par note'], ['✨ Belle voix chantée', 'Belle voix chantée (juste + douce)']];
   const tunePrev = makePreview();
   const noteEd = createNoteEditor({
@@ -818,6 +818,36 @@ export async function render(el, { params }) {
     fillCats(); fxCat.value = MINE; fillFx(); toast(`Réglage « ${name} » enregistré (${mine.length}/250)`, 'ok');
   };
 
+  // Éditeur du preset sélectionné : doser chaque brique, la couper ou la retirer.
+  let editingFx = null;
+  const fxEditor = h('div.stack.preset-editor');
+  const FX_EDIT = {
+    tune:{strength:['Force',0,1,.05],speed:['Vitesse (ms)',0,200,1]}, shift:{semi:['Demi-tons',-12,12,1],formant:['Formant',-4,4,.5]},
+    double:{gain:['Niveau',.2,.8,.05]}, harmony:{gain:['Niveau',.2,.7,.05]},
+    reverb:{size:['Taille',.3,5,.1],mix:['Dosage',0,.6,.01],decay:['Durée',1,5,.1]},
+    delay:{time:['Temps',.05,.8,.01],fb:['Répétitions',0,.6,.01],mix:['Dosage',0,.5,.01]},
+    pingpong:{time:['Temps',.08,.6,.01],mix:['Dosage',0,.5,.01]}, chorus:{mix:['Dosage',0,.7,.01]}, flanger:{mix:['Dosage',0,.7,.01]},
+    tube:{amt:['Intensité',1,3,.1]}, tape:{amt:['Intensité',1,3,.1]}, exciter:{mix:['Dosage',0,.5,.01]}, air:{gain:['Gain dB',0,6,.1]},
+    peak:{f:['Fréquence Hz',40,12000,10],q:['Q',.4,4,.1],gain:['Gain dB',-8,8,.1]}, distort:{amt:['Saturation',1,10,.1],tone:['Tonalité Hz',3000,12000,100]},
+    band:{lo:['Bas Hz',100,1000,10],hi:['Haut Hz',2000,10000,50],drive:['Drive',0,8,.1]}, lofi:{bits:['Bits',4,10,1],hi:['Filtre haut Hz',3000,10000,100]}
+  };
+  function editableFxItem(){const base=resolve(fxSel.value);if(!base)return null;if(!editingFx||editingFx.source!==fxSel.value)return base;const p=base.list[0]||{};return {name:editingFx.name,list:[{name:editingFx.name,chain:sanitizeChain(editingFx.chain.filter(x=>x.enabled!==false)),voice:p.voice?sanitizeVoice(p.voice):null}]};}
+  function drawFxEditor(){
+    fxEditor.innerHTML='';const base=resolve(fxSel.value);if(!base)return;
+    if(!editingFx||editingFx.source!==fxSel.value){const p=base.list[0]||{};editingFx={source:fxSel.value,name:base.name,chain:(p.chain||[]).map(x=>({...x,enabled:true}))};}
+    fxEditor.append(h('strong.small','🧩 Ajuster le preset avant application'));
+    editingFx.chain.forEach((st,i)=>{
+      const type=st.t==='fx'?st.kind:st.t;
+      const enabled=h('input',{type:'checkbox',checked:st.enabled!==false,onchange:e=>{st.enabled=e.target.checked;}});
+      const row=h('div.row',h('label.chk.small',enabled,(i+1)+'. '+type),h('button.btn.small.ghost',{onclick:()=>{editingFx.chain.splice(i,1);drawFxEditor();}},'✕ Retirer'));
+      const sliders=h('div.sliders');
+      for(const [key,def] of Object.entries(FX_EDIT[type]||{})){if(st[key]===undefined)continue;const [label,min,max,step]=def;const val=h('b',String(st[key]));sliders.append(h('label',h('span',label+' ',val),h('input',{type:'range',min,max,step,value:st[key],oninput:e=>{st[key]=Number(e.target.value);val.textContent=String(st[key]);}})));}
+      fxEditor.append(h('div.card.stack',{style:{padding:'8px'}},row,sliders));
+    });
+    if(!editingFx.chain.length)fxEditor.append(h('p.tiny.muted','Aucun effet dans ce preset.'));
+    fxEditor.append(h('div.row',h('button.btn.small.ghost',{onclick:()=>{editingFx=null;drawFxEditor();}},'↺ Réinitialiser'),h('button.btn.small',{onclick:async()=>{const name=await promptBox('Nom du nouveau preset',editingFx.name+' personnalisé');if(!name)return;const mine=lsGet('studio_vfx_mine',[]);mine.push({name,steps:[],custom:{chain:sanitizeChain(editingFx.chain.filter(x=>x.enabled!==false)),voice:null}});lsSet('studio_vfx_mine',mine);fillCats();fxCat.value=MINE;fillFx();toast('Preset personnalisé enregistré.','ok');}},'💾 Enregistrer ma version')));
+  }
+  fxSel.addEventListener('change',()=>{editingFx=null;drawFxEditor();});drawFxEditor();
   const nrAmount = h('input', { type: 'range', min: 0.1, max: 1, step: 0.05, value: 0.6 });
   const presetSel = h('select', Object.entries(VOICE_PRESETS).map(([k, p]) => h('option', { value: k }, p.label)));
   const vc = { ...VOICE_PRESETS.rap };
@@ -919,7 +949,7 @@ export async function render(el, { params }) {
         h('button.btn.small', { onclick: (e) => fxPreview(e.target, true) }, '⏭ Suivant'),
         h('button.btn.small.primary', { onclick: fxApply }, '✅ Appliquer')),
       h('div.row', h('button.btn.small.ghost', { onclick: fxFav }, '⭐ Favori'), h('button.btn.small.ghost', { onclick: fxSave }, '💾 Sauver ma combinaison')),
-      fxPrev.box,
+      fxEditor, fxPrev.box,
       h('p.tiny.muted', 'Écoute chaque effet sur 15 s de ta voix (A/B pour comparer), puis applique-le. Tu peux en enchaîner plusieurs puis « Sauver ma combinaison ». La tonalité est détectée toute seule ; les harmonies suivent les accords de l’instru si elle est dans tes pistes. « ↩ Annuler » revient d’une étape, « Revenir à l’original » repart de la prise brute.'),
       h('h3', '📝 Transcrire'),
       h('div.row', h('button.btn.small', { onclick: async (e) => {
