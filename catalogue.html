@@ -5784,8 +5784,12 @@ async function pmLoadAwinCatalogue(){
     }
     // Le catalogue public présente les fiches illustrées même lorsqu'aucun prix fiable n'est disponible.
     // Le prix ne doit jamais conditionner l'apparition d'un produit dans la vitrine.
+    const compactFeed=feed.schema_version===1&&feed.image_policy==="authorized_feed_images_only";
     const feedProducts=feed.products.filter(product=>
-      product&&product.id&&product.name&&pmHasRealProductImage(product)&&
+      product&&product.id&&product.name&&
+      (compactFeed
+        ? /^https:\/\//i.test(String(product.image||""))&&!/unsplash\\.com/i.test(String(product.image||""))
+        : pmHasRealProductImage(product))&&
       /^https:\/\//i.test(String(product.sourceUrl||""))&&String(product.merchant||"").trim()
     );
     const displayProducts=feedProducts.map(product=>{
@@ -5795,13 +5799,21 @@ async function pmLoadAwinCatalogue(){
       const priceFresh=hasPrice&&pmAwinPriceIsFresh(merchantUpdatedAt);
       const priceTaxIncluded=product.priceTaxStatus==="included"||product.price_tax_status==="included";
       const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";
+      const priceText=hasPrice?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(product.priceValue)):"";
       return {
         ...product,
+        desc:product.desc||[product.brand,product.color,product.size,product.product_type].filter(Boolean).join(" • "),
+        query:product.query||[product.name,product.brand,product.color,product.size].filter(Boolean).join(" "),
+        imageSource:product.imageSource||product.sourceUrl,
+        imageSourceName:product.imageSourceName||product.merchant,
+        imageKind:product.imageKind||"merchant_feed",
+        imageStatus:product.imageStatus||"authorized_feed_image",
+        isAwinProduct:true,
         merchantUpdatedAt:merchantUpdatedAt||null,
         // Seul un prix TTC confirmé et daté par le marchand est exploitable comme offre actuelle.
         priceStatus,
         priceValue:priceStatus==="fresh"?Number(product.priceValue):null,
-        price:priceStatus==="fresh"?product.price:"",
+        price:priceStatus==="fresh"?(product.price||priceText):"",
         // Prix public indiqué par le marchand dans son flux : affiché avec sa date et « à confirmer »,
         // jamais utilisé pour « Meilleur prix total » ni pour les comparaisons vérifiées.
         listedPriceValue:hasPrice?Number(product.priceValue):null,
