@@ -2,6 +2,7 @@
 // chaîne voix, mixage, mastering (loudness BS.1770 approchée + limiteur), détection du tempo.
 import { audioCtx } from './core.js';
 import { truePeakCeilingGainDb } from './meters.js';
+import { quantizePcmSample } from './wav-export.js';
 
 export const SR = 44100;
 
@@ -43,8 +44,8 @@ export function encodeWav(buffer, bits = 16) {
   for (let i = 0; i < n; i++) {
     for (let c = 0; c < ch; c++) {
       let s = Math.max(-1, Math.min(1, data[c][i]));
-      if (bits === 16) { v.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true); o += 2; }
-      else { const x = Math.round(s < 0 ? s * 0x800000 : s * 0x7fffff); v.setUint8(o, x & 255); v.setUint8(o + 1, (x >> 8) & 255); v.setUint8(o + 2, (x >> 16) & 255); o += 3; }
+      if (bits === 16) { v.setInt16(o, quantizePcmSample(s, 16), true); o += 2; }
+      else { const x = quantizePcmSample(s, 24); v.setUint8(o, x & 255); v.setUint8(o + 1, (x >> 8) & 255); v.setUint8(o + 2, (x >> 16) & 255); o += 3; }
     }
   }
   return new Blob([ab], { type: 'audio/wav' });
