@@ -2,7 +2,7 @@
 // Lancer : node --test test/ingexpert.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { analyzeSamples, findResonance, STYLES, STYLE_ORDER, deessFor, antipopFor, expertChain, instruDuckDb, expertReport, expertTipsPrompt, EXPERT_SYSTEM_CORE, CONSULTATIONS, buildConsult } from '../public/js/lib/ingexpert.js';
+import { analyzeSamples, findResonance, STYLES, STYLE_ORDER, deessFor, antipopFor, expertChain, instruDuckDb, expertReport, expertTipsPrompt, EXPERT_SYSTEM_CORE, CONSULTATIONS, buildConsult, buildVoiceProposals } from '../public/js/lib/ingexpert.js';
 
 const sine = (hz, sec, sr = 44100, amp = 0.5) => { const n = Math.floor(sec * sr), a = new Float32Array(n); for (let i = 0; i < n; i++) a[i] = amp * Math.sin(2 * Math.PI * hz * i / sr); return a; };
 
@@ -93,4 +93,15 @@ test('consultations : 4 fiches, persona partagé, variables remplies', () => {
   const master = buildConsult('master', { style: 'Trap', headroom: '-6' });
   assert.match(master.prompt, /-6 dB/); assert.match(master.prompt, /LUFS|True Peak|dBTP/);
   assert.equal(buildConsult('inconnu'), null);
+});
+
+test('Head Audio Engineer : quatre propositions distinctes et adaptées aux mesures', () => {
+  const low = buildVoiceProposals({ brightness: 0.15, lowRatio: 0.2, crestDb: 19, resonanceHz: null }, 'rap');
+  const bright = buildVoiceProposals({ brightness: 0.85, lowRatio: 0.8, crestDb: 5, resonanceHz: 310 }, 'drill');
+  assert.deepEqual(low.map(p => p.id), ['premium', 'broadcast', 'modern', 'natural']);
+  assert.equal(bright.length, 4);
+  assert.equal(new Set(low.map(p => JSON.stringify(p.settings))).size, 4, 'les quatre chaînes sont distinctes');
+  assert.ok(bright[0].settings.highpass > low[0].settings.highpass, 'plus de bas mesuré → passe-haut plus haut');
+  assert.ok(bright[0].settings.deess > low[0].settings.deess, 'plus de brillance mesurée → contrôle sifflantes renforcé');
+  assert.ok(bright[3].settings.comp < bright[2].settings.comp, 'version naturelle moins compressée');
 });
