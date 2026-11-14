@@ -13,6 +13,7 @@ import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.j
 import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult } from '../lib/ingexpert.js';
 import { analyzeMaster, compareToRef } from '../lib/meters.js';
 import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
+import { evaluateExpertPass, expertAgentSummary } from '../lib/expert-agent.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -1388,14 +1389,31 @@ export async function render(el, { params }) {
     track._abUrls && track._abUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch {} }); track._abUrls = null;
     masterResult = null;
     say('Mesure de la justesse après traitement…');
-    const jAfter = justesse((await detectPitch(track.buffer)).f0, key);
+    let agentQA = null;
+    if (expert && dspAnalysis?.valid) {
+      say('Contrôle qualité du traitement (avant / après)…');
+      const afterSamples = track.buffer.getChannelData(0);
+      const afterBasic = analyzeSamples(afterSamples, track.buffer.sampleRate);
+      const afterDsp = analyzeVoiceDsp(afterSamples, track.buffer.sampleRate);
+      agentQA = evaluateExpertPass(
+        { peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, clipPct: analysis.clipPct, sibilanceRatio: dspAnalysis.sibilanceRatio },
+        { peakDb: afterBasic.peakDb, rmsDb: afterBasic.rmsDb, clipPct: afterBasic.clipPct, sibilanceRatio: afterDsp?.valid ? afterDsp.sibilanceRatio : null }
+      );
+      if (agentQA.verdict === 'rollback') {
+        track.buffer = raw;
+        track.fxDone = [];
+        track.gainDb = 0;
+        track.pan = 0;
+      }
+    }
+    const jAfter = agentQA?.verdict === 'rollback' ? jBefore : justesse((await detectPitch(track.buffer)).f0, key);
     track.inge = {
       role, key: keyName(key), bpm: ingeSession.bpm, levelDb, noiseDb, peakDb: levelDb,
       snrDb: Math.round((rmsDb - noiseDb) * 10) / 10,
       denoise: plan.denoise, alignMs, gainDb: track.gainDb,
       justesseBefore: jBefore.pct, justesseAfter: jAfter.pct,
       seconds: Math.round((performance.now() - t0) / 100) / 10, tips: null, tipsSource: null,
-      expert: false, reportText: null, em: null,
+      expert: false, reportText: null, em: null, agentQA,
     };
     if (expert) {
       say('Sonie et équilibre voix/instru…');
@@ -1406,7 +1424,7 @@ export async function render(el, { params }) {
       const em = { style: ingePrefs.style, peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, crestDb: analysis.crestDb, clipPct: analysis.clipPct, lufs, brightness: analysis.brightness, resonanceHz: analysis.resonanceHz, breathPct: analysis.breathPct, deess: ex.voice.deess, notchHz: ex.steps.notchHz, instruDuck, justesseBefore: jBefore.pct, justesseAfter: jAfter.pct,
         dsp: dspAnalysis?.valid ? { peakDbfs: dspAnalysis.peakDbfs, rmsDbfs: dspAnalysis.rmsDbfs, noiseFloorEstimateDbfs: dspAnalysis.noiseFloorEstimateDbfs, crestDb: dspAnalysis.crestDb, spectralCentroidHz: dspAnalysis.spectralCentroidHz, bandEnergy: dspAnalysis.bandEnergy, sibilanceRatio: dspAnalysis.sibilanceRatio, lowRatio: dspAnalysis.lowRatio, highRatio: dspAnalysis.highRatio, confidence: dspAnalysis.confidence } : null,
         dspRecommendations: voiceDspRecommendations(dspAnalysis || {}) };
-      track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em);
+      track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em) + (agentQA ? '\\n\\n' + expertAgentSummary(agentQA) : '');
     }
     drawList(); drawEdit(); updUndo();
     fetchTips(track);     // conseils du LLM à partir des SEULES mesures (aucun audio envoyé)
@@ -1605,6 +1623,15 @@ export async function render(el, { params }) {
         h('label.chk.small', ingeExpert, '🎓 Mode expert : analyse poussée (dynamique, sifflantes, résonance, clipping, LUFS), de-esser + EQ anti-résonance, voix calée au-dessus de l’instru, conseils d’ingé pro'),
         h('div.row', h('span.small', '🎚️ Style :'), h('div.grow', ingeStyle)),
         h('div.row', h('button.btn.small', { onclick: () => openConsult() }, '💬 Consulter l’ingé son (voix, basses, mastering, référence)')),
+        h('button.btn.primary', { onclick: async (e) => {
+          const t = tracks[selected];
+          if (!t || t.kind !== 'voix' || t.empty) return toast('Sélectionne d’abord une vraie piste voix.');
+          e.currentTarget.disabled = true;
+          ingePrefs.enabled = true; ingePrefs.expert = true; ingeOn.checked = true; ingeExpert.checked = true; saveIngePrefs();
+          try { await processTake(t); toast('Agent Expert : analyse et traitement terminés. Écoute A/B avant de garder le résultat.', 'ok'); }
+          catch (err) { toastErr(err); }
+          e.currentTarget.disabled = false;
+        } }, '🧠 Lancer l’agent Expert sur la piste sélectionnée'),
         h('div.row', h('button.btn.small', { onclick: (e) => micTest(e.target) }, '🎤 Test micro (5 s)'), h('button.btn.small', { onclick: (e) => analyzeInstru(e.target) }, '🎵 Analyser l’instru (tonalité + BPM)')),
         micInfo, instruInfo,
         h('p.tiny.muted', 'Après chaque prise : rôle proposé (Lead, Double, Backs, Ad-lib), chaîne selon les mesures (débruitage dosé, anti-pop, gate, calage, autotune dans la tonalité, chaîne voix et volume/panoramique du rôle, écho au tempo), rapport chiffré, conseils (mesures seules, aucun audio envoyé), A/B. Vu-mètre et alerte « SATURE » dans « Mes pistes ».'),
