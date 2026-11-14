@@ -1,0 +1,50 @@
+name: Tester le catalogue Awin léger
+
+on:
+  push:
+    branches: [perf/compact-awin-catalogue-feed]
+    paths:
+      - "catalogue.html"
+      - "scripts/build_awin_catalogue.mjs"
+      - "scripts/build_awin_catalogue.test.mjs"
+      - ".github/workflows/test-compact-awin-catalogue.yml"
+  pull_request:
+    paths:
+      - "catalogue.html"
+      - "scripts/build_awin_catalogue.mjs"
+      - "scripts/build_awin_catalogue.test.mjs"
+      - ".github/workflows/test-compact-awin-catalogue.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  compact-feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vérifier la syntaxe et les tests unitaires
+        run: |
+          node --check scripts/build_awin_catalogue.mjs
+          node --test scripts/build_awin_catalogue.test.mjs
+      - name: Construire le flux compact depuis le vrai snapshot Awin
+        run: node scripts/build_awin_catalogue.mjs
+      - name: Vérifier la cohérence du flux compact réel
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const source = JSON.parse(fs.readFileSync("data/awin-products.json", "utf8"));
+          const compact = JSON.parse(fs.readFileSync("data/awin-catalogue.json", "utf8"));
+          if (compact.source_product_count !== source.products.length || compact.fetched_at !== source.fetched_at) {
+            throw new Error("Le snapshot compact ne correspond pas à la source Awin.");
+          }
+          const bytes = fs.statSync("data/awin-catalogue.json").size;
+          if (!compact.products.length || bytes > 16 * 1024 * 1024) {
+            throw new Error("Le flux compact est vide ou dépasse 16 Mio.");
+          }
+          console.log("Flux compact réel validé :", compact.products.length, "fiches ;", bytes, "octets.");
+          NODE
