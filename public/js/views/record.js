@@ -152,11 +152,11 @@ export async function render(el, { params }) {
   const saveIngePrefs = () => { try { localStorage.setItem('studio_inge', JSON.stringify(ingePrefs)); } catch {} };
   const ingeSession = { key: null, keyLabel: null, bpm: null };
   const ingeOn = h('input', { type: 'checkbox', checked: ingePrefs.enabled });
-  const ingeAuto = h('input', { type: 'checkbox', checked: ingePrefs.autoProcess });
+  // Les prises sont toujours conservées brutes après l'enregistrement.
+  ingePrefs.autoProcess = false; saveIngePrefs();
   const ingeExpert = h('input', { type: 'checkbox', checked: ingePrefs.expert });
   const ingeStyle = h('select', STYLE_ORDER.map(s => h('option', { value: s, selected: s === ingePrefs.style }, STYLES[s].label)));
   ingeOn.onchange = () => { ingePrefs.enabled = ingeOn.checked; saveIngePrefs(); drawInge(); };
-  ingeAuto.onchange = () => { ingePrefs.autoProcess = ingeAuto.checked; saveIngePrefs(); };
   ingeExpert.onchange = () => { ingePrefs.expert = ingeExpert.checked; saveIngePrefs(); const track = tracks[selected]; if (track?.kind === 'voix') processTake(track); else drawInge(); };
   ingeStyle.onchange = () => { ingePrefs.style = ingeStyle.value; saveIngePrefs(); };
   const micInfo = h('div.small.muted');
@@ -498,9 +498,7 @@ export async function render(el, { params }) {
       beatGainNode = null; saveSoon(true);
       if (monOn.checked) openLiveMonitor();
       if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
-      // Ingé son IA : traitement automatique de la prise (en local), si activé.
-      const ingeTake = tracks[selected];
-      if (ingePrefs.enabled && ingePrefs.autoProcess && ingeTake && ingeTake.kind === 'voix') { try { await processTake(ingeTake); } catch (e) { toastErr(e); } }
+      // Aucun effet n'est appliqué à la fin de la prise : traitement manuel uniquement.
       stopping.p = null;
       ast?.onRecordStopped();
     })();
@@ -1673,7 +1671,6 @@ export async function render(el, { params }) {
       h('div.card.stack',
         h('h3', '🎚️ Ingé son IA'),
         h('label.chk.small', ingeOn, 'Activer — analyse, autotune et mix automatiques (100 % en local, gratuit)'),
-        h('label.chk.small', ingeAuto, 'Traiter chaque prise automatiquement dès la fin de l’enregistrement'),
         h('label.chk.small', ingeExpert, '🎓 Mode expert : analyse poussée (dynamique, sifflantes, résonance, clipping, LUFS), de-esser + EQ anti-résonance, voix calée au-dessus de l’instru, conseils d’ingé pro'),
         h('div.row', h('span.small', '🎚️ Style :'), h('div.grow', ingeStyle)),
         h('div.row', h('button.btn.small', { onclick: () => openConsult() }, '💬 Consulter l’ingé son (voix, basses, mastering, référence)')),
@@ -1749,10 +1746,14 @@ export async function render(el, { params }) {
         return { node, marker };
       });
       const panel = (name, label, node) => {
-        const section = h('section.studio-expert-panel');
-        section.append(h('div.studio-expert-panel-title', h('span', label), h('span.studio-expert-status', 'LOCAL DSP')));
+        const section = h('section.studio-expert-panel', { draggable: true, 'data-panel': name });
+        section.append(h('div.studio-expert-panel-title', { title: 'Glisse ce bandeau pour déplacer le panneau' }, h('span', '⠿ ' + label), h('span.studio-expert-status', 'DÉPLAÇABLE · REDIMENSIONNABLE')));
         if (node) section.append(node);
         else section.append(h('p.small.muted', 'Ce module sera disponible lorsqu’une piste ou une prise sera chargée.'));
+        section.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', name); e.dataTransfer.effectAllowed = 'move'; section.classList.add('is-dragging'); });
+        section.addEventListener('dragend', () => section.classList.remove('is-dragging'));
+        section.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+        section.addEventListener('drop', e => { e.preventDefault(); const moving = expertWorkspace?.querySelector('[data-panel="' + e.dataTransfer.getData('text/plain') + '"]'); if (!moving || moving === section) return; const r = section.getBoundingClientRect(); expertWorkspace.insertBefore(moving, e.clientY < r.top + r.height / 2 ? section : section.nextSibling); try { localStorage.setItem('studio.expertPanelOrder', JSON.stringify([...expertWorkspace.querySelectorAll('[data-panel]')].map(x => x.dataset.panel))); } catch {} });
         return section;
       };
       expertWorkspace = h('div.studio-expert-workspace',
@@ -1760,11 +1761,13 @@ export async function render(el, { params }) {
           h('div.studio-expert-title', h('span.studio-expert-kicker', 'STUDIO IA / PROFESSIONAL WORKSPACE'), h('strong', 'Régie de production')),
           h('div.studio-expert-live', h('i'), 'MOTEUR AUDIO LOCAL')),
         panel('tracks', '01 / SESSION & TIMELINE', nodes.tracks),
-        h('div.studio-expert-grid',
-          h('div.studio-expert-column', panel('settings', '02 / PRISE DE SON', nodes.settings), panel('assistant', 'ASSISTANT DE SESSION', nodes.assistant)),
-          h('div.studio-expert-column', panel('engineer', '03 / HEAD AUDIO ENGINEER', nodes.engineer), panel('editor', '04 / ÉDITION & TRAITEMENT', nodes.editor)),
-          h('div.studio-expert-column', panel('master', '05 / MIX BUS & MASTER', nodes.master))),
+        panel('settings', '02 / PRISE DE SON', nodes.settings),
+        panel('assistant', 'ASSISTANT DE SESSION', nodes.assistant),
+        panel('engineer', '03 / HEAD AUDIO ENGINEER', nodes.engineer),
+        panel('editor', '04 / ÉDITION & TRAITEMENT', nodes.editor),
+        panel('master', '05 / MIX BUS & MASTER', nodes.master),
         panel('mixer', '06 / CONSOLE MULTIPISTE', nodes.mixer));
+      try { const order = JSON.parse(localStorage.getItem('studio.expertPanelOrder') || '[]'); for (const key of order) { const p = expertWorkspace.querySelector('[data-panel="' + key + '"]'); if (p) expertWorkspace.append(p); } } catch {}
       studioHeader.after(expertWorkspace);
     }
     if (enabled) {
