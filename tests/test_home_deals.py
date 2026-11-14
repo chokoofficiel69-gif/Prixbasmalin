@@ -228,6 +228,21 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn('label:"Rechercher"', product_page)
 
 
+    def test_gifts_do_not_repeat_the_same_image_and_keep_filling_with_unique_photos(self):
+        awin = {"fetched_at": "2026-11-14T00:00:00Z", "products": [
+            product("Parfum A 30 ml", "A", 20, image="https://img.example/shared.webp"),
+            product("Parfum A2 30 ml", "A", 30, image="https://img.example/unique-a.webp"),
+            product("Parfum B 30 ml", "B", 25, image="https://img.example/shared.webp"),
+            product("Parfum C 30 ml", "C", 28, image="https://img.example/unique-c.webp"),
+        ]}
+        gifts = deals.build_gifts(awin, limit=48)
+        images = [gift["image"] for gift in gifts]
+        self.assertEqual(len(gifts), 3)
+        self.assertEqual(len(images), len(set(images)))
+        self.assertIn("https://img.example/unique-a.webp", images)
+        self.assertIn("https://img.example/unique-c.webp", images)
+
+
 class ProductSheetOutlierTests(unittest.TestCase):
     def test_absurd_high_prices_are_dropped(self):
         spec2 = importlib.util.spec_from_file_location("bps", ROOT / "scripts" / "build_product_sheets.py")
