@@ -1693,20 +1693,22 @@ export async function render(el, { params }) {
     ['🧠 Ingénieur son IA', 'Ingé son IA'],
     ['🎛️ Mix & mastering', 'Mixage et mastering'],
   ];
-  const studioHeader = h('section.card.stack', { style: { marginBottom: '14px', padding: '16px', border: '1px solid var(--accent)', background: 'linear-gradient(120deg, color-mix(in srgb, var(--accent) 13%, var(--panel)), var(--panel))' } },
-    h('div.row', { style: { alignItems: 'center', justifyContent: 'space-between' } },
-      h('div.stack', { style: { gap: '3px' } },
-        h('span.tiny', { style: { color: 'var(--accent)', fontWeight: 800, letterSpacing: '.12em' } }, 'STUDIO AUDIO PROFESSIONNEL'),
-        h('h2', { style: { margin: 0 } }, 'Poste de production'),
-        h('p.small.muted', { style: { margin: 0 } }, 'Enregistre ta voix, travaille le son, mixe et prépare ton master depuis un seul espace.')),
-      h('span.badge.ok', 'Traitement local')),
-    h('div.row', { style: { gap: '7px' } }, ...studioSections.map(([label, target]) =>
+  const studioHeader = h('section.card.stack.studio-hero', { style: { marginBottom: '14px', padding: '16px' } },
+    h('div.row.studio-hero-top', { style: { justifyContent: 'space-between' } },
+      h('div.studio-ai-identity',
+        h('div.studio-ai-orb', h('span')),
+        h('div.studio-ai-copy',
+          h('span.eyebrow', 'STUDIO IA · HEAD AUDIO ENGINEER'),
+          h('h2', 'La régie intelligente'),
+          h('p.small', 'Analyse vocale, chaîne de traitement, console et mastering dans un environnement de studio.'))),
+      h('span.badge.ok', 'DSP local · sans API audio payante')),
+    h('div.row.studio-shortcuts', { style: { gap: '7px' } }, ...studioSections.map(([label, target]) =>
       h('button.btn.small', { onclick: () => {
         const heading = [...el.querySelectorAll('h3')].find(x => x.textContent.includes(target));
         const card = heading?.closest('.card');
         if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); card.style.outline = '2px solid var(--accent)'; setTimeout(() => { card.style.outline = ''; }, 1200); }
       } }, label))),
-    h('p.tiny.muted', { style: { margin: 0 } }, 'Parcours conseillé : 1. préparer le micro et enregistrer · 2. corriger/nettoyer la voix · 3. équilibrer les pistes · 4. masteriser et exporter. Les commandes ci-dessous pilotent les outils existants du projet.')
+    h('p.tiny.studio-guidance', { style: { margin: 0 } }, 'Ordre de travail : 1. Ingénieur du son · 2. Autotune professionnel · 3. Enregistrement · 4. Mixage et mastering. Les outils existants restent accessibles et pilotables.')
   );
   el.prepend(studioHeader);
 
