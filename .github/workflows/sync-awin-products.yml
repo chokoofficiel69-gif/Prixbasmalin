@@ -240,7 +240,7 @@ jobs:
             ["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"].includes(p.imageStatus) &&
             p.imageKind !== "illustration"
           );
-          if (data.status !== "ok" || data.schema_version !== 1 ||
+          if (data.status !== "ok" || data.schema_version !== 1 || data.image_policy !== "authorized_feed_images_only" ||
               data.fetched_at !== process.env.EXPECTED_FETCHED_AT ||
               data.products.length !== verified.length || data.source_product_count !== source.products.length) {
             throw new Error("Le flux catalogue léger ne correspond pas au flux Awin complet.");
