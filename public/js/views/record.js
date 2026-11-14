@@ -1538,6 +1538,7 @@ export async function render(el, { params }) {
         { id:'rap', name:'2 · Rap précis', explanation:'Correction plus ferme et présence légère, sans effet robot extrême.', strength:0.88, speed:65, eqGain:1.2, delayMix:0.08, reverbMix:0.04, key },
         { id:'melodic', name:'3 · Mélodique', explanation:'Correction fluide, petit écho et espace modéré pour une voix chantée.', strength:0.78, speed:115, eqGain:0.5, delayMix:0.18, reverbMix:0.16, key },
       ];
+      let ready = 0;
       for (const option of defs) {
         const card = h('div.card.stack', { style:{padding:'10px'} });
         const status = h('p.tiny.muted','En attente du rendu…');
@@ -1569,9 +1570,16 @@ export async function render(el, { params }) {
           labels,h('div.row',rerender,apply),audio,status);
         alternativesBox.append(card);
         option.card=card;
-        await renderExpertOption(track,option,card,status);
+        try {
+          await renderExpertOption(track,option,card,status);
+          if (option.buffer) ready++;
+        } catch (e) {
+          status.textContent='Rendu impossible : '+e.message;
+        }
       }
-      toast('Trois rendus audio distincts sont prêts à comparer.','ok');
+      if (ready === defs.length) toast('Trois rendus audio distincts sont prêts à comparer.','ok');
+      else if (ready > 0) toast(`${ready} proposition(s) audio prête(s) ; les autres ont rencontré une erreur ou un contrôle qualité défavorable.`,'ok');
+      else toast('Aucune proposition n’a passé le contrôle qualité. La prise originale est conservée.');
     } catch(e) {
       alternativesBox.append(h('p.small.muted','Aucune proposition produite : '+e.message));
       toast('Analyse interrompue : '+e.message);
