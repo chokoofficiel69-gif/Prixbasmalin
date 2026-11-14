@@ -180,10 +180,20 @@ def build_gifts(awin, limit=48, now=None, previous_gifts=None):
                     mixed.append(lane.pop(len(lane) // 2))
         by_merchant[merchant] = mixed
     gifts, queues = [], [list(v) for _, v in sorted(by_merchant.items())]
+    # Une même photo de flux ne doit apparaître qu'une fois dans la vitrine :
+    # les variantes (stockage, taille, couleur) restent accessibles sur leur fiche,
+    # mais ne prennent pas plusieurs emplacements promotionnels.
+    seen_images = set()
     while len(gifts) < limit and any(queues):
         for q in queues:
-            if q and len(gifts) < limit:
-                gifts.append(q.pop(0))
+            while q and len(gifts) < limit:
+                candidate = q.pop(0)
+                image_key = candidate["image"]
+                if image_key in seen_images:
+                    continue
+                seen_images.add(image_key)
+                gifts.append(candidate)
+                break
     return gifts
 
 
