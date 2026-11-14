@@ -8,6 +8,8 @@ on:
     branches: [main, awin-direct-feed-fix-2026-11-04, fix/awin-gtin-mpn-aliases, fix/awin-feed-import-freshness-2026-11-13, fix/awin-feed-timestamp-self-test]
     paths:
       - "price-engine/sync-awin-products.mjs"
+      - "scripts/build_awin_catalogue.mjs"
+      - "scripts/build_awin_catalogue.test.mjs"
       - "scripts/build_home_deals.py"
       - "scripts/check_awin_gift_images.py"
       - "scripts/build_seo_pages.py"
@@ -43,6 +45,8 @@ jobs:
         run: |
           node --check price-engine/sync-awin-products.mjs
           node price-engine/sync-awin-products.mjs --self-test
+          node --check scripts/build_awin_catalogue.mjs
+          node --test scripts/build_awin_catalogue.test.mjs
       - name: Vérifier la présence d'un accès Awin sans afficher sa valeur
         env:
           AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
@@ -78,7 +82,9 @@ jobs:
           AWIN_PRODUCT_DATA_API_KEY: ${{ secrets.AWIN_PRODUCT_DATA_API_KEY }}
           AWIN_PUBLISHER_ID: "3137386"
           AWIN_FEED_LOCALE: "fr_FR"
-        run: node price-engine/sync-awin-products.mjs
+        run: |
+          node price-engine/sync-awin-products.mjs
+          node scripts/build_awin_catalogue.mjs
       - name: Mettre à jour la vitrine d'accueil (idées cadeaux)
         run: |
           python3 scripts/build_home_deals.py
@@ -95,7 +101,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- data/awin-products.json data/awin-sync-status.json data/home-deals.json idees-cadeaux prix sitemap.xml sitemap.txt data/sitemap-lastmod.json; then
+          if git diff --quiet -- data/awin-products.json data/awin-catalogue.json data/awin-sync-status.json data/home-deals.json idees-cadeaux prix sitemap.xml sitemap.txt data/sitemap-lastmod.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Aucune nouvelle donnée catalogue ; aucun commit inutile."
             exit 0
@@ -109,7 +115,7 @@ jobs:
           echo "expected_fetched_at=$EXPECTED_FETCHED_AT" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/awin-products.json data/awin-sync-status.json data/home-deals.json idees-cadeaux prix sitemap.xml sitemap.txt data/sitemap-lastmod.json
+          git add data/awin-products.json data/awin-catalogue.json data/awin-sync-status.json data/home-deals.json idees-cadeaux prix sitemap.xml sitemap.txt data/sitemap-lastmod.json
           git commit -m "Refresh authorized Awin product catalogue"
           for attempt in 1 2 3; do
             git fetch origin "${GITHUB_REF_NAME}"
@@ -213,6 +219,53 @@ jobs:
           done
           echo "::error::Le site public n'a pas servi la nouvelle version du flux Awin après 10 minutes."
           exit 1
+      - name: Vérifier le flux catalogue léger publié
+        if: steps.save.outputs.changed == 'true' && github.ref == 'refs/heads/main'
+        env:
+          EXPECTED_FETCHED_AT: ${{ steps.save.outputs.expected_fetched_at }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --connect-timeout 3 --max-time 20 \
+            -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
+            "https://prixbasmalin.fr/data/awin-catalogue.json?v=${EXPECTED_FETCHED_AT}" --output /tmp/awin-catalogue-public.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const raw = fs.readFileSync("/tmp/awin-catalogue-public.json", "utf8");
+          const data = JSON.parse(raw);
+          const source = JSON.parse(fs.readFileSync("/tmp/awin-public.json", "utf8"));
+          const verified = source.products.filter(p =>
+            p && p.id && p.name && p.merchant && /^https:\/\//i.test(String(p.sourceUrl || "")) &&
+            /^https:\/\//i.test(String(p.image || "")) && !/unsplash\.com/i.test(String(p.image || "")) &&
+            ["manufacturer_verified","official_press_image","retailer_product_image","authorized_feed_image"].includes(p.imageStatus) &&
+            p.imageKind !== "illustration"
+          );
+          const byId = new Map(verified.map(p => [String(p.id), p]));
+          const seen = new Set();
+          if (data.status !== "ok" || data.schema_version !== 1 || data.image_policy !== "authorized_feed_images_only" ||
+              data.fetched_at !== process.env.EXPECTED_FETCHED_AT ||
+              data.products.length !== verified.length || data.source_product_count !== source.products.length) {
+            throw new Error("Le flux catalogue léger ne correspond pas au flux Awin complet.");
+          }
+          for (const product of data.products) {
+            const id = String(product.id);
+            const original = byId.get(id);
+            if (!original || seen.has(id)) throw new Error("Identité produit absente ou dupliquée dans le flux compact.");
+            seen.add(id);
+            for (const field of ["name","image","sourceUrl","merchant","priceValue","priceTaxStatus","merchantUpdatedAt","shippingPriceValue","availability","gtin","mpn","category","brand","product_type"]) {
+              if (product[field] !== original[field]) throw new Error("Champ source modifié : " + field + " (" + id + ").");
+            }
+          }
+          const bytes = Buffer.byteLength(raw, "utf8");
+          if (bytes > 16 * 1024 * 1024) throw new Error("Le flux catalogue léger dépasse 16 Mio.");
+          console.log("Catalogue navigateur vérifié :", data.products.length, "fiches ;", bytes, "octets ;", Math.round(bytes / 1024 / 1024 * 100) / 100, "Mio.");
+          NODE
+          curl --fail --silent --show-error --location --connect-timeout 3 --max-time 20 \
+            -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
+            "https://prixbasmalin.fr/catalogue.html?v=${EXPECTED_FETCHED_AT}" --output /tmp/catalogue-compact-public.html
+          grep -Fq 'fetch("/data/awin-catalogue.json"' /tmp/catalogue-compact-public.html
+          grep -Fq 'fetch("/data/awin-products.json"' /tmp/catalogue-compact-public.html
+          echo "Catalogue public : flux léger utilisé, repli sûr conservé."
       - name: Vérifier la vitrine cadeaux et les images marchandes publiques
         if: ${{ steps.save.outputs.changed == 'true' && github.ref == 'refs/heads/main' }}
         env:
