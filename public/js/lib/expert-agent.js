@@ -44,5 +44,5 @@ export function expertAgentSummary(result) {
   const title = result?.verdict === 'rollback' ? 'Contrôle qualité : traitement à annuler'
     : result?.verdict === 'review' ? 'Contrôle qualité : écoute ciblée nécessaire'
     : 'Contrôle qualité : mesures sans alerte majeure';
-  return [title, ...(result?.checks || []).map(x => (x.level === 'error' ? '⛔ ' : x.level === 'warning' ? '⚠️ ' : '✓ ') + x.message)].join('\\n');
+  return [title, ...(result?.checks || []).map(x => (x.level === 'error' ? '⛔ ' : x.level === 'warning' ? '⚠️ ' : '✓ ') + x.message)].join('\n');
 }
