@@ -4,10 +4,12 @@
   "private": true,
   "description": "Studio IA personnel : discussion multi-modèles, agents, images, clips, musique et voix, branché sur FreeLLMAPI.",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node server/index.js",
-    "test": "node --test --test-concurrency=1 test/quota.test.mjs test/routing.test.mjs test/ingesong.test.mjs test/autotunepro.test.mjs test/daw.test.mjs test/comp.test.mjs test/ingexpert.test.mjs test/ingexpert-dsp.test.mjs test/meters.test.mjs"
+    "test": "node --test --test-concurrency=1 test/quota.test.mjs test/routing.test.mjs test/ingesong.test.mjs test/autotunepro.test.mjs test/daw.test.mjs test/comp.test.mjs test/ingexpert.test.mjs test/ingexpert-dsp.test.mjs test/meters.test.mjs test/livetune-worklet.test.mjs"
   },
   "license": "MIT"
 }
