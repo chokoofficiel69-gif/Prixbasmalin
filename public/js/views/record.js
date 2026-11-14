@@ -1631,6 +1631,30 @@ export async function render(el, { params }) {
       ),
     ),
   ));
+  // Tableau de bord professionnel : accès direct aux zones de travail déjà présentes.
+  const studioSections = [
+    ['🎙️ Enregistrement', 'Réglages d’enregistrement'],
+    ['🎚️ Console', 'Console de mixage'],
+    ['🧠 Ingénieur son IA', 'Ingé son IA'],
+    ['🎛️ Mix & mastering', 'Mixage et mastering'],
+  ];
+  const studioHeader = h('section.card.stack', { style: { marginBottom: '14px', padding: '16px', border: '1px solid var(--accent)', background: 'linear-gradient(120deg, color-mix(in srgb, var(--accent) 13%, var(--panel)), var(--panel))' } },
+    h('div.row', { style: { alignItems: 'center', justifyContent: 'space-between' } },
+      h('div.stack', { style: { gap: '3px' } },
+        h('span.tiny', { style: { color: 'var(--accent)', fontWeight: 800, letterSpacing: '.12em' } }, 'STUDIO AUDIO PROFESSIONNEL'),
+        h('h2', { style: { margin: 0 } }, 'Poste de production'),
+        h('p.small.muted', { style: { margin: 0 } }, 'Enregistre ta voix, travaille le son, mixe et prépare ton master depuis un seul espace.')),
+      h('span.badge.ok', 'Traitement local')),
+    h('div.row', { style: { gap: '7px' } }, ...studioSections.map(([label, target]) =>
+      h('button.btn.small', { onclick: () => {
+        const heading = [...el.querySelectorAll('h3')].find(x => x.textContent.includes(target));
+        const card = heading?.closest('.card');
+        if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); card.style.outline = '2px solid var(--accent)'; setTimeout(() => { card.style.outline = ''; }, 1200); }
+      } }, label))),
+    h('p.tiny.muted', { style: { margin: 0 } }, 'Parcours conseillé : 1. préparer le micro et enregistrer · 2. corriger/nettoyer la voix · 3. équilibrer les pistes · 4. masteriser et exporter. Les commandes ci-dessous pilotent les outils existants du projet.')
+  );
+  el.prepend(studioHeader);
+
   await restoreSession();
   drawList(); drawEdit(); ast?.refresh();
 
