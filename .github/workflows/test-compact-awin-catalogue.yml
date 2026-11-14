@@ -31,17 +31,6 @@ jobs:
         run: |
           node --check scripts/build_awin_catalogue.mjs
           node --test scripts/build_awin_catalogue.test.mjs
-      - name: Diagnostiquer le poids des champs Awin source
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from "node:fs";
-          const feed = JSON.parse(fs.readFileSync("data/awin-products.json", "utf8"));
-          const totals = Object.keys(feed.products[0] || {}).map(key => ({
-            field: key,
-            bytes: Buffer.byteLength(JSON.stringify(feed.products.map(p => p[key] ?? null)), "utf8")
-          })).sort((a,b) => b.bytes-a.bytes);
-          console.log("Poids des champs source (octets) :", JSON.stringify(totals.slice(0,20)));
-          NODE
       - name: Construire le flux compact depuis le vrai snapshot Awin
         run: node scripts/build_awin_catalogue.mjs
       - name: Vérifier la cohérence du flux compact réel
@@ -50,7 +39,7 @@ jobs:
           import fs from "node:fs";
           const source = JSON.parse(fs.readFileSync("data/awin-products.json", "utf8"));
           const compact = JSON.parse(fs.readFileSync("data/awin-catalogue.json", "utf8"));
-          if (compact.source_product_count !== source.products.length || compact.fetched_at !== source.fetched_at) {
+          if (compact.image_policy !== "authorized_feed_images_only" || compact.source_product_count !== source.products.length || compact.fetched_at !== source.fetched_at) {
             throw new Error("Le snapshot compact ne correspond pas à la source Awin.");
           }
           const bytes = fs.statSync("data/awin-catalogue.json").size;
