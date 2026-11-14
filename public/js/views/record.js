@@ -1462,7 +1462,7 @@ export async function render(el, { params }) {
       em.diagnostic = diagnostic;
       const diagnosticText = [
         'DIAGNOSTIC EXPERT · confiance ' + diagnostic.confidenceLabel,
-        ...diagnostic.findings.map((item, index) => (index + 1) + '. ' + item.title + ' — ' + item.evidence + '\\n   Action : ' + item.action),
+        ...diagnostic.findings.map((item, index) => (index + 1) + '. ' + item.title + ' — ' + item.evidence + '\n   Action : ' + item.action),
         diagnostic.disclaimer
       ].join(String.fromCharCode(10));
       track.inge.reportText = expertReport(em) + String.fromCharCode(10, 10) + diagnosticText + (agentQA ? String.fromCharCode(10, 10) + expertAgentSummary(agentQA) : '');
