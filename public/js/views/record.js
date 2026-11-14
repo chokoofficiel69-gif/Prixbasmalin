@@ -1045,7 +1045,7 @@ export async function render(el, { params }) {
       const r = await master(mixed, masterSel.value, (s) => { masterInfo.innerHTML = `<span class="spinner"></span> ${s}`; });
       masterResult = r;
       masterInfo.innerHTML = '';
-      masterInfo.append(h('div', `Sonie : ${r.before.toFixed(1)} → ${r.after.toFixed(1)} LUFS (cible ${r.target}) · crête ${r.peakDb.toFixed(1)} dBFS · durée ${fmtTime(r.buffer.duration)}`));
+      masterInfo.append(h('div', `Sonie : ${r.before.toFixed(1)} → ${r.after.toFixed(1)} LUFS (cible ${r.target}) · crête ${r.peakDb.toFixed(1)} dBFS${r.truePeakGainDb < 0 ? ` · sécurité True Peak : ${r.truePeakGainDb.toFixed(1)} dB` : ''} · durée ${fmtTime(r.buffer.duration)}`));
       mixPlayerEl.innerHTML = '';
       mixPlayerEl.append(h('audio', { controls: true, src: URL.createObjectURL(encodeWav(r.buffer)) }));
       renderMasterMeters(r.buffer, r.after);
