@@ -150,11 +150,10 @@ def awin_offers(feed):
             url = str(offer.get("url") or offer.get("sourceUrl") or product.get("sourceUrl") or "")
             if not gtin or not price or not url.startswith("https://"):
                 continue
-            # Date de la ligne produit si le marchand la fournit, sinon date de mise à jour du flux marchand.
-            # La date de téléchargement par Prix Malin n'est jamais utilisée comme date de prix.
+            # Seule une date propre à cette offre/fiche peut dater le prix.
+            # feedUpdatedAt provient de feed_last_imported : il date le flux, pas le prix du produit.
             product_date = parse_time(offer.get("merchantUpdatedAt") or product.get("merchantUpdatedAt"))
-            feed_date = parse_time(offer.get("feedUpdatedAt") or product.get("feedUpdatedAt"))
-            checked = product_date or feed_date
+            checked = product_date
             yield {
                 "gtin": gtin,
                 "source": "awin",
@@ -166,7 +165,7 @@ def awin_offers(feed):
                 "shipping_price_eur": money(offer.get("shippingPriceValue")),
                 "url": url,
                 "checked_at": iso(checked),
-                "checked_at_basis": "merchant_product_update" if product_date else ("merchant_feed_update" if feed_date else None),
+                "checked_at_basis": "merchant_product_update" if product_date else None,
                 "price_tax_status": "included" if (offer.get("priceTaxStatus") or product.get("priceTaxStatus")) == "included" else "unspecified",
                 "availability": availability(offer.get("availability") or product.get("availability")),
             }
@@ -190,8 +189,9 @@ def rakuten_offers(feed):
             "price_eur": price,
             "shipping_price_eur": money(product.get("shippingPriceValue")),
             "url": url,
-            "checked_at": iso(parse_time(product.get("sourceCreatedAt"))),
-            "checked_at_basis": "merchant_feed_creation",
+            # sourceCreatedAt date la création du snapshot Rakuten, pas la mise à jour du prix.
+            "checked_at": iso(parse_time(product.get("merchantUpdatedAt") or product.get("priceUpdatedAt"))),
+            "checked_at_basis": "merchant_product_update" if parse_time(product.get("merchantUpdatedAt") or product.get("priceUpdatedAt")) else None,
             # Le TTC n'est retenu que si le snapshot porte la confirmation explicite.
             "price_tax_status": "included" if tax_verified and product.get("priceTaxStatus") == "included" else "unspecified",
             "availability": availability(product.get("availability")),
