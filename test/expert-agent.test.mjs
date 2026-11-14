@@ -31,3 +31,25 @@ test('summary reminds that A/B listening remains necessary', () => {
   assert.match(summary, /Contrôle qualité/);
   assert.match(summary, /A\/B à écouter/);
 });
+
+
+test('diagnostic vocal : priorise les défauts mesurés et reste prudent', async () => {
+  const { diagnoseVoice } = await import('../public/js/lib/expert-agent.js');
+  const r = diagnoseVoice({
+    clipPct: 0.2, peakDb: -0.4, crestDb: 4,
+    sibilanceRatio: 0.3, lowRatio: 0.7,
+    confidence: 0.9
+  });
+  assert.equal(r.findings[0].code, 'clipping');
+  assert.ok(r.findings.some(x => x.code === 'sibilance'));
+  assert.equal(r.confidenceLabel, 'bonne');
+  assert.match(r.disclaimer, /écoute/i);
+});
+
+test('diagnostic vocal : ne transforme pas une mesure absente en défaut', async () => {
+  const { diagnoseVoice } = await import('../public/js/lib/expert-agent.js');
+  const r = diagnoseVoice({});
+  assert.equal(r.findings.length, 1);
+  assert.equal(r.findings[0].code, 'listen_ab');
+  assert.equal(r.confidenceLabel, 'faible');
+});
