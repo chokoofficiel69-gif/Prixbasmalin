@@ -13,7 +13,7 @@ import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.j
 import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult, buildVoiceProposals } from '../lib/ingexpert.js';
 import { analyzeMaster, compareToRef } from '../lib/meters.js';
 import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
-import { evaluateExpertPass, expertAgentSummary } from '../lib/expert-agent.js';
+import { evaluateExpertPass, expertAgentSummary, diagnoseVoice } from '../lib/expert-agent.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -1451,7 +1451,21 @@ export async function render(el, { params }) {
       const em = { style: ingePrefs.style, peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, crestDb: analysis.crestDb, clipPct: analysis.clipPct, lufs, brightness: analysis.brightness, resonanceHz: analysis.resonanceHz, breathPct: analysis.breathPct, deess: ex.voice.deess, notchHz: ex.steps.notchHz, instruDuck, justesseBefore: jBefore.pct, justesseAfter: jAfter.pct,
         dsp: dspAnalysis?.valid ? { peakDbfs: dspAnalysis.peakDbfs, rmsDbfs: dspAnalysis.rmsDbfs, noiseFloorEstimateDbfs: dspAnalysis.noiseFloorEstimateDbfs, crestDb: dspAnalysis.crestDb, spectralCentroidHz: dspAnalysis.spectralCentroidHz, bandEnergy: dspAnalysis.bandEnergy, sibilanceRatio: dspAnalysis.sibilanceRatio, lowRatio: dspAnalysis.lowRatio, highRatio: dspAnalysis.highRatio, confidence: dspAnalysis.confidence } : null,
         dspRecommendations: voiceDspRecommendations(dspAnalysis || {}) };
-      track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em) + (agentQA ? String.fromCharCode(10, 10) + expertAgentSummary(agentQA) : '');
+      track.inge.expert = true; track.inge.em = em;
+      const diagnostic = diagnoseVoice({
+        clipPct: analysis.clipPct, peakDb: analysis.peakDb,
+        rmsDbfs: dspAnalysis?.rmsDbfs, crestDb: dspAnalysis?.crestDb,
+        noiseFloorEstimateDbfs: dspAnalysis?.noiseFloorEstimateDbfs,
+        sibilanceRatio: dspAnalysis?.sibilanceRatio, lowRatio: dspAnalysis?.lowRatio,
+        confidence: dspAnalysis?.confidence
+      });
+      em.diagnostic = diagnostic;
+      const diagnosticText = [
+        'DIAGNOSTIC EXPERT · confiance ' + diagnostic.confidenceLabel,
+        ...diagnostic.findings.map((item, index) => (index + 1) + '. ' + item.title + ' — ' + item.evidence + '\\n   Action : ' + item.action),
+        diagnostic.disclaimer
+      ].join(String.fromCharCode(10));
+      track.inge.reportText = expertReport(em) + String.fromCharCode(10, 10) + diagnosticText + (agentQA ? String.fromCharCode(10, 10) + expertAgentSummary(agentQA) : '');
     }
     drawList(); drawEdit(); updUndo();
     fetchTips(track);     // conseils du LLM à partir des SEULES mesures (aucun audio envoyé)
