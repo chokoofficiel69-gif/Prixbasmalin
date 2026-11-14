@@ -15,11 +15,9 @@ const VERIFIED_IMAGE_STATUSES = new Set([
 ]);
 
 const PRODUCT_FIELDS = [
-  "id", "name", "desc", "query", "category", "category_label", "brand",
-  "color", "size", "availability", "priceTaxStatus", "shippingPriceValue",
-  "merchantUpdatedAt", "feedUpdatedAt", "gtin", "mpn", "identityType",
-  "image", "imageSource", "imageSourceName", "imageKind", "imageStatus",
-  "merchant", "priceValue", "price", "sourceUrl", "isAwinProduct"
+  "id", "name", "category", "brand", "color", "size", "product_type",
+  "availability", "priceTaxStatus", "shippingPriceValue", "merchantUpdatedAt",
+  "gtin", "mpn", "image", "merchant", "priceValue", "sourceUrl"
 ];
 
 const OFFER_FIELDS = [
@@ -87,6 +85,7 @@ export function buildCompactFeed(feed) {
   return {
     status: "ok",
     schema_version: 1,
+    image_policy: "authorized_feed_images_only",
     fetched_at: feed.fetched_at,
     source_product_count: feed.products.length,
     products
