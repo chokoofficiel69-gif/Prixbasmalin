@@ -104,3 +104,12 @@ export function compareToRef(mix, ref) {
   if (!tips.length) tips.push('Ton mix est déjà proche de la référence sur le niveau, la balance et la stéréo.');
   return tips.slice(0, 4);
 }
+
+/** Gain de sécurité à appliquer après le limiteur pour respecter un plafond True-Peak estimé. */
+export function truePeakCeilingGainDb(L, R = null, ceilingDb = -1) {
+  const ceiling = Number.isFinite(ceilingDb) ? ceilingDb : -1;
+  const peakL = truePeakDb(L);
+  const peakR = R ? truePeakDb(R) : -Infinity;
+  const measured = Math.max(peakL, peakR);
+  return Number.isFinite(measured) ? Math.min(0, Math.round((ceiling - measured) * 10) / 10) : 0;
+}

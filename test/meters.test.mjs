@@ -2,7 +2,7 @@
 // Lancer : node --test test/meters.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { peakDb, rmsDb, crestDb, truePeakDb, phaseCorrelation, stereoWidth, spectralBands, analyzeMaster, compareToRef } from '../public/js/lib/meters.js';
+import { peakDb, rmsDb, crestDb, truePeakDb, truePeakCeilingGainDb, phaseCorrelation, stereoWidth, spectralBands, analyzeMaster, compareToRef } from '../public/js/lib/meters.js';
 
 const sine = (hz, sec = 1, sr = 44100, amp = 0.5, ph = 0) => { const n = Math.floor(sec * sr), a = new Float32Array(n); for (let i = 0; i < n; i++) a[i] = amp * Math.sin(2 * Math.PI * hz * i / sr + ph); return a; };
 
@@ -58,4 +58,13 @@ test('compareToRef donne des conseils chiffrés', () => {
   assert.ok(tips.some(t => /Graves/i.test(t)));
   assert.ok(tips.some(t => /Stéréo/i.test(t)));
   assert.ok(compareToRef({ lufs: -10, width: 30, bands: { low: .3, mid: .4, high: .3 } }, { lufs: -10, width: 30, bands: { low: .3, mid: .4, high: .3 } }).length >= 1);
+});
+
+test('plafond True-Peak calcule une réduction de gain sûre pour L/R', () => {
+  const hot = sine(3675, 0.2, 44100, 1, Math.PI / 12);
+  const safe = sine(1000, 0.2, 44100, 0.5);
+  assert.ok(truePeakCeilingGainDb(hot, null, -1) < 0, 'réduit si le TP dépasse le plafond');
+  assert.equal(truePeakCeilingGainDb(safe, safe, -1), 0, 'ne remonte jamais un signal déjà sûr');
+  const gain = 10 ** (truePeakCeilingGainDb(hot, null, -1) / 20);
+  assert.ok(truePeakDb(Float32Array.from(hot, x => x * gain)) <= -0.9, 'ramène le TP sous le plafond avec marge d’arrondi');
 });
