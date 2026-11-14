@@ -90,7 +90,7 @@ test("exclut exactement les visuels que le catalogue public ne doit pas montrer"
   assert.equal(isCatalogueImage(illustration), false);
   assert.equal(isCatalogueImage(unsplash), false);
   assert.equal(isCatalogueImage(http), false);
-  assert.equal(buildCompactFeed(feed([generic, illustration, unsplash, http])).products.length, 0);
+  assert.throws(() => buildCompactFeed(feed([generic, illustration, unsplash, http])), /Aucune fiche Awin/);
 });
 
 test("refuse une source absente, vide ou mal datée", () => {
