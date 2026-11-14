@@ -156,7 +156,7 @@ export async function render(el, { params }) {
   const ingeStyle = h('select', STYLE_ORDER.map(s => h('option', { value: s, selected: s === ingePrefs.style }, STYLES[s].label)));
   ingeOn.onchange = () => { ingePrefs.enabled = ingeOn.checked; saveIngePrefs(); drawInge(); };
   ingeAuto.onchange = () => { ingePrefs.autoProcess = ingeAuto.checked; saveIngePrefs(); };
-  ingeExpert.onchange = () => { ingePrefs.expert = ingeExpert.checked; saveIngePrefs(); };
+  ingeExpert.onchange = () => { ingePrefs.expert = ingeExpert.checked; saveIngePrefs(); const track = tracks[selected]; if (track?.kind === 'voix') processTake(track); else drawInge(); };
   ingeStyle.onchange = () => { ingePrefs.style = ingeStyle.value; saveIngePrefs(); };
   const micInfo = h('div.small.muted');
   const instruInfo = h('div.small.muted');
