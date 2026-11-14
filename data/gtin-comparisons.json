@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
  "status": "ok",
- "generated_at": "2026-11-14T00:28:11.041969Z",
+ "generated_at": "2026-11-14T00:35:51.171066Z",
  "freshness_max_age_hours": 48,
  "method": "GTIN valide commun à au moins deux marchands ; marque, contenance et nom contrôlés pour refuser les faux rapprochements.",
  "counts": {
@@ -9,7 +9,7 @@
   "comparisons": 36,
   "comparisons_with_two_current_offers": 0,
   "offers": 72,
-  "offers_stale_or_undated": 36,
+  "offers_stale_or_undated": 72,
   "offers_tax_confirmed": 0,
   "rejected": {
    "name_mismatch": 7,
@@ -43,8 +43,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430610910313007533748361&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fmalbrum-wildfire-extrait-de-parfum-unisex%3Fvariant%3D56535562224000",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -57,12 +57,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011556&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -89,8 +89,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430615484568862252725598&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-vii-queen-anne-cosmos-flower-noble-collection-parfum-for-women%3Fvariant%3D56535405691264",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -103,12 +103,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010722&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -135,8 +135,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069252174453351111793&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-crab-apple-blossom-est-1872-crown-collection-parfum-unisex%3Fvariant%3D56535404609920",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -149,12 +149,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011296&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -181,8 +181,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543065250092687402757692&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-1872-feminine-original-collection-parfum-for-women%3Fvariant%3D56535404282240",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -195,12 +195,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=42967200313&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -227,8 +227,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430617858523071098452173&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-x-feminine-original-collection-parfum-for-women%3Fvariant%3D56535405887872",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -241,12 +241,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41436994935&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -273,12 +273,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010721&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     },
     {
      "merchant": "Nicchia Luxury",
@@ -287,8 +287,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061915015135718461222&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-i-woody-floral-feminine-private-collection-parfum-for-women%3Fvariant%3D56535404773760",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -319,8 +319,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430612413971712305890008&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-town-country-est-1872-crown-collection-parfum-unisex%3Fvariant%3D56535404708224",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -333,12 +333,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41436994940&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -365,8 +365,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430616631805668290453676&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fclive-christian-l-red-tea-vetiver-private-collection-parfum-for-men%3Fvariant%3D56535405265280",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -379,12 +379,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=40965549114&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -411,8 +411,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543063830117774763016130&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fhoubigant-paris-ambre-des-abysses-eau-de-parfum-for-men%3Fvariant%3D56535500587392",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -425,12 +425,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41474260804&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -457,12 +457,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41090259806&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     },
     {
      "merchant": "Nicchia Luxury",
@@ -471,8 +471,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430612477576128407929957&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-le-patchouli-elixir-eau-de-parfum-unisex%3Fvariant%3D56535901733248",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -503,12 +503,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41484300607&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     },
     {
      "merchant": "Nicchia Luxury",
@@ -517,8 +517,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430615618341401453958798&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-dolce-riviera-eau-de-parfum-unisex%3Fvariant%3D56535901340032",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -549,8 +549,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430613644678543941543624&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-fleur-de-delice-eau-de-parfum-unisex%3Fvariant%3D56535901438336",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -563,12 +563,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41090259814&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -595,12 +595,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=42813651398&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     },
     {
      "merchant": "Nicchia Luxury",
@@ -609,8 +609,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061353880123860802776&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-souffle-ambre-intense-eau-de-toilette-unisex%3Fvariant%3D56535902617984",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -641,12 +641,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41090259805&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     },
     {
      "merchant": "Nicchia Luxury",
@@ -655,8 +655,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543063148840293273445480&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-musc-charnel-eau-de-parfum-unisex%3Fvariant%3D56535902355840",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -687,8 +687,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543067324257527617008343&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Ffloraiku-paris-and-your-lips-eau-de-parfum-unisex%3Fvariant%3D56535447667072",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -701,12 +701,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=44423524941&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -733,8 +733,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430611224838672562420286&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-absolute-aphrodisiac-eau-de-parfum-unisex%3Fvariant%3D56535504126336",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -747,12 +747,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41618525531&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -779,8 +779,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543068090704228354716087&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-oud-for-happiness-eau-de-parfum-unisex%3Fvariant%3D56535505043840",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -793,12 +793,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011244&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -825,8 +825,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543067758624838591775560&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-high-frequency-eau-de-parfum-unisex%3Fvariant%3D56535504683392",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -839,12 +839,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010735&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -871,8 +871,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069147915704127254315&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-power-self-extrait-de-parfum-unisex%3Fvariant%3D56535505109376",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -885,12 +885,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41474260818&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -917,8 +917,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543067530850119204880617&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-miksado-extrait-de-parfum-unisex%3Fvariant%3D56535513563520",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -931,12 +931,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41517730789&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -963,8 +963,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069659329295429277043&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-origino-extrait-de-parfum-unisex%3Fvariant%3D56535513858432",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -977,12 +977,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011945&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1009,8 +1009,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430617499725415233216080&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-vespero-extrait-de-parfum-for-men%3Fvariant%3D56535514055040",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1023,12 +1023,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011947&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1055,8 +1055,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430615914929499673951961&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-boha-extrait-de-parfum-for-women%3Fvariant%3D56535512482176",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1069,12 +1069,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011948&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1101,8 +1101,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069961334844409122793&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-ligno-extrait-de-parfum-unisex%3Fvariant%3D56535513465216",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1115,12 +1115,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011949&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1147,8 +1147,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430617144978009881084100&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-gozo-extrait-de-parfum-unisex%3Fvariant%3D56535513235840",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1161,12 +1161,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=46418890246&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1193,8 +1193,8 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061713450501071961237&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fjeroboam-unue-extrait-de-parfum-unisex%3Fvariant%3D56535513923968",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1207,12 +1207,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179011952&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1239,8 +1239,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430610281583193283202203&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-duro-extrait-de-parfum-for-men%3Fvariant%3D56535790846336",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1253,12 +1253,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010246&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1285,8 +1285,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543064031857943847989821&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-narcotic-v-extrait-de-parfum-for-women%3Fvariant%3D56535791305088",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1299,12 +1299,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010247&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1331,8 +1331,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.54306145991959580140319&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-silver-musk-extrait-de-parfum-unisex%3Fvariant%3D56535792189824",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1345,12 +1345,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010248&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1377,8 +1377,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061659367951624268476&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-absinth-extrait-de-parfum-unisex%3Fvariant%3D56535789830528",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1391,12 +1391,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010249&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1423,8 +1423,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430613219464005789074313&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-black-afgano-extrait-de-parfum-unisex%3Fvariant%3D56535790190976",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1437,12 +1437,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010251&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1469,8 +1469,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543065639663353997585214&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-pardon-extrait-de-parfum-for-men%3Fvariant%3D56535791665536",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1483,12 +1483,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=44079959413&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1515,8 +1515,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430613176498862800728877&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-blamage-extrait-de-parfum-unisex%3Fvariant%3D56535790420352",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1529,12 +1529,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010253&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1561,8 +1561,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543064256098095113448884&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-baraonda-extrait-de-parfum-unisex%3Fvariant%3D56535789896064",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1575,12 +1575,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010254&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1607,8 +1607,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061294527454276738958&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-nudiflorum-extrait-de-parfum-unisex%3Fvariant%3D56535791567232",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1621,12 +1621,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010255&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   },
@@ -1653,8 +1653,8 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543068814477109130796727&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fnasomatto-fantomas-extrait-de-parfum-unisex%3Fvariant%3D56535791108480",
-     "checked_at": "2026-11-07T03:05:36Z",
-     "checked_at_basis": "merchant_feed_creation",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
@@ -1667,12 +1667,12 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010256&a=3137386&m=105475",
-     "checked_at": "2026-11-14T00:11:29Z",
-     "checked_at_basis": "merchant_feed_update",
+     "checked_at": null,
+     "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
      "freshness_max_age_hours": 48,
-     "stale": false
+     "stale": true
     }
    ]
   }
