@@ -5767,10 +5767,16 @@ function pmAwinPriceIsFresh(value,now=Date.now()){
 async function pmLoadAwinCatalogue(){
   const setStatus=()=>{};
   try{
-    let response=await fetch("/data/awin-catalogue.json",{cache:"no-cache"});
-    if(!response.ok)response=await fetch("/data/awin-products.json",{cache:"no-cache"});
-    if(!response.ok){setStatus("Flux marchand momentanément indisponible ; les prix marchands ne sont pas actualisés.");return;}
-    const feed=await response.json();
+    let feed=null;
+    try{
+      const compactResponse=await fetch("/data/awin-catalogue.json",{cache:"no-cache"});
+      if(compactResponse.ok)feed=await compactResponse.json();
+    }catch{}
+    if(feed?.status!=="ok"||!Array.isArray(feed.products)){
+      const fallbackResponse=await fetch("/data/awin-products.json",{cache:"no-cache"});
+      if(!fallbackResponse.ok){setStatus("Flux marchand momentanément indisponible ; les prix marchands ne sont pas actualisés.");return;}
+      feed=await fallbackResponse.json();
+    }
     if(feed?.status!=="ok"||!Array.isArray(feed.products)){
       setStatus("Le flux marchand reçu n’a pas le format attendu ; aucun prix de ce flux n’est affiché.");
       return;
