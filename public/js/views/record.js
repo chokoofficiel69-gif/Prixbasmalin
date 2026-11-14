@@ -1424,7 +1424,7 @@ export async function render(el, { params }) {
       const em = { style: ingePrefs.style, peakDb: analysis.peakDb, rmsDb: analysis.rmsDb, crestDb: analysis.crestDb, clipPct: analysis.clipPct, lufs, brightness: analysis.brightness, resonanceHz: analysis.resonanceHz, breathPct: analysis.breathPct, deess: ex.voice.deess, notchHz: ex.steps.notchHz, instruDuck, justesseBefore: jBefore.pct, justesseAfter: jAfter.pct,
         dsp: dspAnalysis?.valid ? { peakDbfs: dspAnalysis.peakDbfs, rmsDbfs: dspAnalysis.rmsDbfs, noiseFloorEstimateDbfs: dspAnalysis.noiseFloorEstimateDbfs, crestDb: dspAnalysis.crestDb, spectralCentroidHz: dspAnalysis.spectralCentroidHz, bandEnergy: dspAnalysis.bandEnergy, sibilanceRatio: dspAnalysis.sibilanceRatio, lowRatio: dspAnalysis.lowRatio, highRatio: dspAnalysis.highRatio, confidence: dspAnalysis.confidence } : null,
         dspRecommendations: voiceDspRecommendations(dspAnalysis || {}) };
-      track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em) + (agentQA ? '\\n\\n' + expertAgentSummary(agentQA) : '');
+      track.inge.expert = true; track.inge.em = em; track.inge.reportText = expertReport(em) + (agentQA ? String.fromCharCode(10, 10) + expertAgentSummary(agentQA) : '');
     }
     drawList(); drawEdit(); updUndo();
     fetchTips(track);     // conseils du LLM à partir des SEULES mesures (aucun audio envoyé)
