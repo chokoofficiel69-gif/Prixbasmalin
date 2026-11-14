@@ -246,3 +246,74 @@ canvas.wave { background: linear-gradient(180deg, #0c0e13, #090a0e); }
 .strip input.fader { -webkit-appearance: slider-vertical; appearance: slider-vertical; writing-mode: vertical-lr; direction: rtl; width: 26px; height: 120px; padding: 0; background: var(--panel2); border-radius: 99px; accent-color: var(--accent); }
 .strip input[type=range]:not(.fader) { width: 100%; }
 canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg, #0c0e13, #090a0e); border-radius: 8px; border: 1px solid var(--line); display: block; }
+
+
+/* ===== Studio IA · régie immersive inspirée des références ===== */
+:root {
+  --accent: #398cff;
+  --accent2: #65d8ff;
+}
+:root[data-theme="light"] {
+  --accent: #245fd6;
+  --accent2: #168dbb;
+}
+.studio-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 172px;
+  border-color: #315b88 !important;
+  background:
+    radial-gradient(ellipse at 78% 48%, rgba(36,117,210,.22), transparent 36%),
+    radial-gradient(ellipse at 8% 0%, rgba(180,35,55,.17), transparent 42%),
+    linear-gradient(115deg, #10141e 0%, #111c2b 55%, #0d111a 100%) !important;
+  box-shadow: inset 0 1px 0 rgba(160,210,255,.12), 0 12px 36px rgba(0,0,0,.22) !important;
+}
+.studio-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .22;
+  background-image: radial-gradient(rgba(125,190,255,.55) .7px, transparent .9px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(90deg, transparent 20%, #000 75%);
+}
+.studio-hero .studio-hero-top { position: relative; z-index: 1; align-items: center; }
+.studio-ai-identity {
+  display: flex; align-items: center; gap: 16px; min-width: 0;
+}
+.studio-ai-orb {
+  position: relative; flex: none; width: 88px; height: 88px; border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 30%, #e9f8ff 0 3%, #8bd8ff 5%, transparent 22%),
+    radial-gradient(circle at 58% 46%, #1d77d5 0 12%, #123a70 48%, #09172a 72%);
+  border: 1px solid rgba(125,205,255,.65);
+  box-shadow: 0 0 18px rgba(50,150,255,.55), inset -9px -8px 20px rgba(0,0,0,.55);
+}
+.studio-ai-orb::before, .studio-ai-orb::after {
+  content: ''; position: absolute; inset: -9px; border: 1px solid rgba(107,188,255,.42);
+  border-radius: 46% 54% 58% 42%; transform: rotate(28deg);
+  box-shadow: 0 0 12px rgba(50,150,255,.18);
+}
+.studio-ai-orb::after { inset: -16px 3px; transform: rotate(-34deg); border-style: dashed; opacity: .7; }
+.studio-ai-copy { display: grid; gap: 4px; min-width: 0; }
+.studio-ai-copy .eyebrow { color: #76caff; font-size: 10px; font-weight: 800; letter-spacing: .2em; }
+.studio-ai-copy h2 { color: #f1f7ff; font-size: clamp(19px, 2.6vw, 27px); margin: 0; }
+.studio-ai-copy p { color: #aabbd0; margin: 0; max-width: 620px; }
+.studio-hero .badge { color: #a9e4ff; border-color: rgba(105,190,255,.4); background: rgba(27,75,120,.28); }
+.studio-hero .btn { border-color: rgba(100,165,230,.32); background: rgba(18,34,54,.82); color: #dceeff; }
+.studio-hero .btn:hover { border-color: #58baff; background: rgba(28,75,120,.65); }
+.studio-hero .btn.primary { background: linear-gradient(120deg,#1768c9,#248dc7); border-color: #369be0; color: white; }
+.studio-hero .studio-shortcuts { position: relative; z-index: 1; margin-top: 15px; }
+.studio-hero .studio-shortcuts .btn { flex: 1 1 auto; }
+.studio-hero .studio-guidance { position: relative; z-index: 1; color: #91a9c3; }
+.mixer .strip { border-radius: 5px; background: linear-gradient(180deg,#202733,#131923); border-color: #354252; box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 5px 16px rgba(0,0,0,.2); }
+.mixer .strip.master { background: linear-gradient(180deg,#1d2c40,#121b28); border-top-color: #3c9df2; }
+.mixer .strip input.fader { accent-color: #58aaff; }
+.mixer .strip canvas.vu { background: linear-gradient(180deg,#23151a,#101820); border-color: #405064; }
+.mixer .strip-name { color: #d8e9fa; letter-spacing: .03em; }
+@media (max-width: 600px) {
+  .studio-ai-orb { width: 64px; height: 64px; }
+  .studio-hero { padding: 12px !important; }
+  .studio-ai-identity { gap: 11px; }
+}
