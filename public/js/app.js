@@ -7,7 +7,7 @@ const VIEWS = [
   { id: 'images', label: 'IMAGES', title: 'Images', icon: '🎨', load: () => import('./views/images.js') },
   { id: 'clips', label: 'VIDÉOS ET CLIPS', title: 'Vidéos et clips', icon: '🎬', load: () => import('./views/clips.js') },
   { id: 'musique', label: 'STUDIO MUSIQUE', title: 'Studio musique', icon: '🎹', load: () => import('./views/music.js') },
-  { id: 'enregistrement', label: 'ENREGISTREMENT AUDIO', title: 'Enregistrement audio', icon: '🎙️', load: () => import('./views/record.js') },
+  { id: 'enregistrement', label: 'ENREGISTREMENT AUDIO', title: 'Enregistrement audio', icon: '🎙️', load: () => import('./views/record.js?v=20261114-voice-console-13') },
   { id: 'projets', label: 'MES PROJETS', title: 'Mes projets', icon: '🗂️', load: () => import('./views/projects.js') },
   { id: 'fichiers', label: 'FICHIERS', title: 'Fichiers', icon: '📁', load: () => import('./views/files.js') },
   { id: 'tokens', label: 'SUIVI DES TOKENS', title: 'Suivi des tokens', icon: '📊', load: () => import('./views/usage.js') },
