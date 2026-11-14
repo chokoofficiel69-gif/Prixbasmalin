@@ -10,7 +10,7 @@ import { ROLES, ROLE_ORDER, proposeRole, adlibPan, roleChain, micAdvice, justess
 import { VOICE_TYPES, VOICE_TYPE_ORDER, PRO_PRESETS, PRO_PRESET_ORDER, DEFAULT_PRO, clampPro, buildTuneStep, applyPreset, formantForVoice, proName } from '../lib/autotunepro.js';
 import { clampBpm, fmtBarsBeats, countInDuration, beatClickTimes, colorForTrack, dbToMeterPct } from '../lib/daw.js';
 import { planComp, stitchMono, splitLoopTakes, punchInMono } from '../lib/comp.js';
-import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult } from '../lib/ingexpert.js';
+import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertReport, expertTipsPrompt, CONSULTATIONS, buildConsult, buildVoiceProposals } from '../lib/ingexpert.js';
 import { analyzeMaster, compareToRef } from '../lib/meters.js';
 import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
 
@@ -1412,6 +1412,51 @@ export async function render(el, { params }) {
     fetchTips(track);     // conseils du LLM à partir des SEULES mesures (aucun audio envoyé)
   }
 
+  async function generateVoiceProposals(track) {
+    if (!track?.original || !track.inge?.em) return toast('Lance d’abord l’analyse experte de cette prise.');
+    const btn = document.querySelector('[data-head-engineer-generate]');
+    if (btn) btn.disabled = true;
+    try {
+      const plans = buildVoiceProposals(track.inge.em, track.inge.style || ingePrefs.style);
+      const rendered = [];
+      for (const plan of plans) {
+        const buffer = await voiceChain(track.original, plan.settings);
+        rendered.push({ ...plan, buffer });
+      }
+      track.inge.proposals = rendered;
+      track.inge.proposalSelected = null;
+      drawInge();
+      toast('4 versions vocales calculées depuis les mesures de ta prise. Écoute-les avant validation.', 'ok');
+    } catch (e) { toastErr(e); }
+    finally { if (btn) btn.disabled = false; }
+  }
+
+  function previewVoiceProposal(track, id) {
+    const proposal = track?.inge?.proposals?.find(p => p.id === id);
+    if (!proposal) return;
+    try {
+      const url = URL.createObjectURL(encodeWav(proposal.buffer));
+      track._proposalUrls ||= [];
+      track._proposalUrls.push(url);
+      ingeAudio.src = url;
+      ingeAudio.play().catch(() => {});
+      track.inge.proposalSelected = id;
+      drawInge();
+    } catch (e) { toastErr(e); }
+  }
+
+  function applyVoiceProposal(track, id) {
+    const proposal = track?.inge?.proposals?.find(p => p.id === id);
+    if (!proposal) return;
+    pushUndo(track, { buffer: track.buffer, fxDone: (track.fxDone || []).slice(), label: 'Avant proposition Head Engineer' });
+    track.buffer = cloneBuffer(proposal.buffer);
+    track.fxDone = [...(track.fxDone || []), 'Head Engineer · ' + proposal.name];
+    track.inge.appliedProposal = id;
+    masterResult = null;
+    drawList(); drawEdit(); updUndo(); drawInge();
+    toast('Proposition appliquée. La prise originale reste conservée.', 'ok');
+  }
+
   async function fetchTips(track) {
     const { system, prompt } = track.inge.expert ? expertTipsPrompt(track.inge.em) : tipsPrompt(track.inge);
     try {
@@ -1484,6 +1529,16 @@ export async function render(el, { params }) {
       h('div.row', h('span.small', 'Rôle :'), h('div.grow', roleSel), h('span.tiny.muted', g.seconds != null ? `traité en ${g.seconds} s` : '')),
       h('pre.small', { style: { whiteSpace: 'pre-wrap', background: 'var(--bg)', padding: '8px', borderRadius: '10px', margin: 0 } }, g.reportText || buildReport(g)),
       h('div.row', h('button.btn.small', { onclick: () => abIng(t, 'a') }, 'A · prise brute'), h('button.btn.small.primary', { onclick: () => abIng(t, 'b') }, 'B · traitée')),
+      ...(g.expert ? [h('div.card.stack', { style: { padding: '10px' } },
+        h('strong.small', '🧠 HEAD AUDIO ENGINEER AI · propositions vocales'),
+        h('p.tiny.muted', 'Quatre rendus hors-ligne calculés à partir des mesures de cette prise. Écoute chaque version puis applique celle que tu préfères.'),
+        h('button.btn.small.primary', { 'data-head-engineer-generate': '1', onclick: () => generateVoiceProposals(t) }, g.proposals?.length ? '↻ Recalculer les 4 propositions' : '✨ Générer 4 propositions audio'),
+        ...(g.proposals || []).map(p => h('div.row', { style: { alignItems: 'center', gap: '6px' } },
+          h('div.grow', h('strong.small', p.name), h('div.tiny.muted', p.objective)),
+          h('button.btn.small', { onclick: () => previewVoiceProposal(t, p.id) }, g.proposalSelected === p.id ? '▶ Écoutée' : '▶ Écouter'),
+          h('button.btn.small.primary', { onclick: () => applyVoiceProposal(t, p.id), disabled: g.appliedProposal === p.id }, g.appliedProposal === p.id ? '✓ Appliquée' : 'Appliquer')
+        ))
+      )] : []),
       ingeAudio,
       h('p.tiny.muted', 'La prise brute est conservée. « ↩ Annuler » (en haut des effets) revient étape par étape ; « ↺ Revenir à l’original » repart de la prise brute.'));
     if (g.tips === null) ingeReport.append(h('div.small.muted', h('span.spinner'), ' Conseils de l’ingé son…'));
