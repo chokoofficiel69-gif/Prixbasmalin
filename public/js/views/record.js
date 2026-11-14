@@ -1528,7 +1528,7 @@ export async function render(el, { params }) {
       const srcDsp = analyzeVoiceDsp(source.getChannelData(0), source.sampleRate);
       const srcBasic = analyzeSamples(source.getChannelData(0), source.sampleRate);
       if (!srcDsp.valid || srcDsp.confidence < 0.35) throw new Error('Signal trop faible ou trop court pour produire trois propositions fiables.');
-      if (srcBasic.peakDb > -0.05 || srcBasic.clipPct > 1) throw new Error('La source semble déjà écrêtée. Reprends l’enregistrement avec davantage de marge avant de générer des versions.');
+      if (srcBasic.peakDb > -0.05 || srcBasic.clipPct > 0.01) throw new Error('La source semble déjà écrêtée. Reprends l’enregistrement avec davantage de marge avant de générer des versions.');
       const pitch = await detectPitch(source);
       const voiced = pitch.f0.filter(v => v > 0).length / Math.max(1, pitch.f0.length);
       if (voiced < 0.08) throw new Error('Je ne détecte pas assez de hauteur vocale stable pour proposer trois corrections de justesse fiables.');
@@ -1553,8 +1553,8 @@ export async function render(el, { params }) {
           h('label.small','Écho · mix ',delay));
         const apply = h('button.btn.small.primary',{onclick:()=>{
           if(!option.buffer) return toast('Génère d’abord le rendu sans écrêtage.');
-          pushUndo(track,{buffer:track.buffer,fxDone:(track.fxDone||[]).slice(),label:'Choisir proposition IA'});
-          track.buffer=option.buffer; track.fxDone=[...(track.fxDone||[]),'Proposition IA : '+option.name];
+          pushUndo(track,{buffer:track.buffer,fxDone:(track.fxDone||[]).slice(),label:'Choisir proposition audio'});
+          track.buffer=option.buffer; track.fxDone=[...(track.fxDone||[]),'Proposition audio : '+option.name];
           masterResult=null; drawList(); drawEdit(); updUndo(); toast(option.name+' appliquée à la piste.','ok');
         }},'Utiliser cette version');
         const rerender = h('button.btn.small',{onclick:async()=>{
@@ -1723,7 +1723,7 @@ export async function render(el, { params }) {
         } }, '🧠 Lancer l’agent Expert sur la piste sélectionnée'),
         h('div.row', h('button.btn.small', { onclick: (e) => micTest(e.target) }, '🎤 Test micro (5 s)'), h('button.btn.small', { onclick: (e) => analyzeInstru(e.target) }, '🎵 Analyser l’instru (tonalité + BPM)')),
         micInfo, instruInfo,
-        h('button.btn.primary', { onclick:(e)=>generateExpertOptions(e.currentTarget) }, '🎧 Générer 3 propositions audio IA'),
+        h('button.btn.primary', { onclick:(e)=>generateExpertOptions(e.currentTarget) }, '🎧 Générer 3 propositions audio'),
         alternativesBox,
         h('p.tiny.muted', 'Après chaque prise : rôle proposé (Lead, Double, Backs, Ad-lib), chaîne selon les mesures (débruitage dosé, anti-pop, gate, calage, autotune dans la tonalité, chaîne voix et volume/panoramique du rôle, écho au tempo), rapport chiffré, conseils (mesures seules, aucun audio envoyé), A/B. Vu-mètre et alerte « SATURE » dans « Mes pistes ».'),
         ingeReport),
