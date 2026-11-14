@@ -85,8 +85,25 @@ class GtinComparisonTests(unittest.TestCase):
         self.assertIsNone(list(MODULE.awin_offers(feed))[0]["checked_at"])
         feed["products"][0]["feedUpdatedAt"] = "2026-11-13 02:00:00"
         row = list(MODULE.awin_offers(feed))[0]
-        self.assertEqual(row["checked_at"], "2026-11-13T02:00:00Z")
-        self.assertEqual(row["checked_at_basis"], "merchant_feed_update")
+        self.assertIsNone(row["checked_at"])
+        self.assertIsNone(row["checked_at_basis"])
+        feed["products"][0]["merchantUpdatedAt"] = "2026-11-13T01:45:00Z"
+        row = list(MODULE.awin_offers(feed))[0]
+        self.assertEqual(row["checked_at"], "2026-11-13T01:45:00Z")
+        self.assertEqual(row["checked_at_basis"], "merchant_product_update")
+
+    def test_rakuten_snapshot_creation_time_is_not_price_update_date(self):
+        product = {"gtin": "652638010168", "priceValue": 360,
+                   "sourceUrl": "https://click.linksynergy.com/x",
+                   "merchant": "Nicchia Luxury", "name": "Clive Christian",
+                   "brand": "Clive Christian", "sourceCreatedAt": "2026-11-13T03:00:00Z"}
+        row = list(MODULE.rakuten_offers({"products": [product]}))[0]
+        self.assertIsNone(row["checked_at"])
+        self.assertIsNone(row["checked_at_basis"])
+        product["merchantUpdatedAt"] = "2026-11-13T02:30:00Z"
+        row = list(MODULE.rakuten_offers({"products": [product]}))[0]
+        self.assertEqual(row["checked_at"], "2026-11-13T02:30:00Z")
+        self.assertEqual(row["checked_at_basis"], "merchant_product_update")
 
     def test_committed_comparisons_respect_the_public_contract(self):
         data = json.loads((ROOT / "data" / "gtin-comparisons.json").read_text(encoding="utf-8"))
