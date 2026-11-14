@@ -33,6 +33,24 @@ jobs:
         run: |
           node --check scripts/build_awin_catalogue.mjs
           node --test scripts/build_awin_catalogue.test.mjs
+      - name: Diagnostiquer les 318 références classées « other »
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const feed = JSON.parse(fs.readFileSync("data/awin-products.json", "utf8"));
+          const other = feed.products.filter(p => p.category === "other");
+          const counts = {};
+          for (const p of other) {
+            const merchant = p.merchant || "sans marchand";
+            counts[merchant] = (counts[merchant] || 0) + 1;
+          }
+          console.log("OTHER_TOTAL", other.length);
+          console.log("OTHER_BY_MERCHANT", JSON.stringify(Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,40)));
+          console.log("OTHER_SAMPLE", JSON.stringify(other.slice(0,80).map(p => ({
+            id:p.id,name:p.name,desc:p.desc,brand:p.brand,merchant:p.merchant,
+            category:p.category,product_type:p.product_type,google_product_category:p.google_product_category
+          }))));
+          NODE
       - name: Construire le flux compact depuis le vrai snapshot Awin
         run: node scripts/build_awin_catalogue.mjs
       - name: Vérifier la cohérence du flux compact réel
