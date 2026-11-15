@@ -1,0 +1,75 @@
+name: Tests des pages produits Awin
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "scripts/build_awin_pages.py"
+      - "tests/test_awin_pages.py"
+      - ".github/workflows/sync-awin-products.yml"
+      - ".github/workflows/test-awin-product-pages.yml"
+      - "data/awin-products.json"
+  pull_request:
+    paths:
+      - "scripts/build_awin_pages.py"
+      - "tests/test_awin_pages.py"
+      - ".github/workflows/sync-awin-products.yml"
+      - ".github/workflows/test-awin-product-pages.yml"
+      - "data/awin-products.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-awin-product-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Vérifier la syntaxe du générateur
+        run: python3 -m py_compile scripts/build_awin_pages.py
+
+      - name: Tester la date individuelle, la fraîcheur et le statut TVA
+        run: python3 -m unittest discover -s tests -p 'test_awin_pages.py' -v
+
+      - name: Vérifier que le snapshot réel ne transforme pas la date d'import en date de prix
+        run: |
+          python3 - <<'PY'
+          import json
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+          import sys
+
+          sys.path.insert(0, "scripts")
+          import build_awin_pages as pages
+
+          feed = json.loads(Path("data/awin-products.json").read_text(encoding="utf-8"))
+          now = datetime.now(timezone.utc)
+          generated = pages.build(feed, now=now)
+          shown = 0
+          for html in generated.values():
+              shown += html.count("<strong>")
+          source_rows = feed.get("products") or []
+          fresh_rows = sum(
+              1 for row in source_rows
+              if pages.parse_feed_time(row.get("merchantUpdatedAt")) is not None
+              and timedelta(minutes=-5) <= now - pages.parse_feed_time(row.get("merchantUpdatedAt")) < timedelta(hours=48)
+              and str(row.get("priceTaxStatus") or row.get("price_tax_status") or "unspecified").lower() in ("included", "unspecified")
+              and row.get("priceValue") is not None
+          )
+          if shown > fresh_rows + 500:
+              raise SystemExit(f"Nombre de prix rendus anormalement élevé : {shown}; lignes marchandes fraîches : {fresh_rows}")
+          print(f"Pages générées : {len(generated)} ; prix issus de lignes avec date marchande fraîche : {fresh_rows}")
+          PY
