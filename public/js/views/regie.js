@@ -3,11 +3,12 @@
 // affiche de VRAIES formes d'onde (drawWave) et joue un vrai mix local. 100 % local, 0 €.
 // Les autres onglets sont des APERÇUS visuels de la maquette validée, clairement signalés,
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
-import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder } from '../lib/core.js';
+import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder, downloadBlob } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
-import { decodeBlob, drawWave, denoise, antipop, voiceChain, normalize, loudness } from '../lib/audio.js';
+import { decodeBlob, drawWave, denoise, antipop, voiceChain, normalize, loudness, encodeWav, master, cloneBuffer } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
 import { analyzeSamples, buildVoiceProposals, antipopFor } from '../lib/ingexpert.js';
+import { mountAssistant } from './assistant.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
 const CSS = `
@@ -377,6 +378,7 @@ export async function render(el, { params }) {
       await save();
       toast(`Prise enregistrée ✓ (${buffer.duration.toFixed(1)} s) — visible dans la Timeline`, 'ok');
       go(cur);
+      if (recViaAssistant) { recViaAssistant = false; try { ast?.onRecordStopped?.(); } catch {} }
     } catch (e) { toastErr(e); }
   }
   function stopAllRec() { try { rec?.stop(); } catch {} rec = null; recording = false; stopMon(); try { instruSrc?.stop(); } catch {} instruSrc = null; clearInterval(metroTimer); }
@@ -450,6 +452,69 @@ export async function render(el, { params }) {
       toast('Voix nettoyée & mixée ✓', 'ok');
     } catch (e) { if (status) status.textContent = 'Erreur'; toastErr(e); }
     finally { mixBusy = false; }
+  }
+
+  // ---------- Mixage (rendu offline) + master + export ----------
+  const VOICE_PRESETS = {
+    rap: { highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
+    chant: { highpass: 80, low: 1, presence: 2.5, air: 3, deess: 3, comp: 0.5, reverb: 0.22 },
+    propre: { highpass: 85, low: 0, presence: 3, air: 2, deess: 3, comp: 0.5, reverb: 0.06 },
+  };
+  let lastMaster = null;
+  async function renderMix() {
+    const audible = tracks.filter(t => t.buffer); if (!audible.length) return null;
+    const sr = audible[0].buffer.sampleRate, total = totalDuration();
+    const ctx = new OfflineAudioContext(2, Math.max(1, Math.ceil((total + 0.3) * sr)), sr);
+    const anySolo = tracks.some(t => t.solo);
+    for (const t of audible) {
+      const on = anySolo ? t.solo : !t.mute; if (!on) continue;
+      const s = ctx.createBufferSource(); s.buffer = t.buffer;
+      const g = ctx.createGain(); g.gain.value = 10 ** ((t.gainDb || 0) / 20); let node = g;
+      if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, t.pan || 0)); g.connect(p); node = p; }
+      s.connect(g); node.connect(ctx.destination); s.start(t.offset || 0);
+    }
+    return await ctx.startRendering();
+  }
+  const masterKey = (p) => { const s = String(p || '').toLowerCase(); if (/club|fort|boum|boom/.test(s)) return 'club'; if (/rap|punch/.test(s)) return 'rap'; return 'streaming'; };
+  async function doMasterExport(preset = 'streaming', download = true) {
+    const mix = await renderMix(); if (!mix) throw new Error('aucune piste à mixer');
+    const out = await master(mix, preset); lastMaster = out?.buffer || out;
+    if (download) downloadBlob(encodeWav(lastMaster, 16), `${(proj.name || 'studio').replace(/\s+/g, '-')}-master.wav`);
+    return lastMaster;
+  }
+
+  // ---------- Assistant ingé expert EN DIRECT (voix + texte + actions réelles) ----------
+  let ast = null, recViaAssistant = false, selVoixIdx = -1;
+  const lastVoixIdx = () => { let idx = -1; tracks.forEach((t, i) => { if (!isInstru(t)) idx = i; }); return idx; };
+  const curVoix = () => { let i = (selVoixIdx >= 0 && tracks[selVoixIdx] && !isInstru(tracks[selVoixIdx])) ? selVoixIdx : lastVoixIdx(); if (i < 0) throw new Error('aucune piste voix — enregistre d’abord'); return { t: tracks[i], i }; };
+  function buildAssistantS() {
+    return {
+      isRecording: () => recording,
+      snapshot: () => ({
+        enregistrement_en_cours: recording,
+        pistes: tracks.map((t, i) => ({ n: i + 1, nom: t.name, type: t.kind, duree_s: t.buffer ? Math.round(t.buffer.duration * 10) / 10 : 0, volume_db: t.gainDb, muet: t.mute, effets_appliques: t.fxDone || [] })),
+        piste_selectionnee: (lastVoixIdx() + 1) || 1, instru_presente: tracks.some(isInstru),
+      }),
+      record: async () => { recViaAssistant = true; const ci = recOpt.countIn; recOpt.countIn = 0; try { await startRecording(); } finally { recOpt.countIn = ci; } },
+      do: {
+        stop: async () => { if (recording) return stopRecording(); stopPlay(); stopPreview(); },
+        pause: async () => { stopPlay(); stopPreview(); },
+        play: async (x) => { if (x?.what === 'voix') { const { t } = curVoix(); playBuffer(t.buffer); } else startPlay(0); },
+        select: async (x) => { const n = Number(x.track); if (n >= 1 && tracks[n - 1]) selVoixIdx = n - 1; },
+        clean: async () => { const { t, i } = curVoix(); const p = buildVoiceProposals(analyzeVoix(t), 'rap').find(z => z.id === 'premium'); await applyCleanMix(t, i, p, null); },
+        voice: async (x) => { const { t } = curVoix(); const v = VOICE_PRESETS[x.preset] || VOICE_PRESETS.rap; const src = t.original || t.buffer; const out = await voiceChain(src, v); if (!t.original) t.original = t.buffer; t.buffer = out; t.fxDone = [...(t.fxDone || []), 'voix']; proposalCache = {}; await save(); },
+        tune: async (x) => { const { t } = curVoix(); const lvl = String(x.level || '').toLowerCase(); atOpt.speed = /fort|robot|hard|t.?pain/.test(lvl) ? 0 : /moyen|melod|drake/.test(lvl) ? 25 : /leger|l.ger|naturel/.test(lvl) ? 120 : 55; atOpt.strength = 1; await applyAutotune(t, { textContent: '' }, { textContent: '' }); },
+        effect: async (x) => { const { t } = curVoix(); if (!Array.isArray(x.chain) || !x.chain.length) throw new Error('effet non reconnu'); const src = t.buffer; const res = await applyChain(src, x.chain); if (!t.original) t.original = t.buffer; t.buffer = res.buffer; t.fxDone = [...(t.fxDone || []), 'effet']; proposalCache = {}; await save(); },
+        volume: async (x) => { let i = x.track === 'instru' ? tracks.findIndex(isInstru) : x.track === 'voix' ? lastVoixIdx() : Number(x.track) - 1; if (i < 0 || !tracks[i]) throw new Error('pas de piste'); const g = x.delta !== undefined ? (tracks[i].gainDb || 0) + Number(x.delta) : Number(x.db) || 0; tracks[i].gainDb = Math.max(-30, Math.min(12, g)); await save(); },
+        mute: async (x) => { let i = x.track === 'instru' ? tracks.findIndex(isInstru) : x.track === 'voix' ? lastVoixIdx() : Number(x.track) - 1; if (tracks[i]) { tracks[i].mute = x.on !== false; await save(); } },
+        normalize: async () => { const { t } = curVoix(); const src = t.original || t.buffer; if (!t.original) t.original = t.buffer; t.buffer = normalize(cloneBuffer(src), -1); proposalCache = {}; await save(); },
+        original: async () => { const { t } = curVoix(); if (t.original) { t.buffer = t.original; t.fxDone = []; proposalCache = {}; await save(); } },
+        master: async (x) => { await doMasterExport(masterKey(x.preset), false); toast('Mix & master prêt — dis « télécharge »', 'ok'); },
+        save: async () => { await doMasterExport('streaming', true); },
+        download: async () => { await doMasterExport('streaming', true); },
+        all: async () => { const { t, i } = curVoix(); const p = buildVoiceProposals(analyzeVoix(t), 'rap').find(z => z.id === 'premium'); await applyCleanMix(t, i, p, null); await doMasterExport('streaming', false); toast('Nettoyé, mixé & masterisé ✓', 'ok'); },
+      },
+    };
   }
 
   // ================================================================ onglets
@@ -683,11 +748,12 @@ export async function render(el, { params }) {
     const premiumProp = () => buildVoiceProposals(analyzeVoix(curTrack()), 'rap').find(p => p.id === 'premium');
     root.append(h('div.grid', { style: { gridTemplateColumns: '1.25fr 1fr' } },
       h('div.panel', { style: { display: 'flex', flexDirection: 'column' } },
-        h('div.ph', '🧠 Ingé son IA — Marco', h('span.r', { style: { color: '#bff5db' } }, 'RÉEL · 0 €')),
+        h('div.ph', '🧠 Ingé son IA — assistant en direct', h('span.r', { style: { color: '#bff5db' } }, 'RÉEL · voix + texte · 0 €')),
         h('div.pb', { style: { flex: '1' } },
           h('div', { style: { display: 'flex', gap: '10px', marginBottom: '12px' } }, h('div.orb'),
-            h('div.msg.ai', { style: { margin: '0' } }, 'Donne-moi ta prise, je te la nettoie et je te la mixe : je réduis le bruit, j’enlève les « pop », j’égalise, je compresse, je dose les sifflantes et je mets au niveau. Ta mélodie n’est pas touchée (pas d’auto-tune ici).')),
-          h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', margin: '14px 0 6px', flexWrap: 'wrap' } },
+            h('div.msg.ai', { style: { margin: '0' } }, 'Parle-moi ou écris-moi, je pilote le studio : « enregistre »… « stop » · « nettoie ma voix » · « mets un autotune léger » · « monte la voix de 2 dB » · « mixe et masterise » · « télécharge ». Clique « Mains libres » pour me parler.')),
+          ast ? h('div', { style: { marginBottom: '12px' } }, ast.card) : h('p.muted', 'Assistant indisponible dans ce navigateur.'),
+          h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', margin: '4px 0 6px', flexWrap: 'wrap' } },
             h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel,
             h('button.rbtn', { onclick: doAnalyze }, '🔎 Analyser')),
           h('div', { style: { display: 'flex', gap: '7px', flexWrap: 'wrap', marginTop: '6px' } },
@@ -784,10 +850,11 @@ export async function render(el, { params }) {
   el.append(root);
 
   await load();
+  try { ast = mountAssistant(buildAssistantS()); } catch (e) { ast = null; }
   renderSidebar();
   renderTabs();
   go(cur);
 
   // nettoyage
-  return () => { stopPlay(); stopAllRec(); stopPreview(); };
+  return () => { stopPlay(); stopAllRec(); stopPreview(); try { ast?.destroy?.(); } catch {} };
 }
