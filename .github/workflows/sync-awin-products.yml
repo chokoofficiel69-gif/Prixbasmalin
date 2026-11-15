@@ -85,10 +85,12 @@ jobs:
         run: |
           node price-engine/sync-awin-products.mjs
           node scripts/build_awin_catalogue.mjs
+      - name: Sauvegarder le dernier snapshot de la vitrine
+        run: cp data/home-deals.json /tmp/home-deals-previous.json
       - name: Mettre à jour la vitrine d'accueil (idées cadeaux)
         run: |
           python3 scripts/build_home_deals.py
-          python3 scripts/check_awin_gift_images.py
+          python3 scripts/check_awin_gift_images.py --previous /tmp/home-deals-previous.json
           python3 scripts/build_seo_pages.py
           python3 scripts/build_sitemap.py
       - name: Tester les pages cadeaux et historiques publiées

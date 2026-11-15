@@ -1,0 +1,51 @@
+name: Tests de rotation des visuels cadeaux
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "scripts/build_home_deals.py"
+      - "scripts/check_awin_gift_images.py"
+      - "tests/test_home_deals.py"
+      - "tests/test_awin_gift_images.py"
+      - "data/home-deals.json"
+      - ".github/workflows/rotate-home-deals.yml"
+      - ".github/workflows/test-home-deals-rotation.yml"
+  pull_request:
+    paths:
+      - "scripts/build_home_deals.py"
+      - "scripts/check_awin_gift_images.py"
+      - "tests/test_home_deals.py"
+      - "tests/test_awin_gift_images.py"
+      - "data/home-deals.json"
+      - ".github/workflows/rotate-home-deals.yml"
+      - ".github/workflows/test-home-deals-rotation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-home-deals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Vérifier la syntaxe
+        run: python3 -m py_compile scripts/build_home_deals.py scripts/check_awin_gift_images.py
+
+      - name: Tester la rotation 48 h
+        run: python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+
+      - name: Tester la validation et le repli des images
+        run: python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v

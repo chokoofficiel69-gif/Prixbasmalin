@@ -136,7 +136,14 @@ class HomeDealsTests(unittest.TestCase):
         awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
-        self.assertEqual(published, deals.build(awin, sheets, previous=published))
+        rotation = published.get("rotation", {})
+        check_times = [
+            deals.parse_utc(rotation.get("last_attempt_at")),
+            deals.parse_utc(rotation.get("last_rotated_at")),
+            deals.parse_utc(awin.get("fetched_at")),
+        ]
+        rotation_now = max(value for value in check_times if value is not None)
+        self.assertEqual(published, deals.build(awin, sheets, previous=published, rotation_now=rotation_now))
 
     def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
         awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
@@ -148,6 +155,8 @@ class HomeDealsTests(unittest.TestCase):
             self.assertIn("cancel-in-progress: false", workflow)
             self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', workflow)
             self.assertIn("trois tentatives", workflow)
+        self.assertIn("cp data/home-deals.json /tmp/home-deals-previous.json", awin)
+        self.assertIn("python3 scripts/check_awin_gift_images.py --previous /tmp/home-deals-previous.json", awin)
         for line in awin.splitlines():
             if "${{" in line:
                 self.assertEqual(line.count("${{"), line.count("}}"), line)
@@ -258,6 +267,164 @@ class ProductSheetOutlierTests(unittest.TestCase):
                 for m, v in (("a", 100), ("b", 110), ("c", 120), ("d", 4800))]
         offers = bps.build({"offers": rows}, {"products": []})["products"][0]["offers"]
         self.assertEqual([o["merchant"] for o in offers], ["a", "b", "c"])
+
+
+
+class HomeDealsRotationTests(unittest.TestCase):
+    def rotation_awin(self, count, fetched_at):
+        return {
+            "fetched_at": fetched_at,
+            "products": [
+                product(
+                    f"Parfum rotation {i}",
+                    f"Marchand {i % 4}",
+                    20 + (i % 40),
+                    desc="Parfums",
+                    image=f"https://img.example/rotation-{i}.webp",
+                    sourceUrl=f"https://merchant.example/item/{i}",
+                )
+                for i in range(count)
+            ],
+        }
+
+    def test_rotation_waits_48_hours_and_then_selects_new_products(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        initial_ids = {gift["id"] for gift in initial["gifts"]}
+        self.assertEqual(len(initial_ids), 48)
+        self.assertEqual(initial["rotation"]["status"], "initial_selection")
+
+        before_due = deals.build(
+            self.rotation_awin(100, "2026-11-11T11:59:59Z"),
+            {"products": []},
+            previous=initial,
+        )
+        self.assertEqual({gift["id"] for gift in before_due["gifts"]}, initial_ids)
+        self.assertEqual(before_due["rotation"]["last_rotated_at"], first_time)
+
+        after_due = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        next_ids = {gift["id"] for gift in after_due["gifts"]}
+        self.assertEqual(len(next_ids), 48)
+        self.assertTrue(initial_ids.isdisjoint(next_ids))
+        self.assertEqual(after_due["rotation"]["status"], "rotated")
+        self.assertEqual(set(after_due["rotation_history"][0]["product_ids"]), initial_ids)
+        self.assertTrue(all(len(value) == 64 for value in after_due["rotation_history"][0]["image_hashes"]))
+        self.assertFalse(any(value.startswith("https://") for value in after_due["rotation_history"][0]["image_hashes"]))
+
+    def test_rotation_keeps_previous_snapshot_when_fewer_than_48_new_items_exist(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(60, first_time), {"products": []})
+        initial_ids = {gift["id"] for gift in initial["gifts"]}
+        self.assertEqual(len(initial_ids), 48)
+
+        attempted = deals.build(
+            self.rotation_awin(60, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        self.assertEqual({gift["id"] for gift in attempted["gifts"]}, initial_ids)
+        self.assertEqual(attempted["rotation"]["status"], "held_insufficient_candidates")
+        self.assertEqual(attempted["rotation"]["last_rotated_at"], first_time)
+        self.assertEqual(attempted["rotation"]["candidate_count"], 12)
+
+    def test_rotation_journal_contains_ids_and_hashes_not_image_urls(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        rotated = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        journal = rotated["rotation_history"][0]
+        self.assertEqual(journal["rotated_at"], first_time)
+        self.assertEqual(len(journal["product_ids"]), 48)
+        self.assertEqual(len(journal["image_hashes"]), 48)
+        self.assertFalse(any("https://" in str(value) for value in journal.values()))
+
+
+
+    def test_rotation_uses_wall_clock_even_when_awin_snapshot_is_unchanged(self):
+        fetched_at = "2026-11-10T12:00:00Z"
+        initial = deals.build(
+            self.rotation_awin(100, fetched_at),
+            {"products": []},
+            rotation_now=deals.parse_utc(fetched_at),
+        )
+        rotated = deals.build(
+            self.rotation_awin(100, fetched_at),
+            {"products": []},
+            previous=initial,
+            rotation_now=deals.parse_utc("2026-11-12T12:00:00Z"),
+        )
+        self.assertEqual(rotated["rotation"]["status"], "rotated")
+        self.assertNotEqual(
+            {gift["id"] for gift in initial["gifts"]},
+            {gift["id"] for gift in rotated["gifts"]},
+        )
+
+    def test_failed_rotation_retries_after_twelve_hour_cooldown(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        held = dict(initial)
+        held["rotation"] = {
+            "interval_hours": 48,
+            "last_rotated_at": first_time,
+            "last_attempt_at": "2026-11-12T12:00:00Z",
+            "status": "held_previous_snapshot",
+            "selected_count": 48,
+        }
+        cooldown = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=held,
+            rotation_now=deals.parse_utc("2026-11-12T18:00:00Z"),
+        )
+        self.assertEqual(cooldown["rotation"]["status"], "retry_cooldown")
+        self.assertEqual([g["id"] for g in cooldown["gifts"]], [g["id"] for g in held["gifts"]])
+        retry = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=held,
+            rotation_now=deals.parse_utc("2026-11-13T00:00:01Z"),
+        )
+        self.assertEqual(retry["rotation"]["status"], "rotated")
+
+
+
+    def test_rotation_workflow_checks_every_two_hours_without_awin_api_calls(self):
+        workflow = (ROOT / ".github" / "workflows" / "rotate-home-deals.yml").read_text(encoding="utf-8")
+        self.assertIn('cron: "27 */2 * * *"', workflow)
+        self.assertIn("prix-malin-price-data-refresh", workflow)
+        self.assertIn("python3 scripts/build_home_deals.py", workflow)
+        self.assertIn("python3 scripts/check_awin_gift_images.py --previous", workflow)
+        self.assertIn("git push origin HEAD:main", workflow)
+        self.assertNotIn("sync-awin-products.mjs", workflow)
+        self.assertNotIn("AWIN_API_TOKEN", workflow)
+
+        ci = (ROOT / ".github" / "workflows" / "test-home-deals-rotation.yml").read_text(encoding="utf-8")
+        self.assertIn("test_home_deals.py", ci)
+        self.assertIn("test_awin_gift_images.py", ci)
+        self.assertIn("pull_request:", ci)
+        self.assertNotIn("secrets.", ci)
+
+
+
+    def test_rotation_holds_previous_snapshot_when_awin_feed_is_over_48_hours_old(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        stale = deals.build(
+            self.rotation_awin(100, first_time),
+            {"products": []},
+            previous=initial,
+            rotation_now=deals.parse_utc("2026-11-12T12:00:01Z"),
+        )
+        self.assertEqual(stale["rotation"]["status"], "held_stale_catalog")
+        self.assertEqual([g["id"] for g in stale["gifts"]], [g["id"] for g in initial["gifts"]])
+
 
 
 if __name__ == "__main__":
