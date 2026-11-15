@@ -315,8 +315,8 @@ def build(awin, sheets, previous=None):
                 image_fingerprint(gift.get("image")) for gift in previous_gifts
             }
             for entry in history:
-                excluded_ids.update(str(value) for value in entry.get("product_ids", []))
-                excluded_image_hashes.update(str(value) for value in entry.get("image_hashes", []))
+                excluded_ids.update(str(value) for value in (entry.get("product_ids") or []))
+                excluded_image_hashes.update(str(value) for value in (entry.get("image_hashes") or []))
             candidates = build_gifts(
                 awin,
                 limit=48,
