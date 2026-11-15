@@ -85,6 +85,10 @@ const CSS = `
 .regie .clip .cnm{position:absolute;left:6px;top:4px;font-size:9px;color:rgba(255,255,255,.7);pointer-events:none}
 .regie .playhead{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 8px #fff,0 0 18px var(--rcy);z-index:4;pointer-events:none}
 .regie .emptytl{border:1px dashed var(--rline);border-radius:12px;padding:30px;text-align:center;color:var(--rmut)}
+.regie .rctx{position:fixed;z-index:99999;min-width:220px;padding:6px;background:#111126;border:1px solid #51458b;border-radius:10px;box-shadow:0 16px 42px rgba(0,0,0,.55);display:none;color:#eceefc}
+.regie .rctx.open{display:block}.regie .rctx button{display:flex;width:100%;align-items:center;gap:10px;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:inherit;text-align:left;font:12px inherit;cursor:pointer}
+.regie .rctx button:hover{background:rgba(168,85,247,.2)}.regie .rctx button:disabled{opacity:.35;cursor:not-allowed}
+.regie .rctx .sep{height:1px;background:#302b52;margin:4px 3px}
 /* transport */
 .regie .transport{grid-column:1/3;display:flex;align-items:center;gap:12px;padding:0 16px;background:linear-gradient(180deg,#0d0d1e,#090914);border-top:1px solid var(--rline)}
 .regie .rb{width:38px;height:38px;border-radius:50%;background:var(--rpan2);border:1px solid var(--rline);display:grid;place-items:center;font-size:14px;cursor:pointer;color:#d2d5f0}
@@ -278,7 +282,7 @@ export async function render(el, { params }) {
       const panLab = h('span', panTxt(t.pan ?? 0));
       pan.oninput = () => { t.pan = +pan.value; panLab.textContent = panTxt(t.pan); };
       pan.onchange = save;
-      const head = h('div.thead', { style: { '--tc': color } },
+      const head = h('div.thead', { style: { '--tc': color, cursor: 'context-menu' }, oncontextmenu: (e) => showContextMenu(e, 'track', i) },
         h('div.nm', h('span', { style: { color } }, t.kind === 'instru' ? '🥁' : '🎤'), t.name || `Piste ${i + 1}`),
         h('div.ctrls', mB, sB, aB),
         vol, h('div.lab', 'Vol', volLab),
@@ -289,10 +293,13 @@ export async function render(el, { params }) {
         const clipW = Math.max(8, t.buffer.duration * pxPerSec);
         const canvas = h('canvas');
         const clip = h('div.clip', { style: { left: ((t.offset || 0) * pxPerSec) + 'px', width: clipW + 'px' } }, canvas, h('div.cnm', t.name || ''));
+        clip.style.cursor = 'context-menu';
+        clip.addEventListener('contextmenu', (e) => showContextMenu(e, 'clip', i));
         lane.append(clip);
         // dessin après insertion (clientWidth disponible)
         setTimeout(() => { canvas.style.width = clipW + 'px'; canvas.style.height = '100%'; drawClip(canvas, t, i); }, 0);
       }
+      lane.addEventListener('contextmenu', (e) => { if (e.target === lane) showContextMenu(e, 'empty', -1); });
       // clic sur la lane = placer la tête de lecture
       lane.onclick = (e) => {
         const rect = lane.getBoundingClientRect();
@@ -624,6 +631,87 @@ export async function render(el, { params }) {
   const tabsBar = h('div.rtabs');
   const main = h('div.rmain');
   const side = h('div.rside');
+  const contextMenu = h('div.rctx');
+  let audioClipboard = null;
+  function cloneAudioBuffer(buffer) {
+    if (!buffer) return null;
+    const copy = audioCtx().createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) copy.copyToChannel(new Float32Array(buffer.getChannelData(ch)), ch);
+    return copy;
+  }
+  function sliceAudioBuffer(buffer, from, to) {
+    if (!buffer) return null;
+    const start = Math.max(0, Math.min(buffer.length, Math.floor(from * buffer.sampleRate)));
+    const end = Math.max(start, Math.min(buffer.length, Math.floor(to * buffer.sampleRate)));
+    if (end <= start) return null;
+    const part = audioCtx().createBuffer(buffer.numberOfChannels, end - start, buffer.sampleRate);
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) part.copyToChannel(buffer.getChannelData(ch).slice(start, end), ch);
+    return part;
+  }
+  function refreshAfterEdit(message) {
+    save(); renderSidebar();
+    if (cur === 'timeline') go('timeline');
+    if (message) toast(message, 'ok');
+  }
+  function closeContextMenu() { contextMenu.classList.remove('open'); contextMenu.innerHTML = ''; }
+  function pasteAudio() {
+    if (!audioClipboard || !audioClipboard.buffer) return;
+    const buffer = cloneAudioBuffer(audioClipboard.buffer);
+    tracks.push({ name: audioClipboard.name + ' (copie)', kind: audioClipboard.kind || 'voix', gainDb: audioClipboard.gainDb || 0, pan: audioClipboard.pan || 0, offset: startOffset, mute: false, solo: false, armed: false, empty: false, fxDone: [], fx: null, fileId: null, buffer, original: cloneAudioBuffer(buffer) });
+    refreshAfterEdit('Audio collé à la position du curseur');
+  }
+  function splitTrackAtCursor(index) {
+    const track = tracks[index]; if (!track || !track.buffer) return;
+    const local = startOffset - (track.offset || 0);
+    const left = sliceAudioBuffer(track.buffer, 0, local), right = sliceAudioBuffer(track.buffer, local, track.buffer.duration);
+    if (!left || !right) return;
+    tracks.splice(index, 1,
+      { ...track, name: (track.name || 'Piste') + ' · A', buffer: left, original: left },
+      { ...track, name: (track.name || 'Piste') + ' · B', offset: startOffset, buffer: right, original: right });
+    refreshAfterEdit('Clip découpé en deux pistes');
+  }
+  function showContextMenu(event, type, index) {
+    event.preventDefault(); event.stopPropagation(); contextMenu.innerHTML = '';
+    const track = index >= 0 ? tracks[index] : null;
+    const add = (label, action, disabled) => contextMenu.append(h('button', { type: 'button', disabled: !!disabled, onclick: () => { closeContextMenu(); action(); } }, label));
+    const sep = () => contextMenu.append(h('div.sep'));
+    if (type === 'track' && track) {
+      add('✏️ Renommer la piste', () => { const n = window.prompt('Nom de la piste', track.name || 'Piste'); if (n && n.trim()) { track.name = n.trim(); refreshAfterEdit('Piste renommée'); } });
+      add(track.mute ? '🔊 Réactiver la piste' : '🔇 Mettre en sourdine', () => { track.mute = !track.mute; refreshAfterEdit('État Mute modifié'); });
+      add(track.solo ? '◉ Désactiver Solo' : '◉ Activer Solo', () => { track.solo = !track.solo; refreshAfterEdit('État Solo modifié'); });
+      sep();
+      add('📄 Dupliquer la piste', () => { tracks.splice(index + 1, 0, { ...track, name: (track.name || 'Piste') + ' (copie)', buffer: cloneAudioBuffer(track.buffer), original: cloneAudioBuffer(track.original || track.buffer), fxDone: [...(track.fxDone || [])] }); refreshAfterEdit('Piste dupliquée'); });
+      add('📋 Copier le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; toast('Clip copié', 'ok'); }, !track.buffer);
+      add('✂️ Couper le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; tracks.splice(index, 1); refreshAfterEdit('Clip coupé'); }, !track.buffer);
+      add('📌 Coller à la position du curseur', pasteAudio, !audioClipboard);
+      sep();
+      add('🗑️ Supprimer la piste', () => { if (window.confirm('Supprimer cette piste ?')) { tracks.splice(index, 1); refreshAfterEdit('Piste supprimée'); } });
+    } else if (type === 'clip' && track) {
+      add('▶ Placer le curseur au début du clip', () => { startOffset = track.offset || 0; movePlayhead(startOffset); });
+      add('📋 Copier le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; toast('Clip copié', 'ok'); }, !track.buffer);
+      add('✂️ Couper le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; tracks.splice(index, 1); refreshAfterEdit('Clip coupé'); }, !track.buffer);
+      add('📄 Dupliquer le clip à la suite', () => { tracks.splice(index + 1, 0, { ...track, name: (track.name || 'Clip') + ' (copie)', buffer: cloneAudioBuffer(track.buffer), original: cloneAudioBuffer(track.original || track.buffer), offset: (track.offset || 0) + track.buffer.duration, fxDone: [...(track.fxDone || [])] }); refreshAfterEdit('Clip dupliqué'); }, !track.buffer);
+      add('📌 Coller à la position du curseur', pasteAudio, !audioClipboard);
+      sep();
+      const local = startOffset - (track.offset || 0), validCut = !!track.buffer && local > 0 && local < track.buffer.duration;
+      add('✂️ Découper au curseur', () => splitTrackAtCursor(index), !validCut);
+      add('◁ Rogner le début jusqu’au curseur', () => { const b = sliceAudioBuffer(track.buffer, local, track.buffer.duration); if (b) { track.buffer = b; track.original = b; track.offset = startOffset; refreshAfterEdit('Début rogné'); } }, !validCut);
+      add('▷ Rogner la fin au curseur', () => { const b = sliceAudioBuffer(track.buffer, 0, local); if (b) { track.buffer = b; track.original = b; refreshAfterEdit('Fin rognée'); } }, !validCut);
+      sep();
+      add('⚙️ Ouvrir Auto-Tune et effets', () => go('fx'));
+      add('🗑️ Supprimer le clip', () => { if (window.confirm('Supprimer ce clip audio ?')) { tracks.splice(index, 1); refreshAfterEdit('Clip supprimé'); } });
+    } else {
+      add('➕ Importer un fichier audio', () => importTrack());
+      add('📌 Coller à la position du curseur', pasteAudio, !audioClipboard);
+      add('➕ Ajouter une piste vide', () => { tracks.push({ name: 'Piste ' + (tracks.length + 1), kind: 'voix', gainDb: 0, pan: 0, offset: startOffset, mute: false, solo: false, armed: false, empty: true, fxDone: [], fx: null, fileId: null, buffer: null, original: null }); refreshAfterEdit('Piste vide ajoutée'); });
+    }
+    contextMenu.style.left = Math.min(event.clientX, window.innerWidth - 245) + 'px';
+    contextMenu.style.top = Math.min(event.clientY, window.innerHeight - 300) + 'px';
+    contextMenu.classList.add('open');
+  }
+
+  root.append(contextMenu);
+  document.addEventListener('click', closeContextMenu);
 
   function renderTabs() {
     tabsBar.innerHTML = '';
@@ -694,5 +782,5 @@ export async function render(el, { params }) {
   go(cur);
 
   // nettoyage
-  return () => { stopPlay(); stopAllRec(); stopPreview(); };
+  return () => { document.removeEventListener('click', closeContextMenu); closeContextMenu(); stopPlay(); stopAllRec(); stopPreview(); };
 }
