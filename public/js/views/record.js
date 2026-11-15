@@ -33,6 +33,11 @@ const FX_KINDS = {
   warm: {}, tube: { amt: [1, 3] }, tape: { amt: [1, 3] }, exciter: { mix: [0, 0.5] }, air: { gain: [0, 6] },
   peak: { f: [40, 12000], q: [0.4, 4], gain: [-8, 8] }, distort: { amt: [1, 10], tone: [3000, 12000] },
   band: { lo: [100, 1000], hi: [2000, 10000], drive: [0, 8] }, lofi: { bits: [4, 10], hi: [3000, 10000] },
+  eq: { low: [-8, 8], mid: [-8, 8], high: [-8, 8], lowFreq: [50, 500], midFreq: [200, 8000], midQ: [0.4, 4], highFreq: [3000, 16000] },
+  compressor: { threshold: [-50, 0], knee: [0, 30], ratio: [1, 12], attack: [0.001, 0.1], release: [0.02, 0.6] },
+  gate: { threshold: [-60, -10], ratio: [2, 24], release: [0.03, 0.3] },
+  deesser: { split: [3500, 10000], threshold: [-50, 0], ratio: [1, 10], highGain: [0, 1] },
+  phaser: { stages: [2, 8], rate: [0.05, 3], depth: [100, 1500], dry: [0, 1], mix: [0, 1] },
 };
 const clampN = (v, [a, b], d) => { const n = Number(v); return Number.isFinite(n) ? Math.min(b, Math.max(a, n)) : d; };
 export function sanitizeChain(chain) {
@@ -60,7 +65,7 @@ export function sanitizeVoice(v) {
   return o;
 }
 function describeChain(p) {
-  const parts = p.chain.map(s => s.t === 'tune' ? `autotune ${s.speed <= 10 ? 'fort' : s.speed <= 40 ? 'moyen' : 'léger'}` : s.t === 'shift' ? `voix ${s.semi > 0 ? '+' : ''}${s.semi} demi-tons` : s.t === 'double' ? 'doublage' : s.t === 'harmony' ? 'harmonies' : ({ reverb: 'réverbe', delay: 'écho', pingpong: 'écho ping-pong', chorus: 'chorus', flanger: 'flanger', warm: 'chaleur', tube: 'lampe', tape: 'bande', exciter: 'brillance', air: 'air', peak: 'égaliseur', distort: 'saturation', band: 'filtre radio', lofi: 'lo-fi' }[s.kind] || s.kind));
+  const parts = p.chain.map(s => s.t === 'tune' ? `autotune ${s.speed <= 10 ? 'fort' : s.speed <= 40 ? 'moyen' : 'léger'}` : s.t === 'shift' ? `voix ${s.semi > 0 ? '+' : ''}${s.semi} demi-tons` : s.t === 'double' ? 'doublage' : s.t === 'harmony' ? 'harmonies' : ({ reverb: 'réverbe', delay: 'écho', pingpong: 'écho ping-pong', chorus: 'chorus', flanger: 'flanger', warm: 'chaleur', tube: 'lampe', tape: 'bande', exciter: 'brillance', air: 'air', peak: 'égaliseur', distort: 'saturation', band: 'filtre radio', lofi: 'lo-fi', eq: 'égaliseur', compressor: 'compresseur', gate: 'porte de bruit', deesser: 'de-esser', phaser: 'phaser' }[s.kind] || s.kind));
   if (p.voice) parts.push(`voix : présence ${p.voice.presence} dB, brillance ${p.voice.air} dB, compression ${p.voice.comp}`);
   return parts.join(' · ');
 }
@@ -70,7 +75,7 @@ const VFX_AI_PROMPT = `Tu es ingénieur du son spécialisé rap/RnB (FR et US). 
 - {"t":"double","steps":[0,0],"gain":0.2-0.8} doublage (steps -12 = octave grave, 12 = octave aiguë)
 - {"t":"harmony","steps":[2],"gain":0.2-0.7} harmonies (2 = tierce, 4 = quinte)
 - {"t":"fx","kind":K,...} avec K parmi : reverb(size 0.3-5, mix 0-0.6), delay(time 0.05-0.8, fb 0-0.6, mix 0-0.5), pingpong(time, mix), chorus(mix), flanger(mix), warm, tube(amt 1-3), tape(amt 1-3), exciter(mix), air(gain 0-6), peak(f Hz, q 0.4-4, gain -8..8), distort(amt 1-10, tone Hz), band(lo, hi, drive), lofi(bits 4-10, hi)
-Et une chaîne voix "voix" (EQ + compression, appliquée en dernier) : {"highpass":40-200,"low":-6..6,"presence":-4..8,"air":-4..8,"deess":0-10,"comp":0-1,"reverb":0-0.5}.
+Effets supplémentaires : eq(low/mid/high en dB), compressor(threshold, ratio, attack, release), gate(threshold, ratio), deesser(split Hz, threshold, ratio), phaser(rate, depth, mix). Et une chaîne voix "voix" (EQ + compression, appliquée en dernier) : {"highpass":40-200,"low":-6..6,"presence":-4..8,"air":-4..8,"deess":0-10,"comp":0-1,"reverb":0-0.5}.
 Reste subtil : peu d'effets bien dosés, pas de grosse réverbe sauf si demandé. Si l'artiste cite un rappeur, traduis son rendu typique (justesse, brillance, ampleur, écho) sans prétendre copier sa voix.
 Réponds UNIQUEMENT avec ce JSON : {"propositions":[{"nom":"court","pourquoi":"1 phrase","chaine":[...],"voix":{...}}]}`;
 
