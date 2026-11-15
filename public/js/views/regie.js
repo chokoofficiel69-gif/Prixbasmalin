@@ -75,7 +75,7 @@ const CSS = `
 .regie .tl-ruler{position:relative;height:18px;margin-left:160px;border-bottom:1px solid var(--rline);font-size:10px;color:var(--rmut)}
 .regie .tl-ruler span{position:absolute;top:2px;transform:translateX(-1px);border-left:1px solid #2b2850;padding-left:3px}
 .regie .trk{display:flex;gap:10px;margin-bottom:8px}
-.regie .thead{width:150px;flex:none;border-radius:11px;padding:8px 9px;background:#111128;border:1px solid var(--rline);border-left:4px solid var(--tc,#888)}
+.regie .thead{width:150px;flex:none;position:sticky;left:0;z-index:5;border-radius:11px;padding:8px 9px;background:#111128;border:1px solid var(--rline);border-left:4px solid var(--tc,#888)}
 .regie .thead .nm{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .regie .thead .ctrls{display:flex;gap:4px;margin-top:7px}
 .regie .tbtn{width:23px;height:21px;border-radius:6px;background:#1b1b38;border:1px solid var(--rline);font-size:10px;font-weight:800;display:grid;place-items:center;color:var(--rmut);cursor:pointer}
@@ -451,7 +451,7 @@ export async function render(el, { params }) {
         vol, h('div.lab', 'Vol', volLab),
         pan, h('div.lab', 'Pan', panLab));
 
-      const lane = h('div.lane', { style: { '--beat': beat + 'px', width: laneW + 'px' } });
+      const lane = h('div.lane', { style: { '--beat': beat + 'px', width: laneW + 'px', flex: '0 0 ' + laneW + 'px' } });
       if (t.buffer) {
         const clipW = Math.max(8, Math.round(t.buffer.duration * pxPerSec));
         const clip = h('div.clip', { style: { left: ((t.offset || 0) * pxPerSec) + 'px', width: clipW + 'px' } });
@@ -464,7 +464,7 @@ export async function render(el, { params }) {
       head.oncontextmenu = (e) => trackMenu(i, e);
       lane.oncontextmenu = (e) => trackMenu(i, e);
       head.title = 'Clic droit : nettoyer, effets, volume, supprimer…';
-      rows.append(h('div.trk', head, lane));
+      rows.append(h('div.trk', { style: { width: (160 + laneW) + 'px' } }, head, lane));
     });
     rows.append(playheadEl);
     container.append(rows);
@@ -968,7 +968,7 @@ export async function render(el, { params }) {
         knobs)));
 
     // ROW 3 : Timeline (réelle)
-    const mini = h('div.pb');
+    const mini = h('div.pb', { style: { overflowX: 'auto' } });
     root.append(h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '🎵 Timeline', h('span.r', 'glisse pour sélectionner, clic droit sur une piste pour agir')), mini));
     laneWrap = mini; selBarEl = null; zoomLblEl = null; zoomRangeEl = null;
     setTimeout(() => buildTimeline(mini), 0);
@@ -1311,7 +1311,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE11'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE12'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
