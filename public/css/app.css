@@ -534,3 +534,18 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 
 /* Badge presets / pills */
 :root:not([data-theme="light"]) .badge { background: rgba(168,85,247,.12); border-color: rgba(168,85,247,.35); color:#c9b6ff; }
+
+/* ===== Tuiles « Ambiances en 1 clic » (simple + néon) ===== */
+.vibe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 9px; }
+.vibe-tile {
+  display: grid; justify-items: center; gap: 2px; padding: 12px 8px; cursor: pointer; text-align: center;
+  border-radius: 12px; border: 1px solid var(--line); color: var(--text);
+  background: linear-gradient(180deg, #16182e, #0e0f1c);
+  transition: transform .12s, box-shadow .12s, border-color .12s;
+}
+.vibe-tile:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 0 0 1px rgba(168,85,247,.5), 0 0 22px rgba(168,85,247,.3); }
+.vibe-tile:active { transform: translateY(-1px); }
+.vibe-emoji { font-size: 26px; line-height: 1.1; filter: drop-shadow(0 0 6px rgba(34,211,238,.5)); }
+.vibe-name { font-weight: 800; font-size: 13px; letter-spacing: .02em; }
+.vibe-hint { font-size: 10px; color: var(--muted); }
+:root[data-theme="light"] .vibe-tile { background: linear-gradient(180deg,#fff,#eef0f8); }

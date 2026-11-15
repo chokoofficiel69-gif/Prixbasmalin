@@ -76,3 +76,18 @@ test('presetAt boucle proprement (index négatif / débordant)', () => {
   assert.equal(presetAt('voicetone', -1).name, u.presets[u.presets.length - 1].name);
   assert.equal(presetAt('voicetone', u.presets.length).name, u.presets[0].name);
 });
+
+test('QUICK_VIBES : 8 vibes avec fx + tune bornés', async () => {
+  const { QUICK_VIBES, buildVibe, vibeById } = await import('../public/js/lib/vocalunits.js');
+  assert.equal(QUICK_VIBES.length, 8);
+  for (const v of QUICK_VIBES) {
+    const b = buildVibe(v.id);
+    assert.ok(b.fx.tune === undefined || (b.fx.tune >= 0 && b.fx.tune <= 1));
+    assert.ok(b.tune && typeof b.tune.speed === 'number');
+    assert.match(b.label, new RegExp(v.name));
+  }
+  assert.equal(vibeById('robot').name, 'Robot');
+  assert.equal(vibeById('inconnu').id, QUICK_VIBES[0].id);
+  // robot = correction maximale
+  assert.equal(buildVibe('robot').fx.tune, 1);
+});

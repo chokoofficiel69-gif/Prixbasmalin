@@ -15,7 +15,7 @@ import { analyzeMaster, compareToRef } from '../lib/meters.js';
 import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
 import { evaluateExpertPass, expertAgentSummary } from '../lib/expert-agent.js';
 import { expertFace } from '../lib/expertface.js';
-import { UNITS, unitById, buildFx, totalPresets } from '../lib/vocalunits.js';
+import { UNITS, unitById, buildFx, totalPresets, QUICK_VIBES, buildVibe } from '../lib/vocalunits.js';
 import { optionDial } from '../lib/optiondial.js';
 
 const VOICE_PRESETS = {
@@ -1266,6 +1266,26 @@ export async function render(el, { params }) {
     toast(`🎛️ ${label} → ${t.name}`, 'ok');
   }
   fillDrop(UNITS[0]);
+  // ---------- Vibes en un clic (simple : un enfant clique, la chaîne s'applique) ----------
+  function applyVibe(id) {
+    const t = tracks[selected];
+    if (!t || t.empty) return toast('Sélectionne d’abord une piste.');
+    if (t.kind === 'instru') return toast('Choisis une piste voix (pas l’instru).');
+    const { fx, tune, label } = buildVibe(id);
+    t.fx = { ...FX_DEF, ...fx };
+    t.tunePro = tune;
+    masterResult = null;
+    renderKnobs();
+    if (live.srcs.length) playLive(livePos());
+    saveSoon();
+    toast(`${label} → ${t.name}`, 'ok');
+  }
+  const vibesCard = h('div.card.stack',
+    h('div.row', h('strong.grow', '🎧 Ambiances en 1 clic'), h('span.tiny.muted', 'simple')),
+    h('p.tiny.muted', 'Clique une ambiance : elle règle tout (EQ, effets, autotune) sur la piste choisie. Tu peux retoucher après aux molettes.'),
+    h('div.vibe-grid', QUICK_VIBES.map(v => h('button.vibe-tile', { type: 'button', title: v.hint, onclick: () => applyVibe(v.id) },
+      h('span.vibe-emoji', v.emoji), h('span.vibe-name', v.name), h('span.vibe-hint', v.hint)))),
+  );
   const unitsCard = h('div.card.stack',
     h('div.row', h('strong.grow', '🎛️ Banque de processeurs vocaux'), h('span.badge', `${totalPresets()} presets`)),
     h('p.tiny.muted', 'Inspiré du matériel pro (HeadRush VX5, TC-Helicon, Mooer, Audota, Tascam, Waves, BOSS). Choisis un appareil et un preset avec la molette : il pré-règle les molettes EQ/effets + l’autotune de la piste. Nos traitements, 100 % local — tu peux retoucher ensuite.'),
@@ -1866,7 +1886,7 @@ export async function render(el, { params }) {
         h('button.btn.small', { onclick: async () => { for (const f of await pickFromLibrary({ kinds: ['audio', 'video'] })) await addBlob(await fetchFileBlob(f.id), f.name, null, f.id); } }, '📚 Mes fichiers'),
         trashBtn, h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet'), saveLbl),
       micMeter.proxEl,
-      timeline.el, timeline.selBar, unitsCard, knobBox,
+      timeline.el, timeline.selBar, vibesCard, unitsCard, knobBox,
       h('p.tiny.muted', '⌨️ Raccourcis : Espace = lecture / pause (stop pendant une prise) · R = enregistrer · E ou Suppr = effacer le passage sélectionné (sinon la piste) · Ctrl+Z = annuler · Ctrl+Y = rétablir · M = muet · S = solo · A = armer ● · N = nouvelle piste · ↑ ↓ = changer de piste · ← → = reculer / avancer de 5 s · Maj + ← → = décaler la piste de 10 ms pour la caler · F = tout voir · Entrée = début · Échap = stop.'),
       h('p.tiny.muted', '➕ Ajouter une piste (backs, refrain…) puis ⏺ : la prise va dans la piste armée ● et l’enregistrement démarre là où est la tête de lecture, en jouant tout le reste. Clique sur la ligne de temps pour placer la lecture · ⬚ Sélectionner : glisse sur une prise pour choisir un passage à couper · ✋ Déplacer : glisse une prise pour la caler · M = muet, S = solo, Vol = volume, G/D = gauche/droite.')),
     h('div.card.stack', { style: { marginBottom: '14px' } },

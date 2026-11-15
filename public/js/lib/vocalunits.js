@@ -218,3 +218,37 @@ export function buildFx(unitId, index) {
   }
   return { fx, tune: p.tune || { speed: 0.4, humanize: 0.35 }, label: `${u.ref} · ${String(p.n).padStart(2, '0')} ${p.name}`, name: p.name, n: p.n };
 }
+
+// ---------------------------------------------------------------------------
+// « Vibes » en un clic : simple pour un enfant, chaîne complète derrière.
+// Chaque vibe pré-règle les molettes EQ/effets + l'autotune de la piste.
+// ---------------------------------------------------------------------------
+export const QUICK_VIBES = [
+  { id: 'clair', emoji: '🫧', name: 'Clair', hint: 'Voix propre et nette', fx: { tune: 0.4, pres: 2, air: 2, comp: 0.3 }, tune: { speed: 0.3, humanize: 0.5 } },
+  { id: 'rapfr', emoji: '🔥', name: 'Rap FR', hint: 'Présent, qui claque', fx: { tune: 0.6, low: -2, pres: 3, air: 2, comp: 0.5, deess: -2 }, tune: { speed: 0.4, humanize: 0.35 } },
+  { id: 'autotune', emoji: '🎤', name: 'Auto-Tune', hint: 'Mélodique calé', fx: { tune: 0.85, reverb: 0.25, air: 2 }, tune: { speed: 0.8, humanize: 0.2 } },
+  { id: 'robot', emoji: '🤖', name: 'Robot', hint: 'Effet T-Pain dur', fx: { tune: 1, chorus: 0.3 }, tune: { speed: 1, humanize: 0 } },
+  { id: 'drill', emoji: '🎯', name: 'Drill', hint: 'Sombre et ferme', fx: { tune: 0.7, low: 2, pres: 2, sat: 0.2, reverb: 0.15 }, tune: { speed: 0.5, humanize: 0.3 } },
+  { id: 'rnb', emoji: '✨', name: 'R&B', hint: 'Doux et chaud', fx: { tune: 0.55, warmth: 2, air: 3, reverb: 0.3, chorus: 0.2 }, tune: { speed: 0.35, humanize: 0.5 } },
+  { id: 'melo', emoji: '🎶', name: 'Mélodique', hint: 'Chant large', fx: { tune: 0.8, reverb: 0.3, echo: 0.2, air: 2 }, tune: { speed: 0.6, humanize: 0.3 } },
+  { id: 'radio', emoji: '📻', name: 'Radio', hint: 'Effet vieux micro', fx: { tune: 0.6, sub: -8, low: -5, air: -6, mid: 3, sat: 0.3 }, tune: { speed: 0.4, humanize: 0.35 } },
+];
+
+export function vibeById(id) { return QUICK_VIBES.find(v => v.id === id) || QUICK_VIBES[0]; }
+
+/** Construit l'objet fx borné + tune d'une vibe, comme buildFx. */
+export function buildVibe(id) {
+  const v = vibeById(id);
+  const raw = v.fx || {};
+  const fx = {};
+  for (const k in raw) {
+    let val = raw[k];
+    if (k === 'tune' || k === 'comp' || k === 'sat') val = clamp(val, 0, 1);
+    else if (k === 'chorus') val = clamp(val, 0, 0.7);
+    else if (k === 'reverb') val = clamp(val, 0, 0.7);
+    else if (k === 'echo') val = clamp(val, 0, 0.6);
+    else val = clamp(val, -12, 12);
+    fx[k] = val;
+  }
+  return { fx, tune: v.tune || { speed: 0.4, humanize: 0.35 }, label: `${v.emoji} ${v.name}`, name: v.name };
+}
