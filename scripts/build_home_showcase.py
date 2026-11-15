@@ -189,7 +189,7 @@ CSS = """<style id="pm-showcase-style">
 .pmx-promo{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;justify-content:space-between;margin:14px 0 0;padding:14px 18px;border-radius:14px;border:2px dashed #ffb02e;background:#1a1410;color:#fff!important;text-decoration:none}.pmx-promo b{font-size:18px}.pmx-promo span{color:#ffcf99;font-size:13.5px;font-weight:700}
 .pmx-note{color:var(--mut);font-size:12px;margin:8px 2px 0}
 .pmx-hero-art,.pmx-ci,.pmx-bi{display:none}
-@media(min-width:1024px){.pm-old-bottom{display:none!important}}
+@media(min-width:1024px){html body nav.pm-old-bottom{display:none!important}}
 @media(min-width:761px) and (max-width:1279px){.pmx-hero-art{width:36%!important}.pmx-hero-art .p1,.pmx-hero-art .p3{display:none!important}.pmx-hero-art .p2{left:auto!important;right:0!important;top:10%!important;bottom:auto!important;width:96px!important;height:96px!important}.pmx-hero-art .m{right:12%!important;max-height:290px!important}.pmx-hero-txt{max-width:62%}.pmx-trust{max-width:64%}}
 @media(min-width:761px){
  .pmx-hero-img{display:none}
