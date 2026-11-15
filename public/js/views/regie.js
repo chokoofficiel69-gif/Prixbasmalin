@@ -635,7 +635,7 @@ export async function render(el, { params }) {
       {name:'Vocodeur',cat:'Effets',kind:'fx',chain:[{t:'vocoder',bands:24,voices:[0],blend:.12}]},
       {name:'Robot',cat:'Effets',kind:'tune',strength:1,speed:0},
       {name:'Lo-Fi',cat:'Effets',kind:'voice',params:{highpass:180,low:-3,presence:-1,air:-5,deess:2,comp:.6,reverb:.04}},
-      {name:'Tube',cat:'Effets',kind:'fx',chain:[{t:'fx',kind:'saturation',drive:1.4,mix:.18}]},
+      {name:'Tube',cat:'Effets',kind:'fx',chain:[{t:'fx',kind:'distort',amt:2,tone:6500}]},
       {name:'Mega',cat:'Effets',kind:'voice',params:{highpass:80,low:2,presence:4,air:3,deess:4,comp:.8,reverb:.08}},
       {name:'Jul · mélodique',cat:'Références',kind:'tune',strength:.9,speed:75},
       {name:'Naza · puissant',cat:'Références',kind:'voice',params:{highpass:75,low:2,presence:3,air:1,deess:3,comp:.72,reverb:.08}},
