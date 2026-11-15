@@ -1195,7 +1195,7 @@ export async function render(el, { params }) {
   const norm2 = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const fakeBtn = () => ({ disabled: false });
   // ---------- Panneau de molettes (piste sélectionnée) ----------
-  const knobBox = h('div.card.stack', { style: { padding: '10px', background: 'var(--bg)' } });
+  const knobBox = h('div.card.stack.vocal-knob-console', { style: { padding: '10px', background: 'var(--bg)' } });
   const KN = [
     ['sub', '🫧 Sub 80 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
     ['low', '🔈 Grave', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
@@ -1256,7 +1256,7 @@ export async function render(el, { params }) {
     knobBox.innerHTML = '';
     const t = tracks[selected];
     if (!t || t.empty) { knobBox.append(h('p.small.muted', 'Clique sur une piste pour la régler en direct avec les molettes.')); return; }
-    const row = h('div.row', { style: { flexWrap: 'wrap', gap: '10px', justifyContent: 'space-around' } });
+    const row = h('div.vocal-knob-grid', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(112px, 1fr))', gap: '12px', maxHeight: '440px', overflowY: 'auto', padding: '8px 4px' } });
     const knobs = KN.map(([k, label, min, max, step, fmt]) => knob({ label, min, max, step, value: fxOf(t)[k], def: FX_DEF[k], fmt, onInput: (v) => { t.fx = { ...fxOf(t), [k]: v }; masterResult = null; applyLiveFx(t, k); saveSoon(); } }));
     knobs.forEach(kn => row.append(kn.el));
     knobBox.append(
