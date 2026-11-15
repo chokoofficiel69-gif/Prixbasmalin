@@ -18,9 +18,15 @@ export function normalizeState(s) {
 
 const CSS = `
 .expert-face{display:flex;gap:12px;align-items:center}
-.expert-face .ef-portrait{width:92px;height:92px;flex:0 0 auto;border-radius:50%;overflow:hidden;
-  background:radial-gradient(120% 120% at 50% 30%, #1d2230 0%, #0c0e14 70%);
-  box-shadow:0 2px 10px rgba(0,0,0,.45), inset 0 0 0 1px rgba(124,92,255,.35)}
+.expert-face .ef-portrait{width:96px;height:96px;flex:0 0 auto;border-radius:50%;overflow:hidden;
+  background:radial-gradient(120% 120% at 60% 28%, #10233a 0%, #0a0c18 72%);
+  box-shadow:0 0 20px rgba(34,211,238,.4), 0 2px 10px rgba(0,0,0,.5), inset 0 0 0 1px rgba(34,211,238,.45)}
+/* champ de particules / wireframe façon IA */
+.ef-particles circle{animation:ef-twinkle 2.6s infinite ease-in-out}
+.ef-particles circle:nth-child(3n){animation-delay:.6s}
+.ef-particles circle:nth-child(3n+1){animation-delay:1.2s}
+@keyframes ef-twinkle{0%,100%{opacity:.25}50%{opacity:.9}}
+@media (prefers-reduced-motion: reduce){.ef-particles circle{animation:none!important}}
 .expert-face .ef-portrait svg{width:100%;height:100%;display:block}
 .expert-face .ef-meta{min-width:0}
 .expert-face .ef-name{font-weight:700;letter-spacing:.2px}
@@ -78,7 +84,7 @@ const PORTRAIT_SVG = `
       <stop offset="0%" stop-color="#4b5160"/><stop offset="100%" stop-color="#20242e"/>
     </linearGradient>
   </defs>
-  <circle class="ef-ring" cx="50" cy="50" r="46" fill="none" stroke="#7c5cff" stroke-width="2"/>
+  <circle class="ef-ring" cx="50" cy="50" r="46" fill="none" stroke="#a855f7" stroke-width="2"/>
   <!-- épaules / t-shirt studio -->
   <path d="M18 100 Q22 78 38 72 L62 72 Q78 78 82 100 Z" fill="url(#ef-tee)"/>
   <path d="M44 70 L56 70 L56 78 Q50 82 44 78 Z" fill="#cf9b70"/>
@@ -118,8 +124,18 @@ const PORTRAIT_SVG = `
   <!-- micro perche -->
   <path d="M69 52 Q82 56 80 70" stroke="#11141b" stroke-width="2" fill="none" stroke-linecap="round"/>
   <circle cx="80" cy="71" r="4" fill="#2b3140" stroke="#0c0e14"/>
+  <!-- particules / wireframe façon IA (côté gauche, dissolution) -->
+  <g class="ef-particles" fill="#22d3ee">
+    <circle cx="20" cy="30" r="1.3"/><circle cx="13" cy="38" r="1"/><circle cx="24" cy="44" r="1.5"/>
+    <circle cx="9" cy="48" r="1"/><circle cx="17" cy="54" r="1.2"/><circle cx="26" cy="60" r="1"/>
+    <circle cx="12" cy="62" r="1.4"/><circle cx="7" cy="34" r=".9"/><circle cx="22" cy="68" r="1.1"/>
+    <circle cx="15" cy="24" r="1"/><circle cx="30" cy="52" r="1.2"/><circle cx="5" cy="56" r=".8"/>
+  </g>
+  <g stroke="#22d3ee" stroke-width=".4" opacity=".4" fill="none">
+    <path d="M20 30 L24 44 L17 54 L26 60"/><path d="M13 38 L9 48 L12 62"/><path d="M24 44 L30 52"/>
+  </g>
   <!-- barres EQ (analyse) -->
-  <g class="ef-eq" fill="#7c5cff">
+  <g class="ef-eq" fill="#22d3ee">
     <rect x="38" y="80" width="2.4" height="10"/><rect x="43" y="80" width="2.4" height="10"/>
     <rect x="48" y="80" width="2.4" height="10"/><rect x="53" y="80" width="2.4" height="10"/>
     <rect x="58" y="80" width="2.4" height="10"/>
