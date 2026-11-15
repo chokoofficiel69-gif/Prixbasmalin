@@ -136,5 +136,70 @@ class AwinGiftImageTests(unittest.TestCase):
         self.assertEqual(summary["verified_gifts"], 2)
 
 
+    def test_failed_rotation_restores_previous_snapshot_and_rechecks_old_images(self):
+        now = datetime(2026, 11, 15, 12, 0, tzinfo=timezone.utc)
+        current = {
+            "awin_fetched_at": "2026-11-15T12:00:00Z",
+            "rotation": {"status": "rotated", "last_rotated_at": "2026-11-15T12:00:00Z"},
+            "rotation_history": [{"product_ids": ["older-set"]}],
+            "gifts": [
+                {"id": "new-bad", "image": "https://cdn.example/new-bad.webp", "image_verified": False},
+                {"id": "new-good", "image": "https://cdn.example/new-good.webp", "image_verified": False},
+            ],
+        }
+        previous = {
+            "awin_fetched_at": "2026-11-13T12:00:00Z",
+            "rotation": {"status": "rotated", "last_rotated_at": "2026-11-13T12:00:00Z"},
+            "rotation_history": [{"product_ids": ["previous-history"]}],
+            "gifts": [
+                {"id": "old-one", "image": "https://cdn.example/old-one.webp", "image_verified": False},
+                {"id": "old-two", "image": "https://cdn.example/old-two.webp", "image_verified": False},
+            ],
+        }
+        results = {
+            "https://cdn.example/new-bad.webp": "invalid",
+            "https://cdn.example/new-good.webp": "ok",
+            "https://cdn.example/old-one.webp": "ok",
+            "https://cdn.example/old-two.webp": "ok",
+        }
+        checked, _ = checker.apply_image_checks(current, results, now=now)
+        restored, did_restore, old_summary = checker.restore_previous_snapshot_if_rotation_unverified(
+            checked, previous, results, now=now, required=2
+        )
+        self.assertTrue(did_restore)
+        self.assertEqual(restored["awin_fetched_at"], "2026-11-15T12:00:00Z")
+        self.assertEqual([gift["id"] for gift in restored["gifts"]], ["old-one", "old-two"])
+        self.assertTrue(all(gift["image_verified"] for gift in restored["gifts"]))
+        self.assertEqual(restored["rotation"]["status"], "held_previous_snapshot")
+        self.assertEqual(restored["rotation"]["last_rotated_at"], "2026-11-13T12:00:00Z")
+        self.assertEqual(restored["rotation_history"], previous["rotation_history"])
+        self.assertEqual(old_summary["verified_gifts"], 2)
+
+    def test_successful_rotation_does_not_restore_previous_snapshot(self):
+        now = datetime(2026, 11, 15, 12, 0, tzinfo=timezone.utc)
+        current = {
+            "rotation": {"status": "rotated"},
+            "gifts": [
+                {"image": "https://cdn.example/new-one.webp", "image_verified": False},
+                {"image": "https://cdn.example/new-two.webp", "image_verified": False},
+            ],
+        }
+        previous = {"gifts": [{"image": "https://cdn.example/old.webp", "image_verified": True}]}
+        results = {
+            "https://cdn.example/new-one.webp": "ok",
+            "https://cdn.example/new-two.webp": "ok",
+            "https://cdn.example/old.webp": "ok",
+        }
+        checked, _ = checker.apply_image_checks(current, results, now=now)
+        restored, did_restore, _ = checker.restore_previous_snapshot_if_rotation_unverified(
+            checked, previous, results, now=now, required=2
+        )
+        self.assertFalse(did_restore)
+        self.assertEqual([gift["image"] for gift in restored["gifts"]], [
+            "https://cdn.example/new-one.webp", "https://cdn.example/new-two.webp"
+        ])
+
+
+
 if __name__ == "__main__":
     unittest.main()
