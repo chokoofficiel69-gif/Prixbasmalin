@@ -460,3 +460,77 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 .vocal-knob-console .vocal-knob-grid > * { min-width:0; }
 .vocal-knob-console .vocal-knob-grid label { color:#d5e2f2; }
 @media (max-width:700px) { .vocal-knob-console .vocal-knob-grid { grid-template-columns:repeat(2,minmax(0,1fr))!important; max-height:360px!important; } }
+
+/* ========================================================================
+   SKIN NÉON « VOCAL PRO » — habillage global inspiré des régies pro
+   (violet/cyan, panneaux qui glow). Ne change aucune fonction ni preset.
+   ======================================================================== */
+:root:not([data-theme="light"]) {
+  --bg: #080912; --bg2: #0c0e1b; --panel: #121327; --panel2: #1a1c35; --line: #272a4a;
+  --accent: #a855f7; --accent2: #22d3ee; --text: #e9eaf7; --muted: #8b90b5;
+  --neon: 0 0 10px rgba(168,85,247,.55); --neon2: 0 0 10px rgba(34,211,238,.5);
+}
+/* Fond général profond avec halos */
+:root:not([data-theme="light"]) body {
+  background:
+    radial-gradient(1100px 520px at 82% -8%, rgba(168,85,247,.12), transparent 60%),
+    radial-gradient(900px 480px at 0% 108%, rgba(34,211,238,.09), transparent 55%),
+    var(--bg);
+}
+/* Barre latérale + topbar vitrées */
+:root:not([data-theme="light"]) .sidebar { background: linear-gradient(180deg,#0c0e1b,#090a14); border-right-color: #1d2140; }
+:root:not([data-theme="light"]) .topbar { background: linear-gradient(180deg,#0e1022,#0a0b16); box-shadow: 0 1px 0 rgba(168,85,247,.35), 0 8px 22px rgba(0,0,0,.35); }
+:root:not([data-theme="light"]) .brand .logo { filter: drop-shadow(0 0 8px rgba(168,85,247,.8)); }
+:root:not([data-theme="light"]) .brand::after { color:#22d3ee; border-color: rgba(34,211,238,.5); box-shadow: 0 0 8px rgba(34,211,238,.35); }
+
+/* Panneaux « plugin » : fond dégradé, liseré néon, LED d'accent en coin */
+:root:not([data-theme="light"]) .card {
+  position: relative; background: linear-gradient(180deg,#12142a,#0c0d1a);
+  border: 1px solid #231f45;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 0 0 1px rgba(168,85,247,.05), 0 10px 30px rgba(0,0,0,.42);
+}
+:root:not([data-theme="light"]) .card::after {
+  content: ''; position: absolute; left: 10px; right: 10px; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168,85,247,.7), rgba(34,211,238,.6), transparent);
+  opacity: .6;
+}
+:root:not([data-theme="light"]) .card.link:hover { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(168,85,247,.5), 0 0 24px rgba(168,85,247,.25), 0 12px 30px rgba(0,0,0,.5); }
+
+/* Boutons */
+:root:not([data-theme="light"]) .btn { background: linear-gradient(180deg,#1a1d38,#14152a); border-color:#2b2f55; }
+:root:not([data-theme="light"]) .btn:hover { border-color: var(--accent2); box-shadow: 0 0 12px rgba(34,211,238,.25); }
+:root:not([data-theme="light"]) .btn.primary {
+  background: linear-gradient(120deg,#8b3cf0,#22a9d8); border-color: transparent; color:#fff;
+  box-shadow: 0 0 16px rgba(168,85,247,.45), inset 0 1px 0 rgba(255,255,255,.2);
+}
+:root:not([data-theme="light"]) .btn.primary:hover { filter: brightness(1.08); box-shadow: 0 0 22px rgba(168,85,247,.6); }
+:root:not([data-theme="light"]) .btn.on, :root:not([data-theme="light"]) .tabs button.active,
+:root:not([data-theme="light"]) nav a.active {
+  background: linear-gradient(120deg, rgba(168,85,247,.35), rgba(34,211,238,.22));
+  box-shadow: inset 0 0 0 1px rgba(168,85,247,.5), 0 0 14px rgba(168,85,247,.25); color:#fff;
+}
+:root:not([data-theme="light"]) nav a.active::before { background: linear-gradient(180deg,#a855f7,#22d3ee); box-shadow: 0 0 8px rgba(168,85,247,.8); }
+
+/* Molettes : anneau violet→cyan plus lumineux, pointeur cyan qui glow fort */
+:root:not([data-theme="light"]) .knob-ring {
+  background: conic-gradient(from 225deg, #a855f7 0, #22d3ee var(--p,0deg), rgba(120,130,200,.14) var(--p,0deg) 270deg, transparent 270deg 360deg);
+  filter: drop-shadow(0 0 5px rgba(34,211,238,.55));
+}
+:root:not([data-theme="light"]) .knob-ind { background: #d7f6ff; box-shadow: 0 0 8px #22d3ee, 0 0 3px #fff; }
+:root:not([data-theme="light"]) .knob-body { background: radial-gradient(circle at 38% 28%, rgba(255,255,255,.18), transparent 45%), linear-gradient(180deg,#20233f,#121327 60%,#0b0c16); border-color:#05060c; }
+
+/* Signature titre + tick néon */
+:root:not([data-theme="light"]) .topbar h2::before { background: linear-gradient(180deg,#a855f7,#22d3ee); box-shadow: 0 0 10px rgba(168,85,247,.8); }
+:root:not([data-theme="light"]) .home-hero { border-color:#2a2150; background:
+  radial-gradient(ellipse at 85% 20%, rgba(168,85,247,.25), transparent 45%),
+  radial-gradient(ellipse at 5% 110%, rgba(34,211,238,.15), transparent 45%),
+  linear-gradient(120deg,#120f24,#0c0d1c); }
+:root:not([data-theme="light"]) .home-hero .eyebrow { color:#c4a6ff; }
+:root:not([data-theme="light"]) .module-card .module-ic { background: rgba(168,85,247,.16); border-color: rgba(34,211,238,.35); box-shadow: 0 0 10px rgba(168,85,247,.2); }
+
+/* Vu-mètres / barres en néon */
+:root:not([data-theme="light"]) .meter i { background: linear-gradient(90deg,#22d3ee,#a855f7 70%,#ef4444); }
+:root:not([data-theme="light"]) .bar > i { background: linear-gradient(90deg,#a855f7,#22d3ee); box-shadow: 0 0 8px rgba(34,211,238,.4); }
+
+/* Badge presets / pills */
+:root:not([data-theme="light"]) .badge { background: rgba(168,85,247,.12); border-color: rgba(168,85,247,.35); color:#c9b6ff; }
