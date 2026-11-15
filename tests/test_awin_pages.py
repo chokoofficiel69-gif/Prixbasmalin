@@ -23,7 +23,7 @@ def product(i, **over):
 
 class AwinPagesTest(unittest.TestCase):
     def build(self, products):
-        return pages.build({"status": "ok", "products": products}, now=NOW)
+        return pages.build({"status": "ok", "image_policy": pages.IMAGE_POLICY, "fetched_at": "2026-11-15T00:11:04Z", "products": products}, now=NOW)
 
     def test_page_uses_individual_merchant_price_date_and_affiliate_notice(self):
         files = self.build([product(1), product(2)])
@@ -73,7 +73,21 @@ class AwinPagesTest(unittest.TestCase):
             product(6, name="Glucomètre portable"),
             product(7, sourceUrl="http://insecure.example"),
         ])
-        self.assertEqual(files, {})
+        self.assertIn("produits/tech.html", files)
+        page = files["produits/tech.html"]
+        self.assertEqual(page.count('class="card pm-card"'), 1)
+        self.assertIn("Produit &quot;2&quot;", page)
+
+    def test_build_rejects_unverified_image_feed(self):
+        with self.assertRaisesRegex(ValueError, "politique d’image marchande vérifiée"):
+            pages.build({"status": "ok", "fetched_at": "2026-11-15T00:11:04Z", "products": [product(1)]}, now=NOW)
+
+    def test_mobile_product_cards_use_horizontal_scroll_rail(self):
+        page = self.build([product(1)])["produits/tech.html"]
+        self.assertIn("@media(max-width:560px)", page)
+        self.assertIn("overflow-x:auto!important", page)
+        self.assertIn("scroll-snap-type:x mandatory", page)
+        self.assertIn("flex:0 0 min(74vw,230px)", page)
 
     def test_cheap_product_is_not_given_a_published_price(self):
         page = self.build([product(4, priceValue=2.0)])["produits/tech.html"]
