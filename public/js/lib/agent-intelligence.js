@@ -29,7 +29,10 @@ export function validateAgentActions(actions, utterance = '') {
     } else if (['play'].includes(raw.a)) {
       x.what = ['tout','voix','master'].includes(raw.what) ? raw.what : 'tout';
     } else if (['select','volume','mute','delete'].includes(raw.a)) {
-      if (raw.track !== undefined) x.track = typeof raw.track === 'string' && ['voix','instru'].includes(raw.track) ? raw.track : Math.max(-1, Math.min(100, Math.trunc(Number(raw.track) || 1)));
+      if (raw.track !== undefined) {
+        if (raw.a === 'volume' && ['voix','instru'].includes(raw.track)) x.track = raw.track;
+        else x.track = Math.max(-1, Math.min(100, Math.trunc(Number(raw.track) || 1)));
+      }
       if (raw.a === 'volume') {
         if (raw.delta !== undefined) x.delta = Math.max(-12, Math.min(12, Number(raw.delta) || 0));
         else x.db = Math.max(-30, Math.min(12, Number(raw.db) || 0));
