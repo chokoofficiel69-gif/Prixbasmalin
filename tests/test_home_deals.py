@@ -136,7 +136,13 @@ class HomeDealsTests(unittest.TestCase):
         awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
-        self.assertEqual(published, deals.build(awin, sheets, previous=published))
+        rotation = published.get("rotation", {})
+        rotation_now = deals.parse_utc(
+            rotation.get("last_attempt_at")
+            or rotation.get("last_rotated_at")
+            or awin.get("fetched_at")
+        )
+        self.assertEqual(published, deals.build(awin, sheets, previous=published, rotation_now=rotation_now))
 
     def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
         awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
@@ -337,6 +343,54 @@ class HomeDealsRotationTests(unittest.TestCase):
         self.assertEqual(len(journal["product_ids"]), 48)
         self.assertEqual(len(journal["image_hashes"]), 48)
         self.assertFalse(any("https://" in str(value) for value in journal.values()))
+
+
+
+    def test_rotation_uses_wall_clock_even_when_awin_snapshot_is_unchanged(self):
+        fetched_at = "2026-11-10T12:00:00Z"
+        initial = deals.build(
+            self.rotation_awin(100, fetched_at),
+            {"products": []},
+            rotation_now=deals.parse_utc(fetched_at),
+        )
+        rotated = deals.build(
+            self.rotation_awin(100, fetched_at),
+            {"products": []},
+            previous=initial,
+            rotation_now=deals.parse_utc("2026-11-12T12:00:00Z"),
+        )
+        self.assertEqual(rotated["rotation"]["status"], "rotated")
+        self.assertNotEqual(
+            {gift["id"] for gift in initial["gifts"]},
+            {gift["id"] for gift in rotated["gifts"]},
+        )
+
+    def test_failed_rotation_retries_after_twelve_hour_cooldown(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        held = dict(initial)
+        held["rotation"] = {
+            "interval_hours": 48,
+            "last_rotated_at": first_time,
+            "last_attempt_at": "2026-11-12T12:00:00Z",
+            "status": "held_previous_snapshot",
+            "selected_count": 48,
+        }
+        cooldown = deals.build(
+            self.rotation_awin(100, first_time),
+            {"products": []},
+            previous=held,
+            rotation_now=deals.parse_utc("2026-11-12T18:00:00Z"),
+        )
+        self.assertEqual(cooldown["rotation"]["status"], "retry_cooldown")
+        self.assertEqual([g["id"] for g in cooldown["gifts"]], [g["id"] for g in held["gifts"]])
+        retry = deals.build(
+            self.rotation_awin(100, first_time),
+            {"products": []},
+            previous=held,
+            rotation_now=deals.parse_utc("2026-11-13T00:00:01Z"),
+        )
+        self.assertEqual(retry["rotation"]["status"], "rotated")
 
 
 
