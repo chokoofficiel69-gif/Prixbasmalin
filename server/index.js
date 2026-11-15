@@ -84,9 +84,11 @@ setLedger(ledger);
 function checkLogin(username, password) {
   const u = findUserByName(username);
   if (!u || u.disabled) return null;
+  // Le mot de passe d'environnement est prioritaire pour l'administrateur,
+  // y compris si un hash historique existe déjà dans le stockage.
+  if (u.role === 'admin' && envPasswordMatches(password)) return u;
   if (u.passwordHash) return verifyHash(password, u.passwordHash) ? u : null;
-  // L'administrateur sans mot de passe enregistré utilise STUDIO_PASSWORD.
-  return u.role === 'admin' && envPasswordMatches(password) ? u : null;
+  return null;
 }
 
 // ---------------------------------------------------------------------------
