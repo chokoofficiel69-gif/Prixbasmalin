@@ -57,7 +57,7 @@ const CSS = `
 .regie .ph .r{margin-left:auto;font-size:10px;color:var(--rmut);font-weight:600}
 .regie .pb{padding:12px}
 .regie .grid{display:grid;gap:12px}
-.regie .rbtn{padding:7px 12px;border-radius:9px;font-size:12.5px;font-weight:700;background:transparent;border:1px solid var(--rline);color:#d2d5f0;cursor:pointer;flex:none;white-space:nowrap}
+.regie .rbtn{width:auto;height:auto;min-height:32px;display:inline-flex;align-items:center;justify-content:center;gap:5px;box-shadow:none;padding:7px 12px;border-radius:9px;font-size:12.5px;font-weight:700;background:transparent;border:1px solid var(--rline);color:#d2d5f0;cursor:pointer;flex:none;white-space:nowrap}
 .regie .rbtn:hover{background:rgba(255,255,255,.05)}
 .regie .rbtn.p{background:linear-gradient(120deg,var(--rpur2),var(--rpur));border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(168,85,247,.35)}
 .regie .rbtn.g{background:linear-gradient(120deg,#16a34a,var(--rgr));border-color:transparent;color:#042}
@@ -1311,7 +1311,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE12'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE13'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
