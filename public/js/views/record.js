@@ -1347,12 +1347,12 @@ export async function render(el, { params }) {
       const t = timeline.selTrack(), r = sel; if (!t || !r) return;
       selected = tracks.indexOf(t); drawEdit();
       if (kind === 'play') { const g0 = (t.offset || 0) - minOffNow(); return playLive(g0 + r[0], g0 + r[1]); }
-      const label = { delete: 'Suppression du passage…', keep: 'Rognage…', silence: 'Silence…' }[kind];
+      const label = { delete: 'Suppression du passage…', keep: 'Rognage…', silence: 'Silence…', erase: 'Effacement sans décalage…' }[kind];
       await work(label, async (b) => {
         if (kind === 'keep') return sliceBuffer(b, r[0], r[1]);
         if (kind === 'delete') return removeRange(b, r[0], r[1]);
         const o2 = cloneBuffer(b), a = Math.floor(r[0] * b.sampleRate), z = Math.min(b.length, Math.floor(r[1] * b.sampleRate)), f = Math.floor(0.01 * b.sampleRate);
-        for (let c = 0; c < o2.numberOfChannels; c++) { const d = o2.getChannelData(c); for (let i = a; i < z; i++) { const k = Math.min(1, (i - a) / f, (z - i) / f); d[i] *= 1 - k; } }
+        for (let c = 0; c < o2.numberOfChannels; c++) { const d = o2.getChannelData(c); for (let i = a; i < z; i++) { if (kind === 'erase') d[i] = 0; else { const k = Math.min(1, (i - a) / f, (z - i) / f); d[i] *= 1 - k; } } }
         return o2;
       });
       if (kind === 'keep') t.offset = (t.offset || 0) + r[0];
