@@ -665,9 +665,40 @@ export async function render(el, { params }) {
         const chosen = selectedEffects();
         const chosenLine = chosen.length ? `Effets expressément sélectionnés par l’utilisateur (n’en ajoute aucun autre) : ${chosen.join(', ')}.` : 'Aucun effet imposé : choisis les traitements adaptés à la demande.';
         const targetMaster = masterStyle.value;
-        const system = `Tu es un ingénieur du son professionnel intégré à un DAW. Transforme la demande en opérations audio réellement exécutables. Réponds UNIQUEMENT en JSON valide : {"message":"explication courte en français","actions":[{"type":"denoise|antipop|gate|voice|autotune|normalize|limit|master|reverse|fadeIn|fadeOut","params":{}}]}. Types autorisés : denoise amount 0..1; antipop amount 0..1; gate thresholdDb -60..-25 et floorDb -60..-10; voice highpass 40..180, low/presence/air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode"; normalize targetDb -3..-1; limit ceilingDb -2..-0.3; master preset streaming|spotify|youtube|apple|tiktok|podcast|rap|club|doux; reverse; fadeIn; fadeOut. Maximum 10 actions, sans doublon. ${chosenLine} Si master est demandé, utilise impérativement le profil de mastering choisi : ${targetMaster}. Si des effets sont cochés, ne retourne que ces types. Si le mastering est coché, ajoute master avec ce preset. Ne prétends pas traiter plusieurs pistes si les actions ne le permettent pas. Préserve la dynamique et un son naturel ; n’invente aucune mesure. Contexte audio mesuré : ${JSON.stringify(context)}`;
+        const agents = [
+          { name: 'Diagnostic audio', role: 'analyseur audio : interprète les mesures fournies, repère les problèmes probables sans inventer de mesures' },
+          { name: 'Spécialiste nettoyage', role: 'réduction du bruit, souffle, clics, pops et artefacts' },
+          { name: 'Ingénieur vocal', role: 'correction de justesse, tonalité, formants et naturel de la voix' },
+          { name: 'Égalisation', role: 'EQ correctif et tonal, masquage fréquentiel et intelligibilité' },
+          { name: 'Dynamique', role: 'compression, gate, de-esser, contrôle des transitoires et crêtes' },
+          { name: 'Effets spatiaux', role: 'réverbération, delay, profondeur, largeur et placement stéréo' },
+          { name: 'Mixage', role: 'équilibre voix/instrumental, gain staging, panoramique et cohérence du mix' },
+          { name: 'Mastering', role: 'préparation du master selon le profil cible, sonie et true peak' },
+          { name: 'Direction artistique', role: 'intention sonore, références stylistiques, choix entre naturel, professionnel et créatif' },
+          { name: 'Contrôle qualité', role: 'auditeur critique : détecte les risques, traitements excessifs, incohérences et valide la chaîne proposée' }
+        ];
+        const task = `Tu es le cerveau principal et l'ingénieur du son en chef. Tu gardes une seule conversation avec l'utilisateur et tu coordonnes les dix spécialistes disponibles en coulisses. Ne renvoie jamais l'utilisateur vers un autre agent ou un autre onglet. Fais intervenir les spécialistes utiles, confronte leurs avis si nécessaire, puis décide toi-même de la chaîne finale.
+Demande utilisateur : ${request}
+Piste sélectionnée : ${JSON.stringify(context)}
+Effets choisis par l'utilisateur : ${chosen.length ? chosen.join(', ') : 'choix automatique par le chef'}
+Profil mastering demandé : ${targetMaster}
+Contraintes moteur DSP réellement disponibles : denoise, antipop, gate, voice, autotune, normalize, limit, master, reverse, fadeIn, fadeOut.
+Le livrable final doit être UNIQUEMENT un JSON valide de cette forme :
+{"message":"explication courte en français","actions":[{"type":"...","params":{}}]}
+Types autorisés : denoise amount 0..1; antipop amount 0..1; gate thresholdDb -60..-25 et floorDb -60..-10; voice highpass 40..180, low/presence/air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode"; normalize targetDb -3..-1; limit ceilingDb -2..-0.3; master preset streaming|spotify|youtube|apple|tiktok|podcast|rap|club|doux; reverse; fadeIn; fadeOut.
+Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coché, utilise exactement le preset demandé. Maximum 10 actions. N'invente aucune mesure, aucun traitement ni aucune écoute. Une seule piste est traitée dans cette opération. Le contrôle qualité doit vérifier que chaque action est supportée.`;
         let raw = '';
-        await sse('/api/chat', { projectId: state.projectId, model: 'auto:smart', messages: [{ role: 'system', content: system }, { role: 'user', content: request }] }, ev => { if (ev.type === 'delta' && ev.content) raw += ev.content; if (ev.type === 'error') throw new Error(ev.error); });
+        const agentStatus = new Map();
+        await sse('/api/agents/run', { projectId: state.projectId, task, agents, mode: 'chef', rounds: 1, synthModel: 'auto' }, ev => {
+          if (ev.type === 'step') {
+            agentStatus.set(ev.id, ev.agent + ' — ' + (ev.title || 'travail'));
+            status.textContent = 'Équipe en cours : ' + [...agentStatus.values()].slice(-3).join(' · ');
+          }
+          if (ev.type === 'delta' && ev.content) raw += ev.content;
+          if (ev.type === 'final' && ev.content) raw = ev.content;
+          if (ev.type === 'error') throw new Error(ev.error);
+          if (ev.type === 'done' && ev.error) say('expert', ev.agent + ' indisponible : ' + ev.error);
+        });
         pendingPlan = parsePlan(raw, chosen);
         say('expert', pendingPlan.message || 'Plan de traitement prêt. Vérifie les opérations avant exécution.');
         for (const a of pendingPlan.actions) planBox.append(h('div', { style: { padding: '8px 10px', background: '#101027', border: '1px solid var(--rline)', borderRadius: '8px', fontSize: '12px' } }, '• ' + a.type + ' — ' + JSON.stringify(a.params || {})));
