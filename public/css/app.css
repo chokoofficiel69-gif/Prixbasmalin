@@ -422,6 +422,23 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 :root[data-theme="light"] .knob-ring { background: conic-gradient(from 225deg, var(--accent) 0 var(--p,0deg), rgba(90,100,130,.18) var(--p,0deg) 270deg, transparent 270deg 360deg); }
 :root[data-theme="light"] .knob-ind { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
 
+/* ===== Molette d'options + afficheur LCD (banque de processeurs vocaux) ===== */
+.option-dial { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.option-dial .od-dial { width: 62px; height: 62px; flex: none; }
+.od-side { display: grid; gap: 8px; min-width: 180px; }
+.od-lcd {
+  border-radius: 7px; padding: 7px 10px; border: 1px solid #16402f;
+  background: linear-gradient(180deg, #06140d, #0a1c12);
+  box-shadow: inset 0 0 14px rgba(0,0,0,.6), inset 0 0 0 1px rgba(80,255,170,.06);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.od-label { font-size: 9px; font-weight: 800; letter-spacing: .22em; color: #3fae7e; }
+.od-read { display: flex; align-items: baseline; gap: 8px; }
+.od-num { font-size: 22px; font-weight: 800; color: #5df0a6; text-shadow: 0 0 8px rgba(93,240,166,.6); line-height: 1; }
+.od-name { font-size: 13px; color: #a7f3cf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+.od-nav { gap: 6px; }
+.od-nav .btn { min-width: 34px; }
+
 /* Studio IA — banque de réglages vocaux avancés */
 .vocal-knob-console { border:1px solid #34445c; background:linear-gradient(180deg,#151f2d,#0d1420)!important; color:#e6eefb; }
 .vocal-knob-console .vocal-knob-grid { scrollbar-width:thin; scrollbar-color:#526b89 #101927; }

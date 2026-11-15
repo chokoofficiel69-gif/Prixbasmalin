@@ -15,6 +15,8 @@ import { analyzeMaster, compareToRef } from '../lib/meters.js';
 import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
 import { evaluateExpertPass, expertAgentSummary } from '../lib/expert-agent.js';
 import { expertFace } from '../lib/expertface.js';
+import { UNITS, unitById, buildFx, totalPresets } from '../lib/vocalunits.js';
+import { optionDial } from '../lib/optiondial.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -1242,6 +1244,35 @@ export async function render(el, { params }) {
   const fakeBtn = () => ({ disabled: false });
   // ---------- Panneau de molettes (piste sélectionnée) ----------
   const knobBox = h('div.card.stack.vocal-knob-console', { style: { padding: '10px', background: 'var(--bg)' } });
+  // ---------- Banque de processeurs vocaux (molette d'options, inspirée du matériel pro) ----------
+  let unitId = UNITS[0].id;
+  const unitSel = h('select', UNITS.map(u => h('option', { value: u.id }, `${u.name} — ${u.ref}`)));
+  const presetDrop = h('select');
+  const fillDrop = (u) => { presetDrop.innerHTML = ''; u.presets.forEach((p, idx) => presetDrop.append(h('option', { value: String(idx) }, `${String(p.n).padStart(2, '0')} · ${p.name}`))); };
+  const unitDial = optionDial({ items: UNITS[0].presets, label: 'PRESET', onChange: (idx) => { presetDrop.value = String(idx); } });
+  unitSel.onchange = () => { unitId = unitSel.value; const u = unitById(unitId); unitDial.setItems(u.presets, 0); fillDrop(u); presetDrop.value = '0'; };
+  presetDrop.onchange = () => unitDial.set(Number(presetDrop.value));
+  function applyUnit() {
+    const t = tracks[selected];
+    if (!t || t.empty) return toast('Sélectionne d’abord une piste.');
+    if (t.kind === 'instru') return toast('Choisis une piste voix (pas l’instru).');
+    const { fx, tune, label } = buildFx(unitId, unitDial.index);
+    t.fx = { ...FX_DEF, ...fx };
+    t.tunePro = tune; // vitesse/humanize conservés pour le traitement
+    masterResult = null;
+    renderKnobs();
+    if (live.srcs.length) playLive(livePos());
+    saveSoon();
+    toast(`🎛️ ${label} → ${t.name}`, 'ok');
+  }
+  fillDrop(UNITS[0]);
+  const unitsCard = h('div.card.stack',
+    h('div.row', h('strong.grow', '🎛️ Banque de processeurs vocaux'), h('span.badge', `${totalPresets()} presets`)),
+    h('p.tiny.muted', 'Inspiré du matériel pro (HeadRush VX5, TC-Helicon, Mooer, Audota, Tascam, Waves, BOSS). Choisis un appareil et un preset avec la molette : il pré-règle les molettes EQ/effets + l’autotune de la piste. Nos traitements, 100 % local — tu peux retoucher ensuite.'),
+    h('div.row', h('span.tiny.muted', 'Appareil :'), h('div.grow', unitSel)),
+    unitDial.el,
+    h('div.row', h('span.tiny.muted', 'Liste :'), h('div.grow', presetDrop), h('button.btn.small.primary', { type: 'button', onclick: applyUnit }, '✓ Appliquer à la piste')),
+  );
   const KN = [
     ['sub', '🫧 Sub 80 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
     ['low', '🔈 Grave', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
@@ -1835,7 +1866,7 @@ export async function render(el, { params }) {
         h('button.btn.small', { onclick: async () => { for (const f of await pickFromLibrary({ kinds: ['audio', 'video'] })) await addBlob(await fetchFileBlob(f.id), f.name, null, f.id); } }, '📚 Mes fichiers'),
         trashBtn, h('button.btn.small.ghost', { onclick: newProject }, '🗑️ Nouveau projet'), saveLbl),
       micMeter.proxEl,
-      timeline.el, timeline.selBar, knobBox,
+      timeline.el, timeline.selBar, unitsCard, knobBox,
       h('p.tiny.muted', '⌨️ Raccourcis : Espace = lecture / pause (stop pendant une prise) · R = enregistrer · E ou Suppr = effacer le passage sélectionné (sinon la piste) · Ctrl+Z = annuler · Ctrl+Y = rétablir · M = muet · S = solo · A = armer ● · N = nouvelle piste · ↑ ↓ = changer de piste · ← → = reculer / avancer de 5 s · Maj + ← → = décaler la piste de 10 ms pour la caler · F = tout voir · Entrée = début · Échap = stop.'),
       h('p.tiny.muted', '➕ Ajouter une piste (backs, refrain…) puis ⏺ : la prise va dans la piste armée ● et l’enregistrement démarre là où est la tête de lecture, en jouant tout le reste. Clique sur la ligne de temps pour placer la lecture · ⬚ Sélectionner : glisse sur une prise pour choisir un passage à couper · ✋ Déplacer : glisse une prise pour la caler · M = muet, S = solo, Vol = volume, G/D = gauche/droite.')),
     h('div.card.stack', { style: { marginBottom: '14px' } },
