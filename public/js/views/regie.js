@@ -5,7 +5,7 @@
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
 import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder, sse } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
-import { decodeBlob, drawWave, voiceChain, denoise, detectBeats, normalize, gate, antipop, limit, master, mix, encodeWav } from '../lib/audio.js';
+import { decodeBlob, drawWave, voiceChain, denoise, detectBeats, normalize, gate, antipop, limit, master, mix, encodeWav, analyzeBuffer } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
@@ -801,10 +801,9 @@ RÈGLES D’UTILISATION :
       planBox.innerHTML = ''; say('user', request); input.value = '';
       status.textContent = 'L’ingénieur analyse ta demande et prépare les opérations…';
       try {
-        const b = t.original || t.buffer;
-        let peak = 0, rms = 0, n = 0;
-        for (let c = 0; c < b.numberOfChannels; c++) { const d = b.getChannelData(c); for (let i = 0; i < d.length; i += 16) { peak = Math.max(peak, Math.abs(d[i])); rms += d[i]*d[i]; n++; } }
-        const context = { piste: t.name, duree_secondes: +b.duration.toFixed(2), sampleRate: b.sampleRate, peakDbfs: +(20*Math.log10(Math.max(peak,1e-7))).toFixed(1), rmsDbfs: +(20*Math.log10(Math.sqrt(rms/Math.max(1,n)))).toFixed(1), autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
+        const b = t?.original || t?.buffer || null;
+        const signalAnalysis = b ? analyzeBuffer(b, 1) : null;
+        const context = { piste: t?.name || null, type_piste: t?.kind || null, analyse_signal_mesuree: signalAnalysis, autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
         const chosen = selectedEffects();
         const chosenLine = chosen.length ? `Effets expressément sélectionnés par l’utilisateur (n’en ajoute aucun autre) : ${chosen.join(', ')}.` : 'Aucun effet imposé : choisis les traitements adaptés à la demande.';
         const targetMaster = masterStyle.value;
@@ -822,7 +821,7 @@ RÈGLES D’UTILISATION :
         ];
         const task = `Tu es La Zone, le cerveau principal et l'ingénieur du son en chef. Tu gardes une seule conversation avec l'utilisateur et tu coordonnes les dix spécialistes disponibles en coulisses. Ne renvoie jamais l'utilisateur vers un autre agent ou un autre onglet. Fais intervenir les spécialistes utiles, confronte leurs avis si nécessaire, puis décide toi-même de la chaîne finale.
 Demande utilisateur : ${request}
-Piste sélectionnée : ${JSON.stringify(context)}
+Piste sélectionnée et analyse réelle du buffer : ${JSON.stringify(context)}
 Si aucune piste n’est sélectionnée, réponds à la question de façon naturelle et utile, sans demander de piste, et retourne obligatoirement actions: []. Si la demande est une conversation ou une question générale, ne force pas un traitement audio.
 Effets choisis par l'utilisateur : ${chosen.length ? chosen.join(', ') : 'choix automatique par le chef'}
 Profil mastering demandé : ${targetMaster}
@@ -831,7 +830,7 @@ Contraintes moteur DSP réellement disponibles : denoise, antipop, gate, voice, 
 Le livrable final doit être UNIQUEMENT un JSON valide de cette forme :
 {"message":"explication courte en français","actions":[{"type":"...","params":{}}]}
 Types autorisés : denoise amount 0..1; antipop amount 0..1; gate thresholdDb -60..-25 et floorDb -60..-10; voice highpass 40..180, low/presence/air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode"; normalize targetDb -3..-1; limit ceilingDb -2..-0.3; master preset streaming|spotify|youtube|apple|tiktok|podcast|rap|club|doux; reverse; fadeIn; fadeOut.
-Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coché, utilise exactement le preset demandé. Maximum 10 actions. N'invente aucune mesure, aucun traitement ni aucune écoute. Une seule piste est traitée dans cette opération. Le contrôle qualité doit vérifier que chaque action est supportée.`;
+Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coché, utilise exactement le preset demandé. Maximum 10 actions. Les mesures de analyse_signal_mesuree sont calculées directement sur tous les échantillons du buffer source : utilise-les pour distinguer niveau global, crêtes, dynamique, silences et zones problématiques. Les fenêtres nearSilence sont des indices, pas automatiquement des silences à couper. N'invente aucune mesure, aucun traitement ni aucune écoute subjective. Une seule piste est traitée dans cette opération. Le contrôle qualité doit vérifier que chaque action est supportée.`;
         let raw = '';
         const agentStatus = new Map();
         await sse('/api/agents/run', { projectId: state.projectId, task, agents, mode: 'chef', rounds: 1, synthModel: 'auto' }, ev => {
