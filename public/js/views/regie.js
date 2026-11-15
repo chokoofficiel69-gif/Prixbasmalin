@@ -620,12 +620,13 @@ export async function render(el, { params }) {
     const undoBtn = h('button.rbtn', { disabled: true }, '↩ Restaurer l’original');
     let pendingPlan = null, busy = false;
     const say = (who, txt) => chat.append(h('div', { style: { margin: '7px 0', padding: '9px 11px', borderRadius: '10px', background: who === 'expert' ? '#171636' : 'rgba(168,85,247,.18)', border: '1px solid var(--rline)', whiteSpace: 'pre-wrap', fontSize: '12px', lineHeight: '1.5' } }, h('b', who === 'expert' ? '🎧 Ingénieur IA' : 'Vous'), h('div', { style: { marginTop: '4px' } }, txt)));
-    const parsePlan = raw => {
+    const parsePlan = (raw, chosen = []) => {
       const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
       const obj = JSON.parse(cleaned);
       if (!obj || !Array.isArray(obj.actions)) throw new Error('Plan IA invalide : liste d’actions absente.');
       const allowed = new Set(['denoise','antipop','gate','voice','autotune','normalize','limit','master','reverse','fadeIn','fadeOut']);
       for (const a of obj.actions) if (!allowed.has(a.type)) throw new Error('Action non autorisée ou non prise en charge : ' + a.type);
+      if (chosen.length && obj.actions.some(a => !chosen.includes(a.type))) throw new Error('Le plan contient un effet que tu n’as pas sélectionné. Relance la demande.');
       return obj;
     };
     const askExpert = async () => {
@@ -646,7 +647,7 @@ export async function render(el, { params }) {
         const system = `Tu es un ingénieur du son professionnel intégré à un DAW. Transforme la demande en opérations audio réellement exécutables. Réponds UNIQUEMENT en JSON valide : {"message":"explication courte en français","actions":[{"type":"denoise|antipop|gate|voice|autotune|normalize|limit|master|reverse|fadeIn|fadeOut","params":{}}]}. Types autorisés : denoise amount 0..1; antipop amount 0..1; gate thresholdDb -60..-25 et floorDb -60..-10; voice highpass 40..180, low/presence/air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode"; normalize targetDb -3..-1; limit ceilingDb -2..-0.3; master preset streaming|spotify|youtube|apple|tiktok|podcast|rap|club|doux; reverse; fadeIn; fadeOut. Maximum 10 actions, sans doublon. ${chosenLine} Si master est demandé, utilise impérativement le profil de mastering choisi : ${targetMaster}. Si des effets sont cochés, ne retourne que ces types. Si le mastering est coché, ajoute master avec ce preset. Ne prétends pas traiter plusieurs pistes si les actions ne le permettent pas. Préserve la dynamique et un son naturel ; n’invente aucune mesure. Contexte audio mesuré : ${JSON.stringify(context)}`;
         let raw = '';
         await sse('/api/chat', { projectId: state.projectId, model: 'auto:smart', messages: [{ role: 'system', content: system }, { role: 'user', content: request }] }, ev => { if (ev.type === 'delta' && ev.content) raw += ev.content; if (ev.type === 'error') throw new Error(ev.error); });
-        pendingPlan = parsePlan(raw);
+        pendingPlan = parsePlan(raw, chosen);
         say('expert', pendingPlan.message || 'Plan de traitement prêt. Vérifie les opérations avant exécution.');
         for (const a of pendingPlan.actions) planBox.append(h('div', { style: { padding: '8px 10px', background: '#101027', border: '1px solid var(--rline)', borderRadius: '8px', fontSize: '12px' } }, '• ' + a.type + ' — ' + JSON.stringify(a.params || {})));
         applyBtn.disabled = !pendingPlan.actions.length;
