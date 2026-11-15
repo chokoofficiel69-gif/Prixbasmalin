@@ -570,3 +570,95 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 .score-item[data-s="warn"] .score-bari{background:linear-gradient(90deg,#f5a623,#22e39a)}
 .score-item[data-s="bad"] .score-bari{background:linear-gradient(90deg,#ef4444,#f5a623)}
 .score-label{flex:none;min-width:84px}
+
+
+/* ===== STUDIO IA VOCAL PRO X — console tout-en-un ===== */
+.studio-expert-active { background:#070a14; }
+.studio-expert-active > .studio-hero { display:none !important; }
+.studio-expert-workspace.is-visible {
+  display:grid !important;
+  grid-template-columns:minmax(210px, .82fr) minmax(460px, 2fr) minmax(250px, .95fr);
+  grid-template-rows:auto minmax(150px, 24vh) minmax(230px, 1fr) minmax(145px, 21vh);
+  grid-template-areas:
+    "toolbar toolbar toolbar"
+    "tracks tracks tracks"
+    "engineer effects mixer"
+    "settings editor master";
+  gap:10px;
+  height:calc(100vh - 112px);
+  min-height:720px;
+  max-height:1100px;
+  overflow:hidden;
+  padding:10px;
+  margin:0;
+  border-radius:16px;
+  border:1px solid rgba(64,130,255,.48);
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(24,92,180,.18),transparent 48%),
+    linear-gradient(145deg,#080d1b 0%,#0b1020 55%,#100b22 100%);
+  box-shadow:0 0 34px rgba(36,115,255,.12),inset 0 0 28px rgba(108,70,255,.05);
+}
+.studio-expert-toolbar { grid-area:toolbar; min-height:42px; padding:7px 12px; background:linear-gradient(90deg,#101a32,#12152a 60%,#17102d); border-color:#293c68; }
+.studio-expert-title strong { font-size:15px; letter-spacing:.06em; }
+.studio-expert-kicker { color:#59d7ff; }
+.studio-expert-live { font-size:10px; }
+.studio-expert-panel {
+  min-width:0; min-height:0; overflow:auto; overscroll-behavior:contain;
+  scrollbar-width:thin; scrollbar-color:#465e99 #0b1020;
+  border:1px solid rgba(69,115,210,.42);
+  border-radius:12px;
+  padding:8px;
+  background:linear-gradient(155deg,rgba(18,28,53,.97),rgba(10,15,31,.98));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 24px rgba(0,0,0,.2);
+}
+.studio-expert-panel-title {
+  position:sticky; top:-8px; z-index:5;
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  margin:-8px -8px 8px; padding:8px 10px;
+  border-bottom:1px solid rgba(85,140,230,.25);
+  background:rgba(12,19,39,.96); backdrop-filter:blur(12px);
+  color:#cfe5ff; font-size:10px; font-weight:900; letter-spacing:.11em;
+}
+.studio-expert-status { color:#58d9c2; font-size:8px; white-space:nowrap; }
+.studio-expert-panel[data-panel="tracks"] { grid-area:tracks; }
+.studio-expert-panel[data-panel="engineer"] { grid-area:engineer; }
+.studio-expert-panel[data-panel="effects"] { grid-area:effects; }
+.studio-expert-panel[data-panel="mixer"] { grid-area:mixer; }
+.studio-expert-panel[data-panel="settings"] { grid-area:settings; }
+.studio-expert-panel[data-panel="editor"] { grid-area:editor; }
+.studio-expert-panel[data-panel="master"] { grid-area:master; }
+.studio-expert-panel[data-panel="assistant"] { display:none; }
+.studio-expert-panel .card { margin:0 !important; min-width:0; box-shadow:none; border-color:rgba(65,111,202,.3); background:rgba(13,20,39,.72); }
+.studio-expert-panel h3 { font-size:13px; }
+.studio-expert-panel .tiny, .studio-expert-panel .small { line-height:1.35; }
+.studio-expert-panel[data-panel="tracks"] .card { padding:8px !important; }
+.studio-expert-panel[data-panel="tracks"] .timeline,
+.studio-expert-panel[data-panel="tracks"] canvas { max-width:100%; }
+.studio-expert-panel[data-panel="engineer"] .expert-face { flex-direction:column; align-items:stretch; gap:8px; }
+.studio-expert-panel[data-panel="engineer"] .ef-portrait { width:100%; height:clamp(130px,19vh,210px); border-radius:10px; }
+.studio-expert-panel[data-panel="engineer"] .ef-portrait svg { transform:scale(1.55); }
+.studio-expert-panel[data-panel="engineer"] .ef-meta { padding:2px 4px; }
+.studio-expert-panel[data-panel="effects"] { padding:8px; }
+.studio-expert-panel[data-panel="effects"] .card { max-height:none; }
+.studio-expert-panel[data-panel="effects"] .vocal-knob-grid,
+.studio-expert-panel[data-panel="effects"] .quick-fx-grid { max-height:210px !important; overflow:auto; }
+.studio-expert-panel[data-panel="effects"] .quick-fx-grid { grid-template-columns:repeat(3,minmax(0,1fr)) !important; }
+.studio-expert-panel[data-panel="mixer"] .mixer { min-width:0; overflow-x:auto; }
+.studio-expert-panel[data-panel="mixer"] .mixer > * { min-width:54px; }
+.studio-expert-panel[data-panel="settings"] .card,
+.studio-expert-panel[data-panel="master"] .card,
+.studio-expert-panel[data-panel="editor"] .card { padding:9px !important; }
+.studio-expert-panel[data-panel="editor"] { grid-column:span 1; }
+.studio-expert-panel[data-panel="master"] .card { font-size:12px; }
+.studio-expert-panel .studio-ai-orb { width:54px; height:54px; }
+@media (max-width:1180px) {
+ .studio-expert-workspace.is-visible { grid-template-columns:minmax(180px,.7fr) minmax(360px,1.5fr); grid-template-rows:auto minmax(145px,22vh) minmax(220px,1fr) minmax(170px,24vh) minmax(160px,20vh); grid-template-areas:"toolbar toolbar" "tracks tracks" "engineer effects" "mixer mixer" "settings master" "editor editor"; height:auto; max-height:none; min-height:0; overflow:visible; }
+}
+@media (max-width:720px) {
+ .studio-expert-workspace.is-visible { display:flex !important; flex-direction:column; height:auto; max-height:none; min-height:0; overflow:visible; }
+ .studio-expert-panel { max-height:55vh; }
+ .studio-expert-panel[data-panel="tracks"] { max-height:46vh; }
+ .studio-expert-panel[data-panel="engineer"] .expert-face { flex-direction:row; }
+ .studio-expert-panel[data-panel="engineer"] .ef-portrait { width:112px; height:112px; }
+ .studio-expert-panel[data-panel="assistant"] { display:block; }
+}
