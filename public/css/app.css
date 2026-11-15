@@ -356,6 +356,21 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 @media(max-width:720px) { .studio-expert-workspace.is-visible { grid-template-columns:1fr; } .studio-expert-workspace > .studio-expert-panel { min-width:0; width:100%; resize:vertical; } }
 
 
+/* ===== Signature studio commune à toutes les pages (barre du haut) ===== */
+.topbar {
+  background: linear-gradient(180deg, var(--bg2), color-mix(in srgb, var(--bg2) 90%, #000));
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 22%, transparent), 0 6px 18px rgba(0,0,0,.18);
+}
+.topbar h2 { letter-spacing: .03em; display: flex; align-items: center; gap: 9px; }
+.topbar h2::before {
+  content: ''; flex: none; width: 3px; height: 16px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent), var(--accent2));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.brand { letter-spacing: .01em; }
+.brand::after { content: 'PRO'; font-size: 8px; font-weight: 800; letter-spacing: .14em; color: var(--accent2);
+  border: 1px solid color-mix(in srgb, var(--accent2) 45%, transparent); border-radius: 4px; padding: 1px 4px; margin-left: 2px; }
+
 /* ===== Accueil harmonisé — identité studio pro ===== */
 .home-hero {
   position: relative; overflow: hidden; border: 1px solid #2f4d74; border-radius: 12px;
