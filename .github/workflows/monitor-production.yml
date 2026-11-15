@@ -17,6 +17,8 @@ on:
       - "scripts/build_guides.py"
       - "scripts/generate_ai_guides.py"
       - "scripts/site_chrome.py"
+      - "scripts/build_home_deals.py"
+      - "scripts/check_awin_gift_images.py"
       - "scripts/import_amazon_report.py"
       - "js/cookie-consent.js"
       - "stats.html"
@@ -51,6 +53,8 @@ on:
       - "data/home-deals.json"
       - "data/fiches-produits.json"
       - "scripts/build_seo_pages.py"
+      - "scripts/build_home_deals.py"
+      - "scripts/check_awin_gift_images.py"
       - "prix/**"
       - "idees-cadeaux/**"
       - "sitemap.xml"
@@ -126,6 +130,11 @@ jobs:
         run: node --test workers/prixbasmalin-ai.test.mjs
       - name: Vérifier la syntaxe des scripts Python modifiés
         run: python3 -m py_compile scripts/build_guides.py scripts/build_seo_pages.py scripts/import_amazon_report.py scripts/site_chrome.py
+      - name: Tester la vitrine cadeaux et la rotation 48 h
+        run: |
+          python3 -m py_compile scripts/build_home_deals.py scripts/check_awin_gift_images.py
+          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+          python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v
       - name: Tester l'affiliation Amazon, le consentement et l'import CSV officiel
         run: python3 -m unittest discover -s tests -p 'test_tracking_and_affiliation.py' -v
       - name: Tester les réponses OpenRouter vides et les conseils IA
