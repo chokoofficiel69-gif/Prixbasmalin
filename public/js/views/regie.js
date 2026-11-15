@@ -3,9 +3,9 @@
 // affiche de VRAIES formes d'onde (drawWave) et joue un vrai mix local. 100 % local, 0 €.
 // Les autres onglets sont des APERÇUS visuels de la maquette validée, clairement signalés,
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
-import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder } from '../lib/core.js';
+import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder, sse } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
-import { decodeBlob, drawWave, voiceChain, denoise, detectBeats } from '../lib/audio.js';
+import { decodeBlob, drawWave, voiceChain, denoise, detectBeats, normalize, gate, antipop, limit, master } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
@@ -595,111 +595,94 @@ export async function render(el, { params }) {
 
   function viewIA() {
     const root = h('div');
-    const voices = voixTracks();
-    const select = h('select', { style: selStyle() },
-      voices.length ? voices.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
-    const chosen = () => tracks[Number(select.value)];
-    const status = h('div.muted', { style: { minHeight: '20px', marginTop: '8px' } }, voices.length ? 'Choisis une piste puis lance une vraie analyse locale.' : 'Importe ou enregistre une voix pour commencer.');
-    const report = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '8px' } });
-    const prompt = h('input', { placeholder: 'Ex. : nettoie ma voix, garde un rendu naturel, prépare un mix rap mélodique…', style: { flex: '1', minWidth: '220px', padding: '10px', borderRadius: '9px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' } });
-    const amount = h('input', { type: 'range', min: 0, max: 1, step: .05, value: .55, style: { flex: '1' } });
-    const amountLabel = h('span.muted', '55 %');
-    amount.oninput = () => amountLabel.textContent = Math.round(+amount.value * 100) + ' %';
-    const proposals = new Map();
-    let selected = 'pro', busy = false;
-    const cards = h('div.grid', { style: { gridTemplateColumns: 'repeat(3,minmax(0,1fr))' } });
-    const cardDefs = [
-      { id: 'natural', title: 'Naturelle', desc: 'Correction douce, dynamique préservée', opts: { highpass: 75, low: 0, presence: 1, air: 1, deess: 1.5, comp: .25, reverb: .04, gainDb: 0 } },
-      { id: 'pro', title: 'Studio Pro', desc: 'Voix maîtrisée, présence et contrôle', opts: { highpass: 85, low: 0.5, presence: 2.5, air: 1.5, deess: 3, comp: .55, reverb: .09, gainDb: 0 } },
-      { id: 'creative', title: 'Créative', desc: 'Traitement plus marqué et ambiance', opts: { highpass: 90, low: 1, presence: 4, air: 3, deess: 2.5, comp: .72, reverb: .2, gainDb: -1 } },
-    ];
-    const renderCards = () => {
-      cards.innerHTML = '';
-      for (const d of cardDefs) {
-        const ready = proposals.has(d.id);
-        cards.append(h('div.vcard', { style: { borderColor: selected === d.id ? 'var(--rpur)' : 'var(--rline)', boxShadow: selected === d.id ? '0 0 14px rgba(168,85,247,.25)' : 'none' } },
-          h('h4', d.title), h('p', d.desc),
-          h('button.rbtn' + (selected === d.id ? '.p' : ''), { style: { width: '100%', marginBottom: '6px' }, onclick: () => { selected = d.id; renderCards(); } }, selected === d.id ? '✓ Sélectionnée' : 'Choisir'),
-          h('button.rbtn', { style: { width: '100%' }, disabled: !ready, onclick: () => playBuffer(proposals.get(d.id)) }, ready ? '▶ Écouter' : 'À générer')));
-      }
+    const voiceOptions = voixTracks();
+    const trackSel = h('select', { style: selStyle() },
+      voiceOptions.length ? voiceOptions.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
+    const trackNow = () => tracks[Number(trackSel.value)];
+    const chat = h('div', { style: { minHeight: '230px', maxHeight: '44vh', overflow: 'auto', padding: '10px', background: '#090916', border: '1px solid var(--rline)', borderRadius: '10px' } });
+    const input = h('textarea', { rows: 3, placeholder: 'Dis à ton ingénieur ce que tu veux : « nettoie la voix, Auto-Tune naturel en La mineur, compression légère, EQ avec présence, réverbération courte et delay discret. Fais aussi ressortir l’instru sans masquer la voix. »', style: { width: '100%', resize: 'vertical', padding: '11px', borderRadius: '9px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' } });
+    const status = h('div.muted', { style: { minHeight: '20px', marginTop: '8px' } }, 'L’ingénieur peut préparer un plan, puis appliquer les traitements disponibles au son.');
+    const planBox = h('div', { style: { display: 'grid', gap: '6px', marginTop: '8px' } });
+    const send = h('button.rbtn.p', '🧠 Demander à l’ingénieur');
+    const applyBtn = h('button.rbtn.g', { disabled: true }, '✓ Exécuter les modifications');
+    const undoBtn = h('button.rbtn', { disabled: true }, '↩ Restaurer l’original');
+    let pendingPlan = null, busy = false;
+    const say = (who, txt) => chat.append(h('div', { style: { margin: '7px 0', padding: '9px 11px', borderRadius: '10px', background: who === 'expert' ? '#171636' : 'rgba(168,85,247,.18)', border: '1px solid var(--rline)', whiteSpace: 'pre-wrap', fontSize: '12px', lineHeight: '1.5' } }, h('b', who === 'expert' ? '🎧 Ingénieur IA' : 'Vous'), h('div', { style: { marginTop: '4px' } }, txt)));
+    const parsePlan = raw => {
+      const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const obj = JSON.parse(cleaned);
+      if (!obj || !Array.isArray(obj.actions)) throw new Error('Plan IA invalide : liste d’actions absente.');
+      const allowed = new Set(['denoise','antipop','gate','voice','autotune','normalize','limit','master','reverse','fadeIn','fadeOut']);
+      for (const a of obj.actions) if (!allowed.has(a.type)) throw new Error('Action non autorisée ou non prise en charge : ' + a.type);
+      return obj;
     };
-    renderCards();
-    const analyze = async () => {
-      const t = chosen(); if (!t?.buffer || busy) { if (!t?.buffer) toast('Sélectionne une piste voix avec de l’audio.', 'bad'); return; }
-      busy = true; status.textContent = 'Analyse réelle de la piste en cours…'; report.innerHTML = '';
+    const askExpert = async () => {
+      const request = input.value.trim(), t = trackNow();
+      if (!request || busy) return;
+      if (!t?.buffer) { toast('Sélectionne d’abord une piste audio.', 'bad'); return; }
+      busy = true; send.disabled = true; applyBtn.disabled = true; pendingPlan = null;
+      planBox.innerHTML = ''; say('user', request); input.value = '';
+      status.textContent = 'L’ingénieur analyse ta demande et prépare les opérations…';
       try {
         const b = t.original || t.buffer;
-        const pitch = await detectPitch(b, p => status.textContent = 'Analyse de justesse : ' + Math.round(p * 100) + ' %');
-        const key = detectKey(pitch);
-        let peakValue = 0, sum = 0, count = 0;
-        for (let c = 0; c < b.numberOfChannels; c++) {
-          const data = b.getChannelData(c);
-          for (let i = 0; i < data.length; i += 8) { const v = data[i]; peakValue = Math.max(peakValue, Math.abs(v)); sum += v * v; count++; }
-        }
-        const rms = Math.sqrt(sum / Math.max(1, count));
-        const db = v => (20 * Math.log10(Math.max(v, 1e-7))).toFixed(1) + ' dBFS';
-        const beats = await detectBeats(b).catch(() => null);
-        const bpm = beats?.bpm ? Math.round(beats.bpm) + ' BPM' : 'Non déterminé';
-        const items = [
-          ['Durée', b.duration.toFixed(2) + ' s'],
-          ['Tonalité estimée', keyName(key)],
-          ['Niveau crête', db(peakValue)],
-          ['Niveau moyen RMS', db(rms)],
-          ['Tempo estimé', bpm],
-          ['Échantillonnage', b.sampleRate + ' Hz'],
-        ];
-        for (const [label, value] of items) report.append(h('div', { style: { padding: '9px', border: '1px solid var(--rline)', borderRadius: '9px', background: '#0c0c1a' } }, h('div.muted', { style: { fontSize: '10px' } }, label), h('b', { style: { display: 'block', marginTop: '3px', color: '#bff5db' } }, value)));
-        status.textContent = 'Analyse terminée. Valeurs calculées depuis le fichier audio, pas des chiffres préremplis.';
-      } catch (e) { status.textContent = 'Analyse impossible : ' + (e?.message || e); }
-      finally { busy = false; }
+        let peak = 0, rms = 0, n = 0;
+        for (let c = 0; c < b.numberOfChannels; c++) { const d = b.getChannelData(c); for (let i = 0; i < d.length; i += 16) { peak = Math.max(peak, Math.abs(d[i])); rms += d[i]*d[i]; n++; } }
+        const context = { piste: t.name, duree_secondes: +b.duration.toFixed(2), sampleRate: b.sampleRate, peakDbfs: +(20*Math.log10(Math.max(peak,1e-7))).toFixed(1), rmsDbfs: +(20*Math.log10(Math.sqrt(rms/Math.max(1,n)))).toFixed(1), autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
+        const system = `Tu es un ingénieur du son professionnel intégré à un DAW. Tu dois transformer les demandes utilisateur en opérations AUDIO réellement exécutables. Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, schéma: {"message":"explication courte en français","actions":[{"type":"denoise|antipop|gate|voice|autotune|normalize|limit|master|reverse|fadeIn|fadeOut","params":{}}]}. Actions disponibles: denoise params.amount 0..1; antipop params.amount 0..1; gate params.thresholdDb (-60..-25) et floorDb (-60..-10); voice params.highpass 40..180, low -6..6, presence -6..6, air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune params.speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode" (root 0..11; mode majeur ou mineur); normalize params.targetDb -3..-1; limit params.ceilingDb -2..-0.3; master params.preset streaming|youtube|podcast|club; reverse; fadeIn; fadeOut. Maximum 8 actions. Pour une demande de mixage global, ne prétends pas modifier plusieurs pistes si tu n’as pas une action pour cela : indique-le dans message et ne propose que des opérations adaptées à la piste sélectionnée. N’invente aucune mesure audio. Ne choisis pas Auto-Tune si non demandé ou si la piste est instrumentale. Préserve un rendu naturel sauf demande d’effet robot. Contexte mesuré: ${JSON.stringify(context)}`;
+        let raw = '';
+        await sse('/api/chat', { projectId: state.projectId, model: 'auto:smart', messages: [{ role: 'system', content: system }, { role: 'user', content: request }] }, ev => { if (ev.type === 'delta' && ev.content) raw += ev.content; if (ev.type === 'error') throw new Error(ev.error); });
+        pendingPlan = parsePlan(raw);
+        say('expert', pendingPlan.message || 'Plan de traitement prêt. Vérifie les opérations avant exécution.');
+        for (const a of pendingPlan.actions) planBox.append(h('div', { style: { padding: '8px 10px', background: '#101027', border: '1px solid var(--rline)', borderRadius: '8px', fontSize: '12px' } }, '• ' + a.type + ' — ' + JSON.stringify(a.params || {})));
+        applyBtn.disabled = !pendingPlan.actions.length;
+        status.textContent = pendingPlan.actions.length + ' opération(s) prêtes. Clique sur Exécuter pour modifier le son.';
+      } catch (e) { say('expert', 'Je n’ai pas pu préparer un plan exécutable : ' + (e?.message || e)); status.textContent = 'Erreur IA. Vérifie la disponibilité du modèle et réessaie.'; }
+      finally { busy = false; send.disabled = false; }
     };
-    const generate = async () => {
-      const t = chosen(); if (!t?.buffer || busy) { if (!t?.buffer) toast('Sélectionne une piste voix avec de l’audio.', 'bad'); return; }
-      busy = true; proposals.clear(); renderCards();
-      const original = t.original || t.buffer;
-      const ask = (prompt.value || '').toLowerCase();
-      let defs = cardDefs;
-      if (/netto|bruit|souffle/.test(ask)) status.textContent = 'Nettoyage audio réel en cours…';
-      else status.textContent = 'Préparation des trois rendus audio…';
+    const execute = async () => {
+      const t = trackNow(); if (!t?.buffer || !pendingPlan || busy) return;
+      busy = true; applyBtn.disabled = true; send.disabled = true;
       try {
-        for (const d of defs) {
-          let input = original;
-          if (/netto|bruit|souffle/.test(ask)) input = await denoise(input, +amount.value);
-          const rendered = await voiceChain(input, d.opts);
-          proposals.set(d.id, rendered); renderCards();
-          status.textContent = d.title + ' : rendu prêt (' + rendered.duration.toFixed(1) + ' s).';
+        if (!t.original) t.original = cloneAudioBuffer(t.buffer);
+        let b = cloneAudioBuffer(t.buffer);
+        for (const a of pendingPlan.actions) {
+          const p = a.params || {};
+          status.textContent = 'Application : ' + a.type + '…';
+          if (a.type === 'denoise') b = await denoise(b, Math.max(0,Math.min(1,Number(p.amount ?? .55))));
+          else if (a.type === 'antipop') b = antipop(b, Math.max(0,Math.min(1,Number(p.amount ?? .8))));
+          else if (a.type === 'gate') b = gate(b, Number(p.thresholdDb ?? -45), Number(p.floorDb ?? -30));
+          else if (a.type === 'voice') b = await voiceChain(b, p);
+          else if (a.type === 'autotune') {
+            const key = typeof p.key === 'string' && /^\d{1,2}\|(majeur|mineur)$/.test(p.key) ? (() => { const [root,mode]=p.key.split('|'); return {root:+root,mode}; })() : null;
+            const tuned = await applyChain(b, [{t:'tune',strength:Math.max(0,Math.min(1,Number(p.strength ?? .8))),speed:Math.max(0,Math.min(200,Number(p.speed ?? 80))),formant:Math.max(-4,Math.min(4,Number(p.formant ?? 0)))}], {key});
+            b = tuned.buffer;
+          } else if (a.type === 'normalize') b = normalize(b, Math.max(-3,Math.min(-1,Number(p.targetDb ?? -1))));
+          else if (a.type === 'limit') b = limit(b, Math.max(-2,Math.min(-.3,Number(p.ceilingDb ?? -1))));
+          else if (a.type === 'master') b = await master(b, ['streaming','youtube','podcast','club'].includes(p.preset) ? p.preset : 'streaming');
+          else if (a.type === 'reverse') for (let c=0;c<b.numberOfChannels;c++) b.getChannelData(c).reverse();
+          else if (a.type === 'fadeIn' || a.type === 'fadeOut') fadeClip(b, a.type === 'fadeIn');
         }
-        status.textContent = 'Les trois rendus sont prêts. Écoute-les puis applique celui que tu préfères.';
-      } catch (e) { status.textContent = 'Erreur de traitement : ' + (e?.message || e); }
-      finally { busy = false; }
+        t.buffer = b; t.fxDone = [...(t.fxDone || []), ...pendingPlan.actions.map(a=>a.type)];
+        await save(); renderSidebar(); if (cur === 'timeline') go('timeline');
+        undoBtn.disabled = false;
+        say('expert', 'Traitements appliqués à « ' + (t.name || 'la piste') + ' ». La prise originale est conservée : tu peux la restaurer.');
+        status.textContent = 'Terminé. Écoute le résultat et demande les corrections que tu veux.';
+        pendingPlan = null; planBox.innerHTML = '';
+      } catch (e) { say('expert', 'Erreur pendant le traitement : ' + (e?.message || e)); status.textContent = 'Traitement interrompu. L’original est conservé.'; }
+      finally { busy = false; send.disabled = false; applyBtn.disabled = !pendingPlan; }
     };
-    const apply = async () => {
-      const t = chosen(), b = proposals.get(selected);
-      if (!t || !b) { toast('Génère et sélectionne d’abord une version.', 'bad'); return; }
-      if (!t.original) t.original = t.buffer;
-      t.buffer = b; t.fxDone = [...(t.fxDone || []), 'assistant-' + selected];
-      await save(); renderSidebar(); if (cur === 'timeline') go('timeline');
-      toast('Version ' + selected + ' appliquée. Original conservé.', 'ok');
-    };
-    root.append(
-      h('div.grid', { style: { gridTemplateColumns: '1.15fr .85fr' } },
-        h('div.panel', h('div.ph', '🧠 Assistant audio — analyse et traitement réels', h('span.r', 'DSP local · sans coût API')),
-          h('div.pb', h('div', { style: { display: 'flex', gap: '9px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px' } }, h('span.muted', 'Piste à analyser :'), select,
-            h('button.rbtn.p', { onclick: analyze, disabled: !voices.length }, '🔎 Analyser le son')),
-            report, status)),
-        h('div.panel', h('div.ph', '🎛️ Instructions de traitement', h('span.r', 'commandes locales')),
-          h('div.pb', prompt,
-            h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', margin: '12px 0' } }, h('span.muted', 'Intensité nettoyage'), amount, amountLabel),
-            h('div.muted', { style: { fontSize: '11px', marginBottom: '10px' } }, 'Les mots « nettoie », « bruit » ou « souffle » déclenchent le débruitage avant le traitement vocal. Les trois profils utilisent le moteur audio local.'),
-            h('button.rbtn.p', { style: { width: '100%' }, onclick: generate, disabled: !voices.length }, '✨ Générer les 3 versions')))),
-      h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '🎧 Comparer et appliquer', h('span.r', 'original toujours conservé')),
-        h('div.pb', cards,
-          h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' } },
-            h('button.rbtn', { onclick: () => playBuffer(chosen()?.original || chosen()?.buffer) }, '▶ Écouter original'),
-            h('button.rbtn', { onclick: () => playBuffer(proposals.get(selected)) , disabled: !proposals.has(selected) }, '▶ Écouter sélection'),
-            h('button.rbtn', { onclick: stopPreview }, '⏹ Stop'),
-            h('button.rbtn.g', { onclick: apply, disabled: !proposals.has(selected) }, '✓ Appliquer la version choisie'))))
-    );
+    send.onclick = askExpert; applyBtn.onclick = execute;
+    undoBtn.onclick = () => { const t = trackNow(); if (t?.original) { t.buffer = cloneAudioBuffer(t.original); t.fxDone = []; save(); if (cur === 'timeline') go('timeline'); status.textContent = 'Prise originale restaurée.'; } };
+    root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 280px' } },
+      h('div.panel', h('div.ph', '🧠 Ingénieur du son IA', h('span.r', 'planifie et exécute les traitements')),
+        h('div.pb', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat,
+          h('div', { style: { marginTop: '10px' } }, input),
+          h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' } }, send, applyBtn, undoBtn),
+          status, planBox)),
+      h('div.panel', h('div.ph', '🎚️ Ce qu’il peut faire maintenant'), h('div.pb',
+        ...['Nettoyer le souffle et les bruits', 'Régler la voix et sa présence', 'Ajouter compression et réverbération', 'Corriger la justesse et la tonalité', 'Normaliser et limiter les crêtes', 'Masteriser avec un preset', 'Inverser ou faire des fondus', 'Enchaîner plusieurs traitements'].map(x => h('div.ditem', '✓ ' + x)),
+        h('div.muted', { style: { marginTop: '10px', fontSize: '11px', lineHeight: '1.5' } }, 'Les opérations sont calculées localement après le plan IA. L’IA choisit les traitements, le moteur audio les exécute. Les actions disponibles dépendent de la piste sélectionnée.')))));
+    if (!voiceOptions.length) say('expert', 'Commence par importer ou enregistrer une piste audio dans la Timeline. Ensuite, décris-moi le résultat sonore que tu veux.');
     return root;
   }
 
