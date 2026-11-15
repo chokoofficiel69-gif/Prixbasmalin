@@ -1,5 +1,6 @@
 // Assistant vocal « mains libres » de l'enregistrement : on parle, il agit.
 import { api, h, state, toast, stopSpeaking, parseJsonLoose } from '../lib/core.js';
+import { buildAgentContext, validateAgentActions } from '../lib/agent-intelligence.js';
 
 const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’'-]/g, ' ').replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
 const NUM = { une: 1, un: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, dix: 10, quinze: 15, vingt: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60 };
@@ -78,7 +79,7 @@ Actions possibles (exécutées dans l'ordre, sur la piste sélectionnée sauf in
 {"a":"all"} tout faire (nettoyer, caler, voix rap, mix, master)
 {"a":"master","preset":"streaming|rap|club|doux"} mixer et masteriser
 {"a":"versions"} préparer plusieurs versions du master · {"a":"save"} enregistrer le master dans ses fichiers · {"a":"download"} télécharger le master
-Règles : « chante juste / corrige mes fausses notes / la plus belle voix possible » → tune parfait (ou belle si c'est du chant), jamais deux autotunes l'un sur l'autre (undo d'abord si un autotune est déjà appliqué). « moins de réverbe / c'était mieux avant » → undo. « Plus de réverbe » → effect avec une réverbe légère (mix 0.12-0.2). Un style musical (rap, drill, trap, RnB, mélodique, kickage…) → combine voice + tune/effect adaptés, sans exagérer. N'invente jamais une piste qui n'existe pas : si aucune voix n'est enregistrée, propose d'enregistrer. Si la demande n'est pas une commande (bonjour, question), réponds sans action. Phrase de réponse : 1 phrase, 15 mots max.`;
+Règles de raisonnement : tu es un véritable assistant de studio et un ingénieur du son pédagogue, naturel et pro. Comprends le français oral, les formulations familières, les fautes de transcription et les demandes indirectes. Tiens compte de l'état du studio et des derniers échanges. Ne transforme pas une question en action : explique clairement quand l'artiste demande un avis ou une explication. Quand il demande une action claire, exécute-la avec les outils disponibles. Si une précision indispensable manque, pose UNE seule question courte. Propose spontanément une amélioration utile quand elle est pertinente, sans imposer de traitement. Préserve toujours la prise originale ; privilégie les opérations réversibles. N'invente jamais une piste, une écoute, une mesure ou un résultat. Ne prétends jamais qu'une action est faite avant son exécution réussie. Ne supprime jamais une piste sans demande explicite. Pour « moins de réverbe / c'était mieux avant », annule uniquement si une étape récente peut raisonnablement être annulée ; sinon demande ce que l'artiste veut réduire. « Plus de réverbe » : chaîne légère, mix 0.12-0.2. « Voix plus grave/aiguë » : shift, pas autotune. « Chante juste / corrige mes fausses notes » : tune parfait (ou belle si chant), jamais deux autotunes superposés. Pour un style musical, combine intelligemment voix + justesse + effets subtils selon le contexte. Réponds en français naturel, tutoiement, ton humain, direct, sans formule robotique. Réponse concise mais assez développée pour être utile ; pas de limite artificielle à 15 mots.`;
 
 export function mountAssistant(S) {
   const R = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -94,7 +95,10 @@ export function mountAssistant(S) {
   const input = h('input', { placeholder: 'Ou écris : « nettoie et cale sur le beat », « plus de réverbe »…' });
   const toggle = h('button.btn.primary', '🎙️ Mains libres');
 
+  const history = [];
   const add = (who, text) => {
+    history.push({ role: who === 'moi' ? 'user' : 'assistant', content: String(text || '').slice(0, 700) });
+    if (history.length > 12) history.shift();
     log.append(h('div', h('b', who === 'moi' ? '🗣️ ' : '🤖 '), text));
     while (log.children.length > 12) log.firstChild.remove();
     log.scrollTop = log.scrollHeight;
@@ -229,11 +233,11 @@ export function mountAssistant(S) {
     busy = true; status.innerHTML = '<span class="spinner"></span> Je réfléchis…';
     try {
       const r = await api('/api/complete', { method: 'POST', body: { src: 'musique', projectId: state.projectId, temperature: 0.3, json: true, max_tokens: 400, system: SYSTEM,
-        prompt: `État du studio : ${JSON.stringify(S.snapshot())}\nL'artiste dit : « ${text} »` } });
+        prompt: `${buildAgentContext(history, S.snapshot())}\nDEMANDE ACTUELLE DE L'ARTISTE : « ${text} »\nRéponds dans le JSON demandé. Si aucune action n'est nécessaire, renvoie actions: [].` } });
       const j = parseJsonLoose(r.content);
       if (!j) throw new Error('réponse illisible');
       busy = false;
-      await run(Array.isArray(j.actions) ? j.actions.slice(0, 8) : [], j.reponse);
+      const actions = validateAgentActions(j.actions, text);\n      const reply = typeof j.reponse === 'string' ? j.reponse.trim().slice(0, 700) : 'Je peux t’aider sur ce point.';\n      await run(actions, reply);
     } catch (e) { busy = false; status.textContent = on ? '👂 Je t’écoute…' : ''; await say(/quota|429|limite|attendre/i.test(e?.message || '') ? 'Les IA gratuites sont saturées, réessaie dans une minute.' : 'Je n’ai pas compris, redis-le plus simplement.'); }
     drain();
   }
