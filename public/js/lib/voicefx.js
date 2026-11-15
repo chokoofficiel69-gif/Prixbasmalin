@@ -389,6 +389,43 @@ function fx(kind, o = {}) {
         for (let i = 0; i < 4096; i++) { const v = i / 2048 - 1; c[i] = Math.round(v * steps / 2) / (steps / 2); } n.curve = c;
         src.connect(filt('lowpass', o.hi || 4000)).connect(filt('highpass', 150)).connect(n).connect(g(0.9)).connect(out); break;
       }
+      case 'eq': {
+        const chain = [];
+        if (o.low) chain.push(filt('lowshelf', o.lowFreq || 120, 0.7, o.low));
+        if (o.mid) chain.push(filt('peaking', o.midFreq || 1200, o.midQ || 1, o.mid));
+        if (o.high) chain.push(filt('highshelf', o.highFreq || 8500, 0.7, o.high));
+        if (!chain.length) chain.push(filt('peaking', 1800, 1, 0));
+        let node = src; for (const n of chain) node = node.connect(n); node.connect(out); break;
+      }
+      case 'compressor': {
+        const c = ctx.createDynamicsCompressor();
+        c.threshold.value = o.threshold ?? -20; c.knee.value = o.knee ?? 12;
+        c.ratio.value = o.ratio ?? 3; c.attack.value = o.attack ?? 0.008; c.release.value = o.release ?? 0.12;
+        src.connect(c).connect(out); break;
+      }
+      case 'gate': {
+        const c = ctx.createDynamicsCompressor();
+        c.threshold.value = o.threshold ?? -42; c.knee.value = 0;
+        c.ratio.value = o.ratio ?? 16; c.attack.value = 0.002; c.release.value = o.release ?? 0.09;
+        src.connect(c).connect(out); break;
+      }
+      case 'deesser': {
+        const low = filt('lowpass', o.split || 4800), high = filt('highpass', o.split || 4800);
+        const c = ctx.createDynamicsCompressor(); c.threshold.value = o.threshold ?? -28;
+        c.knee.value = 4; c.ratio.value = o.ratio ?? 5; c.attack.value = 0.002; c.release.value = 0.07;
+        src.connect(low).connect(out); src.connect(high).connect(c).connect(g(o.highGain ?? 0.85)).connect(out); break;
+      }
+      case 'phaser': {
+        src.connect(g(o.dry ?? 0.75)).connect(out);
+        let node = src;
+        for (let i = 0; i < (o.stages || 4); i++) {
+          const ap = ctx.createBiquadFilter(); ap.type = 'allpass'; ap.frequency.value = 350 + i * 420; ap.Q.value = 0.7;
+          const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = o.rate || 0.35;
+          const depth = g(o.depth || 900); lfo.connect(depth).connect(ap.frequency); lfo.start();
+          node = node.connect(ap);
+        }
+        node.connect(g(o.mix ?? 0.55)).connect(out); break;
+      }
       default: src.connect(out);
     }
     return out;
