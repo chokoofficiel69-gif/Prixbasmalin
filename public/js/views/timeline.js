@@ -13,8 +13,9 @@ export function createTimeline(o) {
   let snap = localStorage.getItem('studio.tl.snap') === '1';      // aimantation sur la grille (BPM)
   let tool = 'select';
   let selTrack = null; // piste de la sélection
-  const scroller = h('div', { style: { overflowX: 'auto', overflowY: 'hidden', position: 'relative', border: '1px solid var(--line, rgba(127,127,127,.25))', borderRadius: '10px', background: 'var(--bg)' } });
-  const inner = h('div', { style: { position: 'relative', minHeight: '60px' } });
+  const scroller = h('div.studio-timeline-scroller', { style: { width: '100%', height: 'clamp(260px, 42vh, 520px)', minHeight: '260px', overflow: 'auto', position: 'relative', border: '1px solid var(--line, rgba(127,127,127,.25))', borderRadius: '10px', background: '#080e1b' } });
+  const inner = h('div', { style: { position: 'relative', minHeight: '100%', minWidth: '100%' } });
+  const laneObservers = [];
   const playhead = h('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '2px', background: '#f59e0b', zIndex: 3, pointerEvents: 'none', left: HEAD + 'px' } });
   scroller.append(inner);
   const posLbl = h('b', { style: { fontVariantNumeric: 'tabular-nums', fontSize: '1.15em', minWidth: '70px', display: 'inline-block' } }, '0:00.0');
@@ -72,6 +73,7 @@ export function createTimeline(o) {
       t.empty ? h('span.small.muted', { style: { position: 'absolute', left: g0 * pps + 8 + 'px', top: '30px' } }, t.armed ? '● Piste vide armée : place la tête de lecture et appuie sur ⏺ Enregistrer' : 'Piste vide : arme-la (●) pour enregistrer dedans') : clip);
     const draw = () => { drawWave(cv, t.buffer, { sel: selTrack === t ? o.getSel() : null, color: col }); };
     requestAnimationFrame(draw);
+    if (typeof ResizeObserver !== 'undefined') { const observer = new ResizeObserver(() => draw()); observer.observe(clip); laneObservers.push(observer); }
     let start = null;
     clip.addEventListener('pointerdown', (e) => {
       e.stopPropagation(); clip.setPointerCapture(e.pointerId);
@@ -124,6 +126,7 @@ export function createTimeline(o) {
   }
 
   function render() {
+    for (const observer of laneObservers.splice(0)) observer.disconnect();
     pps = Math.max(4, Math.min(5000, pps));
     const minO = minOff();
     inner.innerHTML = '';
