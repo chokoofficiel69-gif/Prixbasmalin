@@ -148,6 +148,8 @@ class HomeDealsTests(unittest.TestCase):
             self.assertIn("cancel-in-progress: false", workflow)
             self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', workflow)
             self.assertIn("trois tentatives", workflow)
+        self.assertIn("cp data/home-deals.json /tmp/home-deals-previous.json", awin)
+        self.assertIn("python3 scripts/check_awin_gift_images.py --previous /tmp/home-deals-previous.json", awin)
         for line in awin.splitlines():
             if "${{" in line:
                 self.assertEqual(line.count("${{"), line.count("}}"), line)
