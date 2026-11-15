@@ -48,6 +48,15 @@ class AwinPagesTest(unittest.TestCase):
         self.assertNotIn("22,90", page)
         self.assertIn("Date individuelle du marchand absente ou supérieure à 48 h", page)
 
+
+    def test_price_timestamp_must_be_strictly_younger_than_48_hours(self):
+        page = self.build([
+            product(1, merchantUpdatedAt="2026-11-13 10:00:00"),
+            product(2, merchantUpdatedAt="2026-11-13 10:00:01"),
+        ])["produits/tech.html"]
+        self.assertIn("<strong>Prix non affiché</strong>", page)
+        self.assertIn("21,90", page)
+
     def test_unconfirmed_tax_is_never_labelled_ttc(self):
         page = self.build([product(1, priceTaxStatus="unspecified")])["produits/tech.html"]
         self.assertIn("20,90", page)
