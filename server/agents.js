@@ -23,7 +23,7 @@ function extractJson(text) {
  */
 export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, synthModel = 'auto', projectContext = '', emit, signal, uid }) {
   if (!agents?.length) throw new Error('Ajoutez au moins un agent.');
-  agents = agents.slice(0, 6);
+  agents = agents.slice(0, 10);
   const transcript = [];
   let stepNo = 0;
 
