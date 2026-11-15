@@ -405,6 +405,12 @@ class HomeDealsRotationTests(unittest.TestCase):
         self.assertNotIn("sync-awin-products.mjs", workflow)
         self.assertNotIn("AWIN_API_TOKEN", workflow)
 
+        ci = (ROOT / ".github" / "workflows" / "test-home-deals-rotation.yml").read_text(encoding="utf-8")
+        self.assertIn("test_home_deals.py", ci)
+        self.assertIn("test_awin_gift_images.py", ci)
+        self.assertIn("pull_request:", ci)
+        self.assertNotIn("secrets.", ci)
+
 
 
     def test_rotation_holds_previous_snapshot_when_awin_feed_is_over_48_hours_old(self):
