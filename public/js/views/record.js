@@ -581,7 +581,11 @@ export async function render(el, { params }) {
       beatGainNode = null; saveSoon(true);
       if (monOn.checked) openLiveMonitor();
       if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
-      // Aucun effet n'est appliqué à la fin de la prise : traitement manuel uniquement.
+      // L’IA intervient sur chaque nouvelle prise, mais sans correction de hauteur ni effet robotique.
+      if (ingePrefs.enabled && take && take.kind === 'voix') {
+        try { await processTake(take); }
+        catch (e) { toast('Analyse IA indisponible : ta prise brute est conservée. ' + (e?.message || ''), 'bad'); }
+      }
       stopping.p = null;
       ast?.onRecordStopped();
     })();
@@ -1613,8 +1617,7 @@ export async function render(el, { params }) {
     let alignMs = 0;
     const beat = tracks.find(x => x.kind === 'instru' && x !== track);
     if (beat) { const before = track.offset || 0; say('Calage sur l’instru'); await alignTrack(track, beat); alignMs = ((track.offset || 0) - before) * 1000; }
-    const tune = expert ? ex.tune : plan.autotune;
-    await stepBuf(`Autotune (${keyName(key)})`, async (b) => (await applyChain(b, [{ t: 'tune', strength: tune.strength, speed: tune.speed }], { key })).buffer);
+    // Pas d’autotune automatique : on conserve la hauteur, les glissés et le vibrato naturels.
     await stepBuf('Chaîne voix', (b) => voiceChain(b, expert ? ex.voice : plan.voice));
     if (expert && ex.steps.notchHz) await stepBuf(`EQ anti-résonance ${ex.steps.notchHz} Hz`, async (b) => (await applyChain(b, [{ t: 'fx', kind: 'peak', f: ex.steps.notchHz, q: 2.5, gain: ex.steps.notchGain }])).buffer);
     if (plan.sends.delay) await stepBuf('Écho au tempo', async (b) => (await applyChain(b, [{ t: 'fx', ...plan.sends.delay }])).buffer);
@@ -1939,13 +1942,13 @@ export async function render(el, { params }) {
       h('div.card.stack',
         h('h3', '🎚️ Ingé son IA'),
         face.el,
-        h('label.chk.small', ingeOn, 'Activer — analyse, autotune et mix automatiques (100 % en local, gratuit)'),
+        h('label.chk.small', ingeOn, 'Activer — analyse et nettoyage automatiques de chaque prise, sans correction forcée de la hauteur (100 % en local, gratuit)'),
         h('label.chk.small', ingeExpert, '🎓 Mode expert : analyse poussée (dynamique, sifflantes, résonance, clipping, LUFS), de-esser + EQ anti-résonance, voix calée au-dessus de l’instru, conseils d’ingé pro'),
         h('div.row', h('span.small', '🎚️ Style :'), h('div.grow', ingeStyle)),
         h('div.row', h('button.btn.small', { onclick: () => openConsult() }, '💬 Consulter l’ingé son (voix, basses, mastering, référence)')),
         h('div.row', h('button.btn.small', { onclick: (e) => micTest(e.target) }, '🎤 Test micro (5 s)'), h('button.btn.small', { onclick: (e) => analyzeInstru(e.target) }, '🎵 Analyser l’instru (tonalité + BPM)')),
         micInfo, instruInfo,
-        h('p.tiny.muted', 'Après chaque prise : rôle proposé (Lead, Double, Backs, Ad-lib), chaîne selon les mesures (débruitage dosé, anti-pop, gate, calage, autotune dans la tonalité, chaîne voix et volume/panoramique du rôle, écho au tempo), rapport chiffré, conseils (mesures seules, aucun audio envoyé), A/B. Vu-mètre et alerte « SATURE » dans « Mes pistes ».'),
+        h('p.tiny.muted', 'Après chaque prise : l’IA analyse la voix, propose un rôle, nettoie doucement le bruit et les pops, règle la voix et prépare un rapport. La hauteur, les notes et le vibrato naturels sont préservés : aucun autotune, chorus ou effet robotique n’est appliqué automatiquement. Les effets de hauteur restent disponibles uniquement si tu les demandes. A/B pour comparer la prise brute et traitée. Vu-mètre et alerte « SATURE » dans « Mes pistes ».'),
         ingeReport),
       h('div.card.stack', editBox),
       h('div.card.stack',
