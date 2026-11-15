@@ -787,11 +787,13 @@ export async function render(el, { params }) {
   function splitTrackAtCursor(index) {
     const track = tracks[index]; if (!track || !track.buffer) return;
     const local = startOffset - (track.offset || 0);
+    const sourceOriginal = track.original || track.buffer;
     const left = sliceAudioBuffer(track.buffer, 0, local), right = sliceAudioBuffer(track.buffer, local, track.buffer.duration);
-    if (!left || !right) return;
+    const leftOriginal = sliceAudioBuffer(sourceOriginal, 0, local), rightOriginal = sliceAudioBuffer(sourceOriginal, local, sourceOriginal.duration);
+    if (!left || !right || !leftOriginal || !rightOriginal) return;
     tracks.splice(index, 1,
-      { ...track, name: (track.name || 'Piste') + ' · A', buffer: left, original: left },
-      { ...track, name: (track.name || 'Piste') + ' · B', offset: startOffset, buffer: right, original: right });
+      { ...track, name: (track.name || 'Piste') + ' · A', buffer: left, original: leftOriginal },
+      { ...track, name: (track.name || 'Piste') + ' · B', offset: startOffset, buffer: right, original: rightOriginal });
     refreshAfterEdit('Clip découpé en deux pistes');
   }
   function showContextMenu(event, type, index) {
@@ -833,8 +835,8 @@ export async function render(el, { params }) {
       sep();
       const local = startOffset - (track.offset || 0), validCut = !!track.buffer && local > 0 && local < track.buffer.duration;
       add('✂️ Découper au curseur', () => splitTrackAtCursor(index), !validCut);
-      add('◁ Rogner le début jusqu’au curseur', () => { const b = sliceAudioBuffer(track.buffer, local, track.buffer.duration); if (b) { track.buffer = b; track.original = b; track.offset = startOffset; refreshAfterEdit('Début rogné'); } }, !validCut);
-      add('▷ Rogner la fin au curseur', () => { const b = sliceAudioBuffer(track.buffer, 0, local); if (b) { track.buffer = b; track.original = b; refreshAfterEdit('Fin rognée'); } }, !validCut);
+      add('◁ Rogner le début jusqu’au curseur', () => { const sourceOriginal = track.original || track.buffer; const b = sliceAudioBuffer(track.buffer, local, track.buffer.duration); const original = sliceAudioBuffer(sourceOriginal, local, sourceOriginal.duration); if (b && original) { track.buffer = b; track.original = original; track.offset = startOffset; refreshAfterEdit('Début rogné'); } }, !validCut);
+      add('▷ Rogner la fin au curseur', () => { const sourceOriginal = track.original || track.buffer; const b = sliceAudioBuffer(track.buffer, 0, local); const original = sliceAudioBuffer(sourceOriginal, 0, local); if (b && original) { track.buffer = b; track.original = original; refreshAfterEdit('Fin rognée'); } }, !validCut);
       sep();
       add('⚙️ Ouvrir Auto-Tune et effets', () => go('fx'));
       add('🗑️ Supprimer le clip', () => { if (window.confirm('Supprimer ce clip audio ?')) { tracks.splice(index, 1); refreshAfterEdit('Clip supprimé'); } });
