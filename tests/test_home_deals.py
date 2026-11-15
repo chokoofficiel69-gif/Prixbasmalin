@@ -137,11 +137,12 @@ class HomeDealsTests(unittest.TestCase):
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
         rotation = published.get("rotation", {})
-        rotation_now = deals.parse_utc(
-            rotation.get("last_attempt_at")
-            or rotation.get("last_rotated_at")
-            or awin.get("fetched_at")
-        )
+        check_times = [
+            deals.parse_utc(rotation.get("last_attempt_at")),
+            deals.parse_utc(rotation.get("last_rotated_at")),
+            deals.parse_utc(awin.get("fetched_at")),
+        ]
+        rotation_now = max(value for value in check_times if value is not None)
         self.assertEqual(published, deals.build(awin, sheets, previous=published, rotation_now=rotation_now))
 
     def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
@@ -377,7 +378,7 @@ class HomeDealsRotationTests(unittest.TestCase):
             "selected_count": 48,
         }
         cooldown = deals.build(
-            self.rotation_awin(100, first_time),
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
             {"products": []},
             previous=held,
             rotation_now=deals.parse_utc("2026-11-12T18:00:00Z"),
@@ -385,7 +386,7 @@ class HomeDealsRotationTests(unittest.TestCase):
         self.assertEqual(cooldown["rotation"]["status"], "retry_cooldown")
         self.assertEqual([g["id"] for g in cooldown["gifts"]], [g["id"] for g in held["gifts"]])
         retry = deals.build(
-            self.rotation_awin(100, first_time),
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
             {"products": []},
             previous=held,
             rotation_now=deals.parse_utc("2026-11-13T00:00:01Z"),
@@ -403,6 +404,20 @@ class HomeDealsRotationTests(unittest.TestCase):
         self.assertIn("git push origin HEAD:main", workflow)
         self.assertNotIn("sync-awin-products.mjs", workflow)
         self.assertNotIn("AWIN_API_TOKEN", workflow)
+
+
+
+    def test_rotation_holds_previous_snapshot_when_awin_feed_is_over_48_hours_old(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        stale = deals.build(
+            self.rotation_awin(100, first_time),
+            {"products": []},
+            previous=initial,
+            rotation_now=deals.parse_utc("2026-11-12T12:00:01Z"),
+        )
+        self.assertEqual(stale["rotation"]["status"], "held_stale_catalog")
+        self.assertEqual([g["id"] for g in stale["gifts"]], [g["id"] for g in initial["gifts"]])
 
 
 
