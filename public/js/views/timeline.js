@@ -114,7 +114,7 @@ export function createTimeline(o) {
     if (!s || !t || s[1] - s[0] < 0.02) { selBar.style.display = 'none'; return; }
     selBar.style.display = 'flex';
     selBar.append(h('span.small', `Sélection sur « ${t.name} » : ${fmtPos(s[0])} → ${fmtPos(s[1])} (${(s[1] - s[0]).toFixed(1)} s)`),
-      h('button.btn.small', { onclick: () => o.edit('delete') }, '✂️ Supprimer ce passage'),
+      h('button.btn.small', { onclick: () => o.edit('delete') }, '✂️ Supprimer avec décalage'),\n      h('button.btn.small.primary', { onclick: () => o.edit('erase') }, '🧽 Effacer sans décaler'),
       h('button.btn.small', { onclick: () => o.edit('keep') }, 'Garder seulement ce passage'),
       h('button.btn.small', { onclick: () => o.edit('silence') }, '🔇 Mettre en silence'),
       h('button.btn.small', { onclick: () => o.edit('play') }, '▶ Écouter ce passage'),
