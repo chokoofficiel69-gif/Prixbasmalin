@@ -290,6 +290,19 @@ def build(awin, sheets, previous=None, rotation_now=None):
             "interval_hours": 48, "last_rotated_at": None,
             "status": "date_missing", "selected_count": len(gifts),
         }
+    elif (
+        rotation_reference_time is None
+        or rotation_reference_time - reference_time > ROTATION_INTERVAL
+        or rotation_reference_time - reference_time < timedelta(minutes=-5)
+    ):
+        gifts = previous_gifts
+        rotation = dict(previous_rotation)
+        rotation.update({
+            "interval_hours": 48,
+            "status": "held_stale_catalog",
+            "selected_count": len(gifts),
+            "last_attempt_at": iso_utc(rotation_reference_time),
+        })
     elif not previous_gifts:
         gifts = build_gifts(awin, now=reference_time)
         rotation = {
@@ -390,11 +403,12 @@ def main():
     sheets = json.loads(SHEETS.read_text(encoding="utf-8"))
     previous_rotation = previous.get("rotation", {}) if isinstance(previous.get("rotation"), dict) else {}
     if args.check:
-        rotation_now = parse_utc(
-            previous_rotation.get("last_attempt_at")
-            or previous_rotation.get("last_rotated_at")
-            or awin.get("fetched_at")
-        )
+        check_times = [
+            parse_utc(previous_rotation.get("last_attempt_at")),
+            parse_utc(previous_rotation.get("last_rotated_at")),
+            parse_utc(awin.get("fetched_at")),
+        ]
+        rotation_now = max((value for value in check_times if value is not None), default=None)
     else:
         rotation_now = datetime.now(timezone.utc)
     data = build(awin, sheets, previous=previous, rotation_now=rotation_now)
