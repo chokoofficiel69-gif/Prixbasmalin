@@ -3,7 +3,7 @@
  "awin_fetched_at": "2026-11-14T11:44:13.982Z",
  "sheets_period": {
   "from": "2026-10-09",
-  "to": "2026-11-12"
+  "to": "2026-11-14"
  },
  "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
@@ -23,7 +23,7 @@
    "min_price_eur": 193.99,
    "max_price_eur": 325.88,
    "offer_count": 25,
-   "last_date": "2026-11-12",
+   "last_date": "2026-11-13",
    "price_kind": "historical"
   },
   {
@@ -39,10 +39,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_VR2.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 411.12,
+   "min_price_eur": 409.99,
    "max_price_eur": 537.09,
    "offer_count": 19,
-   "last_date": "2026-11-12",
+   "last_date": "2026-11-14",
    "price_kind": "historical"
   },
   {
@@ -61,7 +61,7 @@
    "min_price_eur": 49.99,
    "max_price_eur": 98.28,
    "offer_count": 18,
-   "last_date": "2026-11-12",
+   "last_date": "2026-11-13",
    "price_kind": "historical"
   },
   {
@@ -78,9 +78,28 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 199.99,
-   "max_price_eur": 308.59,
+   "max_price_eur": 304.39,
    "offer_count": 17,
-   "last_date": "2026-11-12",
+   "last_date": "2026-11-13",
+   "price_kind": "historical"
+  },
+  {
+   "id": "apple-watch-series-11",
+   "name": "Apple Watch Series 11",
+   "brand": "Apple",
+   "category": "montre",
+   "category_label": "Montres connectées",
+   "image": "/assets/produits/apple-watch-series-11.jpg",
+   "image_credit": {
+    "author": "极客湾Geekerwan",
+    "license": "CC BY 3.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
+    "match": "verifie_visuellement"
+   },
+   "min_price_eur": 295.73,
+   "max_price_eur": 427.89,
+   "offer_count": 16,
+   "last_date": "2026-11-14",
    "price_kind": "historical"
   },
   {
@@ -96,10 +115,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:M5_Macbook_Air_13_Sky_Blue_model.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 1277.99,
+   "min_price_eur": 1199.0,
    "max_price_eur": 1399.0,
    "offer_count": 16,
-   "last_date": "2026-11-11",
+   "last_date": "2026-11-13",
    "price_kind": "historical"
   },
   {
@@ -118,26 +137,7 @@
    "min_price_eur": 1085.59,
    "max_price_eur": 1229.0,
    "offer_count": 16,
-   "last_date": "2026-11-12",
-   "price_kind": "historical"
-  },
-  {
-   "id": "apple-watch-series-11",
-   "name": "Apple Watch Series 11",
-   "brand": "Apple",
-   "category": "montre",
-   "category_label": "Montres connectées",
-   "image": "/assets/produits/apple-watch-series-11.jpg",
-   "image_credit": {
-    "author": "极客湾Geekerwan",
-    "license": "CC BY 3.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 349.0,
-   "max_price_eur": 436.55,
-   "offer_count": 14,
-   "last_date": "2026-11-11",
+   "last_date": "2026-11-14",
    "price_kind": "historical"
   },
   {
@@ -156,7 +156,7 @@
    "min_price_eur": 45.02,
    "max_price_eur": 59.36,
    "offer_count": 12,
-   "last_date": "2026-11-11",
+   "last_date": "2026-11-14",
    "price_kind": "historical"
   },
   {
@@ -173,9 +173,9 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 119.95,
-   "max_price_eur": 186.0,
+   "max_price_eur": 240.99,
    "offer_count": 24,
-   "last_date": "2026-11-12",
+   "last_date": "2026-11-13",
    "price_kind": "historical"
   },
   {
@@ -194,7 +194,7 @@
    "min_price_eur": 237.9,
    "max_price_eur": 254.5,
    "offer_count": 13,
-   "last_date": "2026-11-12",
+   "last_date": "2026-11-14",
    "price_kind": "historical"
   },
   {
@@ -213,7 +213,7 @@
    "min_price_eur": 150.01,
    "max_price_eur": 201.9,
    "offer_count": 10,
-   "last_date": "2026-11-12",
+   "last_date": "2026-11-13",
    "price_kind": "historical"
   },
   {
@@ -230,9 +230,9 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 2278.81,
-   "max_price_eur": 2949.98,
+   "max_price_eur": 2908.68,
    "offer_count": 14,
-   "last_date": "2026-11-11",
+   "last_date": "2026-11-13",
    "price_kind": "historical"
   }
  ],
