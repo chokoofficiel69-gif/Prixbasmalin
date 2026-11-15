@@ -32,7 +32,8 @@ export function createTimeline(o) {
   const syncZoom=()=>{ zoomRange.value=String(pps); zoomLbl.textContent=`${Math.round(pps)} px/s`; };
   const snapBtn = h('button.btn.small' + (snap ? '.primary' : '.ghost'), { title: 'Aimanter les prises sur la grille du tempo', onclick: (e) => { snap = !snap; localStorage.setItem('studio.tl.snap', snap ? '1' : '0'); e.currentTarget.classList.toggle('primary', snap); e.currentTarget.classList.toggle('ghost', !snap); } }, '🧲 Aimant');
   const tools = h('div.row', { style: { gap: '6px', flexWrap: 'wrap' } }, toolBtns.select, toolBtns.move, snapBtn,
-    h('button.btn.small.ghost', { onclick: () => zoom(1 / 1.5), title: 'Dézoomer (horizontal)' }, '🔍−'), h('button.btn.small.ghost', { onclick: () => zoom(1.5), title: 'Zoomer (horizontal)' }, '🔍+'), zoomRange, zoomLbl,\n    h('button.btn.small.ghost', { onclick: () => { const s=o.getSel(); if(!s) return; const span=Math.max(.02,s[1]-s[0]); pps=Math.max(4,Math.min(5000,(scroller.clientWidth-HEAD-80)/span)); localStorage.setItem('studio.tl.pps',pps); render(); scroller.scrollLeft=Math.max(0,gx(s[0])-HEAD-30); syncZoom(); }, title:'Agrandir exactement la sélection' }, '🎯 Zoom sélection'),
+    h('button.btn.small.ghost', { onclick: () => zoom(1 / 1.5), title: 'Dézoomer (horizontal)' }, '🔍−'), h('button.btn.small.ghost', { onclick: () => zoom(1.5), title: 'Zoomer (horizontal)' }, '🔍+'), zoomRange, zoomLbl,
+    h('button.btn.small.ghost', { onclick: () => { const s=o.getSel(); if(!s) return; const span=Math.max(.02,s[1]-s[0]); pps=Math.max(4,Math.min(5000,(scroller.clientWidth-HEAD-80)/span)); localStorage.setItem('studio.tl.pps',pps); render(); scroller.scrollLeft=Math.max(0,gx(s[0])-HEAD-30); syncZoom(); }, title:'Agrandir exactement la sélection' }, '🎯 Zoom sélection'),
     h('button.btn.small.ghost', { onclick: () => vzoom(1 / 1.3), title: 'Pistes plus fines' }, '↕−'), h('button.btn.small.ghost', { onclick: () => vzoom(1.3), title: 'Pistes plus hautes' }, '↕+'),
     h('button.btn.small.ghost', { onclick: fit }, '↔ Tout voir'));
 
@@ -114,7 +115,8 @@ export function createTimeline(o) {
     if (!s || !t || s[1] - s[0] < 0.02) { selBar.style.display = 'none'; return; }
     selBar.style.display = 'flex';
     selBar.append(h('span.small', `Sélection sur « ${t.name} » : ${fmtPos(s[0])} → ${fmtPos(s[1])} (${(s[1] - s[0]).toFixed(1)} s)`),
-      h('button.btn.small', { onclick: () => o.edit('delete') }, '✂️ Supprimer avec décalage'),\n      h('button.btn.small.primary', { onclick: () => o.edit('erase') }, '🧽 Effacer sans décaler'),
+      h('button.btn.small', { onclick: () => o.edit('delete') }, '✂️ Supprimer avec décalage'),
+      h('button.btn.small.primary', { onclick: () => o.edit('erase') }, '🧽 Effacer sans décaler'),
       h('button.btn.small', { onclick: () => o.edit('keep') }, 'Garder seulement ce passage'),
       h('button.btn.small', { onclick: () => o.edit('silence') }, '🔇 Mettre en silence'),
       h('button.btn.small', { onclick: () => o.edit('play') }, '▶ Écouter ce passage'),
