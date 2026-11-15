@@ -3,7 +3,7 @@
 // affiche de VRAIES formes d'onde (drawWave) et joue un vrai mix local. 100 % local, 0 €.
 // Les autres onglets sont des APERÇUS visuels de la maquette validée, clairement signalés,
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
-import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles } from '../lib/core.js';
+import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
 import { decodeBlob, drawWave } from '../lib/audio.js';
 
@@ -323,6 +323,60 @@ export async function render(el, { params }) {
     } catch (e) { toastErr(e); }
   }
 
+  // ---------- enregistrement RÉEL (réutilise le moteur micro de core.js) ----------
+  const recOpt = { countIn: 1, metro: false, playInstru: true, monitor: false, monVol: 0.7, bpm: 90, arm: 'new' };
+  let rec = null, recording = false, monNode = null, instruSrc = null, metroTimer = null, inMeterFill = null, recBtnEl = null, recStatusEl = null;
+  const isInstru = (t) => t.kind === 'instru' || /instru|beat|prod/i.test(t.name || '');
+  function setInMeter(l) { if (inMeterFill) inMeterFill.style.width = Math.min(100, Math.round((20 * Math.log10((l || 0) + 1e-6) + 60) / 60 * 100)) + '%'; }
+  function updateRecUI() {
+    if (recBtnEl) { recBtnEl.textContent = recording ? '⏹' : '⏺'; recBtnEl.style.background = recording ? 'radial-gradient(circle at 40% 30%,#ff8a8a,#d11)' : ''; }
+    if (recStatusEl) recStatusEl.textContent = recording ? '🔴 Enregistrement en cours… (clique pour arrêter)' : 'Prêt à enregistrer';
+  }
+  function clickAt(ctx, when, accent) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = accent ? 1600 : 1000; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(recOpt.monVol * 0.5 + 0.2, when + 0.001); g.gain.exponentialRampToValueAtTime(0.0001, when + 0.05);
+    o.start(when); o.stop(when + 0.06);
+  }
+  async function playCountIn(bpm, bars) {
+    const ctx = audioCtx(), beat = 60 / Math.max(40, bpm), t0 = ctx.currentTime + 0.12;
+    for (let i = 0; i < bars * 4; i++) clickAt(ctx, t0 + i * beat, i % 4 === 0);
+    await new Promise(r => setTimeout(r, bars * 4 * beat * 1000 + 80));
+  }
+  function startMon(stream) {
+    try { const ctx = audioCtx(), src = ctx.createMediaStreamSource(stream), g = ctx.createGain(); g.gain.value = recOpt.monVol; src.connect(g).connect(ctx.destination); monNode = { src, g }; } catch {}
+  }
+  function stopMon() { try { monNode?.src.disconnect(); monNode?.g.disconnect(); } catch {} monNode = null; }
+  async function startRecording() {
+    if (recording) return;
+    try {
+      if (recOpt.countIn > 0) { if (recStatusEl) recStatusEl.textContent = '① Décompte…'; await playCountIn(recOpt.bpm, recOpt.countIn); }
+      rec = await startRecorder({ onLevel: setInMeter });
+      recording = true; updateRecUI();
+      const ctx = audioCtx(), t0 = ctx.currentTime + 0.08;
+      if (recOpt.playInstru) { const ins = tracks.find(isInstru); if (ins?.buffer) { try { instruSrc = ctx.createBufferSource(); instruSrc.buffer = ins.buffer; const g = ctx.createGain(); g.gain.value = 10 ** ((ins.gainDb || 0) / 20); instruSrc.connect(g).connect(ctx.destination); instruSrc.start(t0); } catch {} } }
+      if (recOpt.metro) { const beat = 60 / Math.max(40, recOpt.bpm); let n = 0; metroTimer = setInterval(() => clickAt(ctx, audioCtx().currentTime + 0.02, (n++) % 4 === 0), beat * 1000); }
+      if (recOpt.monitor) startMon(rec.stream);
+    } catch (e) { recording = false; rec = null; updateRecUI(); toast('Micro inaccessible : ' + (e?.message || e), 'bad'); }
+  }
+  async function stopRecording() {
+    if (!rec) return;
+    const r = rec; rec = null; recording = false;
+    stopMon(); try { instruSrc?.stop(); } catch {} instruSrc = null; clearInterval(metroTimer); metroTimer = null;
+    updateRecUI(); if (inMeterFill) inMeterFill.style.width = '0%';
+    try {
+      const blob = await r.stop();
+      const buffer = await decodeBlob(blob);
+      if (!buffer || buffer.duration < 0.2) { toast('Prise trop courte, réessaie.', 'bad'); return; }
+      if (recOpt.arm !== 'new' && tracks[+recOpt.arm]) { const t = tracks[+recOpt.arm]; t.buffer = buffer; t.original = buffer; t.empty = false; }
+      else tracks.push({ name: `Voix ${tracks.filter(t => !isInstru(t)).length + 1}`, kind: 'voix', gainDb: 0, pan: 0, offset: 0, mute: false, solo: false, armed: true, empty: false, fxDone: [], fx: null, fileId: null, buffer, original: buffer });
+      await save();
+      toast(`Prise enregistrée ✓ (${buffer.duration.toFixed(1)} s) — visible dans la Timeline`, 'ok');
+      go(cur);
+    } catch (e) { toastErr(e); }
+  }
+  function stopAllRec() { try { rec?.stop(); } catch {} rec = null; recording = false; stopMon(); try { instruSrc?.stop(); } catch {} instruSrc = null; clearInterval(metroTimer); }
+
   // ================================================================ onglets
   function viewTimeline() {
     const wrap = h('div.panel', { style: { height: 'calc(100% - 2px)', display: 'flex', flexDirection: 'column' } });
@@ -372,27 +426,56 @@ export async function render(el, { params }) {
 
   function viewRec() {
     const root = h('div');
-    const prises = [1, 2, 3].map(i => `<div style="display:flex;gap:9px;align-items:center;margin-bottom:7px"><span class="chip ${i === 2 ? 'on' : ''}">Prise ${i}</span><div style="flex:1;height:30px;border-radius:7px;overflow:hidden;border:1px solid var(--rline)">${clipSvg(i === 2 ? '#ec4899' : '#5b5f86', 20 + i * 9)}</div><span class="rbtn" style="padding:5px 9px">▶</span></div>`).join('');
-    const mon = [['Ma voix', '66%', 66], ['Instru', '−4 dB', 80], ['Réverbe', '22%', 22], ['Autotune casque', 'léger', 12]].map(x => `<div style="display:flex;gap:9px;align-items:center;font-size:12px;margin-bottom:11px"><span class="muted" style="width:96px">${x[0]}</span><div style="flex:1;height:6px;border-radius:4px;background:#23213f;position:relative"><i style="position:absolute;top:50%;left:${x[2]}%;transform:translate(-50%,-50%);width:13px;height:13px;border-radius:50%;background:var(--rcy);box-shadow:0 0 8px var(--rcy)"></i></div><b style="width:46px;text-align:right">${x[1]}</b></div>`).join('');
-    root.innerHTML = `<div class="grid" style="grid-template-columns:1.3fr .9fr">
-      <div class="panel"><div class="ph">🎙️ Prise de son <span class="r">prise brute conservée</span></div><div class="pb">
-       <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
-         <a href="#/enregistrement" class="rb rec" style="width:68px;height:68px;font-size:28px;text-decoration:none;box-shadow:0 0 26px rgba(239,68,68,.4)">⏺</a>
-         <div style="flex:1"><div style="font-size:15px;font-weight:700;margin-bottom:4px">Enregistrer la voix</div><div class="muted" style="font-size:12px">Piste armée : Voix Lead · casque conseillé</div>
-           <div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap"><span class="chip on">Décompte 1 mesure</span><span class="chip">Métronome</span><span class="chip">Boucle</span><span class="chip">Punch in/out</span><span class="chip">Pré-roll 2 s</span></div></div>
-       </div>
-       <div style="border:1px solid var(--rline);border-radius:11px;overflow:hidden;background:#0c0a1e;margin-bottom:12px"><div style="padding:7px 11px;font-size:11px;color:var(--rmut);display:flex;gap:8px;align-items:center">🥁 Instru qui tourne<span style="margin-left:auto">BPM 90 · Do# min</span></div><div style="height:56px">${clipSvg('#f59e0b', 7)}</div></div>
-       <div style="font-size:12px;font-weight:700;margin-bottom:8px">Prises (comping)</div>${prises}
-      </div></div>
-      <div class="panel"><div class="ph">🎧 Écoute en direct (monitoring)</div><div class="pb">
-       <div style="height:46px;border-radius:9px;overflow:hidden;border:1px solid var(--rline);margin-bottom:12px;background:#0c0a1e">${clipSvg('#22d3ee', 88)}</div>
-       <label style="display:flex;align-items:center;gap:9px;font-size:13px;margin-bottom:13px"><span style="width:30px;height:16px;border-radius:99px;background:linear-gradient(90deg,var(--rpur),var(--rcy));position:relative"><b style="position:absolute;top:2px;left:16px;width:12px;height:12px;border-radius:50%;background:#fff"></b></span>M'entendre dans le casque</label>
-       ${mon}
-       <div style="display:flex;gap:12px;align-items:flex-end;height:84px;justify-content:center;margin-top:6px"><div style="width:16px;height:100%;border-radius:5px;background:#141230;position:relative;overflow:hidden"><i style="position:absolute;left:0;right:0;bottom:0;height:74%;background:linear-gradient(0deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><div style="width:16px;height:100%;border-radius:5px;background:#141230;position:relative;overflow:hidden"><i style="position:absolute;left:0;right:0;bottom:0;height:68%;background:linear-gradient(0deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><div style="font-size:11px;color:var(--rmut);align-self:center">Micro<br><b style="color:#fff">−6.2 dB</b></div></div>
-       <div class="muted" style="font-size:10px;margin-top:10px;line-height:1.4">Casque filaire conseillé. L'autotune complet se calcule après (≈20 ms en direct).</div>
-      </div></div></div>`;
+    const ins = tracks.find(isInstru);
+    // gros bouton REC réel
+    recBtnEl = h('div.rb.rec', { style: { width: '68px', height: '68px', fontSize: '28px', cursor: 'pointer', boxShadow: '0 0 26px rgba(239,68,68,.4)' }, onclick: () => recording ? stopRecording() : startRecording() }, recording ? '⏹' : '⏺');
+    recStatusEl = h('div.muted', { style: { fontSize: '12px' } }, recording ? '🔴 Enregistrement en cours…' : 'Prêt à enregistrer');
+    // choix de la piste à enregistrer
+    const armSel = h('select', { style: selStyle(), onchange: (e) => { recOpt.arm = e.target.value; } },
+      h('option', { value: 'new', selected: recOpt.arm === 'new' }, '➕ Nouvelle piste voix'),
+      ...tracks.map((t, i) => isInstru(t) ? null : h('option', { value: String(i), selected: recOpt.arm === String(i) }, `↻ Remplacer : ${t.name || 'Piste ' + (i + 1)}`)));
+    // chips options (réelles)
+    const chip = (label, key) => { const c = h('span.chip' + (recOpt[key] ? '.on' : ''), label); c.onclick = () => { recOpt[key] = !recOpt[key]; c.classList.toggle('on', recOpt[key]); }; return c; };
+    const countSel = h('select', { style: selStyle(), onchange: (e) => { recOpt.countIn = +e.target.value; } },
+      [0, 1, 2].map(n => h('option', { value: n, selected: recOpt.countIn === n }, n === 0 ? 'Décompte : non' : `Décompte : ${n} mesure${n > 1 ? 's' : ''}`)));
+    const bpmIn = h('input', { type: 'number', min: 40, max: 220, value: recOpt.bpm, style: { ...selStyle(), width: '66px' }, onchange: (e) => { recOpt.bpm = Math.max(40, Math.min(220, +e.target.value || 90)); } });
+    // mètre d'entrée réel
+    inMeterFill = h('i', { style: { position: 'absolute', left: '0', top: '0', bottom: '0', width: '0%', background: 'linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)', transition: 'width .05s' } });
+    const inMeter = h('div', { style: { position: 'relative', height: '12px', borderRadius: '6px', background: '#141230', overflow: 'hidden', flex: '1' } }, inMeterFill);
+    // monitoring réel
+    const monChip = h('span.chip' + (recOpt.monitor ? '.on' : ''), '🎧 M’entendre dans le casque');
+    monChip.onclick = () => { recOpt.monitor = !recOpt.monitor; monChip.classList.toggle('on', recOpt.monitor); if (recording) { recOpt.monitor ? startMon(rec.stream) : stopMon(); } };
+    const monVol = h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: recOpt.monVol, oninput: (e) => { recOpt.monVol = +e.target.value; if (monNode) monNode.g.gain.value = recOpt.monVol; } });
+
+    const left = h('div.panel',
+      h('div.ph', '🎙️ Prise de son', h('span.r', 'prise brute conservée · casque conseillé')),
+      h('div.pb',
+        h('div', { style: { display: 'flex', gap: '14px', alignItems: 'center', marginBottom: '14px' } },
+          recBtnEl,
+          h('div', { style: { flex: '1' } },
+            h('div', { style: { fontSize: '15px', fontWeight: '700', marginBottom: '4px' } }, 'Enregistrer la voix'),
+            recStatusEl,
+            h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginTop: '9px' } }, h('span.muted', { style: { fontSize: '11px', width: '42px' } }, 'Niveau'), inMeter))),
+        h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px' } },
+          h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), armSel, countSel, h('span.muted', { style: { fontSize: '12px' } }, 'BPM'), bpmIn,
+          chip('🥁 Jouer l’instru', 'playInstru'), chip('🎵 Métronome', 'metro')),
+        ins ? h('div', { style: { border: '1px solid var(--rline)', borderRadius: '11px', overflow: 'hidden', background: '#0c0a1e' } },
+          h('div', { style: { padding: '7px 11px', fontSize: '11px', color: 'var(--rmut)' }, html: `🥁 ${ins.name || 'Instru'} — jouée pendant la prise` }),
+          h('div', { style: { height: '54px' }, html: clipSvg('#f59e0b', 7) }))
+          : h('p.muted', { style: { fontSize: '12px' } }, 'Astuce : importe un instru dans la Timeline pour chanter dessus.')));
+
+    const right = h('div.panel',
+      h('div.ph', '🎧 Écoute en direct (monitoring)'),
+      h('div.pb',
+        monChip,
+        h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', margin: '14px 0', fontSize: '12px' } }, h('span.muted', { style: { width: '92px' } }, 'Volume casque'), monVol),
+        h('div.muted', { style: { fontSize: '10px', lineHeight: '1.4' } }, '⚠️ Mets un casque filaire : sans casque, le micro réentend les haut-parleurs (effet larsen). L’autotune complet se calcule après la prise.')));
+
+    root.append(h('div.grid', { style: { gridTemplateColumns: '1.3fr .9fr' } }, left, right));
+    updateRecUI();
     return root;
   }
+  const selStyle = () => ({ padding: '6px 9px', borderRadius: '8px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)', fontSize: '12px' });
 
   function viewFx() {
     const scaleKbd = () => {
@@ -488,6 +571,7 @@ export async function render(el, { params }) {
   }
   function go(k) {
     if (playing && k !== 'timeline' && k !== 'regie') stopPlay();
+    if (recording && cur === 'rec' && k !== 'rec') stopRecording();
     cur = k; renderTabs();
     main.innerHTML = '';
     const view = h('div.rview'); view.append(VIEWS[k].r());
@@ -496,7 +580,7 @@ export async function render(el, { params }) {
 
   function renderSidebar() {
     const groups = [
-      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => (location.hash = '#/enregistrement')], ['📤', 'Exporter (bientôt)', null]] },
+      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter (bientôt)', null]] },
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => go('timeline'), trackColor(t, i)]) },
       { ic: '🎛️', t: 'Modules', items: [['🎤', 'Auto-Tune', () => go('fx')], ['🎚️', 'Égaliseur', () => go('fx')], ['🗜️', 'Compression', () => go('fx')], ['🌫️', 'Réverbe', () => go('fx')], ['🔁', 'Delay', () => go('fx')], ['🎼', 'Harmonies', () => go('fx')]] },
       { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
@@ -535,7 +619,7 @@ export async function render(el, { params }) {
     h('div.rb', { onclick: () => { stopPlay(); movePlayhead(0); startOffset = 0; } }, '⏮'),
     playBtn,
     h('div.rb', { onclick: () => { stopPlay(); movePlayhead(0); startOffset = 0; } }, '⏹'),
-    h('a.rb', { href: '#/enregistrement', title: 'Enregistrer (page dédiée)' }, '⏺'),
+    h('div.rb.rec', { title: 'Enregistrer dans la Régie', onclick: () => go('rec') }, '⏺'),
     lcdEl,
     h('div', { style: { flex: '1' } }),
     h('span.muted', 'Sortie'),
@@ -550,5 +634,5 @@ export async function render(el, { params }) {
   go(cur);
 
   // nettoyage
-  return () => { stopPlay(); };
+  return () => { stopPlay(); stopAllRec(); };
 }
