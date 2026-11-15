@@ -81,6 +81,10 @@ const CSS = `
 .regie .tbtn{width:23px;height:21px;border-radius:6px;background:#1b1b38;border:1px solid var(--rline);font-size:10px;font-weight:800;display:grid;place-items:center;color:var(--rmut);cursor:pointer}
 .regie .tbtn.on.m{background:rgba(34,211,238,.2);color:var(--rcy);border-color:rgba(34,211,238,.5)}
 .regie .tbtn.on.s{background:rgba(245,180,41,.22);color:var(--rgold);border-color:rgba(245,180,41,.5)}
+.regie .tbtn.del:hover{background:rgba(239,68,68,.25);color:#ff8a8a;border-color:rgba(239,68,68,.5)}
+.regie .selbox{position:absolute;top:0;bottom:0;background:rgba(34,211,238,.18);border-left:2px solid #22d3ee;border-right:2px solid #22d3ee;z-index:3;pointer-events:none}
+.regie .lane{touch-action:pan-x pan-y;user-select:none;cursor:text}
+.regie .selbar{display:none;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--rline);background:rgba(34,211,238,.07)}
 .regie .tbtn.on.a{background:rgba(239,68,68,.25);color:#ff8a8a;border-color:rgba(239,68,68,.5)}
 .regie .thead input[type=range]{width:100%;margin-top:7px;accent-color:var(--tc,#888);height:4px}
 .regie .thead .lab{display:flex;justify-content:space-between;font-size:9px;color:var(--rmut);margin-top:2px}
@@ -106,7 +110,7 @@ const CSS = `
 .regie .orb{width:50px;height:50px;border-radius:50%;flex:none;background:radial-gradient(circle at 36% 30%,#eafaff,#22d3ee 30%,#0a3b63 75%);box-shadow:0 0 24px rgba(34,211,238,.55)}
 .regie .vcard{border:1px solid var(--rline);border-radius:12px;padding:12px;background:linear-gradient(180deg,#141430,#0d0d1e)}
 .regie .vcard h4{margin:0 0 4px;font-size:14px}.regie .vcard p{margin:0 0 10px;font-size:11.5px;color:var(--rmut);line-height:1.4}
-.rgmenu{position:fixed;z-index:9999;min-width:210px;background:linear-gradient(180deg,#15152e,#0d0d1c);border:1px solid #2a2752;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.6);padding:6px;color:#eceefc;font-family:'Segoe UI',system-ui,sans-serif;animation:rgpop .12s}
+.rgmenu{position:fixed;z-index:9999;max-height:calc(100vh - 12px);overflow-y:auto;min-width:210px;background:linear-gradient(180deg,#15152e,#0d0d1c);border:1px solid #2a2752;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.6);padding:6px;color:#eceefc;font-family:'Segoe UI',system-ui,sans-serif;animation:rgpop .12s}
 @keyframes rgpop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 .rgmenu .rgmi{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap}
 .rgmenu .rgmi:hover{background:linear-gradient(90deg,rgba(168,85,247,.28),rgba(34,211,238,.12))}
@@ -164,7 +168,10 @@ export async function render(el, { params }) {
   let tracks = [];          // {name,kind,gainDb,pan,offset,mute,solo,armed,empty,fxDone,fx,fileId,buffer,original}
   let sessionSelected = 0;
   let cur = (params && params.get && params.get('tab')) || 'regie';
-  let pxPerSec = 80;        // zoom horizontal
+  const PPS_MIN = 10, PPS_MAX = 3000;
+  let pxPerSec = Math.max(PPS_MIN, Math.min(PPS_MAX, Number(localStorage.getItem('regie.pps')) || 80)); // zoom horizontal
+  let selRange = null;      // sélection : { i (piste), a, b } en secondes sur la timeline
+  let zoomLblEl = null, zoomRangeEl = null, selBarEl = null;
   // lecture
   let playing = false, srcs = [], ctxRef = null, startedAt = 0, startOffset = 0, playTotal = 0, raf = 0, analyser = null, anaData = null, masterGain = null;
 
@@ -256,6 +263,139 @@ export async function render(el, { params }) {
   function drawClip(canvas, t, i) {
     try { drawWave(canvas, t.buffer, { color: trackColor(t, i) }); } catch {}
   }
+  // Dessine seulement le morceau [t0, t1] (s) d'un buffer : évite les canvas géants
+  // qui restaient vides quand on zoomait (limite navigateur ~32 000 px).
+  function drawSegment(canvas, buffer, t0, t1, color) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.max(1, Math.round(canvas.clientWidth * dpr)), hg = Math.max(1, Math.round(canvas.clientHeight * dpr));
+    canvas.width = w; canvas.height = hg;
+    const g = canvas.getContext('2d'); g.clearRect(0, 0, w, hg); g.fillStyle = color;
+    const d = buffer.getChannelData(0), sr = buffer.sampleRate;
+    const s0 = Math.floor(t0 * sr), s1 = Math.min(d.length, Math.ceil(t1 * sr)), per = (s1 - s0) / w;
+    for (let x = 0; x < w; x++) {
+      const a = s0 + Math.floor(x * per), b = Math.max(a + 1, s0 + Math.floor((x + 1) * per));
+      let mn = 1, mx = -1;
+      for (let k = a; k < b && k < d.length; k++) { const v = d[k]; if (v < mn) mn = v; if (v > mx) mx = v; }
+      if (mx < mn) continue;
+      g.fillRect(x, ((1 - mx) / 2) * hg, 1, Math.max(1, ((mx - mn) / 2) * hg));
+    }
+  }
+  const TILE = 1500; // largeur (px) d'un morceau de forme d'onde
+  function tiledWave(clip, t, i, clipW) {
+    const color = trackColor(t, i);
+    const io = new IntersectionObserver((ents) => {
+      for (const e of ents) {
+        const c = e.target;
+        if (e.isIntersecting && !c._drawn) { c._drawn = true; drawSegment(c, t.buffer, +c.dataset.t0, +c.dataset.t1, color); }
+        else if (!e.isIntersecting && c._drawn) { c._drawn = false; c.width = 1; c.height = 1; } // libère la mémoire
+      }
+    }, { rootMargin: '0px 600px' });
+    for (let x = 0; x < clipW; x += TILE) {
+      const w = Math.min(TILE, clipW - x);
+      const c = h('canvas', { style: { position: 'absolute', left: x + 'px', top: '0', width: w + 'px', height: '100%' } });
+      c.dataset.t0 = String(x / pxPerSec); c.dataset.t1 = String((x + w) / pxPerSec);
+      clip.append(c); io.observe(c);
+    }
+  }
+
+  // ---------- zoom ----------
+  function setZoom(next, anchorSec = null, anchorScreenX = null) {
+    const sc = laneWrap;
+    const ax = anchorScreenX ?? (sc ? sc.clientWidth / 2 : 0);
+    const anchor = anchorSec ?? (sc ? Math.max(0, (sc.scrollLeft + ax - 160) / pxPerSec) : 0);
+    pxPerSec = Math.max(PPS_MIN, Math.min(PPS_MAX, next));
+    try { localStorage.setItem('regie.pps', String(pxPerSec)); } catch {}
+    if (zoomLblEl) zoomLblEl.textContent = `${Math.round(pxPerSec)} px/s`;
+    if (zoomRangeEl) zoomRangeEl.value = String(Math.round(Math.log(pxPerSec) * 100));
+    if (sc) { buildTimeline(sc); sc.scrollLeft = Math.max(0, 160 + anchor * pxPerSec - ax); }
+  }
+  function fitZoom() { const sc = laneWrap; const tot = totalDuration(); if (!sc || !tot) return; setZoom((sc.clientWidth - 180) / tot, 0, 0); sc.scrollLeft = 0; }
+  function zoomToSel() { if (!selRange || !laneWrap) return; const len = Math.max(0.05, selRange.b - selRange.a); setZoom((laneWrap.clientWidth - 220) / len); laneWrap.scrollLeft = Math.max(0, 160 + selRange.a * pxPerSec - 30); }
+
+  // ---------- sélection d'un passage ----------
+  const fmtS = (s) => fmtLcd(s);
+  function paintSelBar() {
+    if (!selBarEl) return;
+    selBarEl.innerHTML = '';
+    if (!selRange || !tracks[selRange.i]) { selBarEl.style.display = 'none'; return; }
+    const t = tracks[selRange.i];
+    selBarEl.style.display = 'flex';
+    selBarEl.append(
+      h('span', { style: { fontSize: '12px' } }, `Sélection · ${t.name || 'Piste ' + (selRange.i + 1)} · ${fmtS(selRange.a)} → ${fmtS(selRange.b)} (${(selRange.b - selRange.a).toFixed(2)} s)`),
+      h('button.rbtn', { onclick: playSel }, '▶ Écouter'),
+      h('button.rbtn', { onclick: zoomToSel }, '🔍 Zoomer dessus'),
+      h('button.rbtn', { onclick: () => editSel('silence') }, '🔇 Silence'),
+      h('button.rbtn', { style: { borderColor: '#ef4444' }, onclick: () => editSel('cut') }, '✂️ Supprimer le passage'),
+      h('button.rbtn', { onclick: () => { selRange = null; paintSel(); } }, '✕'));
+  }
+  function paintSel() {
+    document.querySelectorAll('.regie .selbox').forEach(b => b.remove());
+    if (selRange && laneWrap) {
+      const lane = laneWrap.querySelectorAll('.lane')[selRange.i];
+      if (lane) lane.append(h('div.selbox', { style: { left: (selRange.a * pxPerSec) + 'px', width: Math.max(2, (selRange.b - selRange.a) * pxPerSec) + 'px' } }));
+    }
+    paintSelBar();
+  }
+  function selSlice() {
+    const t = tracks[selRange?.i]; if (!t?.buffer) return null;
+    const off = t.offset || 0, sr = t.buffer.sampleRate;
+    const s0 = Math.max(0, Math.floor((selRange.a - off) * sr)), s1 = Math.min(t.buffer.length, Math.ceil((selRange.b - off) * sr));
+    return s1 > s0 ? { t, s0, s1 } : null;
+  }
+  function playSel() {
+    const z = selSlice(); if (!z) { toast('Rien à écouter dans ce passage.', 'bad'); return; }
+    const ctx = audioCtx(), b = z.t.buffer, out = ctx.createBuffer(b.numberOfChannels, z.s1 - z.s0, b.sampleRate);
+    for (let c = 0; c < b.numberOfChannels; c++) out.getChannelData(c).set(b.getChannelData(c).subarray(z.s0, z.s1));
+    playBuffer(out);
+  }
+  async function editSel(mode) {
+    const z = selSlice(); if (!z) { toast('Ce passage ne contient pas d’audio.', 'bad'); return; }
+    const ctx = audioCtx(), b = z.t.buffer, n = z.s1 - z.s0;
+    const len = mode === 'cut' ? b.length - n : b.length;
+    if (len < 1) { toast('Impossible : la piste serait vide. Supprime plutôt la piste.', 'bad'); return; }
+    const out = ctx.createBuffer(b.numberOfChannels, len, b.sampleRate);
+    for (let c = 0; c < b.numberOfChannels; c++) {
+      const src = b.getChannelData(c), dst = out.getChannelData(c);
+      if (mode === 'cut') { dst.set(src.subarray(0, z.s0), 0); dst.set(src.subarray(z.s1), z.s0); }
+      else { dst.set(src); dst.fill(0, z.s0, z.s1); }
+    }
+    z.t.buffer = out; proposalCache = {};
+    selRange = mode === 'cut' ? null : selRange;
+    await save();
+    toast(mode === 'cut' ? 'Passage supprimé ✓' : 'Passage rendu muet ✓', 'ok');
+    if (laneWrap) buildTimeline(laneWrap);
+  }
+  // glisser sur une piste = sélectionner · simple clic = déplacer la tête de lecture
+  function bindLane(lane, i) {
+    let st = null;
+    lane.onpointerdown = (e) => {
+      if (e.button !== 0) return;
+      const rect = lane.getBoundingClientRect();
+      st = { x0: e.clientX, a: Math.max(0, (e.clientX - rect.left) / pxPerSec), moved: false, id: e.pointerId, touch: e.pointerType === 'touch', lp: null };
+      if (st.touch) st.lp = setTimeout(() => { if (st && !st.moved) { const s = st; st = null; trackMenu(i, { preventDefault() {}, stopPropagation() {}, clientX: s.x0, clientY: e.clientY }); } }, 550);
+      else lane.setPointerCapture?.(e.pointerId);
+    };
+    lane.onpointermove = (e) => {
+      if (!st) return;
+      if (!st.moved && Math.abs(e.clientX - st.x0) < 5) return;
+      if (st.touch && !st.moved) { clearTimeout(st.lp); st = null; return; } // au doigt : glisser = défiler
+      st.moved = true;
+      const rect = lane.getBoundingClientRect();
+      const b = Math.max(0, Math.min(totalDuration(), (e.clientX - rect.left) / pxPerSec));
+      selRange = { i, a: Math.min(st.a, b), b: Math.max(st.a, b) };
+      paintSel();
+    };
+    lane.onpointerup = (e) => {
+      if (!st) return; clearTimeout(st.lp);
+      const s = st; st = null;
+      if (s.moved) return;
+      const pos = s.a;
+      if (selRange) { selRange = null; paintSel(); }
+      if (playing) { stopPlay(); startPlay(pos); } else movePlayhead(pos);
+      startOffset = pos;
+    };
+    lane.onpointercancel = () => { if (st) clearTimeout(st.lp); st = null; };
+  }
   function buildTimeline(container) {
     container.innerHTML = '';
     const total = totalDuration();
@@ -286,6 +426,8 @@ export async function render(el, { params }) {
       mB.onclick = () => { t.mute = !t.mute; mB.classList.toggle('on', t.mute); save(); };
       sB.onclick = () => { t.solo = !t.solo; sB.classList.toggle('on', t.solo); save(); };
       aB.onclick = () => { t.armed = !t.armed; aB.classList.toggle('on', t.armed); save(); };
+      const dB = h('span.tbtn.del', { title: 'Supprimer la piste' }, '🗑');
+      dB.onclick = (e) => { e.stopPropagation(); deleteTrackIdx(i); };
       const vol = h('input', { type: 'range', min: -24, max: 6, step: 0.5, value: t.gainDb ?? 0, title: 'Volume (dB)' });
       const volLab = h('span', `${(t.gainDb ?? 0) > 0 ? '+' : ''}${t.gainDb ?? 0} dB`);
       vol.oninput = () => { t.gainDb = +vol.value; volLab.textContent = `${t.gainDb > 0 ? '+' : ''}${t.gainDb} dB`; };
@@ -296,26 +438,20 @@ export async function render(el, { params }) {
       pan.onchange = save;
       const head = h('div.thead', { style: { '--tc': color } },
         h('div.nm', h('span', { style: { color } }, t.kind === 'instru' ? '🥁' : '🎤'), t.name || `Piste ${i + 1}`),
-        h('div.ctrls', mB, sB, aB),
+        h('div.ctrls', mB, sB, aB, dB),
         vol, h('div.lab', 'Vol', volLab),
         pan, h('div.lab', 'Pan', panLab));
 
       const lane = h('div.lane', { style: { '--beat': beat + 'px', width: laneW + 'px' } });
       if (t.buffer) {
-        const clipW = Math.max(8, t.buffer.duration * pxPerSec);
-        const canvas = h('canvas');
-        const clip = h('div.clip', { style: { left: ((t.offset || 0) * pxPerSec) + 'px', width: clipW + 'px' } }, canvas, h('div.cnm', t.name || ''));
+        const clipW = Math.max(8, Math.round(t.buffer.duration * pxPerSec));
+        const clip = h('div.clip', { style: { left: ((t.offset || 0) * pxPerSec) + 'px', width: clipW + 'px' } });
         lane.append(clip);
-        // dessin après insertion (clientWidth disponible)
-        setTimeout(() => { canvas.style.width = clipW + 'px'; canvas.style.height = '100%'; drawClip(canvas, t, i); }, 0);
+        // dessin par morceaux, seulement la partie visible (marche à tous les zooms)
+        setTimeout(() => { tiledWave(clip, t, i, clipW); clip.append(h('div.cnm', t.name || '')); }, 0);
       }
-      // clic sur la lane = placer la tête de lecture
-      lane.onclick = (e) => {
-        const rect = lane.getBoundingClientRect();
-        const pos = Math.max(0, (e.clientX - rect.left) / pxPerSec);
-        if (playing) { stopPlay(); startPlay(pos); } else movePlayhead(pos);
-        startOffset = pos;
-      };
+      // glisser = sélectionner un passage · clic = placer la tête de lecture
+      bindLane(lane, i);
       head.oncontextmenu = (e) => trackMenu(i, e);
       lane.oncontextmenu = (e) => trackMenu(i, e);
       head.title = 'Clic droit : nettoyer, effets, volume, supprimer…';
@@ -327,6 +463,7 @@ export async function render(el, { params }) {
     container.append(h('div', { style: { display: 'flex', gap: '10px', marginTop: '6px' } },
       h('button.rbtn', { onclick: importTrack, style: { width: '158px' } }, '➕ Importer une piste')));
     movePlayhead(startOffset);
+    if (container === laneWrap) paintSel();
   }
   const panTxt = (p) => p === 0 ? 'C' : (p < 0 ? `G${Math.round(-p * 100)}` : `D${Math.round(p * 100)}`);
 
@@ -619,8 +756,16 @@ export async function render(el, { params }) {
       { head: t.name || `Piste ${i + 1}` },
       { label: '▶ Lire cette piste', fn: () => playBuffer(t.buffer) },
       { label: '⏹ Stop', fn: () => stopPreview() },
+      { label: '🗑️ Supprimer la piste', danger: true, fn: () => deleteTrackIdx(i) },
       '-',
     ];
+    if (selRange && selRange.i === i) items.push(
+      { head: `Sélection ${fmtS(selRange.a)} → ${fmtS(selRange.b)}` },
+      { label: '▶ Écouter la sélection', fn: playSel },
+      { label: '🔍 Zoomer sur la sélection', fn: zoomToSel },
+      { label: '🔇 Rendre muet ce passage', fn: () => editSel('silence') },
+      { label: '✂️ Supprimer ce passage', danger: true, fn: () => editSel('cut') },
+      '-');
     if (vx) items.push(
       { label: '🧼 Nettoyer & mixer', fn: () => quickCleanIdx(i) },
       { label: '🎤 Autotune léger', fn: () => applyPresetTo(i, FXP.at_leger) },
@@ -637,7 +782,6 @@ export async function render(el, { params }) {
       { label: t.solo ? '◻ Retirer le solo' : '⭐ Solo', fn: () => toggleSoloIdx(i) },
     );
     if (vx) items.push({ label: '↩ Revenir à l’original', fn: () => quickRevertIdx(i) });
-    items.push('-', { label: '🗑️ Supprimer la piste', danger: true, fn: () => deleteTrackIdx(i) });
     showMenu(ev.clientX, ev.clientY, items);
   }
 
@@ -699,15 +843,32 @@ export async function render(el, { params }) {
   // ================================================================ onglets
   function viewTimeline() {
     const wrap = h('div.panel', { style: { height: 'calc(100% - 2px)', display: 'flex', flexDirection: 'column' } });
-    const zoomOut = h('button.rbtn', { onclick: () => { pxPerSec = Math.max(12, pxPerSec / 1.5); buildTimeline(body); }, title: 'Dézoomer' }, '🔍−');
-    const zoomIn = h('button.rbtn', { onclick: () => { pxPerSec = Math.min(600, pxPerSec * 1.5); buildTimeline(body); }, title: 'Zoomer (jusqu’à la syllabe)' }, '🔍+');
-    wrap.append(h('div.ph', '🎵 Timeline multipiste',
+    const zoomOut = h('button.rbtn', { onclick: () => setZoom(pxPerSec / 1.5), title: 'Dézoomer' }, '🔍−');
+    const zoomIn = h('button.rbtn', { onclick: () => setZoom(pxPerSec * 1.5), title: 'Zoomer (jusqu’à la syllabe)' }, '🔍+');
+    zoomLblEl = h('span.muted', { style: { minWidth: '62px', textAlign: 'center', fontSize: '12px' } }, `${Math.round(pxPerSec)} px/s`);
+    zoomRangeEl = h('input', { type: 'range', min: String(Math.round(Math.log(PPS_MIN) * 100)), max: String(Math.round(Math.log(PPS_MAX) * 100)), value: String(Math.round(Math.log(pxPerSec) * 100)), title: 'Zoom précis', style: { width: '120px', accentColor: '#a855f7' },
+      oninput: (e) => setZoom(Math.exp(+e.target.value / 100)) });
+    wrap.append(h('div.ph', { style: { flexWrap: 'wrap', gap: '6px' } }, '🎵 Timeline multipiste',
       h('span.r', `${tracks.length} piste(s) · ${fmtLcd(totalDuration()).replace(/\.\d+$/, '')} · projet « ${proj.name} »`),
-      h('span', { style: { marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center' } },
-        zoomOut, h('span.muted', `${pxPerSec | 0} px/s`), zoomIn,
+      h('span', { style: { marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' } },
+        zoomOut, zoomRangeEl, zoomIn, zoomLblEl,
+        h('button.rbtn', { onclick: fitZoom, title: 'Voir tout le morceau' }, '↔ Tout voir'),
         h('button.rbtn.p', { onclick: () => startPlay(startOffset) }, '▶ Lire'),
         h('button.rbtn', { onclick: () => { stopPlay(); movePlayhead(0); startOffset = 0; } }, '⏹'))));
-    const body = h('div.pb', { style: { flex: '1', overflow: 'auto' } });
+    selBarEl = h('div.selbar');
+    wrap.append(selBarEl);
+    wrap.append(h('div.muted', { style: { fontSize: '11px', padding: '4px 12px' } }, 'Astuces : glisse sur une piste pour sélectionner un passage · clic = placer la lecture · Ctrl + molette = zoom · clic droit (ou appui long) = menu · touche Suppr = supprimer le passage'));
+    const body = h('div.pb', { style: { flex: '1', overflow: 'auto' }, tabIndex: 0 });
+    // Ctrl + molette (ou pincer sur pavé tactile) = zoom autour de la souris
+    body.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey) return; e.preventDefault();
+      const r = body.getBoundingClientRect(), ax = e.clientX - r.left;
+      setZoom(pxPerSec * (e.deltaY < 0 ? 1.25 : 0.8), Math.max(0, (body.scrollLeft + ax - 160) / pxPerSec), ax);
+    }, { passive: false });
+    body.addEventListener('keydown', (e) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selRange) { e.preventDefault(); editSel('cut'); }
+      else if (e.key === 'Escape' && selRange) { selRange = null; paintSel(); }
+    });
     wrap.append(body);
     laneWrap = body;
     setTimeout(() => buildTimeline(body), 0);
@@ -764,7 +925,8 @@ export async function render(el, { params }) {
 
     // ROW 3 : Timeline (réelle)
     const mini = h('div.pb');
-    root.append(h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '🎵 Timeline', h('span.r', 'glisse, clic droit sur une piste pour agir')), mini));
+    root.append(h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '🎵 Timeline', h('span.r', 'glisse pour sélectionner, clic droit sur une piste pour agir')), mini));
+    laneWrap = mini; selBarEl = null; zoomLblEl = null; zoomRangeEl = null;
     setTimeout(() => buildTimeline(mini), 0);
 
     // ROW 4 : Banque d'effets (clic = appliquer)
@@ -1094,7 +1256,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE9'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE10'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
