@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Pages statiques « Sélection produits » construites depuis le flux Awin autorisé.
+"""Pages statiques « Sélection produits » construites depuis le catalogue Awin compact à images vérifiées.
 
 - /produits/<catégorie>.html : jusqu'à 48 produits par catégorie, lisibles par Google
   (le catalogue charge le flux en JavaScript, invisible pour les moteurs).
 - /produits/index.html : sommaire des catégories.
+- Source obligatoire : data/awin-catalogue.json avec image_policy=authorized_feed_images_only ;
+  les images non validées sont exclues avant la génération.
 
 Règles :
 - feedUpdatedAt vérifie uniquement l'ancienneté du snapshot catalogue (7 jours maximum) ;
@@ -157,7 +159,7 @@ AWIN_MOBILE_CSS = """<style>
 }
 </style>"""
 
-NOTICE = ('<p class="source">Sélection de produits issus des flux Awin accessibles au compte éditeur. '
+NOTICE = ('<p class="source">Sélection de produits issus des flux Awin accessibles au compte éditeur ; visuels filtrés par la politique d’images marchandes autorisées. '
           'Un prix source n’est affiché que si le marchand fournit une date individuelle de mise à jour de moins de 48 h. '
           'Si la TVA n’est pas explicitement confirmée, la mention « TVA non confirmée » apparaît : ce montant ne constitue pas un prix TTC vérifié ni une comparaison multi-marchands. '
           'Les frais de livraison inconnus sont à vérifier. Le prix et la disponibilité peuvent changer : vérifiez-les chez le marchand. '
