@@ -623,5 +623,29 @@ PRESETS.push(
   { cat: REF_CAT, name: 'Type LJK mélodique (calé sur Dolce Vita)', chain: [{ t: 'tune', mode: 'notes', keep: 0.15, glide: 25 }, { t: 'double', steps: [0, 0], gain: 0.35 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'peak', f: 5500, q: 1, gain: 3 }, { t: 'fx', kind: 'delay', time: 0.23, fb: 0.28, mix: 0.16 }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.14 }], voice: { highpass: 90, low: 0, presence: 2, air: 0, deess: 4, comp: 0.75, reverb: 0 } },
   { cat: REF_CAT, name: 'Pack 8 références (basses, présence, justesse)', chain: [{ t: 'tune', strength: 0.9, speed: 35 }, { t: 'fx', kind: 'peak', f: 70, q: 0.8, gain: 4 }, { t: 'fx', kind: 'peak', f: 4000, q: 1, gain: 2.5 }, { t: 'fx', kind: 'air', gain: 3 }, { t: 'fx', kind: 'reverb', size: 1.6, mix: 0.14 }] },
 );
+
+/* Pack d'alternatives vocales libres : traitements DSP indépendants, sans code tiers copié.
+   Les outils VST3/CLAP cités dans docs/open-source-vocal-alternatives.md restent des
+   applications externes : un navigateur ne peut pas charger directement un binaire VST3. */
+const OPEN_CAT = '🆓 Pack vocal libre';
+PRESETS.push(
+  { cat: OPEN_CAT, name: 'Correction vocale libre — naturelle', chain: [{ t: 'tune', mode: 'notes', strength: 0.85, keep: 0.42, glide: 65 }] },
+  { cat: OPEN_CAT, name: 'Correction vocale libre — hard tune', chain: [{ t: 'tune', mode: 'notes', strength: 1, keep: 0, glide: 0 }] },
+  { cat: OPEN_CAT, name: 'AutoTune EFX — Rap mélodique', chain: [{ t: 'tune', mode: 'notes', strength: 1, keep: 0.12, glide: 18 }, { t: 'fx', kind: 'eq', low: 1, mid: 2, high: 2 }, { t: 'fx', kind: 'compressor', threshold: -22, ratio: 3.5 }, { t: 'fx', kind: 'delay', time: 0.28, fb: 0.22, mix: 0.14 }] },
+  { cat: OPEN_CAT, name: 'Harmony Engine — tierce et quinte', chain: [{ t: 'tune', mode: 'notes', strength: 1, keep: 0.2, glide: 35 }, { t: 'harmony', steps: [2, 4], gain: 0.42 }] },
+  { cat: OPEN_CAT, name: 'Choir — chœur large', chain: [{ t: 'harmony', steps: [-2, 2], gain: 0.4 }, { t: 'double', steps: [0, 0], gain: 0.35 }, { t: 'fx', kind: 'chorus', mix: 0.24 }, { t: 'fx', kind: 'reverb', size: 2.4, mix: 0.28 }] },
+  { cat: OPEN_CAT, name: 'Vocoder — robot 20 bandes', chain: [{ t: 'vocoder', bands: 20, q: 6, voices: [0] }] },
+  { cat: OPEN_CAT, name: 'Articulator — talkbox clair', chain: [{ t: 'vocoder', bands: 16, q: 4.5, voices: [0, 12], blend: 0.18 }, { t: 'fx', kind: 'eq', low: -2, mid: 2, high: 1 }] },
+  { cat: OPEN_CAT, name: 'Aspirer — nettoyage + gate', chain: [{ t: 'fx', kind: 'gate', threshold: -44, ratio: 18 }, { t: 'fx', kind: 'deesser', split: 5200, threshold: -30, ratio: 5 }] },
+  { cat: OPEN_CAT, name: 'Duo — doublage naturel', chain: [{ t: 'double', steps: [0, 0], gain: 0.48 }, { t: 'fx', kind: 'chorus', mix: 0.16 }] },
+  { cat: OPEN_CAT, name: 'Mic Mod — micro radio studio', chain: [{ t: 'fx', kind: 'eq', low: -2, mid: 2.5, high: 1.5, midFreq: 2600 }, { t: 'fx', kind: 'compressor', threshold: -24, ratio: 3 }, { t: 'fx', kind: 'deesser', split: 6000, threshold: -28, ratio: 4 }] },
+  { cat: OPEN_CAT, name: 'Mutator — formant + modulation', chain: [{ t: 'shift', semi: -3, formant: 3 }, { t: 'fx', kind: 'ring', freq: 34 }, { t: 'fx', kind: 'phaser', rate: 0.22, depth: 700, mix: 0.25 }] },
+  { cat: OPEN_CAT, name: 'Punch — voix percutante', chain: [{ t: 'fx', kind: 'compressor', threshold: -25, ratio: 5, attack: 0.004, release: 0.1 }, { t: 'fx', kind: 'eq', low: 1.5, mid: 2, high: 1.5 }, { t: 'fx', kind: 'deesser', split: 6500, threshold: -30, ratio: 4 }] },
+  { cat: OPEN_CAT, name: 'Tranche — attaque et présence', chain: [{ t: 'fx', kind: 'compressor', threshold: -22, ratio: 2.5, attack: 0.018, release: 0.08 }, { t: 'fx', kind: 'peak', f: 3200, q: 1.1, gain: 2.5 }] },
+  { cat: OPEN_CAT, name: 'Gorge — formants graves', chain: [{ t: 'shift', semi: -5, formant: -3 }, { t: 'fx', kind: 'peak', f: 1500, q: 2, gain: 3 }] },
+  { cat: OPEN_CAT, name: 'Chaud — saturation analogique', chain: [{ t: 'fx', kind: 'tube', amt: 1.8 }, { t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'compressor', threshold: -20, ratio: 2.5 }] },
+  { cat: OPEN_CAT, name: 'EFX+ — chaîne créative complète', chain: [{ t: 'tune', mode: 'notes', strength: 1, keep: 0.1, glide: 12 }, { t: 'fx', kind: 'phaser', rate: 0.16, depth: 500, mix: 0.18 }, { t: 'fx', kind: 'deesser', split: 5800, threshold: -28, ratio: 5 }, { t: 'fx', kind: 'compressor', threshold: -23, ratio: 3 }, { t: 'fx', kind: 'reverb', size: 1.7, mix: 0.16 }] },
+);
+
 export const PRESET_CATS = [...new Set(PRESETS.map(p => p.cat))];
 export const KEY_CHOICES = [{ v: '', label: 'Tonalité : détection auto' }, ...['majeur', 'mineur'].flatMap(mode => NOTE_FR.map((n, root) => ({ v: `${root}|${mode}`, label: `${n} ${mode}` })))];
