@@ -97,7 +97,7 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 1277.99,
-   "max_price_eur": 1399,
+   "max_price_eur": 1399.0,
    "offer_count": 16,
    "last_date": "2026-11-11",
    "price_kind": "historical"
@@ -116,7 +116,7 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 1085.59,
-   "max_price_eur": 1229,
+   "max_price_eur": 1229.0,
    "offer_count": 16,
    "last_date": "2026-11-12",
    "price_kind": "historical"
@@ -134,7 +134,7 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 349,
+   "min_price_eur": 349.0,
    "max_price_eur": 436.55,
    "offer_count": 14,
    "last_date": "2026-11-11",
@@ -173,7 +173,7 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 119.95,
-   "max_price_eur": 186,
+   "max_price_eur": 186.0,
    "offer_count": 24,
    "last_date": "2026-11-12",
    "price_kind": "historical"
@@ -1246,11 +1246,12 @@
    "price_tax_status": "unspecified"
   }
  ],
- "rotation": {
+"rotation": {
   "interval_hours": 48,
   "last_rotated_at": "2026-11-14T11:44:13.982Z",
   "status": "baseline_initialized",
   "selected_count": 48
  },
  "rotation_history": []
+
 }
