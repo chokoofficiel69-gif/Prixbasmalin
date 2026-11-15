@@ -13,8 +13,8 @@ export function createTimeline(o) {
   let snap = localStorage.getItem('studio.tl.snap') === '1';      // aimantation sur la grille (BPM)
   let tool = 'select';
   let selTrack = null; // piste de la sélection
-  const scroller = h('div', { style: { overflowX: 'auto', overflowY: 'hidden', position: 'relative', border: '1px solid var(--line, rgba(127,127,127,.25))', borderRadius: '10px', background: 'var(--bg)' } });
-  const inner = h('div', { style: { position: 'relative', minHeight: '60px' } });
+  const scroller = h('div.studio-timeline-scroller', { style: { width: '100%', height: 'clamp(320px, 58vh, 700px)', minHeight: '320px', overflow: 'auto', position: 'relative', border: '1px solid var(--line, rgba(127,127,127,.25))', borderRadius: '10px', background: '#080e1b', overscrollBehavior: 'contain' } });
+  const inner = h('div', { style: { position: 'relative', minHeight: '100%', minWidth: '100%' } });
   const playhead = h('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '2px', background: '#f59e0b', zIndex: 3, pointerEvents: 'none', left: HEAD + 'px' } });
   scroller.append(inner);
   const posLbl = h('b', { style: { fontVariantNumeric: 'tabular-nums', fontSize: '1.15em', minWidth: '70px', display: 'inline-block' } }, '0:00.0');
@@ -97,7 +97,7 @@ export function createTimeline(o) {
 
   function ruler(minO) {
     const tot = total(), cv = h('canvas', { style: { display: 'block', height: '24px', width: (tot * pps + 200) + 'px' } });
-    const wrap = h('div', { style: { display: 'flex', height: '24px', borderBottom: '1px solid rgba(127,127,127,.3)', cursor: 'pointer' } },
+    const wrap = h('div', { style: { display: 'flex', height: '24px', position: 'sticky', top: '0', zIndex: 5, borderBottom: '1px solid rgba(127,127,127,.3)', cursor: 'pointer' } },
       h('div', { style: { position: 'sticky', left: 0, zIndex: 2, width: HEAD + 'px', minWidth: HEAD + 'px', background: 'var(--card, #fff)', borderRight: '1px solid rgba(127,127,127,.3)', fontSize: '.75em', padding: '4px 8px', boxSizing: 'border-box' } }, 'Pistes'), cv);
     requestAnimationFrame(() => {
       cv.width = Math.min(30000, Math.round(tot * pps + 200)); cv.height = 24;
