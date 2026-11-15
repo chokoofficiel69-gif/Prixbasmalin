@@ -601,6 +601,18 @@ export async function render(el, { params }) {
     const trackNow = () => tracks[Number(trackSel.value)];
     const chat = h('div', { style: { minHeight: '230px', maxHeight: '44vh', overflow: 'auto', padding: '10px', background: '#090916', border: '1px solid var(--rline)', borderRadius: '10px' } });
     const input = h('textarea', { rows: 3, placeholder: 'Dis à ton ingénieur ce que tu veux : « nettoie la voix, Auto-Tune naturel en La mineur, compression légère, EQ avec présence, réverbération courte et delay discret. Fais aussi ressortir l’instru sans masquer la voix. »', style: { width: '100%', resize: 'vertical', padding: '11px', borderRadius: '9px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' } });
+    const masterStyle = h('select', { style: selStyle() },
+      ...[['streaming','Streaming standard'],['spotify','Spotify / Deezer'],['youtube','YouTube'],['apple','Apple Music'],['tiktok','TikTok / Reels'],['podcast','Podcast / voix'],['rap','Rap / Trap punchy'],['club','Club / puissant'],['doux','Doux / acoustique']].map(([v,l]) => h('option', { value:v }, l)));
+    const effectChoices = [
+      ['denoise','Nettoyage du souffle / bruit'],['antipop','Anti-pop'],['gate','Porte de bruit'],['autotune','Auto-Tune / correction de justesse'],
+      ['voice','EQ + compression + de-esser + réverbération'],['normalize','Normalisation'],['limit','Limiteur / sécurité crêtes'],
+      ['master','Mastering final'],['reverse','Inverser le son'],['fadeIn','Fondu entrant'],['fadeOut','Fondu sortant']
+    ];
+    const effectChecks = new Map(effectChoices.map(([v,l]) => [v, h('input', { type:'checkbox', checked:false })]));
+    const selectedEffects = () => [...effectChecks].filter(([,el]) => el.checked).map(([v]) => v);
+    const effectPicker = h('div', { style:{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'7px',padding:'10px',margin:'8px 0',background:'#0b0b19',border:'1px solid var(--rline)',borderRadius:'9px'} },
+      h('div', { style:{gridColumn:'1/-1',fontWeight:'700',fontSize:'12px'} }, 'Choisis plusieurs effets à appliquer (facultatif)'),
+      ...effectChoices.map(([v,l]) => h('label', { style:{display:'flex',alignItems:'center',gap:'7px',fontSize:'11px',color:'var(--rtxt)'} }, effectChecks.get(v), l)));
     const status = h('div.muted', { style: { minHeight: '20px', marginTop: '8px' } }, 'L’ingénieur peut préparer un plan, puis appliquer les traitements disponibles au son.');
     const planBox = h('div', { style: { display: 'grid', gap: '6px', marginTop: '8px' } });
     const send = h('button.rbtn.p', '🧠 Demander à l’ingénieur');
@@ -628,7 +640,10 @@ export async function render(el, { params }) {
         let peak = 0, rms = 0, n = 0;
         for (let c = 0; c < b.numberOfChannels; c++) { const d = b.getChannelData(c); for (let i = 0; i < d.length; i += 16) { peak = Math.max(peak, Math.abs(d[i])); rms += d[i]*d[i]; n++; } }
         const context = { piste: t.name, duree_secondes: +b.duration.toFixed(2), sampleRate: b.sampleRate, peakDbfs: +(20*Math.log10(Math.max(peak,1e-7))).toFixed(1), rmsDbfs: +(20*Math.log10(Math.sqrt(rms/Math.max(1,n)))).toFixed(1), autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
-        const system = `Tu es un ingénieur du son professionnel intégré à un DAW. Tu dois transformer les demandes utilisateur en opérations AUDIO réellement exécutables. Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, schéma: {"message":"explication courte en français","actions":[{"type":"denoise|antipop|gate|voice|autotune|normalize|limit|master|reverse|fadeIn|fadeOut","params":{}}]}. Actions disponibles: denoise params.amount 0..1; antipop params.amount 0..1; gate params.thresholdDb (-60..-25) et floorDb (-60..-10); voice params.highpass 40..180, low -6..6, presence -6..6, air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune params.speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode" (root 0..11; mode majeur ou mineur); normalize params.targetDb -3..-1; limit params.ceilingDb -2..-0.3; master params.preset streaming|youtube|podcast|club; reverse; fadeIn; fadeOut. Maximum 8 actions. Pour une demande de mixage global, ne prétends pas modifier plusieurs pistes si tu n’as pas une action pour cela : indique-le dans message et ne propose que des opérations adaptées à la piste sélectionnée. N’invente aucune mesure audio. Ne choisis pas Auto-Tune si non demandé ou si la piste est instrumentale. Préserve un rendu naturel sauf demande d’effet robot. Contexte mesuré: ${JSON.stringify(context)}`;
+        const chosen = selectedEffects();
+        const chosenLine = chosen.length ? `Effets expressément sélectionnés par l’utilisateur (n’en ajoute aucun autre) : ${chosen.join(', ')}.` : 'Aucun effet imposé : choisis les traitements adaptés à la demande.';
+        const targetMaster = masterStyle.value;
+        const system = `Tu es un ingénieur du son professionnel intégré à un DAW. Transforme la demande en opérations audio réellement exécutables. Réponds UNIQUEMENT en JSON valide : {"message":"explication courte en français","actions":[{"type":"denoise|antipop|gate|voice|autotune|normalize|limit|master|reverse|fadeIn|fadeOut","params":{}}]}. Types autorisés : denoise amount 0..1; antipop amount 0..1; gate thresholdDb -60..-25 et floorDb -60..-10; voice highpass 40..180, low/presence/air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode"; normalize targetDb -3..-1; limit ceilingDb -2..-0.3; master preset streaming|spotify|youtube|apple|tiktok|podcast|rap|club|doux; reverse; fadeIn; fadeOut. Maximum 10 actions, sans doublon. ${chosenLine} Si master est demandé, utilise impérativement le profil de mastering choisi : ${targetMaster}. Si des effets sont cochés, ne retourne que ces types. Si le mastering est coché, ajoute master avec ce preset. Ne prétends pas traiter plusieurs pistes si les actions ne le permettent pas. Préserve la dynamique et un son naturel ; n’invente aucune mesure. Contexte audio mesuré : ${JSON.stringify(context)}`;
         let raw = '';
         await sse('/api/chat', { projectId: state.projectId, model: 'auto:smart', messages: [{ role: 'system', content: system }, { role: 'user', content: request }] }, ev => { if (ev.type === 'delta' && ev.content) raw += ev.content; if (ev.type === 'error') throw new Error(ev.error); });
         pendingPlan = parsePlan(raw);
@@ -658,7 +673,7 @@ export async function render(el, { params }) {
             b = tuned.buffer;
           } else if (a.type === 'normalize') b = normalize(b, Math.max(-3,Math.min(-1,Number(p.targetDb ?? -1))));
           else if (a.type === 'limit') b = limit(b, Math.max(-2,Math.min(-.3,Number(p.ceilingDb ?? -1))));
-          else if (a.type === 'master') b = (await master(b, ['streaming','youtube','podcast','club'].includes(p.preset) ? p.preset : 'streaming')).buffer;
+          else if (a.type === 'master') b = (await master(b, ['streaming','spotify','youtube','apple','tiktok','podcast','rap','club','doux'].includes(p.preset) ? p.preset : masterStyle.value)).buffer;
           else if (a.type === 'reverse') for (let c=0;c<b.numberOfChannels;c++) b.getChannelData(c).reverse();
           else if (a.type === 'fadeIn' || a.type === 'fadeOut') fadeClip(b, a.type === 'fadeIn');
         }
@@ -676,6 +691,8 @@ export async function render(el, { params }) {
     root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 280px' } },
       h('div.panel', h('div.ph', '🧠 Ingénieur du son IA', h('span.r', 'planifie et exécute les traitements')),
         h('div.pb', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat,
+          h('div', { style: { display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',margin:'10px 0' } }, h('b', { style:{fontSize:'12px'} }, 'Style de mastering'), masterStyle),
+          effectPicker,
           h('div', { style: { marginTop: '10px' } }, input),
           h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' } }, send, applyBtn, undoBtn),
           status, planBox)),
