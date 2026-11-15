@@ -7,6 +7,7 @@ import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, st
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
 import { decodeBlob, drawWave, voiceChain, denoise, detectBeats, normalize, gate, antipop, limit, master, mix, encodeWav, analyzeBuffer } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
+import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
 const CSS = `
@@ -803,7 +804,17 @@ RÈGLES D’UTILISATION :
       try {
         const b = t?.original || t?.buffer || null;
         const signalAnalysis = b ? analyzeBuffer(b, 1) : null;
-        const context = { piste: t?.name || null, type_piste: t?.kind || null, analyse_signal_mesuree: signalAnalysis, autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
+        let voiceDsp = null, voiceDspTips = [];
+        if (b && (t.kind === 'voice' || /voix|vocal|chant|lead|rap/i.test(t.name || ''))) {
+          const mono = new Float32Array(b.length);
+          for (let channel = 0; channel < b.numberOfChannels; channel++) {
+            const data = b.getChannelData(channel);
+            for (let i = 0; i < data.length; i++) mono[i] += data[i] / b.numberOfChannels;
+          }
+          voiceDsp = analyzeVoiceDsp(mono, b.sampleRate);
+          voiceDspTips = voiceDspRecommendations(voiceDsp);
+        }
+        const context = { piste: t?.name || null, type_piste: t?.kind || null, analyse_signal_mesuree: signalAnalysis, diagnostic_spectral_voix: voiceDsp, conseils_mesures: voiceDspTips, autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
         const chosen = selectedEffects();
         const chosenLine = chosen.length ? `Effets expressément sélectionnés par l’utilisateur (n’en ajoute aucun autre) : ${chosen.join(', ')}.` : 'Aucun effet imposé : choisis les traitements adaptés à la demande.';
         const targetMaster = masterStyle.value;
@@ -830,7 +841,7 @@ Contraintes moteur DSP réellement disponibles : denoise, antipop, gate, voice, 
 Le livrable final doit être UNIQUEMENT un JSON valide de cette forme :
 {"message":"explication courte en français","actions":[{"type":"...","params":{}}]}
 Types autorisés : denoise amount 0..1; antipop amount 0..1; gate thresholdDb -60..-25 et floorDb -60..-10; voice highpass 40..180, low/presence/air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode"; normalize targetDb -3..-1; limit ceilingDb -2..-0.3; master preset streaming|spotify|youtube|apple|tiktok|podcast|rap|club|doux; reverse; fadeIn; fadeOut.
-Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coché, utilise exactement le preset demandé. Maximum 10 actions. Les mesures de analyse_signal_mesuree sont calculées directement sur tous les échantillons du buffer source : utilise-les pour distinguer niveau global, crêtes, dynamique, silences et zones problématiques. Les fenêtres nearSilence sont des indices, pas automatiquement des silences à couper. N'invente aucune mesure, aucun traitement ni aucune écoute subjective. Une seule piste est traitée dans cette opération. Le contrôle qualité doit vérifier que chaque action est supportée.`;
+Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coché, utilise exactement le preset demandé. Maximum 10 actions. Les mesures de analyse_signal_mesuree sont calculées directement sur tous les échantillons du buffer source. Si diagnostic_spectral_voix est présent, exploite ses bandes spectrales et conseils_mesures avec prudence : sibilanceRatio n'est pas une détection phonétique des /s/, noiseFloorEstimateDbfs peut inclure des passages faibles, et les indicateurs ne remplacent jamais l'écoute. Les fenêtres nearSilence sont des indices, pas automatiquement des silences à couper. N'invente aucune mesure, aucun traitement ni aucune écoute subjective. Une seule piste est traitée dans cette opération. Le contrôle qualité doit vérifier que chaque action est supportée.`;
         let raw = '';
         const agentStatus = new Map();
         await sse('/api/agents/run', { projectId: state.projectId, task, agents, mode: 'chef', rounds: 1, synthModel: 'auto' }, ev => {
