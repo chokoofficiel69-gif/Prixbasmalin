@@ -87,6 +87,8 @@ on:
       - "data/home-deals.json"
       - "data/fiches-produits.json"
       - "scripts/build_seo_pages.py"
+      - "scripts/build_home_deals.py"
+      - "scripts/check_awin_gift_images.py"
       - "prix/**"
       - "idees-cadeaux/**"
       - "sitemap.xml"
