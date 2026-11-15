@@ -980,3 +980,86 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
     min-height:330px !important;
   }
 }
+
+
+/* STUDIO IA — espace de travail centré sur la vraie timeline multipiste.
+   La session audio reste la source des formes d'onde : aucun waveform décoratif. */
+.studio-expert-workspace.is-visible {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) !important;
+  grid-template-rows:auto minmax(390px,auto) auto auto !important;
+  grid-template-areas:
+    "toolbar toolbar toolbar"
+    "tracks tracks tracks"
+    "engineer effects mixer"
+    "settings editor master" !important;
+  align-items:stretch !important;
+  gap:12px !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
+.studio-expert-workspace.is-visible > .studio-expert-toolbar { grid-area:toolbar !important; }
+.studio-expert-workspace.is-visible > [data-panel="tracks"] {
+  grid-area:tracks !important;
+  min-width:0 !important;
+  min-height:390px !important;
+  height:auto !important;
+  max-height:none !important;
+  resize:none !important;
+  overflow:visible !important;
+  border-color:#245a91 !important;
+  box-shadow:0 0 22px rgba(24,128,255,.12), inset 0 1px rgba(255,255,255,.04) !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="tracks"] > .card {
+  min-height:360px !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
+.studio-expert-workspace.is-visible .studio-timeline-scroller {
+  display:block !important;
+  width:100% !important;
+  height:clamp(300px,44vh,520px) !important;
+  min-height:300px !important;
+  overflow:auto !important;
+  background:#080e1b !important;
+  border:1px solid #24466f !important;
+  box-shadow:inset 0 0 28px rgba(20,95,180,.08) !important;
+}
+.studio-expert-workspace.is-visible .studio-timeline-scroller canvas {
+  display:block !important;
+  visibility:visible !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="engineer"] { grid-area:engineer !important; }
+.studio-expert-workspace.is-visible > [data-panel="effects"] { grid-area:effects !important; }
+.studio-expert-workspace.is-visible > [data-panel="mixer"] { grid-area:mixer !important; }
+.studio-expert-workspace.is-visible > [data-panel="settings"] { grid-area:settings !important; }
+.studio-expert-workspace.is-visible > [data-panel="editor"] { grid-area:editor !important; }
+.studio-expert-workspace.is-visible > [data-panel="master"] { grid-area:master !important; }
+.studio-expert-workspace.is-visible > [data-panel="assistant"] { display:none !important; }
+@media (max-width:1180px) {
+  .studio-expert-workspace.is-visible {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    grid-template-rows:auto minmax(380px,auto) auto auto auto !important;
+    grid-template-areas:
+      "toolbar toolbar"
+      "tracks tracks"
+      "engineer effects"
+      "mixer mixer"
+      "settings master"
+      "editor editor" !important;
+  }
+}
+@media (max-width:720px) {
+  .studio-expert-workspace.is-visible {
+    display:flex !important;
+    flex-direction:column !important;
+    gap:10px !important;
+  }
+  .studio-expert-workspace.is-visible > [data-panel="tracks"] { min-height:350px !important; }
+  .studio-expert-workspace.is-visible .studio-timeline-scroller {
+    height:42vh !important;
+    min-height:260px !important;
+  }
+}
