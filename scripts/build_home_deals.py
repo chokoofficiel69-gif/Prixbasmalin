@@ -10,6 +10,7 @@
 Aucun prix n'est inventé : chaque prix affiché garde sa source, sa date et son statut TTC.
 """
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -33,6 +34,8 @@ GIFT_FAMILIES = [
 # Pas de produits médicaux, ni de lingerie / gainant en vitrine cadeaux.
 EXCLUDED = re.compile(r"bandelette|glyc[eé]mie|glucose|lancette|test strip|tensiom|culotte|gaine|spanx|collant|string|slip", re.I)
 PRICE_BANDS = [(0, 30, "moins-30"), (30, 60, "30-60"), (60, 100, "60-100"), (100, 10_000, "plus-100")]
+ROTATION_INTERVAL = timedelta(hours=48)
+ROTATION_HISTORY_LIMIT = 1
 
 
 def gift_family(product):
@@ -101,7 +104,26 @@ def verified_merchant_price(product, reference_time):
     return timedelta(minutes=-5) <= age <= timedelta(hours=48)
 
 
-def build_gifts(awin, limit=48, now=None, previous_gifts=None):
+def gift_identity_key(gift):
+    """Stable identity used only to avoid repeating recently displayed gift cards."""
+    product_id = str(gift.get("id") or "").strip()
+    if product_id:
+        return product_id
+    return f"{gift.get('merchant') or ''}|{base_name(gift.get('name'))}"
+
+
+def image_fingerprint(url):
+    """Store a non-reversible image identifier in the public rotation journal."""
+    return hashlib.sha256(str(url or "").encode("utf-8")).hexdigest()
+
+
+def iso_utc(value):
+    if value is None:
+        return None
+    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def build_gifts(awin, limit=48, now=None, previous_gifts=None, exclude_ids=None, exclude_image_hashes=None):
     fetched_at = awin.get("fetched_at")
     reference_time = now or parse_utc(fetched_at)
     previous_images = {}
@@ -180,16 +202,19 @@ def build_gifts(awin, limit=48, now=None, previous_gifts=None):
                     mixed.append(lane.pop(len(lane) // 2))
         by_merchant[merchant] = mixed
     gifts, queues = [], [list(v) for _, v in sorted(by_merchant.items())]
-    # Une même photo de flux ne doit apparaître qu'une fois dans la vitrine :
-    # les variantes (stockage, taille, couleur) restent accessibles sur leur fiche,
-    # mais ne prennent pas plusieurs emplacements promotionnels.
+    # Une même photo de flux ne doit apparaître qu'une fois dans la vitrine.
+    # Les deux dernières sélections sont exclues lors d'une nouvelle rotation.
+    excluded_ids = {str(value) for value in (exclude_ids or [])}
+    excluded_image_hashes = {str(value) for value in (exclude_image_hashes or [])}
     seen_images = set()
     while len(gifts) < limit and any(queues):
         for q in queues:
             while q and len(gifts) < limit:
                 candidate = q.pop(0)
                 image_key = candidate["image"]
-                if image_key in seen_images:
+                identity = gift_identity_key(candidate)
+                fingerprint = image_fingerprint(image_key)
+                if identity in excluded_ids or fingerprint in excluded_image_hashes or image_key in seen_images:
                     continue
                 seen_images.add(image_key)
                 gifts.append(candidate)
@@ -240,16 +265,95 @@ def build_top(sheets, limit=12):
     return top
 
 
+def rotation_record(gifts, rotated_at):
+    return {
+        "rotated_at": rotated_at,
+        "product_ids": [gift_identity_key(gift) for gift in gifts],
+        "image_hashes": [image_fingerprint(gift.get("image")) for gift in gifts],
+    }
+
+
 def build(awin, sheets, previous=None):
+    previous = previous if isinstance(previous, dict) else {}
     reference_time = parse_utc(awin.get("fetched_at"))
-    previous_gifts = (previous or {}).get("gifts", []) if isinstance(previous, dict) else []
+    previous_gifts = previous.get("gifts", []) if isinstance(previous.get("gifts"), list) else []
+    previous_rotation = previous.get("rotation", {}) if isinstance(previous.get("rotation"), dict) else {}
+    history = previous.get("rotation_history", [])
+    history = [entry for entry in history if isinstance(entry, dict)][-ROTATION_HISTORY_LIMIT:]
+
+    if reference_time is None:
+        gifts = previous_gifts or build_gifts(awin, previous_gifts=previous_gifts)
+        rotation = dict(previous_rotation) or {
+            "interval_hours": 48, "last_rotated_at": None,
+            "status": "date_missing", "selected_count": len(gifts),
+        }
+    elif not previous_gifts:
+        gifts = build_gifts(awin, now=reference_time)
+        rotation = {
+            "interval_hours": 48,
+            "last_rotated_at": iso_utc(reference_time),
+            "status": "initial_selection",
+            "selected_count": len(gifts),
+        }
+    else:
+        last_rotated = (
+            parse_utc(previous_rotation.get("last_rotated_at"))
+            or parse_utc(previous.get("awin_fetched_at"))
+            or reference_time
+        )
+        elapsed = reference_time - last_rotated
+        if elapsed < ROTATION_INTERVAL:
+            gifts = previous_gifts
+            rotation = dict(previous_rotation)
+            rotation.setdefault("interval_hours", 48)
+            rotation.setdefault("last_rotated_at", iso_utc(last_rotated))
+            rotation.setdefault("status", "baseline_initialized")
+            rotation["selected_count"] = len(gifts)
+        else:
+            excluded_ids = {gift_identity_key(gift) for gift in previous_gifts}
+            excluded_image_hashes = {
+                image_fingerprint(gift.get("image")) for gift in previous_gifts
+            }
+            for entry in history:
+                excluded_ids.update(str(value) for value in entry.get("product_ids", []))
+                excluded_image_hashes.update(str(value) for value in entry.get("image_hashes", []))
+            candidates = build_gifts(
+                awin,
+                limit=48,
+                now=reference_time,
+                previous_gifts=previous_gifts,
+                exclude_ids=excluded_ids,
+                exclude_image_hashes=excluded_image_hashes,
+            )
+            if len(candidates) >= 48:
+                history = (history + [rotation_record(previous_gifts, iso_utc(last_rotated))])[-ROTATION_HISTORY_LIMIT:]
+                gifts = candidates[:48]
+                rotation = {
+                    "interval_hours": 48,
+                    "last_rotated_at": iso_utc(reference_time),
+                    "status": "rotated",
+                    "selected_count": len(gifts),
+                }
+            else:
+                gifts = previous_gifts
+                rotation = dict(previous_rotation)
+                rotation.update({
+                    "interval_hours": 48,
+                    "status": "held_insufficient_candidates",
+                    "selected_count": len(gifts),
+                    "last_attempt_at": iso_utc(reference_time),
+                    "candidate_count": len(candidates),
+                })
+
     return {
         "version": 1,
         "awin_fetched_at": awin.get("fetched_at"),
         "sheets_period": sheets.get("dataset_period"),
         "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
         "top": build_top(sheets),
-        "gifts": build_gifts(awin, now=reference_time, previous_gifts=previous_gifts),
+        "gifts": gifts,
+        "rotation": rotation,
+        "rotation_history": history,
     }
 
 
