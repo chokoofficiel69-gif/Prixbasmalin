@@ -2008,6 +2008,7 @@ export async function render(el, { params }) {
         editor: editBox.closest('.card'),
         master: findCard('Mixage et mastering'),
         assistant: ast?.card || null,
+        effects: findCard('Effets voix & autotune'),
       };
       const unique = [...new Set(Object.values(nodes).filter(Boolean))];
       expertMoves = unique.map(node => {
@@ -2030,13 +2031,14 @@ export async function render(el, { params }) {
         h('div.studio-expert-toolbar',
           h('div.studio-expert-title', h('span.studio-expert-kicker', 'STUDIO IA / PROFESSIONAL WORKSPACE'), h('strong', 'Régie de production')),
           h('div.studio-expert-live', h('i'), 'MOTEUR AUDIO LOCAL')),
-        panel('tracks', '01 / SESSION & TIMELINE', nodes.tracks),
-        panel('settings', '02 / PRISE DE SON', nodes.settings),
+        panel('tracks', 'SESSION & TIMELINE', nodes.tracks),
+        panel('settings', 'PRISE DE SON', nodes.settings),
         panel('assistant', 'ASSISTANT DE SESSION', nodes.assistant),
-        panel('engineer', '03 / HEAD AUDIO ENGINEER', nodes.engineer),
-        panel('editor', '04 / ÉDITION & TRAITEMENT', nodes.editor),
-        panel('master', '05 / MIX BUS & MASTER', nodes.master),
-        panel('mixer', '06 / CONSOLE MULTIPISTE', nodes.mixer));
+        panel('engineer', 'IA EXPERT · INGÉNIEUR VOCAL', nodes.engineer),
+        panel('editor', 'ÉDITION & TRAITEMENT', nodes.editor),
+        panel('effects', 'AUTO-TUNE · 50+ EFFETS VOCAUX', nodes.effects),
+        panel('master', 'MIX & MASTERING', nodes.master),
+        panel('mixer', 'CONSOLE MULTIPISTE', nodes.mixer));
       try { const order = JSON.parse(localStorage.getItem('studio.expertPanelOrder') || '[]'); for (const key of order) { const p = expertWorkspace.querySelector('[data-panel="' + key + '"]'); if (p) expertWorkspace.append(p); } } catch {}
       studioHeader.after(expertWorkspace);
     }
@@ -2058,7 +2060,8 @@ export async function render(el, { params }) {
   }
   expertToggle.onclick = () => setExpertWorkspace(!el.classList.contains('studio-expert-active'));
   el.prepend(studioHeader);
-  if (localStorage.getItem('studio.expertWorkspace') === '1') setExpertWorkspace(true);
+  // La régie tout-en-un est désormais l'écran principal par défaut.
+  setExpertWorkspace(true);
 
   await restoreSession();
   drawList(); drawEdit(); ast?.refresh();
