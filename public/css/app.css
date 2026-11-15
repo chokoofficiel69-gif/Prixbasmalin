@@ -354,3 +354,11 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 .studio-expert-panel-title:active { cursor:grabbing; }
 .studio-expert-panel.is-dragging { opacity:.45; outline:2px dashed var(--accent); }
 @media(max-width:720px) { .studio-expert-workspace.is-visible { grid-template-columns:1fr; } .studio-expert-workspace > .studio-expert-panel { min-width:0; width:100%; resize:vertical; } }
+
+
+/* Studio IA — banque de réglages vocaux avancés */
+.vocal-knob-console { border:1px solid #34445c; background:linear-gradient(180deg,#151f2d,#0d1420)!important; color:#e6eefb; }
+.vocal-knob-console .vocal-knob-grid { scrollbar-width:thin; scrollbar-color:#526b89 #101927; }
+.vocal-knob-console .vocal-knob-grid > * { min-width:0; }
+.vocal-knob-console .vocal-knob-grid label { color:#d5e2f2; }
+@media (max-width:700px) { .vocal-knob-console .vocal-knob-grid { grid-template-columns:repeat(2,minmax(0,1fr))!important; max-height:360px!important; } }
