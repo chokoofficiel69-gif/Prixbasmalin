@@ -961,7 +961,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
           voiceStatus,
           h('div.zone-note', 'La voix actuelle utilise la reconnaissance et la synthèse vocales du navigateur, en tours successifs. La conversation temps réel continue, avec interruption naturelle, reste à construire.'),
           h('div', { style: { marginTop: '10px' } }, input),
-          h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' } }, send, applyBtn, undoBtn),
+          h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' } }, voiceBtn, send, applyBtn, undoBtn),
           status, liveAudioStatus, planBox)),
       h('div.panel', h('div.ph', '🎚️ Son atelier — outils réellement disponibles'), h('div.pb',
         ...['Nettoyer le souffle et les bruits', 'Régler la voix et sa présence', 'Ajouter compression et réverbération', 'Corriger la justesse et la tonalité', 'Normaliser et limiter les crêtes', 'Masteriser avec un preset', 'Inverser ou faire des fondus', 'Enchaîner plusieurs traitements'].map(x => h('div.ditem', '✓ ' + x)),
