@@ -1255,7 +1255,7 @@ export async function render(el, { params }) {
   const unitSel = h('select', UNITS.map(u => h('option', { value: u.id }, `${u.name} — ${u.ref}`)));
   const presetDrop = h('select');
   const fillDrop = (u) => { presetDrop.innerHTML = ''; u.presets.forEach((p, idx) => presetDrop.append(h('option', { value: String(idx) }, `${String(p.n).padStart(2, '0')} · ${p.name}`))); };
-  const unitDial = optionDial({ items: UNITS[0].presets, label: 'PRESET', onChange: (idx) => { presetDrop.value = String(idx); } });
+  const unitDial = optionDial({ items: UNITS[0].presets, label: 'PRESET', onChange: (idx) => { presetDrop.value = String(idx); applyUnit(); } });
   unitSel.onchange = () => { unitId = unitSel.value; const u = unitById(unitId); unitDial.setItems(u.presets, 0); fillDrop(u); presetDrop.value = '0'; };
   presetDrop.onchange = () => unitDial.set(Number(presetDrop.value));
   function applyUnit() {
@@ -1286,15 +1286,15 @@ export async function render(el, { params }) {
     saveSoon();
     toast(`${label} → ${t.name}`, 'ok');
   }
+  const vibeDial = optionDial({ items: QUICK_VIBES, label: 'AMBIANCE', onChange: (idx, vibe) => applyVibe(vibe.id) });
   const vibesCard = h('div.card.stack',
-    h('div.row', h('strong.grow', '🎧 Ambiances en 1 clic'), h('span.tiny.muted', 'simple')),
-    h('p.tiny.muted', 'Clique une ambiance : elle règle tout (EQ, effets, autotune) sur la piste choisie. Tu peux retoucher après aux molettes.'),
-    h('div.vibe-grid', QUICK_VIBES.map(v => h('button.vibe-tile', { type: 'button', title: v.hint, onclick: () => applyVibe(v.id) },
-      h('span.vibe-emoji', v.emoji), h('span.vibe-name', v.name), h('span.vibe-hint', v.hint)))),
+    h('div.row', h('strong.grow', '🎧 Ambiance vocale'), h('span.tiny.muted', 'sélection par molette')),
+    h('p.tiny.muted', 'Tourne la molette pour choisir un rendu. Le réglage est appliqué immédiatement à la piste vocale sélectionnée ; pendant la lecture, tu entends le changement.'),
+    vibeDial.el,
   );
   const unitsCard = h('div.card.stack',
     h('div.row', h('strong.grow', '🎛️ Banque de processeurs vocaux'), h('span.badge', `${totalPresets()} presets`)),
-    h('p.tiny.muted', 'Inspiré du matériel pro (HeadRush VX5, TC-Helicon, Mooer, Audota, Tascam, Waves, BOSS). Choisis un appareil et un preset avec la molette : il pré-règle les molettes EQ/effets + l’autotune de la piste. Nos traitements, 100 % local — tu peux retoucher ensuite.'),
+    h('p.tiny.muted', 'Banques logicielles inspirées de familles de processeurs vocaux (HeadRush, TC-Helicon, Mooer, Tascam, Waves, BOSS). Ce ne sont pas les appareils physiques ni leurs algorithmes propriétaires : chaque preset est traduit en réglages de notre moteur audio local. Tourne la molette pour appliquer immédiatement le preset à la piste sélectionnée, puis affine avec les commandes live.'),
     h('div.row', h('span.tiny.muted', 'Appareil :'), h('div.grow', unitSel)),
     unitDial.el,
     h('div.row', h('span.tiny.muted', 'Liste :'), h('div.grow', presetDrop), h('button.btn.small.primary', { type: 'button', onclick: applyUnit }, '✓ Appliquer à la piste')),
