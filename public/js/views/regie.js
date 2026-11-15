@@ -556,6 +556,33 @@ export async function render(el, { params }) {
     h_double: { cat: 'Harmonies', emo: '👥', name: 'Doublage', chain: [{ t: 'double', steps: [0, 0] }] },
     h_oct: { cat: 'Harmonies', emo: '⬇️', name: 'Octave grave', chain: [{ t: 'double', steps: [-12], gain: 0.5 }] },
   };
+  // Banque d'effets (tous réels, appliqués via applyChain)
+  const EFFECTS_BANK = [
+    ['Hard Tune', '🎤', [{ t: 'tune', strength: 1, speed: 0 }]],
+    ['Soft Tune', '🎶', [{ t: 'tune', strength: 1, speed: 120 }]],
+    ['Double', '👥', [{ t: 'double', steps: [0, 0] }]],
+    ['Harmonie', '🎼', [{ t: 'harmony', steps: [2] }]],
+    ['Tierce+Quinte', '🎹', [{ t: 'harmony', steps: [2, 4] }]],
+    ['Octave grave', '⬇️', [{ t: 'double', steps: [-12], gain: 0.5 }]],
+    ['Octave aiguë', '⬆️', [{ t: 'double', steps: [12], gain: 0.35 }]],
+    ['Vocoder', '🤖', [{ t: 'vocoder' }]],
+    ['Robot', '🔧', [{ t: 'tune', strength: 1, speed: 0 }, { t: 'fx', kind: 'tube', amt: 1.5 }]],
+    ['Chorus', '🌊', [{ t: 'fx', kind: 'chorus', mix: 0.4 }]],
+    ['Flanger', '🛸', [{ t: 'fx', kind: 'flanger', mix: 0.5 }]],
+    ['Chaleur', '🔥', [{ t: 'fx', kind: 'warm' }]],
+    ['Tube', '🔊', [{ t: 'fx', kind: 'tube', amt: 2 }]],
+    ['Bande', '📼', [{ t: 'fx', kind: 'tape', amt: 2 }]],
+    ['Exciter', '✨', [{ t: 'fx', kind: 'exciter', mix: 0.3 }]],
+    ['Air', '💨', [{ t: 'fx', kind: 'air', gain: 4 }]],
+    ['Distorsion', '⚡', [{ t: 'fx', kind: 'distort', amt: 4, tone: 8000 }]],
+    ['Lo-Fi', '🎛️', [{ t: 'fx', kind: 'lofi', bits: 8, hi: 6000 }]],
+    ['Radio', '📻', [{ t: 'fx', kind: 'band', lo: 400, hi: 3200, drive: 2 }]],
+    ['Téléphone', '📞', [{ t: 'fx', kind: 'band', lo: 500, hi: 2800, drive: 3 }]],
+    ['Reverb Hall', '🏛️', [{ t: 'fx', kind: 'reverb', size: 3, mix: 0.35 }]],
+    ['Reverb Plate', '🪞', [{ t: 'fx', kind: 'reverb', size: 1.5, mix: 0.28 }]],
+    ['Delay', '🔁', [{ t: 'fx', kind: 'delay', time: 0.32, fb: 0.35, mix: 0.3 }]],
+    ['Ping-Pong', '🏓', [{ t: 'fx', kind: 'pingpong', time: 0.24, mix: 0.3 }]],
+  ];
   async function processPreset(src, p) { let cur = src; if (p.chain) cur = (await applyChain(cur, p.chain)).buffer; if (p.voice) cur = await voiceChain(cur, p.voice); return cur; }
   let busyFx = false;
   async function applyPresetTo(i, p) {
@@ -843,11 +870,41 @@ export async function render(el, { params }) {
         h('div.muted', { style: { fontSize: '10px', marginTop: '8px', lineHeight: '1.4' } }, 'L’auto-tune se calcule puis s’applique (pas en direct). 0 ms = robot, plus de ms = naturel.')));
   }
 
+  const hzF = (v) => `${v | 0} Hz`;
   function viewFx() {
     const root = h('div');
-    root.append(liveRackPanel());
-    root.append(h('div', { style: { height: '12px' } }));
-    root.append(autotunePanel());
+    const vt = voixTracks();
+    const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
+    const curIdx = () => +sel.value;
+    const playBtn = h('button.rbtn.p', { style: { whiteSpace: 'nowrap', fontWeight: '800' } }, '▶ Écouter en direct');
+    const refreshPlay = () => { playBtn.textContent = live ? '⏹ Arrêter' : '▶ Écouter en direct'; };
+    playBtn.onclick = () => { if (live) stopLive(); else startLive(curIdx()); refreshPlay(); };
+    sel.onchange = () => { if (live) { startLive(curIdx()); refreshPlay(); } };
+    const liveKnob = (label, key, min, max, step, def, fmt) => knob({ label, min, max, step, value: LF[key], def, fmt, onInput: (v) => liveSet(key, v) }).el;
+    // barre live
+    const bar = h('div.panel', h('div.pb', { style: { display: 'flex', gap: '9px', alignItems: 'center', flexWrap: 'wrap' } },
+      h('span', { style: { width: '9px', height: '9px', borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' } }),
+      h('b', { style: { fontSize: '13px' } }, 'Chaîne vocale en direct'), h('span.muted', { style: { fontSize: '12px' } }, '· piste :'), sel, playBtn,
+      h('button.rbtn.g', { style: { whiteSpace: 'nowrap' }, onclick: () => bakeLive(curIdx()) }, '💾 Graver'),
+      h('button.rbtn', { style: { whiteSpace: 'nowrap' }, onclick: () => revertTrack(tracks[curIdx()], { textContent: '' }) }, '↩ Original'),
+      h('span.muted', { style: { fontSize: '10px', flexBasis: '100%' } }, 'Lance la lecture puis tourne les molettes : le son change en direct. « Graver » enregistre les réglages sur la piste.')));
+    // modules live
+    const eqPanel = h('div.panel', h('div.ph', h('span', { style: { width: '10px', height: '10px', borderRadius: '50%', background: '#3b82f6', boxShadow: '0 0 7px #3b82f6', flex: 'none' } }), '🎚️ Égaliseur paramétrique', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'LIVE')),
+      h('div.pb', h('div', { style: { height: '96px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--rline)', background: '#0b0b1a', marginBottom: '10px' }, html: eqCurveSvg() }),
+        h('div', { style: { display: 'flex', justifyContent: 'space-around' } }, liveKnob('GRAVE', 'hp', 40, 160, 5, 85, hzF), liveKnob('LOW', 'low', -6, 6, 0.5, 0, dbF), liveKnob('MID', 'mid', -6, 8, 0.5, 2.5, dbF), liveKnob('AIGU', 'high', -6, 8, 0.5, 3, dbF))));
+    const compPanel = h('div.panel', h('div.ph', h('span', { style: { width: '10px', height: '10px', borderRadius: '50%', background: '#f0b429', boxShadow: '0 0 7px #f0b429', flex: 'none' } }), '🗜️ Compression', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'LIVE')),
+      h('div.pb', h('div', { style: { display: 'flex', justifyContent: 'space-around', alignItems: 'center' } }, liveKnob('TAUX', 'comp', 0, 1, 0.05, 0.4, pcF), liveKnob('VOLUME', 'vol', -12, 6, 0.5, 0, dbF))));
+    const revPanel = h('div.panel', h('div.ph', h('span', { style: { width: '10px', height: '10px', borderRadius: '50%', background: '#a855f7', boxShadow: '0 0 7px #a855f7', flex: 'none' } }), '🌫️ Réverbe & Delay', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'LIVE')),
+      h('div.pb', h('div', { style: { display: 'flex', justifyContent: 'space-around', alignItems: 'center' } }, liveKnob('RÉVERBE', 'reverb', 0, 0.6, 0.02, 0.1, pcF), liveKnob('DELAY', 'delay', 0, 0.5, 0.02, 0, pcF), liveKnob('SATUR.', 'drive', 0, 1, 0.05, 0, pcF))));
+    // banque d'effets
+    const bank = h('div.panel', h('div.ph', '⭐ Banque d’effets', h('span.r', `${EFFECTS_BANK.length} effets · clic = appliquer`)),
+      h('div.pb', h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: '8px' } },
+        EFFECTS_BANK.map(([nm, emo, chain]) => h('div.preset', { style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo, name: nm, chain }); } },
+          h('div', { style: { fontSize: '20px' } }, emo), h('b', { style: { fontSize: '11px' } }, nm))))));
+    root.append(bar, h('div', { style: { height: '12px' } }),
+      autotunePanel(), h('div', { style: { height: '12px' } }),
+      h('div.grid', { style: { gridTemplateColumns: '1.2fr 1fr 1fr' } }, eqPanel, compPanel, revPanel),
+      h('div', { style: { height: '12px' } }), bank);
     return root;
   }
 
@@ -1017,7 +1074,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE5'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE6'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
