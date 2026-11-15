@@ -106,6 +106,19 @@ const CSS = `
 .regie .orb{width:50px;height:50px;border-radius:50%;flex:none;background:radial-gradient(circle at 36% 30%,#eafaff,#22d3ee 30%,#0a3b63 75%);box-shadow:0 0 24px rgba(34,211,238,.55)}
 .regie .vcard{border:1px solid var(--rline);border-radius:12px;padding:12px;background:linear-gradient(180deg,#141430,#0d0d1e)}
 .regie .vcard h4{margin:0 0 4px;font-size:14px}.regie .vcard p{margin:0 0 10px;font-size:11.5px;color:var(--rmut);line-height:1.4}
+/* La Zone — présence masculine et console de conversation */
+.regie .zone-presence{display:flex;align-items:center;gap:13px;padding:13px;margin:10px 12px 0;border:1px solid rgba(168,85,247,.32);border-radius:13px;background:radial-gradient(circle at 12% 50%,rgba(124,58,237,.24),transparent 45%),linear-gradient(110deg,#111126,#0a0a17)}
+.regie .zone-avatar{width:58px;height:58px;flex:none;border-radius:50%;display:grid;place-items:center;position:relative;background:radial-gradient(circle at 35% 25%,#51418b,#15152c 68%);border:1px solid rgba(34,211,238,.55);box-shadow:0 0 22px rgba(124,58,237,.28),inset 0 0 18px rgba(34,211,238,.12);font-size:27px}
+.regie .zone-avatar:after{content:'';position:absolute;inset:-5px;border:1px solid rgba(168,85,247,.35);border-radius:50%;animation:zonePulse 3s ease-out infinite}
+.regie .zone-meta{min-width:0;flex:1}.regie .zone-meta strong{display:block;font-size:15px;letter-spacing:.02em}.regie .zone-meta small{display:block;color:var(--rmut);font-size:11px;margin-top:2px}
+.regie .zone-state{display:inline-flex;align-items:center;gap:6px;color:#a9f5d2;font-size:10px;font-weight:700;margin-top:6px}
+.regie .zone-state i{width:7px;height:7px;border-radius:50%;background:#34e39a;box-shadow:0 0 9px #34e39a}
+.regie .zone-bars{display:flex;align-items:center;gap:3px;height:28px;margin-left:auto}
+.regie .zone-bars i{width:3px;height:7px;border-radius:4px;background:linear-gradient(#22d3ee,#a855f7);animation:zoneWave .8s ease-in-out infinite alternate}
+.regie .zone-bars i:nth-child(2n){animation-delay:.2s}.regie .zone-bars i:nth-child(3n){animation-delay:.4s}
+@keyframes zoneWave{to{height:23px}}@keyframes zonePulse{0%{transform:scale(1);opacity:.65}100%{transform:scale(1.16);opacity:0}}
+.regie .zone-note{font-size:10.5px;color:var(--rmut);line-height:1.45;margin:7px 2px 0}
+@media(max-width:700px){.regie{grid-template-columns:1fr;grid-template-rows:48px 1fr 56px}.regie .rside{display:none}.regie .rtabs{overflow-x:auto}.regie .rbrand{width:auto}.regie .rtop{gap:5px;padding:0 7px}.regie .rtab{padding:7px 9px}.regie .rview{padding:8px}.regie .zone-presence{margin:8px 8px 0}.regie .zone-bars{display:none}}
 @media(max-width:1050px){.regie{grid-template-columns:60px 1fr}.regie .rbrand{width:0}}
 `;
 
@@ -776,12 +789,16 @@ RÈGLES D’UTILISATION :
     const planBox = h('div', { style: { display: 'grid', gap: '6px', marginTop: '8px' } });
     const send = h('button.rbtn.p', '🎧 Envoyer à La Zone');
     const voiceBtn = h('button.rbtn', { type: 'button' }, '🎙️ Parler à La Zone');
-    const voiceStatus = h('div.muted', { style: { marginTop: '6px', fontSize: '11px' } }, 'Conversation vocale : appuie sur le micro, parle, puis La Zone te répond à voix haute.');
+    const voiceStatus = h('div.muted', { style: { marginTop: '6px', fontSize: '11px' } }, 'Mode vocal navigateur : tu parles, puis La Zone répond. Ce mode n’est pas encore une conversation continue et interruptible.');
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null, listening = false;
     const speak = (text) => {
       if (!('speechSynthesis' in window) || !text) return;
-      try { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(String(text)); utterance.lang = 'fr-FR'; utterance.rate = 1; window.speechSynthesis.speak(utterance); } catch {}
+      try { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(String(text)); utterance.lang = 'fr-FR'; utterance.rate = 0.96;
+        const frenchVoices = window.speechSynthesis.getVoices().filter(v => /^fr([-_]|$)/i.test(v.lang || ''));
+        const masculineVoice = frenchVoices.find(v => /male|homme|thomas|henri|paul|antoine|nicolas|mathieu|david|male/i.test(v.name || ''));
+        if (masculineVoice) utterance.voice = masculineVoice;
+        window.speechSynthesis.speak(utterance); } catch {}
     };
     const stopListening = () => { if (recognition && listening) { listening = false; try { recognition.stop(); } catch {} } };
     if (SpeechRecognitionAPI) {
@@ -795,7 +812,7 @@ RÈGLES D’UTILISATION :
     const applyBtn = h('button.rbtn.g', { disabled: true }, '✓ Exécuter les modifications');
     const undoBtn = h('button.rbtn', { disabled: true }, '↩ Restaurer l’original');
     let pendingPlan = null, busy = false;
-    const say = (who, txt) => chat.append(h('div', { style: { margin: '7px 0', padding: '9px 11px', borderRadius: '10px', background: who === 'expert' ? '#171636' : 'rgba(168,85,247,.18)', border: '1px solid var(--rline)', whiteSpace: 'pre-wrap', fontSize: '12px', lineHeight: '1.5' } }, h('b', who === 'expert' ? '🎧 Ingénieur IA' : 'Vous'), h('div', { style: { marginTop: '4px' } }, txt)));
+    const say = (who, txt) => chat.append(h('div', { style: { margin: '7px 0', padding: '9px 11px', borderRadius: '10px', background: who === 'expert' ? '#171636' : 'rgba(168,85,247,.18)', border: '1px solid var(--rline)', whiteSpace: 'pre-wrap', fontSize: '12px', lineHeight: '1.5' } }, h('b', who === 'expert' ? '🧔 La Zone' : 'Vous'), h('div', { style: { marginTop: '4px' } }, txt)));
     const parsePlan = (raw, chosen = []) => {
       const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
       const obj = JSON.parse(cleaned);
@@ -936,14 +953,17 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
     send.onclick = () => askExpert(); applyBtn.onclick = execute;
     undoBtn.onclick = () => { const t = trackNow(); if (t?.original) { t.buffer = cloneAudioBuffer(t.original); t.fxDone = []; save(); if (cur === 'timeline') go('timeline'); status.textContent = 'Prise originale restaurée.'; } };
     root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 280px' } },
-      h('div.panel', h('div.ph', '🎙️ La Zone — ingénieur du son IA', h('span.r', 'planifie et exécute les traitements')),
+      h('div.panel', h('div.ph', '🎙️ La Zone — ingénieur du son IA', h('span.r', 'chef d’orchestre des 10 spécialistes')),
+        h('div.zone-presence', h('div.zone-avatar', '🧔'), h('div.zone-meta', h('strong', 'LA ZONE'), h('small', 'Ingénieur du son · voix masculine'), h('span.zone-state', h('i'), 'PRÉSENT DANS LE STUDIO')), h('div.zone-bars', ...Array.from({length:7}, () => h('i')))),
         h('div.pb', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat,
           h('div', { style: { display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',margin:'10px 0' } }, h('b', { style:{fontSize:'12px'} }, 'Style de mastering'), masterStyle),
           effectPicker,
+          voiceStatus,
+          h('div.zone-note', 'La voix actuelle utilise la reconnaissance et la synthèse vocales du navigateur, en tours successifs. La conversation temps réel continue, avec interruption naturelle, reste à construire.'),
           h('div', { style: { marginTop: '10px' } }, input),
           h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' } }, send, applyBtn, undoBtn),
           status, liveAudioStatus, planBox)),
-      h('div.panel', h('div.ph', '🎚️ Ce qu’il peut faire maintenant'), h('div.pb',
+      h('div.panel', h('div.ph', '🎚️ Son atelier — outils réellement disponibles'), h('div.pb',
         ...['Nettoyer le souffle et les bruits', 'Régler la voix et sa présence', 'Ajouter compression et réverbération', 'Corriger la justesse et la tonalité', 'Normaliser et limiter les crêtes', 'Masteriser avec un preset', 'Inverser ou faire des fondus', 'Enchaîner plusieurs traitements'].map(x => h('div.ditem', '✓ ' + x)),
         h('div.muted', { style: { marginTop: '10px', fontSize: '11px', lineHeight: '1.5' } }, 'Les opérations sont calculées localement après le plan IA. L’IA choisit les traitements, le moteur audio les exécute. Les actions disponibles dépendent de la piste sélectionnée.')))));
     if (!voiceOptions.length) say('expert', 'Commence par importer ou enregistrer une piste audio dans la Timeline. Ensuite, décris-moi le résultat sonore que tu veux.');
