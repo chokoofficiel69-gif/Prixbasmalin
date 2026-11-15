@@ -38,7 +38,7 @@ test('plugin host rejects invalid plugin shapes and unknown tracks', async () =>
 
 test('plugin host exposes instrument MIDI calls', async () => {
   const calls = [], inst = { output: { connect() {}, disconnect() {} }, noteOn(...a) { calls.push(['on', ...a]); }, noteOff(...a) { calls.push(['off', ...a]); }, destroy() {} };
-  const host = createPluginHost({ audioContext: fakeContext(), loadPlugin: async () => inst, pluginModule: id => id, getTrackOutput: () => ({ connect() {} }) });
+  const host = createPluginHost({ audioContext: fakeContext(), loadPlugin: async () => inst, pluginModule: id => id, getTrackInput: () => ({ connect() {}, disconnect() {} }), getTrackOutput: () => ({ connect() {} }) });
   const ref = await host.addInstrument('midi-1', 'fm_synth');
   host.noteOn(ref.instanceId, 60, 110);
   host.noteOff(ref.instanceId, 60);
