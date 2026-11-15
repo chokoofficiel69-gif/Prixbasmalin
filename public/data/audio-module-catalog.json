@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Catalogue initial de capacités et de sources candidates. Une entrée planned/audited n'est pas chargeable par le navigateur.",
+  "providers": [
+    {
+      "id": "wadspa",
+      "name": "Wadspa",
+      "sourceUrl": "https://github.com/wadspa/wadspa",
+      "runtime": "audio-worklet-wasm",
+      "status": "candidate",
+      "packageStatus": "coming-soon-per-upstream-readme",
+      "licensePolicy": "per-plugin",
+      "notes": "142 modules annoncés : 112 effets et 30 instruments. Vérifier assets publiés/build, ID exacts et licence de chaque module."
+    },
+    {
+      "id": "faust",
+      "name": "Faust / FaustWasm",
+      "sourceUrl": "https://github.com/grame-cncm/faust",
+      "runtime": "audio-worklet-wasm",
+      "status": "candidate",
+      "licensePolicy": "per-dsp-and-wrapper",
+      "notes": "Créer/compiler DSP compatibles navigateur ; examiner les licences des bibliothèques et des DSP importés."
+    },
+    {
+      "id": "superduper-dsp",
+      "name": "SuperDuper DSP",
+      "sourceUrl": "https://github.com/fortunto2/superduper-dsp",
+      "runtime": "external-native",
+      "status": "external-reference",
+      "licensePolicy": "per-project",
+      "notes": "Suite CLAP/VST3/AU ; ne se charge pas directement dans le navigateur."
+    },
+    {
+      "id": "openvoxtuner",
+      "name": "OpenVoxTuner",
+      "sourceUrl": "https://github.com/EiffelBS/OpenVoxTuner",
+      "runtime": "external-native",
+      "status": "external-reference",
+      "license": "AGPL-3.0",
+      "notes": "Correction de justesse et harmonies, plugin natif."
+    },
+    {
+      "id": "snaptune",
+      "name": "SnapTune",
+      "sourceUrl": "https://github.com/NicoFerni/snaptune",
+      "runtime": "external-native",
+      "status": "external-reference",
+      "license": "AGPL-3.0",
+      "notes": "Correction de justesse, plugin natif."
+    },
+    {
+      "id": "rnnoise",
+      "name": "RNNoise",
+      "sourceUrl": "https://github.com/xiph/rnnoise",
+      "runtime": "audio-worklet-wasm",
+      "status": "planned",
+      "license": "BSD-3-Clause",
+      "notes": "Portage WASM et tests à réaliser avant intégration."
+    }
+  ],
+  "wadspaInstruments": [
+    "wadspa_synth",
+    "fm_synth",
+    "mda_DX10",
+    "mda_JX10",
+    "mda_EPiano",
+    "mda_Piano",
+    "synthv1",
+    "drumkv1",
+    "padthv1",
+    "amsynth",
+    "so-404",
+    "so-kl5",
+    "so-666",
+    "tsf",
+    "samplv1",
+    "sorcer",
+    "string-machine",
+    "geonkick",
+    "setbfree",
+    "nekobi",
+    "vl1-emulator",
+    "casynth",
+    "dexed",
+    "juce-opl",
+    "obxd",
+    "chowkick",
+    "calf-monosynth",
+    "adlplug",
+    "helm",
+    "zynaddsubfx"
+  ],
+  "wadspaEffects": {
+    "advertisedCount": 112,
+    "categories": [
+      "equalizers",
+      "filters",
+      "compressors",
+      "limiters",
+      "gates",
+      "reverbs",
+      "delays",
+      "chorus",
+      "flanger",
+      "distortion",
+      "saturation",
+      "spatial",
+      "utility"
+    ],
+    "knownExampleIds": [
+      "dj_eq",
+      "plate"
+    ],
+    "note": "Ne pas inventer les IDs restants : importer le catalogue upstream généré et ses licences."
+  },
+  "moduleStatus": [
+    "planned",
+    "audited",
+    "available",
+    "tested",
+    "blocked",
+    "external-reference"
+  ]
+}
