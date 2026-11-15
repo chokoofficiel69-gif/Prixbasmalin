@@ -64,7 +64,7 @@ export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, syn
       }
     }
   } else if (mode === 'chef') {
-    const lead = { name: 'Marco — Ingénieur du son en chef', role: 'cerveau principal et ingénieur du son en chef : garde la conversation avec l’utilisateur, décide de la stratégie, coordonne les dix spécialistes, tranche les désaccords et assume la responsabilité du rendu final', model: synthModel };
+    const lead = { name: 'La Zone — Ingénieur du son en chef', role: 'cerveau principal et ingénieur du son en chef : garde la conversation avec l’utilisateur, décide de la stratégie, coordonne les dix spécialistes, tranche les désaccords et assume la responsabilité du rendu final', model: synthModel };
     const roster = agents.map(a => `- ${a.name} : ${a.role}`).join('\n');
     const plan = await runOne(lead,
       `Tâche :\n${task}\n\nÉquipe disponible :\n${roster}\n\nDécoupe la tâche en 2 à ${Math.min(10, agents.length)} étapes ordonnées et attribue chacune à un agent de l'équipe. Réponds UNIQUEMENT avec du JSON :\n{"etapes":[{"agent":"Nom exact","consigne":"..."}]}`,
@@ -83,7 +83,7 @@ export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, syn
   }
 
   // Synthèse finale
-  const synth = { name: 'Marco — Décision finale', role: 'ingénieur du son en chef qui fusionne les avis, contrôle la cohérence et remet un seul plan final directement exécutable', model: synthModel };
+  const synth = { name: 'La Zone — Décision finale', role: 'ingénieur du son en chef qui fusionne les avis, contrôle la cohérence et remet un seul plan final directement exécutable', model: synthModel };
   const final = await runOne(synth, `Tâche :\n${task}\n\nTravail de l'équipe :\n${history()}\n\nProduis le livrable final complet (pas un résumé des échanges).`, 'Livrable final');
   emit({ type: 'final', content: final });
   return { transcript, final };
