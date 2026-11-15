@@ -17,8 +17,6 @@ on:
       - "scripts/build_guides.py"
       - "scripts/generate_ai_guides.py"
       - "scripts/site_chrome.py"
-      - "scripts/build_home_deals.py"
-      - "scripts/check_awin_gift_images.py"
       - "scripts/import_amazon_report.py"
       - "js/cookie-consent.js"
       - "stats.html"
