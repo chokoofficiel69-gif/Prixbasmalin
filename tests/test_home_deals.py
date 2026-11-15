@@ -260,5 +260,83 @@ class ProductSheetOutlierTests(unittest.TestCase):
         self.assertEqual([o["merchant"] for o in offers], ["a", "b", "c"])
 
 
+
+class HomeDealsRotationTests(unittest.TestCase):
+    def rotation_awin(self, count, fetched_at):
+        return {
+            "fetched_at": fetched_at,
+            "products": [
+                product(
+                    f"Parfum rotation {i}",
+                    f"Marchand {i % 4}",
+                    20 + (i % 40),
+                    desc="Parfums",
+                    image=f"https://img.example/rotation-{i}.webp",
+                    sourceUrl=f"https://merchant.example/item/{i}",
+                )
+                for i in range(count)
+            ],
+        }
+
+    def test_rotation_waits_48_hours_and_then_selects_new_products(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        initial_ids = {gift["id"] for gift in initial["gifts"]}
+        self.assertEqual(len(initial_ids), 48)
+        self.assertEqual(initial["rotation"]["status"], "initial_selection")
+
+        before_due = deals.build(
+            self.rotation_awin(100, "2026-11-11T11:59:59Z"),
+            {"products": []},
+            previous=initial,
+        )
+        self.assertEqual({gift["id"] for gift in before_due["gifts"]}, initial_ids)
+        self.assertEqual(before_due["rotation"]["last_rotated_at"], first_time)
+
+        after_due = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        next_ids = {gift["id"] for gift in after_due["gifts"]}
+        self.assertEqual(len(next_ids), 48)
+        self.assertTrue(initial_ids.isdisjoint(next_ids))
+        self.assertEqual(after_due["rotation"]["status"], "rotated")
+        self.assertEqual(set(after_due["rotation_history"][0]["product_ids"]), initial_ids)
+        self.assertTrue(all(len(value) == 64 for value in after_due["rotation_history"][0]["image_hashes"]))
+        self.assertFalse(any(value.startswith("https://") for value in after_due["rotation_history"][0]["image_hashes"]))
+
+    def test_rotation_keeps_previous_snapshot_when_fewer_than_48_new_items_exist(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(60, first_time), {"products": []})
+        initial_ids = {gift["id"] for gift in initial["gifts"]}
+        self.assertEqual(len(initial_ids), 48)
+
+        attempted = deals.build(
+            self.rotation_awin(60, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        self.assertEqual({gift["id"] for gift in attempted["gifts"]}, initial_ids)
+        self.assertEqual(attempted["rotation"]["status"], "held_insufficient_candidates")
+        self.assertEqual(attempted["rotation"]["last_rotated_at"], first_time)
+        self.assertEqual(attempted["rotation"]["candidate_count"], 12)
+
+    def test_rotation_journal_contains_ids_and_hashes_not_image_urls(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        rotated = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        journal = rotated["rotation_history"][0]
+        self.assertEqual(journal["rotated_at"], first_time)
+        self.assertEqual(len(journal["product_ids"]), 48)
+        self.assertEqual(len(journal["image_hashes"]), 48)
+        self.assertFalse(any("https://" in str(value) for value in journal.values()))
+
+
+
 if __name__ == "__main__":
     unittest.main()
