@@ -14,6 +14,7 @@ import { analyzeSamples, STYLES, STYLE_ORDER, expertChain, instruDuckDb, expertR
 import { analyzeMaster, compareToRef } from '../lib/meters.js';
 import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.js';
 import { evaluateExpertPass, expertAgentSummary } from '../lib/expert-agent.js';
+import { expertFace } from '../lib/expertface.js';
 
 const VOICE_PRESETS = {
   rap: { label: 'Voix rap claire et présente', highpass: 90, low: -1, presence: 4, air: 3, deess: 4, comp: 0.75, reverb: 0.08 },
@@ -161,6 +162,14 @@ export async function render(el, { params }) {
   ingeStyle.onchange = () => { ingePrefs.style = ingeStyle.value; saveIngePrefs(); };
   const micInfo = h('div.small.muted');
   const instruInfo = h('div.small.muted');
+  // Visage humanisé de l'ingé son : parle/analyse en direct (animations CSS locales).
+  const face = expertFace();
+  let faceIdleTimer = null;
+  const faceSay = (state, ms = 0) => {
+    clearTimeout(faceIdleTimer);
+    face.setState(state);
+    if (ms > 0) faceIdleTimer = setTimeout(() => face.setState('idle'), ms);
+  };
   const ingeReport = h('div.stack');
   const ingeAudio = h('audio', { controls: true, style: { width: '100%' } });
   rawMode.checked = ingePrefs.rawMic;
@@ -1521,7 +1530,7 @@ export async function render(el, { params }) {
   async function processTake(track) {
     if (!track || track.kind !== 'voix') return;
     const t0 = performance.now();
-    const say = (m) => { ingeReport.innerHTML = ''; ingeReport.append(h('div.small', h('span.spinner'), ' ' + m)); };
+    const say = (m) => { faceSay('thinking'); ingeReport.innerHTML = ''; ingeReport.append(h('div.small', h('span.spinner'), ' ' + m)); };
     player.stop();
     track.original = track.original || track.buffer;
     const raw = track.original, ch = raw.getChannelData(0);
@@ -1656,6 +1665,7 @@ export async function render(el, { params }) {
       track.inge.tipsSource = lines.length ? 'IA' : 'règles';
     } catch { track.inge.tips = fallbackTips(track.inge); track.inge.tipsSource = 'règles'; }
     drawInge();
+    faceSay('speaking', 6000); // l'ingé "livre" son rapport, puis repasse au repos
   }
 
   function openConsult() {
@@ -1677,9 +1687,9 @@ export async function render(el, { params }) {
     const askBtn = h('button.btn.small.primary', { onclick: async (e) => {
       const values = {}; for (const k in inputs) values[k] = inputs[k].value;
       const q = buildConsult(csel.value, values); if (!q) return;
-      e.target.disabled = true; info.innerHTML = '<span class="spinner"></span> L’ingé son réfléchit…'; answer.textContent = '';
-      try { const r = await api('/api/complete', { method: 'POST', body: { system: q.system, prompt: q.prompt, src: 'inge-expert', model: 'auto:smart', temperature: 0.4 } }); answer.textContent = String(r.content || '').trim() || 'Pas de réponse.'; info.textContent = `via ${r.routedVia || 'IA'}`; }
-      catch (err) { info.textContent = ''; toastErr(err); }
+      e.target.disabled = true; info.innerHTML = '<span class="spinner"></span> L’ingé son réfléchit…'; answer.textContent = ''; faceSay('thinking');
+      try { const r = await api('/api/complete', { method: 'POST', body: { system: q.system, prompt: q.prompt, src: 'inge-expert', model: 'auto:smart', temperature: 0.4 } }); answer.textContent = String(r.content || '').trim() || 'Pas de réponse.'; info.textContent = `via ${r.routedVia || 'IA'}`; faceSay('speaking', 8000); }
+      catch (err) { info.textContent = ''; faceSay('idle'); toastErr(err); }
       e.target.disabled = false;
     } }, '🎛️ Demander à l’ingé son');
     modal('💬 Consultation — ingé son expert', h('div.stack',
@@ -1845,6 +1855,7 @@ export async function render(el, { params }) {
     h('div.stack',
       h('div.card.stack',
         h('h3', '🎚️ Ingé son IA'),
+        face.el,
         h('label.chk.small', ingeOn, 'Activer — analyse, autotune et mix automatiques (100 % en local, gratuit)'),
         h('label.chk.small', ingeExpert, '🎓 Mode expert : analyse poussée (dynamique, sifflantes, résonance, clipping, LUFS), de-esser + EQ anti-résonance, voix calée au-dessus de l’instru, conseils d’ingé pro'),
         h('div.row', h('span.small', '🎚️ Style :'), h('div.grow', ingeStyle)),

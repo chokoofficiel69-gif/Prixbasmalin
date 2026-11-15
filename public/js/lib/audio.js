@@ -3,6 +3,7 @@
 import { audioCtx } from './core.js';
 import { truePeakCeilingGainDb } from './meters.js';
 import { quantizePcmSample } from './wav-export.js';
+import { multibandSettings, CROSSOVERS, transientShapeChannels } from './master2.js';
 
 export const SR = 44100;
 
@@ -308,7 +309,34 @@ export const MASTER_PRESETS = {
   doux: { label: 'Doux / acoustique −16 LUFS', lufs: -16, low: 0, high: 1, glue: 0.25, width: 1 },
 };
 
-/** Mastering : EQ tonale, compression de bus, largeur stéréo, sonie cible, limiteur. */
+/**
+ * Compresseur multibande (grave / médium / aigu) séparé par filtres Linkwitz-Riley
+ * (biquads en cascade, 24 dB/oct), chaque bande compressée puis resommée. Réglages
+ * par preset (master2.js). Fonctionne dans le navigateur (OfflineAudioContext).
+ */
+export async function multibandCompress(buffer, presetKey = 'streaming') {
+  const mb = multibandSettings(presetKey);
+  const ctx = new OfflineAudioContext(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+  const src = ctx.createBufferSource(); src.buffer = buffer;
+  const makeBand = (filters, cfg) => {
+    let node = src;
+    for (const f of filters) { node.connect(f); node = f; }
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = cfg.threshold; comp.ratio.value = cfg.ratio;
+    comp.attack.value = cfg.attack; comp.release.value = cfg.release; comp.knee.value = 6;
+    const gain = ctx.createGain(); gain.gain.value = 10 ** ((cfg.makeup || 0) / 20);
+    node.connect(comp).connect(gain).connect(ctx.destination);
+  };
+  const lp = (freq) => { const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq; f.Q.value = 0.707; return f; };
+  const hp = (freq) => { const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = freq; f.Q.value = 0.707; return f; };
+  makeBand([lp(CROSSOVERS.lowMid), lp(CROSSOVERS.lowMid)], mb.low);
+  makeBand([hp(CROSSOVERS.lowMid), hp(CROSSOVERS.lowMid), lp(CROSSOVERS.midHigh), lp(CROSSOVERS.midHigh)], mb.mid);
+  makeBand([hp(CROSSOVERS.midHigh), hp(CROSSOVERS.midHigh)], mb.high);
+  src.start();
+  return ctx.startRendering();
+}
+
+/** Mastering : EQ tonale, compression de bus, multibande, transient, largeur, sonie, limiteur. */
 export async function master(buffer, presetKey = 'streaming', onStep) {
   const p = MASTER_PRESETS[presetKey] || MASTER_PRESETS.streaming;
   onStep?.('Égalisation et compression…');
@@ -333,6 +361,15 @@ export async function master(buffer, presetKey = 'streaming', onStep) {
   merge.connect(ctx.destination);
   src.start();
   let out = await ctx.startRendering();
+  onStep?.('Compression multibande…');
+  out = await multibandCompress(out, presetKey);
+  const tr = multibandSettings(presetKey).transient;
+  if (tr && (tr.attack || tr.sustain)) {
+    onStep?.('Transient shaper…');
+    const chans = [...Array(out.numberOfChannels)].map((_, c) => out.getChannelData(c));
+    const shaped = transientShapeChannels(chans, { attack: tr.attack, sustain: tr.sustain, sr: out.sampleRate });
+    for (let c = 0; c < out.numberOfChannels; c++) out.getChannelData(c).set(shaped[c]);
+  }
   onStep?.('Mesure de la sonie…');
   const lufs = await loudness(out);
   const gainDb = Math.min(24, p.lufs - lufs);
