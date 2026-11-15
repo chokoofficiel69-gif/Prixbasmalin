@@ -9,6 +9,7 @@ on:
       - ".github/workflows/sync-awin-products.yml"
       - ".github/workflows/test-awin-product-pages.yml"
       - "data/awin-products.json"
+      - "data/awin-catalogue.json"
   pull_request:
     paths:
       - "scripts/build_awin_pages.py"
@@ -56,7 +57,9 @@ jobs:
           sys.path.insert(0, "scripts")
           import build_awin_pages as pages
 
-          feed = json.loads(Path("data/awin-products.json").read_text(encoding="utf-8"))
+          feed = json.loads(Path("data/awin-catalogue.json").read_text(encoding="utf-8"))
+          if feed.get("image_policy") != pages.IMAGE_POLICY:
+              raise SystemExit("Le flux catalogue n’atteste pas la validation des images.")
           now = datetime.now(timezone.utc)
           generated = pages.build(feed, now=now)
           rendered_prices = sum(
@@ -65,7 +68,7 @@ jobs:
           )
           fresh_price_rows = sum(
               1 for row in (feed.get("products") or [])
-              if (pages.eligible(row, now) or {}).get("price") is not None
+              if (pages.eligible(row, now, feed.get("fetched_at")) or {}).get("price") is not None
           )
           if rendered_prices > fresh_price_rows:
               raise SystemExit(
