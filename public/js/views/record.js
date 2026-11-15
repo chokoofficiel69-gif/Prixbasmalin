@@ -1657,9 +1657,11 @@ export async function render(el, { params }) {
   }
 
   async function fetchTips(track) {
-    const { system, prompt } = track.inge.expert ? expertTipsPrompt(track.inge.em) : tipsPrompt(track.inge);
+    const isExpert = !!track.inge.expert;
+    const { system, prompt } = isExpert ? expertTipsPrompt(track.inge.em) : tipsPrompt(track.inge);
     try {
-      const r = await api('/api/complete', { method: 'POST', body: { system, prompt, src: 'inge-son', model: 'auto:fast', temperature: 0.3 } });
+      // En mode expert on vise le modèle le plus fort (auto:smart) ; sinon rapide.
+      const r = await api('/api/complete', { method: 'POST', body: { system, prompt, src: 'inge-son', model: isExpert ? 'auto:smart' : 'auto:fast', temperature: 0.3 } });
       const lines = String(r.content || '').split('\n').map(s => s.replace(/^[-*•\d.)\s]+/, '').trim()).filter(Boolean).slice(0, 3);
       track.inge.tips = lines.length ? lines : fallbackTips(track.inge);
       track.inge.tipsSource = lines.length ? 'IA' : 'règles';
