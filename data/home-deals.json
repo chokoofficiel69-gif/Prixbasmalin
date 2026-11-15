@@ -1246,12 +1246,11 @@
    "price_tax_status": "unspecified"
   }
  ],
-"rotation": {
+ "rotation": {
   "interval_hours": 48,
   "last_rotated_at": "2026-11-14T11:44:13.982Z",
   "status": "baseline_initialized",
   "selected_count": 48
  },
  "rotation_history": []
-
 }
