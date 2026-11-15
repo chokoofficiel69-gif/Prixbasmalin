@@ -806,12 +806,17 @@ RÈGLES D’UTILISATION :
         const signalAnalysis = b ? analyzeBuffer(b, 1) : null;
         let voiceDsp = null, voiceDspTips = [];
         if (b && (t.kind === 'voice' || /voix|vocal|chant|lead|rap/i.test(t.name || ''))) {
-          const mono = new Float32Array(b.length);
+          // Échantillonne jusqu'à 30 s réparties dans la prise pour limiter le coût CPU/RAM sur mobile.
+          const segmentLength = Math.min(Math.floor(10 * b.sampleRate), b.length);
+          const starts = b.length <= segmentLength * 3 ? [0] : [0, Math.floor((b.length - segmentLength) / 2), b.length - segmentLength];
+          const mono = new Float32Array(segmentLength * starts.length);
           for (let channel = 0; channel < b.numberOfChannels; channel++) {
             const data = b.getChannelData(channel);
-            for (let i = 0; i < data.length; i++) mono[i] += data[i] / b.numberOfChannels;
+            starts.forEach((start, segment) => {
+              for (let i = 0; i < segmentLength; i++) mono[segment * segmentLength + i] += data[start + i] / b.numberOfChannels;
+            });
           }
-          voiceDsp = analyzeVoiceDsp(mono, b.sampleRate);
+          voiceDsp = { ...analyzeVoiceDsp(mono, b.sampleRate), sampledSeconds: +(mono.length / b.sampleRate).toFixed(1), sampleStrategy: 'début, milieu et fin de la prise' };
           voiceDspTips = voiceDspRecommendations(voiceDsp);
         }
         const context = { piste: t?.name || null, type_piste: t?.kind || null, analyse_signal_mesuree: signalAnalysis, diagnostic_spectral_voix: voiceDsp, conseils_mesures: voiceDspTips, autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
