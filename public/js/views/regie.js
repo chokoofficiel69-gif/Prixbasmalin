@@ -281,20 +281,27 @@ export async function render(el, { params }) {
     }
   }
   const TILE = 1500; // largeur (px) d'un morceau de forme d'onde
+  // Morceaux de forme d'onde : seuls ceux visibles (± 800 px) sont dessinés,
+  // calculé à partir du défilement (fiable même aux très forts zooms).
+  let waveTiles = [], tilesRaf = 0;
   function tiledWave(clip, t, i, clipW) {
-    const color = trackColor(t, i);
-    const io = new IntersectionObserver((ents) => {
-      for (const e of ents) {
-        const c = e.target;
-        if (e.isIntersecting && !c._drawn) { c._drawn = true; drawSegment(c, t.buffer, +c.dataset.t0, +c.dataset.t1, color); }
-        else if (!e.isIntersecting && c._drawn) { c._drawn = false; c.width = 1; c.height = 1; } // libère la mémoire
-      }
-    }, { rootMargin: '0px 600px' });
+    const color = trackColor(t, i), left = (t.offset || 0) * pxPerSec;
     for (let x = 0; x < clipW; x += TILE) {
       const w = Math.min(TILE, clipW - x);
       const c = h('canvas', { style: { position: 'absolute', left: x + 'px', top: '0', width: w + 'px', height: '100%' } });
-      c.dataset.t0 = String(x / pxPerSec); c.dataset.t1 = String((x + w) / pxPerSec);
-      clip.append(c); io.observe(c);
+      c.width = 1; c.height = 1;
+      clip.append(c);
+      waveTiles.push({ c, x0: left + x, x1: left + x + w, t0: x / pxPerSec, t1: (x + w) / pxPerSec, buf: t.buffer, color, drawn: false });
+    }
+  }
+  function refreshTiles(container) {
+    const sl = (container?.scrollLeft || 0) - 160 - 800, sr = sl + (container?.clientWidth || innerWidth) + 1600;
+    const scrolls = !!container && container.scrollWidth > container.clientWidth + 2;
+    for (const z of waveTiles) {
+      if (!z.c.isConnected) continue;
+      const vis = !scrolls || (z.x1 > sl && z.x0 < sr);
+      if (vis && !z.drawn) { z.drawn = true; try { drawSegment(z.c, z.buf, z.t0, z.t1, z.color); } catch {} }
+      else if (!vis && z.drawn) { z.drawn = false; z.c.width = 1; z.c.height = 1; }
     }
   }
 
@@ -307,10 +314,10 @@ export async function render(el, { params }) {
     try { localStorage.setItem('regie.pps', String(pxPerSec)); } catch {}
     if (zoomLblEl) zoomLblEl.textContent = `${Math.round(pxPerSec)} px/s`;
     if (zoomRangeEl) zoomRangeEl.value = String(Math.round(Math.log(pxPerSec) * 100));
-    if (sc) { buildTimeline(sc); sc.scrollLeft = Math.max(0, 160 + anchor * pxPerSec - ax); }
+    if (sc) { buildTimeline(sc); sc.scrollLeft = Math.max(0, 160 + anchor * pxPerSec - ax); refreshTiles(sc); }
   }
-  function fitZoom() { const sc = laneWrap; const tot = totalDuration(); if (!sc || !tot) return; setZoom((sc.clientWidth - 180) / tot, 0, 0); sc.scrollLeft = 0; }
-  function zoomToSel() { if (!selRange || !laneWrap) return; const len = Math.max(0.05, selRange.b - selRange.a); setZoom((laneWrap.clientWidth - 220) / len); laneWrap.scrollLeft = Math.max(0, 160 + selRange.a * pxPerSec - 30); }
+  function fitZoom() { const sc = laneWrap; const tot = totalDuration(); if (!sc || !tot) return; setZoom((sc.clientWidth - 180) / tot, 0, 0); sc.scrollLeft = 0; refreshTiles(sc); }
+  function zoomToSel() { if (!selRange || !laneWrap) return; const len = Math.max(0.05, selRange.b - selRange.a); setZoom((laneWrap.clientWidth - 220) / len); laneWrap.scrollLeft = Math.max(0, 160 + selRange.a * pxPerSec - 30); refreshTiles(laneWrap); }
 
   // ---------- sélection d'un passage ----------
   const fmtS = (s) => fmtLcd(s);
@@ -398,6 +405,8 @@ export async function render(el, { params }) {
   }
   function buildTimeline(container) {
     container.innerHTML = '';
+    waveTiles = waveTiles.filter(z => z.c.isConnected && !container.contains(z.c));
+    container.onscroll = () => { cancelAnimationFrame(tilesRaf); tilesRaf = requestAnimationFrame(() => refreshTiles(container)); };
     const total = totalDuration();
     if (!tracks.length) {
       container.append(h('div.emptytl',
@@ -448,7 +457,7 @@ export async function render(el, { params }) {
         const clip = h('div.clip', { style: { left: ((t.offset || 0) * pxPerSec) + 'px', width: clipW + 'px' } });
         lane.append(clip);
         // dessin par morceaux, seulement la partie visible (marche à tous les zooms)
-        setTimeout(() => { tiledWave(clip, t, i, clipW); clip.append(h('div.cnm', t.name || '')); }, 0);
+        tiledWave(clip, t, i, clipW); clip.append(h('div.cnm', t.name || ''));
       }
       // glisser = sélectionner un passage · clic = placer la tête de lecture
       bindLane(lane, i);
@@ -464,6 +473,7 @@ export async function render(el, { params }) {
       h('button.rbtn', { onclick: importTrack, style: { width: '158px' } }, '➕ Importer une piste')));
     movePlayhead(startOffset);
     if (container === laneWrap) paintSel();
+    requestAnimationFrame(() => refreshTiles(container));
   }
   const panTxt = (p) => p === 0 ? 'C' : (p < 0 ? `G${Math.round(-p * 100)}` : `D${Math.round(p * 100)}`);
 
@@ -1301,7 +1311,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE10'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE11'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
