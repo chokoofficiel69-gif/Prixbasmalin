@@ -30,7 +30,7 @@ def url_for(rel):
 
 
 def public_pages():
-    files = [p for p in ROOT.glob("*.html")] + list((ROOT / "prix").glob("*.html")) + list((ROOT / "idees-cadeaux").glob("*.html"))
+    files = [p for p in ROOT.glob("*.html")] + list((ROOT / "prix").glob("*.html")) + list((ROOT / "idees-cadeaux").glob("*.html")) + list((ROOT / "produits").glob("*.html"))
     pages = []
     for p in files:
         rel = p.relative_to(ROOT).as_posix()

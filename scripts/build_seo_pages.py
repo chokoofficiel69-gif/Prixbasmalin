@@ -325,8 +325,14 @@ def product_page(p, sheets, period, guide=None):
     return layout(title, description, f"/prix/{p['id']}.html", body, crumbs, extra)
 
 
+GENERIC_LABELS = {"cuisine": "Cuisine high-tech", "casque-vr": "Casques VR", "coiffure": "Appareils de coiffure",
+                  "accessoire-ps5-jeu": "Jeux PS5", "casque": "Casques audio"}
+
+
 def category_page(cat, label, items):
     slug = CATEGORY_SLUGS.get(cat, cat)
+    if label == "High-Tech" and cat in GENERIC_LABELS:
+        label = GENERIC_LABELS[cat]  # libellé générique partagé : titre unique par catégorie
     cheapest = min(items, key=lambda s: s["min_price_eur"])
     title = fit_title(f"Historique des prix {label.lower()} | Prix Malin",
                       f"Historique des prix {label.lower()}", f"{label} : historique des prix")
@@ -351,7 +357,7 @@ def index_page(groups, total):
         for cat, label, items in groups)
     body = f"""<section class="panel"><h1>Historique des prix high-tech</h1>
 <p>{total} produits avec relevés historiques PrixTracker chez plusieurs marchands : smartphones, consoles, écouteurs, tablettes, ordinateurs, montres connectées, enceintes et aspirateurs. Ces montants sont des observations passées, pas des offres en direct.</p></section>{sections}{ART_SCRIPT}"""
-    return layout("Historique des prix high-tech | Prix Malin",
+    return layout("Comparateur et historique des prix high-tech | Prix Malin",
                   fit_description(f"{total} produits high-tech avec relevés historiques PrixTracker, datés et sourcés. Ces montants ne sont pas des offres en temps réel."),
                   "/prix/", body, [("Accueil", "/"), ("Historique des prix", "/prix/")])
 

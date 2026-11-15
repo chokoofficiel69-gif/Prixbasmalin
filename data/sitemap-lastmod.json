@@ -1,574 +1,602 @@
 {
  "a-propos.html": {
-  "hash": "b4e13a5235de9b85",
-  "lastmod": "2026-11-10"
+  "hash": "2e19e2f1167dae96",
+  "lastmod": "2026-11-15"
  },
  "assistant.html": {
   "hash": "90fc5f74ca644f4a",
   "lastmod": "2026-11-11"
  },
  "black-friday.html": {
-  "hash": "1d2329faafa54ec1",
+  "hash": "8b7a0f03509a51a7",
   "lastmod": "2026-11-15"
  },
  "boutiques-partenaires.html": {
-  "hash": "44f242a78a53a89d",
-  "lastmod": "2026-11-10"
+  "hash": "a886d65e588d278e",
+  "lastmod": "2026-11-15"
  },
  "catalogue.html": {
-  "hash": "cb5db6602e4a3524",
-  "lastmod": "2026-11-14"
+  "hash": "626416a5dd426b66",
+  "lastmod": "2026-11-15"
  },
  "comparateur-historique.html": {
-  "hash": "cf1b74132501be8e",
-  "lastmod": "2026-11-12"
+  "hash": "5417d7c46cda1e61",
+  "lastmod": "2026-11-15"
  },
  "confidentialite.html": {
-  "hash": "7414ef72f71d28db",
-  "lastmod": "2026-11-11"
+  "hash": "8505f1c81a39eae6",
+  "lastmod": "2026-11-15"
  },
  "credits-photos.html": {
-  "hash": "2c662b779280509c",
-  "lastmod": "2026-11-11"
+  "hash": "2edffa2fecaf29ef",
+  "lastmod": "2026-11-15"
  },
  "grossistes.html": {
-  "hash": "935e934769a98075",
-  "lastmod": "2026-11-10"
+  "hash": "8cbe7d386b5d537d",
+  "lastmod": "2026-11-15"
  },
  "guide-air-fryer-pas-cher.html": {
-  "hash": "2a7dfdc0aa761bbc",
-  "lastmod": "2026-11-11"
+  "hash": "d11df37e7de45f40",
+  "lastmod": "2026-11-15"
  },
  "guide-black-friday-2026.html": {
-  "hash": "87d9d6d3a689ff80",
-  "lastmod": "2026-11-11"
+  "hash": "d0214ad1cc804f95",
+  "lastmod": "2026-11-15"
  },
  "guide-cadeaux.html": {
-  "hash": "83b967522aaa9a95",
-  "lastmod": "2026-11-11"
+  "hash": "0246d851f9453c77",
+  "lastmod": "2026-11-15"
  },
  "guide-choisir-aspirateur-robot.html": {
-  "hash": "fa0ca602c5e6d763",
-  "lastmod": "2026-11-11"
+  "hash": "5176ef327ec37f10",
+  "lastmod": "2026-11-15"
  },
  "guide-choisir-smartphone.html": {
-  "hash": "c3f374e6cee40369",
-  "lastmod": "2026-11-11"
+  "hash": "f232a0ae8e6313de",
+  "lastmod": "2026-11-15"
  },
  "guide-ecouteurs-sans-fil-petit-prix.html": {
-  "hash": "c496a42e9fcee38a",
-  "lastmod": "2026-11-11"
+  "hash": "504a6f066a1ce650",
+  "lastmod": "2026-11-15"
  },
  "guide-payer-moins-cher-en-ligne.html": {
-  "hash": "cab8471e60387b17",
-  "lastmod": "2026-11-11"
+  "hash": "59b8af0f0fd67297",
+  "lastmod": "2026-11-15"
  },
  "guides.html": {
-  "hash": "85fd63a25f9542d0",
-  "lastmod": "2026-11-10"
+  "hash": "db2909f623c00e19",
+  "lastmod": "2026-11-15"
  },
  "high-tech.html": {
-  "hash": "26bff7d7b22a80c6",
-  "lastmod": "2026-11-10"
+  "hash": "5583352e32930406",
+  "lastmod": "2026-11-15"
  },
  "historique-prix.html": {
-  "hash": "8e2d2b77685a8d28",
-  "lastmod": "2026-11-12"
+  "hash": "3edb4ea517cab697",
+  "lastmod": "2026-11-15"
  },
  "idees-cadeaux/index.html": {
-  "hash": "7b2dac356b4ef442",
-  "lastmod": "2026-11-10"
+  "hash": "f253c3f8a2f96fe1",
+  "lastmod": "2026-11-15"
  },
  "index.html": {
-  "hash": "945e08289cbb4adb",
+  "hash": "fa4ddfce87942e38",
   "lastmod": "2026-11-15"
  },
  "maison-deco.html": {
-  "hash": "01d168898942670d",
-  "lastmod": "2026-11-11"
+  "hash": "fd5e2759a14238f2",
+  "lastmod": "2026-11-15"
  },
  "mode.html": {
-  "hash": "e4194843bc347ad2",
-  "lastmod": "2026-11-10"
+  "hash": "f3f064b203b201f6",
+  "lastmod": "2026-11-15"
  },
  "nouveautes.html": {
-  "hash": "f62b08bfe73bc269",
-  "lastmod": "2026-11-10"
+  "hash": "267666569cb5b7a1",
+  "lastmod": "2026-11-15"
  },
  "offres.html": {
-  "hash": "40b1e94f99a0fdcf",
-  "lastmod": "2026-11-10"
+  "hash": "e3bb4dbfe6fa4a22",
+  "lastmod": "2026-11-15"
  },
  "partenaires.html": {
-  "hash": "eb47f93623879979",
-  "lastmod": "2026-11-10"
+  "hash": "12d9cd0f1ceed177",
+  "lastmod": "2026-11-15"
  },
  "prix/accessoire-ps5-jeu.html": {
-  "hash": "80671fefff111cb1",
+  "hash": "536f3d535cc482c8",
   "lastmod": "2026-11-15"
  },
  "prix/accessoires-ps5.html": {
-  "hash": "c6adbbd28ce6f601",
+  "hash": "afc7fdf6557c556c",
   "lastmod": "2026-11-15"
  },
  "prix/accessoires-switch.html": {
-  "hash": "be82f5e48fb2607b",
+  "hash": "914930bf12091eef",
   "lastmod": "2026-11-15"
  },
  "prix/airpods-3.html": {
-  "hash": "cd2e263516e1e9c5",
+  "hash": "0567f75f02adb728",
   "lastmod": "2026-11-15"
  },
  "prix/airpods-4-anc.html": {
-  "hash": "349b6359b476e0a4",
+  "hash": "b00d6cd499a178cb",
   "lastmod": "2026-11-15"
  },
  "prix/airpods-4.html": {
-  "hash": "bb017fce7d3ece9b",
+  "hash": "6f0148559bcfe698",
   "lastmod": "2026-11-15"
  },
  "prix/airpods-5.html": {
-  "hash": "edb165d1bcc3f482",
+  "hash": "3f5a382aee467da4",
   "lastmod": "2026-11-15"
  },
  "prix/airpods-max.html": {
-  "hash": "6678c848a5e5fd2c",
+  "hash": "9ee105aa67b31802",
   "lastmod": "2026-11-15"
  },
  "prix/airpods-pro-2.html": {
-  "hash": "66044a5f0ebc8342",
+  "hash": "811a5790cb63e612",
   "lastmod": "2026-11-15"
  },
  "prix/airpods-pro-3.html": {
-  "hash": "7c567c87deaf13ca",
+  "hash": "6ffd307b591ad3e8",
   "lastmod": "2026-11-15"
  },
  "prix/apple-watch-se-3.html": {
-  "hash": "c6d29ab117ea4329",
+  "hash": "da591b735cc8d562",
   "lastmod": "2026-11-15"
  },
  "prix/apple-watch-series-11.html": {
-  "hash": "466b84912f41c4e7",
+  "hash": "8325a598a4ee6cd9",
   "lastmod": "2026-11-15"
  },
  "prix/apple-watch-series-12.html": {
-  "hash": "79cf59656f516254",
+  "hash": "380e3f175be3055d",
   "lastmod": "2026-11-15"
  },
  "prix/apple-watch-ultra-3.html": {
-  "hash": "cf4c7d59c8dca961",
+  "hash": "963ec5792a760b92",
   "lastmod": "2026-11-15"
  },
  "prix/apple-watch-ultra-4.html": {
-  "hash": "41eaf4f6fe651687",
+  "hash": "3d83b257e91ed553",
   "lastmod": "2026-11-15"
  },
  "prix/aspirateurs.html": {
-  "hash": "1ed53d5a8f7d8d19",
+  "hash": "38b603b3987ab9f3",
   "lastmod": "2026-11-15"
  },
  "prix/bose-soundlink-flex-2.html": {
-  "hash": "b46a75f2e428a9a9",
+  "hash": "afe1104c2952869d",
   "lastmod": "2026-11-15"
  },
  "prix/casque-vr.html": {
-  "hash": "e9180d81487b3d54",
+  "hash": "904deb7f05b6d889",
   "lastmod": "2026-11-15"
  },
  "prix/casque.html": {
-  "hash": "fcc34e5ef6448e5e",
+  "hash": "d0a535afe30ee648",
   "lastmod": "2026-11-15"
  },
  "prix/coiffure.html": {
-  "hash": "0f027f390f5fe832",
+  "hash": "e38b1abe6d8f5010",
   "lastmod": "2026-11-15"
  },
  "prix/consoles.html": {
-  "hash": "740240d908e93813",
+  "hash": "4074aea2279c4a91",
   "lastmod": "2026-11-15"
  },
  "prix/cookeo-touch-pro.html": {
-  "hash": "b17cf37f12dd7e3d",
+  "hash": "5b288370644dca48",
   "lastmod": "2026-11-15"
  },
  "prix/cuisine.html": {
-  "hash": "0ad2bf7a70b0cfe9",
+  "hash": "93657cbd59d1d9d0",
   "lastmod": "2026-11-15"
  },
  "prix/dreame-l40s-pro-ultra.html": {
-  "hash": "dd386beb779e3f41",
+  "hash": "99c2a6a0b47f49ad",
   "lastmod": "2026-11-15"
  },
  "prix/dreame-x50-ultra.html": {
-  "hash": "a386b75d7c8763a7",
+  "hash": "f15e6cdfd5bac34e",
   "lastmod": "2026-11-15"
  },
  "prix/dualsense-edge.html": {
-  "hash": "7a5e3adad4982ea2",
+  "hash": "f1afb70fd8424e92",
   "lastmod": "2026-11-15"
  },
  "prix/dualsense.html": {
-  "hash": "65d51eec0e23bd9c",
+  "hash": "d31e8bb20c4edf03",
   "lastmod": "2026-11-15"
  },
  "prix/dyson-airwrap-id.html": {
-  "hash": "c638cf4426aa4523",
+  "hash": "30b8ff322f84d5e0",
   "lastmod": "2026-11-15"
  },
  "prix/dyson-v12s-detect-slim-submarine.html": {
-  "hash": "90e2a900eb2a71c2",
+  "hash": "22ce158bcfcd0ee8",
   "lastmod": "2026-11-15"
  },
  "prix/dyson-v15-detect-absolute.html": {
-  "hash": "3825c2cb05125cc7",
+  "hash": "6ef241703051edc5",
   "lastmod": "2026-11-15"
  },
  "prix/dyson-v16-piston-animal-submarine.html": {
-  "hash": "214b50e49048e015",
+  "hash": "fc302cddff4752d3",
   "lastmod": "2026-11-15"
  },
  "prix/ecouteurs-casques.html": {
-  "hash": "05d0dbdde9887ba0",
+  "hash": "e37eccf777c3a941",
   "lastmod": "2026-11-15"
  },
  "prix/ecovacs-deebot-t90-pro-omni.html": {
-  "hash": "9282ecf55cb4762b",
+  "hash": "8eee1957146ae6a6",
   "lastmod": "2026-11-15"
  },
  "prix/enceintes.html": {
-  "hash": "b8d4657ea24dd3c0",
+  "hash": "110abf27cb920857",
   "lastmod": "2026-11-15"
  },
  "prix/galaxy-s26-plus.html": {
-  "hash": "521cd3235ac9b18e",
+  "hash": "dd1c05215485adf9",
   "lastmod": "2026-11-15"
  },
  "prix/galaxy-s26-ultra.html": {
-  "hash": "a43c8e7432163292",
+  "hash": "80d7dccb326a41b1",
   "lastmod": "2026-11-15"
  },
  "prix/galaxy-s26.html": {
-  "hash": "0ed573e2f7e41ff9",
+  "hash": "28bbe6518247483c",
   "lastmod": "2026-11-15"
  },
  "prix/gta-6-ps5.html": {
-  "hash": "f85d8c28366ea621",
+  "hash": "c58c1675df561125",
   "lastmod": "2026-11-15"
  },
  "prix/harman-kardon-go-play-3.html": {
-  "hash": "b39ad24c30b2a52d",
+  "hash": "d2f06b076bdcbb48",
   "lastmod": "2026-11-15"
  },
  "prix/harman-kardon-onyx-studio-9.html": {
-  "hash": "e6d05dc5e8119081",
+  "hash": "ad2e5041698839e5",
   "lastmod": "2026-11-15"
  },
  "prix/index.html": {
-  "hash": "24a4754cfa862841",
+  "hash": "2affafd19f3c9d95",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-a16.html": {
-  "hash": "69a44870e04e1262",
+  "hash": "bb1d3ce7c73f38e6",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-air-11-m3.html": {
-  "hash": "1acc98875f86afaa",
+  "hash": "e468fbfa30359877",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-air-11-m4.html": {
-  "hash": "20702c9d3b125567",
+  "hash": "79b89810a834ed1b",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-air-13-m3.html": {
-  "hash": "91feb7b33723a8fa",
+  "hash": "64750f05ad246ee4",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-air-13-m4.html": {
-  "hash": "cb00468aab267785",
+  "hash": "7358d51659a1b621",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-mini-a17-pro.html": {
-  "hash": "6d8bf4a45e961b5c",
+  "hash": "d1e46468575086cf",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-mini-a20-pro.html": {
-  "hash": "363701c6a0063e35",
+  "hash": "c673bf635bb0a72f",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-pro-11-m5.html": {
-  "hash": "32507ce526aafbea",
+  "hash": "6f9c1d948f7cc473",
   "lastmod": "2026-11-15"
  },
  "prix/ipad-pro-13-m5.html": {
-  "hash": "b8f596563b2488cc",
+  "hash": "50d14c8fd8052ecb",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-15-pro-max.html": {
-  "hash": "da6d789b573fd854",
+  "hash": "0faa68d2c4c07ebb",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-15-pro.html": {
-  "hash": "c2f3a692fc96619b",
+  "hash": "119756d63c926340",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-15.html": {
-  "hash": "b755e423574e106c",
+  "hash": "e9163a8aba5afd2b",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-16-pro-max.html": {
-  "hash": "a47612b3af6fdef4",
+  "hash": "af687c0c3bcdf8bc",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-16-pro.html": {
-  "hash": "6694950838aea5ec",
+  "hash": "51078d7e113c0391",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-16.html": {
-  "hash": "aa894f21b2603d66",
+  "hash": "c5ef7d621f66b12a",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-16e.html": {
-  "hash": "1d7f2200daf5307f",
+  "hash": "3a78a972b3e1e423",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-17-pro-max.html": {
-  "hash": "f0cbb9b2981b257a",
+  "hash": "60d124a3f974fc4c",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-17-pro.html": {
-  "hash": "18c17f676595a95c",
+  "hash": "035a0742d7a994f9",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-17.html": {
-  "hash": "ba5cda93e594e5cb",
+  "hash": "89aa3f11050f38c9",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-17e.html": {
-  "hash": "e4c97c24e95c331d",
+  "hash": "28df50ebf685316b",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-18-pro-max.html": {
-  "hash": "203edeed266d1395",
+  "hash": "b96cf7d0a6dd5cf2",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-18-pro.html": {
-  "hash": "2209f2f48e922e41",
+  "hash": "9f4f76a01fd7ef90",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-air.html": {
-  "hash": "4b7b4196bb11b9c5",
+  "hash": "c75db000f5e3c905",
   "lastmod": "2026-11-15"
  },
  "prix/iphone-fold.html": {
-  "hash": "75fdd7782c9eb638",
+  "hash": "96016cdb96b9f097",
   "lastmod": "2026-11-15"
  },
  "prix/irobot-roomba-max-705-combo.html": {
-  "hash": "5eb5b5a0c56fbb86",
+  "hash": "3c80b6e492dbc7c5",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-boombox-3.html": {
-  "hash": "bbed4e57453f74eb",
+  "hash": "0459c774996a6498",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-charge-5.html": {
-  "hash": "b2ff0e10159e7433",
+  "hash": "8269970e0f259492",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-charge-6.html": {
-  "hash": "0ce39ca7f26c651a",
+  "hash": "f9d99ce7605c1af2",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-clip-5.html": {
-  "hash": "e4ccc3cf7a0b0e37",
+  "hash": "b1278e56bf80cad5",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-flip-6.html": {
-  "hash": "623e71633d4ba192",
+  "hash": "d3ea36a97582390d",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-flip-7.html": {
-  "hash": "f9307e67f001058e",
+  "hash": "c894b39c87548961",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-go-4.html": {
-  "hash": "787e13fc7f8f646a",
+  "hash": "02c108a10171014d",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-go-5.html": {
-  "hash": "02b383887cfe444f",
+  "hash": "6ffb0a5d72f8ae60",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-xtreme-4.html": {
-  "hash": "951e1dc5dc58ef6f",
+  "hash": "e9e5e8f507352317",
   "lastmod": "2026-11-15"
  },
  "prix/jbl-xtreme-5.html": {
-  "hash": "7aeadbafbbcfbab0",
+  "hash": "8432f34dd4e12a47",
   "lastmod": "2026-11-15"
  },
  "prix/joy-con-2.html": {
-  "hash": "84d16a37d28b1c8f",
+  "hash": "459fc43c63cd2229",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-air-13-m4.html": {
-  "hash": "2e446373c3479a99",
+  "hash": "ebec964a05edea3b",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-air-13-m5.html": {
-  "hash": "a8b098f5b0641a3f",
+  "hash": "c96bbaf42193bde2",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-air-15-m3.html": {
-  "hash": "b007dda29385b25e",
+  "hash": "398648ff9762df58",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-air-15-m4.html": {
-  "hash": "278a655a63637d5f",
+  "hash": "a60a5e797167afad",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-air-15-m5.html": {
-  "hash": "9906e0cc75942d82",
+  "hash": "6471650103f3a1cb",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-pro-14-m4.html": {
-  "hash": "a751adba2bbca611",
+  "hash": "593f08c28c3604e0",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-pro-14-m5.html": {
-  "hash": "cc426840108c3489",
+  "hash": "916b64ffb0012114",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-pro-14-m6.html": {
-  "hash": "dd2764b188bb7c6f",
+  "hash": "7eeffcde72b35112",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-pro-16-m4.html": {
-  "hash": "46965eee8b0d4142",
+  "hash": "c87375d45b6c9154",
   "lastmod": "2026-11-15"
  },
  "prix/macbook-pro-16-m5.html": {
-  "hash": "0e46d2ce65989c7b",
+  "hash": "505f8f6cdb0598a5",
   "lastmod": "2026-11-15"
  },
  "prix/manette-switch-2-pro.html": {
-  "hash": "b7229e792f9d0f66",
+  "hash": "948b560b45ee7ddb",
   "lastmod": "2026-11-15"
  },
  "prix/manette-switch-pro.html": {
-  "hash": "a793111769488149",
+  "hash": "dcc7c4419af92ba1",
   "lastmod": "2026-11-15"
  },
  "prix/marshall-emberton-3.html": {
-  "hash": "35f8ceacf20b670a",
+  "hash": "3167fea869bb9761",
   "lastmod": "2026-11-15"
  },
  "prix/meta-quest-3s.html": {
-  "hash": "18464fb6528e2490",
+  "hash": "98fcd240453f00d8",
   "lastmod": "2026-11-15"
  },
  "prix/montres-connectees.html": {
-  "hash": "4c6fd4f44922fcb2",
+  "hash": "924570abb56c140e",
   "lastmod": "2026-11-15"
  },
  "prix/ninja-foodi-dual-zone-af200eu.html": {
-  "hash": "7d57b85e67aa5c4f",
+  "hash": "fb12de6a4bd53b6c",
   "lastmod": "2026-11-15"
  },
  "prix/ordinateurs-portables.html": {
-  "hash": "cd0b5478156d6079",
+  "hash": "a54b1ce36da2cb02",
   "lastmod": "2026-11-15"
  },
  "prix/playstation-portal.html": {
-  "hash": "2e2ec8f13786cda3",
+  "hash": "38f669fa6d97bcfa",
   "lastmod": "2026-11-15"
  },
  "prix/playstation-vr2.html": {
-  "hash": "06bfdf3e74f784f0",
+  "hash": "fc37c64bbb219ec7",
   "lastmod": "2026-11-15"
  },
  "prix/ps5-pro.html": {
-  "hash": "25f6de65c0806491",
+  "hash": "af41e2f44c60c857",
   "lastmod": "2026-11-15"
  },
  "prix/ps5-slim-digital.html": {
-  "hash": "7206abcd9427f179",
+  "hash": "b9012bbc084763c8",
   "lastmod": "2026-11-15"
  },
  "prix/ps5-slim.html": {
-  "hash": "bc8502a9005b4e21",
+  "hash": "4dbda328205a2296",
   "lastmod": "2026-11-15"
  },
  "prix/roborock-qrevo-curv.html": {
-  "hash": "15627fbdc2693241",
+  "hash": "d09608046d75109f",
   "lastmod": "2026-11-15"
  },
  "prix/roborock-saros-10r.html": {
-  "hash": "ec41b0f3ca627b12",
+  "hash": "e65217fef3d95905",
   "lastmod": "2026-11-15"
  },
  "prix/rowenta-silence-force-ro7457ea.html": {
-  "hash": "75be1e3111c276db",
+  "hash": "65e20c4f719f2ac4",
   "lastmod": "2026-11-15"
  },
  "prix/rowenta-x-force-flex-16-60.html": {
-  "hash": "cc0d5af94a14e8ee",
+  "hash": "aeae2e7b13ac5a76",
   "lastmod": "2026-11-15"
  },
  "prix/samsung-bespoke-ai-jet-lite.html": {
-  "hash": "9bb559ba22136925",
+  "hash": "bd11cb2d29667266",
   "lastmod": "2026-11-15"
  },
  "prix/smartphones.html": {
-  "hash": "2d44ffe4a2860257",
+  "hash": "bb9b2a034e72451a",
   "lastmod": "2026-11-15"
  },
  "prix/sony-wh-1000xm6.html": {
-  "hash": "8fe0901be5c68eb0",
+  "hash": "a893c32b4aec0b53",
   "lastmod": "2026-11-15"
  },
  "prix/switch-2-mario-kart.html": {
-  "hash": "f316d2e928766814",
+  "hash": "0239220a1d13a898",
   "lastmod": "2026-11-15"
  },
  "prix/switch-2-pokemon-pokopia.html": {
-  "hash": "4164481aad2e1954",
+  "hash": "57f85cc707208a37",
   "lastmod": "2026-11-15"
  },
  "prix/switch-2.html": {
-  "hash": "11b3f8089659eb7c",
+  "hash": "0d2b53d575e708b3",
   "lastmod": "2026-11-15"
  },
  "prix/switch-lite.html": {
-  "hash": "a011fa48b6fac0e7",
+  "hash": "bf6978787a319bd2",
   "lastmod": "2026-11-15"
  },
  "prix/switch-oled.html": {
-  "hash": "1ee64b46588c2258",
+  "hash": "3e967624b8c11be6",
   "lastmod": "2026-11-15"
  },
  "prix/switch.html": {
-  "hash": "0b6588beb9a7fb52",
+  "hash": "4fbc08bf507053be",
   "lastmod": "2026-11-15"
  },
  "prix/tablettes.html": {
-  "hash": "701f94740bb8b388",
+  "hash": "c643122a8c4a7b97",
   "lastmod": "2026-11-15"
  },
  "prix/xbox-series-s.html": {
-  "hash": "750d9329351aaa08",
+  "hash": "ab4b56a141583082",
   "lastmod": "2026-11-15"
  },
  "prix/xbox-series-x.html": {
-  "hash": "796f7ff181df7c9b",
+  "hash": "03288890cce0c9c1",
+  "lastmod": "2026-11-15"
+ },
+ "produits/beauty.html": {
+  "hash": "3f9f4fecdf177fb0",
+  "lastmod": "2026-11-15"
+ },
+ "produits/fashion.html": {
+  "hash": "f4a61ecf791bd965",
+  "lastmod": "2026-11-15"
+ },
+ "produits/home.html": {
+  "hash": "0d7edb757a652eaf",
+  "lastmod": "2026-11-15"
+ },
+ "produits/index.html": {
+  "hash": "f4aff76efbd29b32",
+  "lastmod": "2026-11-15"
+ },
+ "produits/kids.html": {
+  "hash": "05194a44305f307f",
+  "lastmod": "2026-11-15"
+ },
+ "produits/sport.html": {
+  "hash": "696c146a0a2f82df",
+  "lastmod": "2026-11-15"
+ },
+ "produits/tech.html": {
+  "hash": "d3e31193ca27320a",
   "lastmod": "2026-11-15"
  },
  "publicite.html": {
-  "hash": "f7ca8ec5284b8e5f",
-  "lastmod": "2026-11-11"
+  "hash": "e19542eae560d4b9",
+  "lastmod": "2026-11-15"
  },
  "services.html": {
-  "hash": "7f10ee3eee25c3b4",
-  "lastmod": "2026-11-11"
+  "hash": "851a68292875f245",
+  "lastmod": "2026-11-15"
  }
 }

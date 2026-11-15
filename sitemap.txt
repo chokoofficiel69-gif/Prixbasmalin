@@ -139,5 +139,12 @@ https://prixbasmalin.fr/prix/switch.html
 https://prixbasmalin.fr/prix/tablettes.html
 https://prixbasmalin.fr/prix/xbox-series-s.html
 https://prixbasmalin.fr/prix/xbox-series-x.html
+https://prixbasmalin.fr/produits/beauty.html
+https://prixbasmalin.fr/produits/fashion.html
+https://prixbasmalin.fr/produits/home.html
+https://prixbasmalin.fr/produits/
+https://prixbasmalin.fr/produits/kids.html
+https://prixbasmalin.fr/produits/sport.html
+https://prixbasmalin.fr/produits/tech.html
 https://prixbasmalin.fr/publicite.html
 https://prixbasmalin.fr/services.html
