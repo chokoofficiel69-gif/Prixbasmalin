@@ -792,3 +792,87 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
  .studio-expert-workspace.is-visible { display:flex !important; flex-direction:column !important; }
  .studio-expert-workspace.is-visible > .studio-expert-panel { width:100% !important; }
 }
+
+
+/* STUDIO PRO — direction artistique Vocal Pro X : néon cyan / violet.
+   Refonte visuelle de la page dédiée, sans toucher au moteur audio. */
+.cockpit{
+ --o:#8b5cf6;--y:#22d3ee;--cpan:#10142a;--cpan2:#151b36;--cline:#293b72;
+ background:
+  radial-gradient(ellipse 680px 330px at 50% -5%,rgba(38,103,255,.22),transparent 70%),
+  radial-gradient(ellipse 460px 300px at 95% 45%,rgba(186,40,255,.13),transparent 72%),
+  radial-gradient(ellipse 420px 260px at 0% 95%,rgba(0,217,255,.10),transparent 70%),
+  linear-gradient(145deg,#050714 0%,#080b1b 52%,#10091f 100%) !important;
+ color:#eef4ff;
+ grid-template-columns:210px minmax(0,1fr) 292px !important;
+ gap:10px !important;padding:10px !important;
+}
+.cockpit .cpanel{
+ background:linear-gradient(155deg,rgba(22,29,59,.96),rgba(9,13,31,.98)) !important;
+ border:1px solid rgba(93,123,255,.38) !important;border-radius:15px !important;
+ box-shadow:inset 0 1px rgba(255,255,255,.07),0 10px 28px rgba(0,0,0,.42),0 0 18px rgba(65,105,255,.08) !important;
+}
+.cockpit .cpanel::before{background:linear-gradient(90deg,transparent,#22d3ee,#a855f7,transparent) !important;opacity:.95 !important}
+.cockpit .cph{color:#c7d7ff !important;border-bottom-color:rgba(106,130,255,.22) !important}
+.cockpit .cled{background:#22d3ee !important;box-shadow:0 0 10px #22d3ee,0 0 18px #8b5cf6 !important}
+.cockpit .cpwr{border-color:#a78bfa !important;box-shadow:0 0 10px rgba(167,139,250,.55) !important}
+.cockpit .cpbody{scrollbar-color:#5144a7 #0b1023}
+.cockpit .cpreset,.cockpit .cbtn,.cockpit .ctile{
+ background:linear-gradient(155deg,#182246,#0d1430) !important;
+ border:1px solid rgba(100,125,255,.32) !important;color:#eaf0ff !important;
+ box-shadow:inset 0 1px rgba(255,255,255,.04) !important;
+}
+.cockpit .cpreset:hover,.cockpit .cpreset.on,.cockpit .ctile:hover{
+ border-color:#22d3ee !important;box-shadow:0 0 15px rgba(34,211,238,.22),0 0 18px rgba(139,92,246,.16) !important;
+}
+.cockpit .cbtn.on,.cockpit .cbtn.prim{
+ background:linear-gradient(110deg,#5531d7,#167de8 58%,#08b8d4) !important;
+ border-color:#7dd3fc !important;color:white !important;
+ box-shadow:0 0 16px rgba(96,91,255,.4) !important;
+}
+.cockpit .knob-wrap.big .knob-val{color:#b8c7ff !important}
+.cockpit .knob-label{color:#b9c9f2 !important}
+.cockpit .eqcurve{background:#080d20 !important;border-color:#35477c !important}
+.cockpit .cg-empty{border-color:#27365f !important;color:#a7b8e8 !important}
+.cockpit .cscore-b{background:#202b50 !important}
+.cockpit .cmeter{background:linear-gradient(90deg,#06d6a0,#22d3ee 55%,#a855f7) !important}
+.cockpit .ctransport{
+ background:linear-gradient(110deg,#111a39,#0a1025) !important;
+ border:1px solid rgba(91,120,255,.42) !important;
+ box-shadow:0 0 20px rgba(59,130,246,.12) !important;
+}
+.cockpit .rbtn{
+ background:radial-gradient(circle at 35% 25%,#293b70,#0c1430) !important;
+ border-color:#455b9b !important;color:#e8f2ff !important;
+ box-shadow:inset 0 1px 3px rgba(255,255,255,.12),0 4px 12px #030611 !important;
+}
+.cockpit .rbtn.play{
+ background:radial-gradient(circle at 35% 25%,#d8b4fe,#7c3aed 55%,#263bff) !important;
+ color:white !important;border-color:#c4b5fd !important;
+ box-shadow:0 0 24px rgba(139,92,246,.7),0 0 40px rgba(34,211,238,.18) !important;
+}
+.cockpit .clcd{background:#080d20 !important;border-color:#40558e !important;color:#67e8f9 !important;text-shadow:0 0 9px #22d3ee !important}
+.cockpit .expert-face{display:flex !important;align-items:center !important;gap:18px !important;min-height:150px !important;padding:10px !important;
+ background:radial-gradient(ellipse at 30% 50%,rgba(33,95,220,.24),transparent 65%),linear-gradient(110deg,#0b1530,#12112d) !important;border:1px solid rgba(77,151,255,.3) !important;border-radius:12px !important}
+.cockpit .expert-face .ef-portrait{width:154px !important;height:154px !important;border-radius:50% !important;
+ background:radial-gradient(circle at 50% 45%,#1b4b8e,#080c20 72%) !important;
+ box-shadow:0 0 25px rgba(34,211,238,.4),0 0 42px rgba(139,92,246,.2),inset 0 0 0 2px rgba(34,211,238,.5) !important}
+.cockpit .expert-face .ef-name{font-size:20px;color:#f4f7ff}
+.cockpit .expert-face .ef-role{font-size:13px;color:#b7c8ee}
+.cockpit .studio-center > .cpanel:first-child{min-height:205px}
+.cockpit .studio-center > .cpanel:first-child .cpbody{overflow:hidden}
+.cockpit .ctile .ct-e{filter:drop-shadow(0 0 7px rgba(34,211,238,.45))}
+.cockpit .ctiles{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+@media(max-width:1100px){
+ .cockpit{grid-template-columns:minmax(170px,.7fr) minmax(0,1.5fr) !important;grid-template-rows:auto auto auto !important;overflow:auto !important}
+ .cockpit .studio-left{grid-column:1}
+ .cockpit .studio-center{grid-column:2}
+ .cockpit .ccol:nth-child(3){grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+ .cockpit .ctransport{grid-column:1/-1}
+}
+@media(max-width:720px){
+ .cockpit{display:flex !important;flex-direction:column !important;overflow:visible !important}
+ .cockpit .expert-face .ef-portrait{width:112px !important;height:112px !important}
+ .cockpit .ctiles{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+ .cockpit .ctransport{flex-wrap:wrap}
+}
