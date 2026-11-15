@@ -763,7 +763,24 @@ RÈGLES D’UTILISATION :
       ...effectChoices.map(([v,l]) => h('label', { style:{display:'flex',alignItems:'center',gap:'7px',fontSize:'11px',color:'var(--rtxt)'} }, effectChecks.get(v), l)));
     const status = h('div.muted', { style: { minHeight: '20px', marginTop: '8px' } }, 'L’ingénieur peut préparer un plan, puis appliquer les traitements disponibles au son.');
     const planBox = h('div', { style: { display: 'grid', gap: '6px', marginTop: '8px' } });
-    const send = h('button.rbtn.p', '🧠 Demander à l’ingénieur');
+    const send = h('button.rbtn.p', '🎧 Envoyer à La Zone');
+    const voiceBtn = h('button.rbtn', { type: 'button' }, '🎙️ Parler à La Zone');
+    const voiceStatus = h('div.muted', { style: { marginTop: '6px', fontSize: '11px' } }, 'Conversation vocale : appuie sur le micro, parle, puis La Zone te répond à voix haute.');
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null, listening = false;
+    const speak = (text) => {
+      if (!('speechSynthesis' in window) || !text) return;
+      try { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(String(text)); utterance.lang = 'fr-FR'; utterance.rate = 1; window.speechSynthesis.speak(utterance); } catch {}
+    };
+    const stopListening = () => { if (recognition && listening) { listening = false; try { recognition.stop(); } catch {} } };
+    if (SpeechRecognitionAPI) {
+      recognition = new SpeechRecognitionAPI(); recognition.lang = 'fr-FR'; recognition.continuous = false; recognition.interimResults = true;
+      recognition.onstart = () => { listening = true; voiceBtn.textContent = '⏹️ Arrêter le micro'; voiceStatus.textContent = 'La Zone t’écoute…'; if ('speechSynthesis' in window) window.speechSynthesis.cancel(); };
+      recognition.onresult = (event) => { let interim = '', finalText = ''; for (let i = event.resultIndex; i < event.results.length; i++) { const part = event.results[i][0]?.transcript || ''; if (event.results[i].isFinal) finalText += part; else interim += part; } if (interim) voiceStatus.textContent = 'J’entends : ' + interim; if (finalText.trim()) { input.value = finalText.trim(); voiceStatus.textContent = 'Demande reçue : ' + finalText.trim(); askExpert(finalText.trim()); } };
+      recognition.onerror = (event) => { voiceStatus.textContent = 'Micro : ' + (event.error || 'erreur de reconnaissance'); };
+      recognition.onend = () => { listening = false; voiceBtn.textContent = '🎙️ Parler à La Zone'; if (!busy && !voiceStatus.textContent.startsWith('Demande reçue')) voiceStatus.textContent = 'Micro arrêté. Tu peux reprendre la conversation.'; };
+    } else { voiceBtn.disabled = true; voiceBtn.title = 'Reconnaissance vocale non disponible dans ce navigateur'; voiceStatus.textContent = 'La reconnaissance vocale du navigateur n’est pas disponible ici. Utilise Chrome ou Edge à jour et autorise le micro.'; }
+    voiceBtn.onclick = () => { if (!recognition) return; if (listening) { stopListening(); return; } try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); recognition.start(); } catch (e) { voiceStatus.textContent = 'Impossible de démarrer le micro : ' + (e?.message || e); } };
     const applyBtn = h('button.rbtn.g', { disabled: true }, '✓ Exécuter les modifications');
     const undoBtn = h('button.rbtn', { disabled: true }, '↩ Restaurer l’original');
     let pendingPlan = null, busy = false;
@@ -867,7 +884,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
       } catch (e) { say('expert', 'Erreur pendant le traitement : ' + (e?.message || e)); status.textContent = 'Traitement interrompu. L’original est conservé.'; }
       finally { busy = false; send.disabled = false; applyBtn.disabled = !pendingPlan; }
     };
-    send.onclick = askExpert; applyBtn.onclick = execute;
+    send.onclick = () => askExpert(); applyBtn.onclick = execute;
     undoBtn.onclick = () => { const t = trackNow(); if (t?.original) { t.buffer = cloneAudioBuffer(t.original); t.fxDone = []; save(); if (cur === 'timeline') go('timeline'); status.textContent = 'Prise originale restaurée.'; } };
     root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 280px' } },
       h('div.panel', h('div.ph', '🎙️ La Zone — ingénieur du son IA', h('span.r', 'planifie et exécute les traitements')),
