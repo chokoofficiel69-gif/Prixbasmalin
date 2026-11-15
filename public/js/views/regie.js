@@ -912,6 +912,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
         });
         pendingPlan = parsePlan(raw, chosen);
         say('expert', pendingPlan.message || 'Plan de traitement prêt. Vérifie les opérations avant exécution.');
+        speak(pendingPlan.message || 'Ton plan de traitement est prêt.');
         for (const a of pendingPlan.actions) planBox.append(h('div', { style: { padding: '8px 10px', background: '#101027', border: '1px solid var(--rline)', borderRadius: '8px', fontSize: '12px' } }, '• ' + a.type + ' — ' + JSON.stringify(a.params || {})));
         applyBtn.disabled = !pendingPlan.actions.length;
         status.textContent = pendingPlan.actions.length + ' opération(s) prêtes. Clique sur Exécuter pour modifier le son.';
