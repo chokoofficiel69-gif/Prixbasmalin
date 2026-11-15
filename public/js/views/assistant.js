@@ -261,11 +261,12 @@ export function mountAssistant(S) {
       listen();
       return;
     }
-    if (reply) say(reply);
-    await exec(actions);
+    const ok = await exec(actions);
+    if (!ok) return;
     const last = [...actions].reverse().find(x => x?.a)?.a;
     const P = showProposals(last);
-    if (actions.some(x => !['stop', 'pause', 'play', 'undo', 'redo', 'volume', 'importInstru'].includes(x.a))) say('C’est fait.' + spokenNext(P));
+    if (reply) await say(reply + (actions.length ? spokenNext(P) : ''));
+    else if (actions.some(x => !['stop', 'pause', 'play', 'undo', 'redo', 'volume', 'importInstru'].includes(x.a))) await say('C’est fait.' + spokenNext(P));
   }
   async function exec(actions, side = false) {
     if (!side) busy = true;
@@ -273,12 +274,13 @@ export function mountAssistant(S) {
       if (!x?.a || !S.do[x.a]) continue;
       status.innerHTML = `<span class="spinner"></span> ${LABELS[x.a] || x.a}…`;
       try { await S.do[x.a](x); }
-      catch (e) { if (!side) busy = false; status.textContent = ''; await say(`Problème : ${e.message || e}`.slice(0, 140)); drain(); return; }
+      catch (e) { if (!side) busy = false; status.textContent = ''; await say(`Problème : ${e.message || e}`.slice(0, 140)); drain(); return false; }
     }
-    if (side) return;
+    if (side) return true;
     busy = false;
     status.textContent = on ? '👂 Je t’écoute…' : '✓ Fait';
     drain();
+    return true;
   }
   // appelé par le studio quand une prise se termine (bouton, « stop », silence ou fin de l'instru)
   async function onRecordStopped() {
