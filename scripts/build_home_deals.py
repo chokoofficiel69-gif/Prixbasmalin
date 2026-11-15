@@ -279,6 +279,7 @@ def build(awin, sheets, previous=None):
     previous_gifts = previous.get("gifts", []) if isinstance(previous.get("gifts"), list) else []
     previous_rotation = previous.get("rotation", {}) if isinstance(previous.get("rotation"), dict) else {}
     history = previous.get("rotation_history", [])
+    history = history if isinstance(history, list) else []
     history = [entry for entry in history if isinstance(entry, dict)][-ROTATION_HISTORY_LIMIT:]
 
     if reference_time is None:
