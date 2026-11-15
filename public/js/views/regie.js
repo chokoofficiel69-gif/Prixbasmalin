@@ -5,8 +5,9 @@
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
 import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
-import { decodeBlob, drawWave } from '../lib/audio.js';
+import { decodeBlob, drawWave, denoise, antipop, voiceChain, normalize, loudness } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
+import { analyzeSamples, buildVoiceProposals, antipopFor } from '../lib/ingexpert.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
 const CSS = `
@@ -318,6 +319,7 @@ export async function render(el, { params }) {
       toast('Décodage de l’audio…');
       const buffer = await decodeBlob(files[0]);
       tracks.push({ name: files[0].name.replace(/\.[^.]+$/, '') || 'Import', kind: 'voix', gainDb: 0, pan: 0, offset: 0, mute: false, solo: false, armed: false, empty: false, fxDone: [], fx: null, fileId: null, buffer, original: buffer });
+      proposalCache = {};
       await save();
       toast('Piste importée ✓ (partagée avec la page Enregistrement)', 'ok');
       if (cur === 'timeline') go('timeline'); else if (cur === 'regie') go('regie');
@@ -371,6 +373,7 @@ export async function render(el, { params }) {
       if (!buffer || buffer.duration < 0.2) { toast('Prise trop courte, réessaie.', 'bad'); return; }
       if (recOpt.arm !== 'new' && tracks[+recOpt.arm]) { const t = tracks[+recOpt.arm]; t.buffer = buffer; t.original = buffer; t.empty = false; }
       else tracks.push({ name: `Voix ${tracks.filter(t => !isInstru(t)).length + 1}`, kind: 'voix', gainDb: 0, pan: 0, offset: 0, mute: false, solo: false, armed: true, empty: false, fxDone: [], fx: null, fileId: null, buffer, original: buffer });
+      proposalCache = {};
       await save();
       toast(`Prise enregistrée ✓ (${buffer.duration.toFixed(1)} s) — visible dans la Timeline`, 'ok');
       go(cur);
@@ -405,6 +408,49 @@ export async function render(el, { params }) {
     finally { atBusy = false; }
   }
   function revertTrack(track, status) { if (track?.original) { track.buffer = track.original; track.fxDone = []; save(); status.textContent = 'Piste rétablie (voix brute)'; toast('Original rétabli', 'ok'); } }
+
+  // ---------- Ingé son IA : NETTOYER & MIXER la voix (sans autotune) ----------
+  // Débruitage → anti-plosives → EQ/compression/de-esser/présence/air/réverbe → niveau.
+  // Réglages adaptés aux mesures réelles de la voix (buildVoiceProposals).
+  let proposalCache = {}; // `${trackIdx}:${id}` -> AudioBuffer traité
+  let mixBusy = false;
+  function analyzeVoix(track) {
+    const buf = track.original || track.buffer;
+    const m = analyzeSamples(buf.getChannelData(0), buf.sampleRate);
+    return m;
+  }
+  async function cleanMix(srcBuf, settings, m) {
+    let cur = srcBuf;
+    cur = await denoise(cur, 0.5);                       // réduction du bruit de fond
+    cur = antipop(cur, antipopFor(m.lowRatio || 0));     // atténue les plosives (p/b/t)
+    cur = await voiceChain(cur, settings);               // EQ + compression + de-esser + présence + air + réverbe légère
+    cur = normalize(cur, -1);                            // met au niveau
+    return cur;
+  }
+  async function buildProposal(track, idx, prop, status) {
+    const key = `${idx}:${prop.id}`;
+    if (proposalCache[key]) return proposalCache[key];
+    const m = analyzeVoix(track);
+    if (status) status.textContent = `Préparation « ${prop.name} »…`;
+    const out = await cleanMix(track.original || track.buffer, prop.settings, m);
+    proposalCache[key] = out;
+    if (status) status.textContent = '';
+    return out;
+  }
+  async function applyCleanMix(track, idx, prop, status) {
+    if (!track?.buffer) { toast('Choisis une piste voix.', 'bad'); return; }
+    if (mixBusy) return; mixBusy = true;
+    try {
+      if (status) status.textContent = `Nettoyage & mixage « ${prop.name} »…`;
+      const out = await buildProposal(track, idx, prop, status);
+      if (!track.original) track.original = track.buffer;
+      track.buffer = out; track.fxDone = [...(track.fxDone || []).filter(x => x !== 'mix'), 'mix'];
+      await save();
+      if (status) status.textContent = `✓ Voix nettoyée & mixée (${prop.name}) — écoute « Après »`;
+      toast('Voix nettoyée & mixée ✓', 'ok');
+    } catch (e) { if (status) status.textContent = 'Erreur'; toastErr(e); }
+    finally { mixBusy = false; }
+  }
 
   // ================================================================ onglets
   function viewTimeline() {
@@ -588,25 +634,74 @@ export async function render(el, { params }) {
 
   function viewIA() {
     const root = h('div');
-    root.innerHTML = `<div class="grid" style="grid-template-columns:1.3fr 1fr">
-      <div class="panel" style="display:flex;flex-direction:column"><div class="ph">🧠 Ingé son IA — Marco <span class="r" style="color:#8a8fb5">aperçu · branchement en phase 5</span></div>
-       <div class="pb" style="flex:1;overflow:auto">
-        <div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Salut ! J'ai écouté ta prise. <b>Tonalité : Do# mineure</b>, tempo 90 BPM. Ta voix est juste (98 %), un peu de sifflantes à maîtriser. Je te prépare 3 versions.</div></div>
-        <div class="msg me">Mets-moi un truc propre pour du rap mélodique.</div>
-        <div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Parfait. J'ai calé l'Auto-Tune sur Do# mineure, posé un de-esser léger et +2 dB de présence. Écoute les 3 rendus ci-contre 👉</div></div>
-       </div>
-       <div class="pb" style="border-top:1px solid var(--rline);display:flex;gap:9px"><input style="flex:1;padding:8px 10px;border-radius:9px;background:#0c0c1a;border:1px solid var(--rline);color:var(--rtxt)" placeholder="Écris à Marco… « nettoie et cale sur le beat »…"><a href="#/parler" class="rbtn p" style="text-decoration:none">Parler aux IA</a></div>
-      </div>
-      <div style="display:grid;gap:12px;align-content:start">
-       <div class="panel"><div class="ph">🎯 Analyse automatique <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb" style="font-size:12.5px">
-         ${[['Tonalité détectée', 'Do# mineure'], ['Tempo', '90 BPM'], ['Justesse', '98 %'], ['Sibilantes', 'à réduire'], ['Bruit de fond', '−58 dBFS (propre)']].map(x => `<div style="display:flex;margin-bottom:8px"><span class="muted">${x[0]}</span><b style="margin-left:auto;color:#bff5db">${x[1]}</b></div>`).join('')}
-       </div></div>
-       <div class="panel"><div class="ph">✨ 3 propositions</div><div class="pb"><div class="grid" style="grid-template-columns:repeat(3,1fr)">
-         <div class="vcard"><h4>🫧 Naturelle</h4><p>Correction douce, voix transparente.</p><span class="rbtn" style="width:100%;text-align:center">▶ Écouter</span></div>
-         <div class="vcard" style="border-color:var(--rpur);box-shadow:0 0 14px rgba(168,85,247,.3)"><h4>🎧 Pro</h4><p>EQ + comp + de-ess calés, prêt mix.</p><span class="rbtn p" style="width:100%;text-align:center">▶ Écouter</span></div>
-         <div class="vcard"><h4>🚀 Créative</h4><p>Autotune marqué + delay + air.</p><span class="rbtn" style="width:100%;text-align:center">▶ Écouter</span></div>
-       </div><div style="text-align:center;margin-top:12px"><span class="rbtn g" style="padding:10px 18px">✓ Appliquer la version choisie</span></div></div></div>
-      </div></div>`;
+    const vt = voixTracks();
+    const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
+    const curTrack = () => tracks[+sel.value];
+    const status = h('div.muted', { style: { fontSize: '11px', minHeight: '15px', marginTop: '6px' } }, vt.length ? 'Choisis une piste et clique « Nettoyer & mixer ».' : 'Enregistre d’abord une voix (onglet Enregistrement).');
+    const analysisBox = h('div.pb', { style: { fontSize: '12.5px' } }, h('p.muted', 'Clique « Analyser » pour mesurer ta voix.'));
+    const PROPS_META = { natural: { emo: '🫧', name: 'Naturelle', obj: 'Propre, timbre respecté' }, premium: { emo: '🎧', name: 'Pro (recommandé)', obj: 'Dense, présente, prête au mix' }, modern: { emo: '🚀', name: 'Moderne', obj: 'Plus brillante et ferme' } };
+
+    async function doAnalyze() {
+      const t = curTrack(); if (!t?.buffer) { toast('Choisis une piste voix.', 'bad'); return; }
+      status.textContent = 'Analyse de la voix…';
+      try {
+        const m = analyzeVoix(t); let lufs = null; try { lufs = Math.round((await loudness(t.original || t.buffer)) * 10) / 10; } catch {}
+        const rows = [
+          ['Niveau crête', `${m.peakDb} dBFS`],
+          ['Niveau moyen', `${m.rmsDb} dBFS`],
+          ['Dynamique', `${m.crestDb} dB${m.crestDb > 18 ? ' (très dynamique)' : m.crestDb < 8 ? ' (compressée)' : ''}`],
+          ['Saturation', m.clipPct > 0.01 ? `${m.clipPct} % ⚠️` : 'aucune'],
+          ['Sifflantes (estim.)', m.brightness > 0.6 ? 'fortes' : m.brightness > 0.35 ? 'moyennes' : 'faibles'],
+          ['Graves/plosives', m.lowRatio > 0.5 ? 'présentes' : 'maîtrisées'],
+          m.resonanceHz ? ['Résonance', `vers ${m.resonanceHz} Hz`] : null,
+          lufs != null ? ['Sonie', `${lufs} LUFS`] : null,
+        ].filter(Boolean);
+        analysisBox.innerHTML = rows.map(x => `<div style="display:flex;margin-bottom:8px"><span class="muted">${x[0]}</span><b style="margin-left:auto;color:#bff5db">${x[1]}</b></div>`).join('');
+        status.textContent = 'Analyse terminée ✓';
+      } catch (e) { status.textContent = 'Analyse impossible'; toastErr(e); }
+    }
+
+    // cartes des 3 rendus réels
+    const propCards = h('div.grid', { style: { gridTemplateColumns: 'repeat(3,1fr)' } });
+    const rebuildCards = () => {
+      propCards.innerHTML = '';
+      const t = curTrack();
+      const props = t?.buffer ? buildVoiceProposals(analyzeVoix(t), 'rap') : [];
+      for (const id of ['natural', 'premium', 'modern']) {
+        const prop = props.find(p => p.id === id) || { id, name: PROPS_META[id].name, settings: {} };
+        const meta = PROPS_META[id];
+        const card = h('div.vcard' + (id === 'premium' ? '' : ''), id === 'premium' ? { style: { borderColor: 'var(--rpur)', boxShadow: '0 0 14px rgba(168,85,247,.3)' } } : {},
+          h('h4', `${meta.emo} ${meta.name}`), h('p', meta.obj),
+          h('div', { style: { display: 'flex', gap: '5px' } },
+            h('button.rbtn', { style: { flex: '1', fontSize: '11px' }, onclick: async () => { const tt = curTrack(); if (!tt) return; status.textContent = `Préparation « ${meta.name} »…`; try { playBuffer(await buildProposal(tt, +sel.value, prop, status)); status.textContent = `▶ ${meta.name}`; } catch (e) { toastErr(e); } } }, '▶ Écouter'),
+            h('button.rbtn' + (id === 'premium' ? '.p' : ''), { style: { flex: '1', fontSize: '11px' }, onclick: () => applyCleanMix(curTrack(), +sel.value, prop, status) }, '✓ Appliquer')));
+        propCards.append(card);
+      }
+    };
+    sel.onchange = () => { rebuildCards(); analysisBox.innerHTML = '<p class="muted">Clique « Analyser » pour mesurer ta voix.</p>'; };
+
+    const premiumProp = () => buildVoiceProposals(analyzeVoix(curTrack()), 'rap').find(p => p.id === 'premium');
+    root.append(h('div.grid', { style: { gridTemplateColumns: '1.25fr 1fr' } },
+      h('div.panel', { style: { display: 'flex', flexDirection: 'column' } },
+        h('div.ph', '🧠 Ingé son IA — Marco', h('span.r', { style: { color: '#bff5db' } }, 'RÉEL · 0 €')),
+        h('div.pb', { style: { flex: '1' } },
+          h('div', { style: { display: 'flex', gap: '10px', marginBottom: '12px' } }, h('div.orb'),
+            h('div.msg.ai', { style: { margin: '0' } }, 'Donne-moi ta prise, je te la nettoie et je te la mixe : je réduis le bruit, j’enlève les « pop », j’égalise, je compresse, je dose les sifflantes et je mets au niveau. Ta mélodie n’est pas touchée (pas d’auto-tune ici).')),
+          h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', margin: '14px 0 6px', flexWrap: 'wrap' } },
+            h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel,
+            h('button.rbtn', { onclick: doAnalyze }, '🔎 Analyser')),
+          h('div', { style: { display: 'flex', gap: '7px', flexWrap: 'wrap', marginTop: '6px' } },
+            h('button.rbtn.g', { style: { padding: '10px 16px', fontWeight: '800' }, onclick: () => { const p = premiumProp(); p && applyCleanMix(curTrack(), +sel.value, p, status); } }, '✨ Nettoyer & mixer ma voix'),
+            h('button.rbtn', { onclick: () => { const t = curTrack(); playBuffer(t?.original || t?.buffer); } }, '▶ Avant'),
+            h('button.rbtn', { onclick: () => playBuffer(curTrack()?.buffer) }, '▶ Après'),
+            h('button.rbtn', { onclick: () => stopPreview() }, '⏹'),
+            h('button.rbtn', { onclick: () => revertTrack(curTrack(), status) }, '↩ Original')),
+          status,
+          h('div.muted', { style: { fontSize: '10px', marginTop: '10px', lineHeight: '1.4' } }, 'Tout se calcule en local, gratuitement. La voix brute est toujours conservée (bouton Original). « Avant/Après » pour comparer.'))),
+      h('div', { style: { display: 'grid', gap: '12px', alignContent: 'start' } },
+        h('div.panel', h('div.ph', '🎯 Analyse de ta voix', h('span.r', { style: { color: '#bff5db' } }, 'mesures réelles')), analysisBox),
+        h('div.panel', h('div.ph', '✨ 3 rendus (adaptés à ta voix)'), h('div.pb', propCards)))));
+    rebuildCards();
     return root;
   }
 
