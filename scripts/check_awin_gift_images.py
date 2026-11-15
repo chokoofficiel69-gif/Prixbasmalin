@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Vérifie les images des idées cadeaux Awin sans toucher aux prix ni aux liens."""
+import argparse
 import ipaddress
 import json
 import re
@@ -180,6 +181,40 @@ def apply_image_checks(data, results, now=None):
     return data, summary
 
 
+def restore_previous_snapshot_if_rotation_unverified(data, previous_data, results, now=None, required=48):
+    """Keep the last published gift selection if a new 48h rotation fails image checks."""
+    rotation = data.get("rotation", {}) if isinstance(data.get("rotation"), dict) else {}
+    if rotation.get("status") != "rotated" or not isinstance(previous_data, dict):
+        return data, False, None
+    gifts = data.get("gifts", [])
+    target = min(required, len(gifts))
+    verified = sum(gift.get("image_verified") is True for gift in gifts if isinstance(gift, dict))
+    if target == 0 or verified >= target:
+        return data, False, None
+    previous_gifts = previous_data.get("gifts", [])
+    if not isinstance(previous_gifts, list) or not previous_gifts:
+        return data, False, None
+
+    now = now or datetime.now(timezone.utc)
+    checked_at = now.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    previous_checked, previous_summary = apply_image_checks(previous_data, results, now=now)
+    restored = dict(data)
+    restored["gifts"] = previous_checked.get("gifts", [])
+    restored["rotation"] = dict(previous_checked.get("rotation") or {})
+    restored["rotation"].update({
+        "interval_hours": 48,
+        "last_rotated_at": (
+            restored["rotation"].get("last_rotated_at")
+            or previous_checked.get("awin_fetched_at")
+        ),
+        "status": "held_previous_snapshot",
+        "last_attempt_at": checked_at,
+        "last_attempt_verified_count": verified,
+    })
+    restored["rotation_history"] = previous_checked.get("rotation_history", [])
+    return restored, True, previous_summary
+
+
 def check_urls(urls, max_workers=8):
     results = {}
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -193,7 +228,10 @@ def check_urls(urls, max_workers=8):
     return results
 
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--previous", type=Path, help="Dernier snapshot publié, utilisé comme repli si la nouvelle rotation échoue.")
+    args = parser.parse_args(argv)
     if not FEED.exists():
         print("data/home-deals.json absent : vérification des images impossible.", file=sys.stderr)
         return 1
@@ -202,14 +240,31 @@ def main():
     except (OSError, json.JSONDecodeError) as error:
         print(f"Flux idées cadeaux invalide : {error}", file=sys.stderr)
         return 1
-    gifts = data.get("gifts", [])
+
+    previous_data = None
+    if args.previous:
+        try:
+            previous_data = json.loads(args.previous.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            print(f"Snapshot précédent indisponible pour le repli : {error}", file=sys.stderr)
+
+    gifts_to_check = list(data.get("gifts", []))
+    if isinstance(previous_data, dict):
+        gifts_to_check.extend(previous_data.get("gifts", []))
     urls = sorted({
         gift.get("image")
-        for gift in gifts
+        for gift in gifts_to_check
         if isinstance(gift, dict) and isinstance(gift.get("image"), str) and gift["image"].startswith("https://")
     })
     results = check_urls(urls)
     data, summary = apply_image_checks(data, results)
+    data, restored, previous_summary = restore_previous_snapshot_if_rotation_unverified(
+        data, previous_data, results
+    )
+    if restored:
+        summary["rotation_fallback"] = "previous_snapshot"
+        summary["verified_gifts"] = previous_summary["verified_gifts"]
+
     FEED.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(
         "Images idées cadeaux Awin : "
@@ -219,9 +274,9 @@ def main():
         f"{summary['transient_urls']} erreurs temporaires, "
         f"{summary['preserved_after_transient']} visuels conservés grâce à une vérification de moins de 48 h, "
         f"{summary['verified_gifts']} cartes utilisables."
+        + (" Rotation annulée : dernier snapshot conservé." if restored else "")
     )
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())
