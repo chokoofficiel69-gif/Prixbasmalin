@@ -356,6 +356,37 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 @media(max-width:720px) { .studio-expert-workspace.is-visible { grid-template-columns:1fr; } .studio-expert-workspace > .studio-expert-panel { min-width:0; width:100%; resize:vertical; } }
 
 
+/* ===== Accueil harmonisé — identité studio pro ===== */
+.home-hero {
+  position: relative; overflow: hidden; border: 1px solid #2f4d74; border-radius: 12px;
+  padding: 22px 24px; margin-bottom: 6px;
+  background:
+    radial-gradient(ellipse at 85% 20%, rgba(57,140,255,.22), transparent 45%),
+    radial-gradient(ellipse at 5% 110%, rgba(101,216,255,.12), transparent 45%),
+    linear-gradient(115deg, #10141e 0%, #111c2b 55%, #0d111a 100%);
+  box-shadow: inset 0 1px 0 rgba(160,210,255,.1);
+}
+.home-hero .home-hero-glow {
+  position: absolute; inset: 0; pointer-events: none; opacity: .22;
+  background-image: radial-gradient(rgba(125,190,255,.5) .7px, transparent .9px);
+  background-size: 18px 18px; mask-image: linear-gradient(90deg, transparent 25%, #000 85%);
+}
+.home-hero-copy { position: relative; z-index: 1; display: grid; gap: 6px; }
+.home-hero .eyebrow { color: #76caff; font-size: 10px; font-weight: 800; letter-spacing: .22em; }
+.home-hero h1 { margin: 0; font-size: clamp(22px, 3vw, 30px); color: #f1f7ff; }
+.home-hero p { margin: 0; color: #a9bcd4; max-width: 640px; }
+.section-label { font-size: 11px; font-weight: 800; letter-spacing: .18em; color: var(--muted); margin: 6px 2px 0; }
+/* Tuiles « modules » : denses, barre d'accent, icône en pastille — look console, pas SaaS */
+.grid.modules { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 9px; }
+.module-card { position: relative; display: flex; gap: 11px; align-items: flex-start; padding: 12px 13px 12px 15px; overflow: hidden; }
+.module-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--accent), var(--accent2)); opacity: .85; }
+.module-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.module-card .module-ic { flex: none; width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; font-size: 18px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--panel2)); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.module-card .module-body { min-width: 0; display: grid; gap: 2px; }
+.module-card .module-body h3 { margin: 0; font-size: 14px; letter-spacing: .01em; }
+.module-card .module-body p { margin: 0; }
+
 /* Studio IA — banque de réglages vocaux avancés */
 .vocal-knob-console { border:1px solid #34445c; background:linear-gradient(180deg,#151f2d,#0d1420)!important; color:#e6eefb; }
 .vocal-knob-console .vocal-knob-grid { scrollbar-width:thin; scrollbar-color:#526b89 #101927; }
