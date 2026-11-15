@@ -577,24 +577,35 @@ export async function render(el, { params }) {
     const grid=h('div.grid',{style:{gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))'}});
     grid.append(autotunePanel());
     const modules=[
-      {name:'Égaliseur voix',desc:'Filtre passe-haut, correction des bas-médiums, présence et air.',kind:'voice',params:{highpass:85,low:-1,presence:2,air:2,deess:1,comp:0,reverb:0}},
-      {name:'Compression',desc:'Contrôle de dynamique avec compresseur et gain de compensation.',kind:'voice',params:{highpass:40,low:0,presence:0,air:0,deess:0,comp:.72,reverb:0}},
-      {name:'De-Esser',desc:'Atténuation des sifflantes dans la zone aiguë.',kind:'voice',params:{highpass:40,low:0,presence:0,air:0,deess:6,comp:0,reverb:0}},
-      {name:'Réverbération',desc:'Espace court et naturel.',kind:'fx',chain:[{t:'fx',kind:'reverb',size:1.8,decay:3,mix:.2}]},
-      {name:'Delay / Écho',desc:'Écho stéréo court synchronisable par réglage.',kind:'fx',chain:[{t:'fx',kind:'delay',time:.28,fb:.28,mix:.22}]},
-      {name:'Saturation',desc:'Harmoniques et densité modérées.',kind:'fx',chain:[{t:'fx',kind:'distort',amt:1.5,tone:6500}]},
-      {name:'Harmonies',desc:'Deux voix harmoniques autour de la mélodie.',kind:'fx',chain:[{t:'harmony',steps:[2,4],gain:.32}]},
-      {name:'Doublage stéréo',desc:'Double vocal léger avec élargissement.',kind:'fx',chain:[{t:'double',steps:[0,0],gain:.35}]}
+      {name:'Égaliseur voix',desc:'Passe-haut, graves, présence et air.',kind:'voice',params:{highpass:85,low:-1,presence:2,air:2,deess:1,comp:0,reverb:0},controls:[['highpass','Passe-haut',40,180,1,' Hz'],['low','Graves',-6,6,.5,' dB'],['presence','Présence',-6,6,.5,' dB'],['air','Air',-6,6,.5,' dB']]},
+      {name:'Compression',desc:'Compresseur vocal et contrôle de dynamique.',kind:'voice',params:{highpass:40,low:0,presence:0,air:0,deess:0,comp:.72,reverb:0},controls:[['comp','Intensité',0,1,.01,'']]},
+      {name:'De-Esser',desc:'Atténuation des sifflantes.',kind:'voice',params:{highpass:40,low:0,presence:0,air:0,deess:6,comp:0,reverb:0},controls:[['deess','Réduction',0,8,.1,' dB']]},
+      {name:'Réverbération',desc:'Espace et profondeur.',kind:'fx',chain:[{t:'fx',kind:'reverb',size:1.8,decay:3,mix:.2}],controls:[['mix','Mélange',0,0.7,.01,''],['size','Taille',.5,4,.1,' s']]},
+      {name:'Delay / Écho',desc:'Répétitions avec retour réglable.',kind:'fx',chain:[{t:'fx',kind:'delay',time:.28,fb:.28,mix:.22}],controls:[['time','Temps',.05,1,.01,' s'],['fb','Feedback',0,.8,.01,''],['mix','Mélange',0,.7,.01,'']]},
+      {name:'Saturation',desc:'Harmoniques et densité.',kind:'fx',chain:[{t:'fx',kind:'distort',amt:1.5,tone:6500}],controls:[['amt','Drive',1,8,.1,''],['tone','Filtre',2000,12000,100,' Hz']]},
+      {name:'Harmonies',desc:'Deux voix harmoniques générées à partir de la mélodie.',kind:'fx',chain:[{t:'harmony',steps:[2,4],gain:.32}],controls:[['gain','Niveau',.1,.8,.01,'']]},
+      {name:'Doublage stéréo',desc:'Double vocal léger et élargissement.',kind:'fx',chain:[{t:'double',steps:[0,0],gain:.35}],controls:[['gain','Niveau',.1,.8,.01,'']]}
     ];
     for(const m of modules){
+      const controls=h('div',{style:{display:'grid',gap:'9px',margin:'12px 0'}});
+      for(const [key,label,min,max,step,unit] of m.controls){
+        const target=m.kind==='voice'?m.params:m.chain[0];
+        const initial=key==='mix'||key==='size'&&m.name==='Réverbération'?target[key]??.2:target[key]??0;
+        const line=h('label',{style:{display:'grid',gap:'4px',fontSize:'12px'}});
+        const top=h('div',{style:{display:'flex',justifyContent:'space-between'}},h('span',label));
+        const value=h('b',String(initial)+unit); top.append(value);
+        const input=h('input',{type:'range',min,max,step,value:initial,style:{width:'100%'}});
+        input.oninput=()=>{target[key]=Number(input.value);value.textContent=Number(input.value).toFixed(step<1?2:0)+unit;};
+        line.append(top,input);controls.append(line);
+      }
       grid.append(h('div.panel',
         h('div.ph',m.name),
         h('div.pb',
-          h('div.muted',{style:{minHeight:'38px',marginBottom:'10px'}},m.desc),
+          h('div.muted',{style:{minHeight:'32px'}},m.desc),
+          controls,
           h('button.rbtn.p',{onclick:()=>applyLibraryPreset(m)},'Appliquer à la piste sélectionnée'))));
     }
-    const status=h('div.muted',{style:{marginTop:'12px'}},'Chaque bouton lance un traitement local et sauvegarde le résultat sur la piste sélectionnée. Utilise Original pour revenir à la prise brute.');
-    root.append(grid,status);
+    root.append(grid,h('div.muted',{style:{marginTop:'12px'}},'Régle les paramètres avant application. Le traitement est rendu sur la piste sélectionnée et sauvegardé. Le bouton Original permet de revenir à la prise brute.'));
     return root;
   }
 
