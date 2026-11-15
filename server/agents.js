@@ -67,11 +67,11 @@ export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, syn
     const lead = { name: 'Marco — Ingénieur du son en chef', role: 'cerveau principal et ingénieur du son en chef : garde la conversation avec l’utilisateur, décide de la stratégie, coordonne les dix spécialistes, tranche les désaccords et assume la responsabilité du rendu final', model: synthModel };
     const roster = agents.map(a => `- ${a.name} : ${a.role}`).join('\n');
     const plan = await runOne(lead,
-      `Tâche :\n${task}\n\nÉquipe disponible :\n${roster}\n\nDécoupe la tâche en 2 à ${Math.min(6, agents.length * 2)} étapes ordonnées et attribue chacune à un agent de l'équipe. Réponds UNIQUEMENT avec du JSON :\n{"etapes":[{"agent":"Nom exact","consigne":"..."}]}`,
+      `Tâche :\n${task}\n\nÉquipe disponible :\n${roster}\n\nDécoupe la tâche en 2 à ${Math.min(10, agents.length)} étapes ordonnées et attribue chacune à un agent de l'équipe. Réponds UNIQUEMENT avec du JSON :\n{"etapes":[{"agent":"Nom exact","consigne":"..."}]}`,
       'Plan de travail');
     const parsed = extractJson(plan);
     const steps = Array.isArray(parsed?.etapes) ? parsed.etapes : agents.map(a => ({ agent: a.name, consigne: task }));
-    for (const s of steps.slice(0, 8)) {
+    for (const s of steps.slice(0, 10)) {
       const agent = agents.find(a => a.name.toLowerCase() === String(s.agent || '').toLowerCase()) || agents[0];
       await runOne(agent, `Tâche globale :\n${task}\n\nTravail déjà fait :\n${history() || '(rien)'}\n\nTa mission maintenant : ${s.consigne}`, String(s.consigne || 'Étape').slice(0, 80));
     }
