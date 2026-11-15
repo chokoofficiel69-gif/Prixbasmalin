@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FEED = ROOT / "data" / "awin-products.json"
 FOLDER = "produits"
 MAX_FEED_AGE = timedelta(days=7)
+MAX_MERCHANT_PRICE_AGE = timedelta(hours=48)
 PER_CATEGORY = 48
 CATEGORIES = OrderedDict([
     ("tech", ("High-tech", "Objets connectés, caméras, accessoires et petits appareils high-tech")),
@@ -60,17 +61,30 @@ def eligible(p, now):
     try:
         price = float(p.get("priceValue"))
     except (TypeError, ValueError):
-        return None
+        price = None
     image = str(p.get("image") or "")
     url = str(p.get("sourceUrl") or "")
     name = clean(p.get("name"))
     feed_time = parse_feed_time(p.get("feedUpdatedAt"))
-    if not (price >= MIN_PRICE and name and p.get("merchant") and image.startswith("https://") and url.startswith("https://")):
+    merchant_time = parse_feed_time(p.get("merchantUpdatedAt"))
+    if not (name and p.get("merchant") and image.startswith("https://") and url.startswith("https://")):
         return None
+    # feedUpdatedAt décrit l'import du flux, pas la date de mise à jour du prix.
+    # Il sert uniquement à vérifier que le catalogue source n'est pas trop ancien.
     if feed_time is None or feed_time > now + timedelta(minutes=5) or now - feed_time > MAX_FEED_AGE:
         return None
     if EXCLUDED.search(name):
         return None
+    price_is_fresh = (
+        price is not None
+        and price >= MIN_PRICE
+        and merchant_time is not None
+        and merchant_time <= now + timedelta(minutes=5)
+        and now - merchant_time < MAX_MERCHANT_PRICE_AGE
+    )
+    tax_status = clean(p.get("priceTaxStatus") or p.get("price_tax_status") or "unspecified").casefold()
+    if tax_status not in ("included", "unspecified"):
+        tax_status = "unspecified"
     shipping = p.get("shippingPriceValue")
     return {
         "id": str(p.get("id")),
@@ -79,8 +93,11 @@ def eligible(p, now):
         "merchant": clean(p.get("merchant")),
         "image": image,
         "url": url,
-        "price": round(price, 2),
-        "shipping": shipping if isinstance(shipping, (int, float)) and not isinstance(shipping, bool) and shipping >= 0 else None,
+        "price": round(price, 2) if price_is_fresh else None,
+        "price_date": merchant_time.date().isoformat() if price_is_fresh else None,
+        "price_time": merchant_time if price_is_fresh else None,
+        "price_tax_status": tax_status if price_is_fresh else "unspecified",
+        "shipping": shipping if price_is_fresh and isinstance(shipping, (int, float)) and not isinstance(shipping, bool) and shipping >= 0 else None,
         "feed_date": feed_time.date().isoformat(),
         "feed_time": feed_time,
         "has_gtin": bool(p.get("gtin")),
@@ -90,7 +107,7 @@ def eligible(p, now):
 def select(products, limit=PER_CATEGORY):
     """Produits les plus récents, en alternant les marchands pour une sélection variée."""
     by_merchant = OrderedDict()
-    for p in sorted(products, key=lambda x: (not x["has_gtin"], -x["feed_time"].timestamp(), x["price"], x["id"])):
+    for p in sorted(products, key=lambda x: (not x["has_gtin"], -x["feed_time"].timestamp(), x["price"] if x["price"] is not None else float("inf"), x["id"])):
         by_merchant.setdefault(p["merchant"], []).append(p)
     picked, seen = [], set()
     while len(picked) < limit and any(by_merchant.values()):
@@ -108,27 +125,49 @@ def select(products, limit=PER_CATEGORY):
 
 
 def card(p):
-    shipping = "Livraison gratuite" if p["shipping"] == 0 else (
-        f"Livraison {euro(p['shipping'])}" if p["shipping"] is not None else "Livraison à vérifier")
+    if p["price"] is None:
+        price_html = "<strong>Prix non affiché</strong>"
+        price_note = "Date individuelle du marchand absente ou supérieure à 48 h · Livraison à vérifier"
+    else:
+        price_html = f"<strong>{euro(p['price'])}</strong>"
+        if p["price_tax_status"] == "included":
+            price_note = f"Prix TTC indiqué par le marchand le {date_fr(p['price_date'])}"
+        else:
+            price_note = f"Prix source du {date_fr(p['price_date'])} · TVA non confirmée"
+        shipping = "Livraison gratuite" if p["shipping"] == 0 else (
+            f"Livraison {euro(p['shipping'])}" if p["shipping"] is not None else "Livraison à vérifier")
+        price_note += " · " + shipping
     brand = f"{e(p['brand'])} · " if p["brand"] else ""
     return (f'<a class="card pm-card" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener">'
             f'<div class="visual"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy"></div>'
             f'<div class="c"><small>{brand}{e(p["merchant"])}</small><b>{e(p["name"])}</b>'
-            f'<strong>{euro(p["price"])}</strong>'
-            f'<small>Prix indiqué dans le flux du marchand du {date_fr(p["feed_date"])} · {e(shipping)}</small></div></a>')
+            f'{price_html}'
+            f'<small>{e(price_note)}</small></div></a>')
 
 
-NOTICE = ('<p class="source">Prix, photos et liens issus des flux marchands autorisés (réseau Awin). '
-          'Chaque prix est celui indiqué par le marchand dans son flux à la date affichée : il peut avoir changé, '
-          'vérifiez-le chez le marchand avant d’acheter. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>')
+NOTICE = ('<p class="source">Sélection de produits issus des flux Awin accessibles au compte éditeur. '
+          'Un prix source n’est affiché que si le marchand fournit une date individuelle de mise à jour de moins de 48 h. '
+          'Si la TVA n’est pas explicitement confirmée, la mention « TVA non confirmée » apparaît : ce montant ne constitue pas un prix TTC vérifié ni une comparaison multi-marchands. '
+          'Les frais de livraison inconnus sont à vérifier. Le prix et la disponibilité peuvent changer : vérifiez-les chez le marchand. '
+          'Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>')
 
 
 def category_page(slug, label, intro, items, others):
     links = " · ".join(f'<a href="/{FOLDER}/{s}.html">{e(l)}</a>' for s, l in others if s != slug)
-    latest = max(p["feed_date"] for p in items)
     merchants = sorted({p["merchant"] for p in items})
-    body = f"""<section class="panel"><h1>{e(label)} : sélection de produits et prix marchands</h1>
-<p>{e(intro)}. {len(items)} produits de {len(merchants)} boutique{'s' if len(merchants) > 1 else ''} partenaire{'s' if len(merchants) > 1 else ''}, avec le prix indiqué par chaque marchand dans son flux (dernière mise à jour : {date_fr(latest)}).</p>
+    dated_prices = [p for p in items if p["price"] is not None]
+    ttc_prices = [p for p in dated_prices if p["price_tax_status"] == "included"]
+    latest_price_date = max((p["price_date"] for p in dated_prices), default=None)
+    if dated_prices:
+        price_summary = (
+            f"{len(dated_prices)} prix sources avec date individuelle de moins de 48 h, "
+            f"dont {len(ttc_prices)} explicitement TTC. "
+            f"Dernière date marchande : {date_fr(latest_price_date)}."
+        )
+    else:
+        price_summary = "Aucun prix n’est affiché : aucune date individuelle du marchand de moins de 48 h n’est disponible."
+    body = f"""<section class="panel"><h1>{e(label)} : sélection de produits</h1>
+<p>{e(intro)}. {len(items)} produits présents dans les flux Awin accessibles, issus de {len(merchants)} marchands. {price_summary}</p>
 <p>Autres rayons : {links}</p>
 <div class="grid pm-cards">{''.join(card(p) for p in items)}</div>
 <p><a href="/catalogue.html">Rechercher dans tout le catalogue →</a></p></section>
@@ -136,8 +175,8 @@ def category_page(slug, label, intro, items, others):
     ld = {"@context": "https://schema.org", "@type": "ItemList", "name": label, "numberOfItems": len(items),
           "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": p["name"]} for i, p in enumerate(items)]}
     return layout(
-        fit_title(f"{label} pas cher : sélection et prix marchands | Prix Malin", f"{label} pas cher | Prix Malin", label),
-        fit_description(f"{label} : {len(items)} produits de {', '.join(merchants[:3])} avec prix marchand daté du {date_fr(latest)}. Comparez et vérifiez chez le marchand."),
+        fit_title(f"{label} : sélection de produits | Prix Malin", f"{label} | Prix Malin", label),
+        fit_description(f"Sélection {label.lower()} issue des flux Awin accessibles. Prix source daté affiché uniquement si une date individuelle du marchand de moins de 48 h est fournie."),
         f"/{FOLDER}/{slug}.html", body,
         [("Accueil", "/"), ("Sélection produits", f"/{FOLDER}/"), (label, f"/{FOLDER}/{slug}.html")],
         extra_head=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n')
@@ -150,12 +189,12 @@ def index_page(groups):
         f'<p><a href="/{FOLDER}/{slug}.html">Voir les {len(items)} produits {e(label.lower())} →</a></p></section>'
         for slug, label, items in groups)
     total = sum(len(items) for _, _, items in groups)
-    body = f"""<section class="panel"><h1>Sélection produits des boutiques partenaires</h1>
-<p>{total} produits classés par rayon, avec le prix indiqué par chaque marchand dans son flux officiel, daté. Cliquez pour voir l’offre chez le marchand.</p></section>
+    body = f"""<section class="panel"><h1>Sélection de produits issus des flux Awin accessibles</h1>
+<p>{total} produits classés par rayon. Un prix source n’est affiché que si une date individuelle de mise à jour du marchand de moins de 48 h est fournie ; sinon, aucun montant n’est affiché. Cette sélection n’est pas une comparaison multi-marchands.</p></section>
 {sections}{NOTICE}"""
     return layout(
-        "Sélection produits des boutiques partenaires | Prix Malin",
-        fit_description(f"{total} produits de boutiques partenaires classés par rayon : high-tech, maison, beauté, mode, enfants, sport. Prix marchands datés."),
+        "Sélection produits des flux marchands | Prix Malin",
+        fit_description(f"{total} produits issus de flux Awin accessibles, classés par rayon. Prix source affiché uniquement avec date individuelle du marchand de moins de 48 h."),
         f"/{FOLDER}/", body, [("Accueil", "/"), ("Sélection produits", f"/{FOLDER}/")])
 
 
