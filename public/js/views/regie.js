@@ -1017,7 +1017,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 €'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE5'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
