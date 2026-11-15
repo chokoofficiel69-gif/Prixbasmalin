@@ -8,6 +8,7 @@ import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
 import { decodeBlob, drawWave, denoise, antipop, voiceChain, normalize, loudness, encodeWav, master, cloneBuffer } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
 import { analyzeSamples, buildVoiceProposals, antipopFor } from '../lib/ingexpert.js';
+import { scoreVoice } from '../lib/voicescore.js';
 import { mountAssistant } from './assistant.js';
 import { knob } from '../lib/knob.js';
 
@@ -684,30 +685,44 @@ export async function render(el, { params }) {
     return wrap;
   }
 
+  const scoreColor = (s) => s === 'ok' ? '#34e39a' : s === 'warn' ? '#f0b429' : '#ef4444';
   function viewRegie() {
     const root = h('div');
-    const check = (x) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;font-size:13px"><span style="width:18px;height:18px;border-radius:50%;background:#34e39a;display:grid;place-items:center;color:#042;font-weight:900;font-size:11px">✓</span><span style="flex:1">${x.split('|')[0]}</span><b>${x.split('|')[1]}</b></div>`;
-    const proc = (x) => `<div style="display:flex;gap:9px;align-items:center;margin-bottom:9px;font-size:12px"><span style="width:16px;height:16px;border-radius:50%;background:#34e39a;display:grid;place-items:center;color:#042;font-weight:900;font-size:10px">✓</span>${x}<span style="flex:1;height:6px;border-radius:4px;background:#1b1440;overflow:hidden"><i style="display:block;height:100%;background:linear-gradient(90deg,#a855f7,#34e39a)"></i></span><small class="muted">100%</small></div>`;
+    const vi = lastVoixIdx(); const vt = vi >= 0 ? tracks[vi] : null;
+    let m = null, sc = { overall: null, items: [] };
+    if (vt?.buffer) { try { m = analyzeSamples((vt.original || vt.buffer).getChannelData(0), vt.buffer.sampleRate); sc = scoreVoice(m); } catch {} }
+    const ov = sc.overall;
+    const dash = (sc.overall ?? 226 * (ov || 0) / 100);
+    const gauge = `<svg viewBox="0 0 88 88" style="width:82px;height:82px;flex:none"><circle cx="44" cy="44" r="36" fill="none" stroke="#1b1440" stroke-width="8"/><circle cx="44" cy="44" r="36" fill="none" stroke="${ov == null ? '#3a3a55' : scoreColor(sc.items[0] ? (ov >= 80 ? 'ok' : ov >= 60 ? 'warn' : 'bad') : 'warn')}" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="${226 - 226 * (ov || 0) / 100}" transform="rotate(-90 44 44)" style="filter:drop-shadow(0 0 6px currentColor)"/><text x="44" y="49" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">${ov == null ? '—' : ov + '%'}</text></svg>`;
+    const items = sc.items.length ? sc.items.map(it => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;font-size:13px"><span style="width:16px;height:16px;border-radius:50%;background:${scoreColor(it.status)};flex:none"></span><span style="flex:1">${it.label}</span><b>${it.pct}%</b></div>`).join('') : '<p class="muted" style="font-size:12px">Enregistre une voix pour l’analyser.</p>';
+    const fx = (vt?.fxDone || []); const uniq = [...new Set(fx)];
+    const proc = uniq.length ? uniq.map(x => `<div style="display:flex;gap:9px;align-items:center;margin-bottom:9px;font-size:12px"><span style="width:16px;height:16px;border-radius:50%;background:#34e39a;display:grid;place-items:center;color:#042;font-weight:900;font-size:10px">✓</span>${x}</div>`).join('') : '<p class="muted" style="font-size:12px">Aucun traitement appliqué.<br>Utilise le Rack LIVE, le clic droit ou l’ingé IA.</p>';
+    const peakPct = m ? Math.min(100, Math.max(0, (m.peakDb + 40) / 40 * 100)) : 0;
+    const rmsPct = m ? Math.min(100, Math.max(0, (m.rmsDb + 50) / 50 * 100)) : 0;
     root.innerHTML = `
-     <div class="grid" style="grid-template-columns:1.05fr 1.05fr 1.5fr 150px">
-      <div class="panel"><div class="ph">📊 Analyse vocale IA <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb" style="display:flex;gap:12px;align-items:center">
-       <svg viewBox="0 0 88 88" style="width:82px;height:82px;flex:none"><circle cx="44" cy="44" r="36" fill="none" stroke="#1b1440" stroke-width="8"/><circle cx="44" cy="44" r="36" fill="none" stroke="#34e39a" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="16" transform="rotate(-90 44 44)" style="filter:drop-shadow(0 0 6px #34e39a)"/><text x="44" y="49" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">96%</text></svg>
-       <div style="flex:1">${['Justesse|98%', 'Clarté|97%', 'Dynamique|95%', 'Sibilances|92%'].map(check).join('')}</div></div></div>
-      <div class="panel"><div class="ph">⚙️ Traitement IA <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb">${['Auto-Tune', 'EQ intelligent', 'Compression', 'Réverbération', 'Mastering IA'].map(proc).join('')}</div></div>
-      <div class="panel"><div class="ph">🌈 Spectre temps réel · réduction de bruit <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb"><div style="height:150px;border-radius:11px;overflow:hidden;background:#07041a;border:1px solid var(--rline);position:relative">${spec3d()}<div style="position:absolute;right:12px;top:10px;text-align:right"><b style="font-size:17px">−24 dB</b><div class="muted" style="font-size:10px">Réduction bruit</div></div></div></div></div>
+     <div class="grid" style="grid-template-columns:1.05fr 1.05fr 1.5fr 160px">
+      <div class="panel"><div class="ph">📊 Analyse vocale <span class="r" style="color:#bff5db">mesures réelles</span></div><div class="pb" style="display:flex;gap:12px;align-items:center">
+       ${gauge}<div style="flex:1">${items}</div></div></div>
+      <div class="panel"><div class="ph">⚙️ Traitements appliqués</div><div class="pb">${proc}</div></div>
+      <div class="panel"><div class="ph">🌈 Spectre (visuel)</div><div class="pb"><div style="height:150px;border-radius:11px;overflow:hidden;background:#07041a;border:1px solid var(--rline);position:relative">${spec3d()}</div></div></div>
       <div class="panel"><div class="ph">🎚️ Niveaux</div><div class="pb">
-       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:44px">Entrée</span>${levelBar()}<b>−6.2</b></div>
-       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:44px">Sortie</span>${levelBar()}<b>−3.1</b></div>
-       <div style="text-align:center;background:#120d02;border:1px solid #4a3410;border-radius:9px;padding:9px"><b style="font-size:20px;color:#ffd37a">−8.9</b><div class="muted" style="font-size:9px">LUFS INTÉGRÉ</div></div></div></div>
+       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Crête</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${peakPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.peakDb : '—'}</b></div>
+       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Moyen</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${rmsPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.rmsDb : '—'}</b></div>
+       <div style="text-align:center;background:#0d1702;border:1px solid #2a4a10;border-radius:9px;padding:9px"><b style="font-size:20px;color:#bff5db">${m ? m.crestDb : '—'}</b><div class="muted" style="font-size:9px">DYNAMIQUE (dB)</div></div></div></div>
      </div>
-     <div class="panel" style="margin-top:12px"><div class="ph">🎛️ Rack · aperçu des modules <span class="r">8 modules · onglet « Effets » pour éditer</span></div><div class="pb"><div class="grid" style="grid-template-columns:repeat(8,1fr)">
-      ${knobHtml('Auto-Tune', '10', '#22d3ee', 55)}${knobHtml('EQ', '+2.5 dB', '#f0b429', 62)}${knobHtml('Comp', '4:1', '#22d3ee', 72)}${knobHtml('De-Ess', '−18', '#22c55e', 48)}${knobHtml('Satur.', '12%', '#ff6b3d', 30)}${knobHtml('Reverb', '28%', '#a855f7', 40)}${knobHtml('Delay', '22%', '#22d3ee', 36)}${knobHtml('Stéréo', '140%', '#ec4899', 80)}
+     <div class="panel" style="margin-top:12px"><div class="ph">🎛️ Rack · aperçu <span class="r">onglet « Effets » pour le rack LIVE</span></div><div class="pb"><div class="grid" style="grid-template-columns:repeat(8,1fr)">
+      ${knobHtml('Auto-Tune', '—', '#22d3ee', 50)}${knobHtml('EQ', '—', '#f0b429', 50)}${knobHtml('Comp', '—', '#22d3ee', 50)}${knobHtml('De-Ess', '—', '#22c55e', 50)}${knobHtml('Satur.', '—', '#ff6b3d', 40)}${knobHtml('Reverb', '—', '#a855f7', 40)}${knobHtml('Delay', '—', '#22d3ee', 36)}${knobHtml('Stéréo', '—', '#ec4899', 60)}
      </div></div></div>`;
     // ligne du bas : Timeline RÉELLE + Marco
     const mini = h('div.pb');
     const bottom = h('div.grid', { style: { gridTemplateColumns: '1.6fr 1fr', marginTop: '12px' } },
       h('div.panel', h('div.ph', '🎵 Timeline', h('span.r', 'onglet « Timeline » pour le plein écran')), mini),
-      h('div.panel', { html: `<div class="ph">🧠 Ingé son IA — Marco</div><div class="pb"><div style="display:flex;gap:11px;align-items:center;margin-bottom:10px"><div class="orb"></div><div><b>Marco · IA</b><div class="muted" style="font-size:12px">Tonalité détectée : <b style="color:#bff5db">Do# mineure</b></div></div></div><div class="msg ai">« Ta voix est juste à 98 %. Je te propose +2 dB de présence et un de-esser léger. Tu veux la version <b>naturelle</b>, <b>pro</b> ou <b>créative</b> ? »</div><div style="display:flex;gap:7px"><span class="rbtn p" style="flex:1;text-align:center">Naturelle</span><span class="rbtn" style="flex:1;text-align:center">Pro</span><span class="rbtn" style="flex:1;text-align:center">Créative</span></div></div>` }));
+      h('div.panel',
+        h('div.ph', '🧠 Ingé son IA'),
+        h('div.pb',
+          h('div', { style: { display: 'flex', gap: '11px', alignItems: 'center', marginBottom: '10px' } }, h('div.orb'), h('div', h('b', 'Marco · IA'), h('div.muted', { style: { fontSize: '12px' } }, 'assistant en direct'))),
+          h('div.msg.ai', { style: { margin: '0 0 10px' } }, 'Parle-moi ou écris-moi pour piloter le studio, ou laisse-moi nettoyer et mixer ta voix.'),
+          h('button.rbtn.p', { style: { width: '100%', textAlign: 'center' }, onclick: () => go('ia') }, 'Ouvrir l’ingé IA →'))));
     root.append(bottom);
     setTimeout(() => buildTimeline(mini), 0);
     return root;
