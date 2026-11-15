@@ -186,6 +186,14 @@ const MIME = {
   '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon',
   '.webmanifest': 'application/manifest+json', '.txt': 'text/plain; charset=utf-8',
 };
+// Version des assets : change à chaque démarrage (donc à chaque déploiement). On la colle
+// sur app.css et app.js dans l'index pour casser TOUT cache (navigateur, proxy) d'un coup.
+const ASSET_V = process.env.ASSET_V || Date.now().toString(36);
+function bustAssets(html) {
+  return html
+    .replace(/\/css\/app\.css(?:\?v=[^"']*)?/g, `/css/app.css?v=${ASSET_V}`)
+    .replace(/\/js\/app\.js(?:\?v=[^"']*)?/g, `/js/app.js?v=${ASSET_V}`);
+}
 function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/' || rel === '') rel = '/index.html';
@@ -194,7 +202,17 @@ function serveStatic(req, res, pathname) {
   fs.stat(file, (err, st) => {
     if (err || !st.isFile()) return serveStatic(req, res, '/index.html');
     const ext = path.extname(file);
-    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': ['.html', '.js', '.css'].includes(ext) ? 'no-store' : 'public, max-age=300', 'Content-Length': st.size });
+    const noStore = ['.html', '.js', '.css'].includes(ext);
+    // L'index HTML est réécrit à la volée pour injecter la version des assets.
+    if (ext === '.html') {
+      return fs.readFile(file, 'utf8', (e, html) => {
+        if (e) return fail(res, 500, 'Lecture impossible');
+        const body = Buffer.from(bustAssets(html));
+        res.writeHead(200, { 'Content-Type': MIME['.html'], 'Cache-Control': 'no-store', 'Content-Length': body.length });
+        res.end(body);
+      });
+    }
+    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': noStore ? 'no-store' : 'public, max-age=300', 'Content-Length': st.size });
     fs.createReadStream(file).pipe(res);
   });
 }
