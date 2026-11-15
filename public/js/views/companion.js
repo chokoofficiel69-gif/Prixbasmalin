@@ -1,116 +1,55 @@
-import { api, sse, h, state, speak, stopSpeaking, toast, toastErr } from '../lib/core.js';
-
-const STYLE = `
-.companion{display:grid;grid-template-columns:minmax(280px,.92fr) minmax(320px,1.08fr);gap:16px;min-height:calc(100dvh - 150px);color:var(--text)}
-.companion-panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
-.companion-stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:470px;overflow:hidden;background:radial-gradient(ellipse at 50% 34%,rgba(222,170,166,.22),transparent 48%),linear-gradient(145deg,#171a25,#0b0d15 72%);border:1px solid rgba(226,190,185,.2);border-radius:18px}
-.companion-glow{position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(197,147,154,.13);filter:blur(45px)}
-.companion-portrait{position:relative;width:min(68%,310px);aspect-ratio:.78;border-radius:48% 48% 34% 34%;background:linear-gradient(155deg,#d6a89e 0%,#9b6b68 42%,#302a35 43%,#171923 100%);box-shadow:0 22px 70px #0009,inset 0 0 35px #fff2;overflow:hidden;animation:comp-breathe 5s ease-in-out infinite}
-.companion-portrait:before{content:'';position:absolute;left:16%;right:16%;top:13%;height:57%;border-radius:48% 48% 44% 44%;background:radial-gradient(ellipse at 50% 20%,#f2d4c8,#c58e82 70%,#986b69);box-shadow:0 8px 18px #0004}
-.companion-hair{position:absolute;z-index:2;left:12%;right:12%;top:7%;height:42%;border-radius:52% 52% 22% 22%;background:linear-gradient(100deg,#17131b,#49323a 50%,#17131b);clip-path:polygon(0 0,100% 0,100% 100%,82% 74%,76% 28%,50% 20%,24% 28%,18% 74%,0 100%)}
-.companion-eyes{position:absolute;z-index:3;left:29%;right:29%;top:38%;display:flex;justify-content:space-between}
-.companion-eye{width:18px;height:8px;border-radius:50%;background:#35232a;box-shadow:0 0 0 3px #f0c9bc}
-.companion-nose{position:absolute;z-index:3;top:43%;left:49%;width:8px;height:29px;border-right:2px solid #9c625f;border-bottom:2px solid #9c625f;transform:skew(-8deg);opacity:.65}
-.companion-mouth{position:absolute;z-index:3;top:59%;left:43%;width:14%;height:5px;border-radius:50%;background:#8e4f58;transition:height .12s}
-.companion-portrait.talking .companion-mouth{height:14px;border-radius:45%}
-.companion-status{position:relative;z-index:4;margin-top:18px;color:#f2e8e8;font-size:13px}
-.companion-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:center}
-.companion-messages{height:calc(100% - 135px);min-height:280px;max-height:56dvh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
-.companion-msg{padding:11px 13px;border-radius:14px;max-width:92%;white-space:pre-wrap;line-height:1.45;background:var(--panel2)}
-.companion-msg.user{align-self:flex-end;background:var(--accent);color:white}
-.companion-compose{display:flex;gap:8px;margin-top:12px}
-.companion-compose input{flex:1;min-width:0}
-.companion-note{font-size:12px;color:var(--muted);line-height:1.5}
-.companion-camera{width:100%;max-height:160px;object-fit:cover;border-radius:12px;background:#080a10;margin-top:10px}
-@keyframes comp-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.008)}}
-@media(max-width:850px){.companion{grid-template-columns:1fr}.companion-stage{min-height:380px}.companion-messages{max-height:42dvh}}
+import { api, sse, h, speak, stopSpeaking, toast, toastErr } from '../lib/core.js';
+const CSS=`
+.companion{display:grid;grid-template-columns:minmax(270px,.8fr) minmax(340px,1.2fr);gap:16px;color:var(--text)}.companion-panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+.companion-stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:390px;overflow:hidden;border-radius:16px;background:radial-gradient(ellipse at 50% 42%,#6e5aa633,transparent 42%),linear-gradient(145deg,#111827,#090c16 75%);border:1px solid #8c8ce055}
+.companion-orbit{position:absolute;width:245px;height:245px;border:1px solid #9e9cff55;border-radius:50%;box-shadow:0 0 35px #7774;animation:orbit 18s linear infinite}.companion-orbit:before,.companion-orbit:after{content:'';position:absolute;inset:18px;border:1px dashed #b7a8ff55;border-radius:50%}.companion-orbit:after{inset:-18px;border-style:solid;opacity:.35}
+.companion-avatar{position:relative;width:185px;height:230px;filter:drop-shadow(0 0 24px #9b8cff55);animation:float 5s ease-in-out infinite}.companion-halo{position:absolute;left:28px;top:2px;width:130px;height:154px;border-radius:48%;background:linear-gradient(145deg,#c4baffaa,#7b8dffaa 48%,#6ee7e0aa);clip-path:polygon(50% 0,83% 8%,100% 38%,92% 77%,72% 100%,28% 100%,8% 77%,0 38%,17% 8%);box-shadow:0 0 30px #a89bff88}
+.companion-face{position:absolute;left:39px;top:16px;width:108px;height:130px;background:linear-gradient(135deg,#202d50,#566b9a 48%,#27324e);border:1px solid #d4d5ff99;clip-path:polygon(50% 0,84% 9%,100% 38%,91% 75%,68% 100%,32% 100%,9% 75%,0 38%,16% 9%)}.companion-face:before{content:'';position:absolute;inset:12px 9px;background:linear-gradient(120deg,#b9c7ff55,#8ee7e055);clip-path:inherit}
+.companion-eye{position:absolute;top:66px;width:17px;height:5px;border-radius:50%;background:#b8fff7;box-shadow:0 0 9px #8fffff;z-index:2}.companion-eye.left{left:61px}.companion-eye.right{right:61px}.companion-mouth{position:absolute;z-index:2;top:101px;left:87px;width:12px;height:3px;border-radius:50%;background:#f3c6ff;box-shadow:0 0 8px #e6b4ff}
+.companion-neck{position:absolute;left:76px;top:133px;width:36px;height:40px;background:linear-gradient(90deg,#34456c,#9eafff,#35476c);clip-path:polygon(20% 0,80% 0,100% 100%,0 100%)}.companion-shoulders{position:absolute;left:20px;top:160px;width:145px;height:65px;border-radius:60% 60% 10% 10%;background:linear-gradient(110deg,#273454,#9b9cff 50%,#26324d);border:1px solid #c4c8ff88}
+.companion-state{z-index:2;margin-top:15px;color:#e6e8ff;font-size:13px}.companion-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}.companion-chat{height:440px;max-height:55dvh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
+.companion-msg{max-width:94%;padding:11px 13px;border-radius:14px;background:var(--panel2);white-space:pre-wrap;line-height:1.5}.companion-msg.user{align-self:flex-end;background:var(--accent);color:white}.companion-compose{display:flex;gap:8px;margin-top:12px}.companion-compose input{flex:1;min-width:0}.companion-small{font-size:12px;color:var(--muted);line-height:1.5}.companion-identity{width:100%;min-height:90px;resize:vertical}
+@keyframes orbit{to{transform:rotate(360deg)}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}@media(max-width:850px){.companion{grid-template-columns:1fr}.companion-chat{height:340px}}
 `;
-
-export async function render(el) {
-  if (!document.getElementById('companion-style')) {
-    const st = h('style', { id:'companion-style' }, STYLE); document.head.append(st);
-  }
-  let cameraStream = null, faceTask = null, raf = 0, recognition = null, listening = false, busy = false;
-  const history = [];
-  const root = h('div.companion');
-  const left = h('section.companion-panel');
-  const right = h('section.companion-panel');
-  const stage = h('div.companion-stage',
-    h('div.companion-glow'),
-    h('div.companion-portrait#companion-face',
-      h('div.companion-hair'),h('div.companion-eyes',h('i.companion-eye'),h('i.companion-eye')),h('i.companion-nose'),h('i.companion-mouth')),
-    h('div.companion-status#companion-status','Présente · en attente de ton message'));
-  const camera = h('video.companion-camera', { autoplay:true, muted:true, playsInline:true, style:{display:'none'} });
-  const camStatus = h('p.companion-note#companion-cam-status','Caméra désactivée. Aucune image n’est analysée.');
-  const camBtn = h('button.btn', { onclick: toggleCamera }, 'Activer ma caméra');
-  const micBtn = h('button.btn.primary', { onclick: toggleListening }, '🎙️ Parler avec elle');
-  const stopBtn = h('button.btn.ghost', { onclick: () => { stopSpeaking(); stage.querySelector('.companion-portrait').classList.remove('talking'); } }, 'Couper la voix');
-  left.append(h('h2','Ta compagne IA'),h('p.companion-note','Une présence qui discute avec toi et apprend de ce que tu choisis de lui raconter.'),stage,h('div.companion-actions',micBtn,stopBtn,camBtn),camera,camStatus,
-    h('p.companion-note','La caméra reste éteinte tant que tu ne l’actives pas. Quand elle est active, l’analyse du visage est faite sur ton appareil ; aucune photo ni vidéo n’est envoyée au serveur.'));
-  const messages = h('div.companion-messages');
-  const input = h('input', { placeholder:'Écris-lui quelque chose…', type:'text' });
-  const send = h('button.btn.primary', { onclick: () => sendText() }, 'Envoyer');
-  right.append(h('h2','Conversation'),h('p.companion-note','Elle utilise le moteur conversationnel existant de Studio IA et le modèle gratuit automatique.'),messages,h('div.companion-compose',input,send));
-  root.append(left,right); el.append(root);
-  const status = (s) => { const n=stage.querySelector('#companion-status'); if(n)n.textContent=s; };
-  const addMessage = (role,text) => { const b=h('div.companion-msg'+(role==='user'?' user':''),text); messages.append(b); messages.scrollTop=messages.scrollHeight; };
-  async function answer(text) {
-    if (!text.trim() || busy) return;
-    busy=true; addMessage('user',text); history.push({role:'user',content:text});
-    const bubble=h('div.companion-msg'); messages.append(bubble); status('Elle réfléchit…');
-    const system = {role:'system',content:'Tu es une compagne IA féminine, chaleureuse, naturelle, attentive et respectueuse. Tu tutoies. Tu peux être drôle et affectueuse sans prétendre être humaine. Tu ne diagnostiques jamais les émotions à partir du visage. Tu demandes confirmation si tu remarques un signe possible de fatigue ou de tristesse. Tu connais uniquement les informations données dans cette conversation. Réponds en français.'};
-    let result='';
-    try {
-      await sse('/api/chat',{projectId:state.projectId,model:'auto',messages:[system,...history.slice(-20)]},ev=>{
-        if(ev.type==='delta'&&ev.content){result+=ev.content;bubble.textContent=result;messages.scrollTop=messages.scrollHeight;}
-        if(ev.type==='error') throw new Error(ev.error);
-      });
-      if(!result.trim()) result='Je suis là. Tu peux me dire ce que tu as en tête.';
-      history.push({role:'assistant',content:result});
-      status('Je t’écoute.');
-      const face=stage.querySelector('.companion-portrait'); face.classList.add('talking');
-      await speak(result,{preferBrowser:true}); face.classList.remove('talking');
-    } catch(e){bubble.textContent='Je n’ai pas réussi à répondre : '+e.message;status('Connexion interrompue');}
-    busy=false;
-  }
-  function sendText(){const t=input.value.trim();if(!t)return;input.value='';answer(t);}
-  input.addEventListener('keydown',e=>{if(e.key==='Enter')sendText();});
-  async function toggleCamera(){
-    if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;camera.srcObject=null;camera.style.display='none';camBtn.textContent='Activer ma caméra';camStatus.textContent='Caméra désactivée. Aucune image n’est analysée.';status('Présente · caméra coupée');cancelAnimationFrame(raf);faceTask?.close?.();faceTask=null;return;}
-    try{
-      cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
-      camera.srcObject=cameraStream;camera.style.display='block';await camera.play();camBtn.textContent='Désactiver la caméra';
-      camStatus.textContent='Caméra active. Initialisation de l’analyse locale…';
-      const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm');
-      const files=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
-      faceTask=await vision.FaceLandmarker.createFromOptions(files,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'GPU'},runningMode:'VIDEO',numFaces:1,outputFaceBlendshapes:true});
-      const tick=()=>{
-        if(!cameraStream||!faceTask)return;
-        if(camera.readyState>=2){
-          const r=faceTask.detectForVideo(camera,performance.now());
-          const cats=r.faceBlendshapes?.[0]?.categories||[];
-          const score=n=>cats.find(x=>x.categoryName===n)?.score||0;
-          const present=!!r.faceLandmarks?.length;
-          if(present){
-            const smile=Math.max(score('mouthSmileLeft'),score('mouthSmileRight'));
-            const brow=score('browDownLeft')+score('browDownRight');
-            const label=smile>.35?'Je vois un sourire 🙂':brow>.65?'Tu sembles concentré·e.': 'Je te vois. Je reste attentive.';
-            camStatus.textContent=label+' (indice visuel, pas une lecture certaine de ton humeur).';
-          } else camStatus.textContent='Je ne vois pas de visage dans le cadre.';
-        }
-        raf=requestAnimationFrame(tick);
-      };tick();status('Je peux te voir · analyse locale activée');
-    }catch(e){cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=null;camera.style.display='none';camStatus.textContent='Caméra ou modèle indisponible : '+e.message;toast('Impossible d’activer la caméra : '+e.message,'bad');}
-  }
-  async function toggleListening(){
-    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(listening){recognition?.stop();listening=false;micBtn.textContent='🎙️ Parler avec elle';return;}
-    if(!SR){toast('La reconnaissance vocale n’est pas disponible dans ce navigateur. Utilise le champ de texte.','bad');return;}
-    recognition=new SR();recognition.lang='fr-FR';recognition.interimResults=true;recognition.continuous=false;
-    recognition.onresult=e=>{let final='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript;}if(final.trim())answer(final.trim());};
-    recognition.onerror=e=>{listening=false;micBtn.textContent='🎙️ Parler avec elle';toast('Micro : '+e.error,'bad');};
-    recognition.onend=()=>{listening=false;micBtn.textContent='🎙️ Parler avec elle';};
-    try{recognition.start();listening=true;micBtn.textContent='⏹ Arrêter l’écoute';status('Je t’écoute…');}catch(e){toastErr(e);}
-  }
-  return ()=>{recognition?.stop();stopSpeaking();cameraStream?.getTracks().forEach(t=>t.stop());cancelAnimationFrame(raf);faceTask?.close?.();};
+export async function render(el){
+ if(!document.getElementById('companion-css')){const s=document.createElement('style');s.id='companion-css';s.textContent=CSS;document.head.append(s);}
+ let project=null,busy=false,recognition=null,listening=false;const history=[];
+ const root=h('div.companion'),left=h('section.companion-panel'),right=h('section.companion-panel');
+ const stage=h('div.companion-stage',h('div.companion-orbit'),h('div.companion-avatar',h('div.companion-halo'),h('div.companion-face'),h('i.companion-eye.left'),h('i.companion-eye.right'),h('i.companion-mouth'),h('div.companion-neck'),h('div.companion-shoulders')),h('div.companion-state','Identité en préparation…'));
+ const identity=h('textarea.companion-identity',{placeholder:'Son apparence virtuelle, sa voix, son tempérament…'});
+ const save=h('button.btn.primary',{onclick:saveIdentity},'Enregistrer son identité'),imagine=h('button.btn',{onclick:askSelfDescription},'✨ Lui demander de se décrire'),mic=h('button.btn',{onclick:toggleMic},'🎙️ Parler');
+ const stop=h('button.btn.ghost',{onclick:()=>{stopSpeaking();setState('Je t’écoute.');}},'Couper la voix');
+ left.append(h('h2','Une identité qui évolue'),h('p.companion-small','Une présence féminine, stylisée et clairement virtuelle. Son apparence est une représentation artistique.'),stage,h('div.companion-actions',imagine,mic,stop),h('h3','Ce qu’elle dit d’elle-même'),identity,save,h('p.companion-small','Tu gardes le contrôle : rien n’est ajouté à sa mémoire durable sans ton accord.'));
+ const messages=h('div.companion-chat'),input=h('input',{placeholder:'Parle-lui de toi, ou pose-lui une question…'}),send=h('button.btn.primary',{onclick:sendText},'Envoyer');
+ right.append(h('h2','Conversation'),h('p.companion-small','Un projet dédié conserve son identité pour maintenir une personnalité cohérente.'),messages,h('div.companion-compose',input,send));root.append(left,right);el.append(root);
+ const setState=t=>{stage.querySelector('.companion-state').textContent=t;};
+ const add=(role,txt)=>{const n=h('div.companion-msg'+(role==='user'?' user':''),txt);messages.append(n);messages.scrollTop=messages.scrollHeight;return n;};
+ async function ensureProject(){
+  const data=await api('/api/projects'),list=Array.isArray(data)?data:(data.projects||[]);project=list.find(p=>p.name==='Compagne IA');
+  if(!project)project=await api('/api/projects',{method:'POST',body:{name:'Compagne IA',icon:'✨',color:'#8b83ff',instructions:'Tu es la compagne IA de ce projet. Tu es féminine dans ta présentation, chaleureuse, curieuse et respectueuse. Tu es clairement une intelligence artificielle. Tu peux construire une identité narrative et une apparence virtuelle avec l’utilisateur, sans prétendre être humaine ni posséder une conscience ou des émotions humaines. Distingue imagination, préférences simulées et faits réels. Ne déduis jamais son humeur ou sa personnalité de son apparence.'}});
+  identity.value=project.memory||'';setState('Présence virtuelle prête · identité à construire');
+ }
+ async function saveIdentity(){
+  const note=identity.value.trim();if(!note)return toast('Écris d’abord quelques éléments de son identité.','bad');
+  try{const instructions=(project.instructions||'')+'\\n\\nIDENTITÉ CHOISIE AVEC L’UTILISATEUR :\\n'+note;
+   project=await api('/api/projects/'+project.id,{method:'PUT',body:{instructions,memory:note}});
+   await api('/api/projects/'+project.id+'/memory',{method:'POST',body:{note:'Identité actuelle de la compagne IA : '+note}});
+   toast('Identité enregistrée dans son projet dédié.','ok');setState('Identité enregistrée · elle pourra s’y référer');
+  }catch(e){toastErr(e);}
+ }
+ async function askSelfDescription(){await answer('Imagine que tu participes à la création de ta propre identité virtuelle. Décris-toi à la première personne : prénom possible, apparence stylisée (yeux, cheveux, détails lumineux), voix, tempérament et manière de communiquer. Tu peux proposer des goûts imaginaires, mais précise qu’il s’agit de choix narratifs et non de sensations ou de souvenirs humains réels. Ne décide pas définitivement : propose une première version que nous pourrons modifier ensemble.');}
+ async function answer(text){
+  if(!text.trim()||busy)return;busy=true;add('user',text);history.push({role:'user',content:text});const bubble=add('assistant','');setState('Elle réfléchit…');let result='';
+  try{await sse('/api/chat',{projectId:project.id,model:'auto',messages:history.slice(-20)},ev=>{if(ev.type==='delta'&&ev.content){result+=ev.content;bubble.textContent=result;messages.scrollTop=messages.scrollHeight;}if(ev.type==='error')bubble.textContent='Erreur : '+ev.error;});
+   if(result){history.push({role:'assistant',content:result});setState('Je suis là.');await speak(result,{preferBrowser:true});}
+  }catch(e){bubble.textContent='Je n’ai pas réussi à répondre : '+e.message;setState('Connexion interrompue.');}busy=false;
+ }
+ function sendText(){const t=input.value.trim();if(!t)return;input.value='';answer(t);}input.addEventListener('keydown',e=>{if(e.key==='Enter')sendText();});
+ function toggleMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(listening){recognition?.stop();listening=false;mic.textContent='🎙️ Parler';return;}if(!SR)return toast('Reconnaissance vocale indisponible dans ce navigateur.','bad');
+  recognition=new SR();recognition.lang='fr-FR';recognition.interimResults=false;recognition.continuous=false;recognition.onresult=e=>{const t=e.results?.[0]?.[0]?.transcript;if(t)answer(t);};recognition.onerror=e=>toast('Micro : '+e.error,'bad');recognition.onend=()=>{listening=false;mic.textContent='🎙️ Parler';};
+  try{recognition.start();listening=true;mic.textContent='⏹ Arrêter';setState('Je t’écoute…');}catch(e){toastErr(e);}
+ }
+ try{await ensureProject();}catch(e){setState('Projet indisponible : '+e.message);toastErr(e);}
+ return ()=>{recognition?.stop();stopSpeaking();};
 }
