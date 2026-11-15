@@ -942,3 +942,41 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
   .studio-expert-workspace.is-visible > [data-panel="assistant"] { display:block !important; }
   .studio-expert-workspace.is-visible > [data-panel="assistant"] > .card { min-height:260px !important; }
 }
+
+
+/* CORRECTION — conserver toute la zone visuelle de la timeline.
+   La hauteur minimale doit contenir la règle, les pistes et les commandes,
+   sans couper les canvases de forme d'onde. */
+.studio-expert-workspace.is-visible {
+  grid-template-rows:auto minmax(360px,auto) minmax(280px,auto) minmax(180px,auto) !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="tracks"] {
+  min-height:360px !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="tracks"] > .card {
+  min-height:330px !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="tracks"] canvas {
+  display:block;
+  visibility:visible;
+}
+@media (max-width:1180px) {
+  .studio-expert-workspace.is-visible {
+    grid-template-rows:auto minmax(360px,auto) auto auto auto auto !important;
+  }
+}
+@media (max-width:720px) {
+  .studio-expert-workspace.is-visible > [data-panel="tracks"] {
+    min-height:360px !important;
+    max-height:none !important;
+  }
+  .studio-expert-workspace.is-visible > [data-panel="tracks"] > .card {
+    min-height:330px !important;
+  }
+}
