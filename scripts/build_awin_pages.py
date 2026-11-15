@@ -6,9 +6,13 @@
 - /produits/index.html : sommaire des catégories.
 
 Règles :
-- Un prix n'est publié que s'il provient d'un flux marchand importé par Awin depuis
-  moins de 7 jours (feedUpdatedAt). Il est présenté comme « prix indiqué par le marchand
-  dans son flux du JJ/MM/AAAA », à confirmer chez le marchand, jamais comme un prix vérifié.
+- feedUpdatedAt vérifie uniquement l'ancienneté du snapshot catalogue (7 jours maximum) ;
+  il ne date jamais un prix.
+- Un montant n'est affiché que si merchantUpdatedAt est une date individuelle valide
+  fournie pour l'offre et âgée de moins de 48 h.
+- Le libellé TTC exige priceTaxStatus="included" ; sinon le montant reste explicitement
+  « prix source · TVA non confirmée », jamais un TTC vérifié.
+- Les frais de livraison ne sont affichés que s'ils sont fournis et numériques.
 - Aucune donnée inventée : nom, image, prix, marchand et lien viennent du flux.
 - Les liens sont affiliés (rel="sponsored nofollow").
 """
