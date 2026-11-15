@@ -797,8 +797,7 @@ RÈGLES D’UTILISATION :
     const askExpert = async (spokenRequest = '') => {
       const request = String(spokenRequest || input.value).trim(), t = trackNow();
       if (!request || busy) return;
-      if (!t?.buffer) { toast('Sélectionne d’abord une piste audio.', 'bad'); return; }
-      busy = true; send.disabled = true; applyBtn.disabled = true; pendingPlan = null;
+            busy = true; send.disabled = true; applyBtn.disabled = true; pendingPlan = null;
       planBox.innerHTML = ''; say('user', request); input.value = '';
       status.textContent = 'L’ingénieur analyse ta demande et prépare les opérations…';
       try {
@@ -824,6 +823,7 @@ RÈGLES D’UTILISATION :
         const task = `Tu es La Zone, le cerveau principal et l'ingénieur du son en chef. Tu gardes une seule conversation avec l'utilisateur et tu coordonnes les dix spécialistes disponibles en coulisses. Ne renvoie jamais l'utilisateur vers un autre agent ou un autre onglet. Fais intervenir les spécialistes utiles, confronte leurs avis si nécessaire, puis décide toi-même de la chaîne finale.
 Demande utilisateur : ${request}
 Piste sélectionnée : ${JSON.stringify(context)}
+Si aucune piste n’est sélectionnée, réponds à la question de façon naturelle et utile, sans demander de piste, et retourne obligatoirement actions: []. Si la demande est une conversation ou une question générale, ne force pas un traitement audio.
 Effets choisis par l'utilisateur : ${chosen.length ? chosen.join(', ') : 'choix automatique par le chef'}
 Profil mastering demandé : ${targetMaster}
 Références stylistiques et mesures disponibles pour guider ton jugement (respecte strictement les limites et ne prétends pas écouter les MP3) :\n${STUDIO_AUDIO_REFERENCE_CONTEXT}
