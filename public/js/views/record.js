@@ -809,6 +809,39 @@ export async function render(el, { params }) {
     return r.buffer;
   });
   const fxApply = () => { const item = editableFxItem(); if (item) applyItem(item); };
+  // Banque de 50 boutons d'effets directs : sélection équilibrée entre les familles existantes.
+  const QUICK_FX_BANK = (() => {
+    const groups = VFX_CATS.map(cat => VFX.filter(p => p.cat === cat));
+    const picked = [];
+    for (let round = 0; picked.length < 50; round++) {
+      let added = false;
+      for (const group of groups) {
+        if (group[round] && picked.length < 50) { picked.push(group[round]); added = true; }
+      }
+      if (!added) break;
+    }
+    return picked;
+  })();
+  const quickFxGrid = h('div.quick-fx-grid', { style: { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(145px,1fr))', gap:'8px', maxHeight:'420px', overflowY:'auto', padding:'8px 2px' } });
+  const quickFxStatus = h('p.tiny.muted', `50 effets prêts — clique sur un bouton pour appliquer à la piste vocale sélectionnée.`);
+  QUICK_FX_BANK.forEach((preset, index) => {
+    const btn = h('button.btn.small.quick-fx-button', {
+      title: `${preset.cat} · ${preset.name}`,
+      onclick: () => {
+        const track = tracks[selected];
+        if (!track || track.empty) return toast('Sélectionne d’abord une prise vocale.');
+        if (track.kind !== 'voix') return toast('Sélectionne une piste Voix pour appliquer cet effet.');
+        btn.disabled = true;
+        quickFxStatus.textContent = `Application : ${preset.name}…`;
+        Promise.resolve(applyItem({ name: preset.name, list: [preset] }))
+          .then(() => { quickFxStatus.textContent = `Appliqué : ${preset.name} · tu peux annuler avec ↩ Annuler.`; })
+          .catch((err) => { quickFxStatus.textContent = 'Échec de l’effet.'; toastErr(err); })
+          .finally(() => { btn.disabled = false; });
+      }
+    }, `${String(index+1).padStart(2,'0')} · ${preset.name}`);
+    quickFxGrid.append(btn);
+  });
+
   const QUICK_TUNE = [['🎯 Juste parfait', 'Justesse parfaite (note par note)'], ['🎤 Léger', 'Justesse naturelle (note par note)'], ['🎤 Moyen (Drake)', 'Rap mélodique note par note'], ['🤖 Fort (T-Pain)', 'Hard-tune note par note'], ['✨ Belle voix chantée', 'Belle voix chantée (juste + douce)']];
   const tunePrev = makePreview();
   const noteEd = createNoteEditor({
@@ -1014,6 +1047,10 @@ export async function render(el, { params }) {
       aiList, aiPrev.box,
       h('p.tiny.muted', 'L’IA traduit ta description en réglages (autotune, EQ, écho, réverbe…). Écoute, applique, ou « 💾 Garder » pour le retrouver dans « Mes réglages ». Plus tu es précis (rappeur, ambiance, refrain ou couplet), plus c’est proche.'),
       h('h3', '🎛️ Effets voix & autotune'),
+      h('h4', '⚡ 50 effets en accès direct'),
+      quickFxStatus, quickFxGrid,
+      h('p.tiny.muted', 'Chaque bouton applique un preset complet à la piste Voix sélectionnée. Les effets restent annulables avec « ↩ Annuler » et la prise originale est conservée.'),
+
       h('div.row', h('div.grow', fxCat), h('div.grow', fxKey)),
       h('div.row', h('div.grow', fxSel),
         h('button.btn.small', { onclick: (e) => fxPreview(e.target) }, '▶ Écouter'),
