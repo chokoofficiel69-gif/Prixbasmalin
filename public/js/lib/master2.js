@@ -80,6 +80,36 @@ export const MULTIBAND_PRESETS = {
     high: { threshold: -26, ratio: 2, attack: 0.004, release: 0.10, makeup: 0.5 },
     transient: { attack: 0.08, sustain: 0 },
   },
+  spotify: {
+    low: { threshold: -24, ratio: 2.5, attack: 0.012, release: 0.18, makeup: 1 },
+    mid: { threshold: -22, ratio: 2, attack: 0.02, release: 0.14, makeup: 0 },
+    high: { threshold: -26, ratio: 2, attack: 0.004, release: 0.10, makeup: 0.5 },
+    transient: { attack: 0.08, sustain: 0 },
+  },
+  youtube: {
+    low: { threshold: -25, ratio: 2.2, attack: 0.014, release: 0.2, makeup: 0.8 },
+    mid: { threshold: -23, ratio: 1.9, attack: 0.02, release: 0.16, makeup: 0 },
+    high: { threshold: -27, ratio: 1.8, attack: 0.005, release: 0.12, makeup: 0.4 },
+    transient: { attack: 0.06, sustain: 0 },
+  },
+  apple: {
+    low: { threshold: -28, ratio: 1.8, attack: 0.02, release: 0.25, makeup: 0 },
+    mid: { threshold: -26, ratio: 1.5, attack: 0.03, release: 0.2, makeup: 0 },
+    high: { threshold: -30, ratio: 1.5, attack: 0.006, release: 0.15, makeup: 0 },
+    transient: { attack: 0, sustain: 0.06 },
+  },
+  tiktok: {
+    low: { threshold: -23, ratio: 2.8, attack: 0.01, release: 0.15, makeup: 1.2 },
+    mid: { threshold: -21, ratio: 2.2, attack: 0.018, release: 0.13, makeup: 0 },
+    high: { threshold: -25, ratio: 2.2, attack: 0.004, release: 0.09, makeup: 0.8 },
+    transient: { attack: 0.12, sustain: 0 },
+  },
+  podcast: {
+    low: { threshold: -28, ratio: 1.8, attack: 0.02, release: 0.25, makeup: 0 },
+    mid: { threshold: -24, ratio: 2, attack: 0.025, release: 0.2, makeup: 0.3 },
+    high: { threshold: -28, ratio: 1.7, attack: 0.006, release: 0.15, makeup: 0.5 },
+    transient: { attack: 0, sustain: 0.04 },
+  },
   rap: {
     low: { threshold: -22, ratio: 3.5, attack: 0.008, release: 0.12, makeup: 1.5 },
     mid: { threshold: -20, ratio: 2.2, attack: 0.02, release: 0.12, makeup: 0 },
