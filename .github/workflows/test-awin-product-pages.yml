@@ -1,0 +1,81 @@
+name: Tests des pages produits Awin
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "scripts/build_awin_pages.py"
+      - "tests/test_awin_pages.py"
+      - ".github/workflows/sync-awin-products.yml"
+      - ".github/workflows/test-awin-product-pages.yml"
+      - "data/awin-products.json"
+      - "data/awin-catalogue.json"
+  pull_request:
+    paths:
+      - "scripts/build_awin_pages.py"
+      - "tests/test_awin_pages.py"
+      - ".github/workflows/sync-awin-products.yml"
+      - ".github/workflows/test-awin-product-pages.yml"
+      - "data/awin-products.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-awin-product-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Vérifier la syntaxe du générateur
+        run: python3 -m py_compile scripts/build_awin_pages.py
+
+      - name: Tester la date individuelle, la fraîcheur et le statut TVA
+        run: python3 -m unittest discover -s tests -p 'test_awin_pages.py' -v
+
+      - name: Vérifier le snapshot réel sans confondre import et mise à jour du prix
+        run: |
+          python3 - <<'PY'
+          import json
+          import re
+          from datetime import datetime, timezone
+          from pathlib import Path
+          import sys
+
+          sys.path.insert(0, "scripts")
+          import build_awin_pages as pages
+
+          feed = json.loads(Path("data/awin-catalogue.json").read_text(encoding="utf-8"))
+          if feed.get("image_policy") != pages.IMAGE_POLICY:
+              raise SystemExit("Le flux catalogue n’atteste pas la validation des images.")
+          now = datetime.now(timezone.utc)
+          generated = pages.build(feed, now=now)
+          rendered_prices = sum(
+              len(re.findall(r"<strong>[^<]*€</strong>", html))
+              for html in generated.values()
+          )
+          fresh_price_rows = sum(
+              1 for row in (feed.get("products") or [])
+              if (pages.eligible(row, now, feed.get("fetched_at")) or {}).get("price") is not None
+          )
+          if rendered_prices > fresh_price_rows:
+              raise SystemExit(
+                  f"Prix affichés ({rendered_prices}) > lignes marchandes fraîches admissibles ({fresh_price_rows})"
+              )
+          print(
+              f"Pages générées : {len(generated)} ; prix chiffrés affichés : {rendered_prices} ; "
+              f"lignes marchandes fraîches admissibles : {fresh_price_rows}"
+          )
+          PY

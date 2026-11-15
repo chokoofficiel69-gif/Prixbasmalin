@@ -1,0 +1,155 @@
+name: Rotation contrôlée de la vitrine cadeaux
+
+on:
+  schedule:
+    - cron: "27 */2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prix-malin-price-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sauvegarder le dernier snapshot publié
+        run: cp data/home-deals.json /tmp/home-deals-previous.json
+
+      - name: Construire et détecter une rotation due
+        id: rotation
+        run: |
+          python3 scripts/build_home_deals.py
+          python3 - <<'PY'
+          import json
+          import os
+          with open("data/home-deals.json", encoding="utf-8") as handle:
+              data = json.load(handle)
+          status = data.get("rotation", {}).get("status", "unknown")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"status={status}\n")
+          print(f"État de la rotation : {status}")
+          if status != "rotated":
+              print("Aucune nouvelle sélection à publier ; aucun flux marchand ni aucune image ne sont téléchargés.")
+          PY
+
+      - name: Vérifier les nouvelles images et conserver le dernier snapshot si nécessaire
+        if: steps.rotation.outputs.status == 'rotated'
+        run: python3 scripts/check_awin_gift_images.py --previous /tmp/home-deals-previous.json
+
+      - name: Régénérer les pages cadeaux et le sitemap
+        if: steps.rotation.outputs.status == 'rotated'
+        run: |
+          python3 scripts/build_seo_pages.py
+          python3 scripts/build_sitemap.py
+
+      - name: Tester la rotation et les pages générées
+        if: steps.rotation.outputs.status == 'rotated'
+        run: |
+          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+          python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v
+          python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
+
+      - name: Capturer les métadonnées attendues
+        if: steps.rotation.outputs.status == 'rotated'
+        id: expected
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          with open("data/home-deals.json", encoding="utf-8") as handle:
+              data = json.load(handle)
+          rotation = data.get("rotation", {})
+          values = {
+              "awin_fetched_at": data.get("awin_fetched_at", ""),
+              "last_rotated_at": rotation.get("last_rotated_at", ""),
+              "status": rotation.get("status", ""),
+          }
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              for key, value in values.items():
+                  output.write(f"{key}={value}\n")
+          print("Snapshot prêt :", values)
+          PY
+
+      - name: Publier uniquement la vitrine validée
+        if: steps.rotation.outputs.status == 'rotated'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/home-deals.json idees-cadeaux prix sitemap.xml sitemap.txt data/sitemap-lastmod.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement de vitrine à publier."
+            exit 0
+          fi
+          git commit -m "Rotate verified gift visuals"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "Vitrine validée publiée sur main."
+              exit 0
+            fi
+            echo "Push refusé ou main avancée ; nouvelle tentative $attempt/3."
+            sleep 3
+          done
+          echo "::error::Impossible de publier la rotation sans contourner les protections."
+          exit 1
+
+      - name: Vérifier la vitrine publique après publication
+        if: steps.rotation.outputs.status == 'rotated'
+        env:
+          EXPECTED_AWIN_FETCHED_AT: ${{ steps.expected.outputs.awin_fetched_at }}
+          EXPECTED_ROTATED_AT: ${{ steps.expected.outputs.last_rotated_at }}
+          EXPECTED_ROTATION_STATUS: ${{ steps.expected.outputs.status }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error --location --connect-timeout 3 --max-time 10 \
+              -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
+              "https://prixbasmalin.fr/data/home-deals.json?v=${EXPECTED_ROTATED_AT}" --output /tmp/home-deals-public.json; then
+              node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/home-deals-public.json", "utf8"));
+          const rotation = data.rotation || {};
+          if (data.awin_fetched_at !== process.env.EXPECTED_AWIN_FETCHED_AT ||
+              rotation.last_rotated_at !== process.env.EXPECTED_ROTATED_AT ||
+              rotation.status !== process.env.EXPECTED_ROTATION_STATUS ||
+              !Array.isArray(data.gifts) || data.gifts.length !== 48) {
+            throw new Error("La vitrine publique ne correspond pas au snapshot validé.");
+          }
+          const verified = data.gifts.filter(g => g.image_verified === true);
+          const unique = new Set(verified.map(g => g.image)).size;
+          if (rotation.status === "rotated" && (verified.length !== 48 || unique !== 48)) {
+            throw new Error("La nouvelle rotation publique ne contient pas 48 images uniques vérifiées.");
+          }
+          if (data.gifts.some(g => g.image_verified === true &&
+              (!/^https:\/\//i.test(String(g.image || "")) || !g.image_verified_at ||
+               g.image_provenance !== "Flux marchand Awin autorisé"))) {
+            throw new Error("Une image publique n'a pas sa provenance vérifiée.");
+          }
+          console.log("Vitrine publique vérifiée :", rotation.status, unique, "images vérifiées.");
+          NODE
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::La nouvelle vitrine n'est pas visible publiquement après le délai de propagation."
+          exit 1

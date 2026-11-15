@@ -29,7 +29,8 @@ test("415 explicite pour un Content-Type absent", async () => {
   const response = await worker.fetch(new Request(endpoint, {
     method: "POST",
     headers: { Origin: siteOrigin, "User-Agent": "test-agent" },
-    body: JSON.stringify({ provider: "agnes", message: "bonjour" })
+    // Un Blob sans type évite que Request ajoute « text/plain » tout seul.
+    body: new Blob([JSON.stringify({ provider: "agnes", message: "bonjour" })])
   }), env);
   assert.equal(response.status, 415);
   const data = await response.json();
@@ -67,4 +68,18 @@ test("retourne 400 pour un JSON invalide correctement typé", async () => {
     body: "{invalid"
   }), env);
   assert.equal(response.status, 400);
+});
+
+
+test("les réponses JSON et OPTIONS portent les en-têtes de sécurité", async () => {
+  const health = await worker.fetch(new Request("https://worker.example/health"), env);
+  const preflight = await worker.fetch(new Request(endpoint, {
+    method: "OPTIONS",
+    headers: { Origin: siteOrigin }
+  }), env);
+  for (const response of [health, preflight]) {
+    assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
+    assert.equal(response.headers.get("X-Frame-Options"), "DENY");
+    assert.equal(response.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin");
+  }
 });

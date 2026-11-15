@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-01",
-  "note": "Statuts saisis d'après les informations communiquées par le propriétaire du site. Une demande envoyée ne vaut pas acceptation ni autorisation d'utiliser un flux, un logo ou des contenus protégés.",
+  "updatedAt": "2026-11-13",
+  "note": "Statuts saisis d'après les informations communiquées par le propriétaire du site et les réponses explicites de l'API Awin. Une demande envoyée ne vaut pas acceptation. Le statut réseau Awin (joined/pending) est suivi séparément de l'autorisation d'utiliser les logos, media kits et contenus protégés : approvalStatus reste pending_confirmation tant que ces droits ne sont pas vérifiés. Les programmes Awin en pending ne sont jamais utilisés comme autorisation.",
   "entries": [
     {
       "name": "Rakuten",
@@ -51,6 +51,87 @@
       "contactStatus": "request_reported_sent",
       "approvalStatus": "pending_confirmation",
       "integration": "Flux marchand à connecter selon accord"
+    },
+    {
+      "name": "Fiido Technology Development Co., Ltd",
+      "displayName": "Fiido",
+      "type": "retailer",
+      "category": "Vélos électriques",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 85523,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/85523",
+      "contactStatus": "joined_via_api",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "joined_api",
+      "statusObservedAt": "2026-11-13",
+      "integration": "Programme Awin joined confirmé par l'API le 2026-11-13 ; flux Enhanced accessible (266 offres importées). Les prix restent masqués faute de date marchande/TTC vérifiée. Logos et visuels hors flux en attente de validation du media kit.",
+      "enhancedFeedStatus": "http_200",
+      "enhancedOffersImported": 266
+    },
+    {
+      "name": "ANITA & ZAHA",
+      "type": "brand",
+      "category": "Cosmétiques",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 115393,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/115393",
+      "contactStatus": "joined_via_api",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "joined_api",
+      "statusObservedAt": "2026-11-13",
+      "integration": "Programme Awin joined confirmé par l'API le 2026-11-13 ; téléchargement Enhanced HTTP 404 (erreur générique Awin). Ne pas assimiler ce 404 à un refus de partenariat ; n'utiliser que les flux standards effectivement exposés. Logos/media kit toujours en attente.",
+      "enhancedFeedStatus": "http_404",
+      "enhancedOffersImported": 0
+    },
+    {
+      "name": "Jowissa",
+      "type": "brand",
+      "category": "Montres",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 59933,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/59933",
+      "contactStatus": "joined_via_api",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "joined_api",
+      "statusObservedAt": "2026-11-13",
+      "integration": "Programme Awin joined confirmé par l'API le 2026-11-13 ; téléchargement Enhanced HTTP 404 (erreur générique Awin). Ne pas assimiler ce 404 à un refus de partenariat ; n'utiliser que les flux standards effectivement exposés. Logos/media kit toujours en attente.",
+      "enhancedFeedStatus": "http_404",
+      "enhancedOffersImported": 0
+    },
+    {
+      "name": "Lusini FR",
+      "type": "retailer",
+      "category": "Équipement professionnel CHR, arts de la table et mobilier",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 22619,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/22619",
+      "contactStatus": "joined_via_api",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "joined_api",
+      "statusObservedAt": "2026-11-13",
+      "integration": "Programme Awin joined confirmé par l'API le 2026-11-13 ; téléchargement Enhanced HTTP 404 (erreur générique Awin). Ne pas assimiler ce 404 à un refus de partenariat ; n'utiliser que les flux standards effectivement exposés. Logos/media kit toujours en attente.",
+      "enhancedFeedStatus": "http_404",
+      "enhancedOffersImported": 0
+    },
+    {
+      "name": "Imou FR",
+      "type": "brand",
+      "category": "Maison connectée et sécurité",
+      "network": "Awin",
+      "publisherId": "3137386",
+      "advertiserId": 122426,
+      "awinProfileUrl": "https://ui.awin.com/merchant-profile/122426",
+      "contactStatus": "joined_via_api",
+      "approvalStatus": "pending_confirmation",
+      "networkStatusObserved": "joined_api",
+      "statusObservedAt": "2026-11-13",
+      "integration": "Programme Awin joined confirmé par l'API le 2026-11-13 ; flux Enhanced accessible (351 offres importées). Les prix restent masqués faute de date marchande/TTC vérifiée. Logos et visuels hors flux en attente de validation du media kit.",
+      "enhancedFeedStatus": "http_200",
+      "enhancedOffersImported": 351
     }
   ]
 }

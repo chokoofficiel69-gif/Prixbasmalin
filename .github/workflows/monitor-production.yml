@@ -7,12 +7,16 @@ on:
   pull_request:
     paths:
       - ".github/workflows/monitor-production.yml"
+      - ".github/workflows/rotate-home-deals.yml"
       - "js/track-outbound.js"
       - "workers/prixbasmalin-attribution.js"
+      - "workers/prixbasmalin-ai.js"
+      - "workers/prixbasmalin-ai.test.mjs"
       - "workers/prixbasmalin-clicks.js"
       - "workers/prixbasmalin-clicks.test.mjs"
       - "tests/**"
       - "scripts/build_guides.py"
+      - "scripts/generate_ai_guides.py"
       - "scripts/site_chrome.py"
       - "scripts/import_amazon_report.py"
       - "js/cookie-consent.js"
@@ -20,6 +24,7 @@ on:
       - "migrations/**"
       - "confidentialite.html"
       - "js/prix-malin-auth.js"
+      - "scripts/generate_ai_guides.py"
       - "catalogue.html"
       - "css/partner-ads.css"
       - "js/partner-ads.js"
@@ -47,6 +52,8 @@ on:
       - "data/home-deals.json"
       - "data/fiches-produits.json"
       - "scripts/build_seo_pages.py"
+      - "scripts/build_home_deals.py"
+      - "scripts/check_awin_gift_images.py"
       - "prix/**"
       - "idees-cadeaux/**"
       - "sitemap.xml"
@@ -55,6 +62,11 @@ on:
       - main
     paths:
       - ".github/workflows/monitor-production.yml"
+      - "workers/prixbasmalin-ai.test.mjs"
+      - "workers/prixbasmalin-ai.js"
+      - "workers/prixbasmalin-clicks.js"
+      - "workers/prixbasmalin-clicks.test.mjs"
+      - "workers/prixbasmalin-attribution.js"
       - "js/track-outbound.js"
       - "js/prix-malin-auth.js"
       - "catalogue.html"
@@ -76,6 +88,8 @@ on:
       - "data/home-deals.json"
       - "data/fiches-produits.json"
       - "scripts/build_seo_pages.py"
+      - "scripts/build_home_deals.py"
+      - "scripts/check_awin_gift_images.py"
       - "prix/**"
       - "idees-cadeaux/**"
       - "sitemap.xml"
@@ -111,10 +125,23 @@ jobs:
         run: node --check workers/prixbasmalin-clicks.js
       - name: Tester le Worker mesure d'audience (tag Amazon, sessions, robots, sécurité) et le script de suivi
         run: node --test workers/prixbasmalin-clicks.test.mjs tests/js/track-outbound.test.mjs
+      - name: Vérifier la syntaxe du Worker IA
+        run: node --check workers/prixbasmalin-ai.js
+      - name: Tester le Worker IA (Content-Type strict et en-têtes)
+        run: node --test workers/prixbasmalin-ai.test.mjs
       - name: Vérifier la syntaxe des scripts Python modifiés
         run: python3 -m py_compile scripts/build_guides.py scripts/build_seo_pages.py scripts/import_amazon_report.py scripts/site_chrome.py
+      - name: Tester la vitrine cadeaux et la rotation 48 h
+        run: |
+          python3 -m py_compile scripts/build_home_deals.py scripts/check_awin_gift_images.py
+          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+          python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v
       - name: Tester l'affiliation Amazon, le consentement et l'import CSV officiel
         run: python3 -m unittest discover -s tests -p 'test_tracking_and_affiliation.py' -v
+      - name: Tester les réponses OpenRouter vides et les conseils IA
+        run: |
+          python3 -m py_compile scripts/generate_ai_guides.py
+          python3 -m unittest discover -s tests -p 'test_ai_guides.py' -v
       - name: Vérifier la syntaxe du module compte et alertes
         run: node --check js/prix-malin-auth.js
       - name: Vérifier la syntaxe du module publicités partenaires
@@ -466,13 +493,44 @@ jobs:
           NODE
       - name: Vérifier le Worker d'attribution
         run: |
-          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
-            https://prixbasmalin-attribution.chokoofficiel69.workers.dev/health --output /tmp/worker-health.json
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 --dump-header /tmp/attribution-headers.txt https://prixbasmalin-attribution.chokoofficiel69.workers.dev/health --output /tmp/attribution-health.json
           node --input-type=module <<'NODE'
           import fs from "node:fs";
-          const data = JSON.parse(fs.readFileSync("/tmp/worker-health.json", "utf8"));
-          if (data.ok !== true || data.service !== "prixbasmalin-attribution" || data.country_measurement !== true) {
-            throw new Error("Le Worker attribution n'a pas renvoyé le statut attendu");
+          const data = JSON.parse(fs.readFileSync("/tmp/attribution-health.json", "utf8"));
+          const headers = fs.readFileSync("/tmp/attribution-headers.txt", "utf8").toLowerCase();
+          if (data.ok !== true || data.service !== "prixbasmalin-attribution" || data.country_measurement !== true) throw new Error("Worker attribution non sain");
+          for (const h of ["x-content-type-options: nosniff", "x-frame-options: deny", "referrer-policy: strict-origin-when-cross-origin"]) {
+            if (!headers.includes(h)) throw new Error("En-tête de sécurité absent : " + h);
           }
-          console.log("Worker attribution joignable et sain.");
+          console.log("Worker attribution joignable, sain et protégé.");
           NODE
+      - name: Vérifier le Worker analytics et clics
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 --dump-header /tmp/clicks-headers.txt https://prixbasmalin-clicks.chokoofficiel69.workers.dev/health --output /tmp/clicks-health.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/clicks-health.json", "utf8"));
+          const headers = fs.readFileSync("/tmp/clicks-headers.txt", "utf8").toLowerCase();
+          if (data.ok !== true || data.service !== "prixbasmalin-analytics") throw new Error("Worker clicks non sain");
+          for (const h of ["x-content-type-options: nosniff", "x-frame-options: deny", "referrer-policy: strict-origin-when-cross-origin"]) {
+            if (!headers.includes(h)) throw new Error("En-tête de sécurité absent : " + h);
+          }
+          console.log("Worker clicks joignable, sain et protégé.");
+          NODE
+      - name: Vérifier le Worker IA et le refus des Content-Type invalides
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 --dump-header /tmp/ai-headers.txt https://prixbasmalin-ia.chokoofficiel69.workers.dev/health --output /tmp/ai-health.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const data = JSON.parse(fs.readFileSync("/tmp/ai-health.json", "utf8"));
+          const headers = fs.readFileSync("/tmp/ai-headers.txt", "utf8").toLowerCase();
+          if (data.ok !== true || data.service !== "Prix Malin AI gateway" || data.configured !== true) throw new Error("Worker IA non sain ou fournisseur non configuré");
+          for (const h of ["x-content-type-options: nosniff", "x-frame-options: deny", "referrer-policy: strict-origin-when-cross-origin"]) {
+            if (!headers.includes(h)) throw new Error("En-tête de sécurité absent : " + h);
+          }
+          console.log("Worker IA joignable, sain et configuré ; aucun appel fournisseur effectué.");
+          NODE
+          status="$(curl --silent --show-error --location --max-time 20 --output /tmp/ai-jsonp.json --write-out "%{http_code}" --request POST --header "Origin: https://prixbasmalin.fr" --header "Content-Type: application/jsonp" --data '{"message":"smoke test"}' https://prixbasmalin-ia.chokoofficiel69.workers.dev/api/ai)"
+          if [[ "$status" != "415" ]]; then echo "Content-Type application/jsonp : HTTP $status au lieu de 415"; exit 1; fi
+          grep -q '"requiredContentType":"application/json"' /tmp/ai-jsonp.json
+          echo "Worker IA refuse bien application/jsonp (HTTP 415), sans appeler le fournisseur."

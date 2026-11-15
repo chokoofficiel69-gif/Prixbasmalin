@@ -1,0 +1,29 @@
+name: Tester le parseur Awin hors ligne
+
+on:
+  pull_request:
+    paths:
+      - "price-engine/sync-awin-products.mjs"
+      - ".github/workflows/test-awin-parser.yml"
+  push:
+    branches: [main]
+    paths:
+      - "price-engine/sync-awin-products.mjs"
+      - ".github/workflows/test-awin-parser.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  parser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vérifier la syntaxe du parseur
+        run: node --check price-engine/sync-awin-products.mjs
+      - name: Exécuter les tests hors ligne du parseur Awin
+        run: node price-engine/sync-awin-products.mjs --self-test

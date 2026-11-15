@@ -29,8 +29,57 @@ class HomeDealsTests(unittest.TestCase):
         self.assertEqual([g["name"] for g in gifts], ["Eau de parfum"])
         self.assertFalse(gifts[0]["price_verified"])
         self.assertIsNone(gifts[0]["price_eur"])
+        self.assertFalse(gifts[0]["image_verified"])
+        self.assertEqual(gifts[0]["image_provenance"], "Flux marchand Awin autorisé")
         self.assertEqual(gifts[0]["price_date_kind"], "missing")
         self.assertEqual(gifts[0]["band"], "a-confirmer")
+
+    def test_prm_coupons_couture_gift_families_use_product_type(self):
+        fashion = product("Patron Know Me n°2137 – Blouse & veste stylée", "PRM Coupons Couture FR", 30,
+                          desc="Patron de couture")
+        home = product("Tissu d'ameublement velours", "PRM Coupons Couture FR", 30, desc="Tissu")
+        unknown = product("PRM référence 123", "PRM Coupons Couture FR", 30, desc="")
+        sewing = product("Aiguilles à coudre Bohin longues A1F", "PRM Coupons Couture FR", 30, desc="Mercerie")
+        pins = product("Assortiment d'épingles de sûreté à ressort Nina BOHIN", "PRM Coupons Couture FR", 30, desc="Mercerie")
+        magnet = product("Aimant en acier BOHIN", "PRM Coupons Couture FR", 30, desc="Mercerie")
+        imou = product("_Gift_ 32GB Micro SD Memory Card-UK - 32GB", "Imou FR", 30, desc="")
+        fiido = product("Accélérateur de pouce Fiido-Q1/Q1S", "Fiido Technology Development Co., Ltd", 30, desc="")
+        self.assertEqual(deals.gift_family(fashion)[0], "mode")
+        self.assertEqual(deals.gift_family(home)[0], "maison")
+        self.assertEqual(deals.gift_family(unknown)[0], "autre")
+        self.assertEqual(deals.gift_family(sewing)[0], "mode")
+        self.assertEqual(deals.gift_family(pins)[0], "mode")
+        self.assertEqual(deals.gift_family(magnet)[0], "mode")
+        self.assertEqual(deals.gift_family(imou)[0], "tech")
+        self.assertEqual(deals.gift_family(fiido)[0], "tech")
+
+    def test_gifts_exclude_known_placeholder_image_urls(self):
+        awin = {"products": [
+            product("Produit sans visuel", "Milk Bar Babystore", 30, desc="Mode",
+                    image="https://images2.productserve.com/noimage.gif"),
+            product("Eau de parfum", "A", 40, desc="Parfums",
+                    image="https://img.example/parfum.webp"),
+        ]}
+        gifts = deals.build_gifts(awin)
+        self.assertEqual([gift["name"] for gift in gifts], ["Eau de parfum"])
+        self.assertFalse(any(deals.is_placeholder_image_url(gift["image"]) for gift in gifts))
+
+    def test_published_gifts_do_not_mark_placeholder_images_as_usable(self):
+        data = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
+        self.assertFalse(any(deals.is_placeholder_image_url(gift.get("image")) for gift in data["gifts"]))
+
+
+    def test_gifts_preserve_recent_image_verification_by_exact_url(self):
+        awin = {"fetched_at": "2026-11-11T12:00:00Z", "products": [
+            product("Parfum vérifié", "A", 59.9, image="https://img.example/parfum.webp")
+        ]}
+        previous = [{"image": "https://img.example/parfum.webp", "image_verified": True,
+                     "image_verified_at": "2026-11-10T12:00:00Z",
+                     "image_checked_at": "2026-11-10T12:00:00Z",
+                     "image_check_status": "ok"}]
+        gifts = deals.build_gifts(awin, previous_gifts=previous)
+        self.assertTrue(gifts[0]["image_verified"])
+        self.assertEqual(gifts[0]["image_verified_at"], "2026-11-10T12:00:00Z")
 
     def test_gifts_show_price_only_with_fresh_merchant_date_and_explicit_ttc(self):
         awin = {"fetched_at": "2026-11-06T13:00:00Z", "products": [
@@ -58,21 +107,43 @@ class HomeDealsTests(unittest.TestCase):
         self.assertTrue(all(gift["shipping_eur"] is None and gift["band"] == "a-confirmer" for gift in gifts))
 
     def test_gifts_alternate_merchants(self):
-        awin = {"products": [product(f"Parfum {i}", m, 20 + i) for m in ("A", "B") for i in range(3)]}
-        merchants = [g["merchant"] for g in deals.build_gifts(awin)]
+        awin = {"products": [
+            product(f"Parfum {i}", merchant, 20 + i,
+                    image=f"https://img.example/{merchant.lower()}-{i}.webp")
+            for merchant in ("A", "B") for i in range(3)
+        ]}
+        gifts = deals.build_gifts(awin)
+        merchants = [gift["merchant"] for gift in gifts]
         self.assertEqual(merchants[:4], ["A", "B", "A", "B"])
+        self.assertEqual(len({gift["image"] for gift in gifts}), len(gifts))
 
     def test_top_has_no_misleading_gap_percent(self):
         data = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
         self.assertTrue(data["top"])
         self.assertTrue(all("gap_percent" not in t and t["offer_count"] >= 8 for t in data["top"]))
         self.assertTrue(all(t["price_kind"] == "historical" for t in data["top"]))
+        self.assertTrue(all(deals.has_verified_local_image(t) for t in data["top"]))
+
+    def test_top_builder_skips_missing_or_uncredited_images(self):
+        sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
+        top = deals.build_top(sheets)
+        self.assertTrue(top)
+        self.assertTrue(all(deals.has_verified_local_image(item) for item in top))
+        self.assertNotIn("ipad-air-11-m3", {item["id"] for item in top})
+        self.assertNotIn("dreame-x50-ultra", {item["id"] for item in top})
 
     def test_published_file_is_up_to_date(self):
         awin = json.loads((ROOT / "data" / "awin-products.json").read_text(encoding="utf-8"))
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
-        self.assertEqual(published, deals.build(awin, sheets))
+        rotation = published.get("rotation", {})
+        check_times = [
+            deals.parse_utc(rotation.get("last_attempt_at")),
+            deals.parse_utc(rotation.get("last_rotated_at")),
+            deals.parse_utc(awin.get("fetched_at")),
+        ]
+        rotation_now = max(value for value in check_times if value is not None)
+        self.assertEqual(published, deals.build(awin, sheets, previous=published, rotation_now=rotation_now))
 
     def test_awin_and_prixtracker_publish_home_deals_under_one_safe_lock(self):
         awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
@@ -84,23 +155,85 @@ class HomeDealsTests(unittest.TestCase):
             self.assertIn("cancel-in-progress: false", workflow)
             self.assertIn('git rebase "origin/${GITHUB_REF_NAME}"', workflow)
             self.assertIn("trois tentatives", workflow)
+        self.assertIn("cp data/home-deals.json /tmp/home-deals-previous.json", awin)
+        self.assertIn("python3 scripts/check_awin_gift_images.py --previous /tmp/home-deals-previous.json", awin)
+        for line in awin.splitlines():
+            if "${{" in line:
+                self.assertEqual(line.count("${{"), line.count("}}"), line)
+                self.assertTrue(line.endswith("}}") and not line.endswith("}}}"), line)
         self.assertIn("github.event.pull_request.head.sha || github.ref", tracker)
+
+    def test_pending_awin_applications_are_not_published_as_active_partners(self):
+        from html import unescape
+
+        page = (ROOT / "index.html").read_text(encoding="utf-8")
+        partners = json.loads((ROOT / "data" / "partners.json").read_text(encoding="utf-8"))
+        start = page.index('<section id="pm-partners"')
+        end = page.index("</section>", start)
+        section = unescape(page[start:end]).casefold()
+
+        pending = [
+            entry for entry in partners.get("entries", [])
+            if entry.get("network") == "Awin" and entry.get("approvalStatus") != "approved"
+        ]
+        self.assertTrue(pending)
+        for entry in pending:
+            name = entry.get("displayName") or entry.get("name", "")
+            name = name.removesuffix(" FR")
+            self.assertNotIn(name.casefold(), section)
+        for logo_class in ("pm-logo-fiido", "pm-logo-jowissa", "pm-logo-lusini", "pm-logo-imou"):
+            self.assertNotIn(logo_class, section)
+
+        # Un lien affilié Awin/Rakuten n'est visible qu'après statut joined explicite.
+        self.assertIn('a.getAttribute("data-authorization-status")==="joined"', page)
+        self.assertIn("if(authorized && ", page)
+        self.assertIn('data-partner="decathlon" data-authorization-status="pending"', section)
+        self.assertIn('data-partner="nicchia-luxury" data-authorization-status="unverified"', section)
+        self.assertIn('les demandes en attente ne sont pas des partenariats actifs.', section)
+
+        footers = []
+        cursor = 0
+        while True:
+            start_footer = page.find("<footer", cursor)
+            if start_footer < 0:
+                break
+            end_footer = page.find("</footer>", start_footer)
+            if end_footer < 0:
+                break
+            footers.append(page[start_footer:end_footer + len("</footer>")])
+            cursor = end_footer + len("</footer>")
+        self.assertTrue(footers)
+        for footer in footers:
+            visible = unescape(footer).casefold()
+            for unapproved in ("<strong>decathlon</strong>", "<strong>nicchia luxury</strong>",
+                               "<strong>lusini</strong>", "<strong>imou</strong>",
+                               "<strong>jowissa</strong>", "<strong>ecovacs</strong>",
+                               "<strong>mibro</strong>"):
+                self.assertNotIn(unapproved, visible)
 
     def test_homepage_sections_partners_and_affiliate_rel(self):
         page = (ROOT / "index.html").read_text(encoding="utf-8")
         for marker in ('id="pm-partners"', 'id="pm-top-prices"', 'id="pm-gifts"', 'fetch("/data/home-deals.json"'):
             self.assertIn(marker, page)
         self.assertIn('href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21"', page)
-        # Les boutons partenaires restent masqués tant que le script n'a pas validé un lien https.
-        self.assertIn('data-partner="decathlon" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=44806&amp;murl=https%3A%2F%2Fwww.decathlon.fr%2F" target="_blank" rel="sponsored nofollow noopener" hidden', page)
-        self.assertIn('data-partner="nicchia-luxury" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=54306', page)
+        # Les liens restent masqués tant que le statut joined n’est pas confirmé.
+        self.assertIn('data-partner="decathlon" data-authorization-status="pending" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=44806&amp;murl=https%3A%2F%2Fwww.decathlon.fr%2F" target="_blank" rel="sponsored nofollow noopener" hidden', page)
+        self.assertIn('data-partner="nicchia-luxury" data-authorization-status="unverified" data-href="https://click.linksynergy.com/deeplink?id=GnFjGr9kD3Y&amp;mid=54306', page)
+        links = [line for line in page.splitlines() if "<a " in line and "data-href=" in line]
+        self.assertTrue(links)
+        for link in links:
+            if 'data-authorization-status="joined"' not in link:
+                self.assertIn(" hidden", link)
         # Promos partenaires : uniquement prix TTC frais, prix barré fourni par le marchand, liens affiliés.
         self.assertIn('id="pm-partner-deals"', page)
         self.assertIn('p.priceTaxStatus==="included"', page)
         self.assertIn('Number(p.regularPriceValue)>Number(p.priceValue)', page)
         self.assertIn(".pm-partner[hidden]{display:none!important}", page)
-        self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(g.image', page)
+        self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(image', page)
         self.assertIn("const giftPriceIsCurrent=g=>", page)
+        self.assertIn("g.image_verified!==true", page)
+        self.assertIn("Prix non vérifié", page)
+        self.assertIn('giftRail.querySelectorAll("img")', page)
         self.assertIn("Prix observés", page)
         self.assertIn("prix affichés seulement si date marchande récente et TTC confirmé", page)
         product_page = (ROOT / "produit.html").read_text(encoding="utf-8")
@@ -108,6 +241,21 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn("Relevés historiques par marchand", product_page)
         self.assertIn("pas des offres actuelles", product_page)
         self.assertIn('label:"Rechercher"', product_page)
+
+
+    def test_gifts_do_not_repeat_the_same_image_and_keep_filling_with_unique_photos(self):
+        awin = {"fetched_at": "2026-11-14T00:00:00Z", "products": [
+            product("Parfum A 30 ml", "A", 20, image="https://img.example/shared.webp"),
+            product("Parfum A2 30 ml", "A", 30, image="https://img.example/unique-a.webp"),
+            product("Parfum B 30 ml", "B", 25, image="https://img.example/shared.webp"),
+            product("Parfum C 30 ml", "C", 28, image="https://img.example/unique-c.webp"),
+        ]}
+        gifts = deals.build_gifts(awin, limit=48)
+        images = [gift["image"] for gift in gifts]
+        self.assertEqual(len(gifts), 3)
+        self.assertEqual(len(images), len(set(images)))
+        self.assertIn("https://img.example/unique-a.webp", images)
+        self.assertIn("https://img.example/unique-c.webp", images)
 
 
 class ProductSheetOutlierTests(unittest.TestCase):
@@ -119,6 +267,164 @@ class ProductSheetOutlierTests(unittest.TestCase):
                 for m, v in (("a", 100), ("b", 110), ("c", 120), ("d", 4800))]
         offers = bps.build({"offers": rows}, {"products": []})["products"][0]["offers"]
         self.assertEqual([o["merchant"] for o in offers], ["a", "b", "c"])
+
+
+
+class HomeDealsRotationTests(unittest.TestCase):
+    def rotation_awin(self, count, fetched_at):
+        return {
+            "fetched_at": fetched_at,
+            "products": [
+                product(
+                    f"Parfum rotation {i}",
+                    f"Marchand {i % 4}",
+                    20 + (i % 40),
+                    desc="Parfums",
+                    image=f"https://img.example/rotation-{i}.webp",
+                    sourceUrl=f"https://merchant.example/item/{i}",
+                )
+                for i in range(count)
+            ],
+        }
+
+    def test_rotation_waits_48_hours_and_then_selects_new_products(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        initial_ids = {gift["id"] for gift in initial["gifts"]}
+        self.assertEqual(len(initial_ids), 48)
+        self.assertEqual(initial["rotation"]["status"], "initial_selection")
+
+        before_due = deals.build(
+            self.rotation_awin(100, "2026-11-11T11:59:59Z"),
+            {"products": []},
+            previous=initial,
+        )
+        self.assertEqual({gift["id"] for gift in before_due["gifts"]}, initial_ids)
+        self.assertEqual(before_due["rotation"]["last_rotated_at"], first_time)
+
+        after_due = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        next_ids = {gift["id"] for gift in after_due["gifts"]}
+        self.assertEqual(len(next_ids), 48)
+        self.assertTrue(initial_ids.isdisjoint(next_ids))
+        self.assertEqual(after_due["rotation"]["status"], "rotated")
+        self.assertEqual(set(after_due["rotation_history"][0]["product_ids"]), initial_ids)
+        self.assertTrue(all(len(value) == 64 for value in after_due["rotation_history"][0]["image_hashes"]))
+        self.assertFalse(any(value.startswith("https://") for value in after_due["rotation_history"][0]["image_hashes"]))
+
+    def test_rotation_keeps_previous_snapshot_when_fewer_than_48_new_items_exist(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(60, first_time), {"products": []})
+        initial_ids = {gift["id"] for gift in initial["gifts"]}
+        self.assertEqual(len(initial_ids), 48)
+
+        attempted = deals.build(
+            self.rotation_awin(60, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        self.assertEqual({gift["id"] for gift in attempted["gifts"]}, initial_ids)
+        self.assertEqual(attempted["rotation"]["status"], "held_insufficient_candidates")
+        self.assertEqual(attempted["rotation"]["last_rotated_at"], first_time)
+        self.assertEqual(attempted["rotation"]["candidate_count"], 12)
+
+    def test_rotation_journal_contains_ids_and_hashes_not_image_urls(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        rotated = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=initial,
+        )
+        journal = rotated["rotation_history"][0]
+        self.assertEqual(journal["rotated_at"], first_time)
+        self.assertEqual(len(journal["product_ids"]), 48)
+        self.assertEqual(len(journal["image_hashes"]), 48)
+        self.assertFalse(any("https://" in str(value) for value in journal.values()))
+
+
+
+    def test_rotation_uses_wall_clock_even_when_awin_snapshot_is_unchanged(self):
+        fetched_at = "2026-11-10T12:00:00Z"
+        initial = deals.build(
+            self.rotation_awin(100, fetched_at),
+            {"products": []},
+            rotation_now=deals.parse_utc(fetched_at),
+        )
+        rotated = deals.build(
+            self.rotation_awin(100, fetched_at),
+            {"products": []},
+            previous=initial,
+            rotation_now=deals.parse_utc("2026-11-12T12:00:00Z"),
+        )
+        self.assertEqual(rotated["rotation"]["status"], "rotated")
+        self.assertNotEqual(
+            {gift["id"] for gift in initial["gifts"]},
+            {gift["id"] for gift in rotated["gifts"]},
+        )
+
+    def test_failed_rotation_retries_after_twelve_hour_cooldown(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        held = dict(initial)
+        held["rotation"] = {
+            "interval_hours": 48,
+            "last_rotated_at": first_time,
+            "last_attempt_at": "2026-11-12T12:00:00Z",
+            "status": "held_previous_snapshot",
+            "selected_count": 48,
+        }
+        cooldown = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=held,
+            rotation_now=deals.parse_utc("2026-11-12T18:00:00Z"),
+        )
+        self.assertEqual(cooldown["rotation"]["status"], "retry_cooldown")
+        self.assertEqual([g["id"] for g in cooldown["gifts"]], [g["id"] for g in held["gifts"]])
+        retry = deals.build(
+            self.rotation_awin(100, "2026-11-12T12:00:00Z"),
+            {"products": []},
+            previous=held,
+            rotation_now=deals.parse_utc("2026-11-13T00:00:01Z"),
+        )
+        self.assertEqual(retry["rotation"]["status"], "rotated")
+
+
+
+    def test_rotation_workflow_checks_every_two_hours_without_awin_api_calls(self):
+        workflow = (ROOT / ".github" / "workflows" / "rotate-home-deals.yml").read_text(encoding="utf-8")
+        self.assertIn('cron: "27 */2 * * *"', workflow)
+        self.assertIn("prix-malin-price-data-refresh", workflow)
+        self.assertIn("python3 scripts/build_home_deals.py", workflow)
+        self.assertIn("python3 scripts/check_awin_gift_images.py --previous", workflow)
+        self.assertIn("git push origin HEAD:main", workflow)
+        self.assertNotIn("sync-awin-products.mjs", workflow)
+        self.assertNotIn("AWIN_API_TOKEN", workflow)
+
+        ci = (ROOT / ".github" / "workflows" / "test-home-deals-rotation.yml").read_text(encoding="utf-8")
+        self.assertIn("test_home_deals.py", ci)
+        self.assertIn("test_awin_gift_images.py", ci)
+        self.assertIn("pull_request:", ci)
+        self.assertNotIn("secrets.", ci)
+
+
+
+    def test_rotation_holds_previous_snapshot_when_awin_feed_is_over_48_hours_old(self):
+        first_time = "2026-11-10T12:00:00Z"
+        initial = deals.build(self.rotation_awin(100, first_time), {"products": []})
+        stale = deals.build(
+            self.rotation_awin(100, first_time),
+            {"products": []},
+            previous=initial,
+            rotation_now=deals.parse_utc("2026-11-12T12:00:01Z"),
+        )
+        self.assertEqual(stale["rotation"]["status"], "held_stale_catalog")
+        self.assertEqual([g["id"] for g in stale["gifts"]], [g["id"] for g in initial["gifts"]])
+
 
 
 if __name__ == "__main__":
