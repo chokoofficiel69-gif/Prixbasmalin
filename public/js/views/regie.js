@@ -223,14 +223,23 @@ export async function render(el, { params }) {
       analyser.getFloatTimeDomainData(anaData);
       let s = 0; for (const x of anaData) s += x * x;
       const rms = Math.sqrt(s / anaData.length);
-      const pct = Math.min(100, Math.max(0, (20 * Math.log10(rms + 1e-6) + 60) / 60 * 100));
+      let peak = 0; for (const x of anaData) peak = Math.max(peak, Math.abs(x));
+      const rmsDb = 20 * Math.log10(rms + 1e-9), peakDb = 20 * Math.log10(peak + 1e-9);
+      const pct = Math.min(100, Math.max(0, (rmsDb + 60) / 60 * 100));
       outMeter.style.width = pct.toFixed(0) + '%';
+      // Diagnostic de lecture en direct : mesures du mix réellement envoyé à la sortie.
+      const now = performance.now();
+      if (liveAudioStatus && now - lastLiveUiAt > 180) {
+        lastLiveUiAt = now;
+        liveAudioStatus.textContent = `EN DIRECT · RMS ${rmsDb.toFixed(1)} dBFS · crête ${peakDb.toFixed(1)} dBFS${peakDb > -1 ? ' · attention, proche saturation' : ''}`;
+        liveAudioStatus.style.color = peakDb > -1 ? '#ff9b9b' : '#9be8c2';
+      }
     }
     raf = requestAnimationFrame(tick);
   }
 
   // ---------- refs DOM partagées ----------
-  let playheadEl = null, lcdEl = null, outMeter = null, playBtn = null, laneWrap = null;
+  let playheadEl = null, lcdEl = null, outMeter = null, playBtn = null, laneWrap = null, liveAudioStatus = null, lastLiveUiAt = 0;
   function movePlayhead(pos) {
     const x = 160 + pos * pxPerSec;
     if (playheadEl) playheadEl.style.left = x + 'px';
@@ -763,6 +772,7 @@ RÈGLES D’UTILISATION :
       h('div', { style:{gridColumn:'1/-1',fontWeight:'700',fontSize:'12px'} }, 'Choisis plusieurs effets à appliquer (facultatif)'),
       ...effectChoices.map(([v,l]) => h('label', { style:{display:'flex',alignItems:'center',gap:'7px',fontSize:'11px',color:'var(--rtxt)'} }, effectChecks.get(v), l)));
     const status = h('div.muted', { style: { minHeight: '20px', marginTop: '8px' } }, 'L’ingénieur peut préparer un plan, puis appliquer les traitements disponibles au son.');
+    liveAudioStatus = h('div.muted', { style: { minHeight:'18px', marginTop:'5px', fontSize:'11px', color:'#9be8c2' } }, 'Analyse en direct activée pendant la lecture du mix.');
     const planBox = h('div', { style: { display: 'grid', gap: '6px', marginTop: '8px' } });
     const send = h('button.rbtn.p', '🎧 Envoyer à La Zone');
     const voiceBtn = h('button.rbtn', { type: 'button' }, '🎙️ Parler à La Zone');
@@ -818,6 +828,30 @@ RÈGLES D’UTILISATION :
           }
           voiceDsp = { ...analyzeVoiceDsp(mono, b.sampleRate), sampledSeconds: +(mono.length / b.sampleRate).toFixed(1), sampleStrategy: 'début, milieu et fin de la prise' };
           voiceDspTips = voiceDspRecommendations(voiceDsp);
+          // Analyse mélodique post-prise : détection F0 sur des extraits répartis.
+          try {
+            const pitchBuffer = audioCtx().createBuffer(1, mono.length, b.sampleRate);
+            pitchBuffer.copyToChannel(mono, 0);
+            const pitch = await detectPitch(pitchBuffer);
+            const validF0 = Array.from(pitch.f0).filter(v => Number.isFinite(v) && v > 0);
+            const key = validF0.length >= 12 ? detectKey(pitch) : null;
+            const midi = validF0.map(hz => Math.round(69 + 12 * Math.log2(hz / 440)));
+            const counts = new Map();
+            for (const n of midi) counts.set(n, (counts.get(n) || 0) + 1);
+            const noteNames = ['Do','Do♯','Ré','Ré♯','Mi','Fa','Fa♯','Sol','Sol♯','La','La♯','Si'];
+            const dominantNotes = [...counts.entries()].sort((a,b) => b[1]-a[1]).slice(0,8)
+              .map(([n,count]) => ({ note: noteNames[((n%12)+12)%12], octave: Math.floor(n/12)-1, share: +(count/midi.length*100).toFixed(1) }));
+            const sorted = [...validF0].sort((a,b)=>a-b);
+            voiceDsp.pitchAnalysis = {
+              voicedFrames: validF0.length, totalFrames: pitch.f0.length,
+              voicedRatio: +(validF0.length / Math.max(1,pitch.f0.length) * 100).toFixed(1),
+              medianHz: sorted.length ? +sorted[Math.floor(sorted.length/2)].toFixed(1) : null,
+              key: key ? { ...key, label: keyName(key) } : null,
+              dominantNotes
+            };
+          } catch (pitchError) {
+            voiceDsp.pitchAnalysis = { available: false, reason: String(pitchError?.message || pitchError).slice(0,180) };
+          }
         }
         const context = { piste: t?.name || null, type_piste: t?.kind || null, analyse_signal_mesuree: signalAnalysis, diagnostic_spectral_voix: voiceDsp, conseils_mesures: voiceDspTips, autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
         const chosen = selectedEffects();
@@ -846,7 +880,7 @@ Contraintes moteur DSP réellement disponibles : denoise, antipop, gate, voice, 
 Le livrable final doit être UNIQUEMENT un JSON valide de cette forme :
 {"message":"explication courte en français","actions":[{"type":"...","params":{}}]}
 Types autorisés : denoise amount 0..1; antipop amount 0..1; gate thresholdDb -60..-25 et floorDb -60..-10; voice highpass 40..180, low/presence/air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode"; normalize targetDb -3..-1; limit ceilingDb -2..-0.3; master preset streaming|spotify|youtube|apple|tiktok|podcast|rap|club|doux; reverse; fadeIn; fadeOut.
-Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coché, utilise exactement le preset demandé. Maximum 10 actions. Les mesures de analyse_signal_mesuree sont calculées directement sur tous les échantillons du buffer source. Si diagnostic_spectral_voix est présent, exploite ses bandes spectrales et conseils_mesures avec prudence : sibilanceRatio n'est pas une détection phonétique des /s/, noiseFloorEstimateDbfs peut inclure des passages faibles, et les indicateurs ne remplacent jamais l'écoute. Les fenêtres nearSilence sont des indices, pas automatiquement des silences à couper. N'invente aucune mesure, aucun traitement ni aucune écoute subjective. Une seule piste est traitée dans cette opération. Le contrôle qualité doit vérifier que chaque action est supportée.`;
+Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coché, utilise exactement le preset demandé. Maximum 10 actions. Les mesures de analyse_signal_mesuree sont calculées directement sur tous les échantillons du buffer source. Si diagnostic_spectral_voix est présent, exploite ses bandes spectrales, conseils_mesures et pitchAnalysis avec prudence : les notes dominantes et la tonalité sont des estimations, pas une transcription musicale parfaite. sibilanceRatio n'est pas une détection phonétique des /s/, noiseFloorEstimateDbfs peut inclure des passages faibles, et les indicateurs ne remplacent jamais l'écoute. Les fenêtres nearSilence sont des indices, pas automatiquement des silences à couper. N'invente aucune mesure, aucun traitement ni aucune écoute subjective. Une seule piste est traitée dans cette opération. Le contrôle qualité doit vérifier que chaque action est supportée.`;
         let raw = '';
         const agentStatus = new Map();
         await sse('/api/agents/run', { projectId: state.projectId, task, agents, mode: 'chef', rounds: 1, synthModel: 'auto' }, ev => {
@@ -908,7 +942,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
           effectPicker,
           h('div', { style: { marginTop: '10px' } }, input),
           h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' } }, send, applyBtn, undoBtn),
-          status, planBox)),
+          status, liveAudioStatus, planBox)),
       h('div.panel', h('div.ph', '🎚️ Ce qu’il peut faire maintenant'), h('div.pb',
         ...['Nettoyer le souffle et les bruits', 'Régler la voix et sa présence', 'Ajouter compression et réverbération', 'Corriger la justesse et la tonalité', 'Normaliser et limiter les crêtes', 'Masteriser avec un preset', 'Inverser ou faire des fondus', 'Enchaîner plusieurs traitements'].map(x => h('div.ditem', '✓ ' + x)),
         h('div.muted', { style: { marginTop: '10px', fontSize: '11px', lineHeight: '1.5' } }, 'Les opérations sont calculées localement après le plan IA. L’IA choisit les traitements, le moteur audio les exécute. Les actions disponibles dépendent de la piste sélectionnée.')))));
