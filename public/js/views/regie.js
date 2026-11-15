@@ -660,6 +660,43 @@ export async function render(el, { params }) {
     tracks.push({ name: audioClipboard.name + ' (copie)', kind: audioClipboard.kind || 'voix', gainDb: audioClipboard.gainDb || 0, pan: audioClipboard.pan || 0, offset: startOffset, mute: false, solo: false, armed: false, empty: false, fxDone: [], fx: null, fileId: null, buffer, original: cloneAudioBuffer(buffer) });
     refreshAfterEdit('Audio collé à la position du curseur');
   }
+
+  function preserveOriginal(track) {
+    if (track && track.buffer && (!track.original || track.original === track.buffer)) track.original = cloneAudioBuffer(track.buffer);
+  }
+  function processClip(index, processor, label) {
+    const track = tracks[index]; if (!track || !track.buffer) return;
+    preserveOriginal(track);
+    const edited = cloneAudioBuffer(track.buffer);
+    processor(edited);
+    track.buffer = edited;
+    refreshAfterEdit(label);
+  }
+  function peakNormalize(buffer) {
+    let peak = 0;
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i]));
+    }
+    if (!peak) return;
+    const gain = 0.98 / peak;
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < data.length; i++) data[i] *= gain;
+    }
+  }
+  function fadeClip(buffer, fadeIn) {
+    const n = Math.min(buffer.length, Math.floor(buffer.sampleRate * Math.min(2, buffer.duration * 0.25)));
+    if (n < 2) return;
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < n; i++) {
+        const ramp = i / (n - 1);
+        const idx = fadeIn ? i : data.length - n + i;
+        data[idx] *= fadeIn ? ramp : 1 - ramp;
+      }
+    }
+  }
   function splitTrackAtCursor(index) {
     const track = tracks[index]; if (!track || !track.buffer) return;
     const local = startOffset - (track.offset || 0);
@@ -679,6 +716,12 @@ export async function render(el, { params }) {
       add('✏️ Renommer la piste', () => { const n = window.prompt('Nom de la piste', track.name || 'Piste'); if (n && n.trim()) { track.name = n.trim(); refreshAfterEdit('Piste renommée'); } });
       add(track.mute ? '🔊 Réactiver la piste' : '🔇 Mettre en sourdine', () => { track.mute = !track.mute; refreshAfterEdit('État Mute modifié'); });
       add(track.solo ? '◉ Désactiver Solo' : '◉ Activer Solo', () => { track.solo = !track.solo; refreshAfterEdit('État Solo modifié'); });
+      add('🎚️ Régler le volume…', () => { const v = window.prompt('Volume en dB (-60 à +12)', String(track.gainDb || 0)); if (v !== null && Number.isFinite(Number(v))) { track.gainDb = Math.max(-60, Math.min(12, Number(v))); refreshAfterEdit('Volume réglé'); } });
+      add('↔️ Régler le panoramique…', () => { const v = window.prompt('Panoramique : -1 gauche, 0 centre, +1 droite', String(track.pan || 0)); if (v !== null && Number.isFinite(Number(v))) { track.pan = Math.max(-1, Math.min(1, Number(v))); refreshAfterEdit('Panoramique réglé'); } });
+      add('🎚️ Réinitialiser volume et panoramique', () => { track.gainDb = 0; track.pan = 0; refreshAfterEdit('Réglages réinitialisés'); });
+      add('⬆️ Monter la piste', () => { if (index > 0) { tracks.splice(index, 1); tracks.splice(index - 1, 0, track); refreshAfterEdit('Piste déplacée vers le haut'); } }, index === 0);
+      add('⬇️ Descendre la piste', () => { if (index < tracks.length - 1) { tracks.splice(index, 1); tracks.splice(index + 1, 0, track); refreshAfterEdit('Piste déplacée vers le bas'); } }, index === tracks.length - 1);
+
       sep();
       add('📄 Dupliquer la piste', () => { tracks.splice(index + 1, 0, { ...track, name: (track.name || 'Piste') + ' (copie)', buffer: cloneAudioBuffer(track.buffer), original: cloneAudioBuffer(track.original || track.buffer), fxDone: [...(track.fxDone || [])] }); refreshAfterEdit('Piste dupliquée'); });
       add('📋 Copier le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; toast('Clip copié', 'ok'); }, !track.buffer);
@@ -688,6 +731,14 @@ export async function render(el, { params }) {
       add('🗑️ Supprimer la piste', () => { if (window.confirm('Supprimer cette piste ?')) { tracks.splice(index, 1); refreshAfterEdit('Piste supprimée'); } });
     } else if (type === 'clip' && track) {
       add('▶ Placer le curseur au début du clip', () => { startOffset = track.offset || 0; movePlayhead(startOffset); });
+      add('✏️ Renommer le clip', () => { const n = window.prompt('Nom du clip', track.name || 'Clip'); if (n && n.trim()) { track.name = n.trim(); refreshAfterEdit('Clip renommé'); } });
+      add('⏮️ Aligner le clip au début du projet', () => { track.offset = 0; refreshAfterEdit('Clip déplacé au début'); });
+      add('🎚️ Normaliser le volume du clip', () => processClip(index, peakNormalize, 'Clip normalisé'));
+      add('↩️ Inverser le clip (Reverse)', () => processClip(index, (b) => { for (let ch = 0; ch < b.numberOfChannels; ch++) b.getChannelData(ch).reverse(); }, 'Clip inversé'));
+      add('🌅 Fondu entrant', () => processClip(index, (b) => fadeClip(b, true), 'Fondu entrant appliqué'));
+      add('🌇 Fondu sortant', () => processClip(index, (b) => fadeClip(b, false), 'Fondu sortant appliqué'));
+      add('↩️ Restaurer la prise originale', () => { if (track.original) { track.buffer = cloneAudioBuffer(track.original); refreshAfterEdit('Prise originale restaurée'); } }, !track.original);
+
       add('📋 Copier le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; toast('Clip copié', 'ok'); }, !track.buffer);
       add('✂️ Couper le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; tracks.splice(index, 1); refreshAfterEdit('Clip coupé'); }, !track.buffer);
       add('📄 Dupliquer le clip à la suite', () => { tracks.splice(index + 1, 0, { ...track, name: (track.name || 'Clip') + ' (copie)', buffer: cloneAudioBuffer(track.buffer), original: cloneAudioBuffer(track.original || track.buffer), offset: (track.offset || 0) + track.buffer.duration, fxDone: [...(track.fxDone || [])] }); refreshAfterEdit('Clip dupliqué'); }, !track.buffer);
