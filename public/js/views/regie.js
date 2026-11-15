@@ -815,6 +815,7 @@ export async function render(el, { params }) {
     const drive = ctx.createWaveShaper(); drive.curve = driveCurve(LF.drive); drive.oversample = '2x';
     const makeup = ctx.createGain(); makeup.gain.value = 10 ** ((LF.comp * 6) / 20);
     const master = ctx.createGain(); master.gain.value = 10 ** (LF.vol / 20);
+    const analyser = ctx.createAnalyser(); analyser.fftSize = 1024; analyser.smoothingTimeConstant = 0.6; master.connect(analyser);
     const conv = ctx.createConvolver(); conv.buffer = makeImpulse(ctx); const revG = ctx.createGain(); revG.gain.value = LF.reverb;
     const dl = ctx.createDelay(1.0); dl.delayTime.value = 0.3; const fb = ctx.createGain(); fb.gain.value = 0.3; const delG = ctx.createGain(); delG.gain.value = LF.delay;
     src.connect(hp).connect(low).connect(mid).connect(high).connect(comp).connect(drive).connect(makeup);
@@ -823,11 +824,44 @@ export async function render(el, { params }) {
     makeup.connect(delG); delG.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(master);
     master.connect(ctx.destination);
     src.start();
-    live = { ctx, src, nodes: { hp, low, mid, high, comp, drive, makeup, master, conv, revG, dl, fb, delG }, i };
+    live = { ctx, src, analyser, nodes: { hp, low, mid, high, comp, drive, makeup, master, conv, revG, dl, fb, delG, analyser }, i };
     return true;
   }
   function stopLive() { if (!live) return; try { live.src.stop(); } catch {} try { Object.values(live.nodes).forEach(n => n.disconnect && n.disconnect()); } catch {} live = null; }
   const liveKnobEl = (label, key, min, max, step, def, fmt) => knob({ label, min, max, step, value: LF[key], def, fmt, onInput: (v) => liveSet(key, v) }).el;
+  // spectrogramme temps réel (lié au lecteur live)
+  function viridis(v) { v = Math.max(0, Math.min(1, v)); const r = Math.round(255 * Math.min(1, Math.max(0, 1.4 * v - 0.2))); const g = Math.round(255 * Math.min(1, Math.max(0, 1.6 * v - 0.1))); const b = Math.round(255 * Math.min(1, Math.max(0, 1 - 1.6 * Math.abs(v - 0.35)))); return [r + 20 * (1 - v) | 0, g, Math.max(b, 30 + 60 * (1 - v)) | 0]; }
+  function makeSpectro(h2 = 128) {
+    const cv = h('canvas'); cv.width = 640; cv.height = h2;
+    cv.style.cssText = `width:100%;height:${h2}px;display:block;border-radius:10px;background:#06030f;border:1px solid var(--rline)`;
+    const g = cv.getContext('2d'); g.fillStyle = '#06030f'; g.fillRect(0, 0, cv.width, cv.height);
+    let raf = 0; const data = new Uint8Array(512);
+    const loop = () => {
+      if (!cv.isConnected) { cancelAnimationFrame(raf); raf = 0; return; }
+      const img = g.getImageData(1, 0, cv.width - 1, cv.height); g.putImageData(img, 0, 0);
+      const x = cv.width - 1;
+      if (live && live.analyser) {
+        const n = live.analyser.frequencyBinCount; live.analyser.getByteFrequencyData(data);
+        for (let y = 0; y < cv.height; y++) { const f = Math.pow(y / cv.height, 1.8); const bin = Math.min(n - 1, Math.floor(f * n)); const c = viridis(data[bin] / 255); g.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`; g.fillRect(x, cv.height - 1 - y, 1, 1); }
+      } else { g.fillStyle = '#06030f'; g.fillRect(x, 0, 1, cv.height); }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return cv;
+  }
+  // clavier (piano) pour choisir la tonalité de l'auto-tune
+  const NOTE_NAMES = ['Do', 'Do♯', 'Ré', 'Ré♯', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si'];
+  function pianoEl(getMode, onPick) {
+    const row = h('div', { style: { display: 'flex', gap: '3px', height: '74px', marginTop: '6px' } });
+    const keys = [];
+    NOTE_NAMES.forEach((nm, root) => {
+      const black = nm.includes('♯');
+      const k = h('div', { style: { flex: black ? '0.72' : '1', borderRadius: '0 0 6px 6px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: '5px', fontSize: '9px', fontWeight: '800', cursor: 'pointer', border: '1px solid #05060c', background: black ? 'linear-gradient(180deg,#1b1b32,#0a0a16)' : 'linear-gradient(180deg,#eceafc,#b9b3d9)', color: black ? '#aab0d8' : '#2a2440', transition: 'box-shadow .1s' }, onclick: () => { onPick(root, nm); highlight(root); } }, nm);
+      keys.push(k); row.append(k);
+    });
+    function highlight(root) { keys.forEach((k, i) => { const on = i === root; k.style.boxShadow = on ? '0 0 12px #a855f7, inset 0 0 10px rgba(168,85,247,.5)' : 'none'; }); }
+    return { el: row, highlight };
+  }
   async function bakeLive(i) {
     const t = tracks[i]; if (!t?.buffer) { toast('Choisis une piste voix.', 'bad'); return; }
     if (busyFx) return; busyFx = true; toast('Gravure des réglages sur la piste…');
@@ -1036,12 +1070,20 @@ export async function render(el, { params }) {
     const presets = [['Naturel', 0.8, 120], ['Pop', 1, 60], ['R&B', 1, 35], ['Trap mélo', 1, 15], ['Hard', 1, 0]];
     const presetRow = h('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '4px 0 10px' } },
       presets.map(([nm, st, sp]) => h('span.chip', { onclick: () => { atOpt.strength = st; atOpt.speed = sp; kStr.set(st, false); kSpeed.set(sp, false); } }, nm)));
+    // gamme + clavier (piano) pour choisir la tonalité
+    let mode = 'mineur';
+    const modeChips = ['mineur', 'majeur'].map(mm => { const c = h('span.chip' + (mm === mode ? '.on' : ''), mm === 'mineur' ? 'Mineure' : 'Majeure'); c.onclick = () => { mode = mm; modeChips.forEach(x => x.classList.toggle('on', x === c)); if (atOpt.key) { atOpt.key = atOpt.key.split('|')[0] + '|' + mode; keyLabel.textContent = NOTE_NAMES[+atOpt.key.split('|')[0]] + ' ' + mode; } }; return c; });
+    const piano = pianoEl(() => mode, (root, nm) => { atOpt.key = `${root}|${mode}`; keyLabel.textContent = `${nm} ${mode}`; });
+    const pianoBox = h('div', { style: { marginTop: '10px' } },
+      h('div', { style: { display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '2px' } }, h('span.muted', { style: { fontSize: '11px' } }, '🎹 Gamme :'), ...modeChips, h('span.muted', { style: { fontSize: '11px', marginLeft: 'auto' } }, 'clique une touche = tonalité')),
+      piano.el);
     return h('div.panel',
       h('div.ph', h('span', { style: { width: '11px', height: '11px', borderRadius: '50%', background: '#a855f7', boxShadow: '0 0 8px #a855f7', flex: 'none' } }), '🎤 Auto-Tune Pro', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'RÉEL')),
       h('div.pb',
-        h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('span.muted', { style: { fontSize: '12px' } }, 'Tonalité :'), keyLabel, keySel),
+        h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('span.muted', { style: { fontSize: '12px' } }, 'Tonalité :'), keyLabel),
         presetRow,
         h('div', { style: { display: 'flex', gap: '18px', justifyContent: 'center', margin: '6px 0 4px' } }, kSpeed.el, kStr.el, kFor.el),
+        pianoBox,
         h('div', { style: { display: 'flex', gap: '7px', flexWrap: 'wrap', marginTop: '10px' } },
           h('button.rbtn', { onclick: () => analyzeKey(curTrack(), status, keyLabel) }, '🎹 Détecter la tonalité'),
           h('button.rbtn.p', { onclick: () => applyAutotune(curTrack(), status, keyLabel) }, '✨ Appliquer'),
@@ -1083,7 +1125,10 @@ export async function render(el, { params }) {
       h('div.pb', h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: '8px' } },
         EFFECTS_BANK.map(([nm, emo, chain]) => h('div.preset', { style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo, name: nm, chain }); } },
           h('div', { style: { fontSize: '20px' } }, emo), h('b', { style: { fontSize: '11px' } }, nm))))));
+    const spectro = h('div.panel', h('div.ph', '🌈 Spectrogramme', h('span.r', { style: { color: '#bff5db' } }, 'temps réel pendant la lecture')),
+      h('div.pb', makeSpectro(128)));
     root.append(bar, h('div', { style: { height: '12px' } }),
+      spectro, h('div', { style: { height: '12px' } }),
       autotunePanel(), h('div', { style: { height: '12px' } }),
       h('div.grid', { style: { gridTemplateColumns: '1.2fr 1fr 1fr' } }, eqPanel, compPanel, revPanel),
       h('div', { style: { height: '12px' } }), bank);
