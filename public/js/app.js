@@ -108,6 +108,17 @@ $('login-form').addEventListener('submit', async (e) => {
 });
 $('logout-btn').onclick = async () => { await api('/api/logout', { method: 'POST' }).catch(() => {}); showLogin(); };
 $('theme-btn').onclick = () => applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+const sidebarCollapsed = localStorage.getItem('studio.sidebar.collapsed') !== 'false';
+function setSidebarCollapsed(collapsed) {
+  $('app').classList.toggle('sidebar-collapsed', collapsed);
+  const btn = $('sidebar-collapse-btn');
+  btn.textContent = collapsed ? '›' : '‹';
+  btn.title = collapsed ? 'Déployer le menu' : 'Replier le menu';
+  btn.setAttribute('aria-label', btn.title);
+  localStorage.setItem('studio.sidebar.collapsed', String(collapsed));
+}
+setSidebarCollapsed(sidebarCollapsed);
+$('sidebar-collapse-btn').onclick = () => setSidebarCollapsed(!$('app').classList.contains('sidebar-collapsed'));
 $('menu-btn').onclick = () => { $('sidebar').classList.toggle('open'); $('scrim').classList.toggle('open'); };
 $('scrim').onclick = () => { $('sidebar').classList.remove('open'); $('scrim').classList.remove('open'); };
 $('project-select').onchange = (e) => {
