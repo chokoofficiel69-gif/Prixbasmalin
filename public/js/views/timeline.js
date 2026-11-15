@@ -24,12 +24,15 @@ export function createTimeline(o) {
   toolBtns.select = h('button.btn.small', { onclick: () => setTool('select'), title: 'Glisser sur une prise pour sélectionner un passage' }, '⬚ Sélectionner');
   toolBtns.move = h('button.btn.small', { onclick: () => setTool('move'), title: 'Glisser une prise vers la gauche ou la droite pour la caler' }, '✋ Déplacer');
   setTool('select');
-  const zoom = (f) => { pps = Math.max(4, Math.min(400, pps * f)); localStorage.setItem('studio.tl.pps', pps); render(); };
+  const zoom = (f, anchorSec = null) => { const anchor = anchorSec ?? o.position(); const screenX = gx(anchor) - scroller.scrollLeft; pps = Math.max(4, Math.min(5000, pps * f)); localStorage.setItem('studio.tl.pps', pps); render(); scroller.scrollLeft = Math.max(0, gx(anchor) - screenX); syncZoom(); };
   const vzoom = (f) => { ROW = Math.max(44, Math.min(200, Math.round(ROW * f))); localStorage.setItem('studio.tl.row', ROW); render(); };
   const fit = () => { const tot = total(); if (tot > 0) { pps = Math.max(4, Math.min(400, (scroller.clientWidth - HEAD - 30) / tot)); render(); } };
+  const zoomLbl = h('span.tiny', `${Math.round(pps)} px/s`);
+  const zoomRange = h('input', { type:'range', min:4, max:5000, step:1, value:pps, title:'Zoom précis de la timeline', style:{width:'150px'}, oninput:(e)=>{ const anchor=o.position(); const screenX=gx(anchor)-scroller.scrollLeft; pps=Number(e.target.value); localStorage.setItem('studio.tl.pps',pps); render(); scroller.scrollLeft=Math.max(0,gx(anchor)-screenX); syncZoom(); } });
+  const syncZoom=()=>{ zoomRange.value=String(pps); zoomLbl.textContent=`${Math.round(pps)} px/s`; };
   const snapBtn = h('button.btn.small' + (snap ? '.primary' : '.ghost'), { title: 'Aimanter les prises sur la grille du tempo', onclick: (e) => { snap = !snap; localStorage.setItem('studio.tl.snap', snap ? '1' : '0'); e.currentTarget.classList.toggle('primary', snap); e.currentTarget.classList.toggle('ghost', !snap); } }, '🧲 Aimant');
   const tools = h('div.row', { style: { gap: '6px', flexWrap: 'wrap' } }, toolBtns.select, toolBtns.move, snapBtn,
-    h('button.btn.small.ghost', { onclick: () => zoom(1 / 1.5), title: 'Dézoomer (horizontal)' }, '🔍−'), h('button.btn.small.ghost', { onclick: () => zoom(1.5), title: 'Zoomer (horizontal)' }, '🔍+'),
+    h('button.btn.small.ghost', { onclick: () => zoom(1 / 1.5), title: 'Dézoomer (horizontal)' }, '🔍−'), h('button.btn.small.ghost', { onclick: () => zoom(1.5), title: 'Zoomer (horizontal)' }, '🔍+'), zoomRange, zoomLbl,\n    h('button.btn.small.ghost', { onclick: () => { const s=o.getSel(); if(!s) return; const span=Math.max(.02,s[1]-s[0]); pps=Math.max(4,Math.min(5000,(scroller.clientWidth-HEAD-80)/span)); localStorage.setItem('studio.tl.pps',pps); render(); scroller.scrollLeft=Math.max(0,gx(s[0])-HEAD-30); syncZoom(); }, title:'Agrandir exactement la sélection' }, '🎯 Zoom sélection'),
     h('button.btn.small.ghost', { onclick: () => vzoom(1 / 1.3), title: 'Pistes plus fines' }, '↕−'), h('button.btn.small.ghost', { onclick: () => vzoom(1.3), title: 'Pistes plus hautes' }, '↕+'),
     h('button.btn.small.ghost', { onclick: fit }, '↔ Tout voir'));
 
@@ -154,5 +157,5 @@ export function createTimeline(o) {
   };
   loop();
 
-  return { el: scroller, tools, selBar, posLbl, render, fit, edit: (k) => o.edit(k), setSelTrack: (t) => { selTrack = t; }, clearSel: () => { selTrack = null; o.setSel(null); showSel(); }, selTrack: () => selTrack, destroy: () => cancelAnimationFrame(raf) };
+  return { el: scroller, tools, selBar, posLbl, render, fit, zoomIn:()=>zoom(2), zoomOut:()=>zoom(.5), edit: (k) => o.edit(k), setSelTrack: (t) => { selTrack = t; }, clearSel: () => { selTrack = null; o.setSel(null); showSel(); }, selTrack: () => selTrack, destroy: () => cancelAnimationFrame(raf) };
 }
