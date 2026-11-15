@@ -876,3 +876,107 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
  .cockpit .ctiles{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
  .cockpit .ctransport{flex-wrap:wrap}
 }
+
+
+/* STUDIO IA — assistant de session visible dans la régie, en dock latéral.
+   Les fonctions audio/timeline existantes ne sont pas modifiées. */
+.studio-expert-workspace.is-visible {
+  grid-template-columns:
+    minmax(185px,.78fr)
+    minmax(300px,1.18fr)
+    minmax(220px,.88fr)
+    minmax(270px,1fr) !important;
+  grid-template-rows:auto minmax(185px,24vh) minmax(280px,auto) minmax(180px,auto) !important;
+  grid-template-areas:
+    "toolbar toolbar toolbar toolbar"
+    "tracks tracks tracks tracks"
+    "engineer effects mixer assistant"
+    "settings editor master assistant" !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="assistant"] {
+  display:block !important;
+  grid-area:assistant !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow:auto !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="assistant"] > .card {
+  height:100% !important;
+  min-height:360px !important;
+  overflow:auto !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="tracks"] > .card {
+  min-height:185px !important;
+}
+@media (max-width:1380px) {
+  .studio-expert-workspace.is-visible {
+    grid-template-columns:minmax(180px,.8fr) minmax(280px,1.2fr) minmax(230px,.9fr) !important;
+    grid-template-rows:auto minmax(180px,auto) auto auto auto !important;
+    grid-template-areas:
+      "toolbar toolbar toolbar"
+      "tracks tracks tracks"
+      "engineer effects assistant"
+      "mixer mixer assistant"
+      "settings editor master" !important;
+  }
+}
+@media (max-width:1180px) {
+  .studio-expert-workspace.is-visible {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    grid-template-rows:auto minmax(180px,auto) auto auto auto auto !important;
+    grid-template-areas:
+      "toolbar toolbar"
+      "tracks tracks"
+      "engineer effects"
+      "mixer mixer"
+      "settings master"
+      "editor editor"
+      "assistant assistant" !important;
+  }
+  .studio-expert-workspace.is-visible > [data-panel="assistant"] > .card {
+    min-height:280px !important;
+  }
+}
+@media (max-width:720px) {
+  .studio-expert-workspace.is-visible { display:flex !important; flex-direction:column !important; }
+  .studio-expert-workspace.is-visible > [data-panel="assistant"] { display:block !important; }
+  .studio-expert-workspace.is-visible > [data-panel="assistant"] > .card { min-height:260px !important; }
+}
+
+
+/* CORRECTION — conserver toute la zone visuelle de la timeline.
+   La hauteur minimale doit contenir la règle, les pistes et les commandes,
+   sans couper les canvases de forme d'onde. */
+.studio-expert-workspace.is-visible {
+  grid-template-rows:auto minmax(360px,auto) minmax(280px,auto) minmax(180px,auto) !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="tracks"] {
+  min-height:360px !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="tracks"] > .card {
+  min-height:330px !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
+.studio-expert-workspace.is-visible > [data-panel="tracks"] canvas {
+  display:block;
+  visibility:visible;
+}
+@media (max-width:1180px) {
+  .studio-expert-workspace.is-visible {
+    grid-template-rows:auto minmax(360px,auto) auto auto auto auto !important;
+  }
+}
+@media (max-width:720px) {
+  .studio-expert-workspace.is-visible > [data-panel="tracks"] {
+    min-height:360px !important;
+    max-height:none !important;
+  }
+  .studio-expert-workspace.is-visible > [data-panel="tracks"] > .card {
+    min-height:330px !important;
+  }
+}
