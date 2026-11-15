@@ -220,7 +220,7 @@ export async function render(el, { params }) {
   const outMeter = makeMeter('🔊 Sortie (instru + voix)');
 
   // ---------- Réglages EN DIRECT par piste (non destructifs) : on tourne une molette, on entend tout de suite ----------
-  const FX_DEF = { sub: 0, low: 0, lowmid: 0, mid: 0, pres: 0, highmid: 0, air: 0, comp: 0, sat: 0, chorus: 0, reverb: 0, echo: 0, tune: 0 };
+  const FX_DEF = { sub: 0, low: 0, lowmid: 0, mid: 0, pres: 0, highmid: 0, air: 0, comp: 0, sat: 0, chorus: 0, reverb: 0, echo: 0, tune: 0, mud: 0, warmth: 0, body: 0, boxy: 0, hollow: 0, nasal: 0, honky: 0, bite: 0, clarity: 0, presence2: 0, edge: 0, harsh: 0, cut: 0, sibilance: 0, deess: 0, ess2: 0, shine: 0, air2: 0, ultraair: 0, subvoice: 0, proximity: 0, chest: 0, thickness: 0, honk2: 0, intelligibility: 0, bite2: 0, deharsh: 0, breath: 0, sparkle: 0, resonance: 0 };
   const fxOf = (t) => Object.assign({}, FX_DEF, t.fx || {});
   const fxActive = (t) => !!t.fx && Object.keys(FX_DEF).some(k => Number(t.fx[k] || 0) !== FX_DEF[k]);
   let tuneModule = null;
@@ -259,12 +259,75 @@ export async function render(el, { params }) {
     let head = input, tune = null;
     if (withTune && fx.tune > 0) { tune = new AudioWorkletNode(ctx, 'live-tune', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1] }); tune.port.postMessage({ strength: Math.min(1, fx.tune), speed: fx.tune > 0.85 ? 1 : 0.1 + fx.tune * 0.3, scale: liveScale() }); head = input.connect(tune); }
     const sub = f('lowshelf', 80, fx.sub), low = f('lowshelf', 180, fx.low), lowmid = f('peaking', 300, fx.lowmid, 1), mid = f('peaking', 700, fx.mid, 0.8), pres = f('peaking', 3200, fx.pres, 0.9), highmid = f('peaking', 5200, fx.highmid, 1), air = f('highshelf', 10000, fx.air);
+    const mud = f('peaking', 180, fx.mud, 1.1);
+    const warmth = f('peaking', 250, fx.warmth, 1);
+    const body = f('peaking', 400, fx.body, 1);
+    const boxy = f('peaking', 500, fx.boxy, 1.2);
+    const hollow = f('peaking', 650, fx.hollow, 1);
+    const nasal = f('peaking', 900, fx.nasal, 1.4);
+    const honky = f('peaking', 1200, fx.honky, 1.2);
+    const bite = f('peaking', 1800, fx.bite, 1);
+    const clarity = f('peaking', 2400, fx.clarity, 1);
+    const presence2 = f('peaking', 2800, fx.presence2, 1);
+    const edge = f('peaking', 3600, fx.edge, 1.2);
+    const harsh = f('peaking', 4500, fx.harsh, 1.5);
+    const cut = f('peaking', 5200, fx.cut, 1.2);
+    const sibilance = f('peaking', 6200, fx.sibilance, 2);
+    const deess = f('peaking', 7200, fx.deess, 2);
+    const ess2 = f('peaking', 8200, fx.ess2, 2);
+    const shine = f('peaking', 9200, fx.shine, 1);
+    const air2 = f('peaking', 11000, fx.air2, 0.8);
+    const ultraair = f('peaking', 14000, fx.ultraair, 0.7);
+    const subvoice = f('peaking', 110, fx.subvoice, 0.8);
+    const proximity = f('peaking', 140, fx.proximity, 1);
+    const chest = f('peaking', 160, fx.chest, 1);
+    const thickness = f('peaking', 320, fx.thickness, 1);
+    const honk2 = f('peaking', 1500, fx.honk2, 1.4);
+    const intelligibility = f('peaking', 3000, fx.intelligibility, 1);
+    const bite2 = f('peaking', 4000, fx.bite2, 1.2);
+    const deharsh = f('peaking', 5800, fx.deharsh, 1.5);
+    const breath = f('peaking', 10000, fx.breath, 1);
+    const sparkle = f('peaking', 12000, fx.sparkle, 0.8);
+    const resonance = f('peaking', 2000, fx.resonance, 2);
+    let voiceTone = air;
+    voiceTone.connect(mud); voiceTone = mud;
+    voiceTone.connect(warmth); voiceTone = warmth;
+    voiceTone.connect(body); voiceTone = body;
+    voiceTone.connect(boxy); voiceTone = boxy;
+    voiceTone.connect(hollow); voiceTone = hollow;
+    voiceTone.connect(nasal); voiceTone = nasal;
+    voiceTone.connect(honky); voiceTone = honky;
+    voiceTone.connect(bite); voiceTone = bite;
+    voiceTone.connect(clarity); voiceTone = clarity;
+    voiceTone.connect(presence2); voiceTone = presence2;
+    voiceTone.connect(edge); voiceTone = edge;
+    voiceTone.connect(harsh); voiceTone = harsh;
+    voiceTone.connect(cut); voiceTone = cut;
+    voiceTone.connect(sibilance); voiceTone = sibilance;
+    voiceTone.connect(deess); voiceTone = deess;
+    voiceTone.connect(ess2); voiceTone = ess2;
+    voiceTone.connect(shine); voiceTone = shine;
+    voiceTone.connect(air2); voiceTone = air2;
+    voiceTone.connect(ultraair); voiceTone = ultraair;
+    voiceTone.connect(subvoice); voiceTone = subvoice;
+    voiceTone.connect(proximity); voiceTone = proximity;
+    voiceTone.connect(chest); voiceTone = chest;
+    voiceTone.connect(thickness); voiceTone = thickness;
+    voiceTone.connect(honk2); voiceTone = honk2;
+    voiceTone.connect(intelligibility); voiceTone = intelligibility;
+    voiceTone.connect(bite2); voiceTone = bite2;
+    voiceTone.connect(deharsh); voiceTone = deharsh;
+    voiceTone.connect(breath); voiceTone = breath;
+    voiceTone.connect(sparkle); voiceTone = sparkle;
+    voiceTone.connect(resonance); voiceTone = resonance;
+
     const comp = ctx.createDynamicsCompressor(); comp.attack.value = 0.005; comp.release.value = 0.12; comp.knee.value = 6;
     const make = ctx.createGain();
     const setComp = (c) => { comp.threshold.value = -6 - c * 26; comp.ratio.value = 1 + c * 5; make.gain.value = 10 ** (c * 7 / 20); };
     setComp(fx.comp);
     const sum = ctx.createGain();
-    head.connect(sub).connect(low).connect(lowmid).connect(mid).connect(pres).connect(highmid).connect(air).connect(comp).connect(make);
+    head.connect(sub).connect(low).connect(lowmid).connect(mid).connect(pres).connect(highmid).connect(air);
+    voiceTone.connect(comp).connect(make);
     const shaper = ctx.createWaveShaper(); shaper.oversample = '4x';
     const setSat = (v) => { const amount = Math.max(0, Math.min(1, Number(v) || 0)); const curve = new Float32Array(2048); const k = 1 + amount * 18, norm = Math.tanh(k); for (let i = 0; i < curve.length; i++) { const x = i * 2 / (curve.length - 1) - 1; curve[i] = amount === 0 ? x : Math.tanh(x * k) / norm; } shaper.curve = curve; };
     setSat(fx.sat); make.connect(shaper).connect(sum);
@@ -277,7 +340,7 @@ export async function render(el, { params }) {
     make.connect(cv).connect(revG).connect(sum);
     const dl = ctx.createDelay(2); dl.delayTime.value = Math.min(1.5, 60 / bpmNow() / 2); const fb = ctx.createGain(); fb.gain.value = 0.3; const echoG = ctx.createGain(); echoG.gain.value = fx.echo;
     make.connect(dl); dl.connect(fb).connect(dl); dl.connect(echoG).connect(sum);
-    return { out: sum, sub, low, lowmid, mid, pres, highmid, air, setComp, setSat, setChorus: (v) => chorusG.gain.setTargetAtTime(Math.max(0, Math.min(0.7, Number(v) || 0)), ctx.currentTime, 0.03), chorusG, revG, echoG, tune };
+    return { out: sum, sub, low, lowmid, mid, pres, highmid, air, mud, warmth, body, boxy, hollow, nasal, honky, bite, clarity, presence2, edge, harsh, cut, sibilance, deess, ess2, shine, air2, ultraair, subvoice, proximity, chest, thickness, honk2, intelligibility, bite2, deharsh, breath, sparkle, resonance, setComp, setSat, setChorus: (v) => chorusG.gain.setTargetAtTime(Math.max(0, Math.min(0.7, Number(v) || 0)), ctx.currentTime, 0.03), chorusG, revG, echoG, tune };
   }
   // pour le mix/master : on « grave » les réglages en direct dans une copie de la piste (l'original n'est pas touché)
   async function renderFx(t) {
@@ -1147,6 +1210,36 @@ export async function render(el, { params }) {
     ['reverb', '🌫️ Réverbe', 0, 0.7, 0.01, (v) => `${Math.round(v / 0.7 * 100)} %`],
     ['echo', '🔁 Écho', 0, 0.6, 0.01, (v) => `${Math.round(v / 0.6 * 100)} %`],
     ['tune', '🎤 Autotune', 0, 1, 0.05, (v) => v ? `${Math.round(v * 100)} %` : 'non'],
+    ['mud', '🎙️ Boue 180 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['warmth', '🎙️ Chaleur 250 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['body', '🎙️ Corps 400 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['boxy', '🎙️ Boîte 500 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['hollow', '🎙️ Creux 650 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['nasal', '🎙️ Nasal 900 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['honky', '🎙️ Médium nasal 1.2 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['bite', '🎙️ Mordant 1.8 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['clarity', '🎙️ Clarté 2.4 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['presence2', '🎙️ Projection 2.8 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['edge', '🎙️ Attaque 3.6 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['harsh', '🎙️ Agressivité 4.5 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['cut', '🎙️ Découpe 5.2 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['sibilance', '🎙️ Sifflantes 6.2 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['deess', '🎙️ De-esser 7.2 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['ess2', '🎙️ Sifflantes hautes 8.2 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['shine', '🎙️ Éclat 9.2 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['air2', '🎙️ Air 11 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['ultraair', '🎙️ Ultra-air 14 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['subvoice', '🎙️ Fondamentale 110 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['proximity', '🎙️ Proximité 140 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['chest', '🎙️ Poitrine 160 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['thickness', '🎙️ Épaisseur 320 Hz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['honk2', '🎙️ Résonance 1.5 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['intelligibility', '🎙️ Intelligibilité 3 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['bite2', '🎙️ Présence consonnes 4 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['deharsh', '🎙️ Adoucir 5.8 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['breath', '🎙️ Souffle 10 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['sparkle', '🎙️ Brillance fine 12 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
+    ['resonance', '🎙️ Résonance 2 kHz', -12, 12, 0.5, (v) => `${v > 0 ? '+' : ''}${v} dB`],
   ];
   function applyLiveFx(t, k) {
     const n = live.fx.get(t); if (!n) return;
