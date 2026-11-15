@@ -794,8 +794,8 @@ RÈGLES D’UTILISATION :
       if (chosen.length && obj.actions.some(a => !chosen.includes(a.type))) throw new Error('Le plan contient un effet que tu n’as pas sélectionné. Relance la demande.');
       return obj;
     };
-    const askExpert = async () => {
-      const request = input.value.trim(), t = trackNow();
+    const askExpert = async (spokenRequest = '') => {
+      const request = String(spokenRequest || input.value).trim(), t = trackNow();
       if (!request || busy) return;
       if (!t?.buffer) { toast('Sélectionne d’abord une piste audio.', 'bad'); return; }
       busy = true; send.disabled = true; applyBtn.disabled = true; pendingPlan = null;
