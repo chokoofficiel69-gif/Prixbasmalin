@@ -35,6 +35,7 @@ GIFT_FAMILIES = [
 EXCLUDED = re.compile(r"bandelette|glyc[eé]mie|glucose|lancette|test strip|tensiom|culotte|gaine|spanx|collant|string|slip", re.I)
 PRICE_BANDS = [(0, 30, "moins-30"), (30, 60, "30-60"), (60, 100, "60-100"), (100, 10_000, "plus-100")]
 ROTATION_INTERVAL = timedelta(hours=48)
+ROTATION_RETRY_INTERVAL = timedelta(hours=12)
 ROTATION_HISTORY_LIMIT = 1
 
 
@@ -273,9 +274,10 @@ def rotation_record(gifts, rotated_at):
     }
 
 
-def build(awin, sheets, previous=None):
+def build(awin, sheets, previous=None, rotation_now=None):
     previous = previous if isinstance(previous, dict) else {}
     reference_time = parse_utc(awin.get("fetched_at"))
+    rotation_reference_time = rotation_now or reference_time
     previous_gifts = previous.get("gifts", []) if isinstance(previous.get("gifts"), list) else []
     previous_rotation = previous.get("rotation", {}) if isinstance(previous.get("rotation"), dict) else {}
     history = previous.get("rotation_history", [])
@@ -292,7 +294,7 @@ def build(awin, sheets, previous=None):
         gifts = build_gifts(awin, now=reference_time)
         rotation = {
             "interval_hours": 48,
-            "last_rotated_at": iso_utc(reference_time),
+            "last_rotated_at": iso_utc(rotation_reference_time),
             "status": "initial_selection",
             "selected_count": len(gifts),
         }
@@ -300,51 +302,67 @@ def build(awin, sheets, previous=None):
         last_rotated = (
             parse_utc(previous_rotation.get("last_rotated_at"))
             or parse_utc(previous.get("awin_fetched_at"))
-            or reference_time
+            or rotation_reference_time
         )
-        elapsed = reference_time - last_rotated
-        if elapsed < ROTATION_INTERVAL:
+        last_attempt = parse_utc(previous_rotation.get("last_attempt_at"))
+        attempt_age = rotation_reference_time - last_attempt if last_attempt and rotation_reference_time else None
+        retryable_statuses = {"held_previous_snapshot", "held_insufficient_candidates", "retry_cooldown"}
+        if (
+            previous_rotation.get("status") in retryable_statuses
+            and attempt_age is not None
+            and timedelta(0) <= attempt_age < ROTATION_RETRY_INTERVAL
+        ):
             gifts = previous_gifts
             rotation = dict(previous_rotation)
-            rotation.setdefault("interval_hours", 48)
-            rotation.setdefault("last_rotated_at", iso_utc(last_rotated))
-            rotation.setdefault("status", "baseline_initialized")
+            if attempt_age > timedelta(0):
+                rotation["status"] = "retry_cooldown"
             rotation["selected_count"] = len(gifts)
         else:
-            excluded_ids = {gift_identity_key(gift) for gift in previous_gifts}
-            excluded_image_hashes = {
-                image_fingerprint(gift.get("image")) for gift in previous_gifts
-            }
-            for entry in history:
-                excluded_ids.update(str(value) for value in (entry.get("product_ids") or []))
-                excluded_image_hashes.update(str(value) for value in (entry.get("image_hashes") or []))
-            candidates = build_gifts(
-                awin,
-                limit=48,
-                now=reference_time,
-                previous_gifts=previous_gifts,
-                exclude_ids=excluded_ids,
-                exclude_image_hashes=excluded_image_hashes,
-            )
-            if len(candidates) >= 48:
-                history = (history + [rotation_record(previous_gifts, iso_utc(last_rotated))])[-ROTATION_HISTORY_LIMIT:]
-                gifts = candidates[:48]
-                rotation = {
-                    "interval_hours": 48,
-                    "last_rotated_at": iso_utc(reference_time),
-                    "status": "rotated",
-                    "selected_count": len(gifts),
-                }
-            else:
+            elapsed = rotation_reference_time - last_rotated
+            if elapsed < ROTATION_INTERVAL:
                 gifts = previous_gifts
                 rotation = dict(previous_rotation)
-                rotation.update({
-                    "interval_hours": 48,
-                    "status": "held_insufficient_candidates",
-                    "selected_count": len(gifts),
-                    "last_attempt_at": iso_utc(reference_time),
-                    "candidate_count": len(candidates),
-                })
+                rotation.setdefault("interval_hours", 48)
+                rotation.setdefault("last_rotated_at", iso_utc(last_rotated))
+                rotation.setdefault("status", "baseline_initialized")
+                if rotation.get("status") == "rotated" and elapsed > timedelta(0):
+                    rotation["status"] = "waiting_48h"
+                rotation["selected_count"] = len(gifts)
+            else:
+                excluded_ids = {gift_identity_key(gift) for gift in previous_gifts}
+                excluded_image_hashes = {
+                    image_fingerprint(gift.get("image")) for gift in previous_gifts
+                }
+                for entry in history:
+                    excluded_ids.update(str(value) for value in (entry.get("product_ids") or []))
+                    excluded_image_hashes.update(str(value) for value in (entry.get("image_hashes") or []))
+                candidates = build_gifts(
+                    awin,
+                    limit=48,
+                    now=reference_time,
+                    previous_gifts=previous_gifts,
+                    exclude_ids=excluded_ids,
+                    exclude_image_hashes=excluded_image_hashes,
+                )
+                if len(candidates) >= 48:
+                    history = (history + [rotation_record(previous_gifts, iso_utc(last_rotated))])[-ROTATION_HISTORY_LIMIT:]
+                    gifts = candidates[:48]
+                    rotation = {
+                        "interval_hours": 48,
+                        "last_rotated_at": iso_utc(rotation_reference_time),
+                        "status": "rotated",
+                        "selected_count": len(gifts),
+                    }
+                else:
+                    gifts = previous_gifts
+                    rotation = dict(previous_rotation)
+                    rotation.update({
+                        "interval_hours": 48,
+                        "status": "held_insufficient_candidates",
+                        "selected_count": len(gifts),
+                        "last_attempt_at": iso_utc(rotation_reference_time),
+                        "candidate_count": len(candidates),
+                    })
 
     return {
         "version": 1,
@@ -368,7 +386,18 @@ def main():
             previous = json.loads(OUTPUT.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             previous = {}
-    data = build(json.loads(AWIN.read_text(encoding="utf-8")), json.loads(SHEETS.read_text(encoding="utf-8")), previous=previous)
+    awin = json.loads(AWIN.read_text(encoding="utf-8"))
+    sheets = json.loads(SHEETS.read_text(encoding="utf-8"))
+    previous_rotation = previous.get("rotation", {}) if isinstance(previous.get("rotation"), dict) else {}
+    if args.check:
+        rotation_now = parse_utc(
+            previous_rotation.get("last_attempt_at")
+            or previous_rotation.get("last_rotated_at")
+            or awin.get("fetched_at")
+        )
+    else:
+        rotation_now = datetime.now(timezone.utc)
+    data = build(awin, sheets, previous=previous, rotation_now=rotation_now)
     text = json.dumps(data, ensure_ascii=False, indent=1) + "\n"
     if args.check:
         if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != text:
