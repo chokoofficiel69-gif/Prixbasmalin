@@ -658,7 +658,7 @@ export async function render(el, { params }) {
             b = tuned.buffer;
           } else if (a.type === 'normalize') b = normalize(b, Math.max(-3,Math.min(-1,Number(p.targetDb ?? -1))));
           else if (a.type === 'limit') b = limit(b, Math.max(-2,Math.min(-.3,Number(p.ceilingDb ?? -1))));
-          else if (a.type === 'master') b = await master(b, ['streaming','youtube','podcast','club'].includes(p.preset) ? p.preset : 'streaming');
+          else if (a.type === 'master') b = (await master(b, ['streaming','youtube','podcast','club'].includes(p.preset) ? p.preset : 'streaming')).buffer;
           else if (a.type === 'reverse') for (let c=0;c<b.numberOfChannels;c++) b.getChannelData(c).reverse();
           else if (a.type === 'fadeIn' || a.type === 'fadeOut') fadeClip(b, a.type === 'fadeIn');
         }
