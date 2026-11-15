@@ -11,6 +11,7 @@ import { analyzeSamples, buildVoiceProposals, antipopFor } from '../lib/ingexper
 import { scoreVoice } from '../lib/voicescore.js';
 import { mountAssistant } from './assistant.js';
 import { knob } from '../lib/knob.js';
+import { expertFace } from '../lib/expertface.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
 const CSS = `
@@ -682,6 +683,7 @@ export async function render(el, { params }) {
     return true;
   }
   function stopLive() { if (!live) return; try { live.src.stop(); } catch {} try { Object.values(live.nodes).forEach(n => n.disconnect && n.disconnect()); } catch {} live = null; }
+  const liveKnobEl = (label, key, min, max, step, def, fmt) => knob({ label, min, max, step, value: LF[key], def, fmt, onInput: (v) => liveSet(key, v) }).el;
   async function bakeLive(i) {
     const t = tracks[i]; if (!t?.buffer) { toast('Choisis une piste voix.', 'bad'); return; }
     if (busyFx) return; busyFx = true; toast('Gravure des réglages sur la piste…');
@@ -713,45 +715,63 @@ export async function render(el, { params }) {
   }
 
   const scoreColor = (s) => s === 'ok' ? '#34e39a' : s === 'warn' ? '#f0b429' : '#ef4444';
+  // ===== Dashboard : TOUT sur une seule page =====
   function viewRegie() {
     const root = h('div');
-    const vi = lastVoixIdx(); const vt = vi >= 0 ? tracks[vi] : null;
+    const vt = voixTracks();
+    const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
+    const curIdx = () => +sel.value;
+    const vi = lastVoixIdx(); const vtr = vi >= 0 ? tracks[vi] : null;
     let m = null, sc = { overall: null, items: [] };
-    if (vt?.buffer) { try { m = analyzeSamples((vt.original || vt.buffer).getChannelData(0), vt.buffer.sampleRate); sc = scoreVoice(m); } catch {} }
+    if (vtr?.buffer) { try { m = analyzeSamples((vtr.original || vtr.buffer).getChannelData(0), vtr.buffer.sampleRate); sc = scoreVoice(m); } catch {} }
     const ov = sc.overall;
-    const dash = (sc.overall ?? 226 * (ov || 0) / 100);
-    const gauge = `<svg viewBox="0 0 88 88" style="width:82px;height:82px;flex:none"><circle cx="44" cy="44" r="36" fill="none" stroke="#1b1440" stroke-width="8"/><circle cx="44" cy="44" r="36" fill="none" stroke="${ov == null ? '#3a3a55' : scoreColor(sc.items[0] ? (ov >= 80 ? 'ok' : ov >= 60 ? 'warn' : 'bad') : 'warn')}" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="${226 - 226 * (ov || 0) / 100}" transform="rotate(-90 44 44)" style="filter:drop-shadow(0 0 6px currentColor)"/><text x="44" y="49" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">${ov == null ? '—' : ov + '%'}</text></svg>`;
-    const items = sc.items.length ? sc.items.map(it => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;font-size:13px"><span style="width:16px;height:16px;border-radius:50%;background:${scoreColor(it.status)};flex:none"></span><span style="flex:1">${it.label}</span><b>${it.pct}%</b></div>`).join('') : '<p class="muted" style="font-size:12px">Enregistre une voix pour l’analyser.</p>';
-    const fx = (vt?.fxDone || []); const uniq = [...new Set(fx)];
-    const proc = uniq.length ? uniq.map(x => `<div style="display:flex;gap:9px;align-items:center;margin-bottom:9px;font-size:12px"><span style="width:16px;height:16px;border-radius:50%;background:#34e39a;display:grid;place-items:center;color:#042;font-weight:900;font-size:10px">✓</span>${x}</div>`).join('') : '<p class="muted" style="font-size:12px">Aucun traitement appliqué.<br>Utilise le Rack LIVE, le clic droit ou l’ingé IA.</p>';
+    const gauge = `<svg viewBox="0 0 96 96" style="width:92px;height:92px;flex:none"><circle cx="48" cy="48" r="40" fill="none" stroke="#1b1440" stroke-width="9"/><circle cx="48" cy="48" r="40" fill="none" stroke="${ov == null ? '#3a3a55' : scoreColor(ov >= 80 ? 'ok' : ov >= 60 ? 'warn' : 'bad')}" stroke-width="9" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="${251 - 251 * (ov || 0) / 100}" transform="rotate(-90 48 48)" style="filter:drop-shadow(0 0 7px currentColor)"/><text x="48" y="54" text-anchor="middle" font-size="22" font-weight="800" fill="#fff">${ov == null ? '—' : ov + '%'}</text></svg>`;
+    const items = sc.items.length ? sc.items.map(it => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12.5px"><span style="width:15px;height:15px;border-radius:50%;background:${scoreColor(it.status)};flex:none"></span><span style="flex:1">${it.label}</span><b>${it.pct}%</b></div>`).join('') : '<p class="muted" style="font-size:12px">Enregistre/importe une voix pour l’analyser.</p>';
     const peakPct = m ? Math.min(100, Math.max(0, (m.peakDb + 40) / 40 * 100)) : 0;
     const rmsPct = m ? Math.min(100, Math.max(0, (m.rmsDb + 50) / 50 * 100)) : 0;
-    root.innerHTML = `
-     <div class="grid" style="grid-template-columns:1.05fr 1.05fr 1.5fr 160px">
-      <div class="panel"><div class="ph">📊 Analyse vocale <span class="r" style="color:#bff5db">mesures réelles</span></div><div class="pb" style="display:flex;gap:12px;align-items:center">
-       ${gauge}<div style="flex:1">${items}</div></div></div>
-      <div class="panel"><div class="ph">⚙️ Traitements appliqués</div><div class="pb">${proc}</div></div>
-      <div class="panel"><div class="ph">🌈 Spectre (visuel)</div><div class="pb"><div style="height:150px;border-radius:11px;overflow:hidden;background:#07041a;border:1px solid var(--rline);position:relative">${spec3d()}</div></div></div>
-      <div class="panel"><div class="ph">🎚️ Niveaux</div><div class="pb">
-       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Crête</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${peakPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.peakDb : '—'}</b></div>
-       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Moyen</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${rmsPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.rmsDb : '—'}</b></div>
-       <div style="text-align:center;background:#0d1702;border:1px solid #2a4a10;border-radius:9px;padding:9px"><b style="font-size:20px;color:#bff5db">${m ? m.crestDb : '—'}</b><div class="muted" style="font-size:9px">DYNAMIQUE (dB)</div></div></div></div>
-     </div>
-     <div class="panel" style="margin-top:12px"><div class="ph">🎛️ Rack · aperçu <span class="r">onglet « Effets » pour le rack LIVE</span></div><div class="pb"><div class="grid" style="grid-template-columns:repeat(8,1fr)">
-      ${knobHtml('Auto-Tune', '—', '#22d3ee', 50)}${knobHtml('EQ', '—', '#f0b429', 50)}${knobHtml('Comp', '—', '#22d3ee', 50)}${knobHtml('De-Ess', '—', '#22c55e', 50)}${knobHtml('Satur.', '—', '#ff6b3d', 40)}${knobHtml('Reverb', '—', '#a855f7', 40)}${knobHtml('Delay', '—', '#22d3ee', 36)}${knobHtml('Stéréo', '—', '#ec4899', 60)}
-     </div></div></div>`;
-    // ligne du bas : Timeline RÉELLE + Marco
+    // visage Marco
+    let face = null; try { face = expertFace(); } catch {}
+    // lecture live
+    const playBtn = h('button.rbtn.p', { style: { whiteSpace: 'nowrap', fontWeight: '800' } }, '▶ Écouter en direct');
+    const refreshPlay = () => { playBtn.textContent = live ? '⏹ Arrêter' : '▶ Écouter en direct'; };
+    playBtn.onclick = () => { if (live) stopLive(); else startLive(curIdx()); refreshPlay(); };
+    sel.onchange = () => { if (live) { startLive(curIdx()); refreshPlay(); } };
+
+    // ROW 1 : Marco | Analyse | Niveaux
+    const marcoPanel = h('div.panel', h('div.ph', '🧠 Ingé son IA — Marco', h('span.r', { style: { color: '#bff5db' } }, 'assistant')),
+      h('div.pb', { style: { display: 'flex', gap: '12px', alignItems: 'center' } },
+        face ? face.el : h('div.orb'),
+        h('div', { style: { flex: '1' } },
+          h('div.msg.ai', { style: { margin: '0 0 10px' } }, 'Parle-moi ou écris-moi, je pilote le studio et je mixe ta voix.'),
+          h('button.rbtn.p', { style: { width: '100%' }, onclick: () => go('ia') }, 'Ouvrir l’ingé IA →'))));
+    const analysePanel = h('div.panel', { html: `<div class="ph">📊 Analyse vocale <span class="r" style="color:#bff5db">réel</span></div><div class="pb" style="display:flex;gap:12px;align-items:center">${gauge}<div style="flex:1">${items}</div></div>` });
+    const nivPanel = h('div.panel', { html: `<div class="ph">🎚️ Niveaux</div><div class="pb"><div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Crête</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${peakPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.peakDb : '—'}</b></div><div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Moyen</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${rmsPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.rmsDb : '—'}</b></div><div style="text-align:center;background:#0d1702;border:1px solid #2a4a10;border-radius:9px;padding:8px"><b style="font-size:19px;color:#bff5db">${m ? m.crestDb : '—'}</b><div class="muted" style="font-size:9px">DYNAMIQUE (dB)</div></div></div>` });
+    root.append(h('div.grid', { style: { gridTemplateColumns: '1.2fr 1.2fr 150px' } }, marcoPanel, analysePanel, nivPanel));
+
+    // ROW 2 : molettes LIVE
+    const knobs = h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'space-between', margin: '6px 4px' } },
+      liveKnobEl('VOLUME', 'vol', -12, 6, 0.5, 0, dbF), liveKnobEl('GRAVE', 'hp', 40, 160, 5, 85, hzF), liveKnobEl('LOW', 'low', -6, 6, 0.5, 0, dbF),
+      liveKnobEl('MID', 'mid', -6, 8, 0.5, 2.5, dbF), liveKnobEl('AIGU', 'high', -6, 8, 0.5, 3, dbF), liveKnobEl('COMP', 'comp', 0, 1, 0.05, 0.4, pcF),
+      liveKnobEl('RÉVERBE', 'reverb', 0, 0.6, 0.02, 0.1, pcF), liveKnobEl('DELAY', 'delay', 0, 0.5, 0.02, 0, pcF), liveKnobEl('SATUR.', 'drive', 0, 1, 0.05, 0, pcF));
+    root.append(h('div.panel', { style: { marginTop: '12px' } },
+      h('div.ph', '🎛️ Molettes en direct', h('span.r', { style: { color: '#bff5db' } }, 'TEMPS RÉEL')),
+      h('div.pb',
+        h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap' } },
+          h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, playBtn,
+          h('button.rbtn.g', { onclick: () => bakeLive(curIdx()) }, '💾 Graver'),
+          h('button.rbtn', { onclick: () => revertTrack(tracks[curIdx()], { textContent: '' }) }, '↩ Original')),
+        knobs)));
+
+    // ROW 3 : Timeline (réelle)
     const mini = h('div.pb');
-    const bottom = h('div.grid', { style: { gridTemplateColumns: '1.6fr 1fr', marginTop: '12px' } },
-      h('div.panel', h('div.ph', '🎵 Timeline', h('span.r', 'onglet « Timeline » pour le plein écran')), mini),
-      h('div.panel',
-        h('div.ph', '🧠 Ingé son IA'),
-        h('div.pb',
-          h('div', { style: { display: 'flex', gap: '11px', alignItems: 'center', marginBottom: '10px' } }, h('div.orb'), h('div', h('b', 'Marco · IA'), h('div.muted', { style: { fontSize: '12px' } }, 'assistant en direct'))),
-          h('div.msg.ai', { style: { margin: '0 0 10px' } }, 'Parle-moi ou écris-moi pour piloter le studio, ou laisse-moi nettoyer et mixer ta voix.'),
-          h('button.rbtn.p', { style: { width: '100%', textAlign: 'center' }, onclick: () => go('ia') }, 'Ouvrir l’ingé IA →'))));
-    root.append(bottom);
+    root.append(h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '🎵 Timeline', h('span.r', 'glisse, clic droit sur une piste pour agir')), mini));
     setTimeout(() => buildTimeline(mini), 0);
+
+    // ROW 4 : Banque d'effets (clic = appliquer)
+    const bank = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: '8px' } },
+      EFFECTS_BANK.map(([nm, emo, chain]) => h('div.preset', { style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo, name: nm, chain }); } },
+        h('div', { style: { fontSize: '20px' } }, emo), h('b', { style: { fontSize: '11px' } }, nm))));
+    root.append(h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '⭐ Banque d’effets', h('span.r', `${EFFECTS_BANK.length} effets · clic = appliquer`)), h('div.pb', bank)));
     return root;
   }
 
@@ -1074,7 +1094,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE7'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE8'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
