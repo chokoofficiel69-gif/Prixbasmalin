@@ -721,6 +721,26 @@ export async function render(el, { params }) {
     return root;
   }
 
+  const STUDIO_AUDIO_REFERENCE_CONTEXT = `
+BIBLIOTHÈQUE DE RÉFÉRENCES FOURNIES PAR L’UTILISATEUR (8 MP3)
+Utilise ces références comme repères stylistiques et de dynamique, jamais comme vérité sur la chaîne de plugins ou les réglages d’origine. Aucun MP3 n’est transmis au modèle pendant cette requête : tu ne les écoutes pas et tu ne dois pas prétendre les avoir écoutés. Les valeurs ci-dessous sont des mesures RMS/crête sur trois fenêtres locales de 12 s (début/milieu/fin), pas des LUFS intégrés ni une analyse spectrale complète. Crête dBFS / RMS dBFS / crest dB :
+- La Fouine & Sinik — Poudrière (3:49) : début −3,5/−21,7/18,1 ; milieu +0,9/−9,8/10,7 ; fin +1,2/−10,2/11,4. Début moins dense que le milieu et la fin.
+- Niro — 21 Grammes (2:45) : début −1,5/−18,7/17,3 ; milieu +0,4/−10,1/10,6 ; fin silencieuse dans la fenêtre mesurée. Milieu plus dense que l’intro.
+- PNL — Au DD (4:50) : début −7,0/−23,1/16,1 ; milieu +0,5/−11,2/11,7 ; fin −16,7/−29,4/12,7. Fort contraste de densité entre sections.
+- PNL — Blanka (5:04) : début −17,7/−32,5/14,8 ; milieu +1,1/−10,2/11,3 ; fin −10,4/−33,1/22,7. Fenêtres très contrastées.
+- PNL — Naha (8:00) : début +1,0/−15,8/16,8 ; milieu −0,2/−13,1/13,0 ; fin −5,5/−16,9/11,3. RMS des fenêtres relativement rapprochés.
+- SCH — ⏳ (4:34) : début −0,1/−17,4/17,3 ; milieu +0,8/−9,9/10,7 ; fin +0,3/−13,0/13,4. Milieu plus dense.
+- Willylancien — coco-açaï (3:17) : début −3,5/−24,2/20,7 ; milieu −1,7/−13,9/12,2 ; fin −0,2/−17,2/17,0. Milieu plus dense.
+- Willylancien — WILLY #1 (7:41) : début −8,6/−27,0/18,3 ; milieu −4,5/−15,2/10,8 ; fin −5,5/−20,2/14,7. Milieu plus dense.
+Prudence : crêtes décodées positives sur MP3 peuvent être des dépassements inter-échantillons et ne prouvent pas un clipping audible. Les fenêtres calmes peuvent être des intros/outros. Ne transpose pas ces chiffres directement au projet courant.
+RÈGLES D’UTILISATION :
+1. Pour chaque demande, pars des mesures réelles du buffer courant et du type de piste, pas des chiffres des références.
+2. Si l’utilisateur demande un style proche d’une référence, formule une direction artistique et une chaîne de départ prudente, puis adapte-la au signal courant.
+3. Ne déduis jamais un plugin, un micro, une prise, un réglage exact, un tempo, une tonalité ou une technique vocale depuis ces seuls chiffres.
+4. Privilégie une voix intelligible, un grave contrôlé, une dynamique cohérente et des effets dosés selon la demande ; n’impose pas un loudness cible sans contexte.
+5. Signale les limites de mesure et demande une piste séparée/stem si une analyse voix/instru indépendante est nécessaire.
+`.trim();
+
   function viewIA() {
     const root = h('div');
     const voiceOptions = voixTracks();
@@ -789,6 +809,7 @@ Demande utilisateur : ${request}
 Piste sélectionnée : ${JSON.stringify(context)}
 Effets choisis par l'utilisateur : ${chosen.length ? chosen.join(', ') : 'choix automatique par le chef'}
 Profil mastering demandé : ${targetMaster}
+Références stylistiques et mesures disponibles pour guider ton jugement (respecte strictement les limites et ne prétends pas écouter les MP3) :\n${STUDIO_AUDIO_REFERENCE_CONTEXT}
 Contraintes moteur DSP réellement disponibles : denoise, antipop, gate, voice, autotune, normalize, limit, master, reverse, fadeIn, fadeOut.
 Le livrable final doit être UNIQUEMENT un JSON valide de cette forme :
 {"message":"explication courte en français","actions":[{"type":"...","params":{}}]}
