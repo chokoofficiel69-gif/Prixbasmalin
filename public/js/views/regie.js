@@ -699,7 +699,7 @@ export async function render(el, { params }) {
     const root=h('div');
     const intro=h('div.panel',h('div.ph','Bibliothèque de références audio',h('span.r','8 morceaux analysés')),
       h('div.pb',
-        h('div.muted',{style:{lineHeight:'1.6'}},'Références privées fournies pour guider le travail de Marco. Les MP3 originaux ne sont pas copiés dans le dépôt. Les mesures ci-dessous proviennent de fenêtres de 12 secondes au début, au milieu et à la fin de chaque fichier. Crête = dBFS décodé ; RMS = dBFS ; crest = différence crête/RMS. Ce ne sont pas des mesures LUFS intégrées.'),
+        h('div.muted',{style:{lineHeight:'1.6'}},'Références privées fournies pour guider le travail de La Zone. Les MP3 originaux ne sont pas copiés dans le dépôt. Les mesures ci-dessous proviennent de fenêtres de 12 secondes au début, au milieu et à la fin de chaque fichier. Crête = dBFS décodé ; RMS = dBFS ; crest = différence crête/RMS. Ce ne sont pas des mesures LUFS intégrées.'),
         h('div.muted',{style:{marginTop:'7px',lineHeight:'1.6',color:'#ffd789'}},'Important : une crête décodée supérieure à 0 dBFS peut être un dépassement inter-échantillons du MP3. Cela ne prouve pas une saturation audible. Les réglages originaux, plugins et chaînes exactes ne peuvent pas être déduits de façon fiable du mix stéréo final.')));
     root.append(intro);
     const grid=h('div.grid',{style:{gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',marginTop:'12px'}});
@@ -711,7 +711,7 @@ export async function render(el, { params }) {
         h('div.pb',rows,h('div.muted',{style:{marginTop:'10px',lineHeight:'1.5'}},r.note))));
     }
     root.append(grid,
-      h('div.panel',{style:{marginTop:'12px'}},h('div.ph','Comment Marco doit exploiter ces références'),
+      h('div.panel',{style:{marginTop:'12px'}},h('div.ph','Comment La Zone doit exploiter ces références'),
         h('div.pb',
           h('ol',{style:{paddingLeft:'19px',margin:'0',lineHeight:'1.7',fontSize:'12px'}},
             h('li','S’en servir comme repères d’écoute et de comparaison, pas comme presets à copier aveuglément.'),
@@ -804,7 +804,7 @@ RÈGLES D’UTILISATION :
           { name: 'Direction artistique', role: 'intention sonore, références stylistiques, choix entre naturel, professionnel et créatif' },
           { name: 'Contrôle qualité', role: 'auditeur critique : détecte les risques, traitements excessifs, incohérences et valide la chaîne proposée' }
         ];
-        const task = `Tu es le cerveau principal et l'ingénieur du son en chef. Tu gardes une seule conversation avec l'utilisateur et tu coordonnes les dix spécialistes disponibles en coulisses. Ne renvoie jamais l'utilisateur vers un autre agent ou un autre onglet. Fais intervenir les spécialistes utiles, confronte leurs avis si nécessaire, puis décide toi-même de la chaîne finale.
+        const task = `Tu es La Zone, le cerveau principal et l'ingénieur du son en chef. Tu gardes une seule conversation avec l'utilisateur et tu coordonnes les dix spécialistes disponibles en coulisses. Ne renvoie jamais l'utilisateur vers un autre agent ou un autre onglet. Fais intervenir les spécialistes utiles, confronte leurs avis si nécessaire, puis décide toi-même de la chaîne finale.
 Demande utilisateur : ${request}
 Piste sélectionnée : ${JSON.stringify(context)}
 Effets choisis par l'utilisateur : ${chosen.length ? chosen.join(', ') : 'choix automatique par le chef'}
@@ -870,7 +870,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
     send.onclick = askExpert; applyBtn.onclick = execute;
     undoBtn.onclick = () => { const t = trackNow(); if (t?.original) { t.buffer = cloneAudioBuffer(t.original); t.fxDone = []; save(); if (cur === 'timeline') go('timeline'); status.textContent = 'Prise originale restaurée.'; } };
     root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 280px' } },
-      h('div.panel', h('div.ph', '🧠 Ingénieur du son IA', h('span.r', 'planifie et exécute les traitements')),
+      h('div.panel', h('div.ph', '🎙️ La Zone — ingénieur du son IA', h('span.r', 'planifie et exécute les traitements')),
         h('div.pb', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat,
           h('div', { style: { display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',margin:'10px 0' } }, h('b', { style:{fontSize:'12px'} }, 'Style de mastering'), masterStyle),
           effectPicker,
