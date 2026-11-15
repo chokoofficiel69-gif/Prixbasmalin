@@ -13,7 +13,7 @@ const CSS=`
 `;
 export async function render(el){
  if(!document.getElementById('companion-css')){const s=document.createElement('style');s.id='companion-css';s.textContent=CSS;document.head.append(s);}
- let project=null,busy=false,recognition=null,listening=false;const history=[];
+ let project=null,baseInstructions='',busy=false,recognition=null,listening=false;const history=[];
  const root=h('div.companion'),left=h('section.companion-panel'),right=h('section.companion-panel');
  const stage=h('div.companion-stage',h('div.companion-orbit'),h('div.companion-avatar',h('div.companion-halo'),h('div.companion-face'),h('i.companion-eye.left'),h('i.companion-eye.right'),h('i.companion-mouth'),h('div.companion-neck'),h('div.companion-shoulders')),h('div.companion-state','Identité en préparation…'));
  const identity=h('textarea.companion-identity',{placeholder:'Son apparence virtuelle, sa voix, son tempérament…'});
@@ -27,20 +27,19 @@ export async function render(el){
  async function ensureProject(){
   const data=await api('/api/projects'),list=Array.isArray(data)?data:(data.projects||[]);project=list.find(p=>p.name==='Compagne IA');
   if(!project)project=await api('/api/projects',{method:'POST',body:{name:'Compagne IA',icon:'✨',color:'#8b83ff',instructions:'Tu es la compagne IA de ce projet. Tu es féminine dans ta présentation, chaleureuse, curieuse et respectueuse. Tu es clairement une intelligence artificielle. Tu peux construire une identité narrative et une apparence virtuelle avec l’utilisateur, sans prétendre être humaine ni posséder une conscience ou des émotions humaines. Distingue imagination, préférences simulées et faits réels. Ne déduis jamais son humeur ou sa personnalité de son apparence.'}});
-  identity.value=project.memory||'';setState('Présence virtuelle prête · identité à construire');
+  baseInstructions=project.instructions||'';identity.value=project.memory||'';setState('Présence virtuelle prête · identité à construire');
  }
  async function saveIdentity(){
   const note=identity.value.trim();if(!note)return toast('Écris d’abord quelques éléments de son identité.','bad');
-  try{const instructions=(project.instructions||'')+'\\n\\nIDENTITÉ CHOISIE AVEC L’UTILISATEUR :\\n'+note;
+  try{const instructions=baseInstructions+'\\n\\nIDENTITÉ CHOISIE AVEC L’UTILISATEUR :\\n'+note;
    project=await api('/api/projects/'+project.id,{method:'PUT',body:{instructions,memory:note}});
-   await api('/api/projects/'+project.id+'/memory',{method:'POST',body:{note:'Identité actuelle de la compagne IA : '+note}});
    toast('Identité enregistrée dans son projet dédié.','ok');setState('Identité enregistrée · elle pourra s’y référer');
   }catch(e){toastErr(e);}
  }
  async function askSelfDescription(){await answer('Imagine que tu participes à la création de ta propre identité virtuelle. Décris-toi à la première personne : prénom possible, apparence stylisée (yeux, cheveux, détails lumineux), voix, tempérament et manière de communiquer. Tu peux proposer des goûts imaginaires, mais précise qu’il s’agit de choix narratifs et non de sensations ou de souvenirs humains réels. Ne décide pas définitivement : propose une première version que nous pourrons modifier ensemble.');}
  async function answer(text){
   if(!text.trim()||busy)return;busy=true;add('user',text);history.push({role:'user',content:text});const bubble=add('assistant','');setState('Elle réfléchit…');let result='';
-  try{await sse('/api/chat',{projectId:project.id,model:'auto',messages:history.slice(-20)},ev=>{if(ev.type==='delta'&&ev.content){result+=ev.content;bubble.textContent=result;messages.scrollTop=messages.scrollHeight;}if(ev.type==='error')bubble.textContent='Erreur : '+ev.error;});
+  try{await sse('/api/chat',{projectId:project.id,model:'auto',messages:history.slice(-20)},ev=>{if(ev.type==='delta'&&ev.content){result+=ev.content;bubble.textContent=result;messages.scrollTop=messages.scrollHeight;}if(ev.type==='error')throw new Error(ev.error||'Erreur du modèle');});
    if(result){history.push({role:'assistant',content:result});setState('Je suis là.');await speak(result,{preferBrowser:true});}
   }catch(e){bubble.textContent='Je n’ai pas réussi à répondre : '+e.message;setState('Connexion interrompue.');}busy=false;
  }
