@@ -2,7 +2,7 @@ import { api, state, h, toast, toastErr, currentProject, modal } from './lib/cor
 
 const VIEWS = [
   { id: 'accueil', label: 'ACCUEIL', title: 'Accueil', icon: '🏠', load: () => import('./views/home.js') },
-  { id: 'parler', label: 'PARLER AUX IA', title: 'Parler aux IA', icon: '💬', load: () => import('./views/chat.js'), full: true },
+  { id: 'parler', label: 'PARLER AUX IA', title: 'Parler aux IA', icon: '💬', load: () => import('./views/chat.js'), full: true },\n  { id: 'compagne', label: 'MA COMPAGNE IA', title: 'Ma compagne IA', icon: '👩', load: () => import('./views/companion.js') },
   { id: 'agents', label: 'AGENTS', title: 'Agents', icon: '🤖', load: () => import('./views/agents.js') },
   { id: 'images', label: 'IMAGES', title: 'Images', icon: '🎨', load: () => import('./views/images.js') },
   { id: 'clips', label: 'VIDÉOS ET CLIPS', title: 'Vidéos et clips', icon: '🎬', load: () => import('./views/clips.js') },
