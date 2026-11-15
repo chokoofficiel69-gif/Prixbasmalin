@@ -580,7 +580,8 @@ export async function render(el, { params }) {
       if (tracks[selected]?.kind === 'voix' && !armed) tracks[selected].gainDb = voiceBusDb;
       beatGainNode = null; saveSoon(true);
       if (monOn.checked) openLiveMonitor();
-      if (lat && tracks.some(t => t.kind === 'instru')) await alignSelected(true);
+      // Le traitement IA cale déjà la prise sur l’instru : ne pas lancer deux calages successifs.
+      if (lat && tracks.some(t => t.kind === 'instru') && !ingePrefs.enabled) await alignSelected(true);
       // L’IA intervient sur chaque nouvelle prise, mais sans correction de hauteur ni effet robotique.
       if (ingePrefs.enabled && take && take.kind === 'voix') {
         try { await processTake(take); }
