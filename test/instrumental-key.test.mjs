@@ -29,8 +29,8 @@ test('ne donne pas de tonalité sur un silence', () => {
 });
 
 test('refuse les entrées invalides et les fréquences impossibles', () => {
-  assert.throws(() => analyzeInstrumentalKey([], 4000), RangeError);
-  assert.throws(() => analyzeInstrumentalKey([new Float32Array(4096)]), TypeError);
+  assert.throws(() => analyzeInstrumentalKey(chord([440]), 4000), RangeError);
+  assert.throws(() => analyzeInstrumentalKey([new Int16Array(4096)]), TypeError);
   assert.equal(analyzeInstrumentalKey(new Float32Array(2000)).reason, 'signal_trop_court');
 });
 
