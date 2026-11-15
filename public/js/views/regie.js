@@ -594,23 +594,76 @@ export async function render(el, { params }) {
     return root;
   }
 
+  async function applyLibraryPreset(p) {
+    const ready = tracks.filter(t => t.buffer), track = ready[sessionSelected] || ready[0];
+    if (!track) { toast('Importe une piste audio avant d’appliquer un preset.', 'bad'); return; }
+    if (playing) stopPlay();
+    const status = document.getElementById('regie-preset-status');
+    if (status) status.textContent = 'Application de ' + p.name + '…';
+    try {
+      const source = track.buffer;
+      if (!track.original) track.original = source;
+      let rendered;
+      if (p.kind === 'tune') rendered = (await applyChain(source, [{ t: 'tune', strength: p.strength, speed: p.speed, formant: p.formant || 0 }], { onProgress: x => { if(status) status.textContent=x; } })).buffer;
+      else if (p.kind === 'fx') rendered = (await applyChain(source, p.chain, { onProgress: x => { if(status) status.textContent=x; } })).buffer;
+      else rendered = await voiceChain(source, p.params || {});
+      track.buffer = rendered;
+      track.fxDone = [...(track.fxDone || []), p.name];
+      track.fx = { ...(track.fx || {}), lastPreset: p.name };
+      await save();
+      if(status) status.textContent = p.name + ' appliqué sur ' + track.name;
+      toast('Preset « ' + p.name + ' » appliqué à ' + track.name, 'ok');
+    } catch(e) { if(status) status.textContent='Échec : '+(e.message||e); toastErr(e); }
+  }
+
   function viewRepo() {
-    const CATS = { 'Références': ['Jul · mélodique', 'Naza · puissant', 'LJK · hard tune'], 'Autotune (60)': ['Rap FR Pro', 'Drill sombre', 'Trap 808', 'Hard snap', 'Soft melodic'], 'Vraies voix (36)': ['Chant velours', 'Voix grave', 'Voix aiguë', 'Voix féminine'], 'Ambiances (30)': ['Club', 'Nuit', 'Live', 'Radio', 'Téléphone'], 'Effets (60+)': ['Vocoder', 'Robot', 'Lo-Fi', 'Tube', 'Mega'] };
-    const FX_CHAIN = [['🎤 Auto-Tune', '#a855f7', 1], ['🎚️ EQ', '#3b82f6', 1], ['🗜️ Compression', '#f0b429', 1], ['🧼 De-Esser', '#22c55e', 1], ['🔥 Saturation', '#ff6b3d', 0], ['🎼 Harmonies', '#ec4899', 1], ['🌫️ Réverbe', '#a855f7', 1], ['🔁 Delay', '#22d3ee', 1]];
-    let lib = '';
-    for (const cat in CATS) lib += `<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;color:#c9b6ff;margin-bottom:8px;letter-spacing:.04em">${cat.toUpperCase()}</div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${CATS[cat].map((p, i) => `<div class="vcard" style="padding:10px;display:flex;gap:9px;align-items:center${cat.includes('Réf') && i === 0 ? ';border-color:var(--rpur);box-shadow:0 0 14px rgba(168,85,247,.3)' : ''}"><div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--rpur),var(--rcy));flex:none"></div><div style="min-width:0"><b style="font-size:13px">${p}</b><div class="muted" style="font-size:10px">${cat.split(' ')[0]}</div></div></div>`).join('')}</div></div>`;
-    const chips = ['Tous', 'Références', 'Autotune', 'Vraies voix', 'Ambiances', 'Transposer', 'Timbre', 'Vocodeur', 'Styles', 'Effets'].map((c, i) => `<span class="chip ${i === 0 ? 'on' : ''}">${c}</span>`).join('');
-    const fxchain = FX_CHAIN.map(f => `<div style="display:flex;gap:10px;align-items:center;padding:8px 9px;border-radius:9px;margin-bottom:5px;font-size:13px;font-weight:600;${f[2] ? 'background:linear-gradient(90deg,rgba(168,85,247,.16),transparent)' : ''}"><span style="width:11px;height:11px;border-radius:50%;background:${f[2] ? f[1] : 'transparent'};box-shadow:0 0 7px ${f[2] ? f[1] : 'transparent'};border:1.5px solid ${f[1]};flex:none"></span>${f[0]}<span style="margin-left:auto;color:#3b3a60;letter-spacing:-2px">⠿</span></div>`).join('');
-    const root = h('div');
-    root.innerHTML = `<div class="grid" style="grid-template-columns:1fr 300px">
-       <div class="panel"><div class="ph">📚 Bibliothèque de presets <span class="r">235 presets</span></div><div class="pb" style="max-height:calc(100vh - 230px);overflow:auto"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">${chips}</div>${lib}</div></div>
-       <div style="display:grid;gap:12px;align-content:start">
-         <div class="panel"><div class="ph">🎛️ Chaîne d'effets</div><div class="pb">${fxchain}</div></div>
-         <div class="panel" data-projects><div class="ph">🗂️ Mes projets</div><div class="pb"></div></div>
-       </div></div>`;
-    // vrais projets cliquables
-    const pbox = root.querySelector('[data-projects] .pb');
-    for (const p of state.projects || []) pbox.append(h('div.ditem' + (p.id === projectId ? '.on' : ''), { style: { marginBottom: '4px' }, onclick: () => { state.projectId = p.id; localStorage.setItem('studio.project', p.id); location.hash = '#/regie'; } }, `${p.icon || '🗂️'} ${p.name}`));
+    const presets = [
+      {name:'Rap FR Pro',cat:'Autotune',kind:'tune',strength:1,speed:60},
+      {name:'Drill sombre',cat:'Autotune',kind:'tune',strength:1,speed:18},
+      {name:'Trap 808',cat:'Autotune',kind:'tune',strength:1,speed:8},
+      {name:'Hard snap',cat:'Autotune',kind:'tune',strength:1,speed:0},
+      {name:'Soft melodic',cat:'Autotune',kind:'tune',strength:.75,speed:150},
+      {name:'Chant velours',cat:'Vraies voix',kind:'voice',params:{highpass:75,low:1,presence:2,air:2,deess:3,comp:.45,reverb:.1}},
+      {name:'Voix grave',cat:'Vraies voix',kind:'voice',params:{highpass:65,low:2,presence:1,air:0,deess:2,comp:.55,reverb:.08}},
+      {name:'Voix aiguë',cat:'Vraies voix',kind:'voice',params:{highpass:110,low:-1,presence:1,air:1,deess:5,comp:.4,reverb:.12}},
+      {name:'Voix féminine',cat:'Vraies voix',kind:'voice',params:{highpass:100,low:0,presence:2,air:3,deess:4,comp:.45,reverb:.13}},
+      {name:'Club',cat:'Ambiances',kind:'fx',chain:[{t:'fx',kind:'reverb',size:1.4,mix:.12},{t:'fx',kind:'delay',time:.25,fb:.2,mix:.1}]},
+      {name:'Nuit',cat:'Ambiances',kind:'voice',params:{highpass:80,low:-1,presence:1,air:0,deess:3,comp:.5,reverb:.22}},
+      {name:'Live',cat:'Ambiances',kind:'fx',chain:[{t:'fx',kind:'reverb',size:2.5,mix:.22}]},
+      {name:'Radio',cat:'Effets',kind:'voice',params:{highpass:260,low:-5,presence:3,air:-3,deess:2,comp:.8,reverb:0}},
+      {name:'Téléphone',cat:'Effets',kind:'voice',params:{highpass:420,low:-6,presence:4,air:-6,deess:1,comp:.7,reverb:0}},
+      {name:'Vocodeur',cat:'Effets',kind:'fx',chain:[{t:'vocoder',bands:24,voices:[0],blend:.12}]},
+      {name:'Robot',cat:'Effets',kind:'tune',strength:1,speed:0},
+      {name:'Lo-Fi',cat:'Effets',kind:'voice',params:{highpass:180,low:-3,presence:-1,air:-5,deess:2,comp:.6,reverb:.04}},
+      {name:'Tube',cat:'Effets',kind:'fx',chain:[{t:'fx',kind:'saturation',drive:1.4,mix:.18}]},
+      {name:'Mega',cat:'Effets',kind:'voice',params:{highpass:80,low:2,presence:4,air:3,deess:4,comp:.8,reverb:.08}},
+      {name:'Jul · mélodique',cat:'Références',kind:'tune',strength:.9,speed:75},
+      {name:'Naza · puissant',cat:'Références',kind:'voice',params:{highpass:75,low:2,presence:3,air:1,deess:3,comp:.72,reverb:.08}},
+      {name:'LJK · hard tune',cat:'Références',kind:'tune',strength:1,speed:0}
+    ];
+    const cats=['Tous','Références','Autotune','Vraies voix','Ambiances','Effets'];
+    let active='Tous';
+    const root=h('div'), list=h('div.grid',{style:{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:'9px'}});
+    const count=h('span.r',presets.length+' presets fonctionnels');
+    const chips=h('div',{style:{display:'flex',gap:'6px',flexWrap:'wrap',marginBottom:'14px'}});
+    const status=h('div.muted',{id:'regie-preset-status',style:{marginTop:'10px',minHeight:'18px'}},'Choisis une piste puis clique sur un preset pour appliquer le traitement.');
+    function drawCards(){
+      list.innerHTML='';
+      const shown=presets.filter(p=>active==='Tous'||p.cat===active);
+      for(const p of shown) list.append(h('button.vcard',{type:'button',style:{padding:'11px',display:'flex',gap:'9px',alignItems:'center',textAlign:'left',cursor:'pointer',color:'inherit',background:'transparent',border:'1px solid var(--rline)',borderRadius:'12px'},onclick:()=>applyLibraryPreset(p)},
+        h('span',{style:{width:'32px',height:'32px',borderRadius:'9px',background:'linear-gradient(135deg,var(--rpur),var(--rcy))',flex:'none'}}),
+        h('span',{style:{minWidth:'0'}},h('b',{style:{fontSize:'13px'}},p.name),h('span.muted',{style:{display:'block',fontSize:'10px'}},p.cat+' · appliquer'))));
+      count.textContent=shown.length+' / '+presets.length+' presets';
+    }
+    for(const cat of cats) chips.append(h('button.chip'+(cat===active?'.on':''),{onclick:()=>{active=cat;for(const el of chips.children)el.classList.toggle('on',el.textContent===active);drawCards();}},cat));
+    drawCards();
+    const side=h('div',{style:{display:'grid',gap:'12px',alignContent:'start'}},
+      h('div.panel',h('div.ph','Chaîne d’effets'),h('div.pb',h('div.muted','Les presets compatibles appliquent de vrais traitements sur la piste sélectionnée. Les autres modules ne sont pas simulés.'))),
+      h('div.panel',{'data-projects':''},h('div.ph','Mes projets'),h('div.pb')));
+    root.append(h('div.grid',{style:{gridTemplateColumns:'minmax(0,1fr) 300px'}},
+      h('div.panel',h('div.ph','Bibliothèque de presets',count),h('div.pb',chips,list,status)),side));
+    const pbox=root.querySelector('[data-projects] .pb');
+    for(const p of state.projects||[])pbox.append(h('div.ditem'+(p.id===projectId?'.on':''),{style:{marginBottom:'4px'},onclick:()=>{state.projectId=p.id;localStorage.setItem('studio.project',p.id);location.hash='#/regie';}},`${p.icon||'🗂️'} ${p.name}`));
     return root;
   }
 
