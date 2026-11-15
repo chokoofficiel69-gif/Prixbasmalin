@@ -1786,10 +1786,14 @@ export async function render(el, { params }) {
       <text x="40" y="43" text-anchor="middle" font-size="21" font-weight="800" fill="#fff">${r.overall}</text>
       <text x="40" y="55" text-anchor="middle" font-size="8" fill="#9aa3c7">QUALITÉ</text>
     </svg>`;
-    const list = h('div.score-list', ...r.items.map(it => h('div.score-item',
-      h('span.score-check', { 'data-s': it.status }, it.status === 'ok' ? '✓' : it.status === 'warn' ? '!' : '✕'),
-      h('span.score-label', it.label),
-      h('span.score-pct', it.pct + ' %'))));
+    const list = h('div.score-list', ...r.items.map(it => {
+      const bar = h('span.score-bari'); bar.style.width = it.pct + '%';
+      return h('div.score-item', { 'data-s': it.status },
+        h('span.score-check', { 'data-s': it.status }, it.status === 'ok' ? '✓' : it.status === 'warn' ? '!' : '✕'),
+        h('span.score-label', it.label),
+        h('span.score-bar', bar),
+        h('span.score-pct', it.pct + ' %'));
+    }));
     return h('div.card.score-panel', { style: { padding: '10px' } },
       h('div.row', h('strong.small.grow', '🎚️ Analyse vocale'), h('span.tiny.muted', 'mesures réelles · 0 € · local')),
       h('div.score-body', gauge, list));

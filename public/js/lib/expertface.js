@@ -1,16 +1,14 @@
-// Visage humanisé de l'ingé son IA — portrait SVG stylisé (personnage fictif, n'imite
-// personne de réel), avec dégradés de peau, casque studio, yeux qui clignent, bouche
-// qui bouge quand il parle et halo d'analyse. 100 % local, 0 Ko réseau, 0 €.
+// Ingé son IA — tête « réseau de neurones » holographique (personnage fictif, n'imite
+// personne de réel). Look studio pro, 100 % SVG/CSS, 0 Ko réseau, 0 €.
 // Pas d'import navigateur au chargement : les helpers purs restent testables sous Node.
 
 export const FACE_STATES = ['idle', 'thinking', 'speaking'];
-export const DEFAULT_ENGINEER = { name: 'Marco', role: "Ingénieur du son · 30 ans de studio" };
+export const DEFAULT_ENGINEER = { name: 'Marco', role: "Ingénieur du son · IA" };
 
 /** Légende sous le portrait (pure, testable). */
 export function faceCaption(name = DEFAULT_ENGINEER.name, role = DEFAULT_ENGINEER.role) {
   return { name: String(name || DEFAULT_ENGINEER.name), role: String(role || DEFAULT_ENGINEER.role) };
 }
-
 /** Normalise un état d'animation (pure, testable). */
 export function normalizeState(s) {
   return FACE_STATES.includes(s) ? s : 'idle';
@@ -18,42 +16,39 @@ export function normalizeState(s) {
 
 const CSS = `
 .expert-face{display:flex;gap:12px;align-items:center}
-.expert-face .ef-portrait{width:96px;height:96px;flex:0 0 auto;border-radius:50%;overflow:hidden;
-  background:radial-gradient(120% 120% at 60% 28%, #10233a 0%, #0a0c18 72%);
-  box-shadow:0 0 20px rgba(34,211,238,.4), 0 2px 10px rgba(0,0,0,.5), inset 0 0 0 1px rgba(34,211,238,.45)}
-/* champ de particules / wireframe façon IA */
-.ef-particles circle{animation:ef-twinkle 2.6s infinite ease-in-out}
-.ef-particles circle:nth-child(3n){animation-delay:.6s}
-.ef-particles circle:nth-child(3n+1){animation-delay:1.2s}
-@keyframes ef-twinkle{0%,100%{opacity:.25}50%{opacity:.9}}
-@media (prefers-reduced-motion: reduce){.ef-particles circle{animation:none!important}}
+.expert-face .ef-portrait{width:104px;height:104px;flex:0 0 auto;border-radius:14px;overflow:hidden;position:relative;
+  background:radial-gradient(120% 110% at 62% 34%, #0e2a44 0%, #060912 72%);
+  box-shadow:0 0 22px rgba(34,211,238,.35), inset 0 0 0 1px rgba(34,211,238,.4)}
 .expert-face .ef-portrait svg{width:100%;height:100%;display:block}
 .expert-face .ef-meta{min-width:0}
-.expert-face .ef-name{font-weight:700;letter-spacing:.2px}
+.expert-face .ef-name{font-weight:800;letter-spacing:.2px}
 .expert-face .ef-role{opacity:.72;font-size:12px;line-height:1.25}
-.expert-face .ef-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;margin-top:4px;opacity:.9}
-.expert-face .ef-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e}
-/* clignement des yeux */
-.ef-eyes{transform-box:fill-box;transform-origin:center;animation:ef-blink 5.4s infinite}
-@keyframes ef-blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
-/* bouche : fermée au repos, s'anime quand il parle */
-.ef-mouth{transform-box:fill-box;transform-origin:center;transform:scaleY(.35)}
-.expert-face[data-state="speaking"] .ef-mouth{animation:ef-talk .32s infinite ease-in-out}
-@keyframes ef-talk{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1.05)}}
-/* halo d'analyse (thinking) : anneau qui pulse + barres EQ */
+.expert-face .ef-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;margin-top:5px;opacity:.95}
+.expert-face .ef-dot{width:8px;height:8px;border-radius:50%;background:#22e39a;box-shadow:0 0 7px #22e39a}
+/* coeur lumineux : respire au repos, pulse en analyse */
+.ef-core{transform-box:fill-box;transform-origin:center;animation:ef-breathe 3.4s infinite ease-in-out}
+@keyframes ef-breathe{0%,100%{opacity:.78}50%{opacity:1}}
+.expert-face[data-state="thinking"] .ef-core{animation:ef-think .9s infinite ease-in-out}
+@keyframes ef-think{0%,100%{opacity:.6}50%{opacity:1}}
+/* noeuds du réseau qui scintillent */
+.ef-nodes circle{animation:ef-tw 2.6s infinite ease-in-out}
+.ef-nodes circle:nth-child(3n){animation-delay:.6s}.ef-nodes circle:nth-child(3n+1){animation-delay:1.3s}
+@keyframes ef-tw{0%,100%{opacity:.35}50%{opacity:1}}
+/* anneau d'analyse */
 .ef-ring{opacity:0;transform-box:fill-box;transform-origin:center}
-.expert-face[data-state="thinking"] .ef-ring{opacity:1;animation:ef-pulse 1.3s infinite ease-out}
-@keyframes ef-pulse{0%{transform:scale(.8);opacity:.55}100%{transform:scale(1.25);opacity:0}}
-.ef-eq rect{transform-box:fill-box;transform-origin:bottom}
-.expert-face[data-state="thinking"] .ef-eq,.expert-face[data-state="speaking"] .ef-eq{opacity:1}
-.ef-eq{opacity:0;transition:opacity .2s}
-.expert-face[data-state="thinking"] .ef-eq rect,.expert-face[data-state="speaking"] .ef-eq rect{animation:ef-bars .7s infinite ease-in-out}
-.ef-eq rect:nth-child(2){animation-delay:.1s}.ef-eq rect:nth-child(3){animation-delay:.22s}
-.ef-eq rect:nth-child(4){animation-delay:.33s}.ef-eq rect:nth-child(5){animation-delay:.15s}
-@keyframes ef-bars{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
-.expert-face[data-state="thinking"] .ef-status .ef-dot{background:#f59e0b;box-shadow:0 0 6px #f59e0b}
-.expert-face[data-state="speaking"] .ef-status .ef-dot{background:#2e8bff;box-shadow:0 0 6px #2e8bff}
-@media (prefers-reduced-motion: reduce){.ef-eyes,.ef-mouth,.ef-ring,.ef-eq rect{animation:none!important}}
+.expert-face[data-state="thinking"] .ef-ring{opacity:1;animation:ef-pulse 1.4s infinite ease-out}
+@keyframes ef-pulse{0%{transform:scale(.7);opacity:.6}100%{transform:scale(1.15);opacity:0}}
+/* onde quand il parle */
+.ef-wave{opacity:0;transition:opacity .2s}
+.expert-face[data-state="speaking"] .ef-wave{opacity:1}
+.ef-wave rect{transform-box:fill-box;transform-origin:center}
+.expert-face[data-state="speaking"] .ef-wave rect{animation:ef-bars .55s infinite ease-in-out}
+.ef-wave rect:nth-child(2){animation-delay:.08s}.ef-wave rect:nth-child(3){animation-delay:.18s}
+.ef-wave rect:nth-child(4){animation-delay:.27s}.ef-wave rect:nth-child(5){animation-delay:.12s}.ef-wave rect:nth-child(6){animation-delay:.22s}
+@keyframes ef-bars{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.expert-face[data-state="thinking"] .ef-dot{background:#f5a623;box-shadow:0 0 7px #f5a623}
+.expert-face[data-state="speaking"] .ef-dot{background:#22d3ee;box-shadow:0 0 7px #22d3ee}
+@media (prefers-reduced-motion: reduce){.ef-core,.ef-nodes circle,.ef-ring,.ef-wave rect{animation:none!important}}
 `;
 
 function ensureCss() {
@@ -65,89 +60,48 @@ function ensureCss() {
   document.head.appendChild(s);
 }
 
-// Portrait SVG — personnage fictif : peau dégradée, cheveux + barbe courts, casque studio,
-// micro à perche, yeux expressifs. Dessiné à la main, lisible en thème sombre.
+// Tête IA : silhouette en profil formée de noeuds + liens, coeur lumineux, casque suggéré.
 const PORTRAIT_SVG = `
-<svg viewBox="0 0 100 100" role="img" aria-label="Portrait de l'ingénieur du son">
+<svg viewBox="0 0 100 100" role="img" aria-label="Ingénieur du son IA">
   <defs>
-    <radialGradient id="ef-skin" cx="42%" cy="38%" r="70%">
-      <stop offset="0%" stop-color="#f3c7a6"/><stop offset="60%" stop-color="#e0ac82"/>
-      <stop offset="100%" stop-color="#b9835b"/>
+    <radialGradient id="ef-core-g" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#eafaff"/><stop offset="35%" stop-color="#4fd8ff"/><stop offset="100%" stop-color="#0a3b63"/>
     </radialGradient>
-    <linearGradient id="ef-hair" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#3a3029"/><stop offset="100%" stop-color="#15100c"/>
-    </linearGradient>
-    <linearGradient id="ef-tee" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#2b3140"/><stop offset="100%" stop-color="#171b24"/>
-    </linearGradient>
-    <linearGradient id="ef-cup" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#4b5160"/><stop offset="100%" stop-color="#20242e"/>
+    <linearGradient id="ef-head-g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1b4b74"/><stop offset="100%" stop-color="#0a1c33"/>
     </linearGradient>
   </defs>
-  <circle class="ef-ring" cx="50" cy="50" r="46" fill="none" stroke="#a855f7" stroke-width="2"/>
-  <!-- épaules / t-shirt studio -->
-  <path d="M18 100 Q22 78 38 72 L62 72 Q78 78 82 100 Z" fill="url(#ef-tee)"/>
-  <path d="M44 70 L56 70 L56 78 Q50 82 44 78 Z" fill="#cf9b70"/>
-  <!-- cou -->
-  <rect x="44" y="62" width="12" height="14" rx="5" fill="#c08f64"/>
-  <!-- oreilles -->
-  <circle cx="28" cy="46" r="5.5" fill="url(#ef-skin)"/><circle cx="72" cy="46" r="5.5" fill="url(#ef-skin)"/>
-  <!-- tête -->
-  <path d="M30 42 Q30 20 50 20 Q70 20 70 42 Q70 64 50 66 Q30 64 30 42 Z" fill="url(#ef-skin)"/>
-  <!-- ombrage joue droite -->
-  <path d="M58 30 Q66 40 62 58 Q56 64 50 65 Q60 52 58 30 Z" fill="#00000018"/>
-  <!-- cheveux -->
-  <path d="M29 42 Q26 16 50 15 Q74 16 71 42 Q68 30 60 27 Q50 24 40 27 Q32 30 29 42 Z" fill="url(#ef-hair)"/>
-  <!-- barbe courte -->
-  <path d="M33 48 Q36 66 50 68 Q64 66 67 48 Q64 60 50 61 Q36 60 33 48 Z" fill="#00000026"/>
-  <!-- sourcils -->
-  <path d="M37 40 Q42 37 46 40" stroke="#2b2017" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <path d="M54 40 Q58 37 63 40" stroke="#2b2017" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <!-- yeux (calmes, regard posé) -->
-  <g class="ef-eyes">
-    <ellipse cx="41.8" cy="45" rx="3.1" ry="1.9" fill="#f7f1ea"/>
-    <ellipse cx="58.2" cy="45" rx="3.1" ry="1.9" fill="#f7f1ea"/>
-    <circle cx="42.2" cy="45.1" r="1.5" fill="#4a3526"/><circle cx="58.6" cy="45.1" r="1.5" fill="#4a3526"/>
-    <circle cx="42.7" cy="44.6" r=".45" fill="#fff"/><circle cx="59.1" cy="44.6" r=".45" fill="#fff"/>
-    <path d="M38.8 45.4 Q41.8 43.6 44.8 45.4" stroke="#00000022" stroke-width=".8" fill="none"/>
-    <path d="M55.2 45.4 Q58.2 43.6 61.2 45.4" stroke="#00000022" stroke-width=".8" fill="none"/>
+  <circle class="ef-ring" cx="50" cy="50" r="44" fill="none" stroke="#22d3ee" stroke-width="2"/>
+  <!-- silhouette de profil (tête tournée) -->
+  <path d="M34 78 Q24 70 26 52 Q28 30 50 26 Q72 24 76 48 Q79 66 66 76 Q58 82 50 80 L50 88 L36 88 Z"
+        fill="url(#ef-head-g)" stroke="#2bd6ff" stroke-width=".8" opacity=".9"/>
+  <!-- liens du réseau -->
+  <g stroke="#2bd6ff" stroke-width=".5" opacity=".55" fill="none">
+    <path d="M38 44 L52 36 L64 46 L58 60 L44 62 Z"/>
+    <path d="M52 36 L60 50 L44 62 M38 44 L44 62 M64 46 L70 58"/>
+    <path d="M40 54 L58 60 M52 36 L46 48 L40 54"/>
   </g>
-  <!-- nez -->
-  <path d="M50 46 L48.4 52.5 Q50 54 51.6 52.5" stroke="#9c6f4a" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-  <!-- bouche (léger sourire) -->
-  <ellipse class="ef-mouth" cx="50" cy="58.2" rx="4.6" ry="1.9" fill="#8a4a3c"/>
-  <path d="M45.5 57.4 Q50 60 54.5 57.4" stroke="#6d382d" stroke-width="1" fill="none" stroke-linecap="round"/>
-  <!-- casque studio : arceau + coussinets -->
-  <path d="M24 44 Q24 12 50 12 Q76 12 76 44" fill="none" stroke="#11141b" stroke-width="5" stroke-linecap="round"/>
-  <rect x="19" y="40" width="12" height="18" rx="5" fill="url(#ef-cup)" stroke="#0c0e14" stroke-width="1"/>
-  <rect x="69" y="40" width="12" height="18" rx="5" fill="url(#ef-cup)" stroke="#0c0e14" stroke-width="1"/>
-  <!-- micro perche -->
-  <path d="M69 52 Q82 56 80 70" stroke="#11141b" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <circle cx="80" cy="71" r="4" fill="#2b3140" stroke="#0c0e14"/>
-  <!-- particules / wireframe façon IA (côté gauche, dissolution) -->
-  <g class="ef-particles" fill="#22d3ee">
-    <circle cx="20" cy="30" r="1.3"/><circle cx="13" cy="38" r="1"/><circle cx="24" cy="44" r="1.5"/>
-    <circle cx="9" cy="48" r="1"/><circle cx="17" cy="54" r="1.2"/><circle cx="26" cy="60" r="1"/>
-    <circle cx="12" cy="62" r="1.4"/><circle cx="7" cy="34" r=".9"/><circle cx="22" cy="68" r="1.1"/>
-    <circle cx="15" cy="24" r="1"/><circle cx="30" cy="52" r="1.2"/><circle cx="5" cy="56" r=".8"/>
+  <!-- noeuds -->
+  <g class="ef-nodes" fill="#9befff">
+    <circle cx="38" cy="44" r="2"/><circle cx="52" cy="36" r="2.4"/><circle cx="64" cy="46" r="2.2"/>
+    <circle cx="58" cy="60" r="2.4"/><circle cx="44" cy="62" r="2"/><circle cx="46" cy="48" r="1.6"/>
+    <circle cx="70" cy="58" r="1.8"/><circle cx="40" cy="54" r="1.6"/><circle cx="60" cy="50" r="1.6"/>
   </g>
-  <g stroke="#22d3ee" stroke-width=".4" opacity=".4" fill="none">
-    <path d="M20 30 L24 44 L17 54 L26 60"/><path d="M13 38 L9 48 L12 62"/><path d="M24 44 L30 52"/>
-  </g>
-  <!-- barres EQ (analyse) -->
-  <g class="ef-eq" fill="#22d3ee">
-    <rect x="38" y="80" width="2.4" height="10"/><rect x="43" y="80" width="2.4" height="10"/>
-    <rect x="48" y="80" width="2.4" height="10"/><rect x="53" y="80" width="2.4" height="10"/>
-    <rect x="58" y="80" width="2.4" height="10"/>
+  <!-- coeur lumineux (le "cerveau") -->
+  <circle class="ef-core" cx="52" cy="49" r="8" fill="url(#ef-core-g)" style="filter:drop-shadow(0 0 6px rgba(79,216,255,.9))"/>
+  <!-- casque suggéré -->
+  <path d="M28 50 Q28 22 54 22" fill="none" stroke="#0c2238" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+  <rect x="24" y="46" width="9" height="15" rx="4" fill="#15324e" stroke="#2bd6ff" stroke-width=".6"/>
+  <!-- onde (parle) -->
+  <g class="ef-wave" fill="#22d3ee">
+    <rect x="34" y="84" width="2.2" height="10"/><rect x="39" y="84" width="2.2" height="10"/><rect x="44" y="84" width="2.2" height="10"/>
+    <rect x="49" y="84" width="2.2" height="10"/><rect x="54" y="84" width="2.2" height="10"/><rect x="59" y="84" width="2.2" height="10"/>
   </g>
 </svg>`;
 
 const STATUS_TEXT = { idle: 'En ligne', thinking: 'Analyse en cours…', speaking: 'Il te parle…' };
 
-/**
- * Construit la carte avatar. Retourne { el, setState(state), setStatus(text) }.
- * `el` est prêt à insérer dans l'interface.
- */
+/** Construit la carte avatar. Retourne { el, setState(state), setStatus(text) }. */
 export function expertFace({ name, role } = {}) {
   ensureCss();
   const cap = faceCaption(name, role);
@@ -162,11 +116,7 @@ export function expertFace({ name, role } = {}) {
   const el = mk('div', 'expert-face');
   el.dataset.state = 'idle';
   el.append(portrait, meta);
-  const setState = (s) => {
-    const st = normalizeState(s);
-    el.dataset.state = st;
-    statusText.textContent = STATUS_TEXT[st];
-  };
+  const setState = (s) => { const st = normalizeState(s); el.dataset.state = st; statusText.textContent = STATUS_TEXT[st]; };
   const setStatus = (text) => { statusText.textContent = String(text || STATUS_TEXT[el.dataset.state] || ''); };
   return { el, setState, setStatus };
 }
