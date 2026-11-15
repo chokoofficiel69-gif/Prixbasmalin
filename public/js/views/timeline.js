@@ -122,7 +122,7 @@ export function createTimeline(o) {
   }
 
   function render() {
-    pps = Math.min(pps, 30000 / ((window.devicePixelRatio || 1) * total()));
+    pps = Math.max(4, Math.min(5000, pps));
     const minO = minOff();
     inner.innerHTML = '';
     inner.style.width = (HEAD + total() * pps + 200) + 'px';
