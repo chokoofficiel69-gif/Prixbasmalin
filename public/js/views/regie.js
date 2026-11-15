@@ -119,7 +119,10 @@ function waveSvgPath(w, hh, dens, seed) {
   return top + bot + 'Z';
 }
 const clipSvg = (color, seed) => `<svg viewBox="0 0 1000 60" preserveAspectRatio="none" style="width:100%;height:100%"><defs><linearGradient id="rg${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".55"/><stop offset=".5" stop-color="${color}" stop-opacity=".2"/><stop offset="1" stop-color="${color}" stop-opacity=".55"/></linearGradient></defs><path d="${waveSvgPath(1000, 60, 5, seed)}" fill="url(#rg${seed})" stroke="${color}" stroke-width=".6"/></svg>`;
-const knobHtml = (nm, val, color, pct, big) => `<div class="kn ${big ? 'kbig' : ''}"><div class="k" style="--kc:${color};--p:${Math.round(pct * 2.7)}deg;width:${big ? 110 : 56}px;height:${big ? 110 : 56}px"><i></i></div><div class="nm">${nm}</div><div class="vv">${val}</div></div>`;
+const knobHtml = (nm, val, color, pct, big) => `<div class="kn ${big ? 'kbig' : ''}"><div class="k" style="--kc:${color};--p:${Math.round(pct * 2.7)}deg;width:${big ? 112 : 56}px;height:${big ? 112 : 56}px"><i></i></div><div class="nm">${nm}</div><div class="vv">${val}</div></div>`;
+const spec3d = () => `<svg viewBox="0 0 520 150" preserveAspectRatio="none" style="width:100%;height:100%"><defs><linearGradient id="row" x1="0" x2="1"><stop offset="0" stop-color="#ec4899"/><stop offset=".5" stop-color="#a855f7"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><filter id="og"><feGaussianBlur stdDeviation="2.3"/></filter></defs><g filter="url(#og)"><path d="M0 150 L0 96 L40 100 L75 60 L110 92 L150 40 L185 88 L220 54 L260 96 L300 46 L340 90 L380 66 L420 100 L460 72 L520 104 L520 150Z" fill="rgba(34,211,238,.22)"/><path d="M0 150 L0 112 L45 108 L85 74 L120 104 L160 60 L200 100 L235 72 L275 108 L315 64 L355 102 L395 82 L435 112 L475 88 L520 116 L520 150Z" fill="rgba(168,85,247,.3)"/><path d="M0 150 L0 126 L50 122 L95 96 L135 120 L175 86 L215 118 L255 92 L295 122 L335 88 L375 118 L415 100 L455 124 L495 106 L520 126 L520 150Z" fill="rgba(236,72,153,.42)"/></g><path d="M0 96 L40 100 L75 60 L110 92 L150 40 L185 88 L220 54 L260 96 L300 46 L340 90 L380 66 L420 100 L460 72 L520 104" fill="none" stroke="url(#row)" stroke-width="1.6" opacity=".9"/></svg>`;
+const eqCurveSvg = () => `<svg viewBox="0 0 500 110" preserveAspectRatio="none" style="width:100%;height:100%"><defs><linearGradient id="eqg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a855f7" stop-opacity=".5"/><stop offset="1" stop-color="#a855f7" stop-opacity="0"/></linearGradient></defs><path d="M0 70 C80 66 110 40 170 50 C240 62 270 90 340 62 C410 38 450 54 500 46 L500 110 L0 110Z" fill="url(#eqg)"/><path d="M0 70 C80 66 110 40 170 50 C240 62 270 90 340 62 C410 38 450 54 500 46" fill="none" stroke="#c98bff" stroke-width="2"/><circle cx="170" cy="50" r="5" fill="#22d3ee"/><circle cx="340" cy="62" r="5" fill="#ec4899"/></svg>`;
+const levelBar = (w = '100%') => `<div style="height:9px;border-radius:5px;width:${w};background:linear-gradient(90deg,#34e39a,#f0b429 70%,#ef4444)"></div>`;
 
 // ---------------------------------------------------------------- utilitaires timeline réelle
 function trackColor(t, i) {
@@ -338,90 +341,129 @@ export async function render(el, { params }) {
     return wrap;
   }
 
-  function apercuBanner(msg, href, label) {
-    return h('div.panel', { style: { marginBottom: '12px' } },
-      h('div.pb', { style: { display: 'flex', gap: '10px', alignItems: 'center' } },
-        h('span.apercu', '👁️ Aperçu visuel'),
-        h('span.muted', { style: { flex: '1' } }, msg),
-        href ? h('a.rbtn.p', { href }, label) : null));
-  }
-
   function viewRegie() {
     const root = h('div');
-    const total = totalDuration();
-    root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 1fr 150px' } },
-      h('div.panel', h('div.ph', '🗂️ Projet'), h('div.pb',
-        kv('Nom', proj.name), kv('Pistes', String(tracks.length)), kv('Durée', fmtLcd(total).replace(/\.\d+$/, '')), kv('Qualité', '44.1 kHz · flottant'))),
-      h('div.panel', h('div.ph', '🎚️ Pistes du projet'), h('div.pb', { style: { maxHeight: '150px', overflow: 'auto' } },
-        tracks.length ? tracks.map((t, i) => h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px', fontSize: '12.5px' } },
-          h('span', { style: { width: '10px', height: '10px', borderRadius: '50%', background: trackColor(t, i), boxShadow: `0 0 7px ${trackColor(t, i)}` } }),
-          h('span', { style: { flex: '1', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' } }, t.name || `Piste ${i + 1}`),
-          h('span.muted', `${t.buffer ? t.buffer.duration.toFixed(1) : 0}s`))) : h('p.muted', 'Projet vide — enregistre ou importe une piste.'))),
-      h('div.panel', h('div.ph', '▶ Transport'), h('div.pb', { style: { textAlign: 'center' } },
-        h('button.rb.pl', { style: { margin: '4px auto' }, onclick: () => startPlay(startOffset) }, '▶'),
-        h('div.muted', { style: { marginTop: '6px' } }, 'Lire le mix')))));
-
-    // mini timeline RÉELLE
+    const check = (x) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;font-size:13px"><span style="width:18px;height:18px;border-radius:50%;background:#34e39a;display:grid;place-items:center;color:#042;font-weight:900;font-size:11px">✓</span><span style="flex:1">${x.split('|')[0]}</span><b>${x.split('|')[1]}</b></div>`;
+    const proc = (x) => `<div style="display:flex;gap:9px;align-items:center;margin-bottom:9px;font-size:12px"><span style="width:16px;height:16px;border-radius:50%;background:#34e39a;display:grid;place-items:center;color:#042;font-weight:900;font-size:10px">✓</span>${x}<span style="flex:1;height:6px;border-radius:4px;background:#1b1440;overflow:hidden"><i style="display:block;height:100%;background:linear-gradient(90deg,#a855f7,#34e39a)"></i></span><small class="muted">100%</small></div>`;
+    root.innerHTML = `
+     <div class="grid" style="grid-template-columns:1.05fr 1.05fr 1.5fr 150px">
+      <div class="panel"><div class="ph">📊 Analyse vocale IA <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb" style="display:flex;gap:12px;align-items:center">
+       <svg viewBox="0 0 88 88" style="width:82px;height:82px;flex:none"><circle cx="44" cy="44" r="36" fill="none" stroke="#1b1440" stroke-width="8"/><circle cx="44" cy="44" r="36" fill="none" stroke="#34e39a" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="16" transform="rotate(-90 44 44)" style="filter:drop-shadow(0 0 6px #34e39a)"/><text x="44" y="49" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">96%</text></svg>
+       <div style="flex:1">${['Justesse|98%', 'Clarté|97%', 'Dynamique|95%', 'Sibilances|92%'].map(check).join('')}</div></div></div>
+      <div class="panel"><div class="ph">⚙️ Traitement IA <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb">${['Auto-Tune', 'EQ intelligent', 'Compression', 'Réverbération', 'Mastering IA'].map(proc).join('')}</div></div>
+      <div class="panel"><div class="ph">🌈 Spectre temps réel · réduction de bruit <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb"><div style="height:150px;border-radius:11px;overflow:hidden;background:#07041a;border:1px solid var(--rline);position:relative">${spec3d()}<div style="position:absolute;right:12px;top:10px;text-align:right"><b style="font-size:17px">−24 dB</b><div class="muted" style="font-size:10px">Réduction bruit</div></div></div></div></div>
+      <div class="panel"><div class="ph">🎚️ Niveaux</div><div class="pb">
+       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:44px">Entrée</span>${levelBar()}<b>−6.2</b></div>
+       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:44px">Sortie</span>${levelBar()}<b>−3.1</b></div>
+       <div style="text-align:center;background:#120d02;border:1px solid #4a3410;border-radius:9px;padding:9px"><b style="font-size:20px;color:#ffd37a">−8.9</b><div class="muted" style="font-size:9px">LUFS INTÉGRÉ</div></div></div></div>
+     </div>
+     <div class="panel" style="margin-top:12px"><div class="ph">🎛️ Rack · aperçu des modules <span class="r">8 modules · onglet « Effets » pour éditer</span></div><div class="pb"><div class="grid" style="grid-template-columns:repeat(8,1fr)">
+      ${knobHtml('Auto-Tune', '10', '#22d3ee', 55)}${knobHtml('EQ', '+2.5 dB', '#f0b429', 62)}${knobHtml('Comp', '4:1', '#22d3ee', 72)}${knobHtml('De-Ess', '−18', '#22c55e', 48)}${knobHtml('Satur.', '12%', '#ff6b3d', 30)}${knobHtml('Reverb', '28%', '#a855f7', 40)}${knobHtml('Delay', '22%', '#22d3ee', 36)}${knobHtml('Stéréo', '140%', '#ec4899', 80)}
+     </div></div></div>`;
+    // ligne du bas : Timeline RÉELLE + Marco
     const mini = h('div.pb');
-    root.append(h('div.panel', { style: { marginTop: '12px' } },
-      h('div.ph', '🎵 Timeline (aperçu réel)', h('span.r', 'onglet « Timeline » pour le plein écran')), mini));
+    const bottom = h('div.grid', { style: { gridTemplateColumns: '1.6fr 1fr', marginTop: '12px' } },
+      h('div.panel', h('div.ph', '🎵 Timeline', h('span.r', 'onglet « Timeline » pour le plein écran')), mini),
+      h('div.panel', { html: `<div class="ph">🧠 Ingé son IA — Marco</div><div class="pb"><div style="display:flex;gap:11px;align-items:center;margin-bottom:10px"><div class="orb"></div><div><b>Marco · IA</b><div class="muted" style="font-size:12px">Tonalité détectée : <b style="color:#bff5db">Do# mineure</b></div></div></div><div class="msg ai">« Ta voix est juste à 98 %. Je te propose +2 dB de présence et un de-esser léger. Tu veux la version <b>naturelle</b>, <b>pro</b> ou <b>créative</b> ? »</div><div style="display:flex;gap:7px"><span class="rbtn p" style="flex:1;text-align:center">Naturelle</span><span class="rbtn" style="flex:1;text-align:center">Pro</span><span class="rbtn" style="flex:1;text-align:center">Créative</span></div></div>` }));
+    root.append(bottom);
     setTimeout(() => buildTimeline(mini), 0);
-
-    // rack d'aperçu (design validé) — clairement signalé non connecté
-    root.append(h('div.panel', { style: { marginTop: '12px' } },
-      h('div.ph', '🎛️ Rack d’effets', h('span.apercu', { style: { marginLeft: 'auto' } }, 'aperçu — édition réelle en phase 3')),
-      h('div.pb', { html: `<div class="grid" style="grid-template-columns:repeat(8,1fr)">${knobHtml('Auto-Tune', '—', '#22d3ee', 50)}${knobHtml('EQ', '—', '#f0b429', 50)}${knobHtml('Comp', '—', '#22d3ee', 50)}${knobHtml('De-Ess', '—', '#22c55e', 50)}${knobHtml('Satur.', '—', '#ff6b3d', 40)}${knobHtml('Reverb', '—', '#a855f7', 40)}${knobHtml('Delay', '—', '#22d3ee', 36)}${knobHtml('Stéréo', '—', '#ec4899', 60)}</div>` })));
     return root;
   }
-  const kv = (k, v) => h('div', { style: { display: 'flex', marginBottom: '8px', fontSize: '12.5px' } }, h('span.muted', k), h('b', { style: { marginLeft: 'auto' } }, v));
 
   function viewRec() {
     const root = h('div');
-    root.append(apercuBanner('L’enregistrement, le monitoring « écoute en direct » et le comping sont déjà pleinement fonctionnels sur la page Enregistrement. Cet onglet reprendra ces outils dans la régie à la phase 2.', '#/enregistrement', '🎙️ Ouvrir l’enregistrement réel'));
-    root.append(h('div.grid', { style: { gridTemplateColumns: '1.3fr .9fr' } },
-      h('div.panel', h('div.ph', '🎙️ Prise de son'), h('div.pb', { html: `<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px"><span class="chip on">Décompte 1 mesure</span><span class="chip">Métronome</span><span class="chip">Boucle</span><span class="chip">Punch in/out</span><span class="chip">Pré-roll 2 s</span></div><div style="border:1px solid var(--rline);border-radius:11px;overflow:hidden;background:#0c0a1e"><div style="padding:7px 11px;font-size:11px;color:var(--rmut)">🥁 Instru qui tourne</div><div style="height:56px">${clipSvg('#f59e0b', 7)}</div></div>` })),
-      h('div.panel', h('div.ph', '🎧 Écoute en direct (monitoring)'), h('div.pb', { html: `${['Ma voix', 'Instru', 'Réverbe', 'Autotune casque'].map((x, i) => `<div style="display:flex;gap:9px;align-items:center;font-size:12px;margin-bottom:11px"><span class="muted" style="width:96px">${x}</span><div style="flex:1;height:6px;border-radius:4px;background:#23213f;position:relative"><i style="position:absolute;top:50%;left:${[60, 78, 24, 14][i]}%;transform:translate(-50%,-50%);width:13px;height:13px;border-radius:50%;background:var(--rcy);box-shadow:0 0 8px var(--rcy)"></i></div></div>`).join('')}<div class="muted" style="font-size:10px;margin-top:6px;line-height:1.4">Réglages d’écoute casque (ne pas oublier) — seront repris ici tels quels à la phase 2.</div>` }))));
+    const prises = [1, 2, 3].map(i => `<div style="display:flex;gap:9px;align-items:center;margin-bottom:7px"><span class="chip ${i === 2 ? 'on' : ''}">Prise ${i}</span><div style="flex:1;height:30px;border-radius:7px;overflow:hidden;border:1px solid var(--rline)">${clipSvg(i === 2 ? '#ec4899' : '#5b5f86', 20 + i * 9)}</div><span class="rbtn" style="padding:5px 9px">▶</span></div>`).join('');
+    const mon = [['Ma voix', '66%', 66], ['Instru', '−4 dB', 80], ['Réverbe', '22%', 22], ['Autotune casque', 'léger', 12]].map(x => `<div style="display:flex;gap:9px;align-items:center;font-size:12px;margin-bottom:11px"><span class="muted" style="width:96px">${x[0]}</span><div style="flex:1;height:6px;border-radius:4px;background:#23213f;position:relative"><i style="position:absolute;top:50%;left:${x[2]}%;transform:translate(-50%,-50%);width:13px;height:13px;border-radius:50%;background:var(--rcy);box-shadow:0 0 8px var(--rcy)"></i></div><b style="width:46px;text-align:right">${x[1]}</b></div>`).join('');
+    root.innerHTML = `<div class="grid" style="grid-template-columns:1.3fr .9fr">
+      <div class="panel"><div class="ph">🎙️ Prise de son <span class="r">prise brute conservée</span></div><div class="pb">
+       <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+         <a href="#/enregistrement" class="rb rec" style="width:68px;height:68px;font-size:28px;text-decoration:none;box-shadow:0 0 26px rgba(239,68,68,.4)">⏺</a>
+         <div style="flex:1"><div style="font-size:15px;font-weight:700;margin-bottom:4px">Enregistrer la voix</div><div class="muted" style="font-size:12px">Piste armée : Voix Lead · casque conseillé</div>
+           <div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap"><span class="chip on">Décompte 1 mesure</span><span class="chip">Métronome</span><span class="chip">Boucle</span><span class="chip">Punch in/out</span><span class="chip">Pré-roll 2 s</span></div></div>
+       </div>
+       <div style="border:1px solid var(--rline);border-radius:11px;overflow:hidden;background:#0c0a1e;margin-bottom:12px"><div style="padding:7px 11px;font-size:11px;color:var(--rmut);display:flex;gap:8px;align-items:center">🥁 Instru qui tourne<span style="margin-left:auto">BPM 90 · Do# min</span></div><div style="height:56px">${clipSvg('#f59e0b', 7)}</div></div>
+       <div style="font-size:12px;font-weight:700;margin-bottom:8px">Prises (comping)</div>${prises}
+      </div></div>
+      <div class="panel"><div class="ph">🎧 Écoute en direct (monitoring)</div><div class="pb">
+       <div style="height:46px;border-radius:9px;overflow:hidden;border:1px solid var(--rline);margin-bottom:12px;background:#0c0a1e">${clipSvg('#22d3ee', 88)}</div>
+       <label style="display:flex;align-items:center;gap:9px;font-size:13px;margin-bottom:13px"><span style="width:30px;height:16px;border-radius:99px;background:linear-gradient(90deg,var(--rpur),var(--rcy));position:relative"><b style="position:absolute;top:2px;left:16px;width:12px;height:12px;border-radius:50%;background:#fff"></b></span>M'entendre dans le casque</label>
+       ${mon}
+       <div style="display:flex;gap:12px;align-items:flex-end;height:84px;justify-content:center;margin-top:6px"><div style="width:16px;height:100%;border-radius:5px;background:#141230;position:relative;overflow:hidden"><i style="position:absolute;left:0;right:0;bottom:0;height:74%;background:linear-gradient(0deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><div style="width:16px;height:100%;border-radius:5px;background:#141230;position:relative;overflow:hidden"><i style="position:absolute;left:0;right:0;bottom:0;height:68%;background:linear-gradient(0deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><div style="font-size:11px;color:var(--rmut);align-self:center">Micro<br><b style="color:#fff">−6.2 dB</b></div></div>
+       <div class="muted" style="font-size:10px;margin-top:10px;line-height:1.4">Casque filaire conseillé. L'autotune complet se calcule après (≈20 ms en direct).</div>
+      </div></div></div>`;
     return root;
   }
 
   function viewFx() {
-    const root = h('div');
-    root.append(apercuBanner('Les modules Auto-Tune, EQ, Compresseur, De-Esser, Saturation, Harmonies, Réverbe et Delay existent déjà et sont câblés au moteur dans Studio Pro. Ici viendront les « grosses molettes » éditables à la phase 3.', '#/studio', '🎛️ Ouvrir Studio Pro (réel)'));
+    const scaleKbd = () => {
+      const chips = ['Chromatique', 'Majeure', 'Mineure', 'Dorien', 'Blues'].map((s, i) => `<span class="chip ${i === 2 ? 'on' : ''}">${s}</span>`).join('');
+      const keys = ['Do', 'Ré', 'Mi', 'Fa', 'Sol', 'La', 'Si'].map((n, i) => `<div style="flex:1;border-radius:0 0 5px 5px;border:1px solid #05060c;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;font-size:9px;background:${[2, 5, 6].includes(i) ? 'linear-gradient(180deg,#14324e,#10243c);color:#bfe9ff;box-shadow:inset 0 0 10px rgba(34,211,238,.4)' : 'linear-gradient(180deg,#1b1b32,#101020);color:#6b6f90'}">${n}</div>`).join('');
+      return `<div style="margin-top:12px;border-top:1px solid rgba(255,255,255,.06);padding-top:11px"><div class="muted" style="font-size:11px;margin-bottom:8px">🎹 Gamme · <b style="color:#bff5db">Do# mineure</b> — notes exactes</div><div style="display:flex;gap:6px;flex-wrap:wrap">${chips}</div><div style="display:flex;gap:3px;margin-top:9px;height:60px">${keys}</div></div>`;
+    };
     const mods = [
-      ['🎤 Auto-Tune Pro', '#a855f7', [['Retune', '—', '#22d3ee', 55, 1], ['Humanize', '—', '#22d3ee', 38], ['Flex', '—', '#22d3ee', 22], ['Formant', '—', '#22d3ee', 50]]],
-      ['🎚️ Égaliseur', '#3b82f6', [['Low', '—', '#22d3ee', 45], ['Mid', '—', '#ec4899', 60], ['High', '—', '#a855f7', 66], ['Air', '—', '#22d3ee', 70]]],
-      ['🗜️ Compression', '#f0b429', [['Thresh', '—', '#f0b429', 40], ['Ratio', '—', '#f0b429', 55], ['Attack', '—', '#f0b429', 30], ['Makeup', '—', '#f0b429', 58]]],
-      ['🌫️ Réverbe', '#a855f7', [['Taille', '—', '#a855f7', 72], ['Decay', '—', '#a855f7', 55], ['Mix', '—', '#a855f7', 28]]],
-      ['🔁 Delay / Écho', '#22d3ee', [['Time', '—', '#22d3ee', 40], ['Feedback', '—', '#22d3ee', 35], ['Mix', '—', '#22d3ee', 22]]],
-      ['🎼 Harmonies', '#ec4899', [['Tierce', '—', '#ec4899', 60], ['Quinte', '—', '#ec4899', 55], ['Octave', '—', '#ec4899', 45], ['Niveau', '—', '#ec4899', 50]]],
+      { t: '🎤 Auto-Tune Pro', c: '#a855f7', scale: 1, k: [['Retune', '10', '#22d3ee', 55, 1], ['Humanize', '35%', '#22d3ee', 38], ['Flex', '20%', '#22d3ee', 22], ['Formant', '0', '#22d3ee', 50], ['Vibrato', 'nat.', '#22d3ee', 40]] },
+      { t: '🎚️ Égaliseur', c: '#3b82f6', eq: 1, k: [['Low', '−2 dB', '#22d3ee', 45], ['Mid', '+2.5 dB', '#ec4899', 60], ['High', '+3 dB', '#a855f7', 66], ['Air', '+4 dB', '#22d3ee', 70]] },
+      { t: '🗜️ Compression', c: '#f0b429', gr: 1, k: [['Thresh', '−18', '#f0b429', 40], ['Ratio', '4:1', '#f0b429', 55], ['Attack', '10 ms', '#f0b429', 30], ['Makeup', '+3 dB', '#f0b429', 58]] },
+      { t: '🌫️ Réverbe', c: '#a855f7', k: [['Taille', '72%', '#a855f7', 72], ['Decay', '3.2 s', '#a855f7', 55], ['Mix', '28%', '#a855f7', 28]] },
+      { t: '🔁 Delay / Écho', c: '#22d3ee', k: [['Time', '1/8', '#22d3ee', 40], ['Feedback', '35%', '#22d3ee', 35], ['Mix', '22%', '#22d3ee', 22]] },
+      { t: '🎼 Harmonies', c: '#ec4899', k: [['Tierce', 'on', '#ec4899', 60], ['Quinte', 'on', '#ec4899', 55], ['Octave', 'on', '#ec4899', 45], ['Niveau', '50%', '#ec4899', 50]] },
+      { t: '🔥 Saturation', c: '#ff6b3d', k: [['Drive', '22%', '#ff6b3d', 22], ['Ton', 'warm', '#ff6b3d', 45], ['Mix', '40%', '#ff6b3d', 40]] },
+      { t: '🧼 De-Esser', c: '#22c55e', k: [['Fréq', '6.8k', '#22c55e', 55], ['Dose', '−4 dB', '#22c55e', 40]] },
     ];
-    const g = h('div.grid', { style: { gridTemplateColumns: '1fr 1fr' } });
-    for (const [t, c, ks] of mods) g.append(h('div.panel', h('div.ph', t, h('span.apercu', { style: { marginLeft: 'auto' } }, 'aperçu')), h('div.pb', { html: `<div class="grid" style="grid-template-columns:repeat(${ks.length},1fr)">${ks.map(k => knobHtml(k[0], k[1], k[2], k[3], k[4])).join('')}</div>` })));
-    root.append(g);
-    return root;
+    let html = '<div class="grid" style="grid-template-columns:1fr 1fr">';
+    for (const m of mods) {
+      html += `<div class="panel"><div class="ph"><span style="width:11px;height:11px;border-radius:50%;background:${m.c};box-shadow:0 0 8px ${m.c};flex:none"></span>${m.t}<span class="r" style="margin-left:auto;color:#8a8fb5">aperçu</span></div><div class="pb">`;
+      if (m.eq) html += `<div style="height:108px;border-radius:10px;overflow:hidden;border:1px solid var(--rline);margin-bottom:12px;background:#0b0b1a">${eqCurveSvg()}</div>`;
+      html += `<div class="grid" style="grid-template-columns:repeat(${m.k.length},1fr)">${m.k.map(k => knobHtml(k[0], k[1], k[2], k[3], k[4])).join('')}</div>`;
+      if (m.gr) html += `<div style="display:flex;gap:9px;align-items:center;margin-top:12px;font-size:11px;color:var(--rmut)"><span>GR</span><div style="flex:1;height:8px;border-radius:4px;background:#1c1710;overflow:hidden"><i style="display:block;height:100%;width:36%;float:right;background:linear-gradient(90deg,#ff6b3d,#f0b429)"></i></div><b style="color:#f0b429">−4.2 dB</b></div>`;
+      if (m.scale) html += scaleKbd();
+      html += '</div></div>';
+    }
+    html += '</div>';
+    const root = h('div'); root.innerHTML = html; return root;
   }
 
   function viewRepo() {
-    const root = h('div');
-    const CATS = { 'Références': ['Jul · mélodique', 'Naza · puissant', 'LJK · hard tune'], 'Autotune': ['Rap FR Pro', 'Drill sombre', 'Trap 808', 'Hard snap', 'Soft melodic'], 'Vraies voix': ['Chant velours', 'Voix grave', 'Voix aiguë', 'Voix féminine'], 'Ambiances': ['Club', 'Nuit', 'Live', 'Radio', 'Téléphone'] };
+    const CATS = { 'Références': ['Jul · mélodique', 'Naza · puissant', 'LJK · hard tune'], 'Autotune (60)': ['Rap FR Pro', 'Drill sombre', 'Trap 808', 'Hard snap', 'Soft melodic'], 'Vraies voix (36)': ['Chant velours', 'Voix grave', 'Voix aiguë', 'Voix féminine'], 'Ambiances (30)': ['Club', 'Nuit', 'Live', 'Radio', 'Téléphone'], 'Effets (60+)': ['Vocoder', 'Robot', 'Lo-Fi', 'Tube', 'Mega'] };
+    const FX_CHAIN = [['🎤 Auto-Tune', '#a855f7', 1], ['🎚️ EQ', '#3b82f6', 1], ['🗜️ Compression', '#f0b429', 1], ['🧼 De-Esser', '#22c55e', 1], ['🔥 Saturation', '#ff6b3d', 0], ['🎼 Harmonies', '#ec4899', 1], ['🌫️ Réverbe', '#a855f7', 1], ['🔁 Delay', '#22d3ee', 1]];
     let lib = '';
-    for (const cat in CATS) lib += `<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;color:#c9b6ff;margin-bottom:8px">${cat.toUpperCase()}</div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${CATS[cat].map(p => `<div class="vcard" style="padding:10px;display:flex;gap:9px;align-items:center"><div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--rpur),var(--rcy));flex:none"></div><div style="min-width:0"><b style="font-size:13px">${p}</b><div class="muted" style="font-size:10px">${cat}</div></div></div>`).join('')}</div></div>`;
-    root.append(apercuBanner('Les 235 presets vocaux existent déjà dans le moteur (banque d’unités). Le répertoire latéral deviendra cliquable à la phase 4.', null, null));
-    root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 300px' } },
-      h('div.panel', h('div.ph', '📚 Bibliothèque de presets', h('span.r', 'aperçu')), h('div.pb', { html: lib })),
-      h('div', { style: { display: 'grid', gap: '12px', alignContent: 'start' } },
-        h('div.panel', h('div.ph', '🗂️ Mes projets'), h('div.pb', (state.projects || []).map(p => h('div.ditem' + (p.id === projectId ? '.on' : ''), { style: { marginBottom: '4px' }, onclick: () => { state.projectId = p.id; location.hash = '#/regie'; } }, `${p.icon || '🗂️'} ${p.name}`)))))));
+    for (const cat in CATS) lib += `<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;color:#c9b6ff;margin-bottom:8px;letter-spacing:.04em">${cat.toUpperCase()}</div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${CATS[cat].map((p, i) => `<div class="vcard" style="padding:10px;display:flex;gap:9px;align-items:center${cat.includes('Réf') && i === 0 ? ';border-color:var(--rpur);box-shadow:0 0 14px rgba(168,85,247,.3)' : ''}"><div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--rpur),var(--rcy));flex:none"></div><div style="min-width:0"><b style="font-size:13px">${p}</b><div class="muted" style="font-size:10px">${cat.split(' ')[0]}</div></div></div>`).join('')}</div></div>`;
+    const chips = ['Tous', 'Références', 'Autotune', 'Vraies voix', 'Ambiances', 'Transposer', 'Timbre', 'Vocodeur', 'Styles', 'Effets'].map((c, i) => `<span class="chip ${i === 0 ? 'on' : ''}">${c}</span>`).join('');
+    const fxchain = FX_CHAIN.map(f => `<div style="display:flex;gap:10px;align-items:center;padding:8px 9px;border-radius:9px;margin-bottom:5px;font-size:13px;font-weight:600;${f[2] ? 'background:linear-gradient(90deg,rgba(168,85,247,.16),transparent)' : ''}"><span style="width:11px;height:11px;border-radius:50%;background:${f[2] ? f[1] : 'transparent'};box-shadow:0 0 7px ${f[2] ? f[1] : 'transparent'};border:1.5px solid ${f[1]};flex:none"></span>${f[0]}<span style="margin-left:auto;color:#3b3a60;letter-spacing:-2px">⠿</span></div>`).join('');
+    const root = h('div');
+    root.innerHTML = `<div class="grid" style="grid-template-columns:1fr 300px">
+       <div class="panel"><div class="ph">📚 Bibliothèque de presets <span class="r">235 presets</span></div><div class="pb" style="max-height:calc(100vh - 230px);overflow:auto"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">${chips}</div>${lib}</div></div>
+       <div style="display:grid;gap:12px;align-content:start">
+         <div class="panel"><div class="ph">🎛️ Chaîne d'effets</div><div class="pb">${fxchain}</div></div>
+         <div class="panel" data-projects><div class="ph">🗂️ Mes projets</div><div class="pb"></div></div>
+       </div></div>`;
+    // vrais projets cliquables
+    const pbox = root.querySelector('[data-projects] .pb');
+    for (const p of state.projects || []) pbox.append(h('div.ditem' + (p.id === projectId ? '.on' : ''), { style: { marginBottom: '4px' }, onclick: () => { state.projectId = p.id; localStorage.setItem('studio.project', p.id); location.hash = '#/regie'; } }, `${p.icon || '🗂️'} ${p.name}`));
     return root;
   }
 
   function viewIA() {
     const root = h('div');
-    root.append(apercuBanner('L’ingé son IA analysera la voix et l’instru (tonalité, justesse, mesures numériques — jamais l’audio envoyé à un LLM) et proposera 3 versions. En attendant, la page « Parler aux IA » et l’assistant de l’enregistrement sont disponibles.', '#/parler', '💬 Parler aux IA'));
-    root.append(h('div.grid', { style: { gridTemplateColumns: '1.3fr 1fr' } },
-      h('div.panel', h('div.ph', '🧠 Ingé son IA — Marco', h('span.apercu', { style: { marginLeft: 'auto' } }, 'conversation réelle en phase 5')),
-        h('div.pb', { html: `<div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Salut ! Dès la phase 5, j’écouterai ta prise, je détecterai la tonalité et le tempo, puis je te préparerai 3 versions (naturelle / pro / créative).</div></div>` })),
-      h('div.panel', h('div.ph', '✨ 3 propositions', h('span.apercu', { style: { marginLeft: 'auto' } }, 'aperçu')),
-        h('div.pb', { html: `<div class="grid" style="grid-template-columns:repeat(3,1fr)"><div class="vcard"><h4>🫧 Naturelle</h4><p>Correction douce, voix transparente.</p></div><div class="vcard" style="border-color:var(--rpur)"><h4>🎧 Pro</h4><p>EQ + comp + de-ess calés, prêt mix.</p></div><div class="vcard"><h4>🚀 Créative</h4><p>Autotune marqué + delay + air.</p></div></div>` }))));
+    root.innerHTML = `<div class="grid" style="grid-template-columns:1.3fr 1fr">
+      <div class="panel" style="display:flex;flex-direction:column"><div class="ph">🧠 Ingé son IA — Marco <span class="r" style="color:#8a8fb5">aperçu · branchement en phase 5</span></div>
+       <div class="pb" style="flex:1;overflow:auto">
+        <div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Salut ! J'ai écouté ta prise. <b>Tonalité : Do# mineure</b>, tempo 90 BPM. Ta voix est juste (98 %), un peu de sifflantes à maîtriser. Je te prépare 3 versions.</div></div>
+        <div class="msg me">Mets-moi un truc propre pour du rap mélodique.</div>
+        <div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Parfait. J'ai calé l'Auto-Tune sur Do# mineure, posé un de-esser léger et +2 dB de présence. Écoute les 3 rendus ci-contre 👉</div></div>
+       </div>
+       <div class="pb" style="border-top:1px solid var(--rline);display:flex;gap:9px"><input style="flex:1;padding:8px 10px;border-radius:9px;background:#0c0c1a;border:1px solid var(--rline);color:var(--rtxt)" placeholder="Écris à Marco… « nettoie et cale sur le beat »…"><a href="#/parler" class="rbtn p" style="text-decoration:none">Parler aux IA</a></div>
+      </div>
+      <div style="display:grid;gap:12px;align-content:start">
+       <div class="panel"><div class="ph">🎯 Analyse automatique <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb" style="font-size:12.5px">
+         ${[['Tonalité détectée', 'Do# mineure'], ['Tempo', '90 BPM'], ['Justesse', '98 %'], ['Sibilantes', 'à réduire'], ['Bruit de fond', '−58 dBFS (propre)']].map(x => `<div style="display:flex;margin-bottom:8px"><span class="muted">${x[0]}</span><b style="margin-left:auto;color:#bff5db">${x[1]}</b></div>`).join('')}
+       </div></div>
+       <div class="panel"><div class="ph">✨ 3 propositions</div><div class="pb"><div class="grid" style="grid-template-columns:repeat(3,1fr)">
+         <div class="vcard"><h4>🫧 Naturelle</h4><p>Correction douce, voix transparente.</p><span class="rbtn" style="width:100%;text-align:center">▶ Écouter</span></div>
+         <div class="vcard" style="border-color:var(--rpur);box-shadow:0 0 14px rgba(168,85,247,.3)"><h4>🎧 Pro</h4><p>EQ + comp + de-ess calés, prêt mix.</p><span class="rbtn p" style="width:100%;text-align:center">▶ Écouter</span></div>
+         <div class="vcard"><h4>🚀 Créative</h4><p>Autotune marqué + delay + air.</p><span class="rbtn" style="width:100%;text-align:center">▶ Écouter</span></div>
+       </div><div style="text-align:center;margin-top:12px"><span class="rbtn g" style="padding:10px 18px">✓ Appliquer la version choisie</span></div></div></div>
+      </div></div>`;
     return root;
   }
 
