@@ -528,3 +528,54 @@ export function bufferPlayer(onTime) {
     seek(t) { const was = playing; offset = t; if (was) this.play(t); else onTime?.(t); },
   };
 }
+
+
+/** Analyse mesurée du signal source : niveaux, dynamique, silence et écrêtage numérique.
+ * Les fenêtres sont calculées sur le buffer réel, sans sous-échantillonnage.
+ * Cela ne remplace pas une écoute subjective ni une analyse spectrale/perceptive.
+ */
+export function analyzeBuffer(buffer, windowSeconds = 1) {
+  if (!buffer || !buffer.numberOfChannels || !buffer.length || !buffer.sampleRate) throw new Error('Buffer audio invalide.');
+  const channels = [];
+  let totalSquares = 0, totalSamples = 0, samplePeak = 0, clippedSamples = 0;
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const data = buffer.getChannelData(c);
+    let sum = 0, peakValue = 0, clipped = 0;
+    for (let i = 0; i < data.length; i++) {
+      const v = data[i], a = Math.abs(v);
+      sum += v * v;
+      if (a > peakValue) peakValue = a;
+      if (a >= 0.999) clipped++;
+    }
+    const rms = Math.sqrt(sum / Math.max(1, data.length));
+    channels.push({ peakDbfs: +(20 * Math.log10(Math.max(peakValue, 1e-9))).toFixed(2), rmsDbfs: +(20 * Math.log10(Math.max(rms, 1e-9))).toFixed(2), samplesNearFullScale: clipped });
+    totalSquares += sum; totalSamples += data.length;
+    samplePeak = Math.max(samplePeak, peakValue); clippedSamples += clipped;
+  }
+  const rms = Math.sqrt(totalSquares / Math.max(1, totalSamples));
+  const winSize = Math.max(1, Math.floor(buffer.sampleRate * Math.max(0.25, Math.min(5, windowSeconds))));
+  const windows = [];
+  const mono = new Float32Array(buffer.length);
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const d = buffer.getChannelData(c);
+    for (let i = 0; i < d.length; i++) mono[i] += d[i] / buffer.numberOfChannels;
+  }
+  let silentSamples = 0;
+  for (let start = 0; start < mono.length; start += winSize) {
+    const end = Math.min(mono.length, start + winSize);
+    let sum = 0, p = 0;
+    for (let i = start; i < end; i++) { const v = mono[i], a = Math.abs(v); sum += v * v; if (a > p) p = a; }
+    const wrms = Math.sqrt(sum / Math.max(1, end - start));
+    const silent = wrms < 0.001;
+    if (silent) silentSamples += end - start;
+    windows.push({ startSeconds: +(start / buffer.sampleRate).toFixed(2), endSeconds: +(end / buffer.sampleRate).toFixed(2), peakDbfs: +(20 * Math.log10(Math.max(p, 1e-9))).toFixed(2), rmsDbfs: +(20 * Math.log10(Math.max(wrms, 1e-9))).toFixed(2), nearSilence: silent });
+  }
+  const peakDbfs = 20 * Math.log10(Math.max(samplePeak, 1e-9));
+  const rmsDbfs = 20 * Math.log10(Math.max(rms, 1e-9));
+  return {
+    durationSeconds: +buffer.duration.toFixed(3), sampleRate: buffer.sampleRate, channels: buffer.numberOfChannels,
+    peakDbfs: +peakDbfs.toFixed(2), rmsDbfs: +rmsDbfs.toFixed(2), crestDb: +(peakDbfs - rmsDbfs).toFixed(2),
+    samplesNearFullScale: clippedSamples, nearSilenceRatio: +(silentSamples / Math.max(1, mono.length)).toFixed(4),
+    channelLevels: channels, windows
+  };
+}
