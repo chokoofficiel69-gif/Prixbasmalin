@@ -573,24 +573,28 @@ export async function render(el, { params }) {
   }
 
   function viewFx() {
-    const root = h('div');
-    const grid = h('div.grid', { style: { gridTemplateColumns: '1fr 1fr' } });
+    const root=h('div');
+    const grid=h('div.grid',{style:{gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))'}});
     grid.append(autotunePanel());
-    const mods = [
-      { t: '🎚️ Égaliseur', c: '#3b82f6', eq: 1, k: [['Low', '−2 dB', '#22d3ee', 45], ['Mid', '+2.5 dB', '#ec4899', 60], ['High', '+3 dB', '#a855f7', 66], ['Air', '+4 dB', '#22d3ee', 70]] },
-      { t: '🗜️ Compression', c: '#f0b429', gr: 1, k: [['Thresh', '−18', '#f0b429', 40], ['Ratio', '4:1', '#f0b429', 55], ['Attack', '10 ms', '#f0b429', 30], ['Makeup', '+3 dB', '#f0b429', 58]] },
-      { t: '🌫️ Réverbe', c: '#a855f7', k: [['Taille', '72%', '#a855f7', 72], ['Decay', '3.2 s', '#a855f7', 55], ['Mix', '28%', '#a855f7', 28]] },
-      { t: '🔁 Delay / Écho', c: '#22d3ee', k: [['Time', '1/8', '#22d3ee', 40], ['Feedback', '35%', '#22d3ee', 35], ['Mix', '22%', '#22d3ee', 22]] },
-      { t: '🎼 Harmonies', c: '#ec4899', k: [['Tierce', 'on', '#ec4899', 60], ['Quinte', 'on', '#ec4899', 55], ['Octave', 'on', '#ec4899', 45], ['Niveau', '50%', '#ec4899', 50]] },
+    const modules=[
+      {name:'Égaliseur voix',desc:'Filtre passe-haut, correction des bas-médiums, présence et air.',kind:'voice',params:{highpass:85,low:-1,presence:2,air:2,deess:1,comp:0,reverb:0}},
+      {name:'Compression',desc:'Contrôle de dynamique avec compresseur et gain de compensation.',kind:'voice',params:{highpass:40,low:0,presence:0,air:0,deess:0,comp:.72,reverb:0}},
+      {name:'De-Esser',desc:'Atténuation des sifflantes dans la zone aiguë.',kind:'voice',params:{highpass:40,low:0,presence:0,air:0,deess:6,comp:0,reverb:0}},
+      {name:'Réverbération',desc:'Espace court et naturel.',kind:'fx',chain:[{t:'fx',kind:'reverb',size:1.8,decay:3,mix:.2}]},
+      {name:'Delay / Écho',desc:'Écho stéréo court synchronisable par réglage.',kind:'fx',chain:[{t:'fx',kind:'delay',time:.28,fb:.28,mix:.22}]},
+      {name:'Saturation',desc:'Harmoniques et densité modérées.',kind:'fx',chain:[{t:'fx',kind:'distort',amt:1.5,tone:6500}]},
+      {name:'Harmonies',desc:'Deux voix harmoniques autour de la mélodie.',kind:'fx',chain:[{t:'harmony',steps:[2,4],gain:.32}]},
+      {name:'Doublage stéréo',desc:'Double vocal léger avec élargissement.',kind:'fx',chain:[{t:'double',steps:[0,0],gain:.35}]}
     ];
-    for (const m of mods) {
-      let html = '';
-      if (m.eq) html += `<div style="height:108px;border-radius:10px;overflow:hidden;border:1px solid var(--rline);margin-bottom:12px;background:#0b0b1a">${eqCurveSvg()}</div>`;
-      html += `<div class="grid" style="grid-template-columns:repeat(${m.k.length},1fr)">${m.k.map(k => knobHtml(k[0], k[1], k[2], k[3], k[4])).join('')}</div>`;
-      if (m.gr) html += `<div style="display:flex;gap:9px;align-items:center;margin-top:12px;font-size:11px;color:var(--rmut)"><span>GR</span><div style="flex:1;height:8px;border-radius:4px;background:#1c1710;overflow:hidden"><i style="display:block;height:100%;width:36%;float:right;background:linear-gradient(90deg,#ff6b3d,#f0b429)"></i></div><b style="color:#f0b429">−4.2 dB</b></div>`;
-      grid.append(h('div.panel', h('div.ph', { html: `<span style="width:11px;height:11px;border-radius:50%;background:${m.c};box-shadow:0 0 8px ${m.c};flex:none"></span>${m.t}<span class="r" style="margin-left:auto;color:#8a8fb5">aperçu</span>` }), h('div.pb', { html })));
+    for(const m of modules){
+      grid.append(h('div.panel',
+        h('div.ph',m.name),
+        h('div.pb',
+          h('div.muted',{style:{minHeight:'38px',marginBottom:'10px'}},m.desc),
+          h('button.rbtn.p',{onclick:()=>applyLibraryPreset(m)},'Appliquer à la piste sélectionnée'))));
     }
-    root.append(grid);
+    const status=h('div.muted',{style:{marginTop:'12px'}},'Chaque bouton lance un traitement local et sauvegarde le résultat sur la piste sélectionnée. Utilise Original pour revenir à la prise brute.');
+    root.append(grid,status);
     return root;
   }
 
