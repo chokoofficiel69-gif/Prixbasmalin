@@ -732,8 +732,8 @@ export async function render(el, { params }) {
     // visage Marco
     let face = null; try { face = expertFace(); } catch {}
     // lecture live
-    const playBtn = h('button.rbtn.p', { style: { whiteSpace: 'nowrap', fontWeight: '800' } }, '▶ Écouter en direct');
-    const refreshPlay = () => { playBtn.textContent = live ? '⏹ Arrêter' : '▶ Écouter en direct'; };
+    const playBtn = h('button.rbtn.p', { style: { whiteSpace: 'nowrap', fontWeight: '800' } }, '▶ Jouer');
+    const refreshPlay = () => { playBtn.textContent = live ? '⏹ Stop' : '▶ Jouer'; };
     playBtn.onclick = () => { if (live) stopLive(); else startLive(curIdx()); refreshPlay(); };
     sel.onchange = () => { if (live) { startLive(curIdx()); refreshPlay(); } };
 
@@ -835,8 +835,8 @@ export async function render(el, { params }) {
     const vt = voixTracks();
     const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const curIdx = () => +sel.value;
-    const playBtn = h('button.rbtn.p', { style: { fontWeight: '800', whiteSpace: 'nowrap' } }, '▶ Écouter en direct');
-    const refreshPlay = () => { playBtn.textContent = live ? '⏹ Arrêter' : '▶ Écouter en direct'; };
+    const playBtn = h('button.rbtn.p', { style: { fontWeight: '800', whiteSpace: 'nowrap' } }, '▶ Jouer');
+    const refreshPlay = () => { playBtn.textContent = live ? '⏹ Stop' : '▶ Jouer'; };
     playBtn.onclick = () => { if (live) { stopLive(); } else { startLive(curIdx()); } refreshPlay(); };
     sel.onchange = () => { if (live) { startLive(curIdx()); refreshPlay(); } };
     const K = (label, key, min, max, step, def, fmt) => knob({ label, min, max, step, value: LF[key], def, fmt, onInput: (v) => liveSet(key, v) }).el;
@@ -896,8 +896,8 @@ export async function render(el, { params }) {
     const vt = voixTracks();
     const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const curIdx = () => +sel.value;
-    const playBtn = h('button.rbtn.p', { style: { whiteSpace: 'nowrap', fontWeight: '800' } }, '▶ Écouter en direct');
-    const refreshPlay = () => { playBtn.textContent = live ? '⏹ Arrêter' : '▶ Écouter en direct'; };
+    const playBtn = h('button.rbtn.p', { style: { whiteSpace: 'nowrap', fontWeight: '800' } }, '▶ Jouer');
+    const refreshPlay = () => { playBtn.textContent = live ? '⏹ Stop' : '▶ Jouer'; };
     playBtn.onclick = () => { if (live) stopLive(); else startLive(curIdx()); refreshPlay(); };
     sel.onchange = () => { if (live) { startLive(curIdx()); refreshPlay(); } };
     const liveKnob = (label, key, min, max, step, def, fmt) => knob({ label, min, max, step, value: LF[key], def, fmt, onInput: (v) => liveSet(key, v) }).el;
@@ -1094,7 +1094,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE8'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE9'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
