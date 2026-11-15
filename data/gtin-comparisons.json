@@ -1,11 +1,11 @@
 {
  "schema_version": 1,
  "status": "ok",
- "generated_at": "2026-11-14T00:35:51.171066Z",
+ "generated_at": "2026-11-15T16:21:00.768538Z",
  "freshness_max_age_hours": 48,
  "method": "GTIN valide commun à au moins deux marchands ; marque, contenance et nom contrôlés pour refuser les faux rapprochements.",
  "counts": {
-  "gtins_with_two_merchants": 53,
+  "gtins_with_two_merchants": 52,
   "comparisons": 36,
   "comparisons_with_two_current_offers": 0,
   "offers": 72,
@@ -13,7 +13,7 @@
   "offers_tax_confirmed": 0,
   "rejected": {
    "name_mismatch": 7,
-   "brand_mismatch": 10
+   "brand_mismatch": 9
   },
   "merchant_pairs": {
    "Nicchia Luxury / Perfumeria Comas FR": 36
