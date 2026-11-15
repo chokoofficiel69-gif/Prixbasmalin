@@ -394,5 +394,17 @@ class HomeDealsRotationTests(unittest.TestCase):
 
 
 
+    def test_rotation_workflow_checks_every_two_hours_without_awin_api_calls(self):
+        workflow = (ROOT / ".github" / "workflows" / "rotate-home-deals.yml").read_text(encoding="utf-8")
+        self.assertIn('cron: "27 */2 * * *"', workflow)
+        self.assertIn("prix-malin-price-data-refresh", workflow)
+        self.assertIn("python3 scripts/build_home_deals.py", workflow)
+        self.assertIn("python3 scripts/check_awin_gift_images.py --previous", workflow)
+        self.assertIn("git push origin HEAD:main", workflow)
+        self.assertNotIn("sync-awin-products.mjs", workflow)
+        self.assertNotIn("AWIN_API_TOKEN", workflow)
+
+
+
 if __name__ == "__main__":
     unittest.main()
