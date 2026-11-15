@@ -159,12 +159,12 @@ export async function render(el) {
   // ---- assemblage cockpit ----
   const cockpit = h('div.cockpit',
     // colonne gauche
-    h('div.ccol',
+    h('div.ccol studio-left',
       panel('Presets vocaux', h('div.cpresets', ...vibeTiles)),
-      panel('Ingé son IA', face.el, (faceStatus = h('div.tiny', { style: { marginTop: '6px', color: '#ffd9a8' } }, 'Prêt')), h('div.tiny.muted', { style: { marginTop: '4px' } }, 'Importe une voix, règle, écoute, masterise.')),
     ),
-    // colonne centre
-    h('div.ccol',
+    // colonne centrale : avatar expert en grand, puis chaîne de traitement
+    h('div.ccol studio-center',
+      panel('IA EXPERT VOCAL · INGÉNIEUR EN LIGNE', face.el, (faceStatus = h('div.tiny', { style: { marginTop: '8px', color: '#b8caff' } }, 'Prêt à analyser ta voix')), h('div.tiny.muted', { style: { marginTop: '5px' } }, 'Analyse la prise, explique les corrections et prépare une chaîne vocale.')),
       panel('Auto-Tune Pro', h('div.cauto',
         h('div.cdial', bigDial),
         h('div.cknobs3',
