@@ -3,9 +3,9 @@
 // affiche de VRAIES formes d'onde (drawWave) et joue un vrai mix local. 100 % local, 0 €.
 // Les autres onglets sont des APERÇUS visuels de la maquette validée, clairement signalés,
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
-import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder } from '../lib/core.js';
+import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder, sse } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
-import { decodeBlob, drawWave } from '../lib/audio.js';
+import { decodeBlob, drawWave, voiceChain, denoise, detectBeats, normalize, gate, antipop, limit, master, mix, encodeWav } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
@@ -85,6 +85,10 @@ const CSS = `
 .regie .clip .cnm{position:absolute;left:6px;top:4px;font-size:9px;color:rgba(255,255,255,.7);pointer-events:none}
 .regie .playhead{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 8px #fff,0 0 18px var(--rcy);z-index:4;pointer-events:none}
 .regie .emptytl{border:1px dashed var(--rline);border-radius:12px;padding:30px;text-align:center;color:var(--rmut)}
+.regie .rctx{position:fixed;z-index:99999;min-width:220px;padding:6px;background:#111126;border:1px solid #51458b;border-radius:10px;box-shadow:0 16px 42px rgba(0,0,0,.55);display:none;color:#eceefc}
+.regie .rctx.open{display:block}.regie .rctx button{display:flex;width:100%;align-items:center;gap:10px;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:inherit;text-align:left;font:12px inherit;cursor:pointer}
+.regie .rctx button:hover{background:rgba(168,85,247,.2)}.regie .rctx button:disabled{opacity:.35;cursor:not-allowed}
+.regie .rctx .sep{height:1px;background:#302b52;margin:4px 3px}
 /* transport */
 .regie .transport{grid-column:1/3;display:flex;align-items:center;gap:12px;padding:0 16px;background:linear-gradient(180deg,#0d0d1e,#090914);border-top:1px solid var(--rline)}
 .regie .rb{width:38px;height:38px;border-radius:50%;background:var(--rpan2);border:1px solid var(--rline);display:grid;place-items:center;font-size:14px;cursor:pointer;color:#d2d5f0}
@@ -278,7 +282,7 @@ export async function render(el, { params }) {
       const panLab = h('span', panTxt(t.pan ?? 0));
       pan.oninput = () => { t.pan = +pan.value; panLab.textContent = panTxt(t.pan); };
       pan.onchange = save;
-      const head = h('div.thead', { style: { '--tc': color } },
+      const head = h('div.thead', { style: { '--tc': color, cursor: 'context-menu' }, oncontextmenu: (e) => showContextMenu(e, 'track', i) },
         h('div.nm', h('span', { style: { color } }, t.kind === 'instru' ? '🥁' : '🎤'), t.name || `Piste ${i + 1}`),
         h('div.ctrls', mB, sB, aB),
         vol, h('div.lab', 'Vol', volLab),
@@ -289,10 +293,13 @@ export async function render(el, { params }) {
         const clipW = Math.max(8, t.buffer.duration * pxPerSec);
         const canvas = h('canvas');
         const clip = h('div.clip', { style: { left: ((t.offset || 0) * pxPerSec) + 'px', width: clipW + 'px' } }, canvas, h('div.cnm', t.name || ''));
+        clip.style.cursor = 'context-menu';
+        clip.addEventListener('contextmenu', (e) => showContextMenu(e, 'clip', i));
         lane.append(clip);
         // dessin après insertion (clientWidth disponible)
         setTimeout(() => { canvas.style.width = clipW + 'px'; canvas.style.height = '100%'; drawClip(canvas, t, i); }, 0);
       }
+      lane.addEventListener('contextmenu', (e) => { if (e.target === lane) showContextMenu(e, 'empty', -1); });
       // clic sur la lane = placer la tête de lecture
       lane.onclick = (e) => {
         const rect = lane.getBoundingClientRect();
@@ -426,33 +433,54 @@ export async function render(el, { params }) {
 
   function viewRegie() {
     const root = h('div');
-    const check = (x) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:7px;font-size:13px"><span style="width:18px;height:18px;border-radius:50%;background:#34e39a;display:grid;place-items:center;color:#042;font-weight:900;font-size:11px">✓</span><span style="flex:1">${x.split('|')[0]}</span><b>${x.split('|')[1]}</b></div>`;
-    const proc = (x) => `<div style="display:flex;gap:9px;align-items:center;margin-bottom:9px;font-size:12px"><span style="width:16px;height:16px;border-radius:50%;background:#34e39a;display:grid;place-items:center;color:#042;font-weight:900;font-size:10px">✓</span>${x}<span style="flex:1;height:6px;border-radius:4px;background:#1b1440;overflow:hidden"><i style="display:block;height:100%;background:linear-gradient(90deg,#a855f7,#34e39a)"></i></span><small class="muted">100%</small></div>`;
-    root.innerHTML = `
-     <div class="grid" style="grid-template-columns:1.05fr 1.05fr 1.5fr 150px">
-      <div class="panel"><div class="ph">📊 Analyse vocale IA <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb" style="display:flex;gap:12px;align-items:center">
-       <svg viewBox="0 0 88 88" style="width:82px;height:82px;flex:none"><circle cx="44" cy="44" r="36" fill="none" stroke="#1b1440" stroke-width="8"/><circle cx="44" cy="44" r="36" fill="none" stroke="#34e39a" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="16" transform="rotate(-90 44 44)" style="filter:drop-shadow(0 0 6px #34e39a)"/><text x="44" y="49" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">96%</text></svg>
-       <div style="flex:1">${['Justesse|98%', 'Clarté|97%', 'Dynamique|95%', 'Sibilances|92%'].map(check).join('')}</div></div></div>
-      <div class="panel"><div class="ph">⚙️ Traitement IA <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb">${['Auto-Tune', 'EQ intelligent', 'Compression', 'Réverbération', 'Mastering IA'].map(proc).join('')}</div></div>
-      <div class="panel"><div class="ph">🌈 Spectre temps réel · réduction de bruit <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb"><div style="height:150px;border-radius:11px;overflow:hidden;background:#07041a;border:1px solid var(--rline);position:relative">${spec3d()}<div style="position:absolute;right:12px;top:10px;text-align:right"><b style="font-size:17px">−24 dB</b><div class="muted" style="font-size:10px">Réduction bruit</div></div></div></div></div>
-      <div class="panel"><div class="ph">🎚️ Niveaux</div><div class="pb">
-       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:44px">Entrée</span>${levelBar()}<b>−6.2</b></div>
-       <div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:44px">Sortie</span>${levelBar()}<b>−3.1</b></div>
-       <div style="text-align:center;background:#120d02;border:1px solid #4a3410;border-radius:9px;padding:9px"><b style="font-size:20px;color:#ffd37a">−8.9</b><div class="muted" style="font-size:9px">LUFS INTÉGRÉ</div></div></div></div>
-     </div>
-     <div class="panel" style="margin-top:12px"><div class="ph">🎛️ Rack · aperçu des modules <span class="r">8 modules · onglet « Effets » pour éditer</span></div><div class="pb"><div class="grid" style="grid-template-columns:repeat(8,1fr)">
-      ${knobHtml('Auto-Tune', '10', '#22d3ee', 55)}${knobHtml('EQ', '+2.5 dB', '#f0b429', 62)}${knobHtml('Comp', '4:1', '#22d3ee', 72)}${knobHtml('De-Ess', '−18', '#22c55e', 48)}${knobHtml('Satur.', '12%', '#ff6b3d', 30)}${knobHtml('Reverb', '28%', '#a855f7', 40)}${knobHtml('Delay', '22%', '#22d3ee', 36)}${knobHtml('Stéréo', '140%', '#ec4899', 80)}
-     </div></div></div>`;
-    // ligne du bas : Timeline RÉELLE + Marco
-    const mini = h('div.pb');
-    const bottom = h('div.grid', { style: { gridTemplateColumns: '1.6fr 1fr', marginTop: '12px' } },
-      h('div.panel', h('div.ph', '🎵 Timeline', h('span.r', 'onglet « Timeline » pour le plein écran')), mini),
-      h('div.panel', { html: `<div class="ph">🧠 Ingé son IA — Marco</div><div class="pb"><div style="display:flex;gap:11px;align-items:center;margin-bottom:10px"><div class="orb"></div><div><b>Marco · IA</b><div class="muted" style="font-size:12px">Tonalité détectée : <b style="color:#bff5db">Do# mineure</b></div></div></div><div class="msg ai">« Ta voix est juste à 98 %. Je te propose +2 dB de présence et un de-esser léger. Tu veux la version <b>naturelle</b>, <b>pro</b> ou <b>créative</b> ? »</div><div style="display:flex;gap:7px"><span class="rbtn p" style="flex:1;text-align:center">Naturelle</span><span class="rbtn" style="flex:1;text-align:center">Pro</span><span class="rbtn" style="flex:1;text-align:center">Créative</span></div></div>` }));
-    root.append(bottom);
-    setTimeout(() => buildTimeline(mini), 0);
+    const duration = totalDuration();
+    const ready = tracks.filter(t => t.buffer);
+    const selected = ready[sessionSelected] || ready[0] || null;
+    const measure = (buffer) => {
+      if (!buffer) return null;
+      let peak = 0, sum = 0, count = 0;
+      for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+        const d = buffer.getChannelData(ch);
+        for (let i = 0; i < d.length; i++) { const v = d[i]; const av = Math.abs(v); if (av > peak) peak = av; sum += v * v; count++; }
+      }
+      return { peakDb: peak ? 20 * Math.log10(peak) : -Infinity, rmsDb: sum && count ? 10 * Math.log10(sum / count) : -Infinity };
+    };
+    const m = measure(selected?.buffer);
+    const metric = (label, value, hint) => h('div.panel',
+      h('div.ph', label),
+      h('div.pb', h('div', { style: { fontSize: '22px', fontWeight: '800' } }, value),
+        h('div.muted', { style: { fontSize: '11px', marginTop: '4px' } }, hint)));
+    const action = (label, desc, tab, icon) => h('button.rbtn', {
+      style: { textAlign: 'left', padding: '13px', minHeight: '74px', display: 'flex', flexDirection: 'column', gap: '6px' },
+      onclick: () => go(tab)
+    }, h('b', icon + ' ' + label), h('span.muted', desc));
+    root.append(
+      h('div.panel', h('div.ph', '🎛️ STUDIO — session en cours',
+        h('span.r', tracks.length ? 'Audio chargé' : 'Aucune piste chargée')),
+        h('div.pb', h('div', { style: { fontSize: '20px', fontWeight: '800', marginBottom: '5px' } }, proj.name || 'Projet audio'),
+          h('div.muted', `${ready.length} piste(s) audio · durée totale ${fmtLcd(duration).replace(/\\.\\d+$/, '')}`))),
+      h('div.grid', { style: { gridTemplateColumns: 'repeat(4,minmax(0,1fr))', marginTop: '12px' } },
+        metric('Pistes audio', String(ready.length), 'Pistes réellement chargées'),
+        metric('Durée session', fmtLcd(duration).replace(/\\.\\d+$/, ''), 'Positionnement et longueur du mix'),
+        metric('Crête piste sélectionnée', m && Number.isFinite(m.peakDb) ? m.peakDb.toFixed(1) + ' dBFS' : 'Non mesurée', selected ? selected.name : 'Sélectionne une piste'),
+        metric('Niveau RMS', m && Number.isFinite(m.rmsDb) ? m.rmsDb.toFixed(1) + ' dBFS' : 'Non mesuré', 'Calculé sur la piste sélectionnée')),
+      h('div.panel', { style: { marginTop: '12px' } },
+        h('div.ph', 'Outils du studio', h('span.r', 'Ouvre un module pour travailler le son')),
+        h('div.pb', h('div.grid', { style: { gridTemplateColumns: 'repeat(3,minmax(0,1fr))' } },
+          action('Timeline multipiste', 'Déplacer, écouter, régler volume et panoramique', 'timeline', '🎚️'),
+          action('Enregistrement', 'Enregistrer une prise depuis le microphone', 'rec', '🎙️'),
+          action('Effets audio', 'Traitements et correction de voix', 'fx', '🎛️'),
+          action('Ingénieur du son IA', 'Demander un traitement sur une piste', 'ia', '🧠'),
+          action('Références', 'Bibliothèque de presets disponible', 'repo', '📚')))),
+      h('div.panel', { style: { marginTop: '12px' } },
+        h('div.ph', 'État de la session'),
+        h('div.pb', selected
+          ? h('div', h('b', selected.name || 'Piste sélectionnée'),
+              h('div.muted', { style: { marginTop: '5px' } }, `Durée : ${selected.buffer.duration.toFixed(2)} s · ${selected.buffer.sampleRate} Hz · ${selected.buffer.numberOfChannels} canal(aux)`),
+              h('div.muted', { style: { marginTop: '5px' } }, selected.fxDone?.length ? 'Traitements enregistrés : ' + selected.fxDone.join(', ') : 'Aucun traitement enregistré sur cette piste.'))
+          : h('div.muted', 'Importe un fichier audio dans la Timeline pour commencer.'))));
     return root;
   }
-
   function viewRec() {
     const root = h('div');
     const ins = tracks.find(isInstru);
@@ -545,68 +573,254 @@ export async function render(el, { params }) {
   }
 
   function viewFx() {
-    const root = h('div');
-    const grid = h('div.grid', { style: { gridTemplateColumns: '1fr 1fr' } });
+    const root=h('div');
+    const grid=h('div.grid',{style:{gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))'}});
     grid.append(autotunePanel());
-    const mods = [
-      { t: '🎚️ Égaliseur', c: '#3b82f6', eq: 1, k: [['Low', '−2 dB', '#22d3ee', 45], ['Mid', '+2.5 dB', '#ec4899', 60], ['High', '+3 dB', '#a855f7', 66], ['Air', '+4 dB', '#22d3ee', 70]] },
-      { t: '🗜️ Compression', c: '#f0b429', gr: 1, k: [['Thresh', '−18', '#f0b429', 40], ['Ratio', '4:1', '#f0b429', 55], ['Attack', '10 ms', '#f0b429', 30], ['Makeup', '+3 dB', '#f0b429', 58]] },
-      { t: '🌫️ Réverbe', c: '#a855f7', k: [['Taille', '72%', '#a855f7', 72], ['Decay', '3.2 s', '#a855f7', 55], ['Mix', '28%', '#a855f7', 28]] },
-      { t: '🔁 Delay / Écho', c: '#22d3ee', k: [['Time', '1/8', '#22d3ee', 40], ['Feedback', '35%', '#22d3ee', 35], ['Mix', '22%', '#22d3ee', 22]] },
-      { t: '🎼 Harmonies', c: '#ec4899', k: [['Tierce', 'on', '#ec4899', 60], ['Quinte', 'on', '#ec4899', 55], ['Octave', 'on', '#ec4899', 45], ['Niveau', '50%', '#ec4899', 50]] },
+    const modules=[
+      {name:'Égaliseur voix',desc:'Passe-haut, graves, présence et air.',kind:'voice',params:{highpass:85,low:-1,presence:2,air:2,deess:1,comp:0,reverb:0},controls:[['highpass','Passe-haut',40,180,1,' Hz'],['low','Graves',-6,6,.5,' dB'],['presence','Présence',-6,6,.5,' dB'],['air','Air',-6,6,.5,' dB']]},
+      {name:'Compression',desc:'Compresseur vocal et contrôle de dynamique.',kind:'voice',params:{highpass:40,low:0,presence:0,air:0,deess:0,comp:.72,reverb:0},controls:[['comp','Intensité',0,1,.01,'']]},
+      {name:'De-Esser',desc:'Atténuation des sifflantes.',kind:'voice',params:{highpass:40,low:0,presence:0,air:0,deess:6,comp:0,reverb:0},controls:[['deess','Réduction',0,8,.1,' dB']]},
+      {name:'Réverbération',desc:'Espace et profondeur.',kind:'fx',chain:[{t:'fx',kind:'reverb',size:1.8,decay:3,mix:.2}],controls:[['mix','Mélange',0,0.7,.01,''],['size','Taille',.5,4,.1,' s']]},
+      {name:'Delay / Écho',desc:'Répétitions avec retour réglable.',kind:'fx',chain:[{t:'fx',kind:'delay',time:.28,fb:.28,mix:.22}],controls:[['time','Temps',.05,1,.01,' s'],['fb','Feedback',0,.8,.01,''],['mix','Mélange',0,.7,.01,'']]},
+      {name:'Saturation',desc:'Harmoniques et densité.',kind:'fx',chain:[{t:'fx',kind:'distort',amt:1.5,tone:6500}],controls:[['amt','Drive',1,8,.1,''],['tone','Filtre',2000,12000,100,' Hz']]},
+      {name:'Harmonies',desc:'Deux voix harmoniques générées à partir de la mélodie.',kind:'fx',chain:[{t:'harmony',steps:[2,4],gain:.32}],controls:[['gain','Niveau',.1,.8,.01,'']]},
+      {name:'Doublage stéréo',desc:'Double vocal léger et élargissement.',kind:'fx',chain:[{t:'double',steps:[0,0],gain:.35}],controls:[['gain','Niveau',.1,.8,.01,'']]}
     ];
-    for (const m of mods) {
-      let html = '';
-      if (m.eq) html += `<div style="height:108px;border-radius:10px;overflow:hidden;border:1px solid var(--rline);margin-bottom:12px;background:#0b0b1a">${eqCurveSvg()}</div>`;
-      html += `<div class="grid" style="grid-template-columns:repeat(${m.k.length},1fr)">${m.k.map(k => knobHtml(k[0], k[1], k[2], k[3], k[4])).join('')}</div>`;
-      if (m.gr) html += `<div style="display:flex;gap:9px;align-items:center;margin-top:12px;font-size:11px;color:var(--rmut)"><span>GR</span><div style="flex:1;height:8px;border-radius:4px;background:#1c1710;overflow:hidden"><i style="display:block;height:100%;width:36%;float:right;background:linear-gradient(90deg,#ff6b3d,#f0b429)"></i></div><b style="color:#f0b429">−4.2 dB</b></div>`;
-      grid.append(h('div.panel', h('div.ph', { html: `<span style="width:11px;height:11px;border-radius:50%;background:${m.c};box-shadow:0 0 8px ${m.c};flex:none"></span>${m.t}<span class="r" style="margin-left:auto;color:#8a8fb5">aperçu</span>` }), h('div.pb', { html })));
+    for(const m of modules){
+      const controls=h('div',{style:{display:'grid',gap:'9px',margin:'12px 0'}});
+      for(const [key,label,min,max,step,unit] of m.controls){
+        const target=m.kind==='voice'?m.params:m.chain[0];
+        const initial=key==='mix'||key==='size'&&m.name==='Réverbération'?target[key]??.2:target[key]??0;
+        const line=h('label',{style:{display:'grid',gap:'4px',fontSize:'12px'}});
+        const top=h('div',{style:{display:'flex',justifyContent:'space-between'}},h('span',label));
+        const value=h('b',String(initial)+unit); top.append(value);
+        const input=h('input',{type:'range',min,max,step,value:initial,style:{width:'100%'}});
+        input.oninput=()=>{target[key]=Number(input.value);value.textContent=Number(input.value).toFixed(step<1?2:0)+unit;};
+        line.append(top,input);controls.append(line);
+      }
+      grid.append(h('div.panel',
+        h('div.ph',m.name),
+        h('div.pb',
+          h('div.muted',{style:{minHeight:'32px'}},m.desc),
+          controls,
+          h('button.rbtn.p',{onclick:()=>applyLibraryPreset(m)},'Appliquer à la piste sélectionnée'))));
     }
-    root.append(grid);
+    root.append(grid,h('div.muted',{style:{marginTop:'12px'}},'Régle les paramètres avant application. Le traitement est rendu sur la piste sélectionnée et sauvegardé. Le bouton Original permet de revenir à la prise brute.'));
     return root;
   }
 
+  async function applyLibraryPreset(p) {
+    const ready = tracks.filter(t => t.buffer), track = ready[sessionSelected] || ready[0];
+    if (!track) { toast('Importe une piste audio avant d’appliquer un preset.', 'bad'); return; }
+    if (playing) stopPlay();
+    const status = document.getElementById('regie-preset-status');
+    if (status) status.textContent = 'Application de ' + p.name + '…';
+    try {
+      const source = track.buffer;
+      if (!track.original) track.original = source;
+      let rendered;
+      if (p.kind === 'tune') rendered = (await applyChain(source, [{ t: 'tune', strength: p.strength, speed: p.speed, formant: p.formant || 0 }], { onProgress: x => { if(status) status.textContent=x; } })).buffer;
+      else if (p.kind === 'fx') rendered = (await applyChain(source, p.chain, { onProgress: x => { if(status) status.textContent=x; } })).buffer;
+      else rendered = await voiceChain(source, p.params || {});
+      track.buffer = rendered;
+      track.fxDone = [...(track.fxDone || []), p.name];
+      track.fx = { ...(track.fx || {}), lastPreset: p.name };
+      await save();
+      if(status) status.textContent = p.name + ' appliqué sur ' + track.name;
+      toast('Preset « ' + p.name + ' » appliqué à ' + track.name, 'ok');
+    } catch(e) { if(status) status.textContent='Échec : '+(e.message||e); toastErr(e); }
+  }
+
   function viewRepo() {
-    const CATS = { 'Références': ['Jul · mélodique', 'Naza · puissant', 'LJK · hard tune'], 'Autotune (60)': ['Rap FR Pro', 'Drill sombre', 'Trap 808', 'Hard snap', 'Soft melodic'], 'Vraies voix (36)': ['Chant velours', 'Voix grave', 'Voix aiguë', 'Voix féminine'], 'Ambiances (30)': ['Club', 'Nuit', 'Live', 'Radio', 'Téléphone'], 'Effets (60+)': ['Vocoder', 'Robot', 'Lo-Fi', 'Tube', 'Mega'] };
-    const FX_CHAIN = [['🎤 Auto-Tune', '#a855f7', 1], ['🎚️ EQ', '#3b82f6', 1], ['🗜️ Compression', '#f0b429', 1], ['🧼 De-Esser', '#22c55e', 1], ['🔥 Saturation', '#ff6b3d', 0], ['🎼 Harmonies', '#ec4899', 1], ['🌫️ Réverbe', '#a855f7', 1], ['🔁 Delay', '#22d3ee', 1]];
-    let lib = '';
-    for (const cat in CATS) lib += `<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:800;color:#c9b6ff;margin-bottom:8px;letter-spacing:.04em">${cat.toUpperCase()}</div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${CATS[cat].map((p, i) => `<div class="vcard" style="padding:10px;display:flex;gap:9px;align-items:center${cat.includes('Réf') && i === 0 ? ';border-color:var(--rpur);box-shadow:0 0 14px rgba(168,85,247,.3)' : ''}"><div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--rpur),var(--rcy));flex:none"></div><div style="min-width:0"><b style="font-size:13px">${p}</b><div class="muted" style="font-size:10px">${cat.split(' ')[0]}</div></div></div>`).join('')}</div></div>`;
-    const chips = ['Tous', 'Références', 'Autotune', 'Vraies voix', 'Ambiances', 'Transposer', 'Timbre', 'Vocodeur', 'Styles', 'Effets'].map((c, i) => `<span class="chip ${i === 0 ? 'on' : ''}">${c}</span>`).join('');
-    const fxchain = FX_CHAIN.map(f => `<div style="display:flex;gap:10px;align-items:center;padding:8px 9px;border-radius:9px;margin-bottom:5px;font-size:13px;font-weight:600;${f[2] ? 'background:linear-gradient(90deg,rgba(168,85,247,.16),transparent)' : ''}"><span style="width:11px;height:11px;border-radius:50%;background:${f[2] ? f[1] : 'transparent'};box-shadow:0 0 7px ${f[2] ? f[1] : 'transparent'};border:1.5px solid ${f[1]};flex:none"></span>${f[0]}<span style="margin-left:auto;color:#3b3a60;letter-spacing:-2px">⠿</span></div>`).join('');
-    const root = h('div');
-    root.innerHTML = `<div class="grid" style="grid-template-columns:1fr 300px">
-       <div class="panel"><div class="ph">📚 Bibliothèque de presets <span class="r">235 presets</span></div><div class="pb" style="max-height:calc(100vh - 230px);overflow:auto"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">${chips}</div>${lib}</div></div>
-       <div style="display:grid;gap:12px;align-content:start">
-         <div class="panel"><div class="ph">🎛️ Chaîne d'effets</div><div class="pb">${fxchain}</div></div>
-         <div class="panel" data-projects><div class="ph">🗂️ Mes projets</div><div class="pb"></div></div>
-       </div></div>`;
-    // vrais projets cliquables
-    const pbox = root.querySelector('[data-projects] .pb');
-    for (const p of state.projects || []) pbox.append(h('div.ditem' + (p.id === projectId ? '.on' : ''), { style: { marginBottom: '4px' }, onclick: () => { state.projectId = p.id; localStorage.setItem('studio.project', p.id); location.hash = '#/regie'; } }, `${p.icon || '🗂️'} ${p.name}`));
+    const presets = [
+      {name:'Rap FR Pro',cat:'Autotune',kind:'tune',strength:1,speed:60},
+      {name:'Drill sombre',cat:'Autotune',kind:'tune',strength:1,speed:18},
+      {name:'Trap 808',cat:'Autotune',kind:'tune',strength:1,speed:8},
+      {name:'Hard snap',cat:'Autotune',kind:'tune',strength:1,speed:0},
+      {name:'Soft melodic',cat:'Autotune',kind:'tune',strength:.75,speed:150},
+      {name:'Chant velours',cat:'Vraies voix',kind:'voice',params:{highpass:75,low:1,presence:2,air:2,deess:3,comp:.45,reverb:.1}},
+      {name:'Voix grave',cat:'Vraies voix',kind:'voice',params:{highpass:65,low:2,presence:1,air:0,deess:2,comp:.55,reverb:.08}},
+      {name:'Voix aiguë',cat:'Vraies voix',kind:'voice',params:{highpass:110,low:-1,presence:1,air:1,deess:5,comp:.4,reverb:.12}},
+      {name:'Voix féminine',cat:'Vraies voix',kind:'voice',params:{highpass:100,low:0,presence:2,air:3,deess:4,comp:.45,reverb:.13}},
+      {name:'Club',cat:'Ambiances',kind:'fx',chain:[{t:'fx',kind:'reverb',size:1.4,mix:.12},{t:'fx',kind:'delay',time:.25,fb:.2,mix:.1}]},
+      {name:'Nuit',cat:'Ambiances',kind:'voice',params:{highpass:80,low:-1,presence:1,air:0,deess:3,comp:.5,reverb:.22}},
+      {name:'Live',cat:'Ambiances',kind:'fx',chain:[{t:'fx',kind:'reverb',size:2.5,mix:.22}]},
+      {name:'Radio',cat:'Effets',kind:'voice',params:{highpass:260,low:-5,presence:3,air:-3,deess:2,comp:.8,reverb:0}},
+      {name:'Téléphone',cat:'Effets',kind:'voice',params:{highpass:420,low:-6,presence:4,air:-6,deess:1,comp:.7,reverb:0}},
+      {name:'Vocodeur',cat:'Effets',kind:'fx',chain:[{t:'vocoder',bands:24,voices:[0],blend:.12}]},
+      {name:'Robot',cat:'Effets',kind:'tune',strength:1,speed:0},
+      {name:'Lo-Fi',cat:'Effets',kind:'voice',params:{highpass:180,low:-3,presence:-1,air:-5,deess:2,comp:.6,reverb:.04}},
+      {name:'Tube',cat:'Effets',kind:'fx',chain:[{t:'fx',kind:'distort',amt:2,tone:6500}]},
+      {name:'Mega',cat:'Effets',kind:'voice',params:{highpass:80,low:2,presence:4,air:3,deess:4,comp:.8,reverb:.08}},
+      {name:'Jul · mélodique',cat:'Références',kind:'tune',strength:.9,speed:75},
+      {name:'Naza · puissant',cat:'Références',kind:'voice',params:{highpass:75,low:2,presence:3,air:1,deess:3,comp:.72,reverb:.08}},
+      {name:'LJK · hard tune',cat:'Références',kind:'tune',strength:1,speed:0}
+    ];
+    const cats=['Tous','Références','Autotune','Vraies voix','Ambiances','Effets'];
+    let active='Tous';
+    const root=h('div'), list=h('div.grid',{style:{gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:'9px'}});
+    const count=h('span.r',presets.length+' presets fonctionnels');
+    const chips=h('div',{style:{display:'flex',gap:'6px',flexWrap:'wrap',marginBottom:'14px'}});
+    const status=h('div.muted',{id:'regie-preset-status',style:{marginTop:'10px',minHeight:'18px'}},'Choisis une piste puis clique sur un preset pour appliquer le traitement.');
+    function drawCards(){
+      list.innerHTML='';
+      const shown=presets.filter(p=>active==='Tous'||p.cat===active);
+      for(const p of shown) list.append(h('button.vcard',{type:'button',style:{padding:'11px',display:'flex',gap:'9px',alignItems:'center',textAlign:'left',cursor:'pointer',color:'inherit',background:'transparent',border:'1px solid var(--rline)',borderRadius:'12px'},onclick:()=>applyLibraryPreset(p)},
+        h('span',{style:{width:'32px',height:'32px',borderRadius:'9px',background:'linear-gradient(135deg,var(--rpur),var(--rcy))',flex:'none'}}),
+        h('span',{style:{minWidth:'0'}},h('b',{style:{fontSize:'13px'}},p.name),h('span.muted',{style:{display:'block',fontSize:'10px'}},p.cat+' · appliquer'))));
+      count.textContent=shown.length+' / '+presets.length+' presets';
+    }
+    for(const cat of cats) chips.append(h('button.chip'+(cat===active?'.on':''),{onclick:()=>{active=cat;for(const el of chips.children)el.classList.toggle('on',el.textContent===active);drawCards();}},cat));
+    drawCards();
+    const side=h('div',{style:{display:'grid',gap:'12px',alignContent:'start'}},
+      h('div.panel',h('div.ph','Chaîne d’effets'),h('div.pb',h('div.muted','Les presets compatibles appliquent de vrais traitements sur la piste sélectionnée. Les autres modules ne sont pas simulés.'))),
+      h('div.panel',{'data-projects':''},h('div.ph','Mes projets'),h('div.pb')));
+    root.append(h('div.grid',{style:{gridTemplateColumns:'minmax(0,1fr) 300px'}},
+      h('div.panel',h('div.ph','Bibliothèque de presets',count),h('div.pb',chips,list,status)),side));
+    const pbox=root.querySelector('[data-projects] .pb');
+    for(const p of state.projects||[])pbox.append(h('div.ditem'+(p.id===projectId?'.on':''),{style:{marginBottom:'4px'},onclick:()=>{state.projectId=p.id;localStorage.setItem('studio.project',p.id);location.hash='#/regie';}},`${p.icon||'🗂️'} ${p.name}`));
     return root;
   }
 
   function viewIA() {
     const root = h('div');
-    root.innerHTML = `<div class="grid" style="grid-template-columns:1.3fr 1fr">
-      <div class="panel" style="display:flex;flex-direction:column"><div class="ph">🧠 Ingé son IA — Marco <span class="r" style="color:#8a8fb5">aperçu · branchement en phase 5</span></div>
-       <div class="pb" style="flex:1;overflow:auto">
-        <div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Salut ! J'ai écouté ta prise. <b>Tonalité : Do# mineure</b>, tempo 90 BPM. Ta voix est juste (98 %), un peu de sifflantes à maîtriser. Je te prépare 3 versions.</div></div>
-        <div class="msg me">Mets-moi un truc propre pour du rap mélodique.</div>
-        <div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Parfait. J'ai calé l'Auto-Tune sur Do# mineure, posé un de-esser léger et +2 dB de présence. Écoute les 3 rendus ci-contre 👉</div></div>
-       </div>
-       <div class="pb" style="border-top:1px solid var(--rline);display:flex;gap:9px"><input style="flex:1;padding:8px 10px;border-radius:9px;background:#0c0c1a;border:1px solid var(--rline);color:var(--rtxt)" placeholder="Écris à Marco… « nettoie et cale sur le beat »…"><a href="#/parler" class="rbtn p" style="text-decoration:none">Parler aux IA</a></div>
-      </div>
-      <div style="display:grid;gap:12px;align-content:start">
-       <div class="panel"><div class="ph">🎯 Analyse automatique <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb" style="font-size:12.5px">
-         ${[['Tonalité détectée', 'Do# mineure'], ['Tempo', '90 BPM'], ['Justesse', '98 %'], ['Sibilantes', 'à réduire'], ['Bruit de fond', '−58 dBFS (propre)']].map(x => `<div style="display:flex;margin-bottom:8px"><span class="muted">${x[0]}</span><b style="margin-left:auto;color:#bff5db">${x[1]}</b></div>`).join('')}
-       </div></div>
-       <div class="panel"><div class="ph">✨ 3 propositions</div><div class="pb"><div class="grid" style="grid-template-columns:repeat(3,1fr)">
-         <div class="vcard"><h4>🫧 Naturelle</h4><p>Correction douce, voix transparente.</p><span class="rbtn" style="width:100%;text-align:center">▶ Écouter</span></div>
-         <div class="vcard" style="border-color:var(--rpur);box-shadow:0 0 14px rgba(168,85,247,.3)"><h4>🎧 Pro</h4><p>EQ + comp + de-ess calés, prêt mix.</p><span class="rbtn p" style="width:100%;text-align:center">▶ Écouter</span></div>
-         <div class="vcard"><h4>🚀 Créative</h4><p>Autotune marqué + delay + air.</p><span class="rbtn" style="width:100%;text-align:center">▶ Écouter</span></div>
-       </div><div style="text-align:center;margin-top:12px"><span class="rbtn g" style="padding:10px 18px">✓ Appliquer la version choisie</span></div></div></div>
-      </div></div>`;
+    const voiceOptions = voixTracks();
+    const trackSel = h('select', { style: selStyle() },
+      voiceOptions.length ? voiceOptions.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
+    const trackNow = () => tracks[Number(trackSel.value)];
+    const chat = h('div', { style: { minHeight: '230px', maxHeight: '44vh', overflow: 'auto', padding: '10px', background: '#090916', border: '1px solid var(--rline)', borderRadius: '10px' } });
+    const input = h('textarea', { rows: 3, placeholder: 'Dis à ton ingénieur ce que tu veux : « nettoie la voix, Auto-Tune naturel en La mineur, compression légère, EQ avec présence, réverbération courte et delay discret. Fais aussi ressortir l’instru sans masquer la voix. »', style: { width: '100%', resize: 'vertical', padding: '11px', borderRadius: '9px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' } });
+    const masterStyle = h('select', { style: selStyle() },
+      ...[['streaming','Streaming standard'],['spotify','Spotify / Deezer'],['youtube','YouTube'],['apple','Apple Music'],['tiktok','TikTok / Reels'],['podcast','Podcast / voix'],['rap','Rap / Trap punchy'],['club','Club / puissant'],['doux','Doux / acoustique']].map(([v,l]) => h('option', { value:v }, l)));
+    const effectChoices = [
+      ['denoise','Nettoyage du souffle / bruit'],['antipop','Anti-pop'],['gate','Porte de bruit'],['autotune','Auto-Tune / correction de justesse'],
+      ['voice','EQ + compression + de-esser + réverbération'],['normalize','Normalisation'],['limit','Limiteur / sécurité crêtes'],
+      ['master','Mastering final'],['reverse','Inverser le son'],['fadeIn','Fondu entrant'],['fadeOut','Fondu sortant']
+    ];
+    const effectChecks = new Map(effectChoices.map(([v,l]) => [v, h('input', { type:'checkbox', checked:false })]));
+    const selectedEffects = () => [...effectChecks].filter(([,el]) => el.checked).map(([v]) => v);
+    const effectPicker = h('div', { style:{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'7px',padding:'10px',margin:'8px 0',background:'#0b0b19',border:'1px solid var(--rline)',borderRadius:'9px'} },
+      h('div', { style:{gridColumn:'1/-1',fontWeight:'700',fontSize:'12px'} }, 'Choisis plusieurs effets à appliquer (facultatif)'),
+      ...effectChoices.map(([v,l]) => h('label', { style:{display:'flex',alignItems:'center',gap:'7px',fontSize:'11px',color:'var(--rtxt)'} }, effectChecks.get(v), l)));
+    const status = h('div.muted', { style: { minHeight: '20px', marginTop: '8px' } }, 'L’ingénieur peut préparer un plan, puis appliquer les traitements disponibles au son.');
+    const planBox = h('div', { style: { display: 'grid', gap: '6px', marginTop: '8px' } });
+    const send = h('button.rbtn.p', '🧠 Demander à l’ingénieur');
+    const applyBtn = h('button.rbtn.g', { disabled: true }, '✓ Exécuter les modifications');
+    const undoBtn = h('button.rbtn', { disabled: true }, '↩ Restaurer l’original');
+    let pendingPlan = null, busy = false;
+    const say = (who, txt) => chat.append(h('div', { style: { margin: '7px 0', padding: '9px 11px', borderRadius: '10px', background: who === 'expert' ? '#171636' : 'rgba(168,85,247,.18)', border: '1px solid var(--rline)', whiteSpace: 'pre-wrap', fontSize: '12px', lineHeight: '1.5' } }, h('b', who === 'expert' ? '🎧 Ingénieur IA' : 'Vous'), h('div', { style: { marginTop: '4px' } }, txt)));
+    const parsePlan = (raw, chosen = []) => {
+      const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const obj = JSON.parse(cleaned);
+      if (!obj || !Array.isArray(obj.actions)) throw new Error('Plan IA invalide : liste d’actions absente.');
+      const allowed = new Set(['denoise','antipop','gate','voice','autotune','normalize','limit','master','reverse','fadeIn','fadeOut']);
+      for (const a of obj.actions) if (!allowed.has(a.type)) throw new Error('Action non autorisée ou non prise en charge : ' + a.type);
+      if (chosen.length && obj.actions.some(a => !chosen.includes(a.type))) throw new Error('Le plan contient un effet que tu n’as pas sélectionné. Relance la demande.');
+      return obj;
+    };
+    const askExpert = async () => {
+      const request = input.value.trim(), t = trackNow();
+      if (!request || busy) return;
+      if (!t?.buffer) { toast('Sélectionne d’abord une piste audio.', 'bad'); return; }
+      busy = true; send.disabled = true; applyBtn.disabled = true; pendingPlan = null;
+      planBox.innerHTML = ''; say('user', request); input.value = '';
+      status.textContent = 'L’ingénieur analyse ta demande et prépare les opérations…';
+      try {
+        const b = t.original || t.buffer;
+        let peak = 0, rms = 0, n = 0;
+        for (let c = 0; c < b.numberOfChannels; c++) { const d = b.getChannelData(c); for (let i = 0; i < d.length; i += 16) { peak = Math.max(peak, Math.abs(d[i])); rms += d[i]*d[i]; n++; } }
+        const context = { piste: t.name, duree_secondes: +b.duration.toFixed(2), sampleRate: b.sampleRate, peakDbfs: +(20*Math.log10(Math.max(peak,1e-7))).toFixed(1), rmsDbfs: +(20*Math.log10(Math.sqrt(rms/Math.max(1,n)))).toFixed(1), autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
+        const chosen = selectedEffects();
+        const chosenLine = chosen.length ? `Effets expressément sélectionnés par l’utilisateur (n’en ajoute aucun autre) : ${chosen.join(', ')}.` : 'Aucun effet imposé : choisis les traitements adaptés à la demande.';
+        const targetMaster = masterStyle.value;
+        const agents = [
+          { name: 'Diagnostic audio', role: 'analyseur audio : interprète les mesures fournies, repère les problèmes probables sans inventer de mesures' },
+          { name: 'Spécialiste nettoyage', role: 'réduction du bruit, souffle, clics, pops et artefacts' },
+          { name: 'Ingénieur vocal', role: 'correction de justesse, tonalité, formants et naturel de la voix' },
+          { name: 'Égalisation', role: 'EQ correctif et tonal, masquage fréquentiel et intelligibilité' },
+          { name: 'Dynamique', role: 'compression, gate, de-esser, contrôle des transitoires et crêtes' },
+          { name: 'Effets spatiaux', role: 'réverbération, delay, profondeur, largeur et placement stéréo' },
+          { name: 'Mixage', role: 'équilibre voix/instrumental, gain staging, panoramique et cohérence du mix' },
+          { name: 'Mastering', role: 'préparation du master selon le profil cible, sonie et true peak' },
+          { name: 'Direction artistique', role: 'intention sonore, références stylistiques, choix entre naturel, professionnel et créatif' },
+          { name: 'Contrôle qualité', role: 'auditeur critique : détecte les risques, traitements excessifs, incohérences et valide la chaîne proposée' }
+        ];
+        const task = `Tu es le cerveau principal et l'ingénieur du son en chef. Tu gardes une seule conversation avec l'utilisateur et tu coordonnes les dix spécialistes disponibles en coulisses. Ne renvoie jamais l'utilisateur vers un autre agent ou un autre onglet. Fais intervenir les spécialistes utiles, confronte leurs avis si nécessaire, puis décide toi-même de la chaîne finale.
+Demande utilisateur : ${request}
+Piste sélectionnée : ${JSON.stringify(context)}
+Effets choisis par l'utilisateur : ${chosen.length ? chosen.join(', ') : 'choix automatique par le chef'}
+Profil mastering demandé : ${targetMaster}
+Contraintes moteur DSP réellement disponibles : denoise, antipop, gate, voice, autotune, normalize, limit, master, reverse, fadeIn, fadeOut.
+Le livrable final doit être UNIQUEMENT un JSON valide de cette forme :
+{"message":"explication courte en français","actions":[{"type":"...","params":{}}]}
+Types autorisés : denoise amount 0..1; antipop amount 0..1; gate thresholdDb -60..-25 et floorDb -60..-10; voice highpass 40..180, low/presence/air -6..6, deess 0..8, comp 0..1, reverb 0..0.35, gainDb -6..6; autotune speed 0..200, strength 0..1, formant -4..4, key facultative "root|mode"; normalize targetDb -3..-1; limit ceilingDb -2..-0.3; master preset streaming|spotify|youtube|apple|tiktok|podcast|rap|club|doux; reverse; fadeIn; fadeOut.
+Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coché, utilise exactement le preset demandé. Maximum 10 actions. N'invente aucune mesure, aucun traitement ni aucune écoute. Une seule piste est traitée dans cette opération. Le contrôle qualité doit vérifier que chaque action est supportée.`;
+        let raw = '';
+        const agentStatus = new Map();
+        await sse('/api/agents/run', { projectId: state.projectId, task, agents, mode: 'chef', rounds: 1, synthModel: 'auto' }, ev => {
+          if (ev.type === 'step') {
+            agentStatus.set(ev.id, ev.agent + ' — ' + (ev.title || 'travail'));
+            status.textContent = 'Équipe en cours : ' + [...agentStatus.values()].slice(-3).join(' · ');
+          }
+          if (ev.type === 'delta' && ev.content) raw += ev.content;
+          if (ev.type === 'final' && ev.content) raw = ev.content;
+          if (ev.type === 'error') throw new Error(ev.error);
+          if (ev.type === 'done' && ev.error) say('expert', ev.agent + ' indisponible : ' + ev.error);
+        });
+        pendingPlan = parsePlan(raw, chosen);
+        say('expert', pendingPlan.message || 'Plan de traitement prêt. Vérifie les opérations avant exécution.');
+        for (const a of pendingPlan.actions) planBox.append(h('div', { style: { padding: '8px 10px', background: '#101027', border: '1px solid var(--rline)', borderRadius: '8px', fontSize: '12px' } }, '• ' + a.type + ' — ' + JSON.stringify(a.params || {})));
+        applyBtn.disabled = !pendingPlan.actions.length;
+        status.textContent = pendingPlan.actions.length + ' opération(s) prêtes. Clique sur Exécuter pour modifier le son.';
+      } catch (e) { say('expert', 'Je n’ai pas pu préparer un plan exécutable : ' + (e?.message || e)); status.textContent = 'Erreur IA. Vérifie la disponibilité du modèle et réessaie.'; }
+      finally { busy = false; send.disabled = false; }
+    };
+    const execute = async () => {
+      const t = trackNow(); if (!t?.buffer || !pendingPlan || busy) return;
+      busy = true; applyBtn.disabled = true; send.disabled = true;
+      try {
+        if (!t.original) t.original = cloneAudioBuffer(t.buffer);
+        let b = cloneAudioBuffer(t.buffer);
+        for (const a of pendingPlan.actions) {
+          const p = a.params || {};
+          status.textContent = 'Application : ' + a.type + '…';
+          if (a.type === 'denoise') b = await denoise(b, Math.max(0,Math.min(1,Number(p.amount ?? .55))));
+          else if (a.type === 'antipop') b = antipop(b, Math.max(0,Math.min(1,Number(p.amount ?? .8))));
+          else if (a.type === 'gate') b = gate(b, Number(p.thresholdDb ?? -45), Number(p.floorDb ?? -30));
+          else if (a.type === 'voice') b = await voiceChain(b, p);
+          else if (a.type === 'autotune') {
+            const key = typeof p.key === 'string' && /^\d{1,2}\|(majeur|mineur)$/.test(p.key) ? (() => { const [root,mode]=p.key.split('|'); return {root:+root,mode}; })() : null;
+            const tuned = await applyChain(b, [{t:'tune',strength:Math.max(0,Math.min(1,Number(p.strength ?? .8))),speed:Math.max(0,Math.min(200,Number(p.speed ?? 80))),formant:Math.max(-4,Math.min(4,Number(p.formant ?? 0)))}], {key});
+            b = tuned.buffer;
+          } else if (a.type === 'normalize') b = normalize(b, Math.max(-3,Math.min(-1,Number(p.targetDb ?? -1))));
+          else if (a.type === 'limit') b = limit(b, Math.max(-2,Math.min(-.3,Number(p.ceilingDb ?? -1))));
+          else if (a.type === 'master') b = (await master(b, ['streaming','spotify','youtube','apple','tiktok','podcast','rap','club','doux'].includes(p.preset) ? p.preset : masterStyle.value)).buffer;
+          else if (a.type === 'reverse') for (let c=0;c<b.numberOfChannels;c++) b.getChannelData(c).reverse();
+          else if (a.type === 'fadeIn' || a.type === 'fadeOut') fadeClip(b, a.type === 'fadeIn');
+        }
+        t.buffer = b; t.fxDone = [...(t.fxDone || []), ...pendingPlan.actions.map(a=>a.type)];
+        await save(); renderSidebar(); if (cur === 'timeline') go('timeline');
+        undoBtn.disabled = false;
+        say('expert', 'Traitements appliqués à « ' + (t.name || 'la piste') + ' ». La prise originale est conservée : tu peux la restaurer.');
+        status.textContent = 'Terminé. Écoute le résultat et demande les corrections que tu veux.';
+        pendingPlan = null; planBox.innerHTML = '';
+      } catch (e) { say('expert', 'Erreur pendant le traitement : ' + (e?.message || e)); status.textContent = 'Traitement interrompu. L’original est conservé.'; }
+      finally { busy = false; send.disabled = false; applyBtn.disabled = !pendingPlan; }
+    };
+    send.onclick = askExpert; applyBtn.onclick = execute;
+    undoBtn.onclick = () => { const t = trackNow(); if (t?.original) { t.buffer = cloneAudioBuffer(t.original); t.fxDone = []; save(); if (cur === 'timeline') go('timeline'); status.textContent = 'Prise originale restaurée.'; } };
+    root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 280px' } },
+      h('div.panel', h('div.ph', '🧠 Ingénieur du son IA', h('span.r', 'planifie et exécute les traitements')),
+        h('div.pb', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat,
+          h('div', { style: { display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',margin:'10px 0' } }, h('b', { style:{fontSize:'12px'} }, 'Style de mastering'), masterStyle),
+          effectPicker,
+          h('div', { style: { marginTop: '10px' } }, input),
+          h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' } }, send, applyBtn, undoBtn),
+          status, planBox)),
+      h('div.panel', h('div.ph', '🎚️ Ce qu’il peut faire maintenant'), h('div.pb',
+        ...['Nettoyer le souffle et les bruits', 'Régler la voix et sa présence', 'Ajouter compression et réverbération', 'Corriger la justesse et la tonalité', 'Normaliser et limiter les crêtes', 'Masteriser avec un preset', 'Inverser ou faire des fondus', 'Enchaîner plusieurs traitements'].map(x => h('div.ditem', '✓ ' + x)),
+        h('div.muted', { style: { marginTop: '10px', fontSize: '11px', lineHeight: '1.5' } }, 'Les opérations sont calculées localement après le plan IA. L’IA choisit les traitements, le moteur audio les exécute. Les actions disponibles dépendent de la piste sélectionnée.')))));
+    if (!voiceOptions.length) say('expert', 'Commence par importer ou enregistrer une piste audio dans la Timeline. Ensuite, décris-moi le résultat sonore que tu veux.');
     return root;
   }
 
@@ -624,6 +838,140 @@ export async function render(el, { params }) {
   const tabsBar = h('div.rtabs');
   const main = h('div.rmain');
   const side = h('div.rside');
+  const contextMenu = h('div.rctx');
+  let audioClipboard = null;
+  function cloneAudioBuffer(buffer) {
+    if (!buffer) return null;
+    const copy = audioCtx().createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) copy.copyToChannel(new Float32Array(buffer.getChannelData(ch)), ch);
+    return copy;
+  }
+  function sliceAudioBuffer(buffer, from, to) {
+    if (!buffer) return null;
+    const start = Math.max(0, Math.min(buffer.length, Math.floor(from * buffer.sampleRate)));
+    const end = Math.max(start, Math.min(buffer.length, Math.floor(to * buffer.sampleRate)));
+    if (end <= start) return null;
+    const part = audioCtx().createBuffer(buffer.numberOfChannels, end - start, buffer.sampleRate);
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) part.copyToChannel(buffer.getChannelData(ch).slice(start, end), ch);
+    return part;
+  }
+  function refreshAfterEdit(message) {
+    save(); renderSidebar();
+    if (cur === 'timeline') go('timeline');
+    if (message) toast(message, 'ok');
+  }
+  function closeContextMenu() { contextMenu.classList.remove('open'); contextMenu.innerHTML = ''; }
+  function pasteAudio() {
+    if (!audioClipboard || !audioClipboard.buffer) return;
+    const buffer = cloneAudioBuffer(audioClipboard.buffer);
+    tracks.push({ name: audioClipboard.name + ' (copie)', kind: audioClipboard.kind || 'voix', gainDb: audioClipboard.gainDb || 0, pan: audioClipboard.pan || 0, offset: startOffset, mute: false, solo: false, armed: false, empty: false, fxDone: [], fx: null, fileId: null, buffer, original: cloneAudioBuffer(buffer) });
+    refreshAfterEdit('Audio collé à la position du curseur');
+  }
+
+  function preserveOriginal(track) {
+    if (track && track.buffer && (!track.original || track.original === track.buffer)) track.original = cloneAudioBuffer(track.buffer);
+  }
+  function processClip(index, processor, label) {
+    const track = tracks[index]; if (!track || !track.buffer) return;
+    preserveOriginal(track);
+    const edited = cloneAudioBuffer(track.buffer);
+    processor(edited);
+    track.buffer = edited;
+    refreshAfterEdit(label);
+  }
+  function peakNormalize(buffer) {
+    let peak = 0;
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i]));
+    }
+    if (!peak) return;
+    const gain = 0.98 / peak;
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < data.length; i++) data[i] *= gain;
+    }
+  }
+  function fadeClip(buffer, fadeIn) {
+    const n = Math.min(buffer.length, Math.floor(buffer.sampleRate * Math.min(2, buffer.duration * 0.25)));
+    if (n < 2) return;
+    for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < n; i++) {
+        const ramp = i / (n - 1);
+        const idx = fadeIn ? i : data.length - n + i;
+        data[idx] *= fadeIn ? ramp : 1 - ramp;
+      }
+    }
+  }
+  function splitTrackAtCursor(index) {
+    const track = tracks[index]; if (!track || !track.buffer) return;
+    const local = startOffset - (track.offset || 0);
+    const sourceOriginal = track.original || track.buffer;
+    const left = sliceAudioBuffer(track.buffer, 0, local), right = sliceAudioBuffer(track.buffer, local, track.buffer.duration);
+    const leftOriginal = sliceAudioBuffer(sourceOriginal, 0, local), rightOriginal = sliceAudioBuffer(sourceOriginal, local, sourceOriginal.duration);
+    if (!left || !right || !leftOriginal || !rightOriginal) return;
+    tracks.splice(index, 1,
+      { ...track, name: (track.name || 'Piste') + ' · A', buffer: left, original: leftOriginal },
+      { ...track, name: (track.name || 'Piste') + ' · B', offset: startOffset, buffer: right, original: rightOriginal });
+    refreshAfterEdit('Clip découpé en deux pistes');
+  }
+  function showContextMenu(event, type, index) {
+    event.preventDefault(); event.stopPropagation(); contextMenu.innerHTML = '';
+    const track = index >= 0 ? tracks[index] : null;
+    const add = (label, action, disabled) => contextMenu.append(h('button', { type: 'button', disabled: !!disabled, onclick: () => { closeContextMenu(); action(); } }, label));
+    const sep = () => contextMenu.append(h('div.sep'));
+    if (type === 'track' && track) {
+      add('✏️ Renommer la piste', () => { const n = window.prompt('Nom de la piste', track.name || 'Piste'); if (n && n.trim()) { track.name = n.trim(); refreshAfterEdit('Piste renommée'); } });
+      add(track.mute ? '🔊 Réactiver la piste' : '🔇 Mettre en sourdine', () => { track.mute = !track.mute; refreshAfterEdit('État Mute modifié'); });
+      add(track.solo ? '◉ Désactiver Solo' : '◉ Activer Solo', () => { track.solo = !track.solo; refreshAfterEdit('État Solo modifié'); });
+      add('🎚️ Régler le volume…', () => { const v = window.prompt('Volume en dB (-60 à +12)', String(track.gainDb || 0)); if (v !== null && Number.isFinite(Number(v))) { track.gainDb = Math.max(-60, Math.min(12, Number(v))); refreshAfterEdit('Volume réglé'); } });
+      add('↔️ Régler le panoramique…', () => { const v = window.prompt('Panoramique : -1 gauche, 0 centre, +1 droite', String(track.pan || 0)); if (v !== null && Number.isFinite(Number(v))) { track.pan = Math.max(-1, Math.min(1, Number(v))); refreshAfterEdit('Panoramique réglé'); } });
+      add('🎚️ Réinitialiser volume et panoramique', () => { track.gainDb = 0; track.pan = 0; refreshAfterEdit('Réglages réinitialisés'); });
+      add('⬆️ Monter la piste', () => { if (index > 0) { tracks.splice(index, 1); tracks.splice(index - 1, 0, track); refreshAfterEdit('Piste déplacée vers le haut'); } }, index === 0);
+      add('⬇️ Descendre la piste', () => { if (index < tracks.length - 1) { tracks.splice(index, 1); tracks.splice(index + 1, 0, track); refreshAfterEdit('Piste déplacée vers le bas'); } }, index === tracks.length - 1);
+
+      sep();
+      add('📄 Dupliquer la piste', () => { tracks.splice(index + 1, 0, { ...track, name: (track.name || 'Piste') + ' (copie)', buffer: cloneAudioBuffer(track.buffer), original: cloneAudioBuffer(track.original || track.buffer), fxDone: [...(track.fxDone || [])] }); refreshAfterEdit('Piste dupliquée'); });
+      add('📋 Copier le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; toast('Clip copié', 'ok'); }, !track.buffer);
+      add('✂️ Couper le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; tracks.splice(index, 1); refreshAfterEdit('Clip coupé'); }, !track.buffer);
+      add('📌 Coller à la position du curseur', pasteAudio, !audioClipboard);
+      sep();
+      add('🗑️ Supprimer la piste', () => { if (window.confirm('Supprimer cette piste ?')) { tracks.splice(index, 1); refreshAfterEdit('Piste supprimée'); } });
+    } else if (type === 'clip' && track) {
+      add('▶ Placer le curseur au début du clip', () => { startOffset = track.offset || 0; movePlayhead(startOffset); });
+      add('✏️ Renommer le clip', () => { const n = window.prompt('Nom du clip', track.name || 'Clip'); if (n && n.trim()) { track.name = n.trim(); refreshAfterEdit('Clip renommé'); } });
+      add('⏮️ Aligner le clip au début du projet', () => { track.offset = 0; refreshAfterEdit('Clip déplacé au début'); });
+      add('🎚️ Normaliser le volume du clip', () => processClip(index, peakNormalize, 'Clip normalisé'));
+      add('↩️ Inverser le clip (Reverse)', () => processClip(index, (b) => { for (let ch = 0; ch < b.numberOfChannels; ch++) b.getChannelData(ch).reverse(); }, 'Clip inversé'));
+      add('🌅 Fondu entrant', () => processClip(index, (b) => fadeClip(b, true), 'Fondu entrant appliqué'));
+      add('🌇 Fondu sortant', () => processClip(index, (b) => fadeClip(b, false), 'Fondu sortant appliqué'));
+      add('↩️ Restaurer la prise originale', () => { if (track.original) { track.buffer = cloneAudioBuffer(track.original); refreshAfterEdit('Prise originale restaurée'); } }, !track.original);
+
+      add('📋 Copier le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; toast('Clip copié', 'ok'); }, !track.buffer);
+      add('✂️ Couper le clip', () => { audioClipboard = { name: track.name || 'Audio', kind: track.kind, buffer: cloneAudioBuffer(track.buffer), gainDb: track.gainDb, pan: track.pan }; tracks.splice(index, 1); refreshAfterEdit('Clip coupé'); }, !track.buffer);
+      add('📄 Dupliquer le clip à la suite', () => { tracks.splice(index + 1, 0, { ...track, name: (track.name || 'Clip') + ' (copie)', buffer: cloneAudioBuffer(track.buffer), original: cloneAudioBuffer(track.original || track.buffer), offset: (track.offset || 0) + track.buffer.duration, fxDone: [...(track.fxDone || [])] }); refreshAfterEdit('Clip dupliqué'); }, !track.buffer);
+      add('📌 Coller à la position du curseur', pasteAudio, !audioClipboard);
+      sep();
+      const local = startOffset - (track.offset || 0), validCut = !!track.buffer && local > 0 && local < track.buffer.duration;
+      add('✂️ Découper au curseur', () => splitTrackAtCursor(index), !validCut);
+      add('◁ Rogner le début jusqu’au curseur', () => { const sourceOriginal = track.original || track.buffer; const b = sliceAudioBuffer(track.buffer, local, track.buffer.duration); const original = sliceAudioBuffer(sourceOriginal, local, sourceOriginal.duration); if (b && original) { track.buffer = b; track.original = original; track.offset = startOffset; refreshAfterEdit('Début rogné'); } }, !validCut);
+      add('▷ Rogner la fin au curseur', () => { const sourceOriginal = track.original || track.buffer; const b = sliceAudioBuffer(track.buffer, 0, local); const original = sliceAudioBuffer(sourceOriginal, 0, local); if (b && original) { track.buffer = b; track.original = original; refreshAfterEdit('Fin rognée'); } }, !validCut);
+      sep();
+      add('⚙️ Ouvrir Auto-Tune et effets', () => go('fx'));
+      add('🗑️ Supprimer le clip', () => { if (window.confirm('Supprimer ce clip audio ?')) { tracks.splice(index, 1); refreshAfterEdit('Clip supprimé'); } });
+    } else {
+      add('➕ Importer un fichier audio', () => importTrack());
+      add('📌 Coller à la position du curseur', pasteAudio, !audioClipboard);
+      add('➕ Ajouter une piste vide', () => { tracks.push({ name: 'Piste ' + (tracks.length + 1), kind: 'voix', gainDb: 0, pan: 0, offset: startOffset, mute: false, solo: false, armed: false, empty: true, fxDone: [], fx: null, fileId: null, buffer: null, original: null }); refreshAfterEdit('Piste vide ajoutée'); });
+    }
+    contextMenu.style.left = Math.min(event.clientX, window.innerWidth - 245) + 'px';
+    contextMenu.style.top = Math.min(event.clientY, window.innerHeight - 300) + 'px';
+    contextMenu.classList.add('open');
+  }
+
+  root.append(contextMenu);
+  document.addEventListener('click', closeContextMenu);
 
   function renderTabs() {
     tabsBar.innerHTML = '';
@@ -638,13 +986,35 @@ export async function render(el, { params }) {
     main.append(view);
   }
 
+  async function exportMix() {
+    const audible = tracks.filter(t => t.buffer);
+    if (!audible.length) { toast('Aucune piste audio à exporter.', 'bad'); return; }
+    const anySolo = audible.some(t => t.solo);
+    try {
+      toast('Préparation du mix WAV…');
+      const mixTracks = audible.map(t => ({ ...t, mute: anySolo ? !t.solo : !!t.mute }));
+      const rendered = await mix(mixTracks, 44100);
+      const blob = encodeWav(rendered, 24);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeName = (proj.name || 'projet').replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'projet';
+      a.href = url; a.download = safeName + '-mix-24bit.wav';
+      document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      toast('Mix WAV 24 bits exporté.', 'ok');
+    } catch (e) {
+      toastErr(e);
+      toast('Échec de l’export WAV.', 'bad');
+    }
+  }
+
   function renderSidebar() {
     const groups = [
-      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter (bientôt)', null]] },
+      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter le mix WAV 24 bits', exportMix]] },
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => go('timeline'), trackColor(t, i)]) },
       { ic: '🎛️', t: 'Modules', items: [['🎤', 'Auto-Tune', () => go('fx')], ['🎚️', 'Égaliseur', () => go('fx')], ['🗜️', 'Compression', () => go('fx')], ['🌫️', 'Réverbe', () => go('fx')], ['🔁', 'Delay', () => go('fx')], ['🎼', 'Harmonies', () => go('fx')]] },
       { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
-      { ic: '🧠', t: 'IA Expert', items: [['🎯', 'Analyser (bientôt)', () => go('ia')], ['🎹', 'Tonalité (bientôt)', () => go('ia')], ['✨', '3 versions (bientôt)', () => go('ia')]] },
+      { ic: '🧠', t: 'IA Expert', items: [['🎯', 'Analyser la piste', () => go('ia')], ['🎹', 'Détecter la tonalité', () => go('ia')], ['✨', 'Préparer 3 propositions', () => go('ia')]] },
     ];
     side.innerHTML = '';
     groups.forEach((g, gi) => {
@@ -694,5 +1064,5 @@ export async function render(el, { params }) {
   go(cur);
 
   // nettoyage
-  return () => { stopPlay(); stopAllRec(); stopPreview(); };
+  return () => { document.removeEventListener('click', closeContextMenu); closeContextMenu(); stopPlay(); stopAllRec(); stopPreview(); };
 }

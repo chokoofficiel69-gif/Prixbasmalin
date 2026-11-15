@@ -23,7 +23,7 @@ function extractJson(text) {
  */
 export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, synthModel = 'auto', projectContext = '', emit, signal, uid }) {
   if (!agents?.length) throw new Error('Ajoutez au moins un agent.');
-  agents = agents.slice(0, 6);
+  agents = agents.slice(0, 10);
   const transcript = [];
   let stepNo = 0;
 
@@ -64,14 +64,14 @@ export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, syn
       }
     }
   } else if (mode === 'chef') {
-    const lead = { name: 'Coordinateur', role: 'chef de projet qui découpe le travail et le confie aux bons agents', model: synthModel };
+    const lead = { name: 'Marco — Ingénieur du son en chef', role: 'cerveau principal et ingénieur du son en chef : garde la conversation avec l’utilisateur, décide de la stratégie, coordonne les dix spécialistes, tranche les désaccords et assume la responsabilité du rendu final', model: synthModel };
     const roster = agents.map(a => `- ${a.name} : ${a.role}`).join('\n');
     const plan = await runOne(lead,
-      `Tâche :\n${task}\n\nÉquipe disponible :\n${roster}\n\nDécoupe la tâche en 2 à ${Math.min(6, agents.length * 2)} étapes ordonnées et attribue chacune à un agent de l'équipe. Réponds UNIQUEMENT avec du JSON :\n{"etapes":[{"agent":"Nom exact","consigne":"..."}]}`,
+      `Tâche :\n${task}\n\nÉquipe disponible :\n${roster}\n\nDécoupe la tâche en 2 à ${Math.min(10, agents.length)} étapes ordonnées et attribue chacune à un agent de l'équipe. Réponds UNIQUEMENT avec du JSON :\n{"etapes":[{"agent":"Nom exact","consigne":"..."}]}`,
       'Plan de travail');
     const parsed = extractJson(plan);
     const steps = Array.isArray(parsed?.etapes) ? parsed.etapes : agents.map(a => ({ agent: a.name, consigne: task }));
-    for (const s of steps.slice(0, 8)) {
+    for (const s of steps.slice(0, 10)) {
       const agent = agents.find(a => a.name.toLowerCase() === String(s.agent || '').toLowerCase()) || agents[0];
       await runOne(agent, `Tâche globale :\n${task}\n\nTravail déjà fait :\n${history() || '(rien)'}\n\nTa mission maintenant : ${s.consigne}`, String(s.consigne || 'Étape').slice(0, 80));
     }
@@ -83,7 +83,7 @@ export async function runAgents({ task, agents, mode = 'equipe', rounds = 2, syn
   }
 
   // Synthèse finale
-  const synth = { name: 'Synthèse', role: 'rédacteur final qui fusionne le travail de l’équipe en un livrable unique, clair et directement utilisable', model: synthModel };
+  const synth = { name: 'Marco — Décision finale', role: 'ingénieur du son en chef qui fusionne les avis, contrôle la cohérence et remet un seul plan final directement exécutable', model: synthModel };
   const final = await runOne(synth, `Tâche :\n${task}\n\nTravail de l'équipe :\n${history()}\n\nProduis le livrable final complet (pas un résumé des échanges).`, 'Livrable final');
   emit({ type: 'final', content: final });
   return { transcript, final };

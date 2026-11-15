@@ -303,7 +303,12 @@ export function limit(buffer, ceilingDb = -1, releaseMs = 80) {
 }
 
 export const MASTER_PRESETS = {
-  streaming: { label: 'Streaming (Spotify, YouTube) −14 LUFS', lufs: -14, low: 1, high: 1.5, glue: 0.4, width: 1 },
+  streaming: { label: 'Streaming standard −14 LUFS', lufs: -14, low: 1, high: 1.5, glue: 0.4, width: 1 },
+  spotify: { label: 'Spotify / Deezer −14 LUFS', lufs: -14, low: 1, high: 1.5, glue: 0.4, width: 1 },
+  youtube: { label: 'YouTube −14 LUFS', lufs: -14, low: 0.8, high: 1.2, glue: 0.35, width: 1 },
+  apple: { label: 'Apple Music −16 LUFS', lufs: -16, low: 0.5, high: 1, glue: 0.3, width: 1 },
+  tiktok: { label: 'TikTok / Reels −14 LUFS', lufs: -14, low: 1.2, high: 1.8, glue: 0.45, width: 1 },
+  podcast: { label: 'Podcast / voix −16 LUFS', lufs: -16, low: 0, high: 1.2, glue: 0.35, width: 1 },
   rap: { label: 'Rap / trap punchy −10 LUFS', lufs: -10, low: 2.5, high: 2, glue: 0.65, width: 1.1 },
   club: { label: 'Club / fort −8 LUFS', lufs: -8, low: 3, high: 2, glue: 0.8, width: 1.1 },
   doux: { label: 'Doux / acoustique −16 LUFS', lufs: -16, low: 0, high: 1, glue: 0.25, width: 1 },
