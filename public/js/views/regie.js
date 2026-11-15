@@ -5,7 +5,7 @@
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
 import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
-import { decodeBlob, drawWave } from '../lib/audio.js';
+import { decodeBlob, drawWave, voiceChain, denoise, detectBeats } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
@@ -595,25 +595,111 @@ export async function render(el, { params }) {
 
   function viewIA() {
     const root = h('div');
-    root.innerHTML = `<div class="grid" style="grid-template-columns:1.3fr 1fr">
-      <div class="panel" style="display:flex;flex-direction:column"><div class="ph">🧠 Ingé son IA — Marco <span class="r" style="color:#8a8fb5">aperçu · branchement en phase 5</span></div>
-       <div class="pb" style="flex:1;overflow:auto">
-        <div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Salut ! J'ai écouté ta prise. <b>Tonalité : Do# mineure</b>, tempo 90 BPM. Ta voix est juste (98 %), un peu de sifflantes à maîtriser. Je te prépare 3 versions.</div></div>
-        <div class="msg me">Mets-moi un truc propre pour du rap mélodique.</div>
-        <div style="display:flex;gap:10px;margin-bottom:12px"><div class="orb"></div><div class="msg ai" style="margin:0">Parfait. J'ai calé l'Auto-Tune sur Do# mineure, posé un de-esser léger et +2 dB de présence. Écoute les 3 rendus ci-contre 👉</div></div>
-       </div>
-       <div class="pb" style="border-top:1px solid var(--rline);display:flex;gap:9px"><input style="flex:1;padding:8px 10px;border-radius:9px;background:#0c0c1a;border:1px solid var(--rline);color:var(--rtxt)" placeholder="Écris à Marco… « nettoie et cale sur le beat »…"><a href="#/parler" class="rbtn p" style="text-decoration:none">Parler aux IA</a></div>
-      </div>
-      <div style="display:grid;gap:12px;align-content:start">
-       <div class="panel"><div class="ph">🎯 Analyse automatique <span class="r" style="color:#8a8fb5">aperçu</span></div><div class="pb" style="font-size:12.5px">
-         ${[['Tonalité détectée', 'Do# mineure'], ['Tempo', '90 BPM'], ['Justesse', '98 %'], ['Sibilantes', 'à réduire'], ['Bruit de fond', '−58 dBFS (propre)']].map(x => `<div style="display:flex;margin-bottom:8px"><span class="muted">${x[0]}</span><b style="margin-left:auto;color:#bff5db">${x[1]}</b></div>`).join('')}
-       </div></div>
-       <div class="panel"><div class="ph">✨ 3 propositions</div><div class="pb"><div class="grid" style="grid-template-columns:repeat(3,1fr)">
-         <div class="vcard"><h4>🫧 Naturelle</h4><p>Correction douce, voix transparente.</p><span class="rbtn" style="width:100%;text-align:center">▶ Écouter</span></div>
-         <div class="vcard" style="border-color:var(--rpur);box-shadow:0 0 14px rgba(168,85,247,.3)"><h4>🎧 Pro</h4><p>EQ + comp + de-ess calés, prêt mix.</p><span class="rbtn p" style="width:100%;text-align:center">▶ Écouter</span></div>
-         <div class="vcard"><h4>🚀 Créative</h4><p>Autotune marqué + delay + air.</p><span class="rbtn" style="width:100%;text-align:center">▶ Écouter</span></div>
-       </div><div style="text-align:center;margin-top:12px"><span class="rbtn g" style="padding:10px 18px">✓ Appliquer la version choisie</span></div></div></div>
-      </div></div>`;
+    const voices = voixTracks();
+    const select = h('select', { style: selStyle() },
+      voices.length ? voices.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
+    const chosen = () => tracks[Number(select.value)];
+    const status = h('div.muted', { style: { minHeight: '20px', marginTop: '8px' } }, voices.length ? 'Choisis une piste puis lance une vraie analyse locale.' : 'Importe ou enregistre une voix pour commencer.');
+    const report = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: '8px' } });
+    const prompt = h('input', { placeholder: 'Ex. : nettoie ma voix, garde un rendu naturel, prépare un mix rap mélodique…', style: { flex: '1', minWidth: '220px', padding: '10px', borderRadius: '9px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' } });
+    const amount = h('input', { type: 'range', min: 0, max: 1, step: .05, value: .55, style: { flex: '1' } });
+    const amountLabel = h('span.muted', '55 %');
+    amount.oninput = () => amountLabel.textContent = Math.round(+amount.value * 100) + ' %';
+    const proposals = new Map();
+    let selected = 'pro', busy = false;
+    const cards = h('div.grid', { style: { gridTemplateColumns: 'repeat(3,minmax(0,1fr))' } });
+    const cardDefs = [
+      { id: 'natural', title: 'Naturelle', desc: 'Correction douce, dynamique préservée', opts: { highpass: 75, low: 0, presence: 1, air: 1, deess: 1.5, comp: .25, reverb: .04, gainDb: 0 } },
+      { id: 'pro', title: 'Studio Pro', desc: 'Voix maîtrisée, présence et contrôle', opts: { highpass: 85, low: 0.5, presence: 2.5, air: 1.5, deess: 3, comp: .55, reverb: .09, gainDb: 0 } },
+      { id: 'creative', title: 'Créative', desc: 'Traitement plus marqué et ambiance', opts: { highpass: 90, low: 1, presence: 4, air: 3, deess: 2.5, comp: .72, reverb: .2, gainDb: -1 } },
+    ];
+    const renderCards = () => {
+      cards.innerHTML = '';
+      for (const d of cardDefs) {
+        const ready = proposals.has(d.id);
+        cards.append(h('div.vcard', { style: { borderColor: selected === d.id ? 'var(--rpur)' : 'var(--rline)', boxShadow: selected === d.id ? '0 0 14px rgba(168,85,247,.25)' : 'none' } },
+          h('h4', d.title), h('p', d.desc),
+          h('button.rbtn' + (selected === d.id ? '.p' : ''), { style: { width: '100%', marginBottom: '6px' }, onclick: () => { selected = d.id; renderCards(); } }, selected === d.id ? '✓ Sélectionnée' : 'Choisir'),
+          h('button.rbtn', { style: { width: '100%' }, disabled: !ready, onclick: () => playBuffer(proposals.get(d.id)) }, ready ? '▶ Écouter' : 'À générer')));
+      }
+    };
+    renderCards();
+    const analyze = async () => {
+      const t = chosen(); if (!t?.buffer || busy) { if (!t?.buffer) toast('Sélectionne une piste voix avec de l’audio.', 'bad'); return; }
+      busy = true; status.textContent = 'Analyse réelle de la piste en cours…'; report.innerHTML = '';
+      try {
+        const b = t.original || t.buffer;
+        const pitch = await detectPitch(b, p => status.textContent = 'Analyse de justesse : ' + Math.round(p * 100) + ' %');
+        const key = detectKey(pitch);
+        let peakValue = 0, sum = 0, count = 0;
+        for (let c = 0; c < b.numberOfChannels; c++) {
+          const data = b.getChannelData(c);
+          for (let i = 0; i < data.length; i += 8) { const v = data[i]; peakValue = Math.max(peakValue, Math.abs(v)); sum += v * v; count++; }
+        }
+        const rms = Math.sqrt(sum / Math.max(1, count));
+        const db = v => (20 * Math.log10(Math.max(v, 1e-7))).toFixed(1) + ' dBFS';
+        const beats = await detectBeats(b).catch(() => null);
+        const bpm = beats?.bpm ? Math.round(beats.bpm) + ' BPM' : 'Non déterminé';
+        const items = [
+          ['Durée', b.duration.toFixed(2) + ' s'],
+          ['Tonalité estimée', keyName(key)],
+          ['Niveau crête', db(peakValue)],
+          ['Niveau moyen RMS', db(rms)],
+          ['Tempo estimé', bpm],
+          ['Échantillonnage', b.sampleRate + ' Hz'],
+        ];
+        for (const [label, value] of items) report.append(h('div', { style: { padding: '9px', border: '1px solid var(--rline)', borderRadius: '9px', background: '#0c0c1a' } }, h('div.muted', { style: { fontSize: '10px' } }, label), h('b', { style: { display: 'block', marginTop: '3px', color: '#bff5db' } }, value)));
+        status.textContent = 'Analyse terminée. Valeurs calculées depuis le fichier audio, pas des chiffres préremplis.';
+      } catch (e) { status.textContent = 'Analyse impossible : ' + (e?.message || e); }
+      finally { busy = false; }
+    };
+    const generate = async () => {
+      const t = chosen(); if (!t?.buffer || busy) { if (!t?.buffer) toast('Sélectionne une piste voix avec de l’audio.', 'bad'); return; }
+      busy = true; proposals.clear(); renderCards();
+      const original = t.original || t.buffer;
+      const ask = (prompt.value || '').toLowerCase();
+      let defs = cardDefs;
+      if (/netto|bruit|souffle/.test(ask)) status.textContent = 'Nettoyage audio réel en cours…';
+      else status.textContent = 'Préparation des trois rendus audio…';
+      try {
+        for (const d of defs) {
+          let input = original;
+          if (/netto|bruit|souffle/.test(ask)) input = await denoise(input, +amount.value);
+          const rendered = await voiceChain(input, d.opts);
+          proposals.set(d.id, rendered); renderCards();
+          status.textContent = d.title + ' : rendu prêt (' + rendered.duration.toFixed(1) + ' s).';
+        }
+        status.textContent = 'Les trois rendus sont prêts. Écoute-les puis applique celui que tu préfères.';
+      } catch (e) { status.textContent = 'Erreur de traitement : ' + (e?.message || e); }
+      finally { busy = false; }
+    };
+    const apply = async () => {
+      const t = chosen(), b = proposals.get(selected);
+      if (!t || !b) { toast('Génère et sélectionne d’abord une version.', 'bad'); return; }
+      if (!t.original) t.original = t.buffer;
+      t.buffer = b; t.fxDone = [...(t.fxDone || []), 'assistant-' + selected];
+      await save(); renderSidebar(); if (cur === 'timeline') go('timeline');
+      toast('Version ' + selected + ' appliquée. Original conservé.', 'ok');
+    };
+    root.append(
+      h('div.grid', { style: { gridTemplateColumns: '1.15fr .85fr' } },
+        h('div.panel', h('div.ph', '🧠 Assistant audio — analyse et traitement réels', h('span.r', 'DSP local · sans coût API')),
+          h('div.pb', h('div', { style: { display: 'flex', gap: '9px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px' } }, h('span.muted', 'Piste à analyser :'), select,
+            h('button.rbtn.p', { onclick: analyze, disabled: !voices.length }, '🔎 Analyser le son')),
+            report, status)),
+        h('div.panel', h('div.ph', '🎛️ Instructions de traitement', h('span.r', 'commandes locales')),
+          h('div.pb', prompt,
+            h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', margin: '12px 0' } }, h('span.muted', 'Intensité nettoyage'), amount, amountLabel),
+            h('div.muted', { style: { fontSize: '11px', marginBottom: '10px' } }, 'Les mots « nettoie », « bruit » ou « souffle » déclenchent le débruitage avant le traitement vocal. Les trois profils utilisent le moteur audio local.'),
+            h('button.rbtn.p', { style: { width: '100%' }, onclick: generate, disabled: !voices.length }, '✨ Générer les 3 versions')))),
+      h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '🎧 Comparer et appliquer', h('span.r', 'original toujours conservé')),
+        h('div.pb', cards,
+          h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' } },
+            h('button.rbtn', { onclick: () => playBuffer(chosen()?.original || chosen()?.buffer) }, '▶ Écouter original'),
+            h('button.rbtn', { onclick: () => playBuffer(proposals.get(selected)) , disabled: !proposals.has(selected) }, '▶ Écouter sélection'),
+            h('button.rbtn', { onclick: stopPreview }, '⏹ Stop'),
+            h('button.rbtn.g', { onclick: apply, disabled: !proposals.has(selected) }, '✓ Appliquer la version choisie'))))
+    );
     return root;
   }
 
