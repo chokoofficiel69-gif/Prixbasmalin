@@ -44,11 +44,12 @@ jobs:
       - name: Tester la date individuelle, la fraîcheur et le statut TVA
         run: python3 -m unittest discover -s tests -p 'test_awin_pages.py' -v
 
-      - name: Vérifier que le snapshot réel ne transforme pas la date d'import en date de prix
+      - name: Vérifier le snapshot réel sans confondre import et mise à jour du prix
         run: |
           python3 - <<'PY'
           import json
-          from datetime import datetime, timedelta, timezone
+          import re
+          from datetime import datetime, timezone
           from pathlib import Path
           import sys
 
@@ -58,18 +59,20 @@ jobs:
           feed = json.loads(Path("data/awin-products.json").read_text(encoding="utf-8"))
           now = datetime.now(timezone.utc)
           generated = pages.build(feed, now=now)
-          shown = 0
-          for html in generated.values():
-              shown += html.count("<strong>")
-          source_rows = feed.get("products") or []
-          fresh_rows = sum(
-              1 for row in source_rows
-              if pages.parse_feed_time(row.get("merchantUpdatedAt")) is not None
-              and timedelta(minutes=-5) <= now - pages.parse_feed_time(row.get("merchantUpdatedAt")) < timedelta(hours=48)
-              and str(row.get("priceTaxStatus") or row.get("price_tax_status") or "unspecified").lower() in ("included", "unspecified")
-              and row.get("priceValue") is not None
+          rendered_prices = sum(
+              len(re.findall(r"<strong>[^<]*€</strong>", html))
+              for html in generated.values()
           )
-          if shown > fresh_rows + 500:
-              raise SystemExit(f"Nombre de prix rendus anormalement élevé : {shown}; lignes marchandes fraîches : {fresh_rows}")
-          print(f"Pages générées : {len(generated)} ; prix issus de lignes avec date marchande fraîche : {fresh_rows}")
+          fresh_price_rows = sum(
+              1 for row in (feed.get("products") or [])
+              if (pages.eligible(row, now) or {}).get("price") is not None
+          )
+          if rendered_prices > fresh_price_rows:
+              raise SystemExit(
+                  f"Prix affichés ({rendered_prices}) > lignes marchandes fraîches admissibles ({fresh_price_rows})"
+              )
+          print(
+              f"Pages générées : {len(generated)} ; prix chiffrés affichés : {rendered_prices} ; "
+              f"lignes marchandes fraîches admissibles : {fresh_price_rows}"
+          )
           PY
