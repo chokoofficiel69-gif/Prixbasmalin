@@ -549,3 +549,16 @@ canvas.spectrum { width: 100%; height: 120px; background: linear-gradient(180deg
 .vibe-name { font-weight: 800; font-size: 13px; letter-spacing: .02em; }
 .vibe-hint { font-size: 10px; color: var(--muted); }
 :root[data-theme="light"] .vibe-tile { background: linear-gradient(180deg,#fff,#eef0f8); }
+
+/* ===== Panneau « Analyse vocale » (cercle de qualité + coches) ===== */
+.score-body { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.score-gauge { flex: none; width: 86px; height: 86px; }
+.score-gauge svg { width: 100%; height: 100%; display: block; }
+.score-list { display: grid; gap: 5px; min-width: 150px; flex: 1; }
+.score-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.score-check { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; color: #07120d; }
+.score-check[data-s="ok"] { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,.5); }
+.score-check[data-s="warn"] { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,.5); }
+.score-check[data-s="bad"] { background: #ef4444; color: #fff; box-shadow: 0 0 8px rgba(239,68,68,.5); }
+.score-label { flex: 1; }
+.score-pct { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text); }

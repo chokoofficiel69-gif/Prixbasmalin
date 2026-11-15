@@ -16,6 +16,7 @@ import { analyzeVoiceDsp, voiceDspRecommendations } from '../lib/ingexpert-dsp.j
 import { evaluateExpertPass, expertAgentSummary } from '../lib/expert-agent.js';
 import { expertFace } from '../lib/expertface.js';
 import { UNITS, unitById, buildFx, totalPresets, QUICK_VIBES, buildVibe } from '../lib/vocalunits.js';
+import { scoreVoice } from '../lib/voicescore.js';
 import { optionDial } from '../lib/optiondial.js';
 
 const VOICE_PRESETS = {
@@ -1769,6 +1770,30 @@ export async function render(el, { params }) {
     btn.disabled = false;
   }
 
+  // Panneau « Analyse vocale » : cercle de qualité + coches, à partir des mesures réelles.
+  function buildScorePanel(em) {
+    const r = scoreVoice(em);
+    if (r.overall == null) return null;
+    const circ = 2 * Math.PI * 34;
+    const off = circ * (1 - r.overall / 100);
+    const color = r.overall >= 80 ? '#22d3ee' : r.overall >= 60 ? '#f59e0b' : '#ef4444';
+    const gauge = document.createElement('div'); gauge.className = 'score-gauge';
+    gauge.innerHTML = `<svg viewBox="0 0 80 80" aria-label="Qualité ${r.overall} %">
+      <circle cx="40" cy="40" r="34" fill="none" stroke="#242044" stroke-width="7"/>
+      <circle cx="40" cy="40" r="34" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"
+        stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 40 40)"
+        style="filter:drop-shadow(0 0 5px ${color})"/>
+      <text x="40" y="43" text-anchor="middle" font-size="21" font-weight="800" fill="#fff">${r.overall}</text>
+      <text x="40" y="55" text-anchor="middle" font-size="8" fill="#9aa3c7">QUALITÉ</text>
+    </svg>`;
+    const list = h('div.score-list', ...r.items.map(it => h('div.score-item',
+      h('span.score-check', { 'data-s': it.status }, it.status === 'ok' ? '✓' : it.status === 'warn' ? '!' : '✕'),
+      h('span.score-label', it.label),
+      h('span.score-pct', it.pct + ' %'))));
+    return h('div.card.score-panel', { style: { padding: '10px' } },
+      h('div.row', h('strong.small.grow', '🎚️ Analyse vocale'), h('span.tiny.muted', 'mesures réelles · 0 € · local')),
+      h('div.score-body', gauge, list));
+  }
   function drawInge() {
     if (!ingeReport) return;
     ingeReport.innerHTML = '';
@@ -1780,6 +1805,7 @@ export async function render(el, { params }) {
     roleSel.onchange = async () => { t.role = roleSel.value; if (t.role === 'adlib') t.adlibIndex = tracks.filter(x => x.kind === 'voix' && x.role === 'adlib' && x !== t).length; try { await processTake(t); } catch (e) { toastErr(e); } };
     ingeReport.append(
       h('div.row', h('span.small', 'Rôle :'), h('div.grow', roleSel), h('span.tiny.muted', g.seconds != null ? `traité en ${g.seconds} s` : '')),
+      ...(g.expert && g.em ? [buildScorePanel(g.em)].filter(Boolean) : []),
       h('pre.small', { style: { whiteSpace: 'pre-wrap', background: 'var(--bg)', padding: '8px', borderRadius: '10px', margin: 0 } }, g.reportText || buildReport(g)),
       h('div.row', h('button.btn.small', { onclick: () => abIng(t, 'a') }, 'A · prise brute'), h('button.btn.small.primary', { onclick: () => abIng(t, 'b') }, 'B · traitée')),
       ...(g.expert ? [h('div.card.stack', { style: { padding: '10px' } },
