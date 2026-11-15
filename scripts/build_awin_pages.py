@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Pages statiques « Sélection produits » construites depuis le flux Awin autorisé.
+"""Pages statiques « Sélection produits » construites depuis le catalogue Awin compact à images vérifiées.
 
 - /produits/<catégorie>.html : jusqu'à 48 produits par catégorie, lisibles par Google
   (le catalogue charge le flux en JavaScript, invisible pour les moteurs).
 - /produits/index.html : sommaire des catégories.
+- Source obligatoire : data/awin-catalogue.json avec image_policy=authorized_feed_images_only ;
+  les images non validées sont exclues avant la génération.
 
 Règles :
 - feedUpdatedAt vérifie uniquement l'ancienneté du snapshot catalogue (7 jours maximum) ;
@@ -29,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_seo_pages import date_fr, e, euro, fit_description, fit_title, layout  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-FEED = ROOT / "data" / "awin-products.json"
+FEED = ROOT / "data" / "awin-catalogue.json"
 FOLDER = "produits"
 MAX_FEED_AGE = timedelta(days=7)
 MAX_MERCHANT_PRICE_AGE = timedelta(hours=48)
@@ -44,6 +46,7 @@ CATEGORIES = OrderedDict([
 ])
 EXCLUDED = re.compile(r"bandelette|glyc[eé]mie|glucose|glucom|diab[eè]t|lancette|tensiom|lingerie|string|culotte|slip|shipping protection|protection|assurance|insurance|carte cadeau|gift ?card|e-?gift|frais de port|échantillon|sample", re.I)
 MIN_PRICE = 5.0
+IMAGE_POLICY = "authorized_feed_images_only"
 
 
 def clean(text):
@@ -61,7 +64,7 @@ def parse_feed_time(value):
     return moment.replace(tzinfo=timezone.utc) if moment.tzinfo is None else moment.astimezone(timezone.utc)
 
 
-def eligible(p, now):
+def eligible(p, now, feed_fetched_at=None):
     try:
         price = float(p.get("priceValue"))
     except (TypeError, ValueError):
@@ -69,7 +72,7 @@ def eligible(p, now):
     image = str(p.get("image") or "")
     url = str(p.get("sourceUrl") or "")
     name = clean(p.get("name"))
-    feed_time = parse_feed_time(p.get("feedUpdatedAt"))
+    feed_time = parse_feed_time(p.get("feedUpdatedAt") or feed_fetched_at)
     merchant_time = parse_feed_time(p.get("merchantUpdatedAt"))
     if not (name and p.get("merchant") and image.startswith("https://") and url.startswith("https://")):
         return None
@@ -149,7 +152,14 @@ def card(p):
             f'<small>{e(price_note)}</small></div></a>')
 
 
-NOTICE = ('<p class="source">Sélection de produits issus des flux Awin accessibles au compte éditeur. '
+AWIN_MOBILE_CSS = """<style>
+@media(max-width:560px){
+  .pm-cards{display:flex!important;flex-flow:row nowrap!important;gap:10px!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:2px 2px 12px!important}
+  .pm-cards .pm-card{flex:0 0 min(74vw,230px)!important;width:min(74vw,230px)!important;min-width:0!important;scroll-snap-align:start}
+}
+</style>"""
+
+NOTICE = ('<p class="source">Sélection de produits issus des flux Awin accessibles au compte éditeur ; visuels filtrés par la politique d’images marchandes autorisées. '
           'Un prix source n’est affiché que si le marchand fournit une date individuelle de mise à jour de moins de 48 h. '
           'Si la TVA n’est pas explicitement confirmée, la mention « TVA non confirmée » apparaît : ce montant ne constitue pas un prix TTC vérifié ni une comparaison multi-marchands. '
           'Les frais de livraison inconnus sont à vérifier. Le prix et la disponibilité peuvent changer : vérifiez-les chez le marchand. '
@@ -183,7 +193,7 @@ def category_page(slug, label, intro, items, others):
         fit_description(f"Sélection {label.lower()} issue des flux Awin accessibles. Prix source daté affiché uniquement si une date individuelle du marchand de moins de 48 h est fournie."),
         f"/{FOLDER}/{slug}.html", body,
         [("Accueil", "/"), ("Sélection produits", f"/{FOLDER}/"), (label, f"/{FOLDER}/{slug}.html")],
-        extra_head=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n')
+        extra_head=AWIN_MOBILE_CSS + f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>\n')
 
 
 def index_page(groups):
@@ -199,12 +209,15 @@ def index_page(groups):
     return layout(
         "Sélection produits des flux marchands | Prix Malin",
         fit_description(f"{total} produits issus de flux Awin accessibles, classés par rayon. Prix source affiché uniquement avec date individuelle du marchand de moins de 48 h."),
-        f"/{FOLDER}/", body, [("Accueil", "/"), ("Sélection produits", f"/{FOLDER}/")])
+        f"/{FOLDER}/", body, [("Accueil", "/"), ("Sélection produits", f"/{FOLDER}/")], extra_head=AWIN_MOBILE_CSS)
 
 
 def build(feed, now=None):
+    if feed.get("image_policy") != IMAGE_POLICY:
+        raise ValueError("Flux Awin sans politique d’image marchande vérifiée.")
     now = now or datetime.now(timezone.utc)
-    rows = [(p.get("category"), eligible(p, now)) for p in feed.get("products") or []]
+    feed_fetched_at = feed.get("fetched_at")
+    rows = [(p.get("category"), eligible(p, now, feed_fetched_at)) for p in feed.get("products") or []]
     groups = []
     for slug, (label, intro) in CATEGORIES.items():
         items = select([p for cat, p in rows if cat == slug and p])
@@ -222,8 +235,8 @@ def main():
     parser.add_argument("--feed", default=str(FEED))
     args = parser.parse_args()
     feed = json.loads(Path(args.feed).read_text(encoding="utf-8"))
-    if feed.get("status") != "ok":
-        print("Flux Awin non exploitable : pages précédentes conservées.")
+    if feed.get("status") != "ok" or feed.get("image_policy") != IMAGE_POLICY:
+        print("Flux Awin non exploitable ou images non vérifiées : pages précédentes conservées.")
         return 0
     files = build(feed)
     if not files:
