@@ -682,6 +682,45 @@ export async function render(el, { params }) {
     return root;
   }
 
+
+  // Bibliothèque de références : mesures extraites des 8 MP3 fournis.
+  // Les valeurs décrivent trois fenêtres locales (début, milieu, fin), pas un mastering intégré.
+  function viewReferences() {
+    const refs = [
+      {artist:'La Fouine & Sinik',title:'Poudrière',duration:'3:49',windows:[['Début','−3,5','−21,7','18,1'],['Milieu','+0,9','−9,8','10,7'],['Fin','+1,2','−10,2','11,4']],note:'Le début est nettement moins dense que les fenêtres centrales et finales. Les crêtes décodées positives peuvent venir du dépassement inter-échantillons MP3 : elles ne prouvent pas à elles seules une saturation audible.'},
+      {artist:'Niro',title:'21 Grammes',duration:'2:45',windows:[['Début','−1,5','−18,7','17,3'],['Milieu','+0,4','−10,1','10,6'],['Fin','silence','silence','—']],note:'La fenêtre centrale est beaucoup plus dense que l’introduction. La fenêtre finale analysée est silencieuse.'},
+      {artist:'PNL',title:'Au DD',duration:'4:50',windows:[['Début','−7,0','−23,1','16,1'],['Milieu','+0,5','−11,2','11,7'],['Fin','−16,7','−29,4','12,7']],note:'Contraste marqué entre l’introduction, le passage central et la fin. Ne pas confondre une section calme avec le niveau global du morceau.'},
+      {artist:'PNL',title:'Blanka',duration:'5:04',windows:[['Début','−17,7','−32,5','14,8'],['Milieu','+1,1','−10,2','11,3'],['Fin','−10,4','−33,1','22,7']],note:'Les trois fenêtres sont très différentes en niveau. La fin analysée est particulièrement peu dense ; les crêtes décodées ne suffisent pas à conclure à un clipping audible.'},
+      {artist:'PNL',title:'Naha',duration:'8:00',windows:[['Début','+1,0','−15,8','16,8'],['Milieu','−0,2','−13,1','13,0'],['Fin','−5,5','−16,9','11,3']],note:'Les niveaux RMS des trois fenêtres sont plus proches que sur plusieurs autres références. Cela ne décrit pas à lui seul l’équilibre tonal ou la largeur stéréo.'},
+      {artist:'SCH',title:'⏳',duration:'4:34',windows:[['Début','−0,1','−17,4','17,3'],['Milieu','+0,8','−9,9','10,7'],['Fin','+0,3','−13,0','13,4']],note:'La fenêtre centrale est plus dense que le début et la fin. La dynamique locale varie selon la section.'},
+      {artist:'Willylancien',title:'coco-açaï',duration:'3:17',windows:[['Début','−3,5','−24,2','20,7'],['Milieu','−1,7','−13,9','12,2'],['Fin','−0,2','−17,2','17,0']],note:'Le passage central est plus dense que les fenêtres de début et de fin. La fin remonte en crête tout en restant moins dense que le milieu.'},
+      {artist:'Willylancien',title:'WILLY #1',duration:'7:41',windows:[['Début','−8,6','−27,0','18,3'],['Milieu','−4,5','−15,2','10,8'],['Fin','−5,5','−20,2','14,7']],note:'La fenêtre centrale est la plus dense des trois. Les mesures sont des estimations RMS/crête sur des extraits de 12 secondes.'}
+    ];
+    const root=h('div');
+    const intro=h('div.panel',h('div.ph','Bibliothèque de références audio',h('span.r','8 morceaux analysés')),
+      h('div.pb',
+        h('div.muted',{style:{lineHeight:'1.6'}},'Références privées fournies pour guider le travail de Marco. Les MP3 originaux ne sont pas copiés dans le dépôt. Les mesures ci-dessous proviennent de fenêtres de 12 secondes au début, au milieu et à la fin de chaque fichier. Crête = dBFS décodé ; RMS = dBFS ; crest = différence crête/RMS. Ce ne sont pas des mesures LUFS intégrées.'),
+        h('div.muted',{style:{marginTop:'7px',lineHeight:'1.6',color:'#ffd789'}},'Important : une crête décodée supérieure à 0 dBFS peut être un dépassement inter-échantillons du MP3. Cela ne prouve pas une saturation audible. Les réglages originaux, plugins et chaînes exactes ne peuvent pas être déduits de façon fiable du mix stéréo final.')));
+    root.append(intro);
+    const grid=h('div.grid',{style:{gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',marginTop:'12px'}});
+    for(const r of refs){
+      const rows=h('div',{style:{display:'grid',gridTemplateColumns:'65px repeat(3,minmax(0,1fr))',gap:'5px',fontSize:'10px',marginTop:'9px'}});
+      rows.append(h('b','Fenêtre'),h('b','Crête'),h('b','RMS'),h('b','Crest'));
+      for(const w of r.windows) rows.append(h('span.muted',w[0]),h('span',w[1]+' dB'),h('span',w[2]==='silence'?'silence':w[2]+' dB'),h('span',w[3]==='—'?'—':w[3]+' dB'));
+      grid.append(h('div.panel',h('div.ph',r.artist+' — '+r.title,h('span.r',r.duration)),
+        h('div.pb',rows,h('div.muted',{style:{marginTop:'10px',lineHeight:'1.5'}},r.note))));
+    }
+    root.append(grid,
+      h('div.panel',{style:{marginTop:'12px'}},h('div.ph','Comment Marco doit exploiter ces références'),
+        h('div.pb',
+          h('ol',{style:{paddingLeft:'19px',margin:'0',lineHeight:'1.7',fontSize:'12px'}},
+            h('li','S’en servir comme repères d’écoute et de comparaison, pas comme presets à copier aveuglément.'),
+            h('li','Analyser séparément la voix, l’instrumental et le mix complet dès que des stems sont disponibles.'),
+            h('li','Mesurer le projet de l’utilisateur avant de proposer EQ, compression, spatialisation ou mastering.'),
+            h('li','Expliquer les traitements proposés et laisser l’utilisateur valider avant rendu destructif.')))));
+    return root;
+  }
+
   function viewIA() {
     const root = h('div');
     const voiceOptions = voixTracks();
@@ -830,6 +869,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
     rec: { t: '🎙️ Enregistrement', r: viewRec },
     fx: { t: '🎛️ Effets & molettes', r: viewFx },
     repo: { t: '📚 Répertoire', r: viewRepo },
+    references: { t: '🎧 Références audio', r: viewReferences },
     ia: { t: '🧠 IA Expert', r: viewIA },
   };
 
