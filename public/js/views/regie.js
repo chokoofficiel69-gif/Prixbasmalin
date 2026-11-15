@@ -5,7 +5,7 @@
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
 import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder, sse } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
-import { decodeBlob, drawWave, voiceChain, denoise, detectBeats, normalize, gate, antipop, limit, master } from '../lib/audio.js';
+import { decodeBlob, drawWave, voiceChain, denoise, detectBeats, normalize, gate, antipop, limit, master, mix, encodeWav } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
 
 // ---------------------------------------------------------------- styles (tout préfixé .regie)
@@ -866,9 +866,31 @@ export async function render(el, { params }) {
     main.append(view);
   }
 
+  async function exportMix() {
+    const audible = tracks.filter(t => t.buffer);
+    if (!audible.length) { toast('Aucune piste audio à exporter.', 'bad'); return; }
+    const anySolo = audible.some(t => t.solo);
+    try {
+      toast('Préparation du mix WAV…');
+      const mixTracks = audible.map(t => ({ ...t, mute: anySolo ? !t.solo : !!t.mute }));
+      const rendered = await mix(mixTracks, 44100);
+      const blob = encodeWav(rendered, 24);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeName = (proj.name || 'projet').replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'projet';
+      a.href = url; a.download = safeName + '-mix-24bit.wav';
+      document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      toast('Mix WAV 24 bits exporté.', 'ok');
+    } catch (e) {
+      toastErr(e);
+      toast('Échec de l’export WAV.', 'bad');
+    }
+  }
+
   function renderSidebar() {
     const groups = [
-      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter (bientôt)', null]] },
+      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter le mix WAV 24 bits', exportMix]] },
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => go('timeline'), trackColor(t, i)]) },
       { ic: '🎛️', t: 'Modules', items: [['🎤', 'Auto-Tune', () => go('fx')], ['🎚️', 'Égaliseur', () => go('fx')], ['🗜️', 'Compression', () => go('fx')], ['🌫️', 'Réverbe', () => go('fx')], ['🔁', 'Delay', () => go('fx')], ['🎼', 'Harmonies', () => go('fx')]] },
       { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
