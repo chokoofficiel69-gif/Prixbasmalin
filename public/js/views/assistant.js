@@ -238,7 +238,8 @@ export function mountAssistant(S) {
       if (!j) throw new Error('réponse illisible');
       busy = false;
       const actions = validateAgentActions(j.actions, text);
-      const reply = typeof j.reponse === 'string' ? j.reponse.trim().slice(0, 700) : 'Je peux t’aider sur ce point.';\n      await run(actions, reply);
+      const reply = typeof j.reponse === 'string' ? j.reponse.trim().slice(0, 700) : 'Je peux t’aider sur ce point.';
+      await run(actions, reply);
     } catch (e) { busy = false; status.textContent = on ? '👂 Je t’écoute…' : ''; await say(/quota|429|limite|attendre/i.test(e?.message || '') ? 'Les IA gratuites sont saturées, réessaie dans une minute.' : 'Je n’ai pas compris, redis-le plus simplement.'); }
     drain();
   }
