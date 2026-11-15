@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/monitor-production.yml"
+      - ".github/workflows/rotate-home-deals.yml"
       - "js/track-outbound.js"
       - "workers/prixbasmalin-attribution.js"
       - "workers/prixbasmalin-ai.js"
