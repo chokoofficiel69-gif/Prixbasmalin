@@ -1352,7 +1352,7 @@ export async function render(el, { params }) {
         if (kind === 'keep') return sliceBuffer(b, r[0], r[1]);
         if (kind === 'delete') return removeRange(b, r[0], r[1]);
         const o2 = cloneBuffer(b), a = Math.floor(r[0] * b.sampleRate), z = Math.min(b.length, Math.floor(r[1] * b.sampleRate)), f = Math.floor(0.01 * b.sampleRate);
-        for (let c = 0; c < o2.numberOfChannels; c++) { const d = o2.getChannelData(c); for (let i = a; i < z; i++) { const k = Math.min(1, (i - a) / f, (z - i) / f); d[i] *= 1 - k; } }
+        for (let c = 0; c < o2.numberOfChannels; c++) { const d = o2.getChannelData(c); for (let i = a; i < z; i++) { if (kind === 'erase') d[i] = 0; else { const k = Math.min(1, (i - a) / f, (z - i) / f); d[i] *= 1 - k; } } }
         return o2;
       });
       if (kind === 'keep') t.offset = (t.offset || 0) + r[0];
