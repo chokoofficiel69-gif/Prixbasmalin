@@ -9,6 +9,7 @@ import {
   DATA_DIR, ensureDirs, ensureUserDirs, newId, readJson, writeJson, getSettings, saveSettings, DEFAULT_SETTINGS,
   getUsers, saveUsers, getUser, findUserByName, publicUser, DEFAULT_USER_LIMITS, migrateLegacy, migrateQuotas, allocatedTokens,
   getProjects, saveProjects, getProject, listConversations, getConversation, saveConversation, deleteConversation,
+  getCompanionProfile, saveCompanionProfile,
   listFiles, getFileMeta, filePath, addFileMeta, updateFileMeta, removeFile, storageUsed, storageUsedAll,
 } from './store.js';
 import { loadUsage, record, guard, summary, perUser, costOf } from './usage.js';
@@ -647,6 +648,17 @@ route('POST', '/api/transcribe', async (req, res, p, user) => {
     record({ uid: user.id, kind: 'transcription', model: 'auto', ok: false, err: err.message, ms: Date.now() - t0 });
     fail(res, err.status || 502, err.message);
   }
+});
+
+// --- Compagnon personnel : profil et mémoire partagés entre La Rue et La Ruse ---
+route('GET', '/api/companion', (req, res, p, user) => ok(res, getCompanionProfile(user.id)));
+route('PUT', '/api/companion', async (req, res, p, user) => {
+  const body = await readJsonBody(req, 30000);
+  const profile = saveCompanionProfile(user.id, {
+    ...(typeof body.memory === 'string' ? { memory: body.memory } : {}),
+    ...(body.avatar === 'rue' || body.avatar === 'ruse' ? { avatar: body.avatar } : {}),
+  });
+  ok(res, profile);
 });
 
 // --- Projets ---
