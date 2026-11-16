@@ -112,15 +112,26 @@ const PORTRAIT_SVG = `
   </g>
 </svg>`;
 
+const PORTRAIT_RUSE_SVG = PORTRAIT_SVG
+  .replace('La Rue, ingénieur du son IA', 'La Ruse, assistante IA')
+  .replace('<path d="M33 49 Q26 27 40 15 Q53 4 73 12 Q91 18 88 45 L83 38 Q79 29 70 28 Q56 33 42 27 L38 47Z" fill="url(#ef-hair)"/>',
+    '<path d="M33 49 Q25 27 34 13 Q45 0 64 5 Q89 5 91 29 Q97 48 86 62 L85 92 Q80 101 74 94 L77 58 Q72 43 60 40 Q47 43 41 58 L44 94 Q37 101 31 92Z" fill="url(#ef-hair)"/>')
+  .replace('<path d="M39 25 Q54 18 68 23 Q78 24 84 34 Q70 29 61 31 Q48 33 39 29Z" fill="#40516a" opacity=".7"/>',
+    '<path d="M36 25 Q49 12 66 18 Q80 20 88 35 Q74 29 63 31 Q49 34 38 40Z" fill="#52647d" opacity=".78"/>')
+  .replace('<path d="M43 78 Q46 91 60 93 Q74 91 77 78" fill="none" stroke="#77524d" stroke-opacity=".34" stroke-width="4" stroke-linecap="round"/>',
+    '<path d="M51 81 Q60 85 69 81" fill="none" stroke="#a64d68" stroke-width="2.4" stroke-linecap="round"/>')
+  .replace('Portrait humanoïde de La Rue', 'Portrait humanoïde de La Ruse');
+
 const STATUS_TEXT = { idle: 'En ligne', thinking: 'Analyse en cours…', speaking: 'Il te parle…' };
 
 /** Construit la carte avatar. Retourne { el, setState(state), setStatus(text) }. */
-export function expertFace({ name, role } = {}) {
+export function expertFace({ name, role, avatar = 'rue' } = {}) {
   ensureCss();
   const cap = faceCaption(name, role);
   const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const portrait = mk('div', 'ef-portrait');
-  portrait.innerHTML = PORTRAIT_SVG;
+  let currentAvatar = avatar === 'ruse' ? 'ruse' : 'rue';
+  portrait.innerHTML = currentAvatar === 'ruse' ? PORTRAIT_RUSE_SVG : PORTRAIT_SVG;
   const statusText = mk('span', '', STATUS_TEXT.idle);
   const status = mk('span', 'ef-status');
   status.append(mk('span', 'ef-dot'), statusText);
@@ -131,5 +142,6 @@ export function expertFace({ name, role } = {}) {
   el.append(portrait, meta);
   const setState = (s) => { const st = normalizeState(s); el.dataset.state = st; statusText.textContent = STATUS_TEXT[st]; };
   const setStatus = (text) => { statusText.textContent = String(text || STATUS_TEXT[el.dataset.state] || ''); };
-  return { el, setState, setStatus };
+  const setAvatar = (next) => { currentAvatar = next === 'ruse' ? 'ruse' : 'rue'; portrait.innerHTML = currentAvatar === 'ruse' ? PORTRAIT_RUSE_SVG : PORTRAIT_SVG; };
+  return { el, setState, setStatus, setAvatar };
 }
