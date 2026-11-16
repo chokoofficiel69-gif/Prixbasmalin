@@ -81,7 +81,7 @@ Actions possibles (exécutées dans l'ordre, sur la piste sélectionnée sauf in
 {"a":"versions"} préparer plusieurs versions du master · {"a":"save"} enregistrer le master dans ses fichiers · {"a":"download"} télécharger le master
 Règles de raisonnement : tu es un véritable assistant de studio et un ingénieur du son pédagogue, naturel et pro. Comprends le français oral, les formulations familières, les fautes de transcription et les demandes indirectes. Tiens compte de l'état du studio et des derniers échanges. Ne transforme pas une question en action : explique clairement quand l'artiste demande un avis ou une explication. Quand il demande une action claire, exécute-la avec les outils disponibles. Si une précision indispensable manque, pose UNE seule question courte. Propose spontanément une amélioration utile quand elle est pertinente, sans imposer de traitement. Préserve toujours la prise originale ; privilégie les opérations réversibles. N'invente jamais une piste, une écoute, une mesure ou un résultat. Ne prétends jamais qu'une action est faite avant son exécution réussie. Ne supprime jamais une piste sans demande explicite. Pour « moins de réverbe / c'était mieux avant », annule uniquement si une étape récente peut raisonnablement être annulée ; sinon demande ce que l'artiste veut réduire. « Plus de réverbe » : chaîne légère, mix 0.12-0.2. « Voix plus grave/aiguë » : shift, pas autotune. « Chante juste / corrige mes fausses notes » : tune parfait (ou belle si chant), jamais deux autotunes superposés. Pour un style musical, combine intelligemment voix + justesse + effets subtils selon le contexte. Réponds en français naturel, tutoiement, ton humain, direct, sans formule robotique. Réponse concise mais assez développée pour être utile ; pas de limite artificielle à 15 mots.`;
 
-export function mountAssistant(S) {
+export function mountAssistant(S, options = {}) {
   const R = window.SpeechRecognition || window.webkitSpeechRecognition;
   const SERVER_VOICES = ['nova', 'shimmer', 'alloy', 'onyx', 'echo', 'fable'];
   const audioCache = new Map(); let serverBlocked = false;
@@ -140,13 +140,17 @@ export function mountAssistant(S) {
       } catch { resolve(); }
     });
   }
+  const setVoiceState = (state) => { try { options.onVoiceState?.(state); } catch {} };
   async function say(text) {
     add('ia', text);
     if (!voiceOut.checked || !text) return;
-    speaking = true; try { rec?.abort(); } catch {}
-    // garde-fou : certaines voix ne signalent jamais la fin
-    await Promise.race([talk(text), new Promise(r => setTimeout(r, 1500 + text.length * 80))]);
-    speaking = false; listen();
+    speaking = true; setVoiceState('speaking'); try { rec?.abort(); } catch {}
+    try {
+      // garde-fou : certaines voix ne signalent jamais la fin
+      await Promise.race([talk(text), new Promise(r => setTimeout(r, 1500 + text.length * 80))]);
+    } finally {
+      speaking = false; setVoiceState('idle'); listen();
+    }
   }
 
   // ---------- Écoute continue ----------
