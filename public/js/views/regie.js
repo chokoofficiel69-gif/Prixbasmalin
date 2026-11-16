@@ -940,7 +940,9 @@ RÈGLES D’UTILISATION :
             voiceDsp.pitchAnalysis = { available: false, reason: String(pitchError?.message || pitchError).slice(0,180) };
           }
         }
-        const context = { piste: t?.name || null, type_piste: t?.kind || null, analyse_signal_mesuree: signalAnalysis, diagnostic_spectral_voix: voiceDsp, conseils_mesures: voiceDspTips, autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
+        let previousTakeReport = null;
+        try { previousTakeReport = JSON.parse(localStorage.getItem('studio.la-zone.last-take.' + String(state.projectId || 'default')) || 'null'); } catch {}
+        const context = { piste: t?.name || null, type_piste: t?.kind || null, analyse_signal_mesuree: signalAnalysis, diagnostic_spectral_voix: voiceDsp, conseils_mesures: voiceDspTips, analyse_automatique_derniere_prise: previousTakeReport, autres_pistes: tracks.map(x=>({nom:x.name,type:x.kind,duree:x.buffer?.duration||0,volumeDb:x.gainDb||0,pan:x.pan||0,mute:!!x.mute})) };
         const chosen = selectedEffects();
         const chosenLine = chosen.length ? `Effets expressément sélectionnés par l’utilisateur (n’en ajoute aucun autre) : ${chosen.join(', ')}.` : 'Aucun effet imposé : choisis les traitements adaptés à la demande.';
         const targetMaster = masterStyle.value;
