@@ -20,19 +20,24 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
     chrome.tabs.create({ url: url.href, active: true }, tab => {
       if (chrome.runtime.lastError || !tab?.id) { sendResponse({ error: chrome.runtime.lastError?.message || "Onglet impossible à ouvrir." }); return; }
       const tabId = tab.id;
-      const listener = (updatedId, changeInfo, updatedTab) => {
-        if (updatedId !== tabId || changeInfo.status !== "complete") return;
-        chrome.tabs.onUpdated.removeListener(listener);
-        sendResponse({ ok: true, opened: updatedTab.url || url.href });
-      };
-      chrome.tabs.onUpdated.addListener(listener);
-      setTimeout(() => {
+      let responded = false;
+      const timer = setTimeout(() => {
+        if (responded) return;
+        responded = true;
         chrome.tabs.onUpdated.removeListener(listener);
         chrome.tabs.get(tabId, current => {
           if (chrome.runtime.lastError) sendResponse({ error: "Page ouverte, mais chargement non confirmé." });
           else sendResponse({ ok: true, opened: current?.url || url.href, loading: true });
         });
       }, 20000);
+      const listener = (updatedId, changeInfo, updatedTab) => {
+        if (updatedId !== tabId || changeInfo.status !== "complete" || responded) return;
+        responded = true;
+        clearTimeout(timer);
+        chrome.tabs.onUpdated.removeListener(listener);
+        sendResponse({ ok: true, opened: updatedTab.url || url.href });
+      };
+      chrome.tabs.onUpdated.addListener(listener);
     });
     return true;
   }
