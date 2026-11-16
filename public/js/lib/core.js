@@ -263,13 +263,13 @@ export function stopSpeaking() {
   try { speechSynthesis.cancel(); } catch {}
   const d = speakDone; speakDone = null; d?.();
 }
-export async function speak(text, { preferBrowser = false } = {}) {
+export async function speak(text, { preferBrowser = false, voiceGender = null, voiceName = null, serverVoice = null } = {}) {
   stopSpeaking();
   const clean = String(text).replace(/```[\s\S]*?```/g, ' (code) ').replace(/[#*_`>|]/g, '').slice(0, 3000);
   if (!clean.trim()) return;
   if (!preferBrowser) {
     try {
-      const res = await api('/api/speech', { method: 'POST', body: { input: clean }, raw: true });
+      const res = await api('/api/speech', { method: 'POST', body: { input: clean, ...(serverVoice ? { voice: serverVoice } : {}) }, raw: true });
       const blob = await res.blob();
       const a = new Audio(URL.createObjectURL(blob));
       currentAudio = a;
@@ -282,7 +282,10 @@ export async function speak(text, { preferBrowser = false } = {}) {
     speakDone = resolve;
     const u = new SpeechSynthesisUtterance(clean);
     u.lang = 'fr-FR';
-    const v = speechSynthesis.getVoices().find(v => v.lang?.startsWith('fr'));
+    const voices = speechSynthesis.getVoices().filter(v => v.lang?.startsWith('fr'));
+    const named = voiceName && voices.find(v => v.name === voiceName);
+    const pattern = voiceGender === 'female' ? /female|femme|denise|julie|céline|celine|audrey|marie|amélie|amelie|hortense|vivienne/i : voiceGender === 'male' ? /male|homme|thomas|henri|paul|nicolas|antoine|remy|rémi/i : null;
+    const v = named || (pattern && voices.find(v => pattern.test(v.name))) || voices[0];
     if (v) u.voice = v;
     u.onend = resolve; u.onerror = resolve;
     speechSynthesis.speak(u);
