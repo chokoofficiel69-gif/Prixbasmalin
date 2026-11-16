@@ -709,7 +709,7 @@ route('POST', '/api/companion/run', async (req, res, p, user) => {
   const projectId = getProject(user.id, String(body.projectId || ''))?.id || getProjects(user.id)[0]?.id;
   const profile = getCompanionProfile(user.id);
   const latestUserText = String([...messages].reverse().find(m => m.role === 'user')?.content || '').toLowerCase();
-  const allowMemorySave = /\\b(retiens|retient|memorise|mémorise|souviens[- ]toi|garde en memoire|garde en mémoire|enregistre dans ta memoire|enregistre dans ta mémoire|n oublie pas|n'oublie pas)\\b/.test(latestUserText);
+  const allowMemorySave = /\b(retiens|retient|memorise|mémorise|souviens[- ]toi|garde en memoire|garde en mémoire|enregistre dans ta memoire|enregistre dans ta mémoire|n oublie pas|n'oublie pas)\b/.test(latestUserText);
   const emit = sseStart(res);
   const ctrl = new AbortController();
   res.on('close', () => { if (!res.writableEnded) ctrl.abort(new Error('client parti')); });
