@@ -771,6 +771,12 @@ RÈGLES D’UTILISATION :
       voiceOptions.length ? voiceOptions.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const trackNow = () => tracks[Number(trackSel.value)];
     const chat = h('div', { style: { minHeight: '230px', maxHeight: '44vh', overflow: 'auto', padding: '10px', background: '#090916', border: '1px solid var(--rline)', borderRadius: '10px' } });
+    // Historique local par projet : conservé après changement d’onglet ou rechargement.
+    const historyKey = 'studio.la-zone.history.' + String(state.projectId || 'default');
+    let conversation = [];
+    try { const saved = JSON.parse(localStorage.getItem(historyKey) || '[]'); if (Array.isArray(saved)) conversation = saved.filter(x => x && ['user','expert'].includes(x.who) && typeof x.txt === 'string').slice(-40); } catch {}
+    const renderMessage = ({ who, txt }) => chat.append(h('div', { style: { margin: '7px 0', padding: '9px 11px', borderRadius: '10px', background: who === 'expert' ? '#171636' : 'rgba(168,85,247,.18)', border: '1px solid var(--rline)', whiteSpace: 'pre-wrap', fontSize: '12px', lineHeight: '1.5' } }, h('b', who === 'expert' ? '🧔 La Zone' : 'Vous'), h('div', { style: { marginTop: '4px' } }, txt)));
+    conversation.forEach(renderMessage);
     const input = h('textarea', { rows: 3, placeholder: 'Dis à ton ingénieur ce que tu veux : « nettoie la voix, Auto-Tune naturel en La mineur, compression légère, EQ avec présence, réverbération courte et delay discret. Fais aussi ressortir l’instru sans masquer la voix. »', style: { width: '100%', resize: 'vertical', padding: '11px', borderRadius: '9px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' } });
     const masterStyle = h('select', { style: selStyle() },
       ...[['streaming','Streaming standard'],['spotify','Spotify / Deezer'],['youtube','YouTube'],['apple','Apple Music'],['tiktok','TikTok / Reels'],['podcast','Podcast / voix'],['rap','Rap / Trap punchy'],['club','Club / puissant'],['doux','Doux / acoustique']].map(([v,l]) => h('option', { value:v }, l)));
@@ -789,15 +795,20 @@ RÈGLES D’UTILISATION :
     const planBox = h('div', { style: { display: 'grid', gap: '6px', marginTop: '8px' } });
     const send = h('button.rbtn.p', '🎧 Envoyer à La Zone');
     const voiceBtn = h('button.rbtn', { type: 'button' }, '🎙️ Parler à La Zone');
-    const voiceStatus = h('div.muted', { style: { marginTop: '6px', fontSize: '11px' } }, 'Mode vocal navigateur : tu parles, puis La Zone répond. Ce mode n’est pas encore une conversation continue et interruptible.');
+    const voiceStatus = h('div.muted', { style: { marginTop: '6px', fontSize: '11px' } }, 'Mode mains libres : La Zone écoute, répond, puis rouvre le micro. Tu peux l’interrompre avec le bouton. Les échanges restent successifs, pas encore en audio temps réel simultané.');
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null, listening = false;
+    let recognition = null, listening = false, voiceSession = false;
     const speak = (text) => {
       if (!('speechSynthesis' in window) || !text) return;
       try { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(String(text)); utterance.lang = 'fr-FR'; utterance.rate = 0.96;
         const frenchVoices = window.speechSynthesis.getVoices().filter(v => /^fr([-_]|$)/i.test(v.lang || ''));
         const masculineVoice = frenchVoices.find(v => /male|homme|thomas|henri|paul|antoine|nicolas|mathieu|david|male/i.test(v.name || ''));
         if (masculineVoice) utterance.voice = masculineVoice;
+        utterance.onend = () => {
+          if (voiceSession && recognition && !busy) {
+            try { recognition.start(); } catch (e) { voiceStatus.textContent = 'Reprise du micro impossible : ' + (e?.message || e); }
+          }
+        };
         window.speechSynthesis.speak(utterance); } catch {}
     };
     const stopListening = () => { if (recognition && listening) { listening = false; try { recognition.stop(); } catch {} } };
@@ -806,13 +817,30 @@ RÈGLES D’UTILISATION :
       recognition.onstart = () => { listening = true; voiceBtn.textContent = '⏹️ Arrêter le micro'; voiceStatus.textContent = 'La Zone t’écoute…'; if ('speechSynthesis' in window) window.speechSynthesis.cancel(); };
       recognition.onresult = (event) => { let interim = '', finalText = ''; for (let i = event.resultIndex; i < event.results.length; i++) { const part = event.results[i][0]?.transcript || ''; if (event.results[i].isFinal) finalText += part; else interim += part; } if (interim) voiceStatus.textContent = 'J’entends : ' + interim; if (finalText.trim()) { input.value = finalText.trim(); voiceStatus.textContent = 'Demande reçue : ' + finalText.trim(); askExpert(finalText.trim()); } };
       recognition.onerror = (event) => { voiceStatus.textContent = 'Micro : ' + (event.error || 'erreur de reconnaissance'); };
-      recognition.onend = () => { listening = false; voiceBtn.textContent = '🎙️ Parler à La Zone'; if (!busy && !voiceStatus.textContent.startsWith('Demande reçue')) voiceStatus.textContent = 'Micro arrêté. Tu peux reprendre la conversation.'; };
+      recognition.onend = () => { listening = false; voiceBtn.textContent = voiceSession ? '⏹️ Terminer la conversation' : '🎙️ Parler à La Zone'; if (!voiceSession && !busy && !voiceStatus.textContent.startsWith('Demande reçue')) voiceStatus.textContent = 'Conversation vocale arrêtée.'; };
     } else { voiceBtn.disabled = true; voiceBtn.title = 'Reconnaissance vocale non disponible dans ce navigateur'; voiceStatus.textContent = 'La reconnaissance vocale du navigateur n’est pas disponible ici. Utilise Chrome ou Edge à jour et autorise le micro.'; }
-    voiceBtn.onclick = () => { if (!recognition) return; if (listening) { stopListening(); return; } try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); recognition.start(); } catch (e) { voiceStatus.textContent = 'Impossible de démarrer le micro : ' + (e?.message || e); } };
+    voiceBtn.onclick = () => {
+      if (!recognition) return;
+      if (voiceSession) {
+        voiceSession = false; stopListening();
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        voiceBtn.textContent = '🎙️ Parler à La Zone';
+        voiceStatus.textContent = 'Conversation vocale terminée.';
+        return;
+      }
+      voiceSession = true;
+      try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); recognition.start(); }
+      catch (e) { voiceSession = false; voiceStatus.textContent = 'Impossible de démarrer le micro : ' + (e?.message || e); }
+    };
     const applyBtn = h('button.rbtn.g', { disabled: true }, '✓ Exécuter les modifications');
     const undoBtn = h('button.rbtn', { disabled: true }, '↩ Restaurer l’original');
     let pendingPlan = null, busy = false;
-    const say = (who, txt) => chat.append(h('div', { style: { margin: '7px 0', padding: '9px 11px', borderRadius: '10px', background: who === 'expert' ? '#171636' : 'rgba(168,85,247,.18)', border: '1px solid var(--rline)', whiteSpace: 'pre-wrap', fontSize: '12px', lineHeight: '1.5' } }, h('b', who === 'expert' ? '🧔 La Zone' : 'Vous'), h('div', { style: { marginTop: '4px' } }, txt)));
+    const say = (who, txt) => {
+      const message = { who, txt: String(txt || '').slice(0, 6000), at: Date.now() };
+      conversation.push(message); conversation = conversation.slice(-40);
+      try { localStorage.setItem(historyKey, JSON.stringify(conversation)); } catch {}
+      renderMessage(message); chat.scrollTop = chat.scrollHeight;
+    };
     const parsePlan = (raw, chosen = []) => {
       const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
       const obj = JSON.parse(cleaned);
@@ -887,7 +915,7 @@ RÈGLES D’UTILISATION :
           { name: 'Contrôle qualité', role: 'auditeur critique : détecte les risques, traitements excessifs, incohérences et valide la chaîne proposée' }
         ];
         const task = `Tu es La Zone, le cerveau principal et l'ingénieur du son en chef. Tu gardes une seule conversation avec l'utilisateur et tu coordonnes les dix spécialistes disponibles en coulisses. Ne renvoie jamais l'utilisateur vers un autre agent ou un autre onglet. Fais intervenir les spécialistes utiles, confronte leurs avis si nécessaire, puis décide toi-même de la chaîne finale.
-Demande utilisateur : ${request}
+Historique récent de cette conversation : ${JSON.stringify(conversation.slice(-12).map(x=>({role:x.who==='user'?'utilisateur':'La Zone',message:x.txt})))}\nDemande utilisateur : ${request}
 Piste sélectionnée et analyse réelle du buffer : ${JSON.stringify(context)}
 Si aucune piste n’est sélectionnée, réponds à la question de façon naturelle et utile, sans demander de piste, et retourne obligatoirement actions: []. Si la demande est une conversation ou une question générale, ne force pas un traitement audio.
 Effets choisis par l'utilisateur : ${chosen.length ? chosen.join(', ') : 'choix automatique par le chef'}
@@ -960,7 +988,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
           h('div', { style: { display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',margin:'10px 0' } }, h('b', { style:{fontSize:'12px'} }, 'Style de mastering'), masterStyle),
           effectPicker,
           voiceStatus,
-          h('div.zone-note', 'La voix actuelle utilise la reconnaissance et la synthèse vocales du navigateur, en tours successifs. La conversation temps réel continue, avec interruption naturelle, reste à construire.'),
+          h('div.zone-note', 'Mode mains libres expérimental : écoute → réponse vocale → reprise du micro. Le bouton arrête la session et permet de couper La Zone. La vraie conversation audio temps réel simultanée reste une étape technique distincte.'),
           h('div', { style: { marginTop: '10px' } }, input),
           h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' } }, voiceBtn, send, applyBtn, undoBtn),
           status, liveAudioStatus, planBox)),
