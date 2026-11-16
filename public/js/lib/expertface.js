@@ -1,8 +1,8 @@
-// Ingé son IA — avatar humanoïde animé de Marco.
+// Ingé son IA — avatar humanoïde animé de La Rue.
 // Portrait vectoriel original : aucune photo, aucun service externe, aucun coût réseau.
 // Les helpers purs restent testables sous Node.
 export const FACE_STATES = ['idle', 'thinking', 'speaking'];
-export const DEFAULT_ENGINEER = { name: 'Marco', role: "Ingénieur du son · IA" };
+export const DEFAULT_ENGINEER = { name: 'La Rue', role: "Ingénieur du son · IA" };
 
 /** Légende sous le portrait (pure, testable). */
 export function faceCaption(name = DEFAULT_ENGINEER.name, role = DEFAULT_ENGINEER.role) {
@@ -55,7 +55,7 @@ function ensureCss() {
 
 // Portrait humain stylisé : visage, cheveux, yeux, nez, bouche, cou, épaules et casque studio.
 const PORTRAIT_SVG = `
-<svg viewBox="0 0 120 140" role="img" aria-label="Portrait humanoïde de Marco, ingénieur du son IA" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 120 140" role="img" aria-label="Portrait humanoïde de La Rue, ingénieur du son IA" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="ef-skin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0c6a5"/><stop offset=".55" stop-color="#c98f72"/><stop offset="1" stop-color="#8d5d54"/></linearGradient>
     <linearGradient id="ef-hair" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#29364c"/><stop offset="1" stop-color="#090f1c"/></linearGradient>
@@ -112,24 +112,38 @@ const PORTRAIT_SVG = `
   </g>
 </svg>`;
 
+const PORTRAIT_RUSE_SVG = PORTRAIT_SVG
+  .replace('La Rue, ingénieur du son IA', 'La Ruse, assistante IA')
+  .replace('<path d="M33 49 Q26 27 40 15 Q53 4 73 12 Q91 18 88 45 L83 38 Q79 29 70 28 Q56 33 42 27 L38 47Z" fill="url(#ef-hair)"/>',
+    '<path d="M33 49 Q25 27 34 13 Q45 0 64 5 Q89 5 91 29 Q97 48 86 62 L85 92 Q80 101 74 94 L77 58 Q72 43 60 40 Q47 43 41 58 L44 94 Q37 101 31 92Z" fill="url(#ef-hair)"/>')
+  .replace('<path d="M39 25 Q54 18 68 23 Q78 24 84 34 Q70 29 61 31 Q48 33 39 29Z" fill="#40516a" opacity=".7"/>',
+    '<path d="M36 25 Q49 12 66 18 Q80 20 88 35 Q74 29 63 31 Q49 34 38 40Z" fill="#52647d" opacity=".78"/>')
+  .replace('<path d="M43 78 Q46 91 60 93 Q74 91 77 78" fill="none" stroke="#77524d" stroke-opacity=".34" stroke-width="4" stroke-linecap="round"/>',
+    '<path d="M51 81 Q60 85 69 81" fill="none" stroke="#a64d68" stroke-width="2.4" stroke-linecap="round"/>')
+  .replace('Portrait humanoïde de La Rue', 'Portrait humanoïde de La Ruse');
+
 const STATUS_TEXT = { idle: 'En ligne', thinking: 'Analyse en cours…', speaking: 'Il te parle…' };
 
 /** Construit la carte avatar. Retourne { el, setState(state), setStatus(text) }. */
-export function expertFace({ name, role } = {}) {
+export function expertFace({ name, role, avatar = 'rue' } = {}) {
   ensureCss();
   const cap = faceCaption(name, role);
   const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const portrait = mk('div', 'ef-portrait');
-  portrait.innerHTML = PORTRAIT_SVG;
+  let currentAvatar = avatar === 'ruse' ? 'ruse' : 'rue';
+  portrait.innerHTML = currentAvatar === 'ruse' ? PORTRAIT_RUSE_SVG : PORTRAIT_SVG;
   const statusText = mk('span', '', STATUS_TEXT.idle);
   const status = mk('span', 'ef-status');
   status.append(mk('span', 'ef-dot'), statusText);
   const meta = mk('div', 'ef-meta');
-  meta.append(mk('div', 'ef-name', cap.name), mk('div', 'ef-role', cap.role), status);
+  const nameEl = mk('div', 'ef-name', cap.name);
+  const roleEl = mk('div', 'ef-role', cap.role);
+  meta.append(nameEl, roleEl, status);
   const el = mk('div', 'expert-face');
   el.dataset.state = 'idle';
   el.append(portrait, meta);
   const setState = (s) => { const st = normalizeState(s); el.dataset.state = st; statusText.textContent = STATUS_TEXT[st]; };
   const setStatus = (text) => { statusText.textContent = String(text || STATUS_TEXT[el.dataset.state] || ''); };
-  return { el, setState, setStatus };
+  const setAvatar = (next) => { currentAvatar = next === 'ruse' ? 'ruse' : 'rue'; portrait.innerHTML = currentAvatar === 'ruse' ? PORTRAIT_RUSE_SVG : PORTRAIT_SVG; nameEl.textContent = currentAvatar === 'ruse' ? 'La Ruse' : 'La Rue'; };
+  return { el, setState, setStatus, setAvatar };
 }
