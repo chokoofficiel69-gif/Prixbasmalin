@@ -211,3 +211,27 @@ export function migrateLegacy(adminId) {
     }
   }
 }
+
+
+// ---------- Compagnon personnel : mémoire durable commune aux deux avatars ----------
+export function getCompanionProfile(uid) {
+  const file = `${U(uid)}/companion.json`;
+  const saved = readJson(file, null);
+  if (saved && typeof saved === 'object') return {
+    memory: String(saved.memory || '').slice(-20000),
+    avatar: saved.avatar === 'ruse' ? 'ruse' : 'rue',
+    updatedAt: saved.updatedAt || null,
+  };
+  const initial = { memory: '', avatar: 'rue', updatedAt: new Date().toISOString() };
+  ensureUserDirs(uid);
+  writeJson(file, initial);
+  return initial;
+}
+export function saveCompanionProfile(uid, patch = {}) {
+  const current = getCompanionProfile(uid);
+  if (typeof patch.memory === 'string') current.memory = patch.memory.slice(-20000);
+  if (patch.avatar === 'rue' || patch.avatar === 'ruse') current.avatar = patch.avatar;
+  current.updatedAt = new Date().toISOString();
+  writeJson(`${U(uid)}/companion.json`, current);
+  return current;
+}
