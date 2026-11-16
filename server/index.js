@@ -99,7 +99,7 @@ function checkLogin(username, password) {
   if (!u || u.disabled) return null;
   // Le mot de passe d'environnement est prioritaire pour l'administrateur,
   // y compris si un hash historique existe déjà dans le stockage.
-  if (u.role === 'admin' && envPasswordMatches(password)) return u;
+  if (u.role === 'admin' && u.passwordSource !== 'user' && envPasswordMatches(password)) return u;
   if (u.passwordHash) return verifyHash(password, u.passwordHash) ? u : null;
   return null;
 }
