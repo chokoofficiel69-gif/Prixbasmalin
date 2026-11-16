@@ -566,6 +566,8 @@ export async function render(el, { params }) {
       aB.onclick = () => { t.armed = !t.armed; aB.classList.toggle('on', t.armed); save(); };
       const dB = h('span.tbtn.del', { title: 'Supprimer la piste' }, '🗑');
       dB.onclick = (e) => { e.stopPropagation(); deleteTrackIdx(i); };
+      const xB = h('span.tbtn', { title: 'Télécharger cette piste en WAV', style: { color: '#bff5db', borderColor: 'rgba(52,227,154,.35)' } }, '⬇');
+      xB.onclick = (e) => { e.stopPropagation(); exportTrackIdx(i); };
       const vol = h('input', { type: 'range', min: -24, max: 6, step: 0.5, value: t.gainDb ?? 0, title: 'Volume (dB)' });
       const volLab = h('span', `${(t.gainDb ?? 0) > 0 ? '+' : ''}${t.gainDb ?? 0} dB`);
       vol.oninput = () => { t.gainDb = +vol.value; volLab.textContent = `${t.gainDb > 0 ? '+' : ''}${t.gainDb} dB`; };
@@ -576,7 +578,7 @@ export async function render(el, { params }) {
       pan.onchange = save;
       const head = h('div.thead', { style: { '--tc': color } },
         h('div.nm', h('span', { style: { color } }, t.kind === 'instru' ? '🥁' : '🎤'), t.name || `Piste ${i + 1}`),
-        h('div.ctrls', mB, sB, aB, dB),
+        h('div.ctrls', mB, sB, aB, xB, dB),
         vol, h('div.lab', 'Vol', volLab),
         pan, h('div.lab', 'Pan', panLab));
 
@@ -941,6 +943,17 @@ export async function render(el, { params }) {
     requestAnimationFrame(() => { if (!menuEl) return; const r = menuEl.getBoundingClientRect(); if (r.right > innerWidth) menuEl.style.left = Math.max(6, innerWidth - r.width - 8) + 'px'; if (r.bottom > innerHeight) menuEl.style.top = Math.max(6, innerHeight - r.height - 8) + 'px'; });
     setTimeout(() => document.addEventListener('pointerdown', closeMenu, { once: true }), 0);
   }
+  // Export WAV d'une piste seule, sans toucher au projet ni aux autres pistes.
+  function exportTrackIdx(i) {
+    const t = tracks[i];
+    if (!t?.buffer) { toast('Cette piste ne contient aucun audio.', 'bad'); return; }
+    try {
+      const safe = String(t.name || `piste-${i + 1}`).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || `piste-${i + 1}`;
+      downloadBlob(encodeWav(t.buffer, 16), `${safe}.wav`);
+      toast(`🎧 Piste « ${t.name || i + 1} » téléchargée en WAV ✓`, 'ok');
+    } catch (e) { toastErr(e); }
+  }
+
   function trackMenu(i, ev) {
     ev.preventDefault(); ev.stopPropagation();
     const t = tracks[i]; if (!t) return;
