@@ -169,7 +169,8 @@ const CSS = `
 .regie .rtile.dragging{opacity:.82;box-shadow:0 0 0 2px var(--rcy),0 24px 60px rgba(0,0,0,.6);z-index:20}
 .regie .rtile.dropzone{outline:2px dashed rgba(34,211,238,.5);outline-offset:-4px}
 .regie .rtileh b{font-size:13px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.regie .rtileb{flex:1;overflow:auto;padding:16px}
+.regie .rtileb{flex:1;overflow:hidden;position:relative}
+.regie .rtfit{padding:16px;transform-origin:top left}
 .regie .rtsz{display:flex;gap:3px}
 .regie .rtsz span{width:24px;height:21px;display:grid;place-items:center;border:1px solid var(--rline);border-radius:5px;font-size:11px;cursor:pointer;color:var(--rmut);background:#0d0d1e;line-height:1}
 .regie .rtsz span:hover{color:#fff}
@@ -179,7 +180,6 @@ const CSS = `
 .regie .rtile.flash{animation:rtfl .9s ease}
 @keyframes rtfl{0%,100%{box-shadow:0 10px 30px rgba(0,0,0,.45)}35%{box-shadow:0 0 0 2px var(--rpur),0 0 26px rgba(168,85,247,.55)}}
 .regie .rwempty{margin:auto;text-align:center;color:var(--rmut);font-size:13px;padding:30px;line-height:1.5}
-.regie .rtile.xl .rtileb .kn,.regie .rtile.l .rtileb .kn,.regie .rtile.xl .rtileb .knob,.regie .rtile.l .rtileb .knob{transform:scale(1.12)}
 /* ===== fond noir bord à bord + espace maximal quand la Régie est active ===== */
 body.regie-max .topbar{display:none!important}
 body.regie-max #view,body.regie-max .view{padding:0!important;background:#060610}
@@ -187,10 +187,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live28')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live29')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live28'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live29'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -1511,6 +1511,22 @@ export async function render(el, { params }) {
   const saveTiles = () => { try { localStorage.setItem('regie.tiles', JSON.stringify({ open: openTiles, size: tileSize, free: tileFree })); } catch {} };
   const tileEl = (key) => main.querySelector('.rtile[data-key="' + key + '"]');
   function applyFree(tile, key) { const f = tileFree[key]; if (f) { SIZES.forEach(c => tile.classList.remove(c)); tile.classList.add('free'); tile.style.flex = '0 0 auto'; tile.style.width = f.w + 'px'; tile.style.height = f.h + 'px'; } }
+  // Mise à l'échelle « tout voir » : le contenu se dézoome pour tenir en entier dans la tuile,
+  // au lieu d'être coupé. Plus la tuile est petite, plus le module est réduit — mais toujours visible.
+  function fitTile(tile) {
+    const body = tile.querySelector('.rtileb'), fitw = tile.querySelector('.rtfit');
+    if (!body || !fitw) return;
+    const availW = body.clientWidth, availH = body.clientHeight;
+    if (availW < 4 || availH < 4) return;
+    const MINW = 340, layoutW = Math.max(availW, MINW);
+    fitw.style.width = layoutW + 'px'; fitw.style.transform = 'none';
+    const natH = fitw.scrollHeight || 1;
+    const s = Math.min(availW / layoutW, availH / natH, 1);
+    fitw.style.transform = s < 0.999 ? 'scale(' + s + ')' : 'none';
+  }
+  const fitAll = () => { try { main.querySelectorAll('.rtile').forEach(fitTile); } catch {} };
+  let fitRAF = 0;
+  const fitSoon = () => { cancelAnimationFrame(fitRAF); fitRAF = requestAnimationFrame(fitAll); };
 
   function buildTile(key) {
     const def = WINDEF[key];
@@ -1519,7 +1535,9 @@ export async function render(el, { params }) {
     const tile = h('div.rtile.' + sz, { 'data-key': key });
     const szBtns = SIZES.map(s => h('span' + (!tileFree[key] && s === sz ? '.on' : ''), { title: 'Taille ' + s.toUpperCase(), onclick: () => setTileSize(key, s) }, SZICON[s]));
     const body = h('div.rtileb');
-    try { body.append(def.r()); } catch (e) { console.error(e); body.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); }
+    const fitw = h('div.rtfit');
+    try { fitw.append(def.r()); } catch (e) { console.error(e); fitw.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); }
+    body.append(fitw);
     const head = h('div.rtileh', h('span.rgrab', { title: 'Glisser pour déplacer' }, '⠿'), h('b', def.t), h('div.rtsz', ...szBtns), h('span.rtx', { title: 'Fermer', onclick: () => closeTile(key) }, '✕'));
     head.onpointerdown = (ev) => startDrag(ev, key);
     tile.append(head, body);
@@ -1570,6 +1588,7 @@ export async function render(el, { params }) {
       if (dir.includes('s')) hh = sh + (e.clientY - sy);
       tile.style.width = Math.max(minW, Math.min(maxW, w)) + 'px';
       tile.style.height = Math.max(minH, hh) + 'px';
+      fitSoon();
     };
     const up = () => {
       window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
@@ -1583,7 +1602,7 @@ export async function render(el, { params }) {
     if (!openTiles.length) work.append(h('div.rwempty', '👈 Choisis un module dans le répertoire à gauche pour le poser ici.', h('br'), 'Tu peux en poser plusieurs et les redimensionner (S / M / L / XL).'));
     for (const k of openTiles) work.append(buildTile(k));
     main.append(work);
-    renderTabs(); highlightSide();
+    renderTabs(); highlightSide(); fitSoon();
   }
   function setTileSize(key, s) {
     delete tileFree[key]; tileSize[key] = s; saveTiles();
@@ -1591,6 +1610,7 @@ export async function render(el, { params }) {
     t.style.flex = ''; t.style.width = ''; t.style.height = '';
     t.className = 'rtile ' + s;
     t.querySelectorAll('.rtsz span').forEach((b, i) => b.classList.toggle('on', SIZES[i] === s));
+    fitSoon();
   }
   function closeTile(key) {
     openTiles = openTiles.filter(k => k !== key); delete tileSize[key]; delete tileFree[key]; saveTiles();
@@ -1607,7 +1627,7 @@ export async function render(el, { params }) {
     if (!openTiles.includes(key)) {
       openTiles.push(key); if (!tileSize[key]) tileSize[key] = 'xl'; saveTiles();
       work.querySelector('.rwempty')?.remove();
-      work.append(buildTile(key));
+      work.append(buildTile(key)); fitSoon();
     }
     renderTabs(); highlightSide(); flashTile(key);
   }
@@ -1634,9 +1654,10 @@ export async function render(el, { params }) {
     for (const k of ['timeline', 'regie']) {
       if (!openTiles.includes(k)) continue;
       const t = tileEl(k); if (!t) continue;
-      const b = t.querySelector('.rtileb'); if (!b) continue;
+      const b = t.querySelector('.rtfit'); if (!b) continue;
       b.innerHTML = ''; try { b.append(WINDEF[k].r()); } catch (e) { console.error(e); }
     }
+    fitSoon();
   }
   function renderTabs() { tabsBar.innerHTML = ''; for (const k of TAB_ORDER) tabsBar.append(h('div.rtab' + (openTiles.includes(k) ? '.on' : ''), { onclick: () => showModule(k) }, WINDEF[k].t)); }
   function highlightSide() { try { side.querySelectorAll('.ditem').forEach(d => d.classList.toggle('on', openTiles.includes(d.dataset.key))); } catch {} }
@@ -1674,7 +1695,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE28'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE29'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
@@ -1702,7 +1723,10 @@ export async function render(el, { params }) {
   try { ast = mountAssistant(buildAssistantS()); } catch (e) { ast = null; }
   renderSidebar();
   renderWork();
+  // recalcule l'échelle quand la zone change (plein écran, menu replié, fenêtre redimensionnée)
+  const ro = (typeof ResizeObserver !== 'undefined') ? new ResizeObserver(() => fitSoon()) : null;
+  try { ro?.observe(main); } catch {}
 
   // nettoyage
-  return () => { try { document.body.classList.remove('regie-max'); } catch {} stopPlay(); stopAllRec(); stopPreview(); stopLive(); closeMenu(); try { ast?.destroy?.(); } catch {} };
+  return () => { try { ro?.disconnect(); } catch {} try { document.body.classList.remove('regie-max'); } catch {} stopPlay(); stopAllRec(); stopPreview(); stopLive(); closeMenu(); try { ast?.destroy?.(); } catch {} };
 }
