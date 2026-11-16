@@ -11,6 +11,8 @@ Cette extension Chrome donne à La Rue et La Ruse un accès limité à l'onglet 
 6. Dans Studio IA → Mon compagnon, colle cet identifiant dans « Relais navigateur » puis enregistre.
 
 ## Autorisations
+- Chrome affiche une autorisation large pour les sites HTTP(S), nécessaire pour pouvoir agir sur les pages web que tu choisis.
+- L’extension ne lit pas les pages en continu : elle intervient uniquement après une demande du compagnon et une confirmation visible dans la page.
 - La communication externe est acceptée uniquement depuis `https://studio.prixbasmalin.prod.page`.
 - Les actions de lecture, clic et saisie demandent une confirmation dans la page active.
 - La saisie ne soumet jamais le formulaire.
