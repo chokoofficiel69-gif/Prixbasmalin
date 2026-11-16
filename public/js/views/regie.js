@@ -6,7 +6,7 @@
 import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder, downloadBlob, confirmBox } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
 import { decodeBlob, drawWave, denoise, antipop, voiceChain, normalize, loudness, encodeWav, master, cloneBuffer } from '../lib/audio.js';
-import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
+import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES, PRESETS, PRESET_CATS } from '../lib/voicefx.js';
 import { analyzeSamples, buildVoiceProposals, antipopFor } from '../lib/ingexpert.js';
 import { scoreVoice } from '../lib/voicescore.js';
 import { mountAssistant } from './assistant.js';
@@ -205,10 +205,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live32')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live33')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31', 'regie-css-live32'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live32'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live33'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -902,11 +902,23 @@ export async function render(el, { params }) {
   ];
   async function processPreset(src, p) { let cur = src; if (p.chain) cur = (await applyChain(cur, p.chain)).buffer; if (p.voice) cur = await voiceChain(cur, p.voice); return cur; }
   let busyFx = false;
-  async function applyPresetTo(i, p) {
+  // AUDITION : chaque preset repart de la voix D'ORIGINE (il REMPLACE le précédent, ne s'empile pas),
+  // puis s'écoute tout de suite. Tu essaies autant d'options que tu veux ; celle que tu gardes est validée,
+  // « ↩ Original » efface tout. (Pour cumuler volontairement : bouton « + Cumuler ».)
+  async function applyPresetTo(i, p, opt) {
     const t = tracks[i]; if (!t?.buffer) return;
     if (busyFx) { toast('Un traitement est déjà en cours…'); return; } busyFx = true;
     toast(`${p.emo} ${p.name}…`);
-    try { const out = await processPreset(t.buffer, p); if (!t.original) t.original = t.buffer; t.buffer = out; t.fxDone = [...(t.fxDone || []), p.name]; proposalCache = {}; await save(); toast(`${p.name} appliqué ✓`, 'ok'); refreshViews(); }
+    try {
+      if (!t.original) t.original = t.buffer;
+      const base = (opt && opt.cumuler) ? t.buffer : t.original;   // par défaut : depuis l'original
+      const out = await processPreset(base, p);
+      t.buffer = out;
+      t.fxDone = (opt && opt.cumuler) ? [...(t.fxDone || []), p.name] : [p.name];
+      proposalCache = {}; await save();
+      toast(`${p.name} ✓ — écoute`, 'ok'); refreshViews();
+      if (!opt || opt.play !== false) { try { stopPreview(); playBuffer(out); } catch {} }
+    }
     catch (e) { toastErr(e); } finally { busyFx = false; }
   }
   async function quickCleanIdx(i) { const t = tracks[i]; if (!t) return; const p = buildVoiceProposals(analyzeVoix(t), 'rap').find(z => z.id === 'premium'); if (busyFx) return; busyFx = true; try { await applyCleanMix(t, i, p, null); refreshViews(); } finally { busyFx = false; } }
@@ -1458,17 +1470,36 @@ export async function render(el, { params }) {
   function winEq() { const eqView = makeEqCurve(); eqRedraw = eqView.redraw; return h('div', eqView.el, h('div', { style: { display: 'flex', justifyContent: 'space-around' } }, liveKnobEl('GRAVE', 'hp', 40, 160, 5, 85, hzF), liveKnobEl('LOW', 'low', -6, 6, 0.5, 0, dbF), liveKnobEl('MID', 'mid', -6, 8, 0.5, 2.5, dbF), liveKnobEl('AIGU', 'high', -6, 8, 0.5, 3, dbF))); }
   function winComp() { return h('div', { style: { display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '10px' } }, liveKnobEl('TAUX', 'comp', 0, 1, 0.05, 0.4, pcF), liveKnobEl('ATTAQUE', 'compAtk', 1, 80, 1, 5, v => `${v | 0} ms`), liveKnobEl('RELEASE', 'compRel', 30, 400, 10, 120, v => `${v | 0} ms`), liveKnobEl('VOLUME', 'vol', -12, 6, 0.5, 0, dbF)); }
   function winRev() { return h('div', { style: { display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '10px' } }, liveKnobEl('RÉVERBE', 'reverb', 0, 0.6, 0.02, 0.1, pcF), liveKnobEl('DELAY', 'delay', 0, 0.5, 0.02, 0, pcF), liveKnobEl('SATUR.', 'drive', 0, 1, 0.05, 0, pcF)); }
+  const emojiOf = (cat) => { const m = (cat || '').match(/^(\p{Extended_Pictographic})/u); return m ? m[1] : '🎛️'; };
   function winBank() {
     const vt = voixTracks();
     const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const curIdx = () => +sel.value;
-    const grid = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(92px,1fr))', gap: '8px' } });
-    const fill = (q = '') => { q = q.trim().toLowerCase(); grid.innerHTML = ''; EFFECTS_BANK.filter(([nm]) => !q || nm.toLowerCase().includes(q)).forEach(([nm, emo, chain]) => grid.append(h('div.preset', { style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo, name: nm, chain }); } }, h('div', { style: { fontSize: '20px' } }, emo), h('b', { style: { fontSize: '11px' } }, nm)))); };
+    let cumuler = false;
+    const catSel = h('select', { style: selStyle() }, h('option', { value: '' }, `Toutes les catégories (${PRESETS.length})`), ...PRESET_CATS.map(c => h('option', { value: c }, `${c} (${PRESETS.filter(p => p.cat === c).length})`)));
+    const count = h('span.muted', { style: { fontSize: '11px' } }, '');
+    const grid = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: '8px' } });
+    const search = h('input', { placeholder: '🔎 Rechercher (nom ou style)…', style: { ...selStyle(), flex: '1', minWidth: '160px' } });
+    const fill = () => {
+      const q = (search.value || '').trim().toLowerCase(), cat = catSel.value;
+      grid.innerHTML = '';
+      const list = PRESETS.filter(p => (!cat || p.cat === cat) && (!q || p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q)));
+      count.textContent = `${list.length} preset${list.length > 1 ? 's' : ''}`;
+      for (const p of list) grid.append(h('div.preset', { title: p.cat, style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo: emojiOf(p.cat), name: p.name, chain: p.chain, voice: p.voice }, { cumuler }); } },
+        h('div', { style: { fontSize: '18px' } }, emojiOf(p.cat)), h('b', { style: { fontSize: '10.5px', lineHeight: '1.2' } }, p.name)));
+    };
+    search.oninput = fill; catSel.onchange = fill;
+    const cumChip = h('span.chip', '➕ Cumuler : non');
+    cumChip.onclick = () => { cumuler = !cumuler; cumChip.classList.toggle('on', cumuler); cumChip.textContent = cumuler ? '➕ Cumuler : OUI' : '➕ Cumuler : non'; };
     fill();
-    const search = h('input', { placeholder: '🔎 Rechercher un effet…', style: { ...selStyle(), flex: '1' }, oninput: (e) => fill(e.target.value) });
     return h('div',
-      h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('button.rbtn', { onclick: () => playBuffer(tracks[curIdx()]?.buffer) }, '▶'), h('button.rbtn', { onclick: () => { stopPreview(); revertTrack(tracks[curIdx()], { textContent: '' }); } }, '↩ Original')),
-      h('div', { style: { marginBottom: '10px' } }, search),
+      h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel,
+        h('button.rbtn', { onclick: () => { const t = tracks[curIdx()]; stopPreview(); playBuffer(t?.original || t?.buffer); } }, '▶ Avant'),
+        h('button.rbtn', { onclick: () => { stopPreview(); playBuffer(tracks[curIdx()]?.buffer); } }, '▶ Après'),
+        h('button.rbtn', { onclick: () => stopPreview() }, '⏹'),
+        h('button.rbtn', { onclick: () => { stopPreview(); quickRevertIdx(curIdx()); } }, '↩ Original')),
+      h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' } }, catSel, search, cumChip, count),
+      h('p.muted', { style: { fontSize: '10.5px', margin: '0 0 8px', lineHeight: '1.4' } }, 'Clique un preset : tu l’entends tout de suite. Chaque essai REMPLACE le précédent (tu auditionnes tranquillement). « Cumuler : OUI » pour les empiler. « ↩ Original » efface tout.'),
       grid);
   }
   const winSpectro = () => makeSpectro(150);
@@ -1745,7 +1776,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, resetBtn, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE32'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE33'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
