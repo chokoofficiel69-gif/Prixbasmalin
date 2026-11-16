@@ -118,7 +118,7 @@ class GeneratedPagesTests(unittest.TestCase):
         self.assertEqual(len(asins), 12)
         historical_data = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
         self.assertEqual(historical_data.get("status"), "historical_reference")
-        self.assertIn("pas un prix en direct", historical_data.get("price_policy", "").lower())
+        self.assertIn("aucun prix n'est présenté comme actuel", historical_data.get("price_policy", "").lower())
         self.assertIn("Historique des prix — produits avec fiche Amazon", catalogue)
         self.assertIn("Relevés historiques PrixTracker (Licence Ouverte 2.0)", catalogue)
         self.assertIn('offers+" relevés historiques · dernier relevé : "', catalogue)
