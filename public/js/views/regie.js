@@ -121,6 +121,12 @@ const CSS = `
 .regie .preset:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(168,85,247,.25);border-color:var(--rpur)}
 .regie .preset .pav{width:30px;height:30px;border-radius:8px;flex:none;display:grid;place-items:center;font-size:15px;background:linear-gradient(135deg,var(--rpur),var(--rcy))}
 .regie .preset b{font-size:12.5px}.regie .preset .po{font-size:10px;color:var(--rmut)}
+.regie .section{margin-bottom:12px;border:1px solid #221f45;border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#101024,#0b0b16)}
+.regie .secth{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;font-size:14px;font-weight:700;user-select:none;background:linear-gradient(180deg,rgba(168,85,247,.12),transparent)}
+.regie .secth:hover{background:linear-gradient(180deg,rgba(168,85,247,.2),transparent)}
+.regie .secth .chev{margin-left:auto;color:var(--rmut);font-size:12px;transition:transform .15s}
+.regie .secbody{padding:12px}
+.regie .secbody.closed{display:none}
 @media(max-width:1050px){.regie{grid-template-columns:60px 1fr}.regie .rbrand{width:0}}
 `;
 
@@ -487,7 +493,7 @@ export async function render(el, { params }) {
       proposalCache = {};
       await save();
       toast('Piste importée ✓ (partagée avec la page Enregistrement)', 'ok');
-      if (cur === 'timeline') go('timeline'); else if (cur === 'regie') go('regie');
+      refreshViews(); renderSidebar();
     } catch (e) { toastErr(e); }
   }
 
@@ -541,7 +547,7 @@ export async function render(el, { params }) {
       proposalCache = {};
       await save();
       toast(`Prise enregistrée ✓ (${buffer.duration.toFixed(1)} s) — visible dans la Timeline`, 'ok');
-      go(cur);
+      refreshViews(); renderSidebar();
       if (recViaAssistant) { recViaAssistant = false; try { ast?.onRecordStopped?.(); } catch {} }
     } catch (e) { toastErr(e); }
   }
@@ -737,15 +743,15 @@ export async function render(el, { params }) {
     const t = tracks[i]; if (!t?.buffer) return;
     if (busyFx) { toast('Un traitement est déjà en cours…'); return; } busyFx = true;
     toast(`${p.emo} ${p.name}…`);
-    try { const out = await processPreset(t.buffer, p); if (!t.original) t.original = t.buffer; t.buffer = out; t.fxDone = [...(t.fxDone || []), p.name]; proposalCache = {}; await save(); toast(`${p.name} appliqué ✓`, 'ok'); if (cur === 'timeline' || cur === 'regie') go(cur); }
+    try { const out = await processPreset(t.buffer, p); if (!t.original) t.original = t.buffer; t.buffer = out; t.fxDone = [...(t.fxDone || []), p.name]; proposalCache = {}; await save(); toast(`${p.name} appliqué ✓`, 'ok'); refreshViews(); }
     catch (e) { toastErr(e); } finally { busyFx = false; }
   }
-  async function quickCleanIdx(i) { const t = tracks[i]; if (!t) return; const p = buildVoiceProposals(analyzeVoix(t), 'rap').find(z => z.id === 'premium'); if (busyFx) return; busyFx = true; try { await applyCleanMix(t, i, p, null); if (cur === 'timeline' || cur === 'regie') go(cur); } finally { busyFx = false; } }
-  function quickRevertIdx(i) { const t = tracks[i]; if (t?.original) { t.buffer = t.original; t.fxDone = []; proposalCache = {}; save(); toast('Original rétabli', 'ok'); if (cur === 'timeline' || cur === 'regie') go(cur); } }
-  function adjustVol(i, d) { const t = tracks[i]; if (!t) return; t.gainDb = Math.max(-30, Math.min(12, (t.gainDb || 0) + d)); save(); if (cur === 'timeline' || cur === 'regie') go(cur); }
-  function toggleMuteIdx(i) { const t = tracks[i]; if (!t) return; t.mute = !t.mute; save(); if (cur === 'timeline' || cur === 'regie') go(cur); }
-  function toggleSoloIdx(i) { const t = tracks[i]; if (!t) return; t.solo = !t.solo; save(); if (cur === 'timeline' || cur === 'regie') go(cur); }
-  async function deleteTrackIdx(i) { const t = tracks[i]; if (!t) return; if (!(await confirmBox(`Supprimer la piste « ${t.name || 'Piste ' + (i + 1)} » ?`, 'Supprimer', true))) return; tracks.splice(i, 1); proposalCache = {}; await save(); toast('Piste supprimée', 'ok'); go(cur); }
+  async function quickCleanIdx(i) { const t = tracks[i]; if (!t) return; const p = buildVoiceProposals(analyzeVoix(t), 'rap').find(z => z.id === 'premium'); if (busyFx) return; busyFx = true; try { await applyCleanMix(t, i, p, null); refreshViews(); } finally { busyFx = false; } }
+  function quickRevertIdx(i) { const t = tracks[i]; if (t?.original) { t.buffer = t.original; t.fxDone = []; proposalCache = {}; save(); toast('Original rétabli', 'ok'); refreshViews(); } }
+  function adjustVol(i, d) { const t = tracks[i]; if (!t) return; t.gainDb = Math.max(-30, Math.min(12, (t.gainDb || 0) + d)); save(); refreshViews(); }
+  function toggleMuteIdx(i) { const t = tracks[i]; if (!t) return; t.mute = !t.mute; save(); refreshViews(); }
+  function toggleSoloIdx(i) { const t = tracks[i]; if (!t) return; t.solo = !t.solo; save(); refreshViews(); }
+  async function deleteTrackIdx(i) { const t = tracks[i]; if (!t) return; if (!(await confirmBox(`Supprimer la piste « ${t.name || 'Piste ' + (i + 1)} » ?`, 'Supprimer', true))) return; tracks.splice(i, 1); proposalCache = {}; await save(); toast('Piste supprimée', 'ok'); refreshViews(); renderSidebar(); }
 
   // ---------- menu contextuel (clic droit) ----------
   let menuEl = null;
@@ -953,31 +959,7 @@ export async function render(el, { params }) {
     const nivPanel = h('div.panel', { html: `<div class="ph">🎚️ Niveaux</div><div class="pb"><div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Crête</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${peakPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.peakDb : '—'}</b></div><div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Moyen</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${rmsPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.rmsDb : '—'}</b></div><div style="text-align:center;background:#0d1702;border:1px solid #2a4a10;border-radius:9px;padding:8px"><b style="font-size:19px;color:#bff5db">${m ? m.crestDb : '—'}</b><div class="muted" style="font-size:9px">DYNAMIQUE (dB)</div></div></div>` });
     root.append(h('div.grid', { style: { gridTemplateColumns: '1.2fr 1.2fr 150px' } }, marcoPanel, analysePanel, nivPanel));
 
-    // ROW 2 : molettes LIVE
-    const knobs = h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'space-between', margin: '6px 4px' } },
-      liveKnobEl('VOLUME', 'vol', -12, 6, 0.5, 0, dbF), liveKnobEl('GRAVE', 'hp', 40, 160, 5, 85, hzF), liveKnobEl('LOW', 'low', -6, 6, 0.5, 0, dbF),
-      liveKnobEl('MID', 'mid', -6, 8, 0.5, 2.5, dbF), liveKnobEl('AIGU', 'high', -6, 8, 0.5, 3, dbF), liveKnobEl('COMP', 'comp', 0, 1, 0.05, 0.4, pcF),
-      liveKnobEl('RÉVERBE', 'reverb', 0, 0.6, 0.02, 0.1, pcF), liveKnobEl('DELAY', 'delay', 0, 0.5, 0.02, 0, pcF), liveKnobEl('SATUR.', 'drive', 0, 1, 0.05, 0, pcF));
-    root.append(h('div.panel', { style: { marginTop: '12px' } },
-      h('div.ph', '🎛️ Molettes en direct', h('span.r', { style: { color: '#bff5db' } }, 'TEMPS RÉEL')),
-      h('div.pb',
-        h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap' } },
-          h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, playBtn,
-          h('button.rbtn.g', { onclick: () => bakeLive(curIdx()) }, '💾 Graver'),
-          h('button.rbtn', { onclick: () => revertTrack(tracks[curIdx()], { textContent: '' }) }, '↩ Original')),
-        knobs)));
-
-    // ROW 3 : Timeline (réelle)
-    const mini = h('div.pb', { style: { overflowX: 'auto' } });
-    root.append(h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '🎵 Timeline', h('span.r', 'glisse pour sélectionner, clic droit sur une piste pour agir')), mini));
-    laneWrap = mini; selBarEl = null; zoomLblEl = null; zoomRangeEl = null;
-    setTimeout(() => buildTimeline(mini), 0);
-
-    // ROW 4 : Banque d'effets (clic = appliquer)
-    const bank = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: '8px' } },
-      EFFECTS_BANK.map(([nm, emo, chain]) => h('div.preset', { style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo, name: nm, chain }); } },
-        h('div', { style: { fontSize: '20px' } }, emo), h('b', { style: { fontSize: '11px' } }, nm))));
-    root.append(h('div.panel', { style: { marginTop: '12px' } }, h('div.ph', '⭐ Banque d’effets', h('span.r', `${EFFECTS_BANK.length} effets · clic = appliquer`)), h('div.pb', bank)));
+    void playBtn; void curIdx;
     return root;
   }
 
@@ -1252,14 +1234,16 @@ export async function render(el, { params }) {
     return root;
   }
 
-  const VIEWS = {
-    regie: { t: '🧩 Régie générale', r: viewRegie },
-    timeline: { t: '🎵 Timeline', r: viewTimeline },
-    rec: { t: '🎙️ Enregistrement', r: viewRec },
-    fx: { t: '🎛️ Effets & molettes', r: viewFx },
-    repo: { t: '📚 Répertoire', r: viewRepo },
-    ia: { t: '🧠 IA Expert', r: viewIA },
-  };
+  // ---------- UNE SEULE PAGE : modules repliables ----------
+  const SECTIONS = [
+    { id: 'regie', t: '🧩 Vue d’ensemble', r: viewRegie, open: true },
+    { id: 'rec', t: '🎙️ Enregistrement', r: viewRec, open: false },
+    { id: 'timeline', t: '🎵 Timeline', r: viewTimeline, open: true },
+    { id: 'fx', t: '🎛️ Effets & molettes', r: viewFx, open: true },
+    { id: 'repo', t: '📚 Répertoire', r: viewRepo, open: false },
+    { id: 'ia', t: '🧠 Ingé IA', r: viewIA, open: false },
+  ];
+  const secEls = {};
 
   // ---------- squelette ----------
   const root = h('div.regie');
@@ -1267,20 +1251,32 @@ export async function render(el, { params }) {
   const main = h('div.rmain');
   const side = h('div.rside');
 
-  function renderTabs() {
-    tabsBar.innerHTML = '';
-    for (const k of Object.keys(VIEWS)) tabsBar.append(h('div.rtab' + (k === cur ? '.on' : ''), { onclick: () => go(k) }, VIEWS[k].t));
-  }
-  function go(k) {
-    if (playing && k !== 'timeline' && k !== 'regie') stopPlay();
-    if (recording && cur === 'rec' && k !== 'rec') stopRecording();
-    if (cur === 'fx' && k !== 'fx') stopLive();
-    stopPreview(); closeMenu();
-    cur = k; renderTabs();
+  function buildWorkspace() {
     main.innerHTML = '';
-    const view = h('div.rview'); view.append(VIEWS[k].r());
+    const view = h('div.rview');
+    for (const s of SECTIONS) {
+      const body = h('div.secbody' + (s.open ? '' : '.closed'));
+      let built = false;
+      const build = () => { if (built) return; built = true; try { body.append(s.r()); } catch (e) { console.error(e); body.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); } };
+      const rebuild = () => { built = false; body.innerHTML = ''; if (!body.classList.contains('closed')) build(); };
+      if (s.open) build();
+      const chev = h('span.chev', { style: { transform: s.open ? 'none' : 'rotate(-90deg)' } }, '▾');
+      const head = h('div.secth', { onclick: () => toggleSec(s.id) }, h('span', s.t.split(' ')[0]), h('b', s.t.replace(/^\S+\s/, '')), chev);
+      const sec = h('div.section', { id: 'sec-' + s.id }, head, body);
+      secEls[s.id] = { sec, body, chev, build, rebuild };
+      view.append(sec);
+    }
     main.append(view);
   }
+  function toggleSec(id, forceOpen) {
+    const e = secEls[id]; if (!e) return;
+    const willOpen = forceOpen || e.body.classList.contains('closed');
+    if (willOpen) { e.body.classList.remove('closed'); e.chev.style.transform = 'none'; e.build(); }
+    else { e.body.classList.add('closed'); e.chev.style.transform = 'rotate(-90deg)'; }
+  }
+  function refreshViews() { ['timeline', 'regie'].forEach(id => { const e = secEls[id]; if (e && !e.body.classList.contains('closed')) e.rebuild(); }); }
+  function renderTabs(active) { tabsBar.innerHTML = ''; for (const s of SECTIONS) tabsBar.append(h('div.rtab' + (s.id === active ? '.on' : ''), { onclick: () => go(s.id) }, s.t)); }
+  function go(k) { const e = secEls[k]; if (!e) return; toggleSec(k, true); try { e.sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {} renderTabs(k); }
 
   function renderSidebar() {
     const groups = [
@@ -1311,7 +1307,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE13'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE14'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
@@ -1335,8 +1331,8 @@ export async function render(el, { params }) {
   await load();
   try { ast = mountAssistant(buildAssistantS()); } catch (e) { ast = null; }
   renderSidebar();
-  renderTabs();
-  go(cur);
+  buildWorkspace();
+  renderTabs('regie');
 
   // nettoyage
   return () => { stopPlay(); stopAllRec(); stopPreview(); stopLive(); closeMenu(); try { ast?.destroy?.(); } catch {} };
