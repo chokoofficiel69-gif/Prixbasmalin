@@ -350,7 +350,7 @@ export async function render(el, { params }) {
       style: { width: '92px', padding: '6px', borderRadius: '8px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)', fontSize: '13px' },
       onchange: (e) => setEdge(which, +e.target.value || 0) });
     const nud = (which, sign) => h('button.rbtn', { title: `${sign < 0 ? 'Reculer' : 'Avancer'} de ${nudgeStep} ms`, onclick: () => setEdge(which, selRange[which] + sign * nudgeStep / 1000) }, sign < 0 ? '◀' : '▶');
-    const stepSel = h('select', { title: 'Pas des flèches', style: { padding: '6px', borderRadius: '8px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' }, onchange: (e) => { nudgeStep = +e.target.value; paintSelBar(); } },
+    const stepSel = h('select', { title: 'Pas des flèches', style: { width: 'auto', flex: 'none', padding: '6px', borderRadius: '8px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' }, onchange: (e) => { nudgeStep = +e.target.value; paintSelBar(); } },
       STEP_MS.map(v => h('option', { value: String(v), selected: v === nudgeStep }, `pas ${v} ms`)));
     const grp = (label, which) => h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '4px' } }, h('b', { style: { fontSize: '12px' } }, label), nud(which, -1), num(which), nud(which, 1));
     selBarEl.append(
@@ -1398,7 +1398,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE19'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE20'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
