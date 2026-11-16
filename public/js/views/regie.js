@@ -118,6 +118,36 @@ const CSS = `
 .regie .zone-bars i:nth-child(2n){animation-delay:.2s}.regie .zone-bars i:nth-child(3n){animation-delay:.4s}
 @keyframes zoneWave{to{height:23px}}@keyframes zonePulse{0%{transform:scale(1);opacity:.65}100%{transform:scale(1.16);opacity:0}}
 .regie .zone-note{font-size:10.5px;color:var(--rmut);line-height:1.45;margin:7px 2px 0}
+
+/* Maquette immersive La Zone : portrait stylisé, statut et scène de conversation */
+.regie .zone-stage{display:grid;grid-template-columns:minmax(210px,.72fr) minmax(0,1.5fr);gap:14px;padding:14px;background:radial-gradient(ellipse at 22% 45%,rgba(34,211,238,.12),transparent 55%),linear-gradient(135deg,#0b0b1b,#11102a 55%,#090916);border:1px solid rgba(124,58,237,.35);border-radius:15px;margin-bottom:12px}
+.regie .zone-portrait{min-height:210px;display:grid;place-items:center;position:relative;overflow:hidden;border-radius:13px;background:radial-gradient(ellipse at 50% 34%,rgba(34,211,238,.22),transparent 45%),linear-gradient(180deg,#191936,#090914);border:1px solid rgba(34,211,238,.22)}
+.regie .zone-portrait:before{content:'';position:absolute;width:190px;height:190px;border-radius:50%;border:1px solid rgba(34,211,238,.18);box-shadow:0 0 40px rgba(124,58,237,.18),inset 0 0 35px rgba(34,211,238,.08)}
+.regie .zone-head{position:relative;width:112px;height:148px;z-index:1;filter:drop-shadow(0 12px 20px rgba(0,0,0,.5));animation:zoneBreath 4s ease-in-out infinite}
+.regie .zone-neck{position:absolute;left:42px;top:105px;width:29px;height:35px;background:linear-gradient(90deg,#754d40,#c28b70 48%,#694638);border-radius:8px}
+.regie .zone-shoulders{position:absolute;left:4px;top:126px;width:105px;height:52px;background:linear-gradient(110deg,#151a30,#34334f 50%,#101426);border-radius:48px 48px 12px 12px;border-top:2px solid rgba(34,211,238,.35)}
+.regie .zone-face{position:absolute;left:22px;top:19px;width:69px;height:94px;border-radius:42% 42% 46% 46%;background:linear-gradient(105deg,#704b3e 0%,#bd886d 43%,#8b5e4b 100%);box-shadow:inset -8px -4px 10px rgba(32,12,10,.28),inset 5px 2px 9px rgba(255,220,190,.18)}
+.regie .zone-hair{position:absolute;left:19px;top:10px;width:75px;height:43px;border-radius:48% 48% 22% 22%;background:linear-gradient(110deg,#10121c,#34303a 55%,#11121b);z-index:2}
+.regie .zone-beard{position:absolute;left:24px;top:76px;width:66px;height:43px;border-radius:12px 12px 48% 48%;background:linear-gradient(100deg,#15131a,#37303a 55%,#17141c);z-index:2;clip-path:polygon(0 0,100% 0,94% 62%,70% 100%,30% 100%,6% 62%)}
+.regie .zone-eye{position:absolute;top:57px;width:8px;height:3px;border-radius:5px;background:#171522;z-index:3;box-shadow:0 0 3px rgba(255,255,255,.25)}
+.regie .zone-eye.left{left:39px}.regie .zone-eye.right{left:67px}
+.regie .zone-mouth{position:absolute;left:49px;top:91px;width:17px;height:3px;border-radius:50%;background:#382027;z-index:3}
+.regie .zone-stage-info{display:flex;flex-direction:column;justify-content:center;gap:9px;min-width:0}
+.regie .zone-kicker{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#78e8f4;font-weight:800}
+.regie .zone-stage-info h2{font-size:clamp(22px,3vw,32px);line-height:1;margin:0;letter-spacing:.06em}
+.regie .zone-stage-info p{font-size:12px;color:#b0b4d2;line-height:1.55;margin:0;max-width:520px}
+.regie .zone-live{display:inline-flex;align-items:center;gap:7px;color:#a9f5d2;font-size:11px;font-weight:700}
+.regie .zone-live i{width:8px;height:8px;border-radius:50%;background:#34e39a;box-shadow:0 0 10px #34e39a}
+.regie .zone-capabilities{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.regie .zone-capabilities span{font-size:10px;color:#d6d8f1;padding:5px 8px;border:1px solid #302d59;border-radius:20px;background:rgba(255,255,255,.035)}
+.regie .zone-chat-shell{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:12px}
+.regie .zone-sidecard{padding:12px;border:1px solid var(--rline);border-radius:12px;background:linear-gradient(180deg,#141430,#0b0b19)}
+.regie .zone-sidecard h4{margin:0 0 8px;font-size:12px}
+.regie .zone-sidecard .muted{font-size:10.5px;line-height:1.5}
+.regie .zone-mic-hint{padding:9px 10px;border-radius:9px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.17);font-size:10.5px;color:#b9c5e5;line-height:1.5}
+@keyframes zoneBreath{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@media(max-width:760px){.regie .zone-stage{grid-template-columns:1fr}.regie .zone-portrait{min-height:180px}.regie .zone-chat-shell{grid-template-columns:1fr}.regie .zone-sidecard{display:none}}
+
 @media(max-width:700px){.regie{grid-template-columns:1fr;grid-template-rows:48px 1fr 56px}.regie .rside{display:none}.regie .rtabs{overflow-x:auto}.regie .rbrand{width:auto}.regie .rtop{gap:5px;padding:0 7px}.regie .rtab{padding:7px 9px}.regie .rview{padding:8px}.regie .zone-presence{margin:8px 8px 0}.regie .zone-bars{display:none}}
 @media(max-width:1050px){.regie{grid-template-columns:60px 1fr}.regie .rbrand{width:0}}
 `;
@@ -1062,8 +1092,10 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
     undoBtn.onclick = () => { const t = trackNow(); if (t?.original) { t.buffer = cloneAudioBuffer(t.original); t.fxDone = []; save(); if (cur === 'timeline') go('timeline'); status.textContent = 'Prise originale restaurée.'; } };
     root.append(h('div.grid', { style: { gridTemplateColumns: '1fr 280px' } },
       h('div.panel', h('div.ph', '🎙️ La Zone — ingénieur du son IA', h('span.r', 'chef d’orchestre des 10 spécialistes')),
-        h('div.zone-presence', h('div.zone-avatar', '🧔'), h('div.zone-meta', h('strong', 'LA ZONE'), h('small', 'Ingénieur du son · voix masculine'), h('span.zone-state', h('i'), 'PRÉSENT DANS LE STUDIO')), h('div.zone-bars', ...Array.from({length:7}, () => h('i')))),
-        h('div.pb', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat,
+        h('div.zone-stage',
+          h('div.zone-portrait', h('div.zone-head', h('div.zone-shoulders'), h('div.zone-neck'), h('div.zone-face'), h('div.zone-hair'), h('div.zone-beard'), h('div.zone-eye.left'), h('div.zone-eye.right'), h('div.zone-mouth'))),
+          h('div.zone-stage-info', h('span.zone-kicker', 'Ton ingénieur personnel'), h('h2', 'LA ZONE'), h('p', 'Un seul interlocuteur pour ton studio. Il coordonne les spécialistes, analyse les mesures audio disponibles et prépare les traitements que tu peux valider.'), h('span.zone-live', h('i'), 'PRÉSENCE STUDIO · MAQUETTE INTERACTIVE'), h('div.zone-capabilities', ...['Conversation vocale','10 spécialistes','Analyse audio','Mixage & mastering'].map(x=>h('span',x))), h('div.zone-bars', ...Array.from({length:7}, () => h('i'))))),
+        h('div.pb', h('div.zone-chat-shell', h('div', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat), h('div.zone-sidecard', h('h4', 'SESSION STUDIO'), h('div.zone-mic-hint', 'Parle naturellement à La Zone. Dans cette maquette, la voix utilise encore les fonctions vocales du navigateur : ce n’est pas encore le moteur temps réel final.'), h('div', { style: { height:'10px' } }), h('h4', 'ÉQUIPE EN COULISSES'), h('div.muted', 'Diagnostic · Nettoyage · Voix · EQ · Dynamique · Effets · Mixage · Mastering · Direction artistique · Contrôle qualité'), h('div', { style: { height:'10px' } }), h('h4', 'PROCHAINE ÉTAPE'), h('div.muted', 'Brancher le moteur vocal temps réel et synchroniser un véritable visage animé.'))),
           h('div', { style: { display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',margin:'10px 0' } }, h('b', { style:{fontSize:'12px'} }, 'Style de mastering'), masterStyle),
           effectPicker,
           voiceStatus,
