@@ -146,6 +146,20 @@ const CSS = `
 .regie .secth .chev{margin-left:auto;color:var(--rmut);font-size:12px;transition:transform .15s}
 .regie .secbody{padding:12px}
 .regie .secbody.closed{display:none}
+/* ===== La Zone : espace IA pleine largeur, sans colonne écrasée ===== */
+.regie .la-zone-workspace{width:100%;min-width:0;min-height:100%;padding:clamp(10px,1.4vw,20px)}
+.regie .la-zone-workspace>.la-zone-main-grid{width:100%;min-width:0;grid-template-columns:minmax(0,1.2fr) minmax(380px,.8fr)!important;gap:14px}
+.regie .la-zone-workspace>.la-zone-main-grid>.panel{min-width:0;width:100%}
+.regie .la-zone-workspace .pb{min-width:0}
+.regie .la-zone-workspace .vcard{min-width:0}
+.regie .la-zone-workspace .vcard .rbtn{white-space:normal}
+@media(max-width:1100px){
+ .regie .la-zone-workspace>.la-zone-main-grid{grid-template-columns:minmax(0,1fr)!important}
+}
+@media(min-width:1500px){
+ .regie .la-zone-workspace>.la-zone-main-grid{grid-template-columns:minmax(0,1.3fr) minmax(420px,.7fr)!important;gap:18px}
+ .regie .la-zone-workspace>.la-zone-main-grid>.panel{min-height:100%}
+}
 @media(max-width:1050px){.regie{grid-template-columns:60px 1fr}.regie .rbrand{width:0}}
 /* ===== plan de travail : tuiles redimensionnables qui se réorganisent (jamais cachées) ===== */
 .regie .rwork{height:100%;overflow:auto;padding:12px;display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start;background:#060610}
@@ -1318,7 +1332,7 @@ export async function render(el, { params }) {
   }
 
   function viewIA() {
-    const root = h('div');
+    const root = h('div.la-zone-workspace');
     const vt = voixTracks();
     const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const curTrack = () => tracks[+sel.value];
@@ -1366,7 +1380,7 @@ export async function render(el, { params }) {
     sel.onchange = () => { rebuildCards(); analysisBox.innerHTML = '<p class="muted">Clique « Analyser » pour mesurer ta voix.</p>'; };
 
     const premiumProp = () => buildVoiceProposals(analyzeVoix(curTrack()), 'rap').find(p => p.id === 'premium');
-    root.append(h('div.grid', { style: { gridTemplateColumns: '1.25fr 1fr' } },
+    root.append(h('div.grid.la-zone-main-grid', { style: { gridTemplateColumns: 'minmax(0, 1.2fr) minmax(380px, .8fr)', width: '100%', alignItems: 'start' } },
       h('div.panel', { style: { display: 'flex', flexDirection: 'column' } },
         h('div.ph', '🧠 Ingé son IA — assistant en direct', h('span.r', { style: { color: '#bff5db' } }, 'RÉEL · voix + texte · 0 €')),
         h('div.pb', { style: { flex: '1' } },
