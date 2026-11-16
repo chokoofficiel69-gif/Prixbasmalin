@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Studio IA — Relais navigateur",
+  "version": "0.1.0",
+  "description": "Relie La Rue et La Ruse au navigateur Chrome avec confirmation des actions.",
+  "permissions": ["tabs"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "externally_connectable": {
+    "matches": ["https://studio.prixbasmalin.prod.page/*"]
+  },
+  "action": {
+    "default_title": "Relais navigateur Studio IA"
+  }
+}
