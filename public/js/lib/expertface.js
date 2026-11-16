@@ -136,12 +136,14 @@ export function expertFace({ name, role, avatar = 'rue' } = {}) {
   const status = mk('span', 'ef-status');
   status.append(mk('span', 'ef-dot'), statusText);
   const meta = mk('div', 'ef-meta');
-  meta.append(mk('div', 'ef-name', cap.name), mk('div', 'ef-role', cap.role), status);
+  const nameEl = mk('div', 'ef-name', cap.name);
+  const roleEl = mk('div', 'ef-role', cap.role);
+  meta.append(nameEl, roleEl, status);
   const el = mk('div', 'expert-face');
   el.dataset.state = 'idle';
   el.append(portrait, meta);
   const setState = (s) => { const st = normalizeState(s); el.dataset.state = st; statusText.textContent = STATUS_TEXT[st]; };
   const setStatus = (text) => { statusText.textContent = String(text || STATUS_TEXT[el.dataset.state] || ''); };
-  const setAvatar = (next) => { currentAvatar = next === 'ruse' ? 'ruse' : 'rue'; portrait.innerHTML = currentAvatar === 'ruse' ? PORTRAIT_RUSE_SVG : PORTRAIT_SVG; };
+  const setAvatar = (next) => { currentAvatar = next === 'ruse' ? 'ruse' : 'rue'; portrait.innerHTML = currentAvatar === 'ruse' ? PORTRAIT_RUSE_SVG : PORTRAIT_SVG; nameEl.textContent = currentAvatar === 'ruse' ? 'La Ruse' : 'La Rue'; };
   return { el, setState, setStatus, setAvatar };
 }
