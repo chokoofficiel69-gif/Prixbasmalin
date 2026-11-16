@@ -160,7 +160,6 @@ export async function render(el) {
     const answer = { role: 'assistant', content: '' };
     conv.messages.push(answer);
     try {
-      const memoryText = profile.memory ? '\n\nMÉMOIRE PERSONNELLE DURABLE (commune aux deux avatars) :\n' + profile.memory : '';
       await sse('/api/companion/run', {
         projectId,
         model: localStorage.getItem('studio.model') || 'auto',
