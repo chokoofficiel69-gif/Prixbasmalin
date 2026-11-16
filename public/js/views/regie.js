@@ -205,10 +205,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live30')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live31')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live30'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live31'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -1531,9 +1531,15 @@ export async function render(el, { params }) {
   function applyFree(tile, key) { const f = tileFree[key]; if (f) { SIZES.forEach(c => tile.classList.remove(c)); tile.classList.add('free'); tile.style.flex = '0 0 auto'; tile.style.width = f.w + 'px'; tile.style.height = f.h + 'px'; } }
   // Mise à l'échelle « tout voir » : le contenu se dézoome pour tenir en entier dans la tuile,
   // au lieu d'être coupé. Plus la tuile est petite, plus le module est réduit — mais toujours visible.
+  // Seuls les panneaux STATIQUES (molettes) se dézooment pour tout montrer.
+  // Les modules INTERACTIFS (clics/glissers sur une forme d'onde, un piano, un canvas)
+  // ne doivent JAMAIS être mis à l'échelle : ça décalerait les clics. Eux défilent.
+  const SCALABLE = new Set(['eq', 'comp', 'rev', 'pitch', 'harmo', 'deess', 'master', 'console']);
   function fitTile(tile) {
     const body = tile.querySelector('.rtileb'), fitw = tile.querySelector('.rtfit');
     if (!body || !fitw) return;
+    if (!SCALABLE.has(tile.dataset.key)) { body.style.overflow = 'auto'; fitw.style.width = ''; fitw.style.transform = 'none'; return; }
+    body.style.overflow = 'hidden';
     const availW = body.clientWidth, availH = body.clientHeight;
     if (availW < 4 || availH < 4) return;
     const MINW = 340, layoutW = Math.max(availW, MINW);
@@ -1713,7 +1719,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE30'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE31'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
