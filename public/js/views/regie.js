@@ -832,6 +832,12 @@ RÈGLES D’UTILISATION :
       try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); recognition.start(); }
       catch (e) { voiceSession = false; voiceStatus.textContent = 'Impossible de démarrer le micro : ' + (e?.message || e); }
     };
+    root._stopLaZoneVoice = () => {
+      voiceSession = false; stopListening();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      voiceBtn.textContent = '🎙️ Parler à La Zone';
+      voiceStatus.textContent = 'Conversation vocale arrêtée.';
+    };
     const applyBtn = h('button.rbtn.g', { disabled: true }, '✓ Exécuter les modifications');
     const undoBtn = h('button.rbtn', { disabled: true }, '↩ Restaurer l’original');
     let pendingPlan = null, busy = false;
@@ -1154,6 +1160,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
     for (const k of Object.keys(VIEWS)) tabsBar.append(h('div.rtab' + (k === cur ? '.on' : ''), { onclick: () => go(k) }, VIEWS[k].t));
   }
   function go(k) {
+    if (cur === 'ia' && k !== 'ia' && root._stopLaZoneVoice) root._stopLaZoneVoice();
     if (playing && k !== 'timeline' && k !== 'regie') stopPlay();
     if (recording && cur === 'rec' && k !== 'rec') stopRecording();
     cur = k; renderTabs();
@@ -1240,5 +1247,5 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
   go(cur);
 
   // nettoyage
-  return () => { document.removeEventListener('click', closeContextMenu); closeContextMenu(); stopPlay(); stopAllRec(); stopPreview(); };
+  return () => { if (root._stopLaZoneVoice) root._stopLaZoneVoice(); document.removeEventListener('click', closeContextMenu); closeContextMenu(); stopPlay(); stopAllRec(); stopPreview(); };
 }
