@@ -554,7 +554,7 @@ export async function render(el, { params }) {
   function stopAllRec() { try { rec?.stop(); } catch {} rec = null; recording = false; stopMon(); try { instruSrc?.stop(); } catch {} instruSrc = null; clearInterval(metroTimer); }
 
   // ---------- Auto-Tune RÉEL (réutilise applyChain + détection de tonalité) ----------
-  const atOpt = { speed: 60, strength: 1, formant: 0, key: '' };
+  const atOpt = { speed: 60, strength: 1, formant: 0, key: '', mode: 'dure', humanize: 0.25, glide: 30, keep: 0.15 };
   let previewSrc = null, atBusy = false;
   const voixTracks = () => tracks.map((t, i) => ({ t, i })).filter(x => !isInstru(x.t));
   function stopPreview() { try { previewSrc?.stop(); } catch {} previewSrc = null; }
@@ -570,7 +570,10 @@ export async function render(el, { params }) {
     if (atBusy) return; atBusy = true;
     try {
       const src = track.original || track.buffer;
-      const res = await applyChain(src, [{ t: 'tune', strength: atOpt.strength, speed: atOpt.speed, formant: atOpt.formant }], { key: parseKey(atOpt.key), onProgress: (m) => status.textContent = m });
+      const step = atOpt.mode === 'douce'
+        ? { t: 'tune', mode: 'notes', strength: atOpt.strength, keep: atOpt.keep, glide: atOpt.glide, humanize: atOpt.humanize, formant: atOpt.formant }
+        : { t: 'tune', strength: atOpt.strength, speed: atOpt.speed, formant: atOpt.formant };
+      const res = await applyChain(src, [step], { key: parseKey(atOpt.key), onProgress: (m) => status.textContent = m });
       if (!track.original) track.original = src;
       track.buffer = res.buffer; track.fxDone = [...(track.fxDone || []), 'autotune'];
       keyLabel.textContent = keyName(res.key);
@@ -1084,12 +1087,17 @@ export async function render(el, { params }) {
     const keyLabel = h('b', { style: { color: '#bff5db' } }, '—');
     const keySel = h('select', { style: selStyle(), onchange: (e) => { atOpt.key = e.target.value; } }, KEY_CHOICES.map(k => h('option', { value: k.v }, k.label)));
     const status = h('div.muted', { style: { fontSize: '11px', minHeight: '15px', marginTop: '6px' } }, '');
-    const kSpeed = knob({ label: 'VITESSE', min: 0, max: 200, step: 5, value: atOpt.speed, def: 60, fmt: v => `${v | 0} ms`, onInput: v => atOpt.speed = v });
+    const kSpeed = knob({ label: 'RETUNE', min: 0, max: 200, step: 5, value: atOpt.speed, def: 60, fmt: v => `${v | 0} ms`, onInput: v => atOpt.speed = v });
     const kStr = knob({ label: 'FORCE', min: 0, max: 1, step: 0.05, value: atOpt.strength, def: 1, fmt: pcF, onInput: v => atOpt.strength = v });
-    const kFor = knob({ label: 'TIMBRE', min: -4, max: 4, step: 1, value: atOpt.formant, def: 0, fmt: v => `${v}`, onInput: v => atOpt.formant = v });
-    const presets = [['Naturel', 0.8, 120], ['Pop', 1, 60], ['R&B', 1, 35], ['Trap mélo', 1, 15], ['Hard', 1, 0]];
+    const kFor = knob({ label: 'FORMANT', min: -4, max: 4, step: 1, value: atOpt.formant, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v}`, onInput: v => atOpt.formant = v });
+    const kHum = knob({ label: 'HUMANIZE', min: 0, max: 1, step: 0.05, value: atOpt.humanize, def: 0.25, fmt: pcF, onInput: v => atOpt.humanize = v });
+    const kGli = knob({ label: 'GLISSANDO', min: 0, max: 200, step: 5, value: atOpt.glide, def: 30, fmt: v => `${v | 0} ms`, onInput: v => atOpt.glide = v });
+    const kKeep = knob({ label: 'NATUREL', min: 0, max: 0.8, step: 0.05, value: atOpt.keep, def: 0.15, fmt: pcF, onInput: v => atOpt.keep = v });
+    // type de correction : dure (robot/net) ou douce (naturel, notes)
+    const typeChips = [['dure', 'Dure (net)'], ['douce', 'Douce (naturel)']].map(([mm, lab]) => { const c = h('span.chip' + (mm === atOpt.mode ? '.on' : ''), lab); c.onclick = () => { atOpt.mode = mm; typeChips.forEach(x => x.classList.toggle('on', x === c)); }; return c; });
+    const presets = [['Naturel', { mode: 'douce', strength: 0.9, keep: 0.25, glide: 60, humanize: 0.4 }], ['Pop', { mode: 'dure', strength: 1, speed: 60 }], ['R&B', { mode: 'douce', strength: 1, keep: 0.12, glide: 30, humanize: 0.2 }], ['Trap mélo', { mode: 'dure', strength: 1, speed: 15 }], ['Hard (robot)', { mode: 'dure', strength: 1, speed: 0 }]];
     const presetRow = h('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '4px 0 10px' } },
-      presets.map(([nm, st, sp]) => h('span.chip', { onclick: () => { atOpt.strength = st; atOpt.speed = sp; kStr.set(st, false); kSpeed.set(sp, false); } }, nm)));
+      presets.map(([nm, p]) => h('span.chip', { onclick: () => { Object.assign(atOpt, p); kStr.set(atOpt.strength, false); kSpeed.set(atOpt.speed, false); kHum.set(atOpt.humanize, false); kGli.set(atOpt.glide, false); kKeep.set(atOpt.keep, false); typeChips.forEach(x => x.classList.toggle('on', x.textContent.toLowerCase().startsWith(atOpt.mode === 'dure' ? 'dure' : 'douce'))); toast(`Preset « ${nm} » chargé`); } }, nm)));
     // gamme + clavier (piano) pour choisir la tonalité
     let mode = 'mineur';
     const modeChips = ['mineur', 'majeur'].map(mm => { const c = h('span.chip' + (mm === mode ? '.on' : ''), mm === 'mineur' ? 'Mineure' : 'Majeure'); c.onclick = () => { mode = mm; modeChips.forEach(x => x.classList.toggle('on', x === c)); if (atOpt.key) { atOpt.key = atOpt.key.split('|')[0] + '|' + mode; keyLabel.textContent = NOTE_NAMES[+atOpt.key.split('|')[0]] + ' ' + mode; } }; return c; });
@@ -1101,8 +1109,9 @@ export async function render(el, { params }) {
       h('div.ph', h('span', { style: { width: '11px', height: '11px', borderRadius: '50%', background: '#a855f7', boxShadow: '0 0 8px #a855f7', flex: 'none' } }), '🎤 Auto-Tune Pro', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'RÉEL')),
       h('div.pb',
         h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('span.muted', { style: { fontSize: '12px' } }, 'Tonalité :'), keyLabel),
+        h('div', { style: { display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px' } }, h('span.muted', { style: { fontSize: '11px' } }, 'Correction :'), ...typeChips),
         presetRow,
-        h('div', { style: { display: 'flex', gap: '18px', justifyContent: 'center', margin: '6px 0 4px' } }, kSpeed.el, kStr.el, kFor.el),
+        h('div', { style: { display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', margin: '6px 0 4px' } }, kSpeed.el, kStr.el, kHum.el, kGli.el, kKeep.el, kFor.el),
         pianoBox,
         h('div', { style: { display: 'flex', gap: '7px', flexWrap: 'wrap', marginTop: '10px' } },
           h('button.rbtn', { onclick: () => analyzeKey(curTrack(), status, keyLabel) }, '🎹 Détecter la tonalité'),
@@ -1111,7 +1120,7 @@ export async function render(el, { params }) {
           h('button.rbtn', { onclick: () => playBuffer(curTrack()?.buffer) }, '▶ Après'),
           h('button.rbtn', { onclick: () => stopPreview() }, '⏹')),
         status,
-        h('div.muted', { style: { fontSize: '10px', marginTop: '8px', lineHeight: '1.4' } }, 'L’auto-tune se calcule puis s’applique (pas en direct). 0 ms = robot, plus de ms = naturel.')));
+        h('div.muted', { style: { fontSize: '10px', marginTop: '8px', lineHeight: '1.4' } }, 'Dure : RETUNE 0 ms = robot, plus de ms = doux. Douce : GLISSANDO = transitions, NATUREL = garde un peu de ta justesse, HUMANIZE = micro-variations. FORMANT = timbre. Choisis la tonalité au piano.')));
   }
 
   const hzF = (v) => `${v | 0} Hz`;
@@ -1336,7 +1345,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE17'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE18'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
