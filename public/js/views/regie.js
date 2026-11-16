@@ -418,6 +418,10 @@ export async function render(el, { params }) {
         for (let i = 0; i < maxSamples; i++) mono[i] += data[i] / buffer.numberOfChannels;
       }
       const spectral = analyzeVoiceDsp(mono, buffer.sampleRate);
+      if (!spectral.valid) {
+        toast('Prise enregistrée. Le signal est trop faible ou trop court pour un diagnostic fiable.', 'bad');
+        return;
+      }
       const pitchBuffer = audioCtx().createBuffer(1, mono.length, buffer.sampleRate);
       pitchBuffer.copyToChannel(mono, 0);
       const pitch = await detectPitch(pitchBuffer);
