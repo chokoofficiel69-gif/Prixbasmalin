@@ -1127,7 +1127,6 @@ Si des effets sont coch√©s, ne retourne aucun autre type. Si mastering est coch√
       try {
         const sourceBuffer = t.buffer;
         const beforeOriginal = t.original;
-        const beforeMetrics = analyzeBuffer(sourceBuffer, 1);
         if (!t.original) t.original = cloneAudioBuffer(t.buffer);
         let b = cloneAudioBuffer(t.buffer);
         for (const a of pendingPlan.actions) {
