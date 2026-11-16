@@ -21,6 +21,9 @@ const CSS = `
   font-family:'Segoe UI',system-ui,-apple-system,sans-serif;transition:grid-template-columns .2s}
 .regie.collapsed{grid-template-columns:60px 1fr}
 .regie *{box-sizing:border-box}
+/* curseur personnalisé : un micro (studio vocal) */
+.regie{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect x='9' y='2' width='8' height='13' rx='4' fill='%23a855f7' stroke='%2322d3ee' stroke-width='1.4'/%3E%3Cpath d='M6 12 a7 7 0 0 0 14 0' fill='none' stroke='%2322d3ee' stroke-width='1.7'/%3E%3Cpath d='M13 19 L13 24 M9 24 L17 24' stroke='%2322d3ee' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E") 13 3, auto}
+.regie input,.regie textarea{cursor:text}
 .regie .rtop{grid-column:1/3;display:flex;align-items:center;gap:6px;padding:0 12px;background:linear-gradient(180deg,#0d0d1e,#090914);border-bottom:1px solid var(--rline)}
 .regie .rburger{width:34px;height:34px;border-radius:9px;background:var(--rpan2);border:1px solid var(--rline);display:grid;place-items:center;font-size:15px;cursor:pointer;flex:none}
 .regie .rbrand{display:flex;align-items:center;gap:9px;width:150px;flex:none;overflow:hidden}
@@ -184,10 +187,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live27')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live28')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live27'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live28'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -1671,7 +1674,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE27'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE28'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
