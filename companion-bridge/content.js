@@ -39,7 +39,7 @@ function approveAndRun(command) {
           const wanted = String(command.text || "").trim().toLowerCase();
           if (!wanted) throw new Error("Libellé de bouton manquant.");
           if (/supprimer|effacer|payer|paiement|acheter|commander|publier|envoyer|valider|confirmer|delete|remove|pay|purchase|buy|publish|submit|send|confirm/i.test(wanted)) throw new Error("Action sensible bloquée. La Rue ne peut pas valider cette action automatiquement.");
-          const candidates = [...document.querySelectorAll("a,button,[role=button]")];
+          const candidates = [...document.querySelectorAll("a,button,[role=button]")].filter(el => !(el.tagName === "BUTTON" && el.type === "submit"));
           const target = candidates.find(el => (el.innerText || el.getAttribute("aria-label") || "").trim().toLowerCase() === wanted);
           if (!target) throw new Error("Aucun bouton ou lien avec ce libellé exact.");
           target.click();
@@ -48,7 +48,8 @@ function approveAndRun(command) {
           const field = String(command.field || "").trim().toLowerCase();
           const value = String(command.value || "");
           if (!field) throw new Error("Nom du champ manquant.");
-          const candidates = [...document.querySelectorAll("input:not([type=password]):not([type=hidden]):not([type=submit]),textarea")];
+          if (/mot de passe|password|carte bancaire|carte de paiement|cvv|cvc|iban|compte bancaire|code secret|otp|verification code/i.test(field)) throw new Error("Champ sensible bloqué.");
+          const candidates = [...document.querySelectorAll("input[type=text],input[type=search],input[type=email],input[type=tel],input[type=url],textarea")];
           const target = candidates.find(el => {
             const label = el.labels ? [...el.labels].map(x => x.innerText).join(" ") : "";
             return [el.placeholder, el.getAttribute("aria-label"), el.name, el.id, label].some(x => String(x || "").trim().toLowerCase() === field);
