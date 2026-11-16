@@ -652,6 +652,13 @@ export async function render(el, { params }) {
     if (download) downloadBlob(encodeWav(lastMaster, 16), `${(proj.name || 'studio').replace(/\s+/g, '-')}-master.wav`);
     return lastMaster;
   }
+  let exporting = false;
+  async function exportMix() {
+    if (exporting) return; if (!tracks.some(t => t.buffer)) { toast('Aucune piste à exporter.', 'bad'); return; }
+    exporting = true; toast('Préparation de l’export (mix + master)…');
+    try { await doMasterExport('streaming', true); toast('🎧 Export WAV téléchargé ✓', 'ok'); }
+    catch (e) { toastErr(e); } finally { exporting = false; }
+  }
 
   // ---------- Assistant ingé expert EN DIRECT (voix + texte + actions réelles) ----------
   let ast = null, recViaAssistant = false, selVoixIdx = -1;
@@ -957,6 +964,11 @@ export async function render(el, { params }) {
           h('button.rbtn.p', { style: { width: '100%' }, onclick: () => go('ia') }, 'Ouvrir l’ingé IA →'))));
     const analysePanel = h('div.panel', { html: `<div class="ph">📊 Analyse vocale <span class="r" style="color:#bff5db">réel</span></div><div class="pb" style="display:flex;gap:12px;align-items:center">${gauge}<div style="flex:1">${items}</div></div>` });
     const nivPanel = h('div.panel', { html: `<div class="ph">🎚️ Niveaux</div><div class="pb"><div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Crête</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${peakPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.peakDb : '—'}</b></div><div style="display:flex;gap:9px;align-items:center;font-size:11px;margin-bottom:9px"><span class="muted" style="width:40px">Moyen</span><div style="flex:1;height:9px;border-radius:5px;background:#141230;overflow:hidden"><i style="display:block;height:100%;width:${rmsPct}%;background:linear-gradient(90deg,#34e39a,#f0b429 72%,#ef4444)"></i></div><b>${m ? m.rmsDb : '—'}</b></div><div style="text-align:center;background:#0d1702;border:1px solid #2a4a10;border-radius:9px;padding:8px"><b style="font-size:19px;color:#bff5db">${m ? m.crestDb : '—'}</b><div class="muted" style="font-size:9px">DYNAMIQUE (dB)</div></div></div>` });
+    root.append(h('div', { style: { display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' } },
+      h('button.rbtn.g', { style: { fontWeight: '800' }, onclick: () => exportMix() }, '📤 Exporter le mix (WAV)'),
+      h('button.rbtn', { onclick: () => go('rec') }, '🎙️ Enregistrer'),
+      h('button.rbtn', { onclick: () => go('fx') }, '🎛️ Effets & molettes'),
+      h('button.rbtn', { onclick: () => go('ia') }, '🧠 Ingé IA')));
     root.append(h('div.grid', { style: { gridTemplateColumns: '1.2fr 1.2fr 150px' } }, marcoPanel, analysePanel, nivPanel));
 
     void playBtn; void curIdx;
@@ -1280,7 +1292,7 @@ export async function render(el, { params }) {
 
   function renderSidebar() {
     const groups = [
-      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter (bientôt)', null]] },
+      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter le mix (WAV)', () => exportMix()]] },
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => go('timeline'), trackColor(t, i)]) },
       { ic: '🎛️', t: 'Modules', items: [['🎤', 'Auto-Tune', () => go('fx')], ['🎚️', 'Égaliseur', () => go('fx')], ['🗜️', 'Compression', () => go('fx')], ['🌫️', 'Réverbe', () => go('fx')], ['🔁', 'Delay', () => go('fx')], ['🎼', 'Harmonies', () => go('fx')]] },
       { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
@@ -1307,7 +1319,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE14'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE15'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');

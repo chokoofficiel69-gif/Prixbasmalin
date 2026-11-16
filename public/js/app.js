@@ -8,7 +8,7 @@ const VIEWS = [
   { id: 'clips', label: 'VIDÉOS ET CLIPS', title: 'Vidéos et clips', icon: '🎬', load: () => import('./views/clips.js') },
   { id: 'musique', label: 'STUDIO MUSIQUE', title: 'Studio musique', icon: '🎹', load: () => import('./views/music.js') },
   { id: 'studio', label: 'STUDIO PRO', title: 'Studio Pro', icon: '🎛️', load: () => import('./views/studio.js'), full: true },
-  { id: 'regie', label: 'RÉGIE PRO', title: 'Régie Pro', icon: '🧩', load: () => import('./views/regie.js?v=20261115-regie-live14'), full: true },
+  { id: 'regie', label: 'RÉGIE PRO', title: 'Régie Pro', icon: '🧩', load: () => import('./views/regie.js?v=20261115-regie-live15'), full: true },
   { id: 'enregistrement', label: 'ENREGISTREMENT AUDIO', title: 'Enregistrement audio', icon: '🎙️', load: () => import('./views/record.js?v=20261114-voice-console-13') },
   { id: 'projets', label: 'MES PROJETS', title: 'Mes projets', icon: '🗂️', load: () => import('./views/projects.js') },
   { id: 'fichiers', label: 'FICHIERS', title: 'Fichiers', icon: '📁', load: () => import('./views/files.js') },
