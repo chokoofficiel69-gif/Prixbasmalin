@@ -891,14 +891,14 @@ async function runSelfTests() {
   const sampleStatus = buildSyncStatus({
     fetchedAt: "2026-11-06T00:00:00.000Z",
     source: "Awin Direct Product Data Feed",
-    joinedCount: 0,
+    joinedCount: 1,
     pendingCount: 6,
     joinedAdvertisers: [{ id: "123", name: "Annonceur test" }],
     additionalOffers: 0,
     counts: { products: 7, merchant_offers: 7 }
   });
   if (sampleStatus.programmes_check_status !== "verified" ||
-      sampleStatus.joined_advertisers_checked !== 0 ||
+      sampleStatus.joined_advertisers_checked !== 1 ||
       sampleStatus.pending_advertisers_detected !== 6 ||
       sampleStatus.joined_advertisers?.[0]?.id !== "123" ||
       sampleStatus.additional_authorized_offers_imported !== 0) {
