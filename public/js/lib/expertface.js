@@ -1,8 +1,8 @@
-// Ingé son IA — avatar humanoïde animé de Marco.
+// Ingé son IA — avatar humanoïde animé de La Rue.
 // Portrait vectoriel original : aucune photo, aucun service externe, aucun coût réseau.
 // Les helpers purs restent testables sous Node.
 export const FACE_STATES = ['idle', 'thinking', 'speaking'];
-export const DEFAULT_ENGINEER = { name: 'Marco', role: "Ingénieur du son · IA" };
+export const DEFAULT_ENGINEER = { name: 'La Rue', role: "Ingénieur du son · IA" };
 
 /** Légende sous le portrait (pure, testable). */
 export function faceCaption(name = DEFAULT_ENGINEER.name, role = DEFAULT_ENGINEER.role) {
@@ -55,7 +55,7 @@ function ensureCss() {
 
 // Portrait humain stylisé : visage, cheveux, yeux, nez, bouche, cou, épaules et casque studio.
 const PORTRAIT_SVG = `
-<svg viewBox="0 0 120 140" role="img" aria-label="Portrait humanoïde de Marco, ingénieur du son IA" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 120 140" role="img" aria-label="Portrait humanoïde de La Rue, ingénieur du son IA" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="ef-skin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0c6a5"/><stop offset=".55" stop-color="#c98f72"/><stop offset="1" stop-color="#8d5d54"/></linearGradient>
     <linearGradient id="ef-hair" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#29364c"/><stop offset="1" stop-color="#090f1c"/></linearGradient>
