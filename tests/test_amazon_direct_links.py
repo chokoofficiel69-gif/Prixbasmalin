@@ -69,6 +69,24 @@ class GeneratedPagesTests(unittest.TestCase):
         self.assertIn("Voir sur Amazon", page)
         self.assertIn("Le bouton Amazon ouvre la fiche du produit", page)
 
+    def test_catalogue_known_asins_use_direct_product_urls(self):
+        catalogue = (ROOT / "catalogue.html").read_text(encoding="utf-8").replace("&amp;", "&")
+        match = re.search(r"const\s+productData\s*=\s*(\[.*?\])\s*;", catalogue, re.S)
+        self.assertIsNotNone(match, "productData doit rester un tableau JSON lisible")
+        products = json.loads(match.group(1))
+        expected = {
+            "apple-airpods-4": "B0DGHWD7CT",
+            "airpodspro3": "B0FQF32239",
+            "nintendo-switch-2": "B0HCPTNRZJ",
+        }
+        for product_id, asin in expected.items():
+            product = next((p for p in products if p.get("id") == product_id), None)
+            self.assertIsNotNone(product, product_id)
+            parsed = urlsplit(product["sourceUrl"])
+            self.assertEqual(parsed.netloc, "www.amazon.fr", product_id)
+            self.assertEqual(parsed.path, f"/dp/{asin}", product_id)
+            self.assertEqual(parse_qs(parsed.query).get("tag"), ["prixbasmalin2-21"], product_id)
+
     def test_black_friday_page_is_honest_and_tagged(self):
         page = (ROOT / "black-friday.html").read_text(encoding="utf-8").replace("&amp;", "&")
         self.assertIn("pas des prix promotionnels en direct", page)
