@@ -1376,8 +1376,14 @@ export async function render(el, { params }) {
     const vt = voixTracks();
     const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const curIdx = () => +sel.value;
-    const grid = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(92px,1fr))', gap: '8px' } }, EFFECTS_BANK.map(([nm, emo, chain]) => h('div.preset', { style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo, name: nm, chain }); } }, h('div', { style: { fontSize: '20px' } }, emo), h('b', { style: { fontSize: '11px' } }, nm))));
-    return h('div', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('button.rbtn', { onclick: () => playBuffer(tracks[curIdx()]?.buffer) }, '▶'), h('button.rbtn', { onclick: () => { stopPreview(); revertTrack(tracks[curIdx()], { textContent: '' }); } }, '↩ Original')), grid);
+    const grid = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(92px,1fr))', gap: '8px' } });
+    const fill = (q = '') => { q = q.trim().toLowerCase(); grid.innerHTML = ''; EFFECTS_BANK.filter(([nm]) => !q || nm.toLowerCase().includes(q)).forEach(([nm, emo, chain]) => grid.append(h('div.preset', { style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo, name: nm, chain }); } }, h('div', { style: { fontSize: '20px' } }, emo), h('b', { style: { fontSize: '11px' } }, nm)))); };
+    fill();
+    const search = h('input', { placeholder: '🔎 Rechercher un effet…', style: { ...selStyle(), flex: '1' }, oninput: (e) => fill(e.target.value) });
+    return h('div',
+      h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('button.rbtn', { onclick: () => playBuffer(tracks[curIdx()]?.buffer) }, '▶'), h('button.rbtn', { onclick: () => { stopPreview(); revertTrack(tracks[curIdx()], { textContent: '' }); } }, '↩ Original')),
+      h('div', { style: { marginBottom: '10px' } }, search),
+      grid);
   }
   const winSpectro = () => makeSpectro(150);
   // helpers boîtiers
@@ -1447,7 +1453,10 @@ export async function render(el, { params }) {
   const TAB_ORDER = ['regie', 'timeline', 'rec', 'console', 'autotune', 'eq', 'comp', 'rev', 'deess', 'pitch', 'harmo', 'bank', 'spectro', 'master', 'repo', 'ia'];
   const openWins = {}; let zTop = 10, winOffset = 0;
   function makeWinContent(key) { const el = h('div'); try { el.append(WINDEF[key].r()); } catch (e) { console.error(e); el.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); } return el; }
-  function openWindow(key) {
+  let saveT = null;
+  function saveLayout() { try { const o = {}; for (const k in openWins) { const w = openWins[k].win; o[k] = { l: w.offsetLeft, t: w.offsetTop, w: w.offsetWidth, h: w.offsetHeight, min: w.classList.contains('min') }; } localStorage.setItem('regie.layout', JSON.stringify(o)); } catch {} }
+  const saveSoon = () => { clearTimeout(saveT); saveT = setTimeout(saveLayout, 350); };
+  function openWindow(key, pos) {
     const def = WINDEF[key]; if (!def) return;
     if (openWins[key]) { const w = openWins[key]; w.win.style.display = 'flex'; w.win.classList.remove('min'); w.win.style.zIndex = String(++zTop); return; }
     const body = h('div.rgwbody'); body.append(makeWinContent(key));
@@ -1456,16 +1465,18 @@ export async function render(el, { params }) {
     const maxW = Math.max(260, (main.clientWidth || 900) - 24);
     const win = h('div.rgwin', { style: { width: Math.min(def.w, maxW) + 'px', height: def.h + 'px', left: (16 + winOffset) + 'px', top: (12 + winOffset) + 'px', zIndex: String(++zTop) } }, head, body);
     winOffset = (winOffset + 26) % 150;
+    if (pos) { win.style.left = Math.max(0, pos.l | 0) + 'px'; win.style.top = Math.max(0, pos.t | 0) + 'px'; if (pos.w) win.style.width = Math.min(pos.w, maxW) + 'px'; if (pos.h) win.style.height = pos.h + 'px'; if (pos.min) win.classList.add('min'); }
     const rebuild = () => { body.innerHTML = ''; body.append(makeWinContent(key)); };
     openWins[key] = { win, body, rebuild };
-    minB.onclick = (e) => { e.stopPropagation(); win.classList.toggle('min'); };
-    closeB.onclick = (e) => { e.stopPropagation(); win.remove(); delete openWins[key]; if (key === 'console') stopLive(); renderTabs(); };
+    minB.onclick = (e) => { e.stopPropagation(); win.classList.toggle('min'); saveSoon(); };
+    closeB.onclick = (e) => { e.stopPropagation(); win.remove(); delete openWins[key]; if (key === 'console') stopLive(); renderTabs(); saveLayout(); };
     win.addEventListener('pointerdown', () => { win.style.zIndex = String(++zTop); });
     let drag = null;
     head.addEventListener('pointerdown', (e) => { if (e.target.closest('.rgwbtn')) return; drag = { x: e.clientX, y: e.clientY, l: win.offsetLeft, t: win.offsetTop }; try { head.setPointerCapture(e.pointerId); } catch {} });
     head.addEventListener('pointermove', (e) => { if (!drag) return; win.style.left = Math.max(0, drag.l + (e.clientX - drag.x)) + 'px'; win.style.top = Math.max(0, drag.t + (e.clientY - drag.y)) + 'px'; });
-    head.addEventListener('pointerup', () => { drag = null; });
-    main.append(win); renderTabs();
+    head.addEventListener('pointerup', () => { if (drag) { drag = null; saveSoon(); } });
+    try { new ResizeObserver(saveSoon).observe(win); } catch {}
+    main.append(win); renderTabs(); if (!pos) saveSoon();
   }
   const go = (k) => openWindow(k);
   function refreshViews() { ['timeline', 'regie'].forEach(k => { if (openWins[k]) openWins[k].rebuild(); }); }
@@ -1473,7 +1484,7 @@ export async function render(el, { params }) {
 
   function renderSidebar() {
     const groups = [
-      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter le mix (WAV)', () => exportMix()]] },
+      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter le mix (WAV)', () => exportMix()], ['🧹', 'Réinitialiser l’espace', () => { try { localStorage.removeItem('regie.layout'); } catch {} location.reload(); }]] },
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => { if (!isInstru(t)) selVoixIdx = i; go('timeline'); refreshViews(); toast('🎯 Piste cible : ' + (t.name || `Piste ${i + 1}`)); }, trackColor(t, i)]) },
       { ic: '🎛️', t: 'Modules (boîtiers)', items: [['🎚️', 'Console live', () => openWindow('console')], ['🎤', 'Auto-Tune Pro', () => openWindow('autotune')], ['🎚️', 'Égaliseur', () => openWindow('eq')], ['🗜️', 'Compresseur', () => openWindow('comp')], ['🌫️', 'Réverbe & FX', () => openWindow('rev')], ['🧼', 'De-Esser', () => openWindow('deess')], ['🎚️', 'Hauteur / Pitch', () => openWindow('pitch')], ['🎼', 'Harmoniseur', () => openWindow('harmo')], ['🌈', 'Spectrogramme', () => openWindow('spectro')], ['⭐', 'Banque d’effets', () => openWindow('bank')], ['🏁', 'Mastering', () => openWindow('master')]] },
       { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
@@ -1500,7 +1511,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE21'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE22'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
@@ -1525,14 +1536,18 @@ export async function render(el, { params }) {
   try { ast = mountAssistant(buildAssistantS()); } catch (e) { ast = null; }
   renderSidebar();
   renderTabs();
-  openWindow('regie'); openWindow('console'); openWindow('timeline');
-  // disposition par défaut en mosaïque (non superposée) sur grand écran
-  setTimeout(() => {
-    const W = main.clientWidth || 1200;
-    const place = (k, l, t, w) => { const e = openWins[k]; if (e) { e.win.style.left = l + 'px'; e.win.style.top = t + 'px'; if (w) e.win.style.width = Math.min(w, W - l - 12) + 'px'; } };
-    if (W > 1000) { place('regie', 12, 10, 700); place('console', 724, 10, W - 736); place('timeline', 12, 452, W - 24); }
-    winOffset = 40;
-  }, 0);
+  // restaure la disposition sauvegardée, sinon mosaïque par défaut
+  let restored = false;
+  try { const o = JSON.parse(localStorage.getItem('regie.layout') || 'null'); if (o && Object.keys(o).length) { for (const k in o) if (WINDEF[k]) openWindow(k, o[k]); restored = true; } } catch {}
+  if (!restored) {
+    openWindow('regie'); openWindow('console'); openWindow('timeline');
+    setTimeout(() => {
+      const W = main.clientWidth || 1200;
+      const place = (k, l, t, w) => { const e = openWins[k]; if (e) { e.win.style.left = l + 'px'; e.win.style.top = t + 'px'; if (w) e.win.style.width = Math.min(w, W - l - 12) + 'px'; } };
+      if (W > 1000) { place('regie', 12, 10, 700); place('console', 724, 10, W - 736); place('timeline', 12, 452, W - 24); }
+      winOffset = 40; saveLayout();
+    }, 0);
+  }
 
   // nettoyage
   return () => { stopPlay(); stopAllRec(); stopPreview(); stopLive(); closeMenu(); try { ast?.destroy?.(); } catch {} };
