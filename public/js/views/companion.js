@@ -31,7 +31,12 @@ export async function render(el) {
   avatarRow.append(rueBtn, ruseBtn, h('span.grow'), status);
   const memory = h('textarea', { rows: 4, placeholder: 'Ce que ton compagnon doit retenir durablement : tes préférences, tes objectifs, les décisions importantes…', value: profile.memory || '' });
   const memorySave = h('button.btn.small', { onclick: saveMemory }, '🧠 Enregistrer la mémoire commune');
-  top.append(title, face.el, avatarRow, h('div.small.muted', 'La mémoire ci-dessous est partagée par La Rue et La Ruse et reste enregistrée dans ton espace Studio.'), memory, memorySave);
+  const bridgeInput = h('input', { placeholder: 'Identifiant de l’extension Chrome', value: localStorage.getItem('studio.companion.extensionId') || '' });
+  const bridgeSave = h('button.btn.small', { onclick: () => { localStorage.setItem('studio.companion.extensionId', bridgeInput.value.trim()); toast('Relais navigateur enregistré sur cet appareil.', 'ok'); } }, 'Connecter le navigateur');
+  const bridgeRow = h('div.row', { style: { gap: '8px', flexWrap: 'wrap' } }, bridgeInput, bridgeSave);
+  bridgeInput.style.flex = '1';
+  top.append(title, face.el, avatarRow, h('div.small.muted', 'La mémoire ci-dessous est partagée par La Rue et La Ruse et reste enregistrée dans ton espace Studio.'), memory, memorySave,
+    h('div.stack', { style: { gap: '6px', marginTop: '8px' } }, h('b', 'Relais navigateur Chrome'), h('p.small.muted', 'Installe le dossier companion-bridge du dépôt en extension non empaquetée, puis colle ici son identifiant Chrome. Les lectures, clics et saisies demanderont une autorisation.'), bridgeRow));
 
   const layout = h('div.grid', { style: { gridTemplateColumns: 'minmax(190px, 250px) minmax(0, 1fr)', gap: '12px', alignItems: 'stretch' } });
   const side = h('div.card.stack', { style: { gap: '8px' } });
@@ -119,6 +124,30 @@ export async function render(el) {
       drawMessages();
     } catch (e) { toastErr(e); }
   }
+  async function handleBrowserRequest(ev) {
+    const extensionId = (bridgeInput.value || localStorage.getItem('studio.companion.extensionId') || '').trim();
+    let result;
+    if (!extensionId) result = { error: 'Relais Chrome non configuré. Installe companion-bridge et renseigne son identifiant dans le panneau du compagnon.' };
+    else {
+      if (ev.command?.action === 'open' && !window.confirm((ev.command.description || 'Ouvrir une page web') + '\\n\\n' + ev.command.url)) {
+        result = { error: 'Ouverture refusée par l’utilisateur.' };
+      } else {
+        try {
+          if (!window.chrome?.runtime?.sendMessage) throw new Error('API Chrome indisponible. Ouvre Studio IA dans Chrome.');
+          result = await new Promise((resolve, reject) => {
+            window.chrome.runtime.sendMessage(extensionId, { type: 'STUDIO_COMPANION_COMMAND', command: ev.command }, response => {
+              const error = window.chrome.runtime.lastError;
+              if (error) reject(new Error(error.message));
+              else resolve(response || { error: 'Le relais Chrome n’a pas répondu.' });
+            });
+          });
+        } catch (e) { result = { error: 'Relais navigateur indisponible : ' + e.message }; }
+      }
+    }
+    try { await api('/api/companion/browser-result', { method: 'POST', body: { requestId: ev.requestId, result } }); }
+    catch (e) { status.textContent = 'Retour navigateur non transmis : ' + e.message; }
+  }
+
   async function sendMessage() {
     const text = input.value.trim();
     if (!text || busy) return;
@@ -139,6 +168,7 @@ export async function render(el) {
         messages: conv.messages.filter(m => m.content).map(m => ({ role: m.role, content: m.content }))
       }, (ev) => {
         if (ev.type === 'tool_start') status.textContent = 'J’utilise : ' + ev.tool;
+        if (ev.type === 'browser_request') { status.textContent = 'En attente de ton autorisation navigateur…'; void handleBrowserRequest(ev); }
         if (ev.type === 'tool_result') status.textContent = ev.summary || 'Outil terminé.';
         if (ev.type === 'delta' && ev.content) { answer.content += ev.content; drawMessages(); }
         if (ev.type === 'error') answer.content = 'Je rencontre un problème : ' + ev.error;
