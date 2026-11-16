@@ -747,6 +747,23 @@ export async function render(el, { params }) {
     ['Reverb Plate', '🪞', [{ t: 'fx', kind: 'reverb', size: 1.5, mix: 0.28 }]],
     ['Delay', '🔁', [{ t: 'fx', kind: 'delay', time: 0.32, fb: 0.35, mix: 0.3 }]],
     ['Ping-Pong', '🏓', [{ t: 'fx', kind: 'pingpong', time: 0.24, mix: 0.3 }]],
+    ['Voix grave', '🧔', [{ t: 'shift', semi: -5, formant: -2 }]],
+    ['Voix aiguë', '🐿️', [{ t: 'shift', semi: 5, formant: 2 }]],
+    ['Voix enfant', '🧒', [{ t: 'shift', semi: 7, formant: 3 }]],
+    ['Voix géant', '👹', [{ t: 'shift', semi: -8, formant: -3 }]],
+    ['Chipmunk', '🐹', [{ t: 'shift', semi: 12, formant: 4 }]],
+    ['Présence', '🔆', [{ t: 'fx', kind: 'peak', f: 3000, q: 1, gain: 4 }]],
+    ['Chaleur grave', '🟤', [{ t: 'fx', kind: 'peak', f: 150, q: 0.8, gain: 3 }]],
+    ['Mégaphone', '📣', [{ t: 'fx', kind: 'band', lo: 600, hi: 3500, drive: 4 }, { t: 'fx', kind: 'distort', amt: 3, tone: 6000 }]],
+    ['Cathédrale', '⛪', [{ t: 'fx', kind: 'reverb', size: 5, mix: 0.4 }]],
+    ['Room', '🚪', [{ t: 'fx', kind: 'reverb', size: 0.8, mix: 0.2 }]],
+    ['Slapback', '↩️', [{ t: 'fx', kind: 'delay', time: 0.12, fb: 0.15, mix: 0.25 }]],
+    ['Dub echo', '🔊', [{ t: 'fx', kind: 'delay', time: 0.45, fb: 0.55, mix: 0.35 }]],
+    ['Vinyle', '💿', [{ t: 'fx', kind: 'lofi', bits: 9, hi: 8000 }, { t: 'fx', kind: 'tape', amt: 2 }]],
+    ['T-Pain', '🎙️', [{ t: 'tune', strength: 1, speed: 0 }, { t: 'fx', kind: 'air', gain: 4 }]],
+    ['Travis', '🌌', [{ t: 'tune', strength: 1, speed: 10 }, { t: 'fx', kind: 'reverb', size: 2.5, mix: 0.3 }]],
+    ['Ange', '😇', [{ t: 'harmony', steps: [4, 7] }, { t: 'fx', kind: 'reverb', size: 3, mix: 0.3 }]],
+    ['Doubleur large', '👬', [{ t: 'double', steps: [0, 0], gain: 0.6 }, { t: 'fx', kind: 'chorus', mix: 0.3 }]],
   ];
   async function processPreset(src, p) { let cur = src; if (p.chain) cur = (await applyChain(cur, p.chain)).buffer; if (p.voice) cur = await voiceChain(cur, p.voice); return cur; }
   let busyFx = false;
@@ -1345,7 +1362,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE18'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE19'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
