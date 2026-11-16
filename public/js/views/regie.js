@@ -810,11 +810,13 @@ export async function render(el, { params }) {
 
   // ---------- RACK LIVE : écouter et régler EN DIRECT ----------
   const LF = { vol: 0, hp: 85, low: 0, mid: 2.5, high: 3, comp: 0.4, reverb: 0.1, delay: 0, drive: 0 };
-  let live = null;
+  let live = null, eqRedraw = null;
   function makeImpulse(ctx, dur = 1.8, decay = 3) { const len = Math.floor(ctx.sampleRate * dur); const imp = ctx.createBuffer(2, len, ctx.sampleRate); for (let c = 0; c < 2; c++) { const d = imp.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); } return imp; }
   function driveCurve(amount) { const k = amount * 60, n = 1024, curve = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; curve[i] = (1 + k) * x / (1 + k * Math.abs(x)); } return curve; }
   function liveSet(k, v) {
-    LF[k] = v; if (!live) return; const n = live.nodes, now = live.ctx.currentTime, T = (p, val) => p.setTargetAtTime(val, now, 0.02);
+    LF[k] = v;
+    if (['hp', 'low', 'mid', 'high'].includes(k)) { try { eqRedraw && eqRedraw(); } catch {} }
+    if (!live) return; const n = live.nodes, now = live.ctx.currentTime, T = (p, val) => p.setTargetAtTime(val, now, 0.02);
     if (k === 'vol') T(n.master.gain, 10 ** (v / 20));
     else if (k === 'hp') T(n.hp.frequency, v);
     else if (k === 'low') T(n.low.gain, v);
@@ -852,6 +854,17 @@ export async function render(el, { params }) {
   }
   function stopLive() { if (!live) return; try { live.src.stop(); } catch {} try { Object.values(live.nodes).forEach(n => n.disconnect && n.disconnect()); } catch {} live = null; }
   const liveKnobEl = (label, key, min, max, step, def, fmt) => knob({ label, min, max, step, value: LF[key], def, fmt, onInput: (v) => liveSet(key, v) }).el;
+  // courbe d'égaliseur qui réagit en direct aux molettes
+  function makeEqCurve() {
+    const box = h('div', { style: { height: '96px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--rline)', background: '#0b0b1a', marginBottom: '10px' } });
+    const redraw = () => {
+      const y = (db) => Math.max(6, Math.min(90, 48 - db * 3));
+      const lo = y(LF.low).toFixed(1), mi = y(LF.mid).toFixed(1), hi = y(LF.high).toFixed(1);
+      box.innerHTML = `<svg viewBox="0 0 500 96" preserveAspectRatio="none" style="width:100%;height:100%"><defs><linearGradient id="eqg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a855f7" stop-opacity=".5"/><stop offset="1" stop-color="#a855f7" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="48" x2="500" y2="48" stroke="#2a2750" stroke-width="1"/><path d="M0 ${lo} C110 ${lo} 150 ${mi} 250 ${mi} C350 ${mi} 400 ${hi} 500 ${hi} L500 96 L0 96 Z" fill="url(#eqg2)"/><path d="M0 ${lo} C110 ${lo} 150 ${mi} 250 ${mi} C350 ${mi} 400 ${hi} 500 ${hi}" fill="none" stroke="#c98bff" stroke-width="2.2"/><circle cx="110" cy="${lo}" r="5" fill="#22d3ee"/><circle cx="250" cy="${mi}" r="5" fill="#ec4899"/><circle cx="400" cy="${hi}" r="5" fill="#a855f7"/></svg>`;
+    };
+    redraw();
+    return { el: box, redraw };
+  }
   // spectrogramme temps réel (lié au lecteur live)
   function viridis(v) { v = Math.max(0, Math.min(1, v)); const r = Math.round(255 * Math.min(1, Math.max(0, 1.4 * v - 0.2))); const g = Math.round(255 * Math.min(1, Math.max(0, 1.6 * v - 0.1))); const b = Math.round(255 * Math.min(1, Math.max(0, 1 - 1.6 * Math.abs(v - 0.35)))); return [r + 20 * (1 - v) | 0, g, Math.max(b, 30 + 60 * (1 - v)) | 0]; }
   function makeSpectro(h2 = 128) {
@@ -1117,8 +1130,9 @@ export async function render(el, { params }) {
       h('button.rbtn', { style: { whiteSpace: 'nowrap' }, onclick: () => revertTrack(tracks[curIdx()], { textContent: '' }) }, '↩ Original'),
       h('span.muted', { style: { fontSize: '10px', flexBasis: '100%' } }, 'Lance la lecture puis tourne les molettes : le son change en direct. « Graver » enregistre les réglages sur la piste.')));
     // modules live
-    const eqPanel = h('div.panel', h('div.ph', h('span', { style: { width: '10px', height: '10px', borderRadius: '50%', background: '#3b82f6', boxShadow: '0 0 7px #3b82f6', flex: 'none' } }), '🎚️ Égaliseur paramétrique', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'LIVE')),
-      h('div.pb', h('div', { style: { height: '96px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--rline)', background: '#0b0b1a', marginBottom: '10px' }, html: eqCurveSvg() }),
+    const eqView = makeEqCurve(); eqRedraw = eqView.redraw;
+    const eqPanel = h('div.panel', h('div.ph', h('span', { style: { width: '10px', height: '10px', borderRadius: '50%', background: '#3b82f6', boxShadow: '0 0 7px #3b82f6', flex: 'none' } }), '🎚️ Égaliseur paramétrique', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'LIVE · réactif')),
+      h('div.pb', eqView.el,
         h('div', { style: { display: 'flex', justifyContent: 'space-around' } }, liveKnob('GRAVE', 'hp', 40, 160, 5, 85, hzF), liveKnob('LOW', 'low', -6, 6, 0.5, 0, dbF), liveKnob('MID', 'mid', -6, 8, 0.5, 2.5, dbF), liveKnob('AIGU', 'high', -6, 8, 0.5, 3, dbF))));
     const compPanel = h('div.panel', h('div.ph', h('span', { style: { width: '10px', height: '10px', borderRadius: '50%', background: '#f0b429', boxShadow: '0 0 7px #f0b429', flex: 'none' } }), '🗜️ Compression', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'LIVE')),
       h('div.pb', h('div', { style: { display: 'flex', justifyContent: 'space-around', alignItems: 'center' } }, liveKnob('TAUX', 'comp', 0, 1, 0.05, 0.4, pcF), liveKnob('VOLUME', 'vol', -12, 6, 0.5, 0, dbF))));
@@ -1319,7 +1333,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE15'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE16'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
