@@ -402,10 +402,46 @@ export async function render(el, { params }) {
       if (recOpt.arm !== 'new' && tracks[+recOpt.arm]) { const t = tracks[+recOpt.arm]; t.buffer = buffer; t.original = buffer; t.empty = false; }
       else tracks.push({ name: `Voix ${tracks.filter(t => !isInstru(t)).length + 1}`, kind: 'voix', gainDb: 0, pan: 0, offset: 0, mute: false, solo: false, armed: true, empty: false, fxDone: [], fx: null, fileId: null, buffer, original: buffer });
       await save();
-      toast(`Prise enregistrée ✓ (${buffer.duration.toFixed(1)} s) — visible dans la Timeline`, 'ok');
+      toast(`Prise enregistrée ✓ (${buffer.duration.toFixed(1)} s) — analyse automatique en cours`, 'ok');
+      analyzeRecordedTake(buffer);
       go(cur);
     } catch (e) { toastErr(e); }
   }
+
+  async function analyzeRecordedTake(buffer) {
+    if (!buffer) return;
+    try {
+      const maxSamples = Math.min(buffer.length, Math.floor(buffer.sampleRate * 24));
+      const mono = new Float32Array(maxSamples);
+      for (let c = 0; c < buffer.numberOfChannels; c++) {
+        const data = buffer.getChannelData(c);
+        for (let i = 0; i < maxSamples; i++) mono[i] += data[i] / buffer.numberOfChannels;
+      }
+      const spectral = analyzeVoiceDsp(mono, buffer.sampleRate);
+      const pitchBuffer = audioCtx().createBuffer(1, mono.length, buffer.sampleRate);
+      pitchBuffer.copyToChannel(mono, 0);
+      const pitch = await detectPitch(pitchBuffer);
+      const voiced = Array.from(pitch.f0 || []).filter(v => Number.isFinite(v) && v > 0);
+      const key = voiced.length >= 12 ? detectKey(pitch) : null;
+      const median = voiced.length ? [...voiced].sort((a,b)=>a-b)[Math.floor(voiced.length/2)] : null;
+      const report = {
+        durationSeconds: +buffer.duration.toFixed(2),
+        peakDbfs: +spectral.peakDbfs.toFixed(1),
+        rmsDbfs: +spectral.rmsDbfs.toFixed(1),
+        spectralCentroidHz: Math.round(spectral.spectralCentroidHz),
+        recommendations: voiceDspRecommendations(spectral).slice(0,4),
+        pitch: median ? { medianHz:+median.toFixed(1), key:key ? keyName(key) : null, voicedFrames:voiced.length } : null,
+        caveat:'Mesures et estimations automatiques uniquement ; aucune écoute subjective ni transcription parfaite.'
+      };
+      const keyNameForStorage = 'studio.la-zone.last-take.' + String(state.projectId || 'default');
+      try { localStorage.setItem(keyNameForStorage, JSON.stringify(report)); } catch {}
+      const tonal = report.pitch?.key ? ' · tonalité estimée ' + report.pitch.key : '';
+      toast('Analyse automatique terminée : crête ' + report.peakDbfs + ' dBFS' + tonal + '. Détails disponibles à La Zone.', 'ok');
+    } catch (e) {
+      toast('Prise enregistrée. Analyse automatique indisponible : ' + (e?.message || e), 'bad');
+    }
+  }
+
   function stopAllRec() { try { rec?.stop(); } catch {} rec = null; recording = false; stopMon(); try { instruSrc?.stop(); } catch {} instruSrc = null; clearInterval(metroTimer); }
 
   // ---------- Auto-Tune RÉEL (réutilise applyChain + détection de tonalité) ----------
