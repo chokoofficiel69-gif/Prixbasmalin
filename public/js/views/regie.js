@@ -167,12 +167,16 @@ const CSS = `
 .regie .rtile{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,#0e0e20,#0a0a14);border:1px solid var(--rline);border-radius:12px;overflow:hidden;min-height:150px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .regie .rtile.free{box-shadow:0 0 0 1px var(--rpur),0 14px 36px rgba(0,0,0,.55)}
 .regie .rgrip{position:absolute;z-index:6;touch-action:none}
-.regie .rg-e{top:38px;right:0;width:10px;height:calc(100% - 38px);cursor:ew-resize}
-.regie .rg-w{top:38px;left:0;width:10px;height:calc(100% - 38px);cursor:ew-resize}
-.regie .rg-s{left:0;bottom:0;height:10px;width:100%;cursor:ns-resize}
-.regie .rg-se{right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;z-index:7}
-.regie .rgrip:hover{background:rgba(168,85,247,.3)}
-.regie .rg-se::after{content:'';position:absolute;right:3px;bottom:3px;width:9px;height:9px;border-right:2px solid rgba(255,255,255,.45);border-bottom:2px solid rgba(255,255,255,.45)}
+.regie .rg-e{top:38px;right:0;width:14px;height:calc(100% - 38px);cursor:ew-resize}
+.regie .rg-w{top:38px;left:0;width:12px;height:calc(100% - 38px);cursor:ew-resize}
+.regie .rg-s{left:0;bottom:0;height:14px;width:100%;cursor:ns-resize}
+.regie .rg-se{right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;z-index:7}
+.regie .rgrip:hover{background:rgba(168,85,247,.22)}
+/* poignées VISIBLES : petite barre d'accroche (bord droit = étirer la longueur) */
+.regie .rg-e::after{content:'';position:absolute;top:50%;right:3px;transform:translateY(-50%);width:4px;height:42px;border-radius:3px;background:rgba(168,85,247,.55);box-shadow:0 0 8px rgba(168,85,247,.4)}
+.regie .rg-s::after{content:'';position:absolute;left:50%;bottom:3px;transform:translateX(-50%);height:4px;width:42px;border-radius:3px;background:rgba(168,85,247,.55);box-shadow:0 0 8px rgba(168,85,247,.4)}
+.regie .rg-e:hover::after,.regie .rg-s:hover::after{background:var(--rcy);box-shadow:0 0 10px var(--rcy)}
+.regie .rg-se::after{content:'';position:absolute;right:4px;bottom:4px;width:10px;height:10px;border-right:2px solid rgba(34,211,238,.7);border-bottom:2px solid rgba(34,211,238,.7)}
 .regie .rtile.s{flex:1 1 300px;max-width:380px}
 .regie .rtile.m{flex:1 1 440px;max-width:600px}
 .regie .rtile.l{flex:3 1 640px}
@@ -201,10 +205,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live29')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live30')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live29'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live30'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -1709,7 +1713,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE29'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE30'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
