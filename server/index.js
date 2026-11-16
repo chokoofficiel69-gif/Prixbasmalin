@@ -477,7 +477,7 @@ route('POST', '/api/complete', async (req, res, p, user) => {
       { role: 'system', content: [body.system || 'Tu es un assistant expert. Réponds en français.', projectContext(user, body.projectId)].filter(Boolean).join('\n\n') },
       ...(body.messages || [{ role: 'user', content: String(body.prompt || '') }]),
     ];
-    const r = await chat({ uid: user.id, model: body.model || 'auto', messages, temperature: body.temperature, src: body.src || 'outil', extra: body.json ? { response_format: { type: 'json_object' } } : {} });
+    const r = await chat({ uid: user.id, model: body.model || 'auto', messages, temperature: body.temperature, maxTokens: Math.max(128, Math.min(1200, Number(body.max_tokens) || 700)), src: body.src || 'outil', extra: body.json ? { response_format: { type: 'json_object' } } : {} });
     ok(res, { content: r.content, routedVia: r.routedVia, redirectedFrom: r.redirectedFrom || null, usage: r.usage });
   } catch (err) { fail(res, err.status || 502, err.message); }
 });
