@@ -205,10 +205,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live34')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31', 'regie-css-live32','regie-css-live33'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live35')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31', 'regie-css-live32','regie-css-live33','regie-css-live34'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live34'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live35'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -685,7 +685,7 @@ export async function render(el, { params }) {
   const parseKey = (v) => { if (!v) return null; const [root, mode] = v.split('|'); return { root: +root, mode }; };
   async function analyzeKey(track, status, keyLabel) {
     if (!track?.buffer) { toast('Choisis une piste voix.', 'bad'); return; }
-    try { status.textContent = 'Analyse de la tonalité…'; const pitch = await detectPitch(track.original || track.buffer, p => status.textContent = `Analyse ${Math.round(p * 100)} %`); const k = detectKey(pitch); keyLabel.textContent = keyName(k); status.textContent = 'Tonalité détectée ✓'; }
+    try { status.textContent = 'Analyse de la tonalité…'; const pitch = await detectPitch(track.original || track.buffer, p => status.textContent = `Analyse ${Math.round(p * 100)} %`); const k = detectKey(pitch); if (k) atOpt.key = `${k.root}|${k.mode}`; keyLabel.textContent = keyName(k); status.textContent = 'Tonalité verrouillée ✓ — ' + keyName(k); return k; }
     catch (e) { status.textContent = 'Analyse impossible'; toastErr(e); }
   }
   async function applyAutotune(track, status, keyLabel, autoplay) {
@@ -1295,6 +1295,14 @@ export async function render(el, { params }) {
         pianoBox,
         h('div', { style: { display: 'flex', gap: '7px', flexWrap: 'wrap', marginTop: '10px' } },
           h('button.rbtn', { onclick: () => analyzeKey(curTrack(), status, keyLabel) }, '🎹 Détecter la tonalité'),
+          h('button.rbtn.g', { title: 'Cale toutes les notes sur la bonne gamme (corrige les fausses notes)', onclick: async () => {
+            const t = curTrack(); if (!t?.buffer) { toast('Choisis une piste voix.', 'bad'); return; }
+            if (!atOpt.key) await analyzeKey(t, status, keyLabel);            // verrouille la gamme
+            atOpt.mode = 'douce'; atOpt.strength = 1; atOpt.keep = 0; atOpt.humanize = 0; atOpt.glide = 20;
+            kStr.set(1, false); kKeep.set(0, false); kHum.set(0, false); kGli.set(20, false);
+            typeChips.forEach(x => x.classList.toggle('on', x.textContent.toLowerCase().startsWith('douce')));
+            await applyAutotune(t, status, keyLabel, true);
+          } }, '🎯 Notes justes'),
           h('button.rbtn.p', { onclick: () => applyAutotune(curTrack(), status, keyLabel) }, '✨ Appliquer'),
           h('button.rbtn', { onclick: () => { const t = curTrack(); playBuffer(t?.original || t?.buffer); } }, '▶ Avant'),
           h('button.rbtn', { onclick: () => playBuffer(curTrack()?.buffer) }, '▶ Après'),
@@ -1799,7 +1807,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, resetBtn, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE34'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE35'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
