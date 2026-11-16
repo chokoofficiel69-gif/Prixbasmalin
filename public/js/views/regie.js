@@ -82,6 +82,9 @@ const CSS = `
 .regie .tbtn.on.m{background:rgba(34,211,238,.2);color:var(--rcy);border-color:rgba(34,211,238,.5)}
 .regie .tbtn.on.s{background:rgba(245,180,41,.22);color:var(--rgold);border-color:rgba(245,180,41,.5)}
 .regie .tbtn.del:hover{background:rgba(239,68,68,.25);color:#ff8a8a;border-color:rgba(239,68,68,.5)}
+.regie .selh{position:absolute;top:0;bottom:0;width:10px;background:#22d3ee;opacity:.85;border-radius:3px}
+.regie .selh.l{left:-6px}.regie .selh.r{right:-6px}
+.regie.seltouch .lane{touch-action:none}
 .regie .selbox{position:absolute;top:0;bottom:0;background:rgba(34,211,238,.18);border-left:2px solid #22d3ee;border-right:2px solid #22d3ee;z-index:3;pointer-events:none}
 .regie .lane{touch-action:pan-x pan-y;user-select:none;cursor:text}
 .regie .selbar{display:none;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--rline);background:rgba(34,211,238,.07)}
@@ -327,32 +330,55 @@ export async function render(el, { params }) {
 
   // ---------- sélection d'un passage ----------
   const fmtS = (s) => fmtLcd(s);
+  let selTouchMode = false; // au doigt : glisser = sélectionner (au lieu de défiler)
+  const STEP_MS = [1, 10, 100];
+  let nudgeStep = 10;
+  function setEdge(which, v) {
+    if (!selRange) return;
+    const tot = totalDuration();
+    if (which === 'a') selRange.a = Math.max(0, Math.min(v, selRange.b - 0.001));
+    else selRange.b = Math.min(tot, Math.max(v, selRange.a + 0.001));
+    paintSel();
+  }
   function paintSelBar() {
     if (!selBarEl) return;
     selBarEl.innerHTML = '';
     if (!selRange || !tracks[selRange.i]) { selBarEl.style.display = 'none'; return; }
     const t = tracks[selRange.i];
     selBarEl.style.display = 'flex';
+    const num = (which) => h('input', { type: 'number', step: '0.001', min: '0', value: selRange[which].toFixed(3), title: which === 'a' ? 'Début (secondes)' : 'Fin (secondes)',
+      style: { width: '92px', padding: '6px', borderRadius: '8px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)', fontSize: '13px' },
+      onchange: (e) => setEdge(which, +e.target.value || 0) });
+    const nud = (which, sign) => h('button.rbtn', { title: `${sign < 0 ? 'Reculer' : 'Avancer'} de ${nudgeStep} ms`, onclick: () => setEdge(which, selRange[which] + sign * nudgeStep / 1000) }, sign < 0 ? '◀' : '▶');
+    const stepSel = h('select', { title: 'Pas des flèches', style: { padding: '6px', borderRadius: '8px', background: '#0c0c1a', border: '1px solid var(--rline)', color: 'var(--rtxt)' }, onchange: (e) => { nudgeStep = +e.target.value; paintSelBar(); } },
+      STEP_MS.map(v => h('option', { value: String(v), selected: v === nudgeStep }, `pas ${v} ms`)));
+    const grp = (label, which) => h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '4px' } }, h('b', { style: { fontSize: '12px' } }, label), nud(which, -1), num(which), nud(which, 1));
     selBarEl.append(
-      h('span', { style: { fontSize: '12px' } }, `Sélection · ${t.name || 'Piste ' + (selRange.i + 1)} · ${fmtS(selRange.a)} → ${fmtS(selRange.b)} (${(selRange.b - selRange.a).toFixed(2)} s)`),
-      h('button.rbtn', { onclick: playSel }, '▶ Écouter'),
-      h('button.rbtn', { onclick: zoomToSel }, '🔍 Zoomer dessus'),
-      h('button.rbtn', { onclick: () => editSel('silence') }, '🔇 Silence'),
-      h('button.rbtn', { style: { borderColor: '#ef4444' }, onclick: () => editSel('cut') }, '✂️ Supprimer le passage'),
-      h('button.rbtn', { onclick: () => { selRange = null; paintSel(); } }, '✕'));
+      h('div', { style: { width: '100%', fontSize: '12px' } }, `Sélection · ${t.name || 'Piste ' + (selRange.i + 1)} · durée ${((selRange.b - selRange.a) * 1000).toFixed(0)} ms`),
+      grp('Début', 'a'), grp('Fin', 'b'), stepSel,
+      h('div', { style: { width: '100%', display: 'flex', flexWrap: 'wrap', gap: '6px' } },
+        h('button.rbtn', { onclick: playSel }, '▶ Écouter'),
+        h('button.rbtn', { onclick: zoomToSel }, '🔍 Zoomer dessus'),
+        h('button.rbtn', { onclick: () => editSel('silence') }, '🔇 Silence'),
+        h('button.rbtn', { style: { borderColor: '#ef4444' }, onclick: () => editSel('cut') }, '✂️ Supprimer le passage'),
+        h('button.rbtn', { onclick: () => { selRange = null; paintSel(); } }, '✕')));
   }
   function paintSel() {
     document.querySelectorAll('.regie .selbox').forEach(b => b.remove());
     if (selRange && laneWrap) {
       const lane = laneWrap.querySelectorAll('.lane')[selRange.i];
-      if (lane) lane.append(h('div.selbox', { style: { left: (selRange.a * pxPerSec) + 'px', width: Math.max(2, (selRange.b - selRange.a) * pxPerSec) + 'px' } }));
+      if (lane) lane.append(h('div.selbox', { style: { left: (selRange.a * pxPerSec) + 'px', width: Math.max(2, (selRange.b - selRange.a) * pxPerSec) + 'px' } }, h('i.selh.l'), h('i.selh.r')));
     }
     paintSelBar();
   }
   function selSlice() {
     const t = tracks[selRange?.i]; if (!t?.buffer) return null;
     const off = t.offset || 0, sr = t.buffer.sampleRate;
-    const s0 = Math.max(0, Math.floor((selRange.a - off) * sr)), s1 = Math.min(t.buffer.length, Math.ceil((selRange.b - off) * sr));
+    let s0 = Math.max(0, Math.round((selRange.a - off) * sr)), s1 = Math.min(t.buffer.length, Math.round((selRange.b - off) * sr));
+    // cale chaque bord sur le passage à zéro le plus proche (≤ 1 ms, à l'intérieur de la sélection) : coupe sans « clic »
+    const d = t.buffer.getChannelData(0), lim = Math.round(sr * 0.001);
+    const zc = (pos, dir) => { for (let k = 0; k <= lim; k++) { const q = pos + dir * k; if (q <= 0 || q >= d.length) return pos; if ((d[q - 1] <= 0) !== (d[q] <= 0)) return q; } return pos; };
+    if (s1 - s0 > 2 * lim + 2) { s0 = zc(s0, 1); s1 = zc(s1, -1); }
     return s1 > s0 ? { t, s0, s1 } : null;
   }
   function playSel() {
@@ -381,27 +407,33 @@ export async function render(el, { params }) {
   // glisser sur une piste = sélectionner · simple clic = déplacer la tête de lecture
   function bindLane(lane, i) {
     let st = null;
+    const posOf = (e) => Math.max(0, Math.min(totalDuration(), (e.clientX - lane.getBoundingClientRect().left) / pxPerSec));
     lane.onpointerdown = (e) => {
       if (e.button !== 0) return;
-      const rect = lane.getBoundingClientRect();
-      st = { x0: e.clientX, a: Math.max(0, (e.clientX - rect.left) / pxPerSec), moved: false, id: e.pointerId, touch: e.pointerType === 'touch', lp: null };
-      if (st.touch) st.lp = setTimeout(() => { if (st && !st.moved) { const s = st; st = null; trackMenu(i, { preventDefault() {}, stopPropagation() {}, clientX: s.x0, clientY: e.clientY }); } }, 550);
-      else lane.setPointerCapture?.(e.pointerId);
+      const x = e.clientX - lane.getBoundingClientRect().left, touch = e.pointerType === 'touch', grab = touch ? 18 : 8;
+      let edge = null;
+      if (selRange && selRange.i === i) {
+        if (Math.abs(x - selRange.a * pxPerSec) <= grab) edge = 'a';
+        else if (Math.abs(x - selRange.b * pxPerSec) <= grab) edge = 'b';
+      }
+      const selecting = !touch || selTouchMode || edge;
+      st = { x0: e.clientX, a: posOf(e), moved: false, touch, edge, selecting, lp: null };
+      if (touch && !selecting) st.lp = setTimeout(() => { if (st && !st.moved) { const s = st; st = null; trackMenu(i, { preventDefault() {}, stopPropagation() {}, clientX: s.x0, clientY: e.clientY }); } }, 550);
+      if (selecting) { lane.setPointerCapture?.(e.pointerId); if (touch) e.preventDefault(); }
     };
     lane.onpointermove = (e) => {
       if (!st) return;
-      if (!st.moved && Math.abs(e.clientX - st.x0) < 5) return;
-      if (st.touch && !st.moved) { clearTimeout(st.lp); st = null; return; } // au doigt : glisser = défiler
+      if (!st.moved && Math.abs(e.clientX - st.x0) < (st.edge ? 1 : 5)) return;
+      if (!st.selecting) { clearTimeout(st.lp); st = null; return; } // au doigt hors mode sélection : glisser = défiler
       st.moved = true;
-      const rect = lane.getBoundingClientRect();
-      const b = Math.max(0, Math.min(totalDuration(), (e.clientX - rect.left) / pxPerSec));
-      selRange = { i, a: Math.min(st.a, b), b: Math.max(st.a, b) };
-      paintSel();
+      const p = posOf(e);
+      if (st.edge) setEdge(st.edge, p);
+      else { selRange = { i, a: Math.min(st.a, p), b: Math.max(st.a, p) }; paintSel(); }
     };
-    lane.onpointerup = (e) => {
+    lane.onpointerup = () => {
       if (!st) return; clearTimeout(st.lp);
       const s = st; st = null;
-      if (s.moved) return;
+      if (s.moved || s.edge) return;
       const pos = s.a;
       if (selRange) { selRange = null; paintSel(); }
       if (playing) { stopPlay(); startPlay(pos); } else movePlayhead(pos);
@@ -946,11 +978,14 @@ export async function render(el, { params }) {
       h('span', { style: { marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' } },
         zoomOut, zoomRangeEl, zoomIn, zoomLblEl,
         h('button.rbtn', { onclick: fitZoom, title: 'Voir tout le morceau' }, '↔ Tout voir'),
+        (() => { const b = h('button.rbtn', { title: 'Au doigt : glisser sélectionne au lieu de défiler' }, '✋ Doigt : défiler');
+          const paint = () => { b.textContent = selTouchMode ? '⬚ Doigt : sélectionner' : '✋ Doigt : défiler'; b.classList.toggle('p', selTouchMode); document.querySelector('.regie')?.classList.toggle('seltouch', selTouchMode); };
+          b.onclick = () => { selTouchMode = !selTouchMode; paint(); }; setTimeout(paint, 0); return b; })(),
         h('button.rbtn.p', { onclick: () => startPlay(startOffset) }, '▶ Lire'),
         h('button.rbtn', { onclick: () => { stopPlay(); movePlayhead(0); startOffset = 0; } }, '⏹'))));
     selBarEl = h('div.selbar');
     wrap.append(selBarEl);
-    wrap.append(h('div.muted', { style: { fontSize: '11px', padding: '4px 12px' } }, 'Astuces : glisse sur une piste pour sélectionner un passage · clic = placer la lecture · Ctrl + molette = zoom · clic droit (ou appui long) = menu · touche Suppr = supprimer le passage'));
+    wrap.append(h('div.muted', { style: { fontSize: '11px', padding: '4px 12px' } }, 'Astuces : glisse sur une piste pour sélectionner un passage · clic = placer la lecture · Ctrl + molette = zoom · clic droit (ou appui long) = menu · touche Suppr = supprimer le passage · tire les poignées bleues pour ajuster au millimètre · flèches = déplacer la fin (Ctrl = le début, Alt = 1 ms, Maj = 100 ms)'));
     const body = h('div.pb', { style: { flex: '1', overflow: 'auto' }, tabIndex: 0 });
     // Ctrl + molette (ou pincer sur pavé tactile) = zoom autour de la souris
     body.addEventListener('wheel', (e) => {
@@ -961,6 +996,7 @@ export async function render(el, { params }) {
     body.addEventListener('keydown', (e) => {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selRange) { e.preventDefault(); editSel('cut'); }
       else if (e.key === 'Escape' && selRange) { selRange = null; paintSel(); }
+      else if (selRange && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); const d = (e.key === 'ArrowLeft' ? -1 : 1) * (e.altKey ? 1 : e.shiftKey ? 100 : 10) / 1000; setEdge(e.ctrlKey || e.metaKey ? 'a' : 'b', selRange[e.ctrlKey || e.metaKey ? 'a' : 'b'] + d); }
     });
     wrap.append(body);
     laneWrap = body;
