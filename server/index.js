@@ -51,6 +51,19 @@ function envPasswordMatches(pw) {
     saveUsers(users);
   }
   const admin = users.find(u => u.role === 'admin');
+  // Au premier démarrage avec un mot de passe d'environnement, synchronise le hash
+  // historique une seule fois. Un mot de passe choisi ensuite par l'utilisateur
+  // est marqué comme personnel et ne sera jamais écrasé au redémarrage.
+  if (admin && process.env.STUDIO_PASSWORD && admin.passwordSource !== 'user') {
+    let envHashValid = false;
+    try { envHashValid = verifyHash(process.env.STUDIO_PASSWORD, admin.passwordHash); } catch {}
+    if (!envHashValid) {
+      admin.passwordHash = hashPassword(process.env.STUDIO_PASSWORD);
+      admin.passwordSource = 'env';
+      saveUsers(users);
+      console.log('Mot de passe administrateur synchronisé depuis la configuration sécurisée.');
+    }
+  }
   if (admin) migrateLegacy(admin.id);
   for (const u of users) getProjects(u.id);
 })();
@@ -324,6 +337,7 @@ route('POST', '/api/password', async (req, res, p, user) => {
   const users = getUsers();
   const me = users.find(u => u.id === user.id);
   me.passwordHash = hashPassword(String(next));
+  me.passwordSource = 'user';
   me.mustChangePassword = false;
   saveUsers(users);
   dropSessionsOf(user.id, getCookie(req, 'studio_sid'));
