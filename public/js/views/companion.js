@@ -164,12 +164,15 @@ export async function render(el) {
       await sse('/api/companion/run', {
         projectId,
         model: localStorage.getItem('studio.model') || 'auto',
-        system: SYSTEM + memoryText,
+        system: SYSTEM,
         messages: conv.messages.filter(m => m.content).map(m => ({ role: m.role, content: m.content }))
       }, (ev) => {
         if (ev.type === 'tool_start') status.textContent = 'J’utilise : ' + ev.tool;
         if (ev.type === 'browser_request') { status.textContent = 'En attente de ton autorisation navigateur…'; void handleBrowserRequest(ev); }
-        if (ev.type === 'tool_result') status.textContent = ev.summary || 'Outil terminé.';
+        if (ev.type === 'tool_result') {
+          status.textContent = ev.summary || 'Outil terminé.';
+          if (ev.tool === 'memory.save') void api('/api/companion').then(p => { profile = p; memory.value = p.memory || ''; }).catch(() => {});
+        }
         if (ev.type === 'delta' && ev.content) { answer.content += ev.content; drawMessages(); }
         if (ev.type === 'error') answer.content = 'Je rencontre un problème : ' + ev.error;
       }, controller.signal);
