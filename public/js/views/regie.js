@@ -147,7 +147,15 @@ const CSS = `
 /* ===== plan de travail : tuiles redimensionnables qui se réorganisent (jamais cachées) ===== */
 .regie .rwork{height:100%;overflow:auto;padding:12px;display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start;background:#060610}
 .regie .rwork::-webkit-scrollbar{width:9px}.regie .rwork::-webkit-scrollbar-thumb{background:#242146;border-radius:9px}
-.regie .rtile{display:flex;flex-direction:column;background:linear-gradient(180deg,#0e0e20,#0a0a14);border:1px solid var(--rline);border-radius:12px;overflow:hidden;min-height:150px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.regie .rtile{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,#0e0e20,#0a0a14);border:1px solid var(--rline);border-radius:12px;overflow:hidden;min-height:150px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.regie .rtile.free{box-shadow:0 0 0 1px var(--rpur),0 14px 36px rgba(0,0,0,.55)}
+.regie .rgrip{position:absolute;z-index:6;touch-action:none}
+.regie .rg-e{top:38px;right:0;width:10px;height:calc(100% - 38px);cursor:ew-resize}
+.regie .rg-w{top:38px;left:0;width:10px;height:calc(100% - 38px);cursor:ew-resize}
+.regie .rg-s{left:0;bottom:0;height:10px;width:100%;cursor:ns-resize}
+.regie .rg-se{right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;z-index:7}
+.regie .rgrip:hover{background:rgba(168,85,247,.3)}
+.regie .rg-se::after{content:'';position:absolute;right:3px;bottom:3px;width:9px;height:9px;border-right:2px solid rgba(255,255,255,.45);border-bottom:2px solid rgba(255,255,255,.45)}
 .regie .rtile.s{flex:1 1 300px;max-width:380px}
 .regie .rtile.m{flex:1 1 440px;max-width:600px}
 .regie .rtile.l{flex:3 1 640px}
@@ -172,10 +180,11 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live25')) {
+  if (!document.getElementById('regie-css-live26')) {
     document.getElementById('regie-css')?.remove();
+    document.getElementById('regie-css-live25')?.remove();
     const s = document.createElement('style');
-    s.id = 'regie-css-live25'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live26'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -1490,20 +1499,50 @@ export async function render(el, { params }) {
   let curKey = 'regie';
   let openTiles = [];
   const tileSize = {};
-  try { const st = JSON.parse(localStorage.getItem('regie.tiles') || 'null'); if (st && Array.isArray(st.open)) { openTiles = st.open.filter(k => WINDEF[k]); Object.assign(tileSize, st.size || {}); } } catch {}
+  const tileFree = {}; // key -> {w,h} : taille libre réglée à la poignée
+  try { const st = JSON.parse(localStorage.getItem('regie.tiles') || 'null'); if (st && Array.isArray(st.open)) { openTiles = st.open.filter(k => WINDEF[k]); Object.assign(tileSize, st.size || {}); Object.assign(tileFree, st.free || {}); } } catch {}
   if (!openTiles.length) openTiles = ['regie'];
-  const saveTiles = () => { try { localStorage.setItem('regie.tiles', JSON.stringify({ open: openTiles, size: tileSize })); } catch {} };
+  const saveTiles = () => { try { localStorage.setItem('regie.tiles', JSON.stringify({ open: openTiles, size: tileSize, free: tileFree })); } catch {} };
   const tileEl = (key) => main.querySelector('.rtile[data-key="' + key + '"]');
+  function applyFree(tile, key) { const f = tileFree[key]; if (f) { SIZES.forEach(c => tile.classList.remove(c)); tile.classList.add('free'); tile.style.flex = '0 0 auto'; tile.style.width = f.w + 'px'; tile.style.height = f.h + 'px'; } }
 
   function buildTile(key) {
     const def = WINDEF[key];
-    const sz = tileSize[key] || (tileSize[key] = 'xl');
+    if (!tileFree[key] && !tileSize[key]) tileSize[key] = 'xl';
+    const sz = tileSize[key] || 'xl';
     const tile = h('div.rtile.' + sz, { 'data-key': key });
-    const szBtns = SIZES.map(s => h('span' + (s === sz ? '.on' : ''), { title: 'Taille ' + s.toUpperCase(), onclick: () => setTileSize(key, s) }, SZICON[s]));
+    const szBtns = SIZES.map(s => h('span' + (!tileFree[key] && s === sz ? '.on' : ''), { title: 'Taille ' + s.toUpperCase(), onclick: () => setTileSize(key, s) }, SZICON[s]));
     const body = h('div.rtileb');
     try { body.append(def.r()); } catch (e) { console.error(e); body.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); }
     tile.append(h('div.rtileh', h('b', def.t), h('div.rtsz', ...szBtns), h('span.rtx', { title: 'Fermer', onclick: () => closeTile(key) }, '✕')), body);
+    // poignées : on étire la tuile en large (bords G/D), en long (bord bas) ou au coin.
+    // Elles ne changent QUE la taille — le contenu du module n'est jamais reconstruit.
+    for (const dir of ['e', 'w', 's', 'se']) tile.append(h('div.rgrip.rg-' + dir, { onpointerdown: (ev) => startResize(ev, key, dir) }));
+    applyFree(tile, key);
     return tile;
+  }
+  function startResize(ev, key, dir) {
+    if (ev.button != null && ev.button !== 0) return;
+    ev.preventDefault(); ev.stopPropagation();
+    const tile = tileEl(key); if (!tile) return;
+    const r = tile.getBoundingClientRect();
+    const sx = ev.clientX, sy = ev.clientY, sw = r.width, sh = r.height;
+    SIZES.forEach(c => tile.classList.remove(c)); tile.classList.add('free'); tile.style.flex = '0 0 auto'; tile.style.width = sw + 'px'; tile.style.height = sh + 'px';
+    tile.querySelectorAll('.rtsz span').forEach(b => b.classList.remove('on'));
+    const minW = 240, minH = 140, maxW = Math.max(minW, (main.clientWidth || 1200) - 28);
+    const move = (e) => {
+      let w = sw, hh = sh;
+      if (dir.includes('e')) w = sw + (e.clientX - sx);
+      if (dir.includes('w')) w = sw - (e.clientX - sx);
+      if (dir.includes('s')) hh = sh + (e.clientY - sy);
+      tile.style.width = Math.max(minW, Math.min(maxW, w)) + 'px';
+      tile.style.height = Math.max(minH, hh) + 'px';
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
+      const rr = tile.getBoundingClientRect(); tileFree[key] = { w: Math.round(rr.width), h: Math.round(rr.height) }; delete tileSize[key]; saveTiles();
+    };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   }
   function renderWork() {
     main.innerHTML = '';
@@ -1514,13 +1553,14 @@ export async function render(el, { params }) {
     renderTabs(); highlightSide();
   }
   function setTileSize(key, s) {
-    tileSize[key] = s; saveTiles();
+    delete tileFree[key]; tileSize[key] = s; saveTiles();
     const t = tileEl(key); if (!t) return;
+    t.style.flex = ''; t.style.width = ''; t.style.height = '';
     t.className = 'rtile ' + s;
     t.querySelectorAll('.rtsz span').forEach((b, i) => b.classList.toggle('on', SIZES[i] === s));
   }
   function closeTile(key) {
-    openTiles = openTiles.filter(k => k !== key); delete tileSize[key]; saveTiles();
+    openTiles = openTiles.filter(k => k !== key); delete tileSize[key]; delete tileFree[key]; saveTiles();
     if (curKey === key) curKey = openTiles[openTiles.length - 1] || 'regie';
     renderWork();
   }
@@ -1540,6 +1580,22 @@ export async function render(el, { params }) {
   }
   const openWindow = (k) => showModule(k);
   const go = (k) => showModule(k);
+  function openAt(key, s) { showModule(key); setTileSize(key, s); flashTile(key); }
+  // Clic droit sur un item du répertoire : poser / mettre en avant / régler la taille / fermer.
+  function sideMenu(key, ev) {
+    ev.preventDefault(); ev.stopPropagation();
+    const open = openTiles.includes(key);
+    const items = [{ head: WINDEF[key].t.replace(/^\S+\s/, '') }];
+    items.push({ label: open ? '👁️ Mettre en avant' : '➕ Poser le module', fn: () => showModule(key) });
+    items.push('-', { head: 'Taille' },
+      { label: '▪ Petit (S)', fn: () => openAt(key, 's') },
+      { label: '◧ Moyen (M)', fn: () => openAt(key, 'm') },
+      { label: '▬ Grand (L)', fn: () => openAt(key, 'l') },
+      { label: '■ Pleine largeur (XL)', fn: () => openAt(key, 'xl') });
+    if (open) items.push('-', { label: '✕ Fermer', danger: true, fn: () => closeTile(key) });
+    if (openTiles.length > 1) items.push({ label: '🧹 Ne garder que celui-ci', fn: () => { openTiles = [key]; saveTiles(); curKey = key; renderWork(); } });
+    showMenu(ev.clientX, ev.clientY, items);
+  }
   // Recâble les tuiles « vivantes » (timeline / vue d'ensemble) après un traitement, sans tout reconstruire.
   function refreshViews() {
     for (const k of ['timeline', 'regie']) {
@@ -1570,7 +1626,7 @@ export async function render(el, { params }) {
         const item = h('div.ditem', { onclick: fn || (() => toast('Disponible dans une prochaine phase')) },
           color ? h('span.led', { style: { color } }) : (ic ? h('span', { style: { width: '16px', textAlign: 'center' } }, ic) : null),
           h('span', { style: { overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' } }, label));
-        if (key) item.dataset.key = key;
+        if (key) { item.dataset.key = key; item.oncontextmenu = (e) => sideMenu(key, e); }
         body.append(item);
       }
       grp._body = body;
@@ -1585,7 +1641,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE25'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE26'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
