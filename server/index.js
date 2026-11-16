@@ -676,7 +676,7 @@ function safeBrowserUrl(raw) {
     const u = new URL(String(raw || ''));
     if (!['http:', 'https:'].includes(u.protocol)) return null;
     const host = u.hostname.toLowerCase();
-    if (host === 'localhost' || host.endsWith('.local') || host === '::1' || /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host) || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(host)) return null;
+    if (u.username || u.password || host === 'localhost' || host.endsWith('.local') || host === '::1' || host === '[::1]' || host.startsWith('fc') || host.startsWith('fd') || host.startsWith('fe80:') || /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host) || /^172\.(1[6-9]|2[0-9]|3[01])\./.test(host)) return null;
     return u.href;
   } catch { return null; }
 }
