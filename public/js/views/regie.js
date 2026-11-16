@@ -879,6 +879,7 @@ RÈGLES D’UTILISATION :
       ...[['preference','Préférence'],['fact','Fait validé'],['decision','Décision'],['correction','Correction'],['pending','À reprendre']].map(([v,l]) => h('option', { value:v }, l)));
     const memoryInput = h('textarea', { rows: 2, placeholder: 'Ex. : Je préfère un mix rap avec une voix devant, mais naturelle.', style: { width:'100%', resize:'vertical', marginTop:'8px', padding:'9px', borderRadius:'8px', background:'#090916', border:'1px solid var(--rline)', color:'var(--rtxt)' } });
     const memorySave = h('button.rbtn.p', { type:'button' }, '＋ Retenir ce point');
+    const memoryLast = h('button.rbtn', { type:'button', title:'Préparer la dernière demande pour validation' }, '↳ Reprendre ma dernière demande');
     const memoryStatus = h('div.muted', { style:{ fontSize:'11px', marginTop:'6px' } }, 'Chargement de la mémoire…');
     const memoryList = h('div', { style:{ display:'grid', gap:'6px', marginTop:'8px' } });
     const memoryNames = { preference:'Préférence', fact:'Fait', decision:'Décision', correction:'Correction', pending:'À reprendre' };
@@ -914,7 +915,15 @@ RÈGLES D’UTILISATION :
       } catch (e) { memoryStatus.textContent = 'Enregistrement impossible : ' + e.message; }
       finally { memorySave.disabled = false; }
     };
-    memoryPanel.append(memoryTitle, memoryCategory, memoryInput, h('div', { style:{ display:'flex', gap:'8px', alignItems:'center', flexWrap:'wrap', marginTop:'7px' } }, memorySave, memoryStatus), memoryList);
+    memoryLast.onclick = () => {
+      const lastUserMessage = [...conversation].reverse().find(x => x.who === 'user' && x.txt.trim());
+      if (!lastUserMessage) { memoryStatus.textContent = 'Aucune demande utilisateur à reprendre dans cette conversation.'; return; }
+      memoryInput.value = lastUserMessage.txt;
+      memoryCategory.value = 'fact';
+      memoryStatus.textContent = 'Demande copiée. Relis-la, choisis sa catégorie, puis confirme avec « Retenir ce point ». Rien n’est enregistré automatiquement.';
+      memoryInput.focus();
+    };
+    memoryPanel.append(memoryTitle, memoryCategory, memoryInput, h('div', { style:{ display:'flex', gap:'8px', alignItems:'center', flexWrap:'wrap', marginTop:'7px' } }, memorySave, memoryLast, memoryStatus), memoryList);
     loadMemory();
     const chat = h('div', { style: { minHeight: '230px', maxHeight: '44vh', overflow: 'auto', padding: '10px', background: '#090916', border: '1px solid var(--rline)', borderRadius: '10px' } });
     // Historique local par projet : conservé après changement d’onglet ou rechargement.
