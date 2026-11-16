@@ -144,12 +144,38 @@ const CSS = `
 .regie .secbody{padding:12px}
 .regie .secbody.closed{display:none}
 @media(max-width:1050px){.regie{grid-template-columns:60px 1fr}.regie .rbrand{width:0}}
+/* ===== plan de travail : tuiles redimensionnables qui se réorganisent (jamais cachées) ===== */
+.regie .rwork{height:100%;overflow:auto;padding:12px;display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start;background:#060610}
+.regie .rwork::-webkit-scrollbar{width:9px}.regie .rwork::-webkit-scrollbar-thumb{background:#242146;border-radius:9px}
+.regie .rtile{display:flex;flex-direction:column;background:linear-gradient(180deg,#0e0e20,#0a0a14);border:1px solid var(--rline);border-radius:12px;overflow:hidden;min-height:150px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.regie .rtile.s{flex:1 1 300px;max-width:380px}
+.regie .rtile.m{flex:1 1 440px;max-width:600px}
+.regie .rtile.l{flex:3 1 640px}
+.regie .rtile.xl{flex:1 1 100%}
+.regie .rtileh{display:flex;align-items:center;gap:8px;padding:8px 10px;background:linear-gradient(180deg,rgba(168,85,247,.16),#0c0c1c);border-bottom:1px solid var(--rline)}
+.regie .rtileh b{font-size:13px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.regie .rtileb{flex:1;overflow:auto;padding:16px}
+.regie .rtsz{display:flex;gap:3px}
+.regie .rtsz span{width:24px;height:21px;display:grid;place-items:center;border:1px solid var(--rline);border-radius:5px;font-size:11px;cursor:pointer;color:var(--rmut);background:#0d0d1e;line-height:1}
+.regie .rtsz span:hover{color:#fff}
+.regie .rtsz span.on{color:#fff;border-color:var(--rpur);background:rgba(168,85,247,.25)}
+.regie .rtx{cursor:pointer;color:var(--rmut);font-size:15px;padding:0 6px;border-radius:5px}
+.regie .rtx:hover{color:#fff;background:rgba(236,72,153,.3)}
+.regie .rtile.flash{animation:rtfl .9s ease}
+@keyframes rtfl{0%,100%{box-shadow:0 10px 30px rgba(0,0,0,.45)}35%{box-shadow:0 0 0 2px var(--rpur),0 0 26px rgba(168,85,247,.55)}}
+.regie .rwempty{margin:auto;text-align:center;color:var(--rmut);font-size:13px;padding:30px;line-height:1.5}
+.regie .rtile.xl .rtileb .kn,.regie .rtile.l .rtileb .kn,.regie .rtile.xl .rtileb .knob,.regie .rtile.l .rtileb .knob{transform:scale(1.12)}
+/* ===== fond noir bord à bord + espace maximal quand la Régie est active ===== */
+body.regie-max .topbar{display:none!important}
+body.regie-max #view,body.regie-max .view{padding:0!important;background:#060610}
+body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css')) {
+  if (!document.getElementById('regie-css-live25')) {
+    document.getElementById('regie-css')?.remove();
     const s = document.createElement('style');
-    s.id = 'regie-css'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live25'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -1456,25 +1482,75 @@ export async function render(el, { params }) {
   const TAB_ORDER = ['regie', 'timeline', 'rec', 'console', 'autotune', 'eq', 'comp', 'rev', 'deess', 'pitch', 'harmo', 'bank', 'spectro', 'master', 'repo', 'ia'];
   const openWins = {}; let zTop = 10, winOffset = 0;
   function makeWinContent(key) { const el = h('div'); try { el.append(WINDEF[key].r()); } catch (e) { console.error(e); el.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); } return el; }
-  // ===== Master-detail : le répertoire à gauche ouvre le module EN GRAND dans la zone =====
+  // ===== Plan de travail : des TUILES redimensionnables qui se réorganisent (jamais cachées) =====
+  // Le répertoire à gauche POSE un module dans la zone. Chaque tuile a 4 tailles (S/M/L/XL) ;
+  // quand on la rapetisse/agrandit, les autres tuiles se réorganisent autour — rien n'est recouvert.
+  const SIZES = ['s', 'm', 'l', 'xl'];
+  const SZICON = { s: '▪', m: '◧', l: '▬', xl: '■' };
   let curKey = 'regie';
+  let openTiles = [];
+  const tileSize = {};
+  try { const st = JSON.parse(localStorage.getItem('regie.tiles') || 'null'); if (st && Array.isArray(st.open)) { openTiles = st.open.filter(k => WINDEF[k]); Object.assign(tileSize, st.size || {}); } } catch {}
+  if (!openTiles.length) openTiles = ['regie'];
+  const saveTiles = () => { try { localStorage.setItem('regie.tiles', JSON.stringify({ open: openTiles, size: tileSize })); } catch {} };
+  const tileEl = (key) => main.querySelector('.rtile[data-key="' + key + '"]');
+
+  function buildTile(key) {
+    const def = WINDEF[key];
+    const sz = tileSize[key] || (tileSize[key] = 'xl');
+    const tile = h('div.rtile.' + sz, { 'data-key': key });
+    const szBtns = SIZES.map(s => h('span' + (s === sz ? '.on' : ''), { title: 'Taille ' + s.toUpperCase(), onclick: () => setTileSize(key, s) }, SZICON[s]));
+    const body = h('div.rtileb');
+    try { body.append(def.r()); } catch (e) { console.error(e); body.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); }
+    tile.append(h('div.rtileh', h('b', def.t), h('div.rtsz', ...szBtns), h('span.rtx', { title: 'Fermer', onclick: () => closeTile(key) }, '✕')), body);
+    return tile;
+  }
+  function renderWork() {
+    main.innerHTML = '';
+    const work = h('div.rwork');
+    if (!openTiles.length) work.append(h('div.rwempty', '👈 Choisis un module dans le répertoire à gauche pour le poser ici.', h('br'), 'Tu peux en poser plusieurs et les redimensionner (S / M / L / XL).'));
+    for (const k of openTiles) work.append(buildTile(k));
+    main.append(work);
+    renderTabs(); highlightSide();
+  }
+  function setTileSize(key, s) {
+    tileSize[key] = s; saveTiles();
+    const t = tileEl(key); if (!t) return;
+    t.className = 'rtile ' + s;
+    t.querySelectorAll('.rtsz span').forEach((b, i) => b.classList.toggle('on', SIZES[i] === s));
+  }
+  function closeTile(key) {
+    openTiles = openTiles.filter(k => k !== key); delete tileSize[key]; saveTiles();
+    if (curKey === key) curKey = openTiles[openTiles.length - 1] || 'regie';
+    renderWork();
+  }
+  function flashTile(key) { const t = tileEl(key); if (!t) return; t.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash'); }
+  // Pose le module (ou le met en avant s'il est déjà là) — ne recouvre jamais les autres.
   function showModule(key) {
     if (!WINDEF[key]) return;
     curKey = key; try { localStorage.setItem('regie.module', key); } catch {}
-    main.innerHTML = '';
-    const def = WINDEF[key];
-    const head = h('div.rpaneh', h('span', { style: { fontSize: '17px' } }, def.t.split(' ')[0]), h('b', def.t.replace(/^\S+\s/, '')));
-    const body = h('div.rpanebody');
-    try { body.append(def.r()); } catch (e) { console.error(e); body.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); }
-    main.append(h('div.rpane', head, body));
-    renderTabs();
-    highlightSide();
+    let work = main.querySelector('.rwork');
+    if (!work) { renderWork(); work = main.querySelector('.rwork'); }
+    if (!openTiles.includes(key)) {
+      openTiles.push(key); if (!tileSize[key]) tileSize[key] = 'xl'; saveTiles();
+      work.querySelector('.rwempty')?.remove();
+      work.append(buildTile(key));
+    }
+    renderTabs(); highlightSide(); flashTile(key);
   }
   const openWindow = (k) => showModule(k);
   const go = (k) => showModule(k);
-  function refreshViews() { if (curKey === 'timeline' || curKey === 'regie') showModule(curKey); }
-  function renderTabs() { tabsBar.innerHTML = ''; for (const k of TAB_ORDER) tabsBar.append(h('div.rtab' + (k === curKey ? '.on' : ''), { onclick: () => showModule(k) }, WINDEF[k].t)); }
-  function highlightSide() { try { side.querySelectorAll('.ditem').forEach(d => d.classList.toggle('on', d.dataset.key === curKey)); } catch {} }
+  // Recâble les tuiles « vivantes » (timeline / vue d'ensemble) après un traitement, sans tout reconstruire.
+  function refreshViews() {
+    for (const k of ['timeline', 'regie']) {
+      if (!openTiles.includes(k)) continue;
+      const t = tileEl(k); if (!t) continue;
+      const b = t.querySelector('.rtileb'); if (!b) continue;
+      b.innerHTML = ''; try { b.append(WINDEF[k].r()); } catch (e) { console.error(e); }
+    }
+  }
+  function renderTabs() { tabsBar.innerHTML = ''; for (const k of TAB_ORDER) tabsBar.append(h('div.rtab' + (openTiles.includes(k) ? '.on' : ''), { onclick: () => showModule(k) }, WINDEF[k].t)); }
+  function highlightSide() { try { side.querySelectorAll('.ditem').forEach(d => d.classList.toggle('on', openTiles.includes(d.dataset.key))); } catch {} }
 
   function renderSidebar() {
     const groups = [
@@ -1504,10 +1580,12 @@ export async function render(el, { params }) {
 
   // top bar
   const burger = h('div.rburger', { onclick: () => root.classList.toggle('collapsed') }, '☰');
+  const toggleFs = () => { try { if (!document.fullscreenElement) (root.requestFullscreen || root.webkitRequestFullscreen)?.call(root); else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document); } catch {} };
+  const fsBtn = h('div.rburger', { title: 'Plein écran', onclick: toggleFs, style: { fontSize: '17px' } }, '⛶');
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
-    tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE24'));
+    tabsBar, fsBtn,
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE25'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
@@ -1528,13 +1606,14 @@ export async function render(el, { params }) {
   root.append(top, side, main, transport);
   el.append(root);
 
+  // Mode « noir bord à bord / espace maximal » : on efface la barre de titre de l'app pendant la Régie.
+  try { document.body.classList.add('regie-max'); } catch {}
+
   await load();
   try { ast = mountAssistant(buildAssistantS()); } catch (e) { ast = null; }
   renderSidebar();
-  let startKey = 'regie';
-  try { const k = localStorage.getItem('regie.module'); if (k && WINDEF[k]) startKey = k; } catch {}
-  showModule(startKey);
+  renderWork();
 
   // nettoyage
-  return () => { stopPlay(); stopAllRec(); stopPreview(); stopLive(); closeMenu(); try { ast?.destroy?.(); } catch {} };
+  return () => { try { document.body.classList.remove('regie-max'); } catch {} stopPlay(); stopAllRec(); stopPreview(); stopLive(); closeMenu(); try { ast?.destroy?.(); } catch {} };
 }
