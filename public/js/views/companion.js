@@ -129,7 +129,7 @@ export async function render(el) {
     let result;
     if (!extensionId) result = { error: 'Relais Chrome non configuré. Installe companion-bridge et renseigne son identifiant dans le panneau du compagnon.' };
     else {
-      if (ev.command?.action === 'open' && !window.confirm((ev.command.description || 'Ouvrir une page web') + '\\n\\n' + ev.command.url)) {
+      if (ev.command?.action === 'open' && !window.confirm((ev.command.description || 'Ouvrir une page web') + '\n\n' + ev.command.url)) {
         result = { error: 'Ouverture refusée par l’utilisateur.' };
       } else {
         try {
