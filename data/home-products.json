@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "catalogue.html productData",
-  "generated_at": "2026-11-09",
+  "generated_at": "2026-11-16",
   "count": 341,
   "verified_image_count": 14,
   "unverified_image_count": 327,
@@ -15,7 +15,7 @@
       "category": "tech",
       "brand": "Apple",
       "image": "https://cdn8.web4s.vn/media/products/3605/tai-nghe-airpods-pro-3-2025-chinh-hang-05.jpg",
-      "sourceUrl": "https://www.amazon.fr/s?k=Apple+AirPods+Pro+3&tag=prixbasmalin2-21"
+      "sourceUrl": "https://www.amazon.fr/dp/B0FQF32239?tag=prixbasmalin2-21"
     },
     {
       "id": "polo1",
@@ -1567,7 +1567,7 @@
       "category": "tech",
       "brand": "Apple",
       "image": "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=900&q=85",
-      "sourceUrl": "https://www.amazon.fr/s?k=Apple%20AirPods%204&tag=prixbasmalin2-21"
+      "sourceUrl": "https://www.amazon.fr/dp/B0DGHWD7CT?tag=prixbasmalin2-21"
     },
     {
       "id": "samsung-galaxy-buds3-pro",
@@ -2483,7 +2483,7 @@
       "category": "kids",
       "brand": "Nintendo",
       "image": "https://images.unsplash.com/photo-1599623560574-39d485900c95?auto=format&fit=crop&w=900&q=85",
-      "sourceUrl": "https://www.amazon.fr/s?k=Nintendo%20Switch%202&tag=prixbasmalin2-21"
+      "sourceUrl": "https://www.amazon.fr/dp/B0HCPTNRZJ?tag=prixbasmalin2-21"
     },
     {
       "id": "nintendo-jeu-mario-kart-world",
