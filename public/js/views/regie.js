@@ -3,7 +3,7 @@
 // affiche de VRAIES formes d'onde (drawWave) et joue un vrai mix local. 100 % local, 0 €.
 // Les autres onglets sont des APERÇUS visuels de la maquette validée, clairement signalés,
 // avec un lien vers les pages réelles existantes — ils seront câblés aux phases suivantes.
-import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder, sse } from '../lib/core.js';
+import { h, state, toast, toastErr, currentProject, audioCtx, pickLocalFiles, startRecorder, sse, api } from '../lib/core.js';
 import { getItem, putItem, unpackBuffer, packBuffer } from '../lib/session.js';
 import { decodeBlob, drawWave, voiceChain, denoise, detectBeats, normalize, gate, antipop, limit, master, mix, encodeWav, analyzeBuffer } from '../lib/audio.js';
 import { applyChain, detectPitch, detectKey, keyName, KEY_CHOICES } from '../lib/voicefx.js';
@@ -871,6 +871,51 @@ RÈGLES D’UTILISATION :
     const trackSel = h('select', { style: selStyle() },
       voiceOptions.length ? voiceOptions.map(x => h('option', { value: String(x.i) }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const trackNow = () => tracks[Number(trackSel.value)];
+    // Mémoire structurée du cerveau : stockage serveur, isolé par compte et projet.
+    const memoryPanel = h('section', { style: { margin: '10px 0', padding: '11px', border: '1px solid var(--rline)', borderRadius: '10px', background: '#101024' } });
+    const memoryTitle = h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' } },
+      h('b', '🧠 Mémoire de La Zone'), h('span.muted', { style: { fontSize: '11px' } }, 'Enregistrée sur le serveur'));
+    const memoryCategory = h('select', { style: selStyle() },
+      ...[['preference','Préférence'],['fact','Fait validé'],['decision','Décision'],['correction','Correction'],['pending','À reprendre']].map(([v,l]) => h('option', { value:v }, l)));
+    const memoryInput = h('textarea', { rows: 2, placeholder: 'Ex. : Je préfère un mix rap avec une voix devant, mais naturelle.', style: { width:'100%', resize:'vertical', marginTop:'8px', padding:'9px', borderRadius:'8px', background:'#090916', border:'1px solid var(--rline)', color:'var(--rtxt)' } });
+    const memorySave = h('button.rbtn.p', { type:'button' }, '＋ Retenir ce point');
+    const memoryStatus = h('div.muted', { style:{ fontSize:'11px', marginTop:'6px' } }, 'Chargement de la mémoire…');
+    const memoryList = h('div', { style:{ display:'grid', gap:'6px', marginTop:'8px' } });
+    const memoryNames = { preference:'Préférence', fact:'Fait', decision:'Décision', correction:'Correction', pending:'À reprendre' };
+    const renderMemory = (items = []) => {
+      memoryList.innerHTML = '';
+      if (!items.length) memoryList.append(h('div.muted', 'Aucun souvenir structuré pour ce projet.'));
+      for (const item of items.slice().reverse()) {
+        const remove = h('button.rbtn', { type:'button', title:'Oublier ce souvenir', onclick: async () => {
+          remove.disabled = true;
+          try { const data = await api('/api/projects/' + encodeURIComponent(state.projectId) + '/memory/' + encodeURIComponent(item.id), { method:'DELETE' }); renderMemory(data.items || []); memoryStatus.textContent = 'Souvenir supprimé.'; }
+          catch (e) { remove.disabled = false; memoryStatus.textContent = 'Suppression impossible : ' + e.message; }
+        } }, '✕');
+        memoryList.append(h('div', { style:{ display:'flex', alignItems:'flex-start', gap:'8px', padding:'8px', borderRadius:'8px', background:'#090916', border:'1px solid var(--rline)' } },
+          h('div', { style:{ flex:'1', minWidth:'0', fontSize:'12px', lineHeight:'1.45' } },
+            h('b', (memoryNames[item.category] || 'Note') + ' · '), item.text,
+            h('div.muted', { style:{ fontSize:'10px', marginTop:'3px' } }, item.createdAt ? new Date(item.createdAt).toLocaleDateString('fr-FR') : '')),
+          remove));
+      }
+    };
+    const loadMemory = async () => {
+      if (!state.projectId) { memoryStatus.textContent = 'Aucun projet sélectionné.'; return; }
+      try { const data = await api('/api/projects/' + encodeURIComponent(state.projectId) + '/memory'); renderMemory(data.items || []); memoryStatus.textContent = (data.items || []).length + ' souvenir(s) structuré(s) · 100 maximum. Les anciennes notes restent conservées.'; }
+      catch (e) { memoryStatus.textContent = 'Mémoire indisponible : ' + e.message; }
+    };
+    memorySave.onclick = async () => {
+      const note = memoryInput.value.trim();
+      if (!note || !state.projectId) return;
+      memorySave.disabled = true;
+      try {
+        const data = await api('/api/projects/' + encodeURIComponent(state.projectId) + '/memory', { method:'POST', body:{ note, category:memoryCategory.value } });
+        renderMemory(data.items || []); memoryInput.value = '';
+        memoryStatus.textContent = data.unchanged ? 'Ce souvenir était déjà enregistré.' : 'Souvenir enregistré et transmis au cerveau de La Zone.';
+      } catch (e) { memoryStatus.textContent = 'Enregistrement impossible : ' + e.message; }
+      finally { memorySave.disabled = false; }
+    };
+    memoryPanel.append(memoryTitle, memoryCategory, memoryInput, h('div', { style:{ display:'flex', gap:'8px', alignItems:'center', flexWrap:'wrap', marginTop:'7px' } }, memorySave, memoryStatus), memoryList);
+    loadMemory();
     const chat = h('div', { style: { minHeight: '230px', maxHeight: '44vh', overflow: 'auto', padding: '10px', background: '#090916', border: '1px solid var(--rline)', borderRadius: '10px' } });
     // Historique local par projet : conservé après changement d’onglet ou rechargement.
     const historyKey = 'studio.la-zone.history.' + String(state.projectId || 'default');
@@ -1095,7 +1140,7 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
         h('div.zone-stage',
           h('div.zone-portrait', h('div.zone-head', h('div.zone-shoulders'), h('div.zone-neck'), h('div.zone-face'), h('div.zone-hair'), h('div.zone-beard'), h('div.zone-eye.left'), h('div.zone-eye.right'), h('div.zone-mouth'))),
           h('div.zone-stage-info', h('span.zone-kicker', 'Ton ingénieur personnel'), h('h2', 'LA ZONE'), h('p', 'Un seul interlocuteur pour ton studio. Il coordonne les spécialistes, analyse les mesures audio disponibles et prépare les traitements que tu peux valider.'), h('span.zone-live', h('i'), 'PRÉSENCE STUDIO · MAQUETTE INTERACTIVE'), h('div.zone-capabilities', ...['Conversation vocale','10 spécialistes','Analyse audio','Mixage & mastering'].map(x=>h('span',x))), h('div.zone-bars', ...Array.from({length:7}, () => h('i'))))),
-        h('div.pb', h('div.zone-chat-shell', h('div', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat), h('div.zone-sidecard', h('h4', 'SESSION STUDIO'), h('div.zone-mic-hint', 'Parle naturellement à La Zone. Dans cette maquette, la voix utilise encore les fonctions vocales du navigateur : ce n’est pas encore le moteur temps réel final.'), h('div', { style: { height:'10px' } }), h('h4', 'ÉQUIPE EN COULISSES'), h('div.muted', 'Diagnostic · Nettoyage · Voix · EQ · Dynamique · Effets · Mixage · Mastering · Direction artistique · Contrôle qualité'), h('div', { style: { height:'10px' } }), h('h4', 'PROCHAINE ÉTAPE'), h('div.muted', 'Brancher le moteur vocal temps réel et synchroniser un véritable visage animé.'))),
+        h('div.pb', h('div.zone-chat-shell', h('div', memoryPanel, h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '9px' } }, h('span.muted', 'Piste cible'), trackSel), chat), h('div.zone-sidecard', h('h4', 'SESSION STUDIO'), h('div.zone-mic-hint', 'Parle naturellement à La Zone. Dans cette maquette, la voix utilise encore les fonctions vocales du navigateur : ce n’est pas encore le moteur temps réel final.'), h('div', { style: { height:'10px' } }), h('h4', 'ÉQUIPE EN COULISSES'), h('div.muted', 'Diagnostic · Nettoyage · Voix · EQ · Dynamique · Effets · Mixage · Mastering · Direction artistique · Contrôle qualité'), h('div', { style: { height:'10px' } }), h('h4', 'PROCHAINE ÉTAPE'), h('div.muted', 'Brancher le moteur vocal temps réel et synchroniser un véritable visage animé.'))),
           h('div', { style: { display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',margin:'10px 0' } }, h('b', { style:{fontSize:'12px'} }, 'Style de mastering'), masterStyle),
           effectPicker,
           voiceStatus,
