@@ -1488,7 +1488,7 @@ export async function render(el, { params }) {
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => { if (!isInstru(t)) selVoixIdx = i; go('timeline'); refreshViews(); toast('🎯 Piste cible : ' + (t.name || `Piste ${i + 1}`)); }, trackColor(t, i)]) },
       { ic: '🎛️', t: 'Modules (boîtiers)', items: [['🎚️', 'Console live', () => openWindow('console')], ['🎤', 'Auto-Tune Pro', () => openWindow('autotune')], ['🎚️', 'Égaliseur', () => openWindow('eq')], ['🗜️', 'Compresseur', () => openWindow('comp')], ['🌫️', 'Réverbe & FX', () => openWindow('rev')], ['🧼', 'De-Esser', () => openWindow('deess')], ['🎚️', 'Hauteur / Pitch', () => openWindow('pitch')], ['🎼', 'Harmoniseur', () => openWindow('harmo')], ['🌈', 'Spectrogramme', () => openWindow('spectro')], ['⭐', 'Banque d’effets', () => openWindow('bank')], ['🏁', 'Mastering', () => openWindow('master')]] },
       { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
-      { ic: '🧠', t: 'IA Expert', items: [['🎯', 'Analyser (bientôt)', () => go('ia')], ['🎹', 'Tonalité (bientôt)', () => go('ia')], ['✨', '3 versions (bientôt)', () => go('ia')]] },
+      { ic: '🧠', t: 'IA Expert', items: [['🧠', 'Ouvrir l’ingé IA', () => openWindow('ia')], ['🎯', 'Analyser ma voix', () => openWindow('ia')], ['✨', 'Nettoyer & mixer', () => openWindow('ia')]] },
     ];
     side.innerHTML = '';
     groups.forEach((g, gi) => {
@@ -1511,7 +1511,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE22'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE23'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
