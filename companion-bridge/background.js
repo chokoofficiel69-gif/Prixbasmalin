@@ -18,8 +18,21 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
       return false;
     }
     chrome.tabs.create({ url: url.href, active: true }, tab => {
-      if (chrome.runtime.lastError) sendResponse({ error: chrome.runtime.lastError.message });
-      else sendResponse({ ok: true, opened: tab.url || url.href });
+      if (chrome.runtime.lastError || !tab?.id) { sendResponse({ error: chrome.runtime.lastError?.message || "Onglet impossible à ouvrir." }); return; }
+      const tabId = tab.id;
+      const listener = (updatedId, changeInfo, updatedTab) => {
+        if (updatedId !== tabId || changeInfo.status !== "complete") return;
+        chrome.tabs.onUpdated.removeListener(listener);
+        sendResponse({ ok: true, opened: updatedTab.url || url.href });
+      };
+      chrome.tabs.onUpdated.addListener(listener);
+      setTimeout(() => {
+        chrome.tabs.onUpdated.removeListener(listener);
+        chrome.tabs.get(tabId, current => {
+          if (chrome.runtime.lastError) sendResponse({ error: "Page ouverte, mais chargement non confirmé." });
+          else sendResponse({ ok: true, opened: current?.url || url.href, loading: true });
+        });
+      }, 20000);
     });
     return true;
   }
