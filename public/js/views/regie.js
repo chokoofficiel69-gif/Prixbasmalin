@@ -124,6 +124,16 @@ const CSS = `
 .regie .preset:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(168,85,247,.25);border-color:var(--rpur)}
 .regie .preset .pav{width:30px;height:30px;border-radius:8px;flex:none;display:grid;place-items:center;font-size:15px;background:linear-gradient(135deg,var(--rpur),var(--rcy))}
 .regie .preset b{font-size:12.5px}.regie .preset .po{font-size:10px;color:var(--rmut)}
+.regie .rmain{position:relative;overflow:auto}
+.regie .rgwin{position:absolute;min-width:240px;min-height:90px;max-width:98%;background:linear-gradient(180deg,#13132b,#0c0c18);border:1px solid #2a2752;border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;resize:both}
+.regie .rgwin.min{height:auto!important;min-height:0;resize:none}
+.regie .rgwin.min .rgwbody{display:none}
+.regie .rgwin::after{content:'';position:absolute;right:2px;bottom:2px;width:12px;height:12px;border-right:2px solid rgba(255,255,255,.25);border-bottom:2px solid rgba(255,255,255,.25);border-radius:0 0 4px 0;pointer-events:none}
+.regie .rgwh{display:flex;align-items:center;gap:8px;padding:9px 11px;cursor:grab;background:linear-gradient(180deg,rgba(168,85,247,.25),transparent);font-size:13px;font-weight:700;user-select:none;border-bottom:1px solid rgba(255,255,255,.07);flex:none}
+.regie .rgwh:active{cursor:grabbing}
+.regie .rgwbody{padding:12px;overflow:auto;flex:1}
+.regie .rgwbtn{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:#1b1b38;border:1px solid var(--rline);cursor:pointer;font-size:12px;flex:none}
+.regie .rgwbtn:hover{background:#2a2658}
 .regie .section{margin-bottom:12px;border:1px solid #221f45;border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#101024,#0b0b16)}
 .regie .secth{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;font-size:14px;font-weight:700;user-select:none;background:linear-gradient(180deg,rgba(168,85,247,.12),transparent)}
 .regie .secth:hover{background:linear-gradient(180deg,rgba(168,85,247,.2),transparent)}
@@ -1326,54 +1336,84 @@ export async function render(el, { params }) {
   }
 
   // ---------- UNE SEULE PAGE : modules repliables ----------
-  const SECTIONS = [
-    { id: 'regie', t: '🧩 Vue d’ensemble', r: viewRegie, open: true },
-    { id: 'rec', t: '🎙️ Enregistrement', r: viewRec, open: false },
-    { id: 'timeline', t: '🎵 Timeline', r: viewTimeline, open: true },
-    { id: 'fx', t: '🎛️ Effets & molettes', r: viewFx, open: true },
-    { id: 'repo', t: '📚 Répertoire', r: viewRepo, open: false },
-    { id: 'ia', t: '🧠 Ingé IA', r: viewIA, open: false },
-  ];
-  const secEls = {};
-
   // ---------- squelette ----------
   const root = h('div.regie');
   const tabsBar = h('div.rtabs');
   const main = h('div.rmain');
   const side = h('div.rside');
 
-  function buildWorkspace() {
-    main.innerHTML = '';
-    const view = h('div.rview');
-    for (const s of SECTIONS) {
-      const body = h('div.secbody' + (s.open ? '' : '.closed'));
-      let built = false;
-      const build = () => { if (built) return; built = true; try { body.append(s.r()); } catch (e) { console.error(e); body.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); } };
-      const rebuild = () => { built = false; body.innerHTML = ''; if (!body.classList.contains('closed')) build(); };
-      if (s.open) build();
-      const chev = h('span.chev', { style: { transform: s.open ? 'none' : 'rotate(-90deg)' } }, '▾');
-      const head = h('div.secth', { onclick: () => toggleSec(s.id) }, h('span', s.t.split(' ')[0]), h('b', s.t.replace(/^\S+\s/, '')), chev);
-      const sec = h('div.section', { id: 'sec-' + s.id }, head, body);
-      secEls[s.id] = { sec, body, chev, build, rebuild };
-      view.append(sec);
-    }
-    main.append(view);
+  // ======= BOÎTIERS : fenêtres de modules déplaçables =======
+  function winConsole() {
+    const vt = voixTracks();
+    const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
+    const curIdx = () => +sel.value;
+    const playBtn = h('button.rbtn.p', { style: { whiteSpace: 'nowrap', fontWeight: '800' } }, live ? '⏹ Stop' : '▶ Jouer');
+    playBtn.onclick = () => { if (live) stopLive(); else startLive(curIdx()); playBtn.textContent = live ? '⏹ Stop' : '▶ Jouer'; };
+    sel.onchange = () => { if (live) startLive(curIdx()); };
+    return h('div',
+      h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, playBtn,
+        h('button.rbtn.g', { onclick: () => bakeLive(curIdx()) }, '💾 Graver'),
+        h('button.rbtn', { onclick: () => revertTrack(tracks[curIdx()], { textContent: '' }) }, '↩ Original')),
+      h('div', { style: { display: 'flex', justifyContent: 'space-around' } }, liveKnobEl('VOLUME', 'vol', -12, 6, 0.5, 0, dbF), liveKnobEl('SATUR.', 'drive', 0, 1, 0.05, 0, pcF)),
+      h('div.muted', { style: { fontSize: '10px', marginTop: '10px', lineHeight: '1.4' } }, 'Lance la lecture, puis ouvre les boîtiers Égaliseur / Compresseur / Réverbe depuis le répertoire : tes molettes changent le son EN DIRECT.'));
   }
-  function toggleSec(id, forceOpen) {
-    const e = secEls[id]; if (!e) return;
-    const willOpen = forceOpen || e.body.classList.contains('closed');
-    if (willOpen) { e.body.classList.remove('closed'); e.chev.style.transform = 'none'; e.build(); }
-    else { e.body.classList.add('closed'); e.chev.style.transform = 'rotate(-90deg)'; }
+  function winEq() { const eqView = makeEqCurve(); eqRedraw = eqView.redraw; return h('div', eqView.el, h('div', { style: { display: 'flex', justifyContent: 'space-around' } }, liveKnobEl('GRAVE', 'hp', 40, 160, 5, 85, hzF), liveKnobEl('LOW', 'low', -6, 6, 0.5, 0, dbF), liveKnobEl('MID', 'mid', -6, 8, 0.5, 2.5, dbF), liveKnobEl('AIGU', 'high', -6, 8, 0.5, 3, dbF))); }
+  function winComp() { return h('div', { style: { display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '10px' } }, liveKnobEl('TAUX', 'comp', 0, 1, 0.05, 0.4, pcF), liveKnobEl('ATTAQUE', 'compAtk', 1, 80, 1, 5, v => `${v | 0} ms`), liveKnobEl('RELEASE', 'compRel', 30, 400, 10, 120, v => `${v | 0} ms`), liveKnobEl('VOLUME', 'vol', -12, 6, 0.5, 0, dbF)); }
+  function winRev() { return h('div', { style: { display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '10px' } }, liveKnobEl('RÉVERBE', 'reverb', 0, 0.6, 0.02, 0.1, pcF), liveKnobEl('DELAY', 'delay', 0, 0.5, 0.02, 0, pcF), liveKnobEl('SATUR.', 'drive', 0, 1, 0.05, 0, pcF)); }
+  function winBank() {
+    const vt = voixTracks();
+    const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
+    const curIdx = () => +sel.value;
+    const grid = h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(92px,1fr))', gap: '8px' } }, EFFECTS_BANK.map(([nm, emo, chain]) => h('div.preset', { style: { flexDirection: 'column', textAlign: 'center', padding: '10px 6px', gap: '4px' }, onclick: () => { const i = curIdx(); if (!tracks[i]) { toast('Choisis une piste voix.', 'bad'); return; } applyPresetTo(i, { emo, name: nm, chain }); } }, h('div', { style: { fontSize: '20px' } }, emo), h('b', { style: { fontSize: '11px' } }, nm))));
+    return h('div', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('button.rbtn', { onclick: () => playBuffer(tracks[curIdx()]?.buffer) }, '▶'), h('button.rbtn', { onclick: () => { stopPreview(); revertTrack(tracks[curIdx()], { textContent: '' }); } }, '↩ Original')), grid);
   }
-  function refreshViews() { ['timeline', 'regie'].forEach(id => { const e = secEls[id]; if (e && !e.body.classList.contains('closed')) e.rebuild(); }); }
-  function renderTabs(active) { tabsBar.innerHTML = ''; for (const s of SECTIONS) tabsBar.append(h('div.rtab' + (s.id === active ? '.on' : ''), { onclick: () => go(s.id) }, s.t)); }
-  function go(k) { const e = secEls[k]; if (!e) return; toggleSec(k, true); try { e.sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {} renderTabs(k); }
+  const winSpectro = () => makeSpectro(150);
+  const WINDEF = {
+    regie: { t: '🧩 Vue d’ensemble', r: viewRegie, w: 720, h: 430 },
+    timeline: { t: '🎵 Timeline', r: viewTimeline, w: 920, h: 380 },
+    rec: { t: '🎙️ Enregistrement', r: viewRec, w: 760, h: 450 },
+    console: { t: '🎚️ Console live', r: winConsole, w: 440, h: 300 },
+    autotune: { t: '🎤 Auto-Tune Pro', r: autotunePanel, w: 600, h: 600 },
+    eq: { t: '🎚️ Égaliseur', r: winEq, w: 480, h: 280 },
+    comp: { t: '🗜️ Compresseur', r: winComp, w: 470, h: 210 },
+    rev: { t: '🌫️ Réverbe & FX', r: winRev, w: 470, h: 210 },
+    bank: { t: '⭐ Banque d’effets', r: winBank, w: 660, h: 440 },
+    spectro: { t: '🌈 Spectrogramme', r: winSpectro, w: 580, h: 240 },
+    repo: { t: '📚 Répertoire', r: viewRepo, w: 660, h: 470 },
+    ia: { t: '🧠 Ingé IA', r: viewIA, w: 680, h: 560 },
+  };
+  const TAB_ORDER = ['regie', 'timeline', 'rec', 'console', 'autotune', 'eq', 'comp', 'rev', 'bank', 'spectro', 'repo', 'ia'];
+  const openWins = {}; let zTop = 10, winOffset = 0;
+  function makeWinContent(key) { const el = h('div'); try { el.append(WINDEF[key].r()); } catch (e) { console.error(e); el.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); } return el; }
+  function openWindow(key) {
+    const def = WINDEF[key]; if (!def) return;
+    if (openWins[key]) { const w = openWins[key]; w.win.style.display = 'flex'; w.win.classList.remove('min'); w.win.style.zIndex = String(++zTop); return; }
+    const body = h('div.rgwbody'); body.append(makeWinContent(key));
+    const minB = h('div.rgwbtn', { title: 'Réduire' }, '–'); const closeB = h('div.rgwbtn', { title: 'Fermer' }, '✕');
+    const head = h('div.rgwh', h('span', def.t.split(' ')[0]), h('b', { style: { flex: '1', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' } }, def.t.replace(/^\S+\s/, '')), minB, closeB);
+    const maxW = Math.max(260, (main.clientWidth || 900) - 24);
+    const win = h('div.rgwin', { style: { width: Math.min(def.w, maxW) + 'px', height: def.h + 'px', left: (16 + winOffset) + 'px', top: (12 + winOffset) + 'px', zIndex: String(++zTop) } }, head, body);
+    winOffset = (winOffset + 26) % 150;
+    const rebuild = () => { body.innerHTML = ''; body.append(makeWinContent(key)); };
+    openWins[key] = { win, body, rebuild };
+    minB.onclick = (e) => { e.stopPropagation(); win.classList.toggle('min'); };
+    closeB.onclick = (e) => { e.stopPropagation(); win.remove(); delete openWins[key]; if (key === 'console') stopLive(); renderTabs(); };
+    win.addEventListener('pointerdown', () => { win.style.zIndex = String(++zTop); });
+    let drag = null;
+    head.addEventListener('pointerdown', (e) => { if (e.target.closest('.rgwbtn')) return; drag = { x: e.clientX, y: e.clientY, l: win.offsetLeft, t: win.offsetTop }; try { head.setPointerCapture(e.pointerId); } catch {} });
+    head.addEventListener('pointermove', (e) => { if (!drag) return; win.style.left = Math.max(0, drag.l + (e.clientX - drag.x)) + 'px'; win.style.top = Math.max(0, drag.t + (e.clientY - drag.y)) + 'px'; });
+    head.addEventListener('pointerup', () => { drag = null; });
+    main.append(win); renderTabs();
+  }
+  const go = (k) => openWindow(k);
+  function refreshViews() { ['timeline', 'regie'].forEach(k => { if (openWins[k]) openWins[k].rebuild(); }); }
+  function renderTabs() { tabsBar.innerHTML = ''; for (const k of TAB_ORDER) tabsBar.append(h('div.rtab' + (openWins[k] ? '.on' : ''), { onclick: () => openWindow(k) }, WINDEF[k].t)); }
 
   function renderSidebar() {
     const groups = [
       { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter le mix (WAV)', () => exportMix()]] },
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => { if (!isInstru(t)) selVoixIdx = i; go('timeline'); refreshViews(); toast('🎯 Piste cible : ' + (t.name || `Piste ${i + 1}`)); }, trackColor(t, i)]) },
-      { ic: '🎛️', t: 'Modules', items: [['🎤', 'Auto-Tune', () => go('fx')], ['🎚️', 'Égaliseur', () => go('fx')], ['🗜️', 'Compression', () => go('fx')], ['🌫️', 'Réverbe', () => go('fx')], ['🔁', 'Delay', () => go('fx')], ['🎼', 'Harmonies', () => go('fx')]] },
+      { ic: '🎛️', t: 'Modules (boîtiers)', items: [['🎚️', 'Console live', () => openWindow('console')], ['🎤', 'Auto-Tune Pro', () => openWindow('autotune')], ['🎚️', 'Égaliseur', () => openWindow('eq')], ['🗜️', 'Compresseur', () => openWindow('comp')], ['🌫️', 'Réverbe & FX', () => openWindow('rev')], ['🌈', 'Spectrogramme', () => openWindow('spectro')], ['⭐', 'Banque d’effets', () => openWindow('bank')]] },
       { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
       { ic: '🧠', t: 'IA Expert', items: [['🎯', 'Analyser (bientôt)', () => go('ia')], ['🎹', 'Tonalité (bientôt)', () => go('ia')], ['✨', '3 versions (bientôt)', () => go('ia')]] },
     ];
@@ -1422,8 +1462,15 @@ export async function render(el, { params }) {
   await load();
   try { ast = mountAssistant(buildAssistantS()); } catch (e) { ast = null; }
   renderSidebar();
-  buildWorkspace();
-  renderTabs('regie');
+  renderTabs();
+  openWindow('regie'); openWindow('console'); openWindow('timeline');
+  // disposition par défaut en mosaïque (non superposée) sur grand écran
+  setTimeout(() => {
+    const W = main.clientWidth || 1200;
+    const place = (k, l, t, w) => { const e = openWins[k]; if (e) { e.win.style.left = l + 'px'; e.win.style.top = t + 'px'; if (w) e.win.style.width = Math.min(w, W - l - 12) + 'px'; } };
+    if (W > 1000) { place('regie', 12, 10, 700); place('console', 724, 10, W - 736); place('timeline', 12, 452, W - 24); }
+    winOffset = 40;
+  }, 0);
 
   // nettoyage
   return () => { stopPlay(); stopAllRec(); stopPreview(); stopLive(); closeMenu(); try { ast?.destroy?.(); } catch {} };
