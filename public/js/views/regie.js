@@ -409,33 +409,64 @@ export async function render(el, { params }) {
   }
 
   async function analyzeRecordedTake(buffer) {
-    if (!buffer) return;
+    if (!buffer || !buffer.length || !buffer.sampleRate) return;
     try {
-      const maxSamples = Math.min(buffer.length, Math.floor(buffer.sampleRate * 24));
-      const mono = new Float32Array(maxSamples);
-      for (let c = 0; c < buffer.numberOfChannels; c++) {
-        const data = buffer.getChannelData(c);
-        for (let i = 0; i < maxSamples; i++) mono[i] += data[i] / buffer.numberOfChannels;
+      // Échantillonne le début, le milieu et la fin pour ne pas juger un long morceau
+      // uniquement sur ses premières secondes. Maximum 24 s de calcul au total.
+      const segmentSeconds = Math.min(8, buffer.duration);
+      const starts = buffer.duration <= 24
+        ? [0]
+        : [0, Math.max(0, (buffer.duration - segmentSeconds) / 2), Math.max(0, buffer.duration - segmentSeconds)];
+      const chunks = [];
+      for (const seconds of starts) {
+        const from = Math.min(buffer.length, Math.floor(seconds * buffer.sampleRate));
+        const count = Math.min(buffer.length - from, Math.floor(segmentSeconds * buffer.sampleRate));
+        if (count > 0) chunks.push({ from, count });
+      }
+      const totalSamples = chunks.reduce((sum, x) => sum + x.count, 0);
+      const mono = new Float32Array(totalSamples);
+      let cursor = 0;
+      for (const chunk of chunks) {
+        for (let c = 0; c < buffer.numberOfChannels; c++) {
+          const data = buffer.getChannelData(c);
+          for (let i = 0; i < chunk.count; i++) mono[cursor + i] += data[chunk.from + i] / buffer.numberOfChannels;
+        }
+        cursor += chunk.count;
       }
       const spectral = analyzeVoiceDsp(mono, buffer.sampleRate);
       if (!spectral.valid) {
         toast('Prise enregistrée. Le signal est trop faible ou trop court pour un diagnostic fiable.', 'bad');
         return;
       }
-      const pitchBuffer = audioCtx().createBuffer(1, mono.length, buffer.sampleRate);
-      pitchBuffer.copyToChannel(mono, 0);
-      const pitch = await detectPitch(pitchBuffer);
-      const voiced = Array.from(pitch.f0 || []).filter(v => Number.isFinite(v) && v > 0);
-      const key = voiced.length >= 12 ? detectKey(pitch) : null;
-      const median = voiced.length ? [...voiced].sort((a,b)=>a-b)[Math.floor(voiced.length/2)] : null;
+
+      // Le diagnostic spectral reste exploitable même si l'estimation de hauteur échoue.
+      let pitchReport = null;
+      try {
+        const pitchBuffer = audioCtx().createBuffer(1, mono.length, buffer.sampleRate);
+        pitchBuffer.copyToChannel(mono, 0);
+        const pitch = await detectPitch(pitchBuffer);
+        const voiced = Array.from(pitch.f0 || []).filter(v => Number.isFinite(v) && v > 0);
+        const key = voiced.length >= 12 ? detectKey(pitch) : null;
+        const median = voiced.length ? [...voiced].sort((a,b)=>a-b)[Math.floor(voiced.length/2)] : null;
+        if (median) pitchReport = { medianHz:+median.toFixed(1), key:key ? keyName(key) : null, voicedFrames:voiced.length };
+      } catch (pitchError) {
+        pitchReport = { available:false, reason:String(pitchError?.message || pitchError).slice(0,180) };
+      }
+
       const report = {
         durationSeconds: +buffer.duration.toFixed(2),
-        peakDbfs: +spectral.peakDbfs.toFixed(1),
-        rmsDbfs: +spectral.rmsDbfs.toFixed(1),
-        spectralCentroidHz: Math.round(spectral.spectralCentroidHz),
+        analyzedSeconds: +(totalSamples / buffer.sampleRate).toFixed(2),
+        sampleCoverage: chunks.length > 1 ? 'début, milieu et fin' : 'prise complète',
+        peakDbfs: spectral.peakDbfs,
+        rmsDbfs: spectral.rmsDbfs,
+        crestDb: spectral.crestDb,
+        estimatedNoiseFloorDbfs: spectral.noiseFloorEstimateDbfs,
+        spectralCentroidHz: spectral.spectralCentroidHz,
+        bandEnergy: spectral.bandEnergy,
+        sibilanceRatio: spectral.sibilanceRatio,
         recommendations: voiceDspRecommendations(spectral).slice(0,4),
-        pitch: median ? { medianHz:+median.toFixed(1), key:key ? keyName(key) : null, voicedFrames:voiced.length } : null,
-        caveat:'Mesures et estimations automatiques uniquement ; aucune écoute subjective ni transcription parfaite.'
+        pitch: pitchReport,
+        caveat:'Mesures et estimations automatiques uniquement ; aucune écoute subjective ni transcription parfaite. Le niveau de bruit est une estimation et peut inclure les silences.'
       };
       const keyNameForStorage = 'studio.la-zone.last-take.' + String(state.projectId || 'default');
       try { localStorage.setItem(keyNameForStorage, JSON.stringify(report)); } catch {}
