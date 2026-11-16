@@ -205,10 +205,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live35')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31', 'regie-css-live32','regie-css-live33','regie-css-live34'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live36')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31', 'regie-css-live32','regie-css-live33','regie-css-live34','regie-css-live35'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live35'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live36'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -677,7 +677,7 @@ export async function render(el, { params }) {
   function stopAllRec() { try { rec?.stop(); } catch {} rec = null; recording = false; stopMon(); try { instruSrc?.stop(); } catch {} instruSrc = null; clearInterval(metroTimer); }
 
   // ---------- Auto-Tune RÉEL (réutilise applyChain + détection de tonalité) ----------
-  const atOpt = { speed: 60, strength: 1, formant: 0, key: '', mode: 'dure', humanize: 0.25, glide: 30, keep: 0.15 };
+  const atOpt = { speed: 120, strength: 0.8, formant: 0, key: '', mode: 'douce', humanize: 0.4, glide: 70, keep: 0.25 };
   let previewSrc = null, atBusy = false;
   const voixTracks = () => tracks.map((t, i) => ({ t, i })).filter(x => !isInstru(x.t));
   function stopPreview() { try { previewSrc?.stop(); } catch {} previewSrc = null; }
@@ -1807,7 +1807,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, resetBtn, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE35'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE36'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
