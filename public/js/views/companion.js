@@ -128,12 +128,14 @@ export async function render(el) {
     conv.messages.push(answer);
     try {
       const memoryText = profile.memory ? '\n\nMÉMOIRE PERSONNELLE DURABLE (commune aux deux avatars) :\n' + profile.memory : '';
-      await sse('/api/chat', {
+      await sse('/api/companion/run', {
         projectId,
         model: localStorage.getItem('studio.model') || 'auto',
         system: SYSTEM + memoryText,
         messages: conv.messages.filter(m => m.content).map(m => ({ role: m.role, content: m.content }))
       }, (ev) => {
+        if (ev.type === 'tool_start') status.textContent = 'J’utilise : ' + ev.tool;
+        if (ev.type === 'tool_result') status.textContent = ev.summary || 'Outil terminé.';
         if (ev.type === 'delta' && ev.content) { answer.content += ev.content; drawMessages(); }
         if (ev.type === 'error') answer.content = 'Je rencontre un problème : ' + ev.error;
       }, controller.signal);
