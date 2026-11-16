@@ -1110,10 +1110,24 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
       } catch (e) { say('expert', 'Je n’ai pas pu préparer un plan exécutable : ' + (e?.message || e)); status.textContent = 'Erreur IA. Vérifie la disponibilité du modèle et réessaie.'; }
       finally { busy = false; send.disabled = false; }
     };
+    const qualityReport = (beforeBuffer, afterBuffer) => {
+      const before = analyzeBuffer(beforeBuffer, 1), after = analyzeBuffer(afterBuffer, 1);
+      const warnings = [];
+      if (!Number.isFinite(after.peakDbfs) || !Number.isFinite(after.rmsDbfs)) warnings.push('mesures audio non finies : résultat potentiellement invalide');
+      if (Math.abs(after.durationSeconds - before.durationSeconds) > 0.02) warnings.push('durée modifiée de façon inattendue');
+      if (after.samplesNearFullScale > 0) warnings.push('échantillons proches du maximum numérique : risque d’écrêtage');
+      if (after.peakDbfs > -0.1) warnings.push('crête trop proche de 0 dBFS');
+      if (before.rmsDbfs > -80 && after.rmsDbfs < -85) warnings.push('signal presque silencieux après traitement');
+      if (Math.abs(after.rmsDbfs - before.rmsDbfs) > 12) warnings.push('variation importante du niveau RMS (' + (after.rmsDbfs - before.rmsDbfs).toFixed(1) + ' dB)');
+      return { before, after, warnings };
+    };
     const execute = async () => {
       const t = trackNow(); if (!t?.buffer || !pendingPlan || busy) return;
       busy = true; applyBtn.disabled = true; send.disabled = true;
       try {
+        const sourceBuffer = t.buffer;
+        const beforeOriginal = t.original;
+        const beforeMetrics = analyzeBuffer(sourceBuffer, 1);
         if (!t.original) t.original = cloneAudioBuffer(t.buffer);
         let b = cloneAudioBuffer(t.buffer);
         for (const a of pendingPlan.actions) {
@@ -1133,10 +1147,22 @@ Si des effets sont cochés, ne retourne aucun autre type. Si mastering est coch�
           else if (a.type === 'reverse') for (let c=0;c<b.numberOfChannels;c++) b.getChannelData(c).reverse();
           else if (a.type === 'fadeIn' || a.type === 'fadeOut') fadeClip(b, a.type === 'fadeIn');
         }
+        const qc = qualityReport(sourceBuffer, b);
+        const deltaRms = qc.after.rmsDbfs - qc.before.rmsDbfs;
+        const qcSummary = 'Contrôle mesuré : crête ' + qc.before.peakDbfs.toFixed(1) + ' → ' + qc.after.peakDbfs.toFixed(1) + ' dBFS ; RMS ' + qc.before.rmsDbfs.toFixed(1) + ' → ' + qc.after.rmsDbfs.toFixed(1) + ' dBFS (' + (deltaRms >= 0 ? '+' : '') + deltaRms.toFixed(1) + ' dB).';
+        if (qc.warnings.length) {
+          const warningText = 'Contrôle qualité : ' + qc.warnings.join(' ; ') + '.';
+          if (!window.confirm(warningText + '\n\n' + qcSummary + '\n\nAppliquer quand même ce résultat ?')) {
+            if (!beforeOriginal) t.original = null;
+            say('expert', 'J’ai arrêté l’application : le contrôle qualité a détecté un risque. ' + warningText);
+            status.textContent = 'Résultat non appliqué. La piste est restée inchangée.';
+            return;
+          }
+        }
         t.buffer = b; t.fxDone = [...(t.fxDone || []), ...pendingPlan.actions.map(a=>a.type)];
         await save(); renderSidebar(); if (cur === 'timeline') go('timeline');
         undoBtn.disabled = false;
-        say('expert', 'Traitements appliqués à « ' + (t.name || 'la piste') + ' ». La prise originale est conservée : tu peux la restaurer.');
+        say('expert', 'Traitements appliqués à « ' + (t.name || 'la piste') + ' ». ' + qcSummary + (qc.warnings.length ? ' Avertissements acceptés : ' + qc.warnings.join(' ; ') + '.' : ' Contrôle automatique sans alerte.') + ' La prise originale est conservée : tu peux la restaurer.');
         status.textContent = 'Terminé. Écoute le résultat et demande les corrections que tu veux.';
         pendingPlan = null; planBox.innerHTML = '';
       } catch (e) { say('expert', 'Erreur pendant le traitement : ' + (e?.message || e)); status.textContent = 'Traitement interrompu. L’original est conservé.'; }
