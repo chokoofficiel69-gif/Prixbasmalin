@@ -1084,7 +1084,7 @@ export async function render(el, { params }) {
   const scoreColor = (s) => s === 'ok' ? '#34e39a' : s === 'warn' ? '#f0b429' : '#ef4444';
   // ===== Dashboard : TOUT sur une seule page =====
   function viewRegie() {
-    const root = h('div.la-zone-workspace');
+    const root = h('div');
     const vt = voixTracks();
     const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const curIdx = () => +sel.value;
@@ -1329,7 +1329,7 @@ export async function render(el, { params }) {
   }
 
   function viewIA() {
-    const root = h('div');
+    const root = h('div.la-zone-workspace');
     const vt = voixTracks();
     const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const curTrack = () => tracks[+sel.value];
