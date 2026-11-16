@@ -655,13 +655,13 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 .pm-amazon-sheet-compare{background:#0b63ce;color:#fff}
 .pm-amazon-sheet-amazon{background:#f4f5f7;border:1px solid #d9dee6;color:#243247}
 @media(max-width:900px){.pm-amazon-sheet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:620px){.pm-amazon-sheet-shelf{padding:13px;margin:16px 0 22px}.pm-amazon-sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pm-amazon-sheet-photo{height:112px}.pm-amazon-sheet-copy{padding:9px}.pm-amazon-sheet-name{font-size:13px}}
+@media(max-width:620px){.pm-amazon-sheet-shelf{padding:13px;margin:16px 0 22px}.pm-amazon-sheet-grid{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:8px}.pm-amazon-sheet-card{flex:0 0 min(76vw,220px);scroll-snap-align:start}.pm-amazon-sheet-photo{height:112px}.pm-amazon-sheet-copy{padding:9px}.pm-amazon-sheet-name{font-size:13px}}
 </style>
 <section id="pm-amazon-sheet-shelf" class="pm-amazon-sheet-shelf" aria-labelledby="pmAmazonSheetTitle" hidden>
   <div class="pm-amazon-sheet-head">
     <div>
-      <h2 id="pmAmazonSheetTitle">Comparaisons produits avec Amazon</h2>
-      <p>Fiches produits suivies chez plusieurs marchands. Les dates indiquent le dernier relevé enregistré : vérifiez le prix et la disponibilité avant achat.</p>
+      <h2 id="pmAmazonSheetTitle">Historique des prix — produits avec fiche Amazon</h2>
+      <p>Relevés historiques PrixTracker (Licence Ouverte 2.0), issus de plusieurs marchands. Le dernier relevé est indiqué pour chaque produit : ce ne sont pas des offres en direct. Vérifiez le prix et la disponibilité chez le vendeur avant achat.</p>
     </div>
   </div>
   <div id="pm-amazon-sheet-grid" class="pm-amazon-sheet-grid" aria-live="polite"></div>
@@ -707,9 +707,9 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
       const name=document.createElement("h3");name.className="pm-amazon-sheet-name";name.textContent=product.name||id;
       const offers=Array.isArray(product.offers)?product.offers.length:Number(product.offer_count||0);
       const meta=document.createElement("p");meta.className="pm-amazon-sheet-meta";
-      meta.textContent=offers+" relevés marchands · dernier relevé : "+formatDate(product.last_date);
+      meta.textContent=offers+" relevés historiques · dernier relevé : "+formatDate(product.last_date);
       const actions=document.createElement("div");actions.className="pm-amazon-sheet-actions";
-      const compare=document.createElement("a");compare.className="pm-amazon-sheet-compare";compare.href="/prix/"+encodeURIComponent(id)+".html";compare.textContent="Voir la comparaison";
+      const compare=document.createElement("a");compare.className="pm-amazon-sheet-compare";compare.href="/prix/"+encodeURIComponent(id)+".html";compare.textContent="Voir l’historique des prix";
       const amazon=document.createElement("a");amazon.className="pm-amazon-sheet-amazon";
       amazon.href="https://www.amazon.fr/dp/"+entry.asin+"?tag="+encodeURIComponent(String(asinData.tag||"prixbasmalin2-21"));
       amazon.target="_blank";amazon.rel="sponsored nofollow noopener noreferrer";amazon.textContent="Voir chez Amazon ↗";

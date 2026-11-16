@@ -116,6 +116,16 @@ class GeneratedPagesTests(unittest.TestCase):
         self.assertIn('"/prix/"+encodeURIComponent(id)+".html"', catalogue)
         self.assertIn('"https://www.amazon.fr/dp/"+entry.asin+"?tag="', catalogue)
         self.assertEqual(len(asins), 12)
+        historical_data = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))
+        self.assertEqual(historical_data.get("status"), "historical_reference")
+        self.assertIn("aucun prix n'est présenté comme actuel", historical_data.get("price_policy", "").lower())
+        self.assertIn("Historique des prix — produits avec fiche Amazon", catalogue)
+        self.assertIn("Relevés historiques PrixTracker (Licence Ouverte 2.0)", catalogue)
+        self.assertIn('offers+" relevés historiques · dernier relevé : "', catalogue)
+        self.assertIn('compare.textContent="Voir l’historique des prix";', catalogue)
+        self.assertIn(".pm-amazon-sheet-grid{display:flex;gap:8px;overflow-x:auto", catalogue)
+        self.assertIn("scroll-snap-type:x mandatory", catalogue)
+        self.assertIn(".pm-amazon-sheet-card{flex:0 0 min(76vw,220px);scroll-snap-align:start}", catalogue)
 
         for product_id, entry in asins.items():
             self.assertIn(product_id, sheets)
