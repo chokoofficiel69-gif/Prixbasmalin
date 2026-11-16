@@ -1528,7 +1528,7 @@ export async function render(el, { params }) {
       download: async () => { if (!masterResult) await doMaster(); downloadBlob(encodeWav(masterResult.buffer, Number(bitSel.value)), `${exportName()}-master.wav`); },
     },
   };
-  ast = mountAssistant(S);
+  ast = mountAssistant(S, { onVoiceState: faceSay });
 
   const exportName = () => (tracks.find(t => t.kind === 'voix')?.name || 'morceau').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-');
 
@@ -1723,7 +1723,7 @@ export async function render(el, { params }) {
       track.inge.tipsSource = lines.length ? 'IA' : 'règles';
     } catch { track.inge.tips = fallbackTips(track.inge); track.inge.tipsSource = 'règles'; }
     drawInge();
-    faceSay('speaking', 6000); // l'ingé "livre" son rapport, puis repasse au repos
+    faceSay('idle'); // l'ingé "livre" son rapport, puis repasse au repos
   }
 
   function openConsult() {
@@ -1746,7 +1746,7 @@ export async function render(el, { params }) {
       const values = {}; for (const k in inputs) values[k] = inputs[k].value;
       const q = buildConsult(csel.value, values); if (!q) return;
       e.target.disabled = true; info.innerHTML = '<span class="spinner"></span> L’ingé son réfléchit…'; answer.textContent = ''; faceSay('thinking');
-      try { const r = await api('/api/complete', { method: 'POST', body: { system: q.system, prompt: q.prompt, src: 'inge-expert', model: 'auto:smart', temperature: 0.4 } }); answer.textContent = String(r.content || '').trim() || 'Pas de réponse.'; info.textContent = `via ${r.routedVia || 'IA'}`; faceSay('speaking', 8000); }
+      try { const r = await api('/api/complete', { method: 'POST', body: { system: q.system, prompt: q.prompt, src: 'inge-expert', model: 'auto:smart', temperature: 0.4 } }); answer.textContent = String(r.content || '').trim() || 'Pas de réponse.'; info.textContent = `via ${r.routedVia || 'IA'}`; faceSay('idle'); }
       catch (err) { info.textContent = ''; faceSay('idle'); toastErr(err); }
       e.target.disabled = false;
     } }, '🎛️ Demander à l’ingé son');
