@@ -160,7 +160,11 @@ const CSS = `
 .regie .rtile.m{flex:1 1 440px;max-width:600px}
 .regie .rtile.l{flex:3 1 640px}
 .regie .rtile.xl{flex:1 1 100%}
-.regie .rtileh{display:flex;align-items:center;gap:8px;padding:8px 10px;background:linear-gradient(180deg,rgba(168,85,247,.16),#0c0c1c);border-bottom:1px solid var(--rline)}
+.regie .rtileh{display:flex;align-items:center;gap:8px;padding:8px 10px;background:linear-gradient(180deg,rgba(168,85,247,.16),#0c0c1c);border-bottom:1px solid var(--rline);cursor:grab;user-select:none;touch-action:none}
+.regie .rtileh:active{cursor:grabbing}
+.regie .rtileh .rgrab{color:var(--rmut);font-size:13px;cursor:grab;flex:none}
+.regie .rtile.dragging{opacity:.82;box-shadow:0 0 0 2px var(--rcy),0 24px 60px rgba(0,0,0,.6);z-index:20}
+.regie .rtile.dropzone{outline:2px dashed rgba(34,211,238,.5);outline-offset:-4px}
 .regie .rtileh b{font-size:13px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .regie .rtileb{flex:1;overflow:auto;padding:16px}
 .regie .rtsz{display:flex;gap:3px}
@@ -180,11 +184,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live26')) {
-    document.getElementById('regie-css')?.remove();
-    document.getElementById('regie-css-live25')?.remove();
+  if (!document.getElementById('regie-css-live27')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live26'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live27'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -1514,12 +1517,39 @@ export async function render(el, { params }) {
     const szBtns = SIZES.map(s => h('span' + (!tileFree[key] && s === sz ? '.on' : ''), { title: 'Taille ' + s.toUpperCase(), onclick: () => setTileSize(key, s) }, SZICON[s]));
     const body = h('div.rtileb');
     try { body.append(def.r()); } catch (e) { console.error(e); body.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); }
-    tile.append(h('div.rtileh', h('b', def.t), h('div.rtsz', ...szBtns), h('span.rtx', { title: 'Fermer', onclick: () => closeTile(key) }, '✕')), body);
+    const head = h('div.rtileh', h('span.rgrab', { title: 'Glisser pour déplacer' }, '⠿'), h('b', def.t), h('div.rtsz', ...szBtns), h('span.rtx', { title: 'Fermer', onclick: () => closeTile(key) }, '✕'));
+    head.onpointerdown = (ev) => startDrag(ev, key);
+    tile.append(head, body);
     // poignées : on étire la tuile en large (bords G/D), en long (bord bas) ou au coin.
     // Elles ne changent QUE la taille — le contenu du module n'est jamais reconstruit.
     for (const dir of ['e', 'w', 's', 'se']) tile.append(h('div.rgrip.rg-' + dir, { onpointerdown: (ev) => startResize(ev, key, dir) }));
     applyFree(tile, key);
     return tile;
+  }
+  // Glisser-déposer : attrape la tuile par sa barre du haut et déplace-la (haut/bas/gauche/droite).
+  // On DÉPLACE le nœud DOM (insertBefore) — le module n'est jamais reconstruit, ton réglage en cours reste intact.
+  function startDrag(ev, key) {
+    if (ev.button != null && ev.button !== 0) return;
+    if (ev.target.closest('.rtsz') || ev.target.closest('.rtx')) return; // boutons : pas de déplacement
+    const work = main.querySelector('.rwork'); const dragTile = tileEl(key); if (!work || !dragTile) return;
+    const sx = ev.clientX, sy = ev.clientY; let active = false;
+    const begin = () => { active = true; dragTile.classList.add('dragging'); dragTile.style.pointerEvents = 'none'; document.body.style.userSelect = 'none'; };
+    const move = (e) => {
+      if (!active) { if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) < 6) return; begin(); }
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      const over = under && under.closest('.rtile');
+      if (over && over !== dragTile && over.parentElement === work) {
+        const rect = over.getBoundingClientRect();
+        const after = (e.clientY > rect.top + rect.height / 2) || (e.clientX > rect.left + rect.width / 2);
+        work.insertBefore(dragTile, after ? over.nextSibling : over);
+        openTiles = [...work.querySelectorAll('.rtile')].map(t => t.dataset.key);
+      }
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
+      if (active) { dragTile.classList.remove('dragging'); dragTile.style.pointerEvents = ''; document.body.style.userSelect = ''; saveTiles(); }
+    };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   }
   function startResize(ev, key, dir) {
     if (ev.button != null && ev.button !== 0) return;
@@ -1641,7 +1671,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE26'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE27'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
