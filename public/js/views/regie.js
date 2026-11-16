@@ -124,7 +124,10 @@ const CSS = `
 .regie .preset:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(168,85,247,.25);border-color:var(--rpur)}
 .regie .preset .pav{width:30px;height:30px;border-radius:8px;flex:none;display:grid;place-items:center;font-size:15px;background:linear-gradient(135deg,var(--rpur),var(--rcy))}
 .regie .preset b{font-size:12.5px}.regie .preset .po{font-size:10px;color:var(--rmut)}
-.regie .rmain{position:relative;overflow:auto}
+.regie .rmain{position:relative;overflow:hidden}
+.regie .rpane{display:flex;flex-direction:column;height:100%;background:linear-gradient(180deg,#0e0e20,#0a0a14)}
+.regie .rpaneh{display:flex;align-items:center;gap:10px;padding:12px 16px;font-weight:800;border-bottom:1px solid var(--rline);background:linear-gradient(180deg,rgba(168,85,247,.16),transparent);flex:none}
+.regie .rpanebody{flex:1;overflow:auto;padding:16px}
 .regie .rgwin{position:absolute;min-width:240px;min-height:90px;max-width:98%;background:linear-gradient(180deg,#13132b,#0c0c18);border:1px solid #2a2752;border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;resize:both}
 .regie .rgwin.min{height:auto!important;min-height:0;resize:none}
 .regie .rgwin.min .rgwbody{display:none}
@@ -1453,42 +1456,33 @@ export async function render(el, { params }) {
   const TAB_ORDER = ['regie', 'timeline', 'rec', 'console', 'autotune', 'eq', 'comp', 'rev', 'deess', 'pitch', 'harmo', 'bank', 'spectro', 'master', 'repo', 'ia'];
   const openWins = {}; let zTop = 10, winOffset = 0;
   function makeWinContent(key) { const el = h('div'); try { el.append(WINDEF[key].r()); } catch (e) { console.error(e); el.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); } return el; }
-  let saveT = null;
-  function saveLayout() { try { const o = {}; for (const k in openWins) { const w = openWins[k].win; o[k] = { l: w.offsetLeft, t: w.offsetTop, w: w.offsetWidth, h: w.offsetHeight, min: w.classList.contains('min') }; } localStorage.setItem('regie.layout', JSON.stringify(o)); } catch {} }
-  const saveSoon = () => { clearTimeout(saveT); saveT = setTimeout(saveLayout, 350); };
-  function openWindow(key, pos) {
-    const def = WINDEF[key]; if (!def) return;
-    if (openWins[key]) { const w = openWins[key]; w.win.style.display = 'flex'; w.win.classList.remove('min'); w.win.style.zIndex = String(++zTop); return; }
-    const body = h('div.rgwbody'); body.append(makeWinContent(key));
-    const minB = h('div.rgwbtn', { title: 'Réduire' }, '–'); const closeB = h('div.rgwbtn', { title: 'Fermer' }, '✕');
-    const head = h('div.rgwh', h('span', def.t.split(' ')[0]), h('b', { style: { flex: '1', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' } }, def.t.replace(/^\S+\s/, '')), minB, closeB);
-    const maxW = Math.max(260, (main.clientWidth || 900) - 24);
-    const win = h('div.rgwin', { style: { width: Math.min(def.w, maxW) + 'px', height: def.h + 'px', left: (16 + winOffset) + 'px', top: (12 + winOffset) + 'px', zIndex: String(++zTop) } }, head, body);
-    winOffset = (winOffset + 26) % 150;
-    if (pos) { win.style.left = Math.max(0, pos.l | 0) + 'px'; win.style.top = Math.max(0, pos.t | 0) + 'px'; if (pos.w) win.style.width = Math.min(pos.w, maxW) + 'px'; if (pos.h) win.style.height = pos.h + 'px'; if (pos.min) win.classList.add('min'); }
-    const rebuild = () => { body.innerHTML = ''; body.append(makeWinContent(key)); };
-    openWins[key] = { win, body, rebuild };
-    minB.onclick = (e) => { e.stopPropagation(); win.classList.toggle('min'); saveSoon(); };
-    closeB.onclick = (e) => { e.stopPropagation(); win.remove(); delete openWins[key]; if (key === 'console') stopLive(); renderTabs(); saveLayout(); };
-    win.addEventListener('pointerdown', () => { win.style.zIndex = String(++zTop); });
-    let drag = null;
-    head.addEventListener('pointerdown', (e) => { if (e.target.closest('.rgwbtn')) return; drag = { x: e.clientX, y: e.clientY, l: win.offsetLeft, t: win.offsetTop }; try { head.setPointerCapture(e.pointerId); } catch {} });
-    head.addEventListener('pointermove', (e) => { if (!drag) return; win.style.left = Math.max(0, drag.l + (e.clientX - drag.x)) + 'px'; win.style.top = Math.max(0, drag.t + (e.clientY - drag.y)) + 'px'; });
-    head.addEventListener('pointerup', () => { if (drag) { drag = null; saveSoon(); } });
-    try { new ResizeObserver(saveSoon).observe(win); } catch {}
-    main.append(win); renderTabs(); if (!pos) saveSoon();
+  // ===== Master-detail : le répertoire à gauche ouvre le module EN GRAND dans la zone =====
+  let curKey = 'regie';
+  function showModule(key) {
+    if (!WINDEF[key]) return;
+    curKey = key; try { localStorage.setItem('regie.module', key); } catch {}
+    main.innerHTML = '';
+    const def = WINDEF[key];
+    const head = h('div.rpaneh', h('span', { style: { fontSize: '17px' } }, def.t.split(' ')[0]), h('b', def.t.replace(/^\S+\s/, '')));
+    const body = h('div.rpanebody');
+    try { body.append(def.r()); } catch (e) { console.error(e); body.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); }
+    main.append(h('div.rpane', head, body));
+    renderTabs();
+    highlightSide();
   }
-  const go = (k) => openWindow(k);
-  function refreshViews() { ['timeline', 'regie'].forEach(k => { if (openWins[k]) openWins[k].rebuild(); }); }
-  function renderTabs() { tabsBar.innerHTML = ''; for (const k of TAB_ORDER) tabsBar.append(h('div.rtab' + (openWins[k] ? '.on' : ''), { onclick: () => openWindow(k) }, WINDEF[k].t)); }
+  const openWindow = (k) => showModule(k);
+  const go = (k) => showModule(k);
+  function refreshViews() { if (curKey === 'timeline' || curKey === 'regie') showModule(curKey); }
+  function renderTabs() { tabsBar.innerHTML = ''; for (const k of TAB_ORDER) tabsBar.append(h('div.rtab' + (k === curKey ? '.on' : ''), { onclick: () => showModule(k) }, WINDEF[k].t)); }
+  function highlightSide() { try { side.querySelectorAll('.ditem').forEach(d => d.classList.toggle('on', d.dataset.key === curKey)); } catch {} }
 
   function renderSidebar() {
     const groups = [
-      { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter le mix (WAV)', () => exportMix()], ['🧹', 'Réinitialiser l’espace', () => { try { localStorage.removeItem('regie.layout'); } catch {} location.reload(); }]] },
+      { ic: '🏠', t: 'Studio', items: [['🧩', 'Vue d’ensemble', () => go('regie'), null, 'regie'], ['🎵', 'Timeline', () => go('timeline'), null, 'timeline'], ['🎙️', 'Enregistrement', () => go('rec'), null, 'rec'], ['📤', 'Exporter le mix (WAV)', () => exportMix()]] },
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => { if (!isInstru(t)) selVoixIdx = i; go('timeline'); refreshViews(); toast('🎯 Piste cible : ' + (t.name || `Piste ${i + 1}`)); }, trackColor(t, i)]) },
-      { ic: '🎛️', t: 'Modules (boîtiers)', items: [['🎚️', 'Console live', () => openWindow('console')], ['🎤', 'Auto-Tune Pro', () => openWindow('autotune')], ['🎚️', 'Égaliseur', () => openWindow('eq')], ['🗜️', 'Compresseur', () => openWindow('comp')], ['🌫️', 'Réverbe & FX', () => openWindow('rev')], ['🧼', 'De-Esser', () => openWindow('deess')], ['🎚️', 'Hauteur / Pitch', () => openWindow('pitch')], ['🎼', 'Harmoniseur', () => openWindow('harmo')], ['🌈', 'Spectrogramme', () => openWindow('spectro')], ['⭐', 'Banque d’effets', () => openWindow('bank')], ['🏁', 'Mastering', () => openWindow('master')]] },
-      { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
-      { ic: '🧠', t: 'IA Expert', items: [['🧠', 'Ouvrir l’ingé IA', () => openWindow('ia')], ['🎯', 'Analyser ma voix', () => openWindow('ia')], ['✨', 'Nettoyer & mixer', () => openWindow('ia')]] },
+      { ic: '🎛️', t: 'Modules', items: [['🎚️', 'Console live', () => go('console'), null, 'console'], ['🎤', 'Auto-Tune Pro', () => go('autotune'), null, 'autotune'], ['🎚️', 'Égaliseur', () => go('eq'), null, 'eq'], ['🗜️', 'Compresseur', () => go('comp'), null, 'comp'], ['🌫️', 'Réverbe & FX', () => go('rev'), null, 'rev'], ['🧼', 'De-Esser', () => go('deess'), null, 'deess'], ['🎚️', 'Hauteur / Pitch', () => go('pitch'), null, 'pitch'], ['🎼', 'Harmoniseur', () => go('harmo'), null, 'harmo'], ['🌈', 'Spectrogramme', () => go('spectro'), null, 'spectro'], ['⭐', 'Banque d’effets', () => go('bank'), null, 'bank'], ['🏁', 'Mastering', () => go('master'), null, 'master']] },
+      { ic: '📚', t: 'Répertoire', items: [['📚', 'Presets (répertoire)', () => go('repo'), null, 'repo']] },
+      { ic: '🧠', t: 'IA Expert', items: [['🧠', 'Ouvrir l’ingé IA', () => go('ia'), null, 'ia']] },
     ];
     side.innerHTML = '';
     groups.forEach((g, gi) => {
@@ -1496,12 +1490,14 @@ export async function render(el, { params }) {
       const head = h('div.dgh', { onclick: () => grp.classList.toggle('closed') }, h('span.ico', g.ic), h('span', g.t), h('span.ch', '▾'));
       const body = h('div.dgb');
       for (const it of g.items) {
-        const [ic, label, fn, color] = it;
+        const [ic, label, fn, color, key] = it;
         const item = h('div.ditem', { onclick: fn || (() => toast('Disponible dans une prochaine phase')) },
           color ? h('span.led', { style: { color } }) : (ic ? h('span', { style: { width: '16px', textAlign: 'center' } }, ic) : null),
           h('span', { style: { overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' } }, label));
+        if (key) item.dataset.key = key;
         body.append(item);
       }
+      grp._body = body;
       grp.append(head, body); side.append(grp);
     });
   }
@@ -1511,7 +1507,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE23'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE24'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
@@ -1535,19 +1531,9 @@ export async function render(el, { params }) {
   await load();
   try { ast = mountAssistant(buildAssistantS()); } catch (e) { ast = null; }
   renderSidebar();
-  renderTabs();
-  // restaure la disposition sauvegardée, sinon mosaïque par défaut
-  let restored = false;
-  try { const o = JSON.parse(localStorage.getItem('regie.layout') || 'null'); if (o && Object.keys(o).length) { for (const k in o) if (WINDEF[k]) openWindow(k, o[k]); restored = true; } } catch {}
-  if (!restored) {
-    openWindow('regie'); openWindow('console'); openWindow('timeline');
-    setTimeout(() => {
-      const W = main.clientWidth || 1200;
-      const place = (k, l, t, w) => { const e = openWins[k]; if (e) { e.win.style.left = l + 'px'; e.win.style.top = t + 'px'; if (w) e.win.style.width = Math.min(w, W - l - 12) + 'px'; } };
-      if (W > 1000) { place('regie', 12, 10, 700); place('console', 724, 10, W - 736); place('timeline', 12, 452, W - 24); }
-      winOffset = 40; saveLayout();
-    }, 0);
-  }
+  let startKey = 'regie';
+  try { const k = localStorage.getItem('regie.module'); if (k && WINDEF[k]) startKey = k; } catch {}
+  showModule(startKey);
 
   // nettoyage
   return () => { stopPlay(); stopAllRec(); stopPreview(); stopLive(); closeMenu(); try { ast?.destroy?.(); } catch {} };
