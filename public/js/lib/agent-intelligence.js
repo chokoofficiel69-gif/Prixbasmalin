@@ -6,9 +6,9 @@ const ACTIONS = new Set([
 ]);
 
 export function buildAgentContext(history = [], snapshot = {}) {
-  const turns = (Array.isArray(history) ? history : []).slice(-8)
+  const turns = (Array.isArray(history) ? history : []).slice(-16)
     .filter(x => x && (x.role === 'user' || x.role === 'assistant'))
-    .map(x => ({ role: x.role, content: String(x.content || '').slice(0, 700) }));
+    .map(x => ({ role: x.role, content: String(x.content || '').slice(0, 1000) }));
   return [
     'CONTEXTE DU STUDIO : ' + JSON.stringify(snapshot),
     'DERNIERS ÉCHANGES : ' + JSON.stringify(turns),
