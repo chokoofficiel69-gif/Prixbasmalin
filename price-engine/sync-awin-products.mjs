@@ -772,6 +772,7 @@ async function loadEnhancedAwinFeeds(rawOffers, {
   const initialCount = rawOffers.length;
   let joinedCount = null;
   let pendingCount = null;
+  let joinedAdvertisers = null;
   let joinedError = null;
 
   if (token) {
@@ -793,6 +794,10 @@ async function loadEnhancedAwinFeeds(rawOffers, {
         .filter(item => /^\d+$/.test(item.id))
         .slice(0, MAX_PROGRAMMES);
       joinedCount = eligible.length;
+      joinedAdvertisers = eligible.map(item => ({
+        id: item.id,
+        name: String(item.program?.name || item.program?.advertiser?.name || "").trim()
+      }));
       log(joinedCount + " partenariat(s) Awin rejoint(s) à examiner.");
 
       const statusCounts = {};
@@ -854,9 +859,9 @@ async function loadEnhancedAwinFeeds(rawOffers, {
   if (!importedOffers && optional) {
     log("Aucune offre Enhanced/standard supplémentaire ; les offres du flux direct sont conservées sans remplacement.");
   }
-  return { joinedCount, pendingCount, importedOffers };
+  return { joinedCount, pendingCount, joinedAdvertisers, importedOffers };
 }
-function buildSyncStatus({ fetchedAt, source, joinedCount, pendingCount, additionalOffers, counts }) {
+function buildSyncStatus({ fetchedAt, source, joinedCount, pendingCount, joinedAdvertisers, additionalOffers, counts }) {
   const programmesCheckStatus = joinedCount === null && pendingCount === null
     ? "not_verified"
     : joinedCount === null || pendingCount === null
@@ -872,6 +877,11 @@ function buildSyncStatus({ fetchedAt, source, joinedCount, pendingCount, additio
     programmes_check_status: programmesCheckStatus,
     joined_advertisers_checked: joinedCount,
     pending_advertisers_detected: pendingCount,
+    joined_advertisers: Array.isArray(joinedAdvertisers)
+      ? joinedAdvertisers.filter(item => item && /^\d+$/.test(String(item.id || ""))).map(item => ({
+          id: String(item.id), name: String(item.name || "").trim().slice(0, 120)
+        }))
+      : null,
     additional_authorized_offers_imported: additionalOffers,
     counts
   };
@@ -881,14 +891,16 @@ async function runSelfTests() {
   const sampleStatus = buildSyncStatus({
     fetchedAt: "2026-11-06T00:00:00.000Z",
     source: "Awin Direct Product Data Feed",
-    joinedCount: 0,
+    joinedCount: 1,
     pendingCount: 6,
+    joinedAdvertisers: [{ id: "123", name: "Annonceur test" }],
     additionalOffers: 0,
     counts: { products: 7, merchant_offers: 7 }
   });
   if (sampleStatus.programmes_check_status !== "verified" ||
-      sampleStatus.joined_advertisers_checked !== 0 ||
+      sampleStatus.joined_advertisers_checked !== 1 ||
       sampleStatus.pending_advertisers_detected !== 6 ||
+      sampleStatus.joined_advertisers?.[0]?.id !== "123" ||
       sampleStatus.additional_authorized_offers_imported !== 0) {
     throw new Error("TEST ÉCHEC : le rapport Awin doit distinguer joined, pending et offres supplémentaires.");
   }
@@ -1285,12 +1297,14 @@ if (process.argv.includes("--self-test")) {
   const directFeedConfigured = Boolean(configuredFeedUrl) && !feedListKey;
   let joinedAdvertisersChecked = null;
   let pendingAdvertisersDetected = null;
+  let joinedAdvertisers = null;
   let additionalAwinOffers = 0;
   if (directFeedConfigured) {
     await loadDirectAwinFeed(rawOffers);
     const programmeStatus = await loadEnhancedAwinFeeds(rawOffers, { optional: true });
     joinedAdvertisersChecked = programmeStatus.joinedCount;
     pendingAdvertisersDetected = programmeStatus.pendingCount;
+    joinedAdvertisers = programmeStatus.joinedAdvertisers;
     additionalAwinOffers = programmeStatus.importedOffers;
   } else {
     if (feedListKey) {
@@ -1299,6 +1313,7 @@ if (process.argv.includes("--self-test")) {
     const programmeStatus = await loadEnhancedAwinFeeds(rawOffers);
     joinedAdvertisersChecked = programmeStatus.joinedCount;
     pendingAdvertisersDetected = programmeStatus.pendingCount;
+    joinedAdvertisers = programmeStatus.joinedAdvertisers;
     additionalAwinOffers = programmeStatus.importedOffers;
   }
   if (!rawOffers.length) throw new Error("Aucune offre Awin exploitable : le catalogue précédent est conservé.");
@@ -1362,6 +1377,7 @@ const statusReport = buildSyncStatus({
   source: output.source,
   joinedCount: joinedAdvertisersChecked,
   pendingCount: pendingAdvertisersDetected,
+  joinedAdvertisers,
   additionalOffers: additionalAwinOffers,
   counts: output.counts
 });
