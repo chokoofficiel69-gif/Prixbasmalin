@@ -1139,7 +1139,7 @@ export async function render(el, { params }) {
     const items = sc.items.length ? sc.items.map(it => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12.5px"><span style="width:15px;height:15px;border-radius:50%;background:${scoreColor(it.status)};flex:none"></span><span style="flex:1">${it.label}</span><b>${it.pct}%</b></div>`).join('') : '<p class="muted" style="font-size:12px">Enregistre/importe une voix pour l’analyser.</p>';
     const peakPct = m ? Math.min(100, Math.max(0, (m.peakDb + 40) / 40 * 100)) : 0;
     const rmsPct = m ? Math.min(100, Math.max(0, (m.rmsDb + 50) / 50 * 100)) : 0;
-    // visage Marco
+    // visage de La Rue, ingénieur du son
     let face = null; try { face = expertFace(); } catch {}
     // lecture live
     const playBtn = h('button.rbtn.p', { style: { whiteSpace: 'nowrap', fontWeight: '800' } }, '▶ Jouer');
@@ -1147,8 +1147,8 @@ export async function render(el, { params }) {
     playBtn.onclick = () => { if (live) stopLive(); else startLive(curIdx()); refreshPlay(); };
     sel.onchange = () => { if (live) { startLive(curIdx()); refreshPlay(); } };
 
-    // ROW 1 : Marco | Analyse | Niveaux
-    const marcoPanel = h('div.panel', h('div.ph', '🧠 Ingé son IA — Marco', h('span.r', { style: { color: '#bff5db' } }, 'assistant')),
+    // ROW 1 : La Rue | Analyse | Niveaux
+    const marcoPanel = h('div.panel', h('div.ph', '🧠 Ingé son IA — La Rue', h('span.r', { style: { color: '#bff5db' } }, 'assistant')),
       h('div.pb', { style: { display: 'flex', gap: '12px', alignItems: 'center' } },
         face ? face.el : h('div.orb'),
         h('div', { style: { flex: '1' } },
