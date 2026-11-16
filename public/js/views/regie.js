@@ -162,7 +162,7 @@ const CSS = `
 }
 @media(max-width:1050px){.regie{grid-template-columns:60px 1fr}.regie .rbrand{width:0}}
 /* ===== plan de travail : tuiles redimensionnables qui se réorganisent (jamais cachées) ===== */
-.regie .rwork{height:100%;overflow:auto;padding:12px;display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start;background:#060610}
+.regie .rwork{height:100%;overflow-y:auto;overflow-x:hidden;padding:12px;display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start;background:#060610}
 .regie .rwork::-webkit-scrollbar{width:9px}.regie .rwork::-webkit-scrollbar-thumb{background:#242146;border-radius:9px}
 .regie .rtile{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,#0e0e20,#0a0a14);border:1px solid var(--rline);border-radius:12px;overflow:hidden;min-height:150px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .regie .rtile.free{box-shadow:0 0 0 1px var(--rpur),0 14px 36px rgba(0,0,0,.55)}
@@ -205,10 +205,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live31')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live32')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live31'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live32'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -431,8 +431,13 @@ export async function render(el, { params }) {
       h('div', { style: { width: '100%', display: 'flex', flexWrap: 'wrap', gap: '6px' } },
         h('button.rbtn', { onclick: playSel }, '▶ Écouter'),
         h('button.rbtn', { onclick: zoomToSel }, '🔍 Zoomer dessus'),
+        h('button.rbtn', { title: 'Le son monte doucement du silence', onclick: () => editSel('fadein') }, '📈 Fondu entrée'),
+        h('button.rbtn', { title: 'Le son descend doucement vers le silence', onclick: () => editSel('fadeout') }, '📉 Fondu sortie'),
+        h('button.rbtn', { onclick: () => editSel('gainup') }, '🔊 +3 dB'),
+        h('button.rbtn', { onclick: () => editSel('gaindown') }, '🔉 −3 dB'),
+        h('button.rbtn', { title: 'Remonte le passage au niveau optimal', onclick: () => editSel('normalize') }, '🎚️ Normaliser'),
         h('button.rbtn', { onclick: () => editSel('silence') }, '🔇 Silence'),
-        h('button.rbtn', { style: { borderColor: '#ef4444' }, onclick: () => editSel('cut') }, '✂️ Supprimer le passage'),
+        h('button.rbtn', { style: { borderColor: '#ef4444' }, onclick: () => editSel('cut') }, '✂️ Supprimer'),
         h('button.rbtn', { onclick: () => { selRange = null; paintSel(); } }, '✕')));
   }
   function paintSel() {
@@ -465,15 +470,29 @@ export async function render(el, { params }) {
     const len = mode === 'cut' ? b.length - n : b.length;
     if (len < 1) { toast('Impossible : la piste serait vide. Supprime plutôt la piste.', 'bad'); return; }
     const out = ctx.createBuffer(b.numberOfChannels, len, b.sampleRate);
+    const clip = (v) => v > 1 ? 1 : v < -1 ? -1 : v;
+    const g = mode === 'gainup' ? 1.4125 : mode === 'gaindown' ? 0.7079 : 1; // ±3 dB
+    // pic de la sélection pour « normaliser »
+    let peak = 0;
+    if (mode === 'normalize') for (let c = 0; c < b.numberOfChannels; c++) { const s = b.getChannelData(c); for (let k = z.s0; k < z.s1; k++) { const a = Math.abs(s[k]); if (a > peak) peak = a; } }
+    const normG = mode === 'normalize' ? (peak > 1e-4 ? 0.97 / peak : 1) : 1;
+    const denom = Math.max(1, n - 1);
     for (let c = 0; c < b.numberOfChannels; c++) {
       const src = b.getChannelData(c), dst = out.getChannelData(c);
-      if (mode === 'cut') { dst.set(src.subarray(0, z.s0), 0); dst.set(src.subarray(z.s1), z.s0); }
-      else { dst.set(src); dst.fill(0, z.s0, z.s1); }
+      if (mode === 'cut') { dst.set(src.subarray(0, z.s0), 0); dst.set(src.subarray(z.s1), z.s0); continue; }
+      dst.set(src);
+      if (mode === 'silence') dst.fill(0, z.s0, z.s1);
+      else if (mode === 'fadein') for (let k = z.s0; k < z.s1; k++) dst[k] = src[k] * ((k - z.s0) / denom);
+      else if (mode === 'fadeout') for (let k = z.s0; k < z.s1; k++) dst[k] = src[k] * (1 - (k - z.s0) / denom);
+      else if (mode === 'gainup' || mode === 'gaindown') for (let k = z.s0; k < z.s1; k++) dst[k] = clip(src[k] * g);
+      else if (mode === 'normalize') for (let k = z.s0; k < z.s1; k++) dst[k] = clip(src[k] * normG);
     }
+    if (!z.t.original) z.t.original = b; // garde la version d'origine pour « Revenir à l'original »
     z.t.buffer = out; proposalCache = {};
     selRange = mode === 'cut' ? null : selRange;
     await save();
-    toast(mode === 'cut' ? 'Passage supprimé ✓' : 'Passage rendu muet ✓', 'ok');
+    const MSG = { cut: 'Passage supprimé', silence: 'Passage muet', fadein: 'Fondu d’entrée appliqué', fadeout: 'Fondu de sortie appliqué', gainup: 'Passage +3 dB', gaindown: 'Passage −3 dB', normalize: 'Passage normalisé' };
+    toast((MSG[mode] || 'Appliqué') + ' ✓', 'ok');
     if (laneWrap) buildTimeline(laneWrap);
   }
   // glisser sur une piste = sélectionner · simple clic = déplacer la tête de lecture
@@ -923,6 +942,11 @@ export async function render(el, { params }) {
       { head: `Sélection ${fmtS(selRange.a)} → ${fmtS(selRange.b)}` },
       { label: '▶ Écouter la sélection', fn: playSel },
       { label: '🔍 Zoomer sur la sélection', fn: zoomToSel },
+      { label: '📈 Fondu d’entrée (du bas vers le haut)', fn: () => editSel('fadein') },
+      { label: '📉 Fondu de sortie (du haut vers le bas)', fn: () => editSel('fadeout') },
+      { label: '🔊 Monter ce passage (+3 dB)', fn: () => editSel('gainup') },
+      { label: '🔉 Baisser ce passage (−3 dB)', fn: () => editSel('gaindown') },
+      { label: '🎚️ Normaliser ce passage', fn: () => editSel('normalize') },
       { label: '🔇 Rendre muet ce passage', fn: () => editSel('silence') },
       { label: '✂️ Supprimer ce passage', danger: true, fn: () => editSel('cut') },
       '-');
@@ -1716,10 +1740,12 @@ export async function render(el, { params }) {
   const burger = h('div.rburger', { onclick: () => root.classList.toggle('collapsed') }, '☰');
   const toggleFs = () => { try { if (!document.fullscreenElement) (root.requestFullscreen || root.webkitRequestFullscreen)?.call(root); else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document); } catch {} };
   const fsBtn = h('div.rburger', { title: 'Plein écran', onclick: toggleFs, style: { fontSize: '17px' } }, '⛶');
+  const resetLayout = () => { openTiles = ['regie']; for (const k in tileSize) delete tileSize[k]; tileSize.regie = 'xl'; for (const k in tileFree) delete tileFree[k]; curKey = 'regie'; saveTiles(); renderWork(); toast('Disposition réinitialisée', 'ok'); };
+  const resetBtn = h('div.rburger', { title: 'Réinitialiser la disposition (tout remettre propre)', onclick: resetLayout, style: { fontSize: '16px' } }, '↺');
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
-    tabsBar, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE31'));
+    tabsBar, resetBtn, fsBtn,
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE32'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
