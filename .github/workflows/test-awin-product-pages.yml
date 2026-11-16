@@ -17,6 +17,10 @@ on:
       - ".github/workflows/sync-awin-products.yml"
       - ".github/workflows/test-awin-product-pages.yml"
       - "data/awin-products.json"
+      - "catalogue.html"
+      - "data/amazon-asins.json"
+      - "data/fiches-produits.json"
+      - "tests/test_amazon_direct_links.py"
   workflow_dispatch:
 
 permissions:
@@ -44,6 +48,9 @@ jobs:
 
       - name: Tester la date individuelle, la fraîcheur et le statut TVA
         run: python3 -m unittest discover -s tests -p 'test_awin_pages.py' -v
+
+      - name: Tester les liens Amazon directs et les fiches produits déjà suivies
+        run: python3 -m unittest discover -s tests -p 'test_amazon_direct_links.py' -v
 
       - name: Vérifier le snapshot réel sans confondre import et mise à jour du prix
         run: |

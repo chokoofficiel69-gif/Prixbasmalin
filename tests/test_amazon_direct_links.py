@@ -104,5 +104,26 @@ class GeneratedPagesTests(unittest.TestCase):
         self.assertIn('href="/black-friday.html"', (ROOT / "guide-black-friday-2026.html").read_text(encoding="utf-8"))
 
 
+    def test_catalogue_exposes_all_existing_amazon_linked_product_sheets(self):
+        catalogue = (ROOT / "catalogue.html").read_text(encoding="utf-8")
+        asin_data = json.loads((ROOT / "data" / "amazon-asins.json").read_text(encoding="utf-8"))
+        sheets = {p["id"]: p for p in SHEETS}
+        asins = asin_data["products"]
+
+        self.assertIn('id="pm-amazon-sheet-shelf"', catalogue)
+        self.assertIn('fetch("/data/amazon-asins.json"', catalogue)
+        self.assertIn('fetch("/data/fiches-produits.json"', catalogue)
+        self.assertIn('"/prix/"+encodeURIComponent(id)+".html"', catalogue)
+        self.assertIn('"https://www.amazon.fr/dp/"+entry.asin+"?tag="', catalogue)
+        self.assertEqual(len(asins), 12)
+
+        for product_id, entry in asins.items():
+            self.assertIn(product_id, sheets)
+            self.assertTrue((ROOT / "prix" / f"{product_id}.html").exists(), product_id)
+            direct = links.product_url(entry["asin"])
+            self.assertEqual(urlsplit(direct).path, f"/dp/{entry['asin']}")
+            self.assertEqual(parse_qs(urlsplit(direct).query), {"tag": ["prixbasmalin2-21"]})
+
+
 if __name__ == "__main__":
     unittest.main()
