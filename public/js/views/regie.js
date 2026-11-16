@@ -205,10 +205,10 @@ body.regie-max{background:#060610}
 `;
 
 function injectCss() {
-  if (!document.getElementById('regie-css-live33')) {
-    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31', 'regie-css-live32'].forEach(id => document.getElementById(id)?.remove());
+  if (!document.getElementById('regie-css-live34')) {
+    ['regie-css', 'regie-css-live25', 'regie-css-live26', 'regie-css-live27', 'regie-css-live28', 'regie-css-live29', 'regie-css-live30', 'regie-css-live31', 'regie-css-live32','regie-css-live33'].forEach(id => document.getElementById(id)?.remove());
     const s = document.createElement('style');
-    s.id = 'regie-css-live33'; s.textContent = CSS; document.head.append(s);
+    s.id = 'regie-css-live34'; s.textContent = CSS; document.head.append(s);
   }
 }
 
@@ -688,21 +688,23 @@ export async function render(el, { params }) {
     try { status.textContent = 'Analyse de la tonalité…'; const pitch = await detectPitch(track.original || track.buffer, p => status.textContent = `Analyse ${Math.round(p * 100)} %`); const k = detectKey(pitch); keyLabel.textContent = keyName(k); status.textContent = 'Tonalité détectée ✓'; }
     catch (e) { status.textContent = 'Analyse impossible'; toastErr(e); }
   }
-  async function applyAutotune(track, status, keyLabel) {
-    if (!track?.buffer) { toast('Choisis une piste voix.', 'bad'); return; }
+  async function applyAutotune(track, status, keyLabel, autoplay) {
+    if (!track?.buffer) { if (!autoplay) toast('Choisis une piste voix.', 'bad'); return; }
     if (atBusy) return; atBusy = true;
     try {
-      const src = track.original || track.buffer;
+      const src = track.original || track.buffer;            // TOUJOURS depuis l'original → remplace, n'empile pas
       const step = atOpt.mode === 'douce'
         ? { t: 'tune', mode: 'notes', strength: atOpt.strength, keep: atOpt.keep, glide: atOpt.glide, humanize: atOpt.humanize, formant: atOpt.formant }
         : { t: 'tune', strength: atOpt.strength, speed: atOpt.speed, formant: atOpt.formant };
+      status.textContent = autoplay ? 'Écoute…' : 'Traitement…';
       const res = await applyChain(src, [step], { key: parseKey(atOpt.key), onProgress: (m) => status.textContent = m });
       if (!track.original) track.original = src;
-      track.buffer = res.buffer; track.fxDone = [...(track.fxDone || []), 'autotune'];
+      track.buffer = res.buffer; track.fxDone = ['autotune'];
       keyLabel.textContent = keyName(res.key);
-      status.textContent = '✓ Auto-Tune appliqué — écoute « Après »';
-      await save(); toast('Auto-Tune appliqué ✓', 'ok');
-    } catch (e) { status.textContent = 'Erreur'; toastErr(e); }
+      status.textContent = '✓ Auto-Tune — écoute « Après »';
+      await save(); refreshViews();
+      if (autoplay) { try { stopPreview(); playBuffer(res.buffer); } catch {} } else toast('Auto-Tune appliqué ✓', 'ok');
+    } catch (e) { status.textContent = 'Erreur'; if (!autoplay) toastErr(e); }
     finally { atBusy = false; }
   }
   function revertTrack(track, status) { if (track?.original) { track.buffer = track.original; track.fxDone = []; save(); status.textContent = 'Piste rétablie (voix brute)'; toast('Original rétabli', 'ok'); } }
@@ -1258,23 +1260,28 @@ export async function render(el, { params }) {
     const sel = h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix'));
     const curTrack = () => tracks[+sel.value];
     const keyLabel = h('b', { style: { color: '#bff5db' } }, '—');
-    const keySel = h('select', { style: selStyle(), onchange: (e) => { atOpt.key = e.target.value; } }, KEY_CHOICES.map(k => h('option', { value: k.v }, k.label)));
+    const keySel = h('select', { style: selStyle(), onchange: (e) => { atOpt.key = e.target.value; atAudition(); } }, KEY_CHOICES.map(k => h('option', { value: k.v }, k.label)));
     const status = h('div.muted', { style: { fontSize: '11px', minHeight: '15px', marginTop: '6px' } }, '');
-    const kSpeed = knob({ label: 'RETUNE', min: 0, max: 200, step: 5, value: atOpt.speed, def: 60, fmt: v => `${v | 0} ms`, onInput: v => atOpt.speed = v });
-    const kStr = knob({ label: 'FORCE', min: 0, max: 1, step: 0.05, value: atOpt.strength, def: 1, fmt: pcF, onInput: v => atOpt.strength = v });
-    const kFor = knob({ label: 'FORMANT', min: -4, max: 4, step: 1, value: atOpt.formant, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v}`, onInput: v => atOpt.formant = v });
-    const kHum = knob({ label: 'HUMANIZE', min: 0, max: 1, step: 0.05, value: atOpt.humanize, def: 0.25, fmt: pcF, onInput: v => atOpt.humanize = v });
-    const kGli = knob({ label: 'GLISSANDO', min: 0, max: 200, step: 5, value: atOpt.glide, def: 30, fmt: v => `${v | 0} ms`, onInput: v => atOpt.glide = v });
-    const kKeep = knob({ label: 'NATUREL', min: 0, max: 0.8, step: 0.05, value: atOpt.keep, def: 0.15, fmt: pcF, onInput: v => atOpt.keep = v });
+    // ÉCOUTE AUTO : dès que tu tournes une molette, on refait l'Auto-Tune depuis l'original et on le joue.
+    let atAuto = true, atTimer = 0;
+    const atAudition = () => { if (!atAuto) return; clearTimeout(atTimer); atTimer = setTimeout(() => applyAutotune(curTrack(), status, keyLabel, true), 450); };
+    const kSpeed = knob({ label: 'RETUNE', min: 0, max: 200, step: 5, value: atOpt.speed, def: 60, fmt: v => `${v | 0} ms`, onInput: v => { atOpt.speed = v; atAudition(); } });
+    const kStr = knob({ label: 'FORCE', min: 0, max: 1, step: 0.05, value: atOpt.strength, def: 1, fmt: pcF, onInput: v => { atOpt.strength = v; atAudition(); } });
+    const kFor = knob({ label: 'FORMANT', min: -4, max: 4, step: 1, value: atOpt.formant, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v}`, onInput: v => { atOpt.formant = v; atAudition(); } });
+    const kHum = knob({ label: 'HUMANIZE', min: 0, max: 1, step: 0.05, value: atOpt.humanize, def: 0.25, fmt: pcF, onInput: v => { atOpt.humanize = v; atAudition(); } });
+    const kGli = knob({ label: 'GLISSANDO', min: 0, max: 200, step: 5, value: atOpt.glide, def: 30, fmt: v => `${v | 0} ms`, onInput: v => { atOpt.glide = v; atAudition(); } });
+    const kKeep = knob({ label: 'NATUREL', min: 0, max: 0.8, step: 0.05, value: atOpt.keep, def: 0.15, fmt: pcF, onInput: v => { atOpt.keep = v; atAudition(); } });
+    const autoChip = h('span.chip.on', { title: 'Tourner une molette rejoue le son aussitôt' }, '🎧 Écoute auto : ON');
+    autoChip.onclick = () => { atAuto = !atAuto; autoChip.classList.toggle('on', atAuto); autoChip.textContent = atAuto ? '🎧 Écoute auto : ON' : '🎧 Écoute auto : OFF'; };
     // type de correction : dure (robot/net) ou douce (naturel, notes)
-    const typeChips = [['dure', 'Dure (net)'], ['douce', 'Douce (naturel)']].map(([mm, lab]) => { const c = h('span.chip' + (mm === atOpt.mode ? '.on' : ''), lab); c.onclick = () => { atOpt.mode = mm; typeChips.forEach(x => x.classList.toggle('on', x === c)); }; return c; });
+    const typeChips = [['dure', 'Dure (net)'], ['douce', 'Douce (naturel)']].map(([mm, lab]) => { const c = h('span.chip' + (mm === atOpt.mode ? '.on' : ''), lab); c.onclick = () => { atOpt.mode = mm; typeChips.forEach(x => x.classList.toggle('on', x === c)); atAudition(); }; return c; });
     const presets = [['Naturel', { mode: 'douce', strength: 0.9, keep: 0.25, glide: 60, humanize: 0.4 }], ['Pop', { mode: 'dure', strength: 1, speed: 60 }], ['R&B', { mode: 'douce', strength: 1, keep: 0.12, glide: 30, humanize: 0.2 }], ['Trap mélo', { mode: 'dure', strength: 1, speed: 15 }], ['Hard (robot)', { mode: 'dure', strength: 1, speed: 0 }]];
     const presetRow = h('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '4px 0 10px' } },
-      presets.map(([nm, p]) => h('span.chip', { onclick: () => { Object.assign(atOpt, p); kStr.set(atOpt.strength, false); kSpeed.set(atOpt.speed, false); kHum.set(atOpt.humanize, false); kGli.set(atOpt.glide, false); kKeep.set(atOpt.keep, false); typeChips.forEach(x => x.classList.toggle('on', x.textContent.toLowerCase().startsWith(atOpt.mode === 'dure' ? 'dure' : 'douce'))); toast(`Preset « ${nm} » chargé`); } }, nm)));
+      presets.map(([nm, p]) => h('span.chip', { onclick: () => { Object.assign(atOpt, p); kStr.set(atOpt.strength, false); kSpeed.set(atOpt.speed, false); kHum.set(atOpt.humanize, false); kGli.set(atOpt.glide, false); kKeep.set(atOpt.keep, false); typeChips.forEach(x => x.classList.toggle('on', x.textContent.toLowerCase().startsWith(atOpt.mode === 'dure' ? 'dure' : 'douce'))); toast(`Preset « ${nm} » chargé`); atAudition(); } }, nm)));
     // gamme + clavier (piano) pour choisir la tonalité
     let mode = 'mineur';
     const modeChips = ['mineur', 'majeur'].map(mm => { const c = h('span.chip' + (mm === mode ? '.on' : ''), mm === 'mineur' ? 'Mineure' : 'Majeure'); c.onclick = () => { mode = mm; modeChips.forEach(x => x.classList.toggle('on', x === c)); if (atOpt.key) { atOpt.key = atOpt.key.split('|')[0] + '|' + mode; keyLabel.textContent = NOTE_NAMES[+atOpt.key.split('|')[0]] + ' ' + mode; } }; return c; });
-    const piano = pianoEl(() => mode, (root, nm) => { atOpt.key = `${root}|${mode}`; keyLabel.textContent = `${nm} ${mode}`; });
+    const piano = pianoEl(() => mode, (root, nm) => { atOpt.key = `${root}|${mode}`; keyLabel.textContent = `${nm} ${mode}`; atAudition(); });
     const pianoBox = h('div', { style: { marginTop: '10px' } },
       h('div', { style: { display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '2px' } }, h('span.muted', { style: { fontSize: '11px' } }, '🎹 Gamme :'), ...modeChips, h('span.muted', { style: { fontSize: '11px', marginLeft: 'auto' } }, 'clique une touche = tonalité')),
       piano.el);
@@ -1282,7 +1289,7 @@ export async function render(el, { params }) {
       h('div.ph', h('span', { style: { width: '11px', height: '11px', borderRadius: '50%', background: '#a855f7', boxShadow: '0 0 8px #a855f7', flex: 'none' } }), '🎤 Auto-Tune Pro', h('span.r', { style: { marginLeft: 'auto', color: '#bff5db' } }, 'RÉEL')),
       h('div.pb',
         h('div', { style: { display: 'flex', gap: '9px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('span.muted', { style: { fontSize: '12px' } }, 'Tonalité :'), keyLabel),
-        h('div', { style: { display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px' } }, h('span.muted', { style: { fontSize: '11px' } }, 'Correction :'), ...typeChips),
+        h('div', { style: { display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' } }, h('span.muted', { style: { fontSize: '11px' } }, 'Correction :'), ...typeChips, autoChip),
         presetRow,
         h('div', { style: { display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', margin: '6px 0 4px' } }, kSpeed.el, kStr.el, kHum.el, kGli.el, kKeep.el, kFor.el),
         pianoBox,
@@ -1513,32 +1520,48 @@ export async function render(el, { params }) {
     try { const res = await applyChain(t.buffer, chain); if (!t.original) t.original = t.buffer; t.buffer = res.buffer; t.fxDone = [...(t.fxDone || []), label]; proposalCache = {}; await save(); if (status) status.textContent = '✓ Appliqué — écoute « Après »'; toast(`${label} appliqué ✓`, 'ok'); refreshViews(); }
     catch (e) { toastErr(e); if (status) status.textContent = 'Erreur'; } finally { busyFx = false; }
   }
+  // Audition « molette » : refait l'effet depuis l'ORIGINAL et le joue tout de suite (remplace, n'empile pas). Débouncé.
+  let audTimer = 0;
+  function auditionChain(t, chain, status, ms = 420) {
+    if (!t?.buffer) return;
+    clearTimeout(audTimer); if (status) status.textContent = '🎧 …';
+    audTimer = setTimeout(async () => {
+      if (busyFx) { auditionChain(t, chain, status, 150); return; }
+      busyFx = true;
+      try { const base = t.original || t.buffer; if (!t.original) t.original = base; const res = await applyChain(base, chain); t.buffer = res.buffer; t.fxDone = ['réglage']; proposalCache = {}; await save(); stopPreview(); playBuffer(res.buffer); if (status) status.textContent = '✓ écoute'; refreshViews(); }
+      catch (e) { if (status) status.textContent = 'Erreur'; } finally { busyFx = false; }
+    }, ms);
+  }
   function winPitch() {
     const sel = trackSel(); const cur = () => tracks[+sel.value]; const status = h('div.muted', { style: { fontSize: '11px', minHeight: '14px', marginTop: '6px' } }, '');
     let semi = 0, formant = 0;
-    const kSemi = knob({ label: 'HAUTEUR', min: -12, max: 12, step: 1, value: 0, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v} st`, onInput: v => semi = v });
-    const kFor = knob({ label: 'FORMANT', min: -5, max: 5, step: 1, value: 0, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v}`, onInput: v => formant = v });
+    const chain = () => [{ t: 'shift', semi, formant }];
+    const kSemi = knob({ label: 'HAUTEUR', min: -12, max: 12, step: 1, value: 0, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v} st`, onInput: v => { semi = v; auditionChain(cur(), chain(), status); } });
+    const kFor = knob({ label: 'FORMANT', min: -5, max: 5, step: 1, value: 0, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v}`, onInput: v => { formant = v; auditionChain(cur(), chain(), status); } });
     return h('div', selRow(sel), h('div', { style: { display: 'flex', gap: '18px', justifyContent: 'center', margin: '8px 0' } }, kSemi.el, kFor.el),
-      btnRow([['✨ Appliquer', () => applyChainTo(cur(), [{ t: 'shift', semi, formant }], 'hauteur', status), 'p'], ['▶ Avant', () => { const t = cur(); playBuffer(t?.original || t?.buffer); }], ['▶ Après', () => playBuffer(cur()?.buffer)], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status,
-      h('div.muted', { style: { fontSize: '10px', marginTop: '8px' } }, 'Change la hauteur sans toucher le tempo (±12 demi-tons). FORMANT change le grain de la voix.'));
+      btnRow([['▶ Avant', () => { const t = cur(); stopPreview(); playBuffer(t?.original || t?.buffer); }], ['▶ Après', () => { stopPreview(); playBuffer(cur()?.buffer); }], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status,
+      h('div.muted', { style: { fontSize: '10px', marginTop: '8px' } }, 'Tourne les molettes : le son change et se joue tout de suite. HAUTEUR = ±12 demi-tons (sans toucher le tempo). FORMANT = grain de la voix.'));
   }
   function winHarmo() {
     const sel = trackSel(); const cur = () => tracks[+sel.value]; const status = h('div.muted', { style: { fontSize: '11px', minHeight: '14px', marginTop: '6px' } }, '');
     const opts = { tierce: true, quinte: false, octave: false, double: false }; let level = 0.45;
-    const chips = [['tierce', 'Tierce'], ['quinte', 'Quinte'], ['octave', 'Octave ↑'], ['double', 'Doublage']].map(([k, l]) => { const c = h('span.chip' + (opts[k] ? '.on' : ''), l); c.onclick = () => { opts[k] = !opts[k]; c.classList.toggle('on', opts[k]); }; return c; });
-    const kLev = knob({ label: 'NIVEAU', min: 0.1, max: 0.8, step: 0.05, value: 0.45, def: 0.45, fmt: pcF, onInput: v => level = v });
-    const apply = () => { const chain = []; const steps = []; if (opts.tierce) steps.push(2); if (opts.quinte) steps.push(4); if (steps.length) chain.push({ t: 'harmony', steps, gain: level }); if (opts.octave) chain.push({ t: 'double', steps: [12], gain: level * 0.7 }); if (opts.double) chain.push({ t: 'double', steps: [0, 0], gain: level }); if (!chain.length) { toast('Choisis au moins une harmonie.', 'bad'); return; } applyChainTo(cur(), chain, 'harmonies', status); };
+    const buildChain = () => { const chain = []; const steps = []; if (opts.tierce) steps.push(2); if (opts.quinte) steps.push(4); if (steps.length) chain.push({ t: 'harmony', steps, gain: level }); if (opts.octave) chain.push({ t: 'double', steps: [12], gain: level * 0.7 }); if (opts.double) chain.push({ t: 'double', steps: [0, 0], gain: level }); return chain; };
+    const aud = () => { const c = buildChain(); if (!c.length) { quickRevertIdx(+sel.value); status.textContent = 'Aucune harmonie'; return; } auditionChain(cur(), c, status); };
+    const chips = [['tierce', 'Tierce'], ['quinte', 'Quinte'], ['octave', 'Octave ↑'], ['double', 'Doublage']].map(([k, l]) => { const c = h('span.chip' + (opts[k] ? '.on' : ''), l); c.onclick = () => { opts[k] = !opts[k]; c.classList.toggle('on', opts[k]); aud(); }; return c; });
+    const kLev = knob({ label: 'NIVEAU', min: 0.1, max: 0.8, step: 0.05, value: 0.45, def: 0.45, fmt: pcF, onInput: v => { level = v; aud(); } });
     return h('div', selRow(sel), h('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '8px 0' } }, ...chips), h('div', { style: { display: 'flex', justifyContent: 'center' } }, kLev.el),
-      btnRow([['✨ Appliquer', apply, 'p'], ['▶ Après', () => playBuffer(cur()?.buffer)], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status);
+      btnRow([['▶ Après', () => { stopPreview(); playBuffer(cur()?.buffer); }], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status,
+      h('div.muted', { style: { fontSize: '10px', marginTop: '8px' } }, 'Choisis les voix (tierce, quinte…) et tourne NIVEAU : tu entends les harmonies tout de suite.'));
   }
   function winDeess() {
     const sel = trackSel(); const cur = () => tracks[+sel.value]; const status = h('div.muted', { style: { fontSize: '11px', minHeight: '14px', marginTop: '6px' } }, '');
     let dose = 4, freq = 6800;
-    const kDose = knob({ label: 'DOSE', min: 0, max: 10, step: 0.5, value: 4, def: 4, fmt: v => `-${v} dB`, onInput: v => dose = v });
-    const kFreq = knob({ label: 'FRÉQ', min: 4000, max: 10000, step: 200, value: 6800, def: 6800, fmt: v => `${(v / 1000).toFixed(1)}k`, onInput: v => freq = v });
+    const chain = () => [{ t: 'fx', kind: 'peak', f: freq, q: 3, gain: -dose }];
+    const kDose = knob({ label: 'DOSE', min: 0, max: 10, step: 0.5, value: 4, def: 4, fmt: v => `-${v} dB`, onInput: v => { dose = v; auditionChain(cur(), chain(), status); } });
+    const kFreq = knob({ label: 'FRÉQ', min: 4000, max: 10000, step: 200, value: 6800, def: 6800, fmt: v => `${(v / 1000).toFixed(1)}k`, onInput: v => { freq = v; auditionChain(cur(), chain(), status); } });
     return h('div', selRow(sel), h('div', { style: { display: 'flex', gap: '18px', justifyContent: 'center', margin: '8px 0' } }, kDose.el, kFreq.el),
-      btnRow([['✨ Appliquer', () => applyChainTo(cur(), [{ t: 'fx', kind: 'peak', f: freq, q: 3, gain: -dose }], 'de-esser', status), 'p'], ['▶ Après', () => playBuffer(cur()?.buffer)], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status,
-      h('div.muted', { style: { fontSize: '10px', marginTop: '8px' } }, 'Réduit les sifflantes « sss » en atténuant la zone aiguë choisie.'));
+      btnRow([['▶ Après', () => { stopPreview(); playBuffer(cur()?.buffer); }], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status,
+      h('div.muted', { style: { fontSize: '10px', marginTop: '8px' } }, 'Tourne DOSE et FRÉQ : réduit les sifflantes « sss », tu entends le résultat tout de suite.'));
   }
   function winMaster() {
     let preset = 'streaming';
@@ -1776,7 +1799,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar, resetBtn, fsBtn,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE33'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE34'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
