@@ -806,6 +806,18 @@ export async function render(el, { params }) {
     ['Travis', '🌌', [{ t: 'tune', strength: 1, speed: 10 }, { t: 'fx', kind: 'reverb', size: 2.5, mix: 0.3 }]],
     ['Ange', '😇', [{ t: 'harmony', steps: [4, 7] }, { t: 'fx', kind: 'reverb', size: 3, mix: 0.3 }]],
     ['Doubleur large', '👬', [{ t: 'double', steps: [0, 0], gain: 0.6 }, { t: 'fx', kind: 'chorus', mix: 0.3 }]],
+    ['Trap 808', '🔊', [{ t: 'fx', kind: 'warm' }, { t: 'fx', kind: 'air', gain: 3 }]],
+    ['Drill sombre', '🌑', [{ t: 'tune', strength: 1, speed: 8 }, { t: 'fx', kind: 'peak', f: 200, q: 1, gain: 2 }]],
+    ['Old school', '🧢', [{ t: 'fx', kind: 'band', lo: 300, hi: 5000, drive: 2 }, { t: 'fx', kind: 'tape', amt: 2 }]],
+    ['Clean pro', '💎', [{ t: 'fx', kind: 'air', gain: 3 }, { t: 'fx', kind: 'peak', f: 3000, q: 1, gain: 2 }]],
+    ['Nasillard', '👃', [{ t: 'fx', kind: 'peak', f: 1200, q: 2, gain: 5 }]],
+    ['Sous-marin', '🌊', [{ t: 'fx', kind: 'band', lo: 200, hi: 1500, drive: 1 }, { t: 'fx', kind: 'reverb', size: 3, mix: 0.3 }]],
+    ['Stade', '🏟️', [{ t: 'fx', kind: 'reverb', size: 4.5, mix: 0.45 }, { t: 'fx', kind: 'delay', time: 0.3, fb: 0.3, mix: 0.2 }]],
+    ['Chuchotement', '🤫', [{ t: 'fx', kind: 'air', gain: 5 }, { t: 'fx', kind: 'peak', f: 200, q: 1, gain: -4 }]],
+    ['Monstre', '😈', [{ t: 'shift', semi: -10, formant: -4 }, { t: 'fx', kind: 'distort', amt: 2, tone: 5000 }]],
+    ['Fée', '🧚', [{ t: 'shift', semi: 8, formant: 3 }, { t: 'fx', kind: 'reverb', size: 2.5, mix: 0.3 }]],
+    ['Double octave', '🎚️', [{ t: 'double', steps: [-12, 12], gain: 0.4 }]],
+    ['Vintage', '🎞️', [{ t: 'fx', kind: 'tape', amt: 3 }, { t: 'fx', kind: 'lofi', bits: 10, hi: 9000 }]],
   ];
   async function processPreset(src, p) { let cur = src; if (p.chain) cur = (await applyChain(cur, p.chain)).buffer; if (p.voice) cur = await voiceChain(cur, p.voice); return cur; }
   let busyFx = false;
@@ -1368,6 +1380,52 @@ export async function render(el, { params }) {
     return h('div', h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel, h('button.rbtn', { onclick: () => playBuffer(tracks[curIdx()]?.buffer) }, '▶'), h('button.rbtn', { onclick: () => { stopPreview(); revertTrack(tracks[curIdx()], { textContent: '' }); } }, '↩ Original')), grid);
   }
   const winSpectro = () => makeSpectro(150);
+  // helpers boîtiers
+  const trackSel = () => { const vt = voixTracks(); return h('select', { style: selStyle() }, vt.length ? vt.map(x => h('option', { value: String(x.i), selected: x.i === defVoix() }, x.t.name || `Piste ${x.i + 1}`)) : h('option', { value: '' }, 'Aucune piste voix')); };
+  const selRow = (sel) => h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Piste :'), sel);
+  const btnRow = (arr) => h('div', { style: { display: 'flex', gap: '7px', flexWrap: 'wrap', marginTop: '10px' } }, arr.map(([l, fn, cls]) => h('button.rbtn' + (cls ? '.' + cls : ''), { onclick: fn }, l)));
+  async function applyChainTo(t, chain, label, status) {
+    if (!t?.buffer) { toast('Choisis une piste voix.', 'bad'); return; }
+    if (busyFx) return; busyFx = true; if (status) status.textContent = 'Traitement…';
+    try { const res = await applyChain(t.buffer, chain); if (!t.original) t.original = t.buffer; t.buffer = res.buffer; t.fxDone = [...(t.fxDone || []), label]; proposalCache = {}; await save(); if (status) status.textContent = '✓ Appliqué — écoute « Après »'; toast(`${label} appliqué ✓`, 'ok'); refreshViews(); }
+    catch (e) { toastErr(e); if (status) status.textContent = 'Erreur'; } finally { busyFx = false; }
+  }
+  function winPitch() {
+    const sel = trackSel(); const cur = () => tracks[+sel.value]; const status = h('div.muted', { style: { fontSize: '11px', minHeight: '14px', marginTop: '6px' } }, '');
+    let semi = 0, formant = 0;
+    const kSemi = knob({ label: 'HAUTEUR', min: -12, max: 12, step: 1, value: 0, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v} st`, onInput: v => semi = v });
+    const kFor = knob({ label: 'FORMANT', min: -5, max: 5, step: 1, value: 0, def: 0, fmt: v => `${v > 0 ? '+' : ''}${v}`, onInput: v => formant = v });
+    return h('div', selRow(sel), h('div', { style: { display: 'flex', gap: '18px', justifyContent: 'center', margin: '8px 0' } }, kSemi.el, kFor.el),
+      btnRow([['✨ Appliquer', () => applyChainTo(cur(), [{ t: 'shift', semi, formant }], 'hauteur', status), 'p'], ['▶ Avant', () => { const t = cur(); playBuffer(t?.original || t?.buffer); }], ['▶ Après', () => playBuffer(cur()?.buffer)], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status,
+      h('div.muted', { style: { fontSize: '10px', marginTop: '8px' } }, 'Change la hauteur sans toucher le tempo (±12 demi-tons). FORMANT change le grain de la voix.'));
+  }
+  function winHarmo() {
+    const sel = trackSel(); const cur = () => tracks[+sel.value]; const status = h('div.muted', { style: { fontSize: '11px', minHeight: '14px', marginTop: '6px' } }, '');
+    const opts = { tierce: true, quinte: false, octave: false, double: false }; let level = 0.45;
+    const chips = [['tierce', 'Tierce'], ['quinte', 'Quinte'], ['octave', 'Octave ↑'], ['double', 'Doublage']].map(([k, l]) => { const c = h('span.chip' + (opts[k] ? '.on' : ''), l); c.onclick = () => { opts[k] = !opts[k]; c.classList.toggle('on', opts[k]); }; return c; });
+    const kLev = knob({ label: 'NIVEAU', min: 0.1, max: 0.8, step: 0.05, value: 0.45, def: 0.45, fmt: pcF, onInput: v => level = v });
+    const apply = () => { const chain = []; const steps = []; if (opts.tierce) steps.push(2); if (opts.quinte) steps.push(4); if (steps.length) chain.push({ t: 'harmony', steps, gain: level }); if (opts.octave) chain.push({ t: 'double', steps: [12], gain: level * 0.7 }); if (opts.double) chain.push({ t: 'double', steps: [0, 0], gain: level }); if (!chain.length) { toast('Choisis au moins une harmonie.', 'bad'); return; } applyChainTo(cur(), chain, 'harmonies', status); };
+    return h('div', selRow(sel), h('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '8px 0' } }, ...chips), h('div', { style: { display: 'flex', justifyContent: 'center' } }, kLev.el),
+      btnRow([['✨ Appliquer', apply, 'p'], ['▶ Après', () => playBuffer(cur()?.buffer)], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status);
+  }
+  function winDeess() {
+    const sel = trackSel(); const cur = () => tracks[+sel.value]; const status = h('div.muted', { style: { fontSize: '11px', minHeight: '14px', marginTop: '6px' } }, '');
+    let dose = 4, freq = 6800;
+    const kDose = knob({ label: 'DOSE', min: 0, max: 10, step: 0.5, value: 4, def: 4, fmt: v => `-${v} dB`, onInput: v => dose = v });
+    const kFreq = knob({ label: 'FRÉQ', min: 4000, max: 10000, step: 200, value: 6800, def: 6800, fmt: v => `${(v / 1000).toFixed(1)}k`, onInput: v => freq = v });
+    return h('div', selRow(sel), h('div', { style: { display: 'flex', gap: '18px', justifyContent: 'center', margin: '8px 0' } }, kDose.el, kFreq.el),
+      btnRow([['✨ Appliquer', () => applyChainTo(cur(), [{ t: 'fx', kind: 'peak', f: freq, q: 3, gain: -dose }], 'de-esser', status), 'p'], ['▶ Après', () => playBuffer(cur()?.buffer)], ['⏹', () => stopPreview()], ['↩ Original', () => quickRevertIdx(+sel.value)]]), status,
+      h('div.muted', { style: { fontSize: '10px', marginTop: '8px' } }, 'Réduit les sifflantes « sss » en atténuant la zone aiguë choisie.'));
+  }
+  function winMaster() {
+    let preset = 'streaming';
+    const chips = [['streaming', 'Streaming'], ['rap', 'Rap'], ['club', 'Club']].map(([k, l]) => { const c = h('span.chip' + (k === preset ? '.on' : ''), l); c.onclick = () => { preset = k; chips.forEach(x => x.classList.toggle('on', x === c)); }; return c; });
+    return h('div', h('p.muted', { style: { fontSize: '12px' } }, 'Mixe toutes les pistes + master, puis télécharge le WAV final.'),
+      h('div', { style: { display: 'flex', gap: '6px', alignItems: 'center', margin: '8px 0' } }, h('span.muted', { style: { fontSize: '12px' } }, 'Rendu :'), ...chips),
+      h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } },
+        h('button.rbtn.g', { style: { fontWeight: '800' }, onclick: async () => { toast('Mastering + export…'); try { await doMasterExport(preset, true); toast('🎧 Master WAV téléchargé ✓', 'ok'); } catch (e) { toastErr(e); } } }, '📤 Masteriser & télécharger'),
+        h('button.rbtn', { onclick: async () => { try { toast('Rendu…'); await doMasterExport(preset, false); if (lastMaster) playBuffer(lastMaster); } catch (e) { toastErr(e); } } }, '▶ Écouter le master')));
+  }
   const WINDEF = {
     regie: { t: '🧩 Vue d’ensemble', r: viewRegie, w: 720, h: 430 },
     timeline: { t: '🎵 Timeline', r: viewTimeline, w: 920, h: 380 },
@@ -1381,8 +1439,12 @@ export async function render(el, { params }) {
     spectro: { t: '🌈 Spectrogramme', r: winSpectro, w: 580, h: 240 },
     repo: { t: '📚 Répertoire', r: viewRepo, w: 660, h: 470 },
     ia: { t: '🧠 Ingé IA', r: viewIA, w: 680, h: 560 },
+    pitch: { t: '🎚️ Hauteur / Pitch', r: winPitch, w: 440, h: 300 },
+    harmo: { t: '🎼 Harmoniseur', r: winHarmo, w: 470, h: 330 },
+    deess: { t: '🧼 De-Esser', r: winDeess, w: 440, h: 300 },
+    master: { t: '🏁 Mastering', r: winMaster, w: 500, h: 240 },
   };
-  const TAB_ORDER = ['regie', 'timeline', 'rec', 'console', 'autotune', 'eq', 'comp', 'rev', 'bank', 'spectro', 'repo', 'ia'];
+  const TAB_ORDER = ['regie', 'timeline', 'rec', 'console', 'autotune', 'eq', 'comp', 'rev', 'deess', 'pitch', 'harmo', 'bank', 'spectro', 'master', 'repo', 'ia'];
   const openWins = {}; let zTop = 10, winOffset = 0;
   function makeWinContent(key) { const el = h('div'); try { el.append(WINDEF[key].r()); } catch (e) { console.error(e); el.append(h('div.notice.bad', 'Erreur : ' + (e && e.message))); } return el; }
   function openWindow(key) {
@@ -1413,7 +1475,7 @@ export async function render(el, { params }) {
     const groups = [
       { ic: '🗂️', t: 'Projet', items: [['🎚️', 'Timeline', () => go('timeline')], ['🎙️', 'Enregistrer', () => go('rec')], ['📤', 'Exporter le mix (WAV)', () => exportMix()]] },
       { ic: '🎵', t: `Pistes (${tracks.length})`, items: tracks.map((t, i) => [null, t.name || `Piste ${i + 1}`, () => { if (!isInstru(t)) selVoixIdx = i; go('timeline'); refreshViews(); toast('🎯 Piste cible : ' + (t.name || `Piste ${i + 1}`)); }, trackColor(t, i)]) },
-      { ic: '🎛️', t: 'Modules (boîtiers)', items: [['🎚️', 'Console live', () => openWindow('console')], ['🎤', 'Auto-Tune Pro', () => openWindow('autotune')], ['🎚️', 'Égaliseur', () => openWindow('eq')], ['🗜️', 'Compresseur', () => openWindow('comp')], ['🌫️', 'Réverbe & FX', () => openWindow('rev')], ['🌈', 'Spectrogramme', () => openWindow('spectro')], ['⭐', 'Banque d’effets', () => openWindow('bank')]] },
+      { ic: '🎛️', t: 'Modules (boîtiers)', items: [['🎚️', 'Console live', () => openWindow('console')], ['🎤', 'Auto-Tune Pro', () => openWindow('autotune')], ['🎚️', 'Égaliseur', () => openWindow('eq')], ['🗜️', 'Compresseur', () => openWindow('comp')], ['🌫️', 'Réverbe & FX', () => openWindow('rev')], ['🧼', 'De-Esser', () => openWindow('deess')], ['🎚️', 'Hauteur / Pitch', () => openWindow('pitch')], ['🎼', 'Harmoniseur', () => openWindow('harmo')], ['🌈', 'Spectrogramme', () => openWindow('spectro')], ['⭐', 'Banque d’effets', () => openWindow('bank')], ['🏁', 'Mastering', () => openWindow('master')]] },
       { ic: '📚', t: 'Presets (235)', items: [['⭐', 'Références', () => go('repo')], ['🎤', 'Autotune', () => go('repo')], ['🗣️', 'Vraies voix', () => go('repo')], ['🌈', 'Ambiances', () => go('repo')]] },
       { ic: '🧠', t: 'IA Expert', items: [['🎯', 'Analyser (bientôt)', () => go('ia')], ['🎹', 'Tonalité (bientôt)', () => go('ia')], ['✨', '3 versions (bientôt)', () => go('ia')]] },
     ];
@@ -1438,7 +1500,7 @@ export async function render(el, { params }) {
   const top = h('div.rtop', burger,
     h('div.rbrand', h('div.wf'), h('div', h('b', 'Studio IA'), h('small', 'Régie Pro'))),
     tabsBar,
-    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE20'));
+    h('span.rpill', h('span.dot'), 'Moteur local · 0 € · build LIVE21'));
 
   // transport
   playBtn = h('div.rb.pl', { onclick: () => startPlay(startOffset) }, '▶');
