@@ -1,4 +1,5 @@
 import { api, sse, h, state, md, toast, toastErr, speak, stopSpeaking } from '../lib/core.js';
+import { expertFace } from '../lib/expertface.js';
 
 const makeId = () => 'c' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
 const SYSTEM = [
@@ -22,14 +23,15 @@ export async function render(el) {
   const shell = h('div.stack', { style: { gap: '14px', maxWidth: '1100px', margin: '0 auto' } });
   const top = h('div.card.stack', { style: { gap: '12px' } });
   const title = h('div.row', h('div.grow', h('h2', 'Ton compagnon personnel'), h('p.small.muted', 'Deux avatars, une seule intelligence, une mémoire commune.')));
-  const avatarRow = h('div.row', { style: { flexWrap: 'wrap', gap: '10px' } });
+  const avatarRow = h('div.row', { style: { flexWrap: 'wrap', gap: '10px', alignItems: 'center' } });
+  const face = expertFace({ name: avatar === 'rue' ? 'La Rue' : 'La Ruse', role: 'Compagnon personnel · IA', avatar });
   const rueBtn = h('button.btn', { onclick: () => chooseAvatar('rue') }, '👨🏻‍💻 La Rue');
   const ruseBtn = h('button.btn', { onclick: () => chooseAvatar('ruse') }, '👩🏻‍💻 La Ruse');
   const status = h('span.small.muted', 'Prêt à discuter.');
   avatarRow.append(rueBtn, ruseBtn, h('span.grow'), status);
   const memory = h('textarea', { rows: 4, placeholder: 'Ce que ton compagnon doit retenir durablement : tes préférences, tes objectifs, les décisions importantes…', value: profile.memory || '' });
   const memorySave = h('button.btn.small', { onclick: saveMemory }, '🧠 Enregistrer la mémoire commune');
-  top.append(title, avatarRow, h('div.small.muted', 'La mémoire ci-dessous est partagée par La Rue et La Ruse et reste enregistrée dans ton espace Studio.'), memory, memorySave);
+  top.append(title, face.el, avatarRow, h('div.small.muted', 'La mémoire ci-dessous est partagée par La Rue et La Ruse et reste enregistrée dans ton espace Studio.'), memory, memorySave);
 
   const layout = h('div.grid', { style: { gridTemplateColumns: 'minmax(190px, 250px) minmax(0, 1fr)', gap: '12px', alignItems: 'stretch' } });
   const side = h('div.card.stack', { style: { gap: '8px' } });
@@ -41,7 +43,7 @@ export async function render(el) {
   const composer = h('div.row', { style: { alignItems: 'end', gap: '8px' } });
   const input = h('textarea', { rows: 2, placeholder: 'Parle-lui de tes projets, pose une question ou demande-lui de t’aider…' });
   const send = h('button.btn.primary', { onclick: sendMessage }, 'Envoyer');
-  const voice = h('button.btn', { onclick: () => { const last = [...(conv?.messages || [])].reverse().find(m => m.role === 'assistant'); if (last) speak(last.content); } }, '🔊 Écouter');
+  const voice = h('button.btn', { onclick: () => { const last = [...(conv?.messages || [])].reverse().find(m => m.role === 'assistant'); if (last) speak(last.content, { preferBrowser: true, voiceGender: avatar === 'ruse' ? 'female' : 'male' }); } }, '🔊 Écouter');
   input.style.flex = '1';
   composer.append(input, send, voice);
   chat.append(h('div.row', h('h3.grow', 'Conversation'), h('span.small.muted', 'Historique sauvegardé automatiquement')), transcript, composer);
@@ -53,11 +55,13 @@ export async function render(el) {
     rueBtn.classList.toggle('primary', avatar === 'rue');
     ruseBtn.classList.toggle('primary', avatar === 'ruse');
     status.textContent = avatar === 'rue' ? 'La Rue est avec toi.' : 'La Ruse est avec toi.';
+    face.setAvatar(avatar);
   }
   async function chooseAvatar(next) {
     if (next === avatar) return;
     avatar = next;
     drawAvatar();
+    face.setAvatar(avatar);
     try { profile = await api('/api/companion', { method: 'PUT', body: { avatar } }); toast('Avatar changé — mémoire et conversation conservées.', 'ok'); }
     catch (e) { toastErr(e); }
   }
