@@ -39,7 +39,7 @@ function approveAndRun(command) {
           const wanted = String(command.text || "").trim().toLowerCase();
           if (!wanted) throw new Error("Libellé de bouton manquant.");
           if (/supprimer|effacer|payer|paiement|acheter|commander|publier|envoyer|valider|confirmer|delete|remove|pay|purchase|buy|publish|submit|send|confirm/i.test(wanted)) throw new Error("Action sensible bloquée. La Rue ne peut pas valider cette action automatiquement.");
-          const candidates = [...document.querySelectorAll("a,button,[role=button]")].filter(el => !(el.tagName === "BUTTON" && el.type === "submit"));
+          const candidates = [...document.querySelectorAll("a,button,[role=button]")].filter(el => !(el.tagName === "BUTTON" && el.type === "submit") && !el.closest("form"));
           const target = candidates.find(el => (el.innerText || el.getAttribute("aria-label") || "").trim().toLowerCase() === wanted);
           if (!target) throw new Error("Aucun bouton ou lien avec ce libellé exact.");
           target.click();
