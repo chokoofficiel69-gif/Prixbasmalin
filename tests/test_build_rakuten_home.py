@@ -34,8 +34,14 @@ class BuildRakutenHomeTest(unittest.TestCase):
         self.assertIn("M-999", ids)
         self.assertLessEqual(len(ids), 10)
 
-    def test_rejects_undisplayable_products(self):
-        bad = [product(1, priceTaxStatus="unspecified"), product(2, price=0), product(3, image="http://x")]
+    def test_keeps_tax_unconfirmed_products_for_discovery_without_confirming_tax(self):
+        item = product(1, priceTaxStatus="unspecified")
+        out = mod.build({"products": [item]})
+        self.assertEqual(len(out["products"]), 1)
+        self.assertEqual(out["products"][0]["priceTaxStatus"], "unspecified")
+
+    def test_rejects_products_without_safe_discovery_fields(self):
+        bad = [product(1, price=0), product(2, image="http://x"), product(3, sourceUrl="http://merchant.example/x")]
         self.assertEqual(mod.build({"products": bad})["products"], [])
 
 
