@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-16T13:06:05.870Z",
+  "fetched_at": "2026-11-17T13:48:07.151Z",
   "source": "Awin Publisher Enhanced/standard feeds autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
   "programmes_check_status": "verified",
-  "joined_advertisers_checked": 20,
+  "joined_advertisers_checked": 21,
   "pending_advertisers_detected": 24,
   "joined_advertisers": [
     {
@@ -70,6 +70,10 @@
       "name": "ANITA & ZAHA"
     },
     {
+      "id": "116725",
+      "name": "World Businesses for Sale"
+    },
+    {
       "id": "122426",
       "name": "Imou FR"
     },
@@ -90,25 +94,25 @@
       "name": "Mibro FR"
     }
   ],
-  "additional_authorized_offers_imported": 23594,
+  "additional_authorized_offers_imported": 23582,
   "counts": {
-    "joined_advertisers_checked": 20,
+    "joined_advertisers_checked": 21,
     "pending_advertisers_detected": 24,
-    "additional_authorized_offers_imported": 23594,
-    "products": 20753,
-    "merchant_offers": 23594,
+    "additional_authorized_offers_imported": 23582,
+    "products": 20742,
+    "merchant_offers": 23582,
     "merchants": 19,
-    "brands": 307,
-    "products_with_gtin": 14253,
-    "products_with_mpn": 13735,
-    "products_with_brand_mpn": 13715,
+    "brands": 306,
+    "products_with_gtin": 14224,
+    "products_with_mpn": 13717,
+    "products_with_brand_mpn": 13697,
     "multi_merchant_products": 0,
-    "offers_with_shipping": 14555,
-    "offers_with_availability": 18938,
+    "offers_with_shipping": 14554,
+    "offers_with_availability": 18954,
     "offers_with_tax_included": 0,
     "products_other_category": 318,
     "offers_fresh_last_48h": 0,
-    "offers_missing_timestamp": 20594,
+    "offers_missing_timestamp": 20582,
     "offers_stale": 3000,
     "offers_invalid_or_future_timestamp": 0
   }
