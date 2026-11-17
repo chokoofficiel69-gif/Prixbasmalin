@@ -50,9 +50,9 @@ jobs:
           RAKUTEN_SFTP_USER: ${{ secrets.RAKUTEN_SFTP_USER }}
           RAKUTEN_SFTP_PASSWORD: ${{ secrets.RAKUTEN_SFTP_PASSWORD }}
           RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'AUTO' }}
-          # Empreinte(s) SHA256 officielle(s) de la clé hôte SSH, confirmée(s) par Rakuten.
-          # Formats acceptés, séparés par des espaces : 64 caractères hexadécimaux ou SHA256:<base64> (format OpenSSH).
-          RAKUTEN_SSH_HOST_SHA256: ${{ vars.RAKUTEN_SSH_HOST_SHA256 || '41b421ca94a7747da2cd8916dc0f8628fa47490048565cad56fdd202dddae6fd' }}
+          # Empreinte SHA256 publique épinglée, confirmée par Rakuten le 17/11/2026 (ssh-ed25519).
+          # Elle est volontairement définie ici : aucun secret ni variable GitHub n'est nécessaire.
+          RAKUTEN_SSH_HOST_SHA256: '41b421ca94a7747da2cd8916dc0f8628fa47490048565cad56fdd202dddae6fd'
         shell: bash
         run: |
           set -euo pipefail
