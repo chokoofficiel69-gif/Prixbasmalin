@@ -314,9 +314,14 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    ).map(p=>({...p,livePrice:Number(p.priceValue),liveMerchant:p.merchant,liveUrl:p.sourceUrl,liveCheckedAt:p.sourceCreatedAt,liveSource:"Rakuten"})):[];
    const live=[...liveAwin,...liveRakuten].sort((a,b)=>String(b.liveCheckedAt||"").localeCompare(String(a.liveCheckedAt||""))||String(a.name||"").localeCompare(String(b.name||""),"fr"));
    const fallback=Array.isArray(home?.products)?home.products:[];
+   // Les fiches Rakuten restent découvrables même si la TVA n'est pas confirmée.
+   // Elles ne rejoignent jamais "live" et aucun prix n'est donc affiché dans cette sélection.
+   const rakutenDiscovery=rakutenFresh&&Array.isArray(rakuten?.products)
+    ?rakuten.products.filter(p=>p&&fresh(p.sourceCreatedAt)):[];
+   const discoveryFallback=[...fallback,...rakutenDiscovery];
    const fallbackPool=[];
    const seenFallbackImages=new Set();
-   fallback.forEach(p=>{
+   discoveryFallback.forEach(p=>{
     if(p&&p.name&&verifiedImageStatuses.has(p.imageStatus)&&p.imageKind!=="illustration"&&safeUrl(p.image)&&safeUrl(p.sourceUrl)&&
        !/^https:\/\/images\.unsplash\.com\//i.test(String(p.image))&&!seenFallbackImages.has(p.image)){
      seenFallbackImages.add(p.image);
