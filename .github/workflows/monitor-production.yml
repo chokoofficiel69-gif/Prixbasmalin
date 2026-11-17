@@ -47,8 +47,14 @@ on:
       - "CNAME"
       - "price-engine/**"
       - ".github/workflows/refresh-prices.yml"
+      - ".github/workflows/monitor-production.yml"
       - ".github/workflows/sync-awin-products.yml"
       - "data/awin-products.json"
+      - "data/awin-catalogue.json"
+      - "data/awin-sync-status.json"
+      - "data/rakuten-home.json"
+      - "data/rakuten-products.json"
+      - "data/gtin-comparisons.json"
       - "data/home-deals.json"
       - "data/fiches-produits.json"
       - "scripts/build_seo_pages.py"
@@ -83,8 +89,14 @@ on:
       - "CNAME"
       - "price-engine/**"
       - ".github/workflows/refresh-prices.yml"
+      - ".github/workflows/monitor-production.yml"
       - ".github/workflows/sync-awin-products.yml"
       - "data/awin-products.json"
+      - "data/awin-catalogue.json"
+      - "data/awin-sync-status.json"
+      - "data/rakuten-home.json"
+      - "data/rakuten-products.json"
+      - "data/gtin-comparisons.json"
       - "data/home-deals.json"
       - "data/fiches-produits.json"
       - "scripts/build_seo_pages.py"
@@ -490,6 +502,81 @@ jobs:
           if (multiMerchant === 0) {
             console.log("AVERTISSEMENT : offres individuelles réelles, mais aucune comparaison multi-marchands exacte sans GTIN/MPN commun.");
           }
+          NODE
+      - name: Vérifier les catalogues Awin/Rakuten et les comparaisons GTIN publiques
+        run: |
+          set -euo pipefail
+          cache_bust="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 5 --max-time 60 \
+            "https://prixbasmalin.fr/data/awin-catalogue.json?check=${cache_bust}" --output /tmp/awin-catalogue.json
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 5 --max-time 30 \
+            "https://prixbasmalin.fr/data/awin-sync-status.json?check=${cache_bust}" --output /tmp/awin-sync-status.json
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 5 --max-time 30 \
+            "https://prixbasmalin.fr/data/rakuten-home.json?check=${cache_bust}" --output /tmp/rakuten-home.json
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 5 --max-time 30 \
+            "https://prixbasmalin.fr/data/gtin-comparisons.json?check=${cache_bust}" --output /tmp/gtin-comparisons.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const read = name => JSON.parse(fs.readFileSync("/tmp/" + name, "utf8"));
+          const awin = read("awin-catalogue.json");
+          const awinStatus = read("awin-sync-status.json");
+          const rakuten = read("rakuten-home.json");
+          const gtin = read("gtin-comparisons.json");
+          if (awin.status !== "ok" || awin.image_policy !== "authorized_feed_images_only" || !Array.isArray(awin.products) || awin.products.length === 0) {
+            throw new Error("Le catalogue Awin léger public est vide, invalide ou sans provenance d’image autorisée.");
+          }
+          if (awinStatus.status !== "ok" || awinStatus.programmes_check_status !== "verified" || !awinStatus.counts) {
+            throw new Error("Le statut public Awin est absent ou non vérifié.");
+          }
+          if (!Array.isArray(rakuten.products) || rakuten.products.length === 0) {
+            throw new Error("Le snapshot de découverte Rakuten public est vide.");
+          }
+          const rakutenImages = rakuten.products.filter(p =>
+            p.imageStatus === "authorized_feed_image" && /^https:\/\//i.test(String(p.image || ""))
+          ).length;
+          const rakutenLinks = rakuten.products.filter(p => /^https:\/\//i.test(String(p.sourceUrl || ""))).length;
+          const rakutenIdentity = rakuten.products.filter(p =>
+            String(p.gtin || "").trim() || (String(p.brand || "").trim() && String(p.mpn || "").trim())
+          ).length;
+          const rakutenDates = rakuten.products.filter(p => {
+            const t = Date.parse(p.sourceCreatedAt || "");
+            return Number.isFinite(t) && t <= Date.now() + 5 * 60 * 1000 && Date.now() - t <= 48 * 60 * 60 * 1000;
+          }).length;
+          if (rakutenImages !== rakuten.products.length || rakutenLinks !== rakuten.products.length || rakutenIdentity !== rakuten.products.length) {
+            throw new Error("Le snapshot Rakuten contient une fiche sans image autorisée, lien marchand HTTPS ou identité produit.");
+          }
+          if (!Array.isArray(gtin.products) || !gtin.counts) {
+            throw new Error("Le flux de comparaisons GTIN public est absent ou invalide.");
+          }
+          const c = awinStatus.counts;
+          const g = gtin.counts;
+          const tax = Number(c.offers_with_tax_included || 0);
+          const fresh = Number(c.offers_fresh_last_48h || 0);
+          const currentComparisons = Number(g.comparisons_with_two_current_offers || 0);
+          console.log("Awin catalogue public :", awin.products.length, "produits ; images autorisées :", awin.image_policy);
+          console.log("Awin partenaires :", awinStatus.joined_advertisers_checked, "rejoints ;", awinStatus.pending_advertisers_detected, "en attente.");
+          console.log("Awin offres :", c.merchant_offers, "— fraîches <48 h :", fresh, "— TTC confirmé :", tax,
+            "— sans date :", c.offers_missing_timestamp, "— périmées :", c.offers_stale, ".");
+          console.log("Rakuten découverte publique :", rakuten.products.length, "produits ; images autorisées :", rakutenImages,
+            "— liens HTTPS :", rakutenLinks, "— identités :", rakutenIdentity, "— sources <48 h :", rakutenDates, ".");
+          console.log("Comparaisons GTIN :", g.comparisons, "— offres :", g.offers, "— comparaisons actuelles :", currentComparisons,
+            "— offres TTC confirmées :", g.offers_tax_confirmed, "— périmées/sans date :", g.offers_stale_or_undated, ".");
+          if (fresh === 0 || tax === 0 || currentComparisons === 0) {
+            console.log("AVERTISSEMENT : catalogue reçu et validé, mais aucune comparaison multi-marchand actuelle TTC ne peut être publiée.");
+          }
+          if (rakutenDates !== rakuten.products.length) {
+            console.log("AVERTISSEMENT : certaines références Rakuten sont trop anciennes ou sans date source ; elles ne doivent pas être présentées comme nouveautés.");
+          }
+          const summary = [
+            "### Flux marchands publics — catalogue vs comparaison réelle",
+            "",
+            "- Awin : " + awin.products.length + " produits compacts ; " + awinStatus.joined_advertisers_checked + " programmes rejoints ; " + awinStatus.pending_advertisers_detected + " en attente.",
+            "- Offres Awin fraîches <48 h : " + fresh + " ; TTC explicitement confirmé : " + tax + " ; sans date : " + (c.offers_missing_timestamp || 0) + " ; périmées : " + (c.offers_stale || 0) + ".",
+            "- Rakuten : " + rakuten.products.length + " références découverte ; images autorisées : " + rakutenImages + " ; identités produit : " + rakutenIdentity + ".",
+            "- GTIN : " + g.comparisons + " correspondances candidates ; comparaisons actuelles : " + currentComparisons + " ; offres TTC confirmées : " + (g.offers_tax_confirmed || 0) + ".",
+            "- Conclusion : " + (currentComparisons > 0 && fresh > 0 && tax > 0 ? "comparaisons actuelles détectées." : "catalogues disponibles, mais aucune comparaison multi-marchand actuelle TTC vérifiée.")
+          ].join("\n");
+          if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + "\n");
           NODE
       - name: Vérifier le Worker d'attribution
         run: |
