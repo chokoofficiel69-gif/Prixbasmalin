@@ -198,6 +198,9 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIn('ssh-keygen -F "aftp.linksynergy.com"', workflow)
         self.assertIn("--retry-all-errors", workflow)
         self.assertIn('temporary="${output}.part"', workflow)
+        self.assertIn('local mid="$1" filename="$2" output="$3" required="$4" remote_path=""', workflow)
+        self.assertIn('local temporary="${output}.part"', workflow)
+        self.assertNotIn('required="$4" remote_path="" temporary="${output}.part"', workflow)
         self.assertIn('gzip -t "$temporary"', workflow)
 
     def test_sftp_workflow_expands_secrets_and_shell_variables(self):
