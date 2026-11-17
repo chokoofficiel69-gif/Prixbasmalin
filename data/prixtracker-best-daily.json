@@ -4,15 +4,15 @@
   "source_url": "https://prixtracker.fr/donnees/meilleur-prix-du-jour.csv",
   "license": "Licence Ouverte 2.0",
   "attribution": "Source : PrixTracker (prixtracker.fr/donnees), réutilisé sous Licence Ouverte 2.0 via data.gouv.fr.",
-  "generated_at": "2026-11-16T13:55:21.307Z",
+  "generated_at": "2026-11-17T14:47:27.196Z",
   "dataset_period": {
     "from": "2025-12-11",
-    "to": "2026-11-15"
+    "to": "2026-11-16"
   },
   "status": "historical_reference",
   "methodology": "Historique du prix minimum observé par produit et par jour chez les marchands suivis. Ce relevé n'est pas une offre disponible en temps réel; le CSV ne fournit ni URL produit ni preuve de stock.",
   "counts": {
-    "rows": 6350,
+    "rows": 6466,
     "products": 115,
     "merchants": 52,
     "categories": 17,
@@ -713,6 +713,16 @@
   ],
   "records": [
     {
+      "date": "2026-11-16",
+      "product_id": "airpods-3",
+      "product": "AirPods 3",
+      "category": "audio",
+      "brand": "Apple",
+      "lowest_observed_merchant": "kauflandfr",
+      "lowest_observed_price_eur_ttc": 151.58,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "airpods-3",
       "product": "AirPods 3",
@@ -1200,6 +1210,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "topbizfr",
       "lowest_observed_price_eur_ttc": 135.19,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "airpods-4",
+      "product": "AirPods 4",
+      "category": "audio",
+      "brand": "Apple",
+      "lowest_observed_merchant": "inmacwstorecom",
+      "lowest_observed_price_eur_ttc": 150,
       "source": "releve PrixTracker"
     },
     {
@@ -2253,6 +2273,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "airpods-4-anc",
+      "product": "AirPods 4 (réduction de bruit)",
+      "category": "audio",
+      "brand": "Apple",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 129,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "airpods-4-anc",
       "product": "AirPods 4 (réduction de bruit)",
@@ -3293,6 +3323,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "airpods-5",
+      "product": "AirPods 5",
+      "category": "audio",
+      "brand": "Apple",
+      "lowest_observed_merchant": "carrefourfr",
+      "lowest_observed_price_eur_ttc": 134,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "airpods-5",
       "product": "AirPods 5",
@@ -3610,6 +3650,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "rakuten",
       "lowest_observed_price_eur_ttc": 144,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "airpods-max",
+      "product": "AirPods Max (USB-C)",
+      "category": "audio",
+      "brand": "Apple",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 510.22,
       "source": "releve PrixTracker"
     },
     {
@@ -4653,6 +4703,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "airpods-pro-2",
+      "product": "AirPods Pro 2",
+      "category": "audio",
+      "brand": "Apple",
+      "lowest_observed_merchant": "buyylocomfr",
+      "lowest_observed_price_eur_ttc": 236.81,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "airpods-pro-2",
       "product": "AirPods Pro 2",
@@ -5620,6 +5680,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "rakuten",
       "lowest_observed_price_eur_ttc": 253,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "airpods-pro-3",
+      "product": "AirPods Pro 3",
+      "category": "audio",
+      "brand": "Apple",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 199,
       "source": "releve PrixTracker"
     },
     {
@@ -6693,6 +6763,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "apple-watch-se-3",
+      "product": "Apple Watch SE 3",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 239,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "apple-watch-se-3",
+      "product": "Apple Watch SE 3",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 239,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "apple-watch-se-3",
       "product": "Apple Watch SE 3",
@@ -6960,6 +7050,26 @@
       "brand": "Apple",
       "lowest_observed_merchant": "boulanger",
       "lowest_observed_price_eur_ttc": 279,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "apple-watch-series-11",
+      "product": "Apple Watch Series 11",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "inmacwstorecom",
+      "lowest_observed_price_eur_ttc": 295.73,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "apple-watch-series-11",
+      "product": "Apple Watch Series 11",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 384.9,
       "source": "releve PrixTracker"
     },
     {
@@ -7233,6 +7343,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "apple-watch-series-12",
+      "product": "Apple Watch Series 12",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 449,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "apple-watch-series-12",
+      "product": "Apple Watch Series 12",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 449,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "apple-watch-series-12",
       "product": "Apple Watch Series 12",
@@ -7493,6 +7623,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "apple-watch-ultra-3",
+      "product": "Apple Watch Ultra 3",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "inmacwstorecom",
+      "lowest_observed_price_eur_ttc": 592.21,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "apple-watch-ultra-3",
       "product": "Apple Watch Ultra 3",
@@ -7740,6 +7880,26 @@
       "brand": "Apple",
       "lowest_observed_merchant": "ebay",
       "lowest_observed_price_eur_ttc": 713.19,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "apple-watch-ultra-4",
+      "product": "Apple Watch Ultra 4",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 859,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "apple-watch-ultra-4",
+      "product": "Apple Watch Ultra 4",
+      "category": "montre",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 859,
       "source": "releve PrixTracker"
     },
     {
@@ -8010,6 +8170,26 @@
       "brand": "Apple",
       "lowest_observed_merchant": "cdiscount",
       "lowest_observed_price_eur_ttc": 874,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "bose-soundlink-flex-2",
+      "product": "Bose SoundLink Flex 2",
+      "category": "enceinte",
+      "brand": "Bose",
+      "lowest_observed_merchant": "amazon",
+      "lowest_observed_price_eur_ttc": 96.95,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "bose-soundlink-flex-2",
+      "product": "Bose SoundLink Flex 2",
+      "category": "enceinte",
+      "brand": "Bose",
+      "lowest_observed_merchant": "amazon",
+      "lowest_observed_price_eur_ttc": 96.95,
       "source": "releve PrixTracker"
     },
     {
@@ -8323,6 +8503,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "cookeo-touch-pro",
+      "product": "Moulinex Cookeo Touch Pro",
+      "category": "cuisine",
+      "brand": "Moulinex",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 479.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "cookeo-touch-pro",
       "product": "Moulinex Cookeo Touch Pro",
@@ -8340,6 +8530,26 @@
       "brand": "Moulinex",
       "lowest_observed_merchant": "boulanger",
       "lowest_observed_price_eur_ttc": 479.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "dreame-l40s-pro-ultra",
+      "product": "Dreame L40s Pro Ultra",
+      "category": "aspirateur",
+      "brand": "Dreame",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 459,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "dreame-l40s-pro-ultra",
+      "product": "Dreame L40s Pro Ultra",
+      "category": "aspirateur",
+      "brand": "Dreame",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 459,
       "source": "releve PrixTracker"
     },
     {
@@ -8790,6 +9000,26 @@
       "brand": "Dreame",
       "lowest_observed_merchant": "rakuten",
       "lowest_observed_price_eur_ttc": 499,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "dreame-x50-ultra",
+      "product": "Dreame X50 Ultra Complete",
+      "category": "aspirateur",
+      "brand": "Dreame",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 599,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "dreame-x50-ultra",
+      "product": "Dreame X50 Ultra Complete",
+      "category": "aspirateur",
+      "brand": "Dreame",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 599,
       "source": "releve PrixTracker"
     },
     {
@@ -9283,6 +9513,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "dualsense",
+      "product": "Manette DualSense",
+      "category": "accessoire-ps5",
+      "brand": "Sony",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 67.9,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "dualsense",
       "product": "Manette DualSense",
@@ -9760,6 +10000,16 @@
       "brand": "Sony",
       "lowest_observed_merchant": "cdiscount",
       "lowest_observed_price_eur_ttc": 64.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "dualsense-edge",
+      "product": "Manette DualSense Edge",
+      "category": "accessoire-ps5",
+      "brand": "Sony",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 199.99,
       "source": "releve PrixTracker"
     },
     {
@@ -10273,6 +10523,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "dyson-airwrap-id",
+      "product": "Dyson Airwrap i.d.",
+      "category": "coiffure",
+      "brand": "Dyson",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 449,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "dyson-airwrap-id",
       "product": "Dyson Airwrap i.d.",
@@ -10289,6 +10549,16 @@
       "category": "coiffure",
       "brand": "Dyson",
       "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 449,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "dyson-v12s-detect-slim-submarine",
+      "product": "Dyson V12s Detect Slim Submarine",
+      "category": "aspirateur",
+      "brand": "Dyson",
+      "lowest_observed_merchant": "manomanofr",
       "lowest_observed_price_eur_ttc": 449,
       "source": "releve PrixTracker"
     },
@@ -10760,6 +11030,16 @@
       "brand": "Dyson",
       "lowest_observed_merchant": "manomanofr",
       "lowest_observed_price_eur_ttc": 434,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "dyson-v15-detect-absolute",
+      "product": "Dyson V15 Detect Absolute",
+      "category": "aspirateur",
+      "brand": "Dyson",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 738.2,
       "source": "releve PrixTracker"
     },
     {
@@ -11243,6 +11523,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "dyson-v16-piston-animal-submarine",
+      "product": "Dyson V16 Piston Animal Submarine",
+      "category": "aspirateur",
+      "brand": "Dyson",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 699,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "dyson-v16-piston-animal-submarine",
       "product": "Dyson V16 Piston Animal Submarine",
@@ -11710,6 +12000,26 @@
       "brand": "Dyson",
       "lowest_observed_merchant": "manomanofr",
       "lowest_observed_price_eur_ttc": 784,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "ecovacs-deebot-t90-pro-omni",
+      "product": "Ecovacs Deebot T90 Pro Omni",
+      "category": "aspirateur",
+      "brand": "Ecovacs",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 449,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "ecovacs-deebot-t90-pro-omni",
+      "product": "Ecovacs Deebot T90 Pro Omni",
+      "category": "aspirateur",
+      "brand": "Ecovacs",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 399,
       "source": "releve PrixTracker"
     },
     {
@@ -12193,6 +12503,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "galaxy-s26",
+      "product": "Samsung Galaxy S26",
+      "category": "smartphone",
+      "brand": "Samsung",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 679,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "galaxy-s26",
       "product": "Samsung Galaxy S26",
@@ -12440,6 +12760,16 @@
       "brand": "Samsung",
       "lowest_observed_merchant": "cdiscount",
       "lowest_observed_price_eur_ttc": 590.98,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "galaxy-s26-plus",
+      "product": "Samsung Galaxy S26+",
+      "category": "smartphone",
+      "brand": "Samsung",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 909,
       "source": "releve PrixTracker"
     },
     {
@@ -12713,6 +13043,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "galaxy-s26-ultra",
+      "product": "Samsung Galaxy S26 Ultra",
+      "category": "smartphone",
+      "brand": "Samsung",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 959,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "galaxy-s26-ultra",
       "product": "Samsung Galaxy S26 Ultra",
@@ -12973,6 +13313,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "gta-6-ps5",
+      "product": "GTA 6 (PS5)",
+      "category": "accessoire-ps5-jeu",
+      "brand": "Rockstar Games",
+      "lowest_observed_merchant": "carrefourfr",
+      "lowest_observed_price_eur_ttc": 69.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "gta-6-ps5",
       "product": "GTA 6 (PS5)",
@@ -12990,6 +13340,26 @@
       "brand": "Rockstar Games",
       "lowest_observed_merchant": "carrefourfr",
       "lowest_observed_price_eur_ttc": 69.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "harman-kardon-go-play-3",
+      "product": "Harman Kardon Go + Play 3",
+      "category": "enceinte",
+      "brand": "Harman Kardon",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 322.14,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "harman-kardon-go-play-3",
+      "product": "Harman Kardon Go + Play 3",
+      "category": "enceinte",
+      "brand": "Harman Kardon",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 322.14,
       "source": "releve PrixTracker"
     },
     {
@@ -13333,6 +13703,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "harman-kardon-onyx-studio-9",
+      "product": "Harman Kardon Onyx Studio 9",
+      "category": "enceinte",
+      "brand": "Harman Kardon",
+      "lowest_observed_merchant": "fnac",
+      "lowest_observed_price_eur_ttc": 262.86,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "harman-kardon-onyx-studio-9",
+      "product": "Harman Kardon Onyx Studio 9",
+      "category": "enceinte",
+      "brand": "Harman Kardon",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 279.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "harman-kardon-onyx-studio-9",
       "product": "Harman Kardon Onyx Studio 9",
@@ -13670,6 +14060,16 @@
       "brand": "Harman Kardon",
       "lowest_observed_merchant": "cdiscount",
       "lowest_observed_price_eur_ttc": 217.39,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "ipad-a16",
+      "product": "iPad 11\" (A16)",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 488.03,
       "source": "releve PrixTracker"
     },
     {
@@ -14163,6 +14563,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "ipad-air-11-m3",
+      "product": "iPad Air 11\" M3",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 659,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "ipad-air-11-m3",
       "product": "iPad Air 11\" M3",
@@ -14620,6 +15030,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "laboutiquedunetcom",
       "lowest_observed_price_eur_ttc": 626.36,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "ipad-air-11-m4",
+      "product": "iPad Air 11\" M4",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 757.8,
       "source": "releve PrixTracker"
     },
     {
@@ -15113,6 +15533,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "ipad-air-13-m3",
+      "product": "iPad Air 13\" M3",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "inmacwstorecom",
+      "lowest_observed_price_eur_ttc": 818.98,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "ipad-air-13-m3",
       "product": "iPad Air 13\" M3",
@@ -15580,6 +16010,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "eleclercfrmarketplac",
       "lowest_observed_price_eur_ttc": 799.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "ipad-air-13-m4",
+      "product": "iPad Air 13\" M4",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 919,
       "source": "releve PrixTracker"
     },
     {
@@ -16063,6 +16503,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "ipad-mini-a17-pro",
+      "product": "iPad mini (A17 Pro)",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 689.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "ipad-mini-a17-pro",
       "product": "iPad mini (A17 Pro)",
@@ -16543,6 +16993,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "ipad-mini-a20-pro",
+      "product": "iPad mini (A20 Pro)",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 759,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "ipad-mini-a20-pro",
       "product": "iPad mini (A20 Pro)",
@@ -16600,6 +17060,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "galaxusfr",
       "lowest_observed_price_eur_ttc": 759,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "ipad-pro-11-m5",
+      "product": "iPad Pro 11\" M5",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 1250,
       "source": "releve PrixTracker"
     },
     {
@@ -17093,6 +17563,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "ipad-pro-13-m5",
+      "product": "iPad Pro 13\" M5",
+      "category": "tablette",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 1549,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "ipad-pro-13-m5",
       "product": "iPad Pro 13\" M5",
@@ -17570,6 +18050,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "eleclercfrmarketplac",
       "lowest_observed_price_eur_ttc": 1199.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "iphone-15",
+      "product": "iPhone 15",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 662,
       "source": "releve PrixTracker"
     },
     {
@@ -19743,6 +20233,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-15-pro",
+      "product": "iPhone 15 Pro",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "kauflandfr",
+      "lowest_observed_price_eur_ttc": 1099.89,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-15-pro",
       "product": "iPhone 15 Pro",
@@ -21883,6 +22383,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-15-pro-max",
+      "product": "iPhone 15 Pro Max",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "kauflandfr",
+      "lowest_observed_price_eur_ttc": 1100.15,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-15-pro-max",
       "product": "iPhone 15 Pro Max",
@@ -24020,6 +24530,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "Ebay",
       "lowest_observed_price_eur_ttc": 1194.3,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "iphone-16",
+      "product": "iPhone 16",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 781.7,
       "source": "releve PrixTracker"
     },
     {
@@ -27973,6 +28493,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-16-pro-max",
+      "product": "iPhone 16 Pro Max",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 1349.9,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-16-pro-max",
       "product": "iPhone 16 Pro Max",
@@ -30133,6 +30663,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-16e",
+      "product": "iPhone 16e",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 629,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-16e",
       "product": "iPhone 16e",
@@ -30650,6 +31190,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "rakuten",
       "lowest_observed_price_eur_ttc": 578.9,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "iphone-17",
+      "product": "iPhone 17",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 869,
       "source": "releve PrixTracker"
     },
     {
@@ -32783,6 +33333,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-17-pro",
+      "product": "iPhone 17 Pro",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 1099,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-17-pro",
       "product": "iPhone 17 Pro",
@@ -34910,6 +35470,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "Rakuten",
       "lowest_observed_price_eur_ttc": 1184.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "iphone-17-pro-max",
+      "product": "iPhone 17 Pro Max",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 1199,
       "source": "releve PrixTracker"
     },
     {
@@ -37103,6 +37673,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-17e",
+      "product": "iPhone 17e",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 817.6,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-17e",
       "product": "iPhone 17e",
@@ -37573,6 +38153,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-18-pro",
+      "product": "iPhone 18 Pro",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 1299,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-18-pro",
       "product": "iPhone 18 Pro",
@@ -37913,6 +38503,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-18-pro-max",
+      "product": "iPhone 18 Pro Max",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 1499,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-18-pro-max",
       "product": "iPhone 18 Pro Max",
@@ -38240,6 +38840,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "rakuten",
       "lowest_observed_price_eur_ttc": 1599,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "iphone-air",
+      "product": "iPhone Air",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 849,
       "source": "releve PrixTracker"
     },
     {
@@ -40403,6 +41013,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "iphone-fold",
+      "product": "iPhone Duo",
+      "category": "smartphone",
+      "brand": "Apple",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 2339,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "iphone-fold",
       "product": "iPhone Duo",
@@ -40670,6 +41290,26 @@
       "brand": "Apple",
       "lowest_observed_merchant": "galaxusfr",
       "lowest_observed_price_eur_ttc": 2339,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "irobot-roomba-max-705-combo",
+      "product": "iRobot Roomba Max 705 Combo + AutoWash",
+      "category": "aspirateur",
+      "brand": "iRobot",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 575.37,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "irobot-roomba-max-705-combo",
+      "product": "iRobot Roomba Max 705 Combo + AutoWash",
+      "category": "aspirateur",
+      "brand": "iRobot",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 575.37,
       "source": "releve PrixTracker"
     },
     {
@@ -41123,6 +41763,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "jbl-boombox-3",
+      "product": "JBL Boombox 3",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 299.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-boombox-3",
+      "product": "JBL Boombox 3",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 299.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "jbl-boombox-3",
       "product": "JBL Boombox 3",
@@ -41450,6 +42110,26 @@
       "brand": "JBL",
       "lowest_observed_merchant": "kauflandfr",
       "lowest_observed_price_eur_ttc": 322.08,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "jbl-charge-5",
+      "product": "JBL Charge 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 99.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-charge-5",
+      "product": "JBL Charge 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 99.99,
       "source": "releve PrixTracker"
     },
     {
@@ -41783,6 +42463,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "jbl-charge-6",
+      "product": "JBL Charge 6",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 139.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-charge-6",
+      "product": "JBL Charge 6",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 139.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "jbl-charge-6",
       "product": "JBL Charge 6",
@@ -41900,6 +42600,26 @@
       "brand": "JBL",
       "lowest_observed_merchant": "cdiscount",
       "lowest_observed_price_eur_ttc": 134.98,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "jbl-clip-5",
+      "product": "JBL Clip 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 48.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-clip-5",
+      "product": "JBL Clip 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 48.99,
       "source": "releve PrixTracker"
     },
     {
@@ -42253,6 +42973,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "jbl-flip-6",
+      "product": "JBL Flip 6",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 96.45,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-flip-6",
+      "product": "JBL Flip 6",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 96.45,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "jbl-flip-6",
       "product": "JBL Flip 6",
@@ -42503,6 +43243,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "jbl-flip-7",
+      "product": "JBL Flip 7",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 87.9,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-flip-7",
+      "product": "JBL Flip 7",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 87.9,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "jbl-flip-7",
       "product": "JBL Flip 7",
@@ -42750,6 +43510,26 @@
       "brand": "JBL",
       "lowest_observed_merchant": "kauflandfr",
       "lowest_observed_price_eur_ttc": 99.5,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "jbl-go-4",
+      "product": "JBL Go 4",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "carrefourfr",
+      "lowest_observed_price_eur_ttc": 34.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-go-4",
+      "product": "JBL Go 4",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "carrefourfr",
+      "lowest_observed_price_eur_ttc": 34.99,
       "source": "releve PrixTracker"
     },
     {
@@ -43043,6 +43823,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "jbl-go-5",
+      "product": "JBL Go 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 39.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-go-5",
+      "product": "JBL Go 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 39.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "jbl-go-5",
       "product": "JBL Go 5",
@@ -43110,6 +43910,26 @@
       "brand": "JBL",
       "lowest_observed_merchant": "carrefourfr",
       "lowest_observed_price_eur_ttc": 39.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "jbl-xtreme-4",
+      "product": "JBL Xtreme 4",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 199.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-xtreme-4",
+      "product": "JBL Xtreme 4",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 199.99,
       "source": "releve PrixTracker"
     },
     {
@@ -43463,6 +44283,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "jbl-xtreme-5",
+      "product": "JBL Xtreme 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 299.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "jbl-xtreme-5",
+      "product": "JBL Xtreme 5",
+      "category": "enceinte",
+      "brand": "JBL",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 299.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "jbl-xtreme-5",
       "product": "JBL Xtreme 5",
@@ -43530,6 +44370,16 @@
       "brand": "JBL",
       "lowest_observed_merchant": "xtremeinnfr",
       "lowest_observed_price_eur_ttc": 330.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "joy-con-2",
+      "product": "Joy-Con 2 (paire)",
+      "category": "accessoire-switch",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 69.99,
       "source": "releve PrixTracker"
     },
     {
@@ -44653,6 +45503,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "macbook-air-13-m5",
+      "product": "MacBook Air 13\" M5",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 1279,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "macbook-air-13-m5",
       "product": "MacBook Air 13\" M5",
@@ -45690,6 +46550,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "rakuten",
       "lowest_observed_price_eur_ttc": 1059,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "macbook-air-15-m3",
+      "product": "MacBook Air 15\" M3",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "onbuycomfr",
+      "lowest_observed_price_eur_ttc": 1566.99,
       "source": "releve PrixTracker"
     },
     {
@@ -47080,6 +47950,16 @@
       "brand": "Apple",
       "lowest_observed_merchant": "amazon",
       "lowest_observed_price_eur_ttc": 1099,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "macbook-air-15-m5",
+      "product": "MacBook Air 15\" M5",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 1543,
       "source": "releve PrixTracker"
     },
     {
@@ -48863,6 +49743,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "macbook-pro-14-m5",
+      "product": "MacBook Pro 14\" M5",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 2604,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "macbook-pro-14-m5",
       "product": "MacBook Pro 14\" M5",
@@ -49893,6 +50783,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "macbook-pro-14-m6",
+      "product": "MacBook Pro 14\" M6",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 2177,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "macbook-pro-14-m6",
       "product": "MacBook Pro 14\" M6",
@@ -50903,6 +51803,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "macbook-pro-16-m5",
+      "product": "MacBook Pro 16\" M5",
+      "category": "laptop",
+      "brand": "Apple",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 3115,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "macbook-pro-16-m5",
       "product": "MacBook Pro 16\" M5",
@@ -51903,6 +52813,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "manette-switch-2-pro",
+      "product": "Manette Switch 2 Pro",
+      "category": "accessoire-switch",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 72.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "manette-switch-2-pro",
       "product": "Manette Switch 2 Pro",
@@ -52390,6 +53310,16 @@
       "brand": "Nintendo",
       "lowest_observed_merchant": "aliexpress",
       "lowest_observed_price_eur_ttc": 61.18,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "manette-switch-pro",
+      "product": "Manette Switch Pro",
+      "category": "accessoire-switch",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 54.99,
       "source": "releve PrixTracker"
     },
     {
@@ -52903,6 +53833,26 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "marshall-emberton-3",
+      "product": "Marshall Emberton III",
+      "category": "enceinte",
+      "brand": "Marshall",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 119.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "marshall-emberton-3",
+      "product": "Marshall Emberton III",
+      "category": "enceinte",
+      "brand": "Marshall",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 119.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "marshall-emberton-3",
       "product": "Marshall Emberton III",
@@ -53223,6 +54173,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "meta-quest-3s",
+      "product": "Meta Quest 3S",
+      "category": "casque-vr",
+      "brand": "Meta",
+      "lowest_observed_merchant": "aliexpress",
+      "lowest_observed_price_eur_ttc": 308.31,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "meta-quest-3s",
       "product": "Meta Quest 3S",
@@ -53240,6 +54200,16 @@
       "brand": "Meta",
       "lowest_observed_merchant": "aliexpress",
       "lowest_observed_price_eur_ttc": 225.54,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "ninja-foodi-dual-zone-af200eu",
+      "product": "Ninja Foodi Dual Zone 7,6 L (AF200EU)",
+      "category": "cuisine",
+      "brand": "Ninja",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 148.19,
       "source": "releve PrixTracker"
     },
     {
@@ -53320,6 +54290,16 @@
       "brand": "OtterBox",
       "lowest_observed_merchant": "coquedetelephonefr",
       "lowest_observed_price_eur_ttc": 35.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "playstation-portal",
+      "product": "PlayStation Portal",
+      "category": "accessoire-ps5",
+      "brand": "Sony",
+      "lowest_observed_merchant": "alternatefr",
+      "lowest_observed_price_eur_ttc": 237.9,
       "source": "releve PrixTracker"
     },
     {
@@ -53800,6 +54780,16 @@
       "brand": "Sony",
       "lowest_observed_merchant": "fnac",
       "lowest_observed_price_eur_ttc": 244.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "playstation-vr2",
+      "product": "PlayStation VR2",
+      "category": "accessoire-ps5",
+      "brand": "Sony",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 399.99,
       "source": "releve PrixTracker"
     },
     {
@@ -55073,6 +56063,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "ps5-slim",
+      "product": "PS5 Slim (édition disque)",
+      "category": "console",
+      "brand": "Sony",
+      "lowest_observed_merchant": "darty",
+      "lowest_observed_price_eur_ttc": 649.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "ps5-slim",
       "product": "PS5 Slim (édition disque)",
@@ -56080,6 +57080,16 @@
       "brand": "Sony",
       "lowest_observed_merchant": "amazon",
       "lowest_observed_price_eur_ttc": 549,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "ps5-slim-digital",
+      "product": "PS5 Slim Édition Digitale",
+      "category": "console",
+      "brand": "Sony",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 739,
       "source": "releve PrixTracker"
     },
     {
@@ -57093,6 +58103,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "roborock-qrevo-curv",
+      "product": "Roborock Qrevo Curv",
+      "category": "aspirateur",
+      "brand": "Roborock",
+      "lowest_observed_merchant": "fnac",
+      "lowest_observed_price_eur_ttc": 819.14,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "roborock-qrevo-curv",
       "product": "Roborock Qrevo Curv",
@@ -57573,6 +58593,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "roborock-saros-10r",
+      "product": "Roborock Saros 10R",
+      "category": "aspirateur",
+      "brand": "Roborock",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 499.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "roborock-saros-10r",
       "product": "Roborock Saros 10R",
@@ -58030,6 +59060,26 @@
       "brand": "Roborock",
       "lowest_observed_merchant": "manomanofr",
       "lowest_observed_price_eur_ttc": 749.99,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "rowenta-silence-force-ro7457ea",
+      "product": "Rowenta Silence Force RO7457EA",
+      "category": "aspirateur",
+      "brand": "Rowenta",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 227.7,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "rowenta-silence-force-ro7457ea",
+      "product": "Rowenta Silence Force RO7457EA",
+      "category": "aspirateur",
+      "brand": "Rowenta",
+      "lowest_observed_merchant": "manomanofr",
+      "lowest_observed_price_eur_ttc": 227.7,
       "source": "releve PrixTracker"
     },
     {
@@ -58503,6 +59553,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "rowenta-x-force-flex-16-60",
+      "product": "Rowenta X-Force Flex 16.60",
+      "category": "aspirateur",
+      "brand": "Rowenta",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 469,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-15",
       "product_id": "rowenta-x-force-flex-16-60",
       "product": "Rowenta X-Force Flex 16.60",
@@ -58950,6 +60010,16 @@
       "brand": "Rowenta",
       "lowest_observed_merchant": "darty",
       "lowest_observed_price_eur_ttc": 476.64,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "samsung-bespoke-ai-jet-lite",
+      "product": "Samsung Bespoke AI Jet Lite Complete",
+      "category": "aspirateur",
+      "brand": "Samsung",
+      "lowest_observed_merchant": "boulanger",
+      "lowest_observed_price_eur_ttc": 499,
       "source": "releve PrixTracker"
     },
     {
@@ -59423,6 +60493,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "sony-wh-1000xm6",
+      "product": "Sony WH-1000XM6",
+      "category": "casque",
+      "brand": "Sony",
+      "lowest_observed_merchant": "aliexpress",
+      "lowest_observed_price_eur_ttc": 329.48,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "sony-wh-1000xm6",
       "product": "Sony WH-1000XM6",
@@ -59440,6 +60520,16 @@
       "brand": "Sony",
       "lowest_observed_merchant": "aliexpress",
       "lowest_observed_price_eur_ttc": 328.31,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "switch",
+      "product": "Nintendo Switch",
+      "category": "console",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 266.09,
       "source": "releve PrixTracker"
     },
     {
@@ -60463,6 +61553,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "switch-2",
+      "product": "Nintendo Switch 2",
+      "category": "console",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 429.99,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "switch-2",
       "product": "Nintendo Switch 2",
@@ -61483,6 +62583,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-16",
+      "product_id": "switch-2-mario-kart",
+      "product": "Nintendo Switch 2 + Mario Kart World",
+      "category": "console",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 731.8,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "switch-2-mario-kart",
       "product": "Nintendo Switch 2 + Mario Kart World",
@@ -61963,6 +63073,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "switch-2-pokemon-pokopia",
+      "product": "Nintendo Switch 2 + Pokémon Pokopia",
+      "category": "console",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 549,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "switch-2-pokemon-pokopia",
       "product": "Nintendo Switch 2 + Pokémon Pokopia",
@@ -61980,6 +63100,16 @@
       "brand": "Nintendo",
       "lowest_observed_merchant": "galaxusfr",
       "lowest_observed_price_eur_ttc": 544.73,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "switch-lite",
+      "product": "Nintendo Switch Lite",
+      "category": "console",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "joybuyfr",
+      "lowest_observed_price_eur_ttc": 195.99,
       "source": "releve PrixTracker"
     },
     {
@@ -62990,6 +64120,16 @@
       "brand": "Nintendo",
       "lowest_observed_merchant": "darty",
       "lowest_observed_price_eur_ttc": 164,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-16",
+      "product_id": "switch-oled",
+      "product": "Nintendo Switch OLED",
+      "category": "console",
+      "brand": "Nintendo",
+      "lowest_observed_merchant": "aliexpress",
+      "lowest_observed_price_eur_ttc": 281.98,
       "source": "releve PrixTracker"
     },
     {
@@ -64173,6 +65313,16 @@
       "source": "releve PrixTracker"
     },
     {
+      "date": "2026-11-15",
+      "product_id": "xbox-series-s",
+      "product": "Xbox Series S",
+      "category": "console",
+      "brand": "Microsoft",
+      "lowest_observed_merchant": "ebay",
+      "lowest_observed_price_eur_ttc": 479,
+      "source": "releve PrixTracker"
+    },
+    {
       "date": "2026-11-14",
       "product_id": "xbox-series-s",
       "product": "Xbox Series S",
@@ -64190,6 +65340,16 @@
       "brand": "Microsoft",
       "lowest_observed_merchant": "ebay",
       "lowest_observed_price_eur_ttc": 479,
+      "source": "releve PrixTracker"
+    },
+    {
+      "date": "2026-11-15",
+      "product_id": "xbox-series-x",
+      "product": "Xbox Series X",
+      "category": "console",
+      "brand": "Microsoft",
+      "lowest_observed_merchant": "galaxusfr",
+      "lowest_observed_price_eur_ttc": 988.49,
       "source": "releve PrixTracker"
     },
     {
