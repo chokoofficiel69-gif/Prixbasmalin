@@ -37,13 +37,13 @@ def _https(value) -> bool:
 
 
 def displayable(p: dict) -> bool:
-    """Filtres statiques communs aux deux blocs Rakuten de index.html."""
+    """Fiche découvrable ; la validation TTC reste faite séparément à l'affichage du prix."""
     return bool(
         p
+        and p.get("id")
         and p.get("name")
         and p.get("merchant")
         and _price(p.get("priceValue")) > 0
-        and p.get("priceTaxStatus") == "included"
         and p.get("sourceCreatedAt")
         and _https(p.get("image"))
         and _https(p.get("sourceUrl"))
