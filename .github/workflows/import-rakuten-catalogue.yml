@@ -52,7 +52,7 @@ jobs:
           RAKUTEN_DATE_FORMAT: ${{ vars.RAKUTEN_DATE_FORMAT || 'AUTO' }}
           # Empreinte(s) SHA256 officielle(s) de la clé hôte SSH, confirmée(s) par Rakuten.
           # Formats acceptés, séparés par des espaces : 64 caractères hexadécimaux ou SHA256:<base64> (format OpenSSH).
-          RAKUTEN_SSH_HOST_SHA256: ${{ vars.RAKUTEN_SSH_HOST_SHA256 || '6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc' }}
+          RAKUTEN_SSH_HOST_SHA256: ${{ vars.RAKUTEN_SSH_HOST_SHA256 || '41b421ca94a7747da2cd8916dc0f8628fa47490048565cad56fdd202dddae6fd' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -66,7 +66,7 @@ jobs:
             echo "::error::RAKUTEN_DATE_FORMAT doit être AUTO, MM/DD/YYYY ou DD/MM/YYYY."
             exit 1
           fi
-          # Mail Rakuten (Maya, 10/11/2026) : une empreinte SHA256 et une empreinte SHA1 (40 caractères).
+          # Mail Rakuten (Maya, 17/11/2026) : empreinte officielle ssh-ed25519 confirmée : SHA256:QbQhypSndH2izYkW3A+GKPpHSQBIVlytVv3SAt3a5v0=.
           # L'ancienne constante EXPECTED_SHA256_A (62 caractères) était la SHA1 suivie de caractères parasites :
           # elle ne pouvait correspondre à aucune clé. Seules les empreintes SHA256 servent à accorder la confiance.
           OFFICIAL_SHA1_REFERENCE="d98a0cdd102177804f99a3534a4a04c6b31ce816"
