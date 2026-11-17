@@ -186,7 +186,7 @@ class RakutenImportValidationTests(unittest.TestCase):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
         # La constante de 62 caractères (SHA1 + caractères parasites) ne doit plus servir d'empreinte.
         self.assertNotIn("d98a0cdd102177804f99a3534a4a04c6b31ce81622cb87103c1101134b4961", workflow)
-        self.assertIn("vars.RAKUTEN_SSH_HOST_SHA256 || '6854993e0f41078a1f007d677d298c2a4f7d5f898de149f53e27d3159e4b2bdc'", workflow)
+        self.assertIn("vars.RAKUTEN_SSH_HOST_SHA256 || '41b421ca94a7747da2cd8916dc0f8628fa47490048565cad56fdd202dddae6fd'", workflow)
         self.assertIn('^[0-9a-fA-F]{64}$', workflow)
         self.assertIn('key_sha256_hex', workflow)
         self.assertIn('base64 -d | sha256sum', workflow)
