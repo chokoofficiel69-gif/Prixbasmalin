@@ -1,22 +1,22 @@
 {
  "schema_version": 1,
  "status": "ok",
- "generated_at": "2026-11-17T18:22:48.412664Z",
+ "generated_at": "2026-11-18T10:23:56.644695Z",
  "freshness_max_age_hours": 48,
  "method": "GTIN valide commun à au moins deux marchands ; marque, contenance et nom contrôlés pour refuser les faux rapprochements.",
  "counts": {
-  "gtins_with_two_merchants": 127,
-  "comparisons": 99,
+  "gtins_with_two_merchants": 125,
+  "comparisons": 98,
   "comparisons_with_two_current_offers": 0,
-  "offers": 198,
-  "offers_stale_or_undated": 198,
+  "offers": 196,
+  "offers_stale_or_undated": 196,
   "offers_tax_confirmed": 0,
   "rejected": {
    "name_mismatch": 13,
-   "brand_mismatch": 15
+   "brand_mismatch": 14
   },
   "merchant_pairs": {
-   "Nicchia Luxury / Perfumeria Comas FR": 99
+   "Nicchia Luxury / Perfumeria Comas FR": 98
   }
  },
  "products": [
@@ -1299,52 +1299,6 @@
      "shipping_price_eur": 12.0,
      "currency": "EUR",
      "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543069144345996205332787&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-souffle-ambre-intense-eau-de-toilette-unisex%3Fvariant%3D56541755277696",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "in_stock",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    }
-   ]
-  },
-  {
-   "id": "gtin-03596930001219",
-   "gtin": "03596930001219",
-   "name": "Reminiscence Souffle Ambré Intense Eau de Toilette 50 ml",
-   "brand": "REMINISCENCE",
-   "image": "https://perfumeriacomas.com/cdnassets/products/136779-1_s.webp",
-   "identity": {
-    "type": "gtin",
-    "checks": [
-     "gtin_check_digit",
-     "brand",
-     "quantity",
-     "name_veto"
-    ]
-   },
-   "offers": [
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 54.9,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=42813651398&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
-    {
-     "merchant": "Nicchia Luxury",
-     "source": "rakuten",
-     "price_eur": 77.0,
-     "shipping_price_eur": 12.0,
-     "currency": "EUR",
-     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543061353880123860802776&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Freminiscence-souffle-ambre-intense-eau-de-toilette-unisex%3Fvariant%3D56535902617984",
      "checked_at": null,
      "checked_at_basis": null,
      "price_tax_status": "unspecified",
