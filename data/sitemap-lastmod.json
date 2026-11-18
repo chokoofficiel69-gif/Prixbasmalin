@@ -1,7 +1,7 @@
 {
  "a-propos.html": {
-  "hash": "2e19e2f1167dae96",
-  "lastmod": "2026-11-15"
+  "hash": "df8862b250e8f7c3",
+  "lastmod": "2026-11-18"
  },
  "assistant.html": {
   "hash": "90fc5f74ca644f4a",
@@ -16,8 +16,8 @@
   "lastmod": "2026-11-15"
  },
  "catalogue.html": {
-  "hash": "919733e3098aa1b2",
-  "lastmod": "2026-11-17"
+  "hash": "b9eb84201131d610",
+  "lastmod": "2026-11-18"
  },
  "comparateur-historique.html": {
   "hash": "5417d7c46cda1e61",
@@ -64,8 +64,8 @@
   "lastmod": "2026-11-15"
  },
  "guides.html": {
-  "hash": "db2909f623c00e19",
-  "lastmod": "2026-11-15"
+  "hash": "c085bb45df16bd50",
+  "lastmod": "2026-11-18"
  },
  "high-tech.html": {
   "hash": "5583352e32930406",
@@ -80,12 +80,16 @@
   "lastmod": "2026-11-15"
  },
  "index.html": {
-  "hash": "7bed47a337de4237",
-  "lastmod": "2026-11-17"
+  "hash": "9ff00524270010f5",
+  "lastmod": "2026-11-18"
  },
  "maison-deco.html": {
   "hash": "fd5e2759a14238f2",
   "lastmod": "2026-11-15"
+ },
+ "methodologie-prix.html": {
+  "hash": "6b4a9f1110e091d4",
+  "lastmod": "2026-11-18"
  },
  "mode.html": {
   "hash": "f3f064b203b201f6",
@@ -564,28 +568,28 @@
   "lastmod": "2026-11-17"
  },
  "produits/beauty.html": {
-  "hash": "25183549c9cd937e",
-  "lastmod": "2026-11-17"
+  "hash": "e97e62d1d65b6c96",
+  "lastmod": "2026-11-18"
  },
  "produits/fashion.html": {
-  "hash": "fd63f3252559bdbd",
-  "lastmod": "2026-11-15"
+  "hash": "201301d23b35385a",
+  "lastmod": "2026-11-18"
  },
  "produits/home.html": {
-  "hash": "e844be0f179016fb",
-  "lastmod": "2026-11-17"
+  "hash": "f2f16100e83f1e81",
+  "lastmod": "2026-11-18"
  },
  "produits/index.html": {
-  "hash": "3de01c9ea80cd608",
-  "lastmod": "2026-11-17"
+  "hash": "d787147a618f6b5a",
+  "lastmod": "2026-11-18"
  },
  "produits/kids.html": {
-  "hash": "37360b2415879202",
-  "lastmod": "2026-11-15"
+  "hash": "9dc54100476197b9",
+  "lastmod": "2026-11-18"
  },
  "produits/sport.html": {
-  "hash": "6b2df88cdd960952",
-  "lastmod": "2026-11-17"
+  "hash": "0fcbaf4e4670aa37",
+  "lastmod": "2026-11-18"
  },
  "produits/tech.html": {
   "hash": "98a83bb9b2ea2f1c",
