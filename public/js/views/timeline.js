@@ -9,7 +9,7 @@ const fmtPos = (t) => `${fmtTime(t)}.${String(Math.floor((Math.max(0, t) % 1) * 
 
 export function createTimeline(o) {
   let pps = Number(localStorage.getItem('studio.tl.pps')) || 30; // pixels par seconde
-  let ROW = Number(localStorage.getItem('studio.tl.row')) || 84;  // hauteur d'une piste (zoom vertical)
+  let ROW = Number(localStorage.getItem('studio.tl.row')) || 108;  // hauteur d'une piste (zoom vertical)
   let snap = localStorage.getItem('studio.tl.snap') === '1';      // aimantation sur la grille (BPM)
   let tool = 'select';
   let selTrack = null; // piste de la sélection
@@ -66,7 +66,7 @@ export function createTimeline(o) {
     const col = colorForTrack(t, i);
     const cv = h('canvas', { style: { width: '100%', height: '100%', display: 'block' } });
     const clip = h('div', { title: tool === 'move' ? 'Glisse pour déplacer la prise' : 'Glisse pour sélectionner un passage', style: { position: 'absolute', top: '6px', bottom: '6px', left: g0 * pps + 'px', width: w + 'px', borderRadius: '6px', overflow: 'hidden', touchAction: 'none',
-      background: col + '38', border: `1px solid ${col}`, opacity: o.effMute(t) ? 0.35 : 1, cursor: tool === 'move' ? 'grab' : 'text' } },
+      background: col + '20', border: `1.5px solid ${col}`, opacity: o.effMute(t) ? 0.35 : 1, cursor: tool === 'move' ? 'grab' : 'text' } },
       h('span.tiny', { style: { position: 'absolute', top: '2px', left: '6px', pointerEvents: 'none', fontWeight: 600, textShadow: '0 0 3px var(--bg)' } }, t.name), cv);
     const laneEl = h('div', { style: { position: 'relative', height: ROW + 'px', width: Math.max(total() * pps + 200, 200) + 'px', borderBottom: '1px solid rgba(127,127,127,.2)' } },
       t.empty ? h('span.small.muted', { style: { position: 'absolute', left: g0 * pps + 8 + 'px', top: '30px' } }, t.armed ? '● Piste vide armée : place la tête de lecture et appuie sur ⏺ Enregistrer' : 'Piste vide : arme-la (●) pour enregistrer dedans') : clip);
@@ -128,13 +128,9 @@ export function createTimeline(o) {
     const minO = minOff();
     inner.innerHTML = '';
     inner.style.width = (HEAD + total() * pps + 200) + 'px';
-    // Grille de mesures calée au tempo (lignes de mesure + temps)
-    const bpmV = o.bpm?.() || 0, bpb = 4;
-    if (bpmV > 0) {
-      const barPx = Math.max(6, (60 / bpmV * bpb) * pps), beatPx = barPx / bpb;
-      inner.style.backgroundImage = `repeating-linear-gradient(90deg, color-mix(in srgb, var(--line) 85%, transparent) 0 1px, transparent 1px ${barPx}px), repeating-linear-gradient(90deg, color-mix(in srgb, var(--line) 28%, transparent) 0 1px, transparent 1px ${beatPx}px)`;
-      inner.style.backgroundPosition = `${HEAD}px 0`; inner.style.backgroundRepeat = 'repeat';
-    } else { inner.style.backgroundImage = 'none'; }
+    // Affichage centré sur les formes d'onde : la grille de mesures reste masquée
+    // pour éviter l'effet séquenceur quadrillé. Le repère temporel reste disponible en haut.
+    inner.style.backgroundImage = 'none';
     inner.append(ruler(minO));
     if (!o.tracks.length) inner.append(h('p.muted.small', { style: { padding: '12px' } }, 'Aucune piste. Importe ton instru (📥) puis enregistre (⏺), ou dis-le à l’assistant.'));
     o.tracks.forEach((t, i) => inner.append(h('div', { style: { display: 'flex' } }, header(t, i), lane(t, i, minO))));
