@@ -7104,7 +7104,7 @@ function pmRakutenIsValidGtin(value){
       const shipping=p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue);
       const shippingLabel=shipping===null||!Number.isFinite(shipping)?"Frais de livraison non renseignés":"Livraison : "+new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(shipping);
       const priceTaxStatus=taxStatusVerified&&p.priceTaxStatus==="included"?"included":"unspecified";
-      const sourceUpdatedAt=p.sourceCreatedAt||null;
+      const sourceUpdatedAt=p.merchantUpdatedAt||p.priceUpdatedAt||null;
       const sourceFresh=fresh&&Boolean(sourceUpdatedAt)&&pmAwinPriceIsFresh(sourceUpdatedAt);
       const hasVerifiedPrice=sourceFresh&&priceTaxStatus==="included";
       const priceStatus=!sourceFresh?"dated":hasVerifiedPrice?"fresh":"tax_unconfirmed";
@@ -7117,12 +7117,12 @@ function pmRakutenIsValidGtin(value){
         priceValue:hasVerifiedPrice?base:null,shippingPriceValue:shipping,
         sourceUrl:p.sourceUrl,gtin:p.gtin||"",sku:p.sku||"",availability:p.availability||"unknown",
         imageSource:p.image,imageSourceName:p.merchant,imageKind:"merchant_feed",
-        imageStatus:"authorized_feed_image",priceTaxStatus,priceStatus,sourceCreatedAt:sourceUpdatedAt,merchantUpdatedAt:sourceUpdatedAt,isRakutenProduct:true
+        imageStatus:"authorized_feed_image",priceTaxStatus,priceStatus,sourceCreatedAt:p.sourceCreatedAt||null,merchantUpdatedAt:sourceUpdatedAt,isRakutenProduct:true
       });
       known.add(p.id);
     });
     const byGtin=new Map();
-    products.filter(p=>fresh&&taxStatusVerified&&pmAwinPriceIsFresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"&&pmRakutenIsValidGtin(p.gtin)).forEach(p=>{
+    products.filter(p=>fresh&&taxStatusVerified&&pmAwinPriceIsFresh(p.merchantUpdatedAt||p.priceUpdatedAt)&&p.priceTaxStatus==="included"&&pmRakutenIsValidGtin(p.gtin)).forEach(p=>{
       const key=String(p.gtin);
       if(!byGtin.has(key))byGtin.set(key,[]);
       byGtin.get(key).push(p);
@@ -7137,7 +7137,7 @@ function pmRakutenIsValidGtin(value){
         offers:rows.map(p=>({
           merchant:p.merchant,price_eur:Number(p.priceValue),
           shipping_price_eur:p.shippingPriceValue===null||p.shippingPriceValue===undefined?null:Number(p.shippingPriceValue),
-          url:p.sourceUrl,checked_at:p.sourceCreatedAt,currency:"EUR",
+          url:p.sourceUrl,checked_at:p.merchantUpdatedAt||p.priceUpdatedAt||null,currency:"EUR",
           price_tax_status:p.priceTaxStatus==="included"?"included":"unspecified",availability:p.availability||"unknown",
           freshness_max_age_hours:48,stale:false
         }))

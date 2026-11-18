@@ -150,6 +150,11 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v
       - name: Tester l'affiliation Amazon, le consentement et l'import CSV officiel
         run: python3 -m unittest discover -s tests -p 'test_tracking_and_affiliation.py' -v
+
+      - name: Tester la visibilité des comparaisons et le coût total
+        run: |
+          python3 -m unittest discover -s tests -p 'test_catalogue_comparison_visibility.py' -v
+          python3 -m unittest discover -s tests -p 'test_catalogue_total_price_display.py' -v
       - name: Tester les réponses OpenRouter vides et les conseils IA
         run: |
           python3 -m py_compile scripts/generate_ai_guides.py

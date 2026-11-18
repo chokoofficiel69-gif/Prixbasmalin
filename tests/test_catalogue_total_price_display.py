@@ -102,11 +102,13 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn("Dernier relevé marchand du ", source)
         self.assertIn("TVA non confirmée par la source : prix exclu des comparaisons.", source)
 
-    def test_rakuten_comparison_uses_each_merchants_source_timestamp(self):
+    def test_rakuten_comparison_uses_each_merchants_product_price_timestamp(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn("const sourceFresh=fresh&&Boolean(sourceUpdatedAt)&&pmAwinPriceIsFresh(sourceUpdatedAt);", source)
-        self.assertIn('products.filter(p=>fresh&&taxStatusVerified&&pmAwinPriceIsFresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"', source)
-        self.assertIn("checked_at:p.sourceCreatedAt,currency:", source)
+        self.assertIn("const sourceUpdatedAt=p.merchantUpdatedAt||p.priceUpdatedAt||null;", source)
+        self.assertIn('products.filter(p=>fresh&&taxStatusVerified&&pmAwinPriceIsFresh(p.merchantUpdatedAt||p.priceUpdatedAt)&&p.priceTaxStatus==="included"', source)
+        self.assertIn("checked_at:p.merchantUpdatedAt||p.priceUpdatedAt||null,currency:", source)
+        self.assertNotIn("pmAwinPriceIsFresh(p.sourceCreatedAt)", source)
 
 
 if __name__ == "__main__":

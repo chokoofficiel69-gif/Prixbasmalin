@@ -77,6 +77,15 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn('offer.shipping_price_eur??p.shippingPriceValue', source)
         self.assertIn('Boolean(merchant)&&', source)
 
+    def test_rakuten_feed_creation_timestamp_is_never_used_as_product_price_timestamp(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('const sourceUpdatedAt=p.merchantUpdatedAt||p.priceUpdatedAt||null;', source)
+        self.assertIn('sourceCreatedAt:p.sourceCreatedAt||null,merchantUpdatedAt:sourceUpdatedAt', source)
+        self.assertIn('pmAwinPriceIsFresh(p.merchantUpdatedAt||p.priceUpdatedAt)', source)
+        self.assertIn('checked_at:p.merchantUpdatedAt||p.priceUpdatedAt||null', source)
+        self.assertNotIn('const sourceUpdatedAt=p.sourceCreatedAt||null;', source)
+        self.assertNotIn('pmAwinPriceIsFresh(p.sourceCreatedAt)', source)
+
     def test_related_suggestions_are_only_added_when_no_exact_text_match_exists(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn('if(q&&exactMatchCount===0&&found.length<20&&relatedRule&&!selectedBrand)', source)
