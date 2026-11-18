@@ -1,1 +1,7 @@
 google.com, pub-6459242759876759, DIRECT, f08c47fec0942fa0
+OWNERDOMAIN=prixbasmalin.fr
+MANAGERDOMAIN=themoneytizer.com
+INVENTORYPARTNERDOMAIN=pubx.ai
+themoneytizer.com,133684,DIRECT
+improvedigital.com, 1602_133684, DIRECT
+improvedigital.com, 1033_133684, DIRECT
