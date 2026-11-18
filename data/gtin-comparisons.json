@@ -1,22 +1,22 @@
 {
  "schema_version": 1,
  "status": "ok",
- "generated_at": "2026-11-18T12:14:47.917743Z",
+ "generated_at": "2026-11-18T15:48:15.267280Z",
  "freshness_max_age_hours": 48,
  "method": "GTIN valide commun à au moins deux marchands ; marque, contenance et nom contrôlés pour refuser les faux rapprochements.",
  "counts": {
-  "gtins_with_two_merchants": 126,
-  "comparisons": 99,
+  "gtins_with_two_merchants": 124,
+  "comparisons": 97,
   "comparisons_with_two_current_offers": 0,
-  "offers": 198,
-  "offers_stale_or_undated": 198,
+  "offers": 194,
+  "offers_stale_or_undated": 194,
   "offers_tax_confirmed": 0,
   "rejected": {
    "name_mismatch": 13,
    "brand_mismatch": 14
   },
   "merchant_pairs": {
-   "Nicchia Luxury / Perfumeria Comas FR": 99
+   "Nicchia Luxury / Perfumeria Comas FR": 97
   }
  },
  "products": [
@@ -2508,8 +2508,8 @@
    "id": "gtin-08016741082481",
    "gtin": "08016741082481",
    "name": "Tiziana Terenzi Al Contrario Extrait de Parfum 50 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/109319-1_s.webp",
+   "brand": "Tiziana Terenzi",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001361530043-01.jpg?v=1758209146",
    "identity": {
     "type": "gtin",
     "checks": [
@@ -2520,20 +2520,6 @@
     ]
    },
    "offers": [
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 190.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=39179013117&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
     {
      "merchant": "Nicchia Luxury",
      "source": "rakuten",
@@ -2547,6 +2533,20 @@
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
      "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 220.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179013117&a=3137386&m=105475",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": true
     }
    ]
   },
@@ -2554,8 +2554,8 @@
    "id": "gtin-08016741092480",
    "gtin": "08016741092480",
    "name": "Tiziana Terenzi Orion Extrait de Parfum 100 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/109341-1_s.webp",
+   "brand": "Tiziana Terenzi",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001361930043-01.jpg?v=1758209472",
    "identity": {
     "type": "gtin",
     "checks": [
@@ -2566,20 +2566,6 @@
     ]
    },
    "offers": [
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 260.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=39179010207&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
     {
      "merchant": "Nicchia Luxury",
      "source": "rakuten",
@@ -2593,50 +2579,18 @@
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
      "stale": true
-    }
-   ]
-  },
-  {
-   "id": "gtin-08016741132322",
-   "gtin": "08016741132322",
-   "name": "Tiziana Terenzi Maremma Extrait de Parfum 100 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/109339-1_s.webp",
-   "identity": {
-    "type": "gtin",
-    "checks": [
-     "gtin_check_digit",
-     "brand",
-     "quantity",
-     "name_veto"
-    ]
-   },
-   "offers": [
+    },
     {
      "merchant": "Perfumeria Comas FR",
      "source": "awin",
-     "price_eur": 190.0,
+     "price_eur": 300.0,
      "shipping_price_eur": 0.0,
      "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=39179013118&a=3137386&m=105475",
+     "url": "https://www.awin1.com/pclick.php?p=39179010207&a=3137386&m=105475",
      "checked_at": null,
      "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
-    {
-     "merchant": "Nicchia Luxury",
-     "source": "rakuten",
-     "price_eur": 220.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.54306618839137435953124&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Ftiziana-terenzi-maremma-extrait-de-parfum-unisex%3Fvariant%3D56535948132736",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "in_stock",
      "freshness_max_age_hours": 48,
      "stale": true
     }
@@ -2646,8 +2600,8 @@
    "id": "gtin-08016741152535",
    "gtin": "08016741152535",
    "name": "Tiziana Terenzi Porpora Extrait de Parfum 100 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/109343-1_s.webp",
+   "brand": "Tiziana Terenzi",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001361980043-01.jpg?v=1758209510",
    "identity": {
     "type": "gtin",
     "checks": [
@@ -2658,20 +2612,6 @@
     ]
    },
    "offers": [
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 300.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=39179010208&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
     {
      "merchant": "Nicchia Luxury",
      "source": "rakuten",
@@ -2685,6 +2625,20 @@
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
      "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 345.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010208&a=3137386&m=105475",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": true
     }
    ]
   },
@@ -2692,8 +2646,8 @@
    "id": "gtin-08016741482601",
    "gtin": "08016741482601",
    "name": "Tiziana Terenzi Poggia Extrait de Parfum 100 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/115139-1_s.webp",
+   "brand": "Tiziana Terenzi",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001361960043-01.jpg?v=1758209504",
    "identity": {
     "type": "gtin",
     "checks": [
@@ -2704,20 +2658,6 @@
     ]
    },
    "offers": [
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 500.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=39179010919&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
     {
      "merchant": "Nicchia Luxury",
      "source": "rakuten",
@@ -2731,6 +2671,20 @@
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
      "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 575.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179010919&a=3137386&m=105475",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": true
     }
    ]
   },
@@ -2738,8 +2692,8 @@
    "id": "gtin-08016741502606",
    "gtin": "08016741502606",
    "name": "Tiziana Terenzi Telea Extrait de Parfum 100 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/115140-1_s.webp",
+   "brand": "Tiziana Terenzi",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001362070043-01.jpg?v=1758209587",
    "identity": {
     "type": "gtin",
     "checks": [
@@ -2750,20 +2704,6 @@
     ]
    },
    "offers": [
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 500.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=40209899079&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
     {
      "merchant": "Nicchia Luxury",
      "source": "rakuten",
@@ -2777,6 +2717,20 @@
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
      "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 575.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=40209899079&a=3137386&m=105475",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": true
     }
    ]
   },
@@ -2784,8 +2738,8 @@
    "id": "gtin-08016741582554",
    "gtin": "08016741582554",
    "name": "Tiziana Terenzi Casanova Extrait de Parfum 100 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/109325-1_s.webp",
+   "brand": "Tiziana Terenzi",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001361570043-01.jpg?v=1758209232",
    "identity": {
     "type": "gtin",
     "checks": [
@@ -2796,20 +2750,6 @@
     ]
    },
    "offers": [
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 380.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=41517730791&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
     {
      "merchant": "Nicchia Luxury",
      "source": "rakuten",
@@ -2823,6 +2763,20 @@
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
      "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 430.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41517730791&a=3137386&m=105475",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": true
     }
    ]
   },
@@ -2830,8 +2784,8 @@
    "id": "gtin-08016741632433",
    "gtin": "08016741632433",
    "name": "Tiziana Terenzi Andromeda Extrait de Parfum 100 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/109320-1_s.webp",
+   "brand": "Tiziana Terenzi",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001361540043-01.jpg?v=1758209157",
    "identity": {
     "type": "gtin",
     "checks": [
@@ -2842,20 +2796,6 @@
     ]
    },
    "offers": [
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 260.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=41768368060&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
     {
      "merchant": "Nicchia Luxury",
      "source": "rakuten",
@@ -2869,6 +2809,20 @@
      "availability": "in_stock",
      "freshness_max_age_hours": 48,
      "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 300.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=41768368060&a=3137386&m=105475",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": true
     }
    ]
   },
@@ -2876,8 +2830,8 @@
    "id": "gtin-08016741652431",
    "gtin": "08016741652431",
    "name": "Tiziana Terenzi Ursa Extrait de Parfum 100 ml",
-   "brand": "TIZIANA TERENZI",
-   "image": "https://perfumeriacomas.com/cdnassets/products/109349-1_s.webp",
+   "brand": "Tiziana Terenzi",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/001362120043-01.jpg?v=1758209621",
    "identity": {
     "type": "gtin",
     "checks": [
@@ -2889,20 +2843,6 @@
    },
    "offers": [
     {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 260.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=39179011991&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
-    {
      "merchant": "Nicchia Luxury",
      "source": "rakuten",
      "price_eur": 300.0,
@@ -2913,6 +2853,20 @@
      "checked_at_basis": null,
      "price_tax_status": "unspecified",
      "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 300.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=39179011991&a=3137386&m=105475",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
      "freshness_max_age_hours": 48,
      "stale": true
     }
@@ -3553,52 +3507,6 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=41366819476&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    }
-   ]
-  },
-  {
-   "id": "gtin-08033488155063",
-   "gtin": "08033488155063",
-   "name": "Xerjoff Renaissance Eau de Parfum 100 ml",
-   "brand": "Xerjoff",
-   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000453160043-01.jpg?v=1758210976",
-   "identity": {
-    "type": "gtin",
-    "checks": [
-     "gtin_check_digit",
-     "brand",
-     "quantity",
-     "name_veto"
-    ]
-   },
-   "offers": [
-    {
-     "merchant": "Nicchia Luxury",
-     "source": "rakuten",
-     "price_eur": 245.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.54306992107842252708888&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fxerjoff-renaissance-eau-de-parfum-unisex%3Fvariant%3D56535969661312",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "in_stock",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 245.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=42803781229&a=3137386&m=105475",
      "checked_at": null,
      "checked_at_basis": null,
      "price_tax_status": "unspecified",
