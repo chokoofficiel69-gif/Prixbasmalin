@@ -1249,7 +1249,7 @@
  "rotation": {
   "interval_hours": 48,
   "last_rotated_at": "2026-11-18T13:23:07.919860Z",
-  "status": "rotated",
+  "status": "waiting_48h",
   "selected_count": 48
  },
  "rotation_history": [
