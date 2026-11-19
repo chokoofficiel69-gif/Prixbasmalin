@@ -41,6 +41,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Tester l'import CSV PrixTracker
+        run: node --test price-engine/import-prixtracker.test.mjs
       - name: Télécharger les exports publics PrixTracker via data.gouv.fr
         run: node price-engine/sync-prixtracker.mjs
       - name: Valider les relevés importés
