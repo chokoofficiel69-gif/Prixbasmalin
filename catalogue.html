@@ -6028,6 +6028,21 @@ async function pmLoadAwinCatalogue(){
       }
       const existing=known.get(product.id);
       if(existing){
+        if(existing.isDiscoveryProduct){
+          // La fiche d'aperçu reste sans prix jusqu'au chargement du flux complet.
+          // À ce moment, seules les valeurs réellement fournies par Awin sont reprises.
+          existing.desc=product.desc||existing.desc;
+          existing.query=product.query||existing.query;
+          existing.price=product.price||"";
+          existing.priceValue=product.priceValue??null;
+          existing.listedPriceValue=product.listedPriceValue??null;
+          existing.priceStatus=product.priceStatus||"unavailable";
+          existing.priceTaxStatus=product.priceTaxStatus||"unspecified";
+          existing.merchantUpdatedAt=product.merchantUpdatedAt||null;
+          existing.shippingPriceValue=product.shippingPriceValue??null;
+          existing.availability=product.availability||"unknown";
+          existing.feedFetchedAt=product.feedFetchedAt||null;
+        }
         // Les visuels du flux affilié autorisé remplacent les photos génériques,
         // sans toucher au nom, au lien, au prix ni aux autres données de la fiche.
         const currentImage=String(existing.image||"");
@@ -6081,6 +6096,44 @@ async function pmLoadAwinCatalogue(){
     console.warn("Le flux de produits autorisés est momentanément indisponible.");
   }
 }
+async function pmLoadHomeDealsPreview(){
+  try{
+    const response=await fetch("/data/home-deals.json",{cache:"no-cache"});
+    if(!response.ok)return;
+    const feed=await response.json();
+    if(!Array.isArray(feed?.gifts))return;
+    const familyCategories={parfum:"beauty",bougie:"home",maison:"home",tech:"tech",mode:"fashion",autre:"other"};
+    const known=new Set(productData.map(product=>product.id));
+    const seenImages=new Set();
+    feed.gifts.forEach(gift=>{
+      const image=String(gift?.image||"");
+      const url=String(gift?.url||"");
+      const checkedAt=Date.parse(gift?.image_checked_at||gift?.image_verified_at||"");
+      if(!gift?.id||!gift.name||gift.image_verified!==true||gift.image_check_status!=="ok"||
+         gift.image_provenance!=="Flux marchand Awin autorisé"||!Number.isFinite(checkedAt)||
+         !/^https:\/\//i.test(image)||!/^https:\/\//i.test(url)||
+         known.has(gift.id)||seenImages.has(image))return;
+      productData.push({
+        id:gift.id,name:gift.name,desc:gift.family_label||"Sélection partenaire",
+        category:familyCategories[gift.family]||"other",brand:"",
+        query:gift.name,image,merchant:gift.merchant||"Marchand partenaire",
+        price:"",priceValue:null,listedPriceValue:null,shippingPriceValue:null,
+        sourceUrl:url,availability:"unknown",priceStatus:"unavailable",
+        priceTaxStatus:gift.price_tax_status||"unspecified",
+        imageSource:image,imageSourceName:gift.merchant||"Marchand partenaire",
+        imageKind:"merchant_feed",imageStatus:"authorized_feed_image",
+        imageVerifiedAt:gift.image_verified_at||gift.image_checked_at||null,
+        imageProvenance:gift.image_provenance,isDiscoveryProduct:true,isAwinProduct:true,
+        feedFetchedAt:feed.awin_fetched_at||null
+      });
+      known.add(gift.id);
+      seenImages.add(image);
+    });
+  }catch(error){
+    console.warn("Sélection vérifiée du catalogue momentanément indisponible.");
+  }
+}
+
 let selectedBrand="";
 let pmCurrentPage=1;
 const pmPageSize=60;
@@ -6129,7 +6182,7 @@ function render(){
     if(selectedBrand && pmSearchNorm(p.brand)!==pmSearchNorm(selectedBrand))return false;
     if(typeof window.pmFilterPasses==="function"&&!window.pmFilterPasses(p))return false;
     // Navigation : uniquement des fiches avec photo et prix. La recherche montre tout (fiches sans prix en dernier).
-    if(!q)return pmHasRealProductImage(p)&&pmProductHasAnyPrice(p);
+    if(!q)return pmHasRealProductImage(p)&&(pmProductHasAnyPrice(p)||p.isDiscoveryProduct===true);
     const haystack=pmSearchNorm([p.name,p.desc,p.query,p.brand,p.category,p.color,p.size,p.product_type,p.gtin,p.merchant].join(" "));
     return correctedQuery.every(term=>{
       const variants=pmSearchSynonyms[term]||[term];
@@ -6235,8 +6288,8 @@ function render(){
   const availableBrands=[...new Set(catalogueData.filter(p=>category==="all"||(Array.isArray(category)?category.includes(p.category):p.category===category)).map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   filtersEl.innerHTML="";
   filtersEl.hidden=false;
-  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";pmCurrentPage=1;render();});filtersEl.append(allBrand);
-  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;pmCurrentPage=1;render();});filtersEl.append(button);});
+  const allBrand=document.createElement("button");allBrand.type="button";allBrand.className="pm-brand-filter"+(!selectedBrand?" active":"");allBrand.textContent="Toutes les marques";allBrand.addEventListener("click",()=>{selectedBrand="";pmCurrentPage=1;render();pmEnsureCatalogueFeedsLoaded();});filtersEl.append(allBrand);
+  availableBrands.forEach(brand=>{const button=document.createElement("button");button.type="button";button.className="pm-brand-filter"+(pmSearchNorm(selectedBrand)===pmSearchNorm(brand)?" active":"");button.textContent=brand;button.addEventListener("click",()=>{selectedBrand=selectedBrand===brand?"":brand;pmCurrentPage=1;render();pmEnsureCatalogueFeedsLoaded();});filtersEl.append(button);});
   // Les statistiques techniques du catalogue restent internes et ne sont pas affichées aux visiteurs.
   const totalPages=Math.max(1,Math.ceil(found.length/pmPageSize));
   pmCurrentPage=Math.min(Math.max(1,pmCurrentPage),totalPages);
@@ -6946,10 +6999,21 @@ function openAmazonSearch(term){
  const url="https://www.amazon.fr/s?"+new URLSearchParams({k:query,s:"price-asc-rank",tag:"prixbasmalin2-21"}).toString();
  window.location.href=url;
 }
+// Les catalogues complets sont volumineux : le premier écran utilise la sélection légère vérifiée.
+let pmAwinCataloguePromise=null;
+function pmEnsureAwinCatalogueLoaded(){
+  if(!pmAwinCataloguePromise)pmAwinCataloguePromise=pmLoadAwinCatalogue().then(render);
+  return pmAwinCataloguePromise;
+}
+function pmEnsureCatalogueFeedsLoaded(){
+  const tasks=[pmEnsureAwinCatalogueLoaded()];
+  if(typeof window.pmEnsureRakutenCatalogueLoaded==="function")tasks.push(window.pmEnsureRakutenCatalogueLoaded());
+  return Promise.all(tasks);
+}
 // Recherche transmise par l'adresse (?q=…), par exemple depuis le comparateur ou la page d'erreur.
-try{const pmUrlQuery=new URLSearchParams(location.search).get("q");if(pmUrlQuery){searchEl.value=pmUrlQuery.slice(0,120);setTimeout(()=>{render();document.getElementById("products")?.scrollIntoView({block:"start"});},0);}}catch(_){}
-amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();selectedBrand="";render();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
-searchEl.addEventListener("input",()=>{selectedBrand="";render();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmCurrentPage=1;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render()});render();pmLoadAwinCatalogue().then(render);
+try{const pmUrlQuery=new URLSearchParams(location.search).get("q");if(pmUrlQuery){searchEl.value=pmUrlQuery.slice(0,120);setTimeout(()=>{render();pmEnsureCatalogueFeedsLoaded();document.getElementById("products")?.scrollIntoView({block:"start"});},0);}}catch(_){}
+amazonSearchForm.addEventListener("submit",e=>{e.preventDefault();selectedBrand="";render();pmEnsureCatalogueFeedsLoaded();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"});});
+searchEl.addEventListener("input",()=>{selectedBrand="";render();if(searchEl.value.trim().length>=2)pmEnsureCatalogueFeedsLoaded();});document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;pmCurrentPage=1;document.querySelectorAll("#filters button").forEach(x=>x.classList.toggle("active",x===b));render();pmEnsureCatalogueFeedsLoaded()});render();pmLoadHomeDealsPreview().then(render);if(categoryParam!=="all")setTimeout(pmEnsureCatalogueFeedsLoaded,0);
 </script>  
 <script>
 
@@ -7188,7 +7252,7 @@ function pmRakutenIsValidGtin(value){
   for(let i=numbers.length-1;i>=0;i--){total+=numbers[i]*weight;weight=weight===3?1:3;}
   return (10-total%10)%10===check;
 }
-(async function pmLoadRakutenCatalogue(){
+async function pmLoadRakutenCatalogue(){
   if(!document.querySelector(".discovery-shelf"))return;
   try{
     const response=await fetch("/data/rakuten-products.json",{cache:"no-store"});
@@ -7252,7 +7316,12 @@ function pmRakutenIsValidGtin(value){
   }catch(error){
     console.warn("Import d’un flux partenaire indisponible ; le catalogue principal reste accessible.");
   }
-})();
+}
+let pmRakutenCataloguePromise=null;
+window.pmEnsureRakutenCatalogueLoaded=function(){
+  if(!pmRakutenCataloguePromise)pmRakutenCataloguePromise=pmLoadRakutenCatalogue();
+  return pmRakutenCataloguePromise;
+};
 </script>
 
 <script id="pm-gtin-comparisons-loader">
