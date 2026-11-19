@@ -6999,6 +6999,7 @@ function openAmazonSearch(term){
  const url="https://www.amazon.fr/s?"+new URLSearchParams({k:query,s:"price-asc-rank",tag:"prixbasmalin2-21"}).toString();
  window.location.href=url;
 }
+// Les catalogues complets sont volumineux : le premier écran utilise la sélection légère vérifiée.
 let pmAwinCataloguePromise=null;
 function pmEnsureAwinCatalogueLoaded(){
   if(!pmAwinCataloguePromise)pmAwinCataloguePromise=pmLoadAwinCatalogue().then(render);
@@ -7320,7 +7321,7 @@ let pmRakutenCataloguePromise=null;
 window.pmEnsureRakutenCatalogueLoaded=function(){
   if(!pmRakutenCataloguePromise)pmRakutenCataloguePromise=pmLoadRakutenCatalogue();
   return pmRakutenCataloguePromise;
-};;
+};
 </script>
 
 <script id="pm-gtin-comparisons-loader">
