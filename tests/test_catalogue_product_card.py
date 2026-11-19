@@ -54,9 +54,11 @@ class CatalogueProductCardTests(unittest.TestCase):
         self.assertNotIn("4 étoiles et plus", self.source)
 
 
-    def test_browsing_only_shows_products_with_photo_and_price(self):
-        self.assertIn("if(!q)return pmHasRealProductImage(p)&&pmProductHasAnyPrice(p);", self.source)
+    def test_browsing_shows_verified_photo_products_or_unpriced_discovery_preview(self):
+        self.assertIn("if(!q)return pmHasRealProductImage(p)&&(pmProductHasAnyPrice(p)||p.isDiscoveryProduct===true);", self.source)
         self.assertIn("function pmProductHasAnyPrice(product){", self.source)
+        self.assertIn("priceValue:null,listedPriceValue:null", self.source)
+        self.assertIn('gift.image_verified!==true', self.source)
 
     def test_catalogue_products_reuse_comparison_sheets_by_exact_name(self):
         self.assertIn('<script id="pm-product-sheets-link">', self.source)
