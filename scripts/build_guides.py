@@ -292,6 +292,11 @@ def render(g, style, footer):
 
 
 def render_index(style, footer):
+    footer = footer.replace(
+        '  <a href="/a-propos.html">À propos</a>',
+        '  <a href="/a-propos.html">À propos</a>\n  <a href="/methodologie-prix.html">Méthode de comparaison</a>',
+        1,
+    )
     cards = "".join(f'<section class="faq"><h3><a href="/{s}.html">{e(h)}</a></h3><p>{e(d)}</p></section>' for s, h, d in all_guides())
     ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": "Accueil", "item": SITE + "/"},
@@ -325,6 +330,7 @@ def render_index(style, footer):
   <section class="hero"><div class="eyebrow">Guides d’achat</div><h1>Bien choisir et payer moins cher</h1>
   <p class="lead">Nos guides pratiques pour comprendre les critères qui comptent vraiment, éviter les options inutiles et repérer les vraies bonnes affaires.</p></section>
   {cards}
+  <section class="faq"><h2>Comment lire les prix affichés ?</h2><p>Avant de comparer deux produits, vérifiez leur référence exacte, la date du relevé et la différence entre un prix historique, une offre marchande et un lien de recherche.</p><p><a class="cta" href="/methodologie-prix.html">Comprendre notre méthode de comparaison</a></p></section>
   <h2>Comparer les prix</h2>
   <p><a class="cta" href="/prix/">Comparateur high-tech</a> <a class="cta" href="/idees-cadeaux/">Idées cadeaux par budget</a> <a class="cta" href="/catalogue.html">Catalogue</a></p>
 </main>
