@@ -3,27 +3,27 @@
  "awin_fetched_at": "2026-11-19T13:46:37.891Z",
  "sheets_period": {
   "from": "2026-10-09",
-  "to": "2026-11-16"
+  "to": "2026-11-19"
  },
  "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
   {
-   "id": "airpods-4",
-   "name": "AirPods 4",
+   "id": "airpods-pro-3",
+   "name": "AirPods Pro 3",
    "brand": "Apple",
    "category": "audio",
    "category_label": "Écouteurs & casques",
-   "image": "/assets/produits/airpods-4.jpg",
+   "image": "/assets/produits/airpods-pro-3.jpg",
    "image_credit": {
-    "author": "AppleFans 1",
-    "license": "CC0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_4.jpg",
+    "author": "Burkhard Mücke",
+    "license": "CC BY-SA 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 119.95,
-   "max_price_eur": 240.99,
-   "offer_count": 25,
-   "last_date": "2026-11-16",
+   "min_price_eur": 198.99,
+   "max_price_eur": 325.88,
+   "offer_count": 26,
+   "last_date": "2026-11-19",
    "price_kind": "historical"
   },
   {
@@ -39,10 +39,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_VR2.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 399.99,
-   "max_price_eur": 537.09,
+   "min_price_eur": 339.0,
+   "max_price_eur": 496.59,
    "offer_count": 19,
-   "last_date": "2026-11-15",
+   "last_date": "2026-11-19",
    "price_kind": "historical"
   },
   {
@@ -61,7 +61,7 @@
    "min_price_eur": 49.99,
    "max_price_eur": 98.28,
    "offer_count": 18,
-   "last_date": "2026-11-16",
+   "last_date": "2026-11-19",
    "price_kind": "historical"
   },
   {
@@ -77,10 +77,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 295.73,
-   "max_price_eur": 427.89,
+   "min_price_eur": 304.49,
+   "max_price_eur": 429.0,
    "offer_count": 17,
-   "last_date": "2026-11-16",
+   "last_date": "2026-11-18",
    "price_kind": "historical"
   },
   {
@@ -96,10 +96,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_-_Red.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 219.99,
-   "max_price_eur": 308.39,
+   "min_price_eur": 239.99,
+   "max_price_eur": 308.74,
    "offer_count": 17,
-   "last_date": "2026-11-16",
+   "last_date": "2026-11-19",
    "price_kind": "historical"
   },
   {
@@ -118,26 +118,26 @@
    "min_price_eur": 1199.0,
    "max_price_eur": 1399.0,
    "offer_count": 16,
-   "last_date": "2026-11-16",
+   "last_date": "2026-11-18",
    "price_kind": "historical"
   },
   {
-   "id": "iphone-17-pro",
-   "name": "iPhone 17 Pro",
+   "id": "iphone-15",
+   "name": "iPhone 15",
    "brand": "Apple",
    "category": "smartphone",
    "category_label": "Smartphones",
-   "image": "/assets/produits/iphone-17-pro.jpg",
+   "image": "/assets/produits/iphone-15.jpg",
    "image_credit": {
-    "author": "Eugen Prostakov",
-    "license": "CC BY 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_17_Pro.png",
+    "author": "IPHONE 15",
+    "license": "CC BY-SA 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_15.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 1085.59,
-   "max_price_eur": 1229.0,
+   "min_price_eur": 611.0,
+   "max_price_eur": 1053.51,
    "offer_count": 16,
-   "last_date": "2026-11-16",
+   "last_date": "2026-11-19",
    "price_kind": "historical"
   },
   {
@@ -156,45 +156,45 @@
    "min_price_eur": 48.99,
    "max_price_eur": 59.36,
    "offer_count": 12,
-   "last_date": "2026-11-16",
+   "last_date": "2026-11-18",
    "price_kind": "historical"
   },
   {
-   "id": "airpods-pro-3",
-   "name": "AirPods Pro 3",
+   "id": "airpods-4",
+   "name": "AirPods 4",
    "brand": "Apple",
    "category": "audio",
    "category_label": "Écouteurs & casques",
-   "image": "/assets/produits/airpods-pro-3.jpg",
+   "image": "/assets/produits/airpods-4.jpg",
    "image_credit": {
-    "author": "Burkhard Mücke",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
+    "author": "AppleFans 1",
+    "license": "CC0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_4.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 196.99,
-   "max_price_eur": 325.88,
+   "min_price_eur": 119.95,
+   "max_price_eur": 197.99,
    "offer_count": 25,
-   "last_date": "2026-11-16",
+   "last_date": "2026-11-19",
    "price_kind": "historical"
   },
   {
-   "id": "playstation-portal",
-   "name": "PlayStation Portal",
+   "id": "dualsense",
+   "name": "Manette DualSense",
    "brand": "Sony",
    "category": "accessoire-ps5",
    "category_label": "Accessoires PS5",
-   "image": "/assets/produits/playstation-portal.jpg",
+   "image": "/assets/produits/dualsense.jpg",
    "image_credit": {
-    "author": "ArlindoPereira",
-    "license": "CC BY 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_Portal.jpg",
+    "author": "Sergey Galyonkin",
+    "license": "CC BY-SA 2.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Playstation_Dualsense_controller.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 237.9,
-   "max_price_eur": 254.5,
-   "offer_count": 13,
-   "last_date": "2026-11-15",
+   "min_price_eur": 54.99,
+   "max_price_eur": 70.3,
+   "offer_count": 14,
+   "last_date": "2026-11-19",
    "price_kind": "historical"
   },
   {
@@ -212,8 +212,8 @@
    },
    "min_price_eur": 150.01,
    "max_price_eur": 201.9,
-   "offer_count": 10,
-   "last_date": "2026-11-16",
+   "offer_count": 11,
+   "last_date": "2026-11-19",
    "price_kind": "historical"
   },
   {
@@ -230,9 +230,9 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 2278.81,
-   "max_price_eur": 2949.98,
+   "max_price_eur": 2949.99,
    "offer_count": 14,
-   "last_date": "2026-11-16",
+   "last_date": "2026-11-18",
    "price_kind": "historical"
   }
  ],
