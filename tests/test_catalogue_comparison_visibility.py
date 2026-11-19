@@ -14,7 +14,7 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
     def test_verified_comparison_shelf_stays_hidden_until_it_has_offers(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn('<section id="verifiedShelf" class="verified-shelf" aria-live="polite" hidden>', source)
-        self.assertIn('if(!usable.length){\n    verifiedShelf.hidden=true;\n    verifiedProductsEl.innerHTML="";\n    return;\n  }', source)
+        self.assertIn('if(!usable.length){\n    verifiedShelf.hidden=true;\n    verifiedProductsEl.innerHTML="";\n    if(pmVerifiedComparisonEmpty)pmVerifiedComparisonEmpty.hidden=false;\n    return;\n  }', source)
         self.assertIn('verifiedShelf.hidden=false;', source)
 
     def test_verified_comparison_shelf_is_not_unconditionally_hidden_by_css(self):
@@ -108,6 +108,15 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn('render();pmLoadAwinCatalogue().then(render)', source)
         self.assertNotIn('(async function pmLoadRakutenCatalogue()', source)
 
+
+    def test_no_comparison_state_explains_the_public_guardrails(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('id="pmVerifiedComparisonEmpty"', source)
+        self.assertIn("Aucune comparaison multi-marchands vérifiée", source)
+        self.assertIn("TVA explicitement confirmée", source)
+        self.assertIn('if(pmVerifiedComparisonEmpty)pmVerifiedComparisonEmpty.hidden=false;', source)
+        self.assertIn('if(pmVerifiedComparisonEmpty)pmVerifiedComparisonEmpty.hidden=true;', source)
+        self.assertIn('#pmVerifiedComparisonEmpty[hidden]{display:none!important}', source)
 
 if __name__ == "__main__":
     unittest.main()
