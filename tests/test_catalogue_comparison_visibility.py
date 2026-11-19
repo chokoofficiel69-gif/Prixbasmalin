@@ -109,5 +109,14 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn('(async function pmLoadRakutenCatalogue()', source)
 
 
+    def test_no_comparison_state_explains_the_public_guardrails(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('id="pmVerifiedComparisonEmpty"', source)
+        self.assertIn("Aucune comparaison multi-marchands vérifiée", source)
+        self.assertIn("TVA explicitement confirmée", source)
+        self.assertIn('if(pmVerifiedComparisonEmpty)pmVerifiedComparisonEmpty.hidden=false;', source)
+        self.assertIn('if(pmVerifiedComparisonEmpty)pmVerifiedComparisonEmpty.hidden=true;', source)
+        self.assertIn('#pmVerifiedComparisonEmpty[hidden]{display:none!important}', source)
+
 if __name__ == "__main__":
     unittest.main()
