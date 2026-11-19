@@ -91,6 +91,23 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertIn('if(q&&exactMatchCount===0&&found.length<20&&relatedRule&&!selectedBrand)', source)
         self.assertIn('name.textContent=p.name+(p._pmRelatedSuggestion?" • suggestion proche":"");', source)
 
+    def test_catalogue_uses_verified_lightweight_preview_and_lazy_loads_full_feeds(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('async function pmLoadHomeDealsPreview()', source)
+        self.assertIn('gift.image_verified!==true', source)
+        self.assertIn('gift.image_check_status!=="ok"', source)
+        self.assertIn('gift.image_provenance!=="Flux marchand Awin autorisé"', source)
+        self.assertIn('priceValue:null,listedPriceValue:null', source)
+        self.assertIn('isDiscoveryProduct:true', source)
+        self.assertIn('pmProductHasAnyPrice(p)||p.isDiscoveryProduct===true', source)
+        self.assertIn('function pmEnsureAwinCatalogueLoaded()', source)
+        self.assertIn('function pmEnsureCatalogueFeedsLoaded()', source)
+        self.assertIn('window.pmEnsureRakutenCatalogueLoaded=function()', source)
+        self.assertIn('if(searchEl.value.trim().length>=2)pmEnsureCatalogueFeedsLoaded();', source)
+        self.assertIn('if(categoryParam!=="all")setTimeout(pmEnsureCatalogueFeedsLoaded,0);', source)
+        self.assertNotIn('render();pmLoadAwinCatalogue().then(render)', source)
+        self.assertNotIn('(async function pmLoadRakutenCatalogue()', source)
+
 
 if __name__ == "__main__":
     unittest.main()
