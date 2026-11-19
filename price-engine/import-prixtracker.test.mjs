@@ -53,7 +53,7 @@ test("ne remplace pas les prix par des offres en temps réel", async () => {
     assert.equal(run.result.status, 0, run.result.stderr);
     const data = JSON.parse(await fs.readFile(run.output, "utf8"));
     assert.equal(data.status, "historical_reference");
-    assert.match(data.methodology, /pas des offres marchandes en direct/);
+    assert.match(data.methodology, /pas des offres disponibles en temps réel/);
     assert.match(data.attribution, /PrixTracker/);
     assert.match(data.license, /Licence Ouverte 2.0/);
   } finally {
