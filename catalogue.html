@@ -738,6 +738,11 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
   </div>
   <div class="grid" id="verifiedProducts"></div>
 </section>
+<p id="pmVerifiedComparisonEmpty" class="pm-verified-comparison-empty" role="status" aria-live="polite" hidden>Aucune comparaison multi-marchands vérifiée n’est disponible pour le moment. Prix Malin n’affiche que les offres correspondant au même produit, en euros, avec une date marchande récente et une TVA explicitement confirmée. Les fiches de découverte restent disponibles ci-dessous.</p>
+<style id="pm-verified-comparison-empty-style">
+#pmVerifiedComparisonEmpty{margin:12px 0 18px;padding:12px 14px;border:1px solid rgba(249,115,22,.32);border-left:3px solid #f97316;border-radius:10px;background:#fff8f1;color:#5b3b24;font-size:13px;line-height:1.5}
+#pmVerifiedComparisonEmpty[hidden]{display:none!important}
+</style>
 
 <style id="pm-amazon-sheet-shelf-style">
 .pm-amazon-sheet-shelf{margin:22px 0 28px;padding:18px;background:#f5f7fa;border:1px solid #e1e6ed;border-radius:16px}
@@ -834,6 +839,7 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
 </main><script>
 const verifiedShelf=document.getElementById("verifiedShelf");
 const verifiedProductsEl=document.getElementById("verifiedProducts");
+const pmVerifiedComparisonEmpty=document.getElementById("pmVerifiedComparisonEmpty");
 let pmBaseVerifiedProducts=[];
 let pmAwinVerifiedProducts=[];
 let pmRakutenVerifiedProducts=[];
@@ -6725,8 +6731,10 @@ function renderVerifiedProducts(products){
   if(!usable.length){
     verifiedShelf.hidden=true;
     verifiedProductsEl.innerHTML="";
+    if(pmVerifiedComparisonEmpty)pmVerifiedComparisonEmpty.hidden=false;
     return;
   }
+  if(pmVerifiedComparisonEmpty)pmVerifiedComparisonEmpty.hidden=true;
   verifiedShelf.hidden=false;
   usable.forEach(p=>{
     const rows=p.offers.filter(o=>isCurrentVerifiedOffer(o)&&(o.merchant||o.merchant_name||o.retailer)&&/^https:\/\//i.test(String(o.url||o.product_url||""))&&
