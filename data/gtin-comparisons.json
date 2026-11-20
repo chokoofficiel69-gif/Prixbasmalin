@@ -1,22 +1,22 @@
 {
  "schema_version": 1,
  "status": "ok",
- "generated_at": "2026-11-20T12:10:34.140026Z",
+ "generated_at": "2026-11-20T13:30:22.202986Z",
  "freshness_max_age_hours": 48,
  "method": "GTIN valide commun à au moins deux marchands ; marque, contenance et nom contrôlés pour refuser les faux rapprochements.",
  "counts": {
-  "gtins_with_two_merchants": 126,
-  "comparisons": 99,
+  "gtins_with_two_merchants": 125,
+  "comparisons": 98,
   "comparisons_with_two_current_offers": 0,
-  "offers": 198,
-  "offers_stale_or_undated": 198,
+  "offers": 196,
+  "offers_stale_or_undated": 196,
   "offers_tax_confirmed": 0,
   "rejected": {
    "name_mismatch": 13,
    "brand_mismatch": 14
   },
   "merchant_pairs": {
-   "Nicchia Luxury / Perfumeria Comas FR": 99
+   "Nicchia Luxury / Perfumeria Comas FR": 98
   }
  },
  "products": [
@@ -2449,52 +2449,6 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=46428201348&a=3137386&m=105475",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "unknown",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    }
-   ]
-  },
-  {
-   "id": "gtin-05060103310593",
-   "gtin": "05060103310593",
-   "name": "Escentric Molecules Escentric 05 Eau de Toilette 100 ml",
-   "brand": "Escentric Molecules",
-   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000853920043-01.jpg?v=1763638109",
-   "identity": {
-    "type": "gtin",
-    "checks": [
-     "gtin_check_digit",
-     "brand",
-     "quantity",
-     "name_veto"
-    ]
-   },
-   "offers": [
-    {
-     "merchant": "Nicchia Luxury",
-     "source": "rakuten",
-     "price_eur": 155.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.5430618102948320582526940&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Fescentric-molecules-escentric-05-eau-de-toilette-unisex%3Fvariant%3D56540711387520",
-     "checked_at": null,
-     "checked_at_basis": null,
-     "price_tax_status": "unspecified",
-     "availability": "in_stock",
-     "freshness_max_age_hours": 48,
-     "stale": true
-    },
-    {
-     "merchant": "Perfumeria Comas FR",
-     "source": "awin",
-     "price_eur": 155.0,
-     "shipping_price_eur": 0.0,
-     "currency": "EUR",
-     "url": "https://www.awin1.com/pclick.php?p=40267493113&a=3137386&m=105475",
      "checked_at": null,
      "checked_at_basis": null,
      "price_tax_status": "unspecified",
