@@ -768,7 +768,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   const now=Date.now(),maxAge=48*60*60*1000;
   const fresh=v=>{const t=Date.parse(v||"");return Number.isFinite(t)&&now-t>=-5*60*1000&&now-t<=maxAge;};
   if(!fresh(feed.generated_at))return;
-  const deals=feed.products.filter(p=>p&&p.name&&fresh(p.sourceCreatedAt)&&p.priceTaxStatus==="included"&&
+  const deals=feed.products.filter(p=>p&&p.name&&fresh(p.merchantUpdatedAt||p.priceUpdatedAt)&&p.priceTaxStatus==="included"&&
    Number(p.priceValue)>0&&Number(p.regularPriceValue)>Number(p.priceValue)&&
    /^https:\/\/click\.linksynergy\.com\//.test(p.sourceUrl||"")&&/^https:\/\//.test(p.image||""))
    .map(p=>({...p,off:Math.round((1-Number(p.priceValue)/Number(p.regularPriceValue))*100)}))
