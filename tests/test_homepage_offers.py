@@ -47,6 +47,15 @@ class HomepageOffersTests(unittest.TestCase):
         discovery = self.source[discovery_start:discovery_end]
         self.assertIn("fresh(p.sourceCreatedAt)", discovery)
 
+    def test_rakuten_partner_deals_require_product_level_price_timestamp(self):
+        loader_start = self.source.index('<script id="pm-partner-deals-loader">')
+        loader_end = self.source.index("</script>", loader_start)
+        loader = self.source[loader_start:loader_end]
+        self.assertIn("feed.priceTaxStatusVerified!==true", loader)
+        self.assertIn("fresh(feed.generated_at)", loader)
+        self.assertIn("fresh(p.merchantUpdatedAt||p.priceUpdatedAt)", loader)
+        self.assertNotIn("fresh(p.sourceCreatedAt)", loader)
+
     def test_prixtracker_history_is_never_rendered_as_a_current_offer(self):
         self.assertIn('data.status!=="historical_reference"', self.source)
         self.assertIn('note.textContent=sheet.last_date?"Historique · dernier relevé le "+day(sheet.last_date):"Historique des prix";', self.source)
@@ -84,6 +93,7 @@ class HomepageOffersTests(unittest.TestCase):
         self.assertIn('const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";', workflow)
         self.assertIn('priceValue:priceStatus==="fresh"?Number(product.priceValue):null', workflow)
         self.assertIn('age<=maxAgeHours*60*60*1000', workflow)
+        self.assertIn("fresh(p.merchantUpdatedAt||p.priceUpdatedAt)", workflow)
         self.assertIn("Publication GitHub Pages encore en propagation", workflow)
 
 
