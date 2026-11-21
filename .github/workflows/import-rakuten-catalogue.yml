@@ -148,7 +148,8 @@ jobs:
           # Le fichier peut aussi être à la racine selon le compte : on détecte les deux cas,
           # sans supposer un chemin ni désactiver la vérification de clé hôte.
           download_feed() {
-            local mid="$1" filename="$2" output="$3" required="$4" remote_path=""
+            local mid="$1" filename="$2" output="$3" required="$4"
+            local remote_path=""
             local temporary="${output}.part"
             if grep -Fxq "$filename" /tmp/rakuten-root-list.txt; then
               remote_path="$filename"
