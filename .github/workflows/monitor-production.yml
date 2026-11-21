@@ -332,6 +332,10 @@ jobs:
               ! grep -Fq "#verifiedShelf," /tmp/catalogue-after.html &&
               ! grep -Fq 'rows.push({merchant:"Amazon",price:null,' /tmp/catalogue-after.html &&
               ! grep -Fq "liveCheckedAt:p.merchantUpdatedAt||awin.fetched_at" /tmp/home-after.html &&
+              grep -Fq 'fresh(p.merchantUpdatedAt||p.priceUpdatedAt)' /tmp/home-after.html &&
+              grep -Fq 'liveCheckedAt:p.merchantUpdatedAt||p.priceUpdatedAt' /tmp/home-after.html &&
+              ! grep -Fq 'liveCheckedAt:p.sourceCreatedAt' /tmp/home-after.html &&
+              ! grep -Fq 'fresh(p.sourceCreatedAt)&&p.priceTaxStatus' /tmp/home-after.html &&
               ! grep -Fq "p.sourceCreatedAt||rakuten.generated_at" /tmp/home-after.html; then
               echo "Les garde-fous prix et le rail mobile sont visibles sur le site public."
               exit 0
