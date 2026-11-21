@@ -1,22 +1,22 @@
 {
  "schema_version": 1,
  "status": "ok",
- "generated_at": "2026-11-20T13:30:22.202986Z",
+ "generated_at": "2026-11-21T11:46:43.796400Z",
  "freshness_max_age_hours": 48,
  "method": "GTIN valide commun à au moins deux marchands ; marque, contenance et nom contrôlés pour refuser les faux rapprochements.",
  "counts": {
-  "gtins_with_two_merchants": 125,
-  "comparisons": 98,
+  "gtins_with_two_merchants": 126,
+  "comparisons": 99,
   "comparisons_with_two_current_offers": 0,
-  "offers": 196,
-  "offers_stale_or_undated": 196,
+  "offers": 198,
+  "offers_stale_or_undated": 198,
   "offers_tax_confirmed": 0,
   "rejected": {
    "name_mismatch": 13,
    "brand_mismatch": 14
   },
   "merchant_pairs": {
-   "Nicchia Luxury / Perfumeria Comas FR": 98
+   "Nicchia Luxury / Perfumeria Comas FR": 99
   }
  },
  "products": [
@@ -1759,6 +1759,52 @@
      "shipping_price_eur": 0.0,
      "currency": "EUR",
      "url": "https://www.awin1.com/pclick.php?p=39179010735&a=3137386&m=105475",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "unknown",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    }
+   ]
+  },
+  {
+   "id": "gtin-03701415901445",
+   "gtin": "03701415901445",
+   "name": "Initio Parfums Privés Musk Therapy Extrait de Parfum 90 ml",
+   "brand": "Initio Parfums Privés",
+   "image": "https://cdn.shopify.com/s/files/1/0940/3491/9808/files/000292820043-01.jpg?v=1758197346",
+   "identity": {
+    "type": "gtin",
+    "checks": [
+     "gtin_check_digit",
+     "brand",
+     "quantity",
+     "name_veto"
+    ]
+   },
+   "offers": [
+    {
+     "merchant": "Nicchia Luxury",
+     "source": "rakuten",
+     "price_eur": 290.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://click.linksynergy.com/link?id=GnFjGr9kD3Y&offerid=2082485.543063427886420119768190&type=15&murl=https%3A%2F%2Fwww.nicchialuxury.com%2Fproducts%2Finitio-parfums-prives-musk-therapy-extrait-de-parfum-unisex%3Fvariant%3D56541294100864",
+     "checked_at": null,
+     "checked_at_basis": null,
+     "price_tax_status": "unspecified",
+     "availability": "in_stock",
+     "freshness_max_age_hours": 48,
+     "stale": true
+    },
+    {
+     "merchant": "Perfumeria Comas FR",
+     "source": "awin",
+     "price_eur": 290.0,
+     "shipping_price_eur": 0.0,
+     "currency": "EUR",
+     "url": "https://www.awin1.com/pclick.php?p=45778526282&a=3137386&m=105475",
      "checked_at": null,
      "checked_at_basis": null,
      "price_tax_status": "unspecified",
