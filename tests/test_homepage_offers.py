@@ -28,13 +28,24 @@ class HomepageOffersTests(unittest.TestCase):
     def test_homepage_live_prices_require_fresh_merchant_dates_and_explicit_ttc(self):
         self.assertIn("fresh(p.merchantUpdatedAt)", self.source)
         self.assertIn('p.priceTaxStatus==="included"||p.price_tax_status==="included"', self.source)
-        self.assertIn("fresh(p.sourceCreatedAt)", self.source)
         self.assertIn('p.priceTaxStatus==="included"', self.source)
         self.assertIn("liveCheckedAt:p.merchantUpdatedAt", self.source)
         self.assertNotIn("liveCheckedAt:p.merchantUpdatedAt||awin.fetched_at", self.source)
-        self.assertNotIn("p.sourceCreatedAt||rakuten.generated_at", self.source)
         self.assertNotIn("liveDateFromFeed", self.source)
         self.assertIn("Aucun prix TTC frais et confirmé n'est actuellement disponible", self.source)
+
+        rakuten_live_start = self.source.index("const liveRakuten=")
+        rakuten_live_end = self.source.index("const live=[", rakuten_live_start)
+        rakuten_live = self.source[rakuten_live_start:rakuten_live_end]
+        self.assertIn("fresh(p.merchantUpdatedAt||p.priceUpdatedAt)", rakuten_live)
+        self.assertIn("liveCheckedAt:p.merchantUpdatedAt||p.priceUpdatedAt", rakuten_live)
+        self.assertNotIn("sourceCreatedAt", rakuten_live)
+
+    def test_rakuten_file_timestamp_only_gates_discovery_not_live_price(self):
+        discovery_start = self.source.index("const rakutenDiscovery=")
+        discovery_end = self.source.index("const discoveryFallback", discovery_start)
+        discovery = self.source[discovery_start:discovery_end]
+        self.assertIn("fresh(p.sourceCreatedAt)", discovery)
 
     def test_prixtracker_history_is_never_rendered_as_a_current_offer(self):
         self.assertIn('data.status!=="historical_reference"', self.source)
