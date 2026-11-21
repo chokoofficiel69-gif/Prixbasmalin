@@ -153,6 +153,7 @@ jobs:
 
       - name: Tester la visibilité des comparaisons et le coût total
         run: |
+          python3 -m unittest discover -s tests -p 'test_homepage_offers.py' -v
           python3 -m unittest discover -s tests -p 'test_catalogue_comparison_visibility.py' -v
           python3 -m unittest discover -s tests -p 'test_catalogue_total_price_display.py' -v
       - name: Tester les réponses OpenRouter vides et les conseils IA
@@ -333,6 +334,7 @@ jobs:
               ! grep -Fq 'rows.push({merchant:"Amazon",price:null,' /tmp/catalogue-after.html &&
               ! grep -Fq "liveCheckedAt:p.merchantUpdatedAt||awin.fetched_at" /tmp/home-after.html &&
               grep -Fq 'fresh(p.merchantUpdatedAt||p.priceUpdatedAt)' /tmp/home-after.html &&
+              grep -Fq 'const deals=feed.products.filter(p=>p&&p.name&&fresh(p.merchantUpdatedAt||p.priceUpdatedAt)&&p.priceTaxStatus==="included"&&' /tmp/home-after.html &&
               grep -Fq 'liveCheckedAt:p.merchantUpdatedAt||p.priceUpdatedAt' /tmp/home-after.html &&
               ! grep -Fq 'liveCheckedAt:p.sourceCreatedAt' /tmp/home-after.html &&
               ! grep -Fq 'fresh(p.sourceCreatedAt)&&p.priceTaxStatus' /tmp/home-after.html &&
