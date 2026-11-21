@@ -6444,7 +6444,9 @@ function render(){
       pmAwinPriceIsFresh(updateValue);
     const priceDateParsed=priceDateValue?new Date(String(priceDateValue).replace(" ","T")):null;
     const priceDateText=priceDateParsed&&Number.isFinite(priceDateParsed.getTime())?priceDateParsed.toLocaleDateString("fr-FR"):"";
-    const listedPrice=!hasVerifiedPrice&&Number.isFinite(Number(p.listedPriceValue))&&Number(p.listedPriceValue)>0?Number(p.listedPriceValue):null;
+    // Un prix de flux sans date individuelle et TVA confirmée reste une donnée source, pas un prix public vérifié.
+    // Le conserver dans les données permet l’audit, mais ne pas afficher son montant dans le catalogue.
+    const listedPrice=null;
     const sheet=!hasVerifiedPrice&&listedPrice===null&&p.pmSheet&&Array.isArray(p.pmSheet.offers)&&p.pmSheet.offers.length?p.pmSheet:null;
     const sheetUrl=sheet?"/prix/"+encodeURIComponent(sheet.id)+".html":"";
     const sheetDate=sheet?new Date(String(sheet.last_date)+"T12:00:00").toLocaleDateString("fr-FR"):"";
