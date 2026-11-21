@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-20T13:29:24.283Z",
+  "fetched_at": "2026-11-21T12:18:36.402Z",
   "source": "Awin Publisher Enhanced/standard feeds autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
@@ -94,25 +94,25 @@
       "name": "Mibro FR"
     }
   ],
-  "additional_authorized_offers_imported": 23601,
+  "additional_authorized_offers_imported": 23616,
   "counts": {
     "joined_advertisers_checked": 21,
     "pending_advertisers_detected": 23,
-    "additional_authorized_offers_imported": 23601,
-    "products": 20789,
-    "merchant_offers": 23601,
+    "additional_authorized_offers_imported": 23616,
+    "products": 20809,
+    "merchant_offers": 23616,
     "merchants": 19,
-    "brands": 307,
-    "products_with_gtin": 14252,
+    "brands": 309,
+    "products_with_gtin": 14246,
     "products_with_mpn": 13776,
     "products_with_brand_mpn": 13757,
     "multi_merchant_products": 0,
-    "offers_with_shipping": 14592,
-    "offers_with_availability": 18961,
+    "offers_with_shipping": 14590,
+    "offers_with_availability": 18959,
     "offers_with_tax_included": 0,
     "products_other_category": 320,
     "offers_fresh_last_48h": 0,
-    "offers_missing_timestamp": 20601,
+    "offers_missing_timestamp": 20616,
     "offers_stale": 3000,
     "offers_invalid_or_future_timestamp": 0
   }
