@@ -564,8 +564,13 @@ jobs:
           const rakutenIdentity = rakuten.products.filter(p =>
             String(p.gtin || "").trim() || (String(p.brand || "").trim() && String(p.mpn || "").trim())
           ).length;
-          const rakutenDates = rakuten.products.filter(p => {
+          const rakutenSnapshotRecent = rakuten.products.filter(p => {
             const t = Date.parse(p.sourceCreatedAt || "");
+            return Number.isFinite(t) && t <= Date.now() + 5 * 60 * 1000 && Date.now() - t <= 48 * 60 * 60 * 1000;
+          }).length;
+          // sourceCreatedAt date le snapshot du flux, jamais la mise à jour du prix d'un produit.
+          const rakutenPricesFresh = rakuten.products.filter(p => {
+            const t = Date.parse(p.priceUpdatedAt || "");
             return Number.isFinite(t) && t <= Date.now() + 5 * 60 * 1000 && Date.now() - t <= 48 * 60 * 60 * 1000;
           }).length;
           if (rakutenImages !== rakuten.products.length || rakutenLinks !== rakuten.products.length || rakutenIdentity !== rakuten.products.length) {
@@ -584,13 +589,13 @@ jobs:
           console.log("Awin offres :", c.merchant_offers, "— fraîches <48 h :", fresh, "— TTC confirmé :", tax,
             "— sans date :", c.offers_missing_timestamp, "— périmées :", c.offers_stale, ".");
           console.log("Rakuten découverte publique :", rakuten.products.length, "produits ; images autorisées :", rakutenImages,
-            "— liens HTTPS :", rakutenLinks, "— identités :", rakutenIdentity, "— sources <48 h :", rakutenDates, ".");
+            "— liens HTTPS :", rakutenLinks, "— identités :", rakutenIdentity, "— snapshots catalogue <48 h :", rakutenSnapshotRecent, "— prix datés <48 h :", rakutenPricesFresh, ".");
           console.log("Comparaisons GTIN :", g.comparisons, "— offres :", g.offers, "— comparaisons actuelles :", currentComparisons,
             "— offres TTC confirmées :", g.offers_tax_confirmed, "— périmées/sans date :", g.offers_stale_or_undated, ".");
           if (fresh === 0 || tax === 0 || currentComparisons === 0) {
             console.log("AVERTISSEMENT : catalogue reçu et validé, mais aucune comparaison multi-marchand actuelle TTC ne peut être publiée.");
           }
-          if (rakutenDates !== rakuten.products.length) {
+          if (rakutenSnapshotRecent !== rakuten.products.length) {
             console.log("AVERTISSEMENT : certaines références Rakuten sont trop anciennes ou sans date source ; elles ne doivent pas être présentées comme nouveautés.");
           }
           const summary = [
@@ -598,7 +603,7 @@ jobs:
             "",
             "- Awin : " + awin.products.length + " produits compacts ; " + awinStatus.joined_advertisers_checked + " programmes rejoints ; " + awinStatus.pending_advertisers_detected + " en attente.",
             "- Offres Awin fraîches <48 h : " + fresh + " ; TTC explicitement confirmé : " + tax + " ; sans date : " + (c.offers_missing_timestamp || 0) + " ; périmées : " + (c.offers_stale || 0) + ".",
-            "- Rakuten : " + rakuten.products.length + " références découverte ; images autorisées : " + rakutenImages + " ; identités produit : " + rakutenIdentity + ".",
+            "- Rakuten : " + rakuten.products.length + " références découverte ; images autorisées : " + rakutenImages + " ; identités produit : " + rakutenIdentity + " ; snapshots catalogue <48 h : " + rakutenSnapshotRecent + " ; prix datés <48 h : " + rakutenPricesFresh + ".",
             "- GTIN : " + g.comparisons + " correspondances candidates ; comparaisons actuelles : " + currentComparisons + " ; offres TTC confirmées : " + (g.offers_tax_confirmed || 0) + ".",
             "- Conclusion : " + (currentComparisons > 0 && fresh > 0 && tax > 0 ? "comparaisons actuelles détectées." : "catalogues disponibles, mais aucune comparaison multi-marchand actuelle TTC vérifiée.")
           ].join("\n");
