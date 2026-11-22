@@ -303,7 +303,7 @@ def build_block():
 </section>"""
     picks, _ = partner_picks()
     art = [p["image"] for p in picks[:3]] if len(picks) >= 3 else [
-        "/assets/produits/airpods-4.jpg", "/assets/produits/manette-switch-pro.jpg", "/assets/produits/macbook-air-13-m5.jpg"]
+        "/assets/produits/manette-switch-pro.jpg", "/assets/produits/iphone-17-pro.jpg", "/assets/produits/iphone-15-pro.jpg"]
     hero = hero.replace("__HERO_ART__", "".join(
         f'<img class="p p{i}" src="{e(src)}" alt="" loading="lazy">' for i, src in enumerate(art, 1)))
     body = f"""{START}
