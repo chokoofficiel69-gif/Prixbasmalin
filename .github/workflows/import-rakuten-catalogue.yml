@@ -144,6 +144,28 @@ jobs:
           CURL=("${BASE_CURL[@]}" --ignore-content-length --max-time 600 --retry 3 --retry-all-errors --retry-delay 3 --retry-max-time 600)
           "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/" > /tmp/rakuten-root-list.txt
 
+          # Inventaire en lecture seule des fichiers Delta signalés par Rakuten.
+          # Aucun Delta n'est téléchargé ni interprété comme prix tant que son schéma n'est pas validé.
+          list_delta_candidates() {
+            local mid="$1" listing="/tmp/rakuten-${mid}-delta-list.txt"
+            if grep -Fxq "$mid" /tmp/rakuten-root-list.txt; then
+              "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/${mid}/" > "$listing"
+            else
+              listing="/tmp/rakuten-root-list.txt"
+            fi
+            local found=0 filename
+            while IFS= read -r filename; do
+              [[ "$filename" =~ ^(${mid}_)?[^/]*_cmp_delta\.(txt|xml)\.gz$ ]] || continue
+              echo "Delta candidat détecté pour MID $mid : $filename."
+              found=$((found + 1))
+            done < "$listing"
+            if [[ "$found" -eq 0 ]]; then
+              echo "Aucun fichier Delta _cmp_delta .txt.gz/.xml.gz détecté pour MID $mid."
+            fi
+          }
+          list_delta_candidates "44806"
+          list_delta_candidates "54306"
+
           # Rakuten confirme que chaque annonceur dispose d'un dossier nommé par son MID.
           # Le fichier peut aussi être à la racine selon le compte : on détecte les deux cas,
           # sans supposer un chemin ni désactiver la vérification de clé hôte.
