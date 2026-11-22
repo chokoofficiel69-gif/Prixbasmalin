@@ -3,27 +3,27 @@
  "awin_fetched_at": "2026-11-21T22:04:09.398Z",
  "sheets_period": {
   "from": "2026-10-09",
-  "to": "2026-11-20"
+  "to": "2026-11-21"
  },
  "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
   {
-   "id": "airpods-pro-3",
-   "name": "AirPods Pro 3",
+   "id": "airpods-4",
+   "name": "AirPods 4",
    "brand": "Apple",
    "category": "audio",
    "category_label": "Écouteurs & casques",
-   "image": "/assets/produits/airpods-pro-3.jpg",
+   "image": "/assets/produits/airpods-4.jpg",
    "image_credit": {
-    "author": "Burkhard Mücke",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
+    "author": "AppleFans 1",
+    "license": "CC0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_4.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 198.99,
-   "max_price_eur": 325.88,
-   "offer_count": 26,
-   "last_date": "2026-11-19",
+   "min_price_eur": 119.95,
+   "max_price_eur": 197.99,
+   "offer_count": 27,
+   "last_date": "2026-11-20",
    "price_kind": "historical"
   },
   {
@@ -61,7 +61,7 @@
    "min_price_eur": 49.99,
    "max_price_eur": 98.28,
    "offer_count": 18,
-   "last_date": "2026-11-19",
+   "last_date": "2026-11-20",
    "price_kind": "historical"
   },
   {
@@ -80,7 +80,7 @@
    "min_price_eur": 304.49,
    "max_price_eur": 427.89,
    "offer_count": 17,
-   "last_date": "2026-11-20",
+   "last_date": "2026-11-21",
    "price_kind": "historical"
   },
   {
@@ -96,10 +96,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_-_Red.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 239.99,
+   "min_price_eur": 199.99,
    "max_price_eur": 308.74,
    "offer_count": 17,
-   "last_date": "2026-11-19",
+   "last_date": "2026-11-20",
    "price_kind": "historical"
   },
   {
@@ -118,7 +118,7 @@
    "min_price_eur": 1085.59,
    "max_price_eur": 1229.0,
    "offer_count": 17,
-   "last_date": "2026-11-20",
+   "last_date": "2026-11-21",
    "price_kind": "historical"
   },
   {
@@ -134,10 +134,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:M5_Macbook_Air_13_Sky_Blue_model.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 1199.0,
-   "max_price_eur": 1399.0,
+   "min_price_eur": 1189.0,
+   "max_price_eur": 1398.17,
    "offer_count": 16,
-   "last_date": "2026-11-19",
+   "last_date": "2026-11-20",
    "price_kind": "historical"
   },
   {
@@ -153,29 +153,29 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:JBL_Clip_5.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 47.46,
+   "min_price_eur": 48.99,
    "max_price_eur": 59.36,
-   "offer_count": 12,
-   "last_date": "2026-11-19",
+   "offer_count": 14,
+   "last_date": "2026-11-21",
    "price_kind": "historical"
   },
   {
-   "id": "airpods-4",
-   "name": "AirPods 4",
+   "id": "airpods-pro-3",
+   "name": "AirPods Pro 3",
    "brand": "Apple",
    "category": "audio",
    "category_label": "Écouteurs & casques",
-   "image": "/assets/produits/airpods-4.jpg",
+   "image": "/assets/produits/airpods-pro-3.jpg",
    "image_credit": {
-    "author": "AppleFans 1",
-    "license": "CC0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_4.jpg",
+    "author": "Burkhard Mücke",
+    "license": "CC BY-SA 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 119.95,
-   "max_price_eur": 197.99,
-   "offer_count": 25,
-   "last_date": "2026-11-19",
+   "min_price_eur": 198.99,
+   "max_price_eur": 325.88,
+   "offer_count": 26,
+   "last_date": "2026-11-20",
    "price_kind": "historical"
   },
   {
@@ -194,7 +194,7 @@
    "min_price_eur": 54.99,
    "max_price_eur": 70.3,
    "offer_count": 14,
-   "last_date": "2026-11-20",
+   "last_date": "2026-11-21",
    "price_kind": "historical"
   },
   {
@@ -213,7 +213,7 @@
    "min_price_eur": 150.01,
    "max_price_eur": 201.9,
    "offer_count": 11,
-   "last_date": "2026-11-19",
+   "last_date": "2026-11-20",
    "price_kind": "historical"
   },
   {
@@ -230,9 +230,9 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 611.0,
-   "max_price_eur": 1053.51,
+   "max_price_eur": 1112.61,
    "offer_count": 16,
-   "last_date": "2026-11-20",
+   "last_date": "2026-11-21",
    "price_kind": "historical"
   }
  ],
