@@ -25,6 +25,17 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         smoke = workflow.split("  smoke-test:", 1)[1]
         self.assertIn("timeout-minutes: 10", smoke)
 
+    def test_rakuten_price_freshness_never_uses_snapshot_timestamp(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("const rakutenSnapshotRecent", workflow)
+        self.assertIn("Date.parse(p.sourceCreatedAt || \"\")", workflow)
+        block = workflow.split("const rakutenPricesFresh", 1)[1].split("}).length;", 1)[0]
+        self.assertIn("priceUpdatedAt", block)
+        self.assertNotIn("sourceCreatedAt", block)
+        self.assertNotIn("merchantUpdatedAt", block)
+        self.assertIn("snapshots catalogue <48 h", workflow)
+        self.assertIn("prix datés <48 h", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()
