@@ -40,6 +40,14 @@ class CatalogueProductCardTests(unittest.TestCase):
         self.assertIn('offer.className="pm-c2-offer pm-c2-offer-listed";', self.source)
         self.assertIn("const isBest=canRankByTotal&&rowIndex===0;", self.source)
 
+    def test_recent_listed_feed_price_is_displayed_with_date(self):
+        # Demande du propriétaire (22/11/2026) : afficher le prix du flux marchand récent (< 7 jours),
+        # daté et « à confirmer » ; jamais classé meilleur prix ; marchands HT exclus.
+        self.assertNotIn("const listedPrice=null;", self.source)
+        self.assertIn("pmListedPriceIsRecent(listedDateValue)&&!pmHtMerchant(p.merchant)", self.source)
+        self.assertIn("age<=7*24*60*60*1000", self.source)
+        self.assertIn("listedPriceValue:base,shippingPriceValue:shipping", self.source)
+
     def test_irrelevant_brand_chips_and_empty_sections_are_gone(self):
         self.assertNotIn('brandsLabel.textContent="Marques à comparer";', self.source)
         self.assertIn("if(!rail.children.length)return;", self.source)
