@@ -38,12 +38,27 @@ class HomeShowcaseTests(unittest.TestCase):
         ref = max(p["last_date"] for p in sheets if p.get("last_date"))
         views = [v for v in (sc.fresh_view(p, ref) for p in sheets) if v]
         known |= {f"{v['max_price_eur'] - v['min_price_eur']:.2f}".replace(".", ",") for v in views}
+        # Coups de cœur partenaires : prix du flux marchand Awin, datés et « à confirmer ».
+        picks, _ = sc.partner_picks()
+        known |= {f"{p['price']:.2f}".replace(".", ",") for p in picks}
         for amount in re.findall(r"(\d[\d \u00a0\u202f]*,\d{2})\s?€", self.block):
             amount = re.sub(r"[ \u00a0\u202f]", "", amount)
             self.assertIn(amount, known, amount)
         self.assertIn("Plus bas prix relevé", self.block)
         self.assertRegex(self.block, r"le \d{2}/\d{2}/\d{4}")
 
+
+    def test_partner_picks_need_verified_image_and_recent_feed(self):
+        import datetime as dt
+        sc = load("build_home_showcase")
+        picks, day = sc.partner_picks()
+        for p in picks:
+            self.assertTrue(p["image_verified"])
+            self.assertTrue(p["image"].startswith("https://"))
+            self.assertIn(p["merchant"], sc.PARTNER_PRIORITY)
+        late = dt.datetime.fromisoformat(day + "T00:00:00+00:00") + dt.timedelta(days=9) if day else None
+        if late:
+            self.assertEqual(sc.partner_picks(now=late)[0], [], "flux trop ancien : aucune carte")
 
     def test_gaps_use_only_recent_new_offers(self):
         sc = load("build_home_showcase")

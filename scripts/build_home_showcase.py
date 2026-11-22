@@ -163,6 +163,7 @@ CSS = """<style id="pm-showcase-style">
 .pmx-gap{align-self:stretch;margin:4px 0 2px;padding:5px 8px;border-radius:8px;background:#16a34a;color:#fff;font-size:12px;font-weight:850;text-align:center}
 .pmx-ph{display:block;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#fff;margin-bottom:6px}
 .pmx-ph img{width:100%;height:100%;object-fit:cover}
+.pmx-pick .pmx-ph{background:#fff}.pmx-pick .pmx-ph img{object-fit:contain}.pmx-pick h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pmx-card h3{margin:0;font-size:15px;line-height:1.25;color:#fff}
 .pmx-card small{color:var(--mut);font-size:12px}
 .pmx-card strong{color:#ff3b30;font-size:26px;font-weight:900;line-height:1.05}
@@ -216,6 +217,63 @@ CSS = """<style id="pm-showcase-style">
 </style>"""
 
 
+# Coups de cœur partenaires : photos de studio fournies par les marchands dans leurs flux autorisés
+# (image vérifiée par data/home-deals.json) et prix du flux marchand, daté et « à confirmer ».
+PARTNER_PRIORITY = ["Ecovacs FR", "Jowissa", "Mibro FR", "Imou FR", "AKKO FR", "Perfumeria Comas FR",
+                    "Al Jazeera Perfumes EU", "BlazeVideo FR", "Fiido Technology Development Co., Ltd"]
+PARTNER_MAX_AGE_DAYS = 7
+
+
+def partner_picks(now=None):
+    try:
+        gifts = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8")).get("gifts") or []
+        cat = json.loads((ROOT / "data" / "awin-catalogue.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return [], None
+    fetched = str(cat.get("fetched_at") or "")
+    try:
+        fetched_at = dt.datetime.fromisoformat(fetched.replace("Z", "+00:00"))
+    except ValueError:
+        return [], None
+    now = now or dt.datetime.now(dt.timezone.utc)
+    fresh = dt.timedelta(0) <= now - fetched_at <= dt.timedelta(days=PARTNER_MAX_AGE_DAYS)
+    prices = {p.get("id"): p for p in cat.get("products") or []}
+    best = {}
+    for g in gifts:
+        p = prices.get(g.get("id")) or {}
+        try:
+            price = float(p.get("priceValue"))
+        except (TypeError, ValueError):
+            continue
+        if not (g.get("image_verified") is True and g.get("image_check_status") == "ok"
+                and str(g.get("image", "")).startswith("https://") and str(g.get("url", "")).startswith("https://")
+                and g.get("merchant") in PARTNER_PRIORITY and price > 0 and fresh):
+            continue
+        cur = best.get(g["merchant"])
+        if cur is None or price > cur["price"]:
+            best[g["merchant"]] = {**g, "price": price}
+    picks = [best[m] for m in PARTNER_PRIORITY if m in best]
+    return picks[:8], fetched_at.date().isoformat()
+
+
+def partner_card(p, day):
+    merchant = p["merchant"].replace(" Technology Development Co., Ltd", "").replace(" FR", "").replace(" EU", "")
+    return (f'<article class="pmx-card pmx-pick"><span class="pmx-badge">Partenaire</span>'
+            f'<a class="pmx-ph" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy" decoding="async"></a>'
+            f'<h3>{e(p["name"])}</h3><small>{e(merchant)}</small><strong>{seo.euro(p["price"])}</strong>'
+            f'<small>Prix du flux marchand du {seo.date_fr(day)} · à confirmer</small>'
+            f'<a class="pmx-go" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener">Voir l’offre ↗</a></article>')
+
+
+def partner_section():
+    picks, day = partner_picks()
+    if len(picks) < 3:
+        return ""
+    return (f'<section class="pmx-sec" aria-labelledby="pmx-picks-t"><div class="pmx-head"><h2 id="pmx-picks-t">⭐ Coups de cœur <span>partenaires</span></h2>'
+            f'<a href="/boutiques-partenaires.html">Nos boutiques partenaires →</a><small>Photos et prix fournis par les marchands dans leurs flux officiels (mis à jour le {seo.date_fr(day)}). Liens affiliés.</small></div>'
+            f'<div class="pmx-rail pmx-offers">{"".join(partner_card(p, day) for p in picks)}</div></section>')
+
+
 def build_block():
     all_sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
     ref_date = max(p["last_date"] for p in all_sheets if p.get("last_date"))
@@ -237,18 +295,24 @@ def build_block():
     latest = max(p["last_date"] for p in top)
     hero = """<section class="pmx-hero" aria-label="Prix Malin">
 <img class="pmx-hero-img" src="/assets/accueil/hero.webp" alt="" fetchpriority="high">
-<div class="pmx-hero-art" aria-hidden="true"><img class="p p1" src="/assets/produits/airpods-4.jpg" alt="" loading="lazy"><img class="p p2" src="/assets/produits/manette-switch-pro.jpg" alt="" loading="lazy"><img class="p p3" src="/assets/produits/macbook-air-13-m5.jpg" alt="" loading="lazy"><img class="m" src="/assets/malin-3d.webp" alt="" loading="lazy"></div>
+<div class="pmx-hero-art" aria-hidden="true">__HERO_ART__<img class="m" src="/assets/malin-3d.webp" alt="" loading="lazy"></div>
 <div class="pmx-hero-txt"><p class="t">Les meilleurs prix<br><span>au même endroit !</span></p>
 <p>Comparez, économisez et trouvez les meilleures offres sur vos produits préférés, avec la date de chaque prix relevé.</p>
 <div class="pmx-cta"><a class="pmx-btn" href="/prix/">Voir toutes les offres →</a><a class="pmx-btn ghost" href="/black-friday.html">Black Friday · 27 nov.</a></div></div>
 <div class="pmx-trust"><span><i>⌕</i>Comparateur<br>de prix</span><span><i>€</i>Prix datés<br>et sourcés</span><span><i>✓</i>Sources<br>vérifiables</span><span><i>♥</i>100 % gratuit<br>sans inscription</span></div>
 </section>"""
+    picks, _ = partner_picks()
+    art = [p["image"] for p in picks[:3]] if len(picks) >= 3 else [
+        "/assets/produits/airpods-4.jpg", "/assets/produits/manette-switch-pro.jpg", "/assets/produits/macbook-air-13-m5.jpg"]
+    hero = hero.replace("__HERO_ART__", "".join(
+        f'<img class="p p{i}" src="{e(src)}" alt="" loading="lazy">' for i, src in enumerate(art, 1)))
     body = f"""{START}
 {CSS}
 <div class="pmx">
 {hero}
 <section class="pmx-sec" aria-labelledby="pmx-cats-t"><div class="pmx-head"><h2 id="pmx-cats-t">Nos grandes <span>catégories</span></h2><a href="/catalogue.html">Voir tout le catalogue →</a></div>
 <div class="pmx-rail pmx-cats">{cats}</div></section>
+{partner_section()}
 <section class="pmx-sec" aria-labelledby="pmx-top-t"><div class="pmx-head"><h2 id="pmx-top-t">🔥 Top offres <span>relevées</span></h2><a href="/prix/">Tout le comparateur →</a><small>Les produits les plus suivis, avec le plus bas prix relevé et les marchands les moins chers (dernier relevé : {seo.date_fr(latest)})</small></div>
 <div class="pmx-rail pmx-offers">{"".join(offer_card(p) for p in top)}</div></section>
 <section class="pmx-sec pmx-ban" aria-label="Sélections">
