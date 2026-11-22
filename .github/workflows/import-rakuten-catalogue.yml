@@ -147,16 +147,19 @@ jobs:
           # Inventaire en lecture seule des fichiers Delta signalés par Rakuten.
           # Aucun Delta n'est téléchargé ni interprété comme prix tant que son schéma n'est pas validé.
           list_delta_candidates() {
-            local mid="$1" listing
+            local mid="$1" listing mid_listing
             listing="/tmp/rakuten-${mid}-delta-list.txt"
+            mid_listing="${listing}.mid"
+            # Examiner les deux emplacements possibles : racine SFTP et dossier MID.
+            cp /tmp/rakuten-root-list.txt "$listing"
             if grep -Fxq "$mid" /tmp/rakuten-root-list.txt; then
-              if ! "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/${mid}/" > "$listing"; then
-                echo "::warning::Liste SFTP du MID $mid indisponible ; import des flux standards poursuivi."
-                return 0
+              if "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/${mid}/" > "$mid_listing"; then
+                cat "$mid_listing" >> "$listing"
+              else
+                echo "::warning::Liste SFTP du MID $mid indisponible ; inventaire racine conservé et import des flux standards poursuivi."
               fi
-            else
-              listing="/tmp/rakuten-root-list.txt"
             fi
+            sort -u "$listing" -o "$listing"
             local found=0 filename
             while IFS= read -r filename; do
               [[ "$filename" =~ ^(${mid}_)?[^/]*_cmp_delta\.(txt|xml)\.gz$ ]] || continue
@@ -164,7 +167,7 @@ jobs:
               found=$((found + 1))
             done < "$listing"
             if [[ "$found" -eq 0 ]]; then
-              echo "Aucun fichier Delta _cmp_delta .txt.gz/.xml.gz détecté pour MID $mid."
+              echo "Aucun fichier Delta _cmp_delta .txt.gz/.xml.gz détecté pour MID $mid dans la racine ou le dossier MID."
             fi
           }
           list_delta_candidates "44806"
