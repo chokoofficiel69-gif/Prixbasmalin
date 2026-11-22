@@ -1,0 +1,39 @@
+name: Signaler les pages à Bing (IndexNow)
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+    inputs:
+      all:
+        description: "Signaler toutes les pages du plan du site"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tests
+        run: python3 -m unittest tests/test_indexnow.py -v
+      - name: Vérifier que la clé est en ligne
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -fsS "https://prixbasmalin.fr/25ba6eb7b7f6a87b8675d786149ae50b.txt" | grep -q 25ba6eb7b7f6a87b8675d786149ae50b; then exit 0; fi
+            sleep 20
+          done
+          echo "Clé IndexNow pas encore publiée" && exit 1
+      - name: Envoyer
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.all }}" = "true" ]; then
+            python3 scripts/indexnow_submit.py --all
+          else
+            python3 scripts/indexnow_submit.py --days 2
+          fi
