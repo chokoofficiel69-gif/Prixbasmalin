@@ -24,6 +24,11 @@ import unicodedata
 
 UTC = dt.timezone.utc
 DEFAULT_MAX_AGE_HOURS = 48
+
+# Perfumeria Comas FR n'est pas dans la liste Awin des programmes rejoints.
+# Le statut exact soft-member/auto-join n'est pas conservé dans le rapport actuel :
+# ses offres restent donc exclues des comparaisons publiques jusqu'à confirmation.
+UNVERIFIED_AWIN_MERCHANTS = {"perfumeria comas fr"}
 STOPWORDS = {
     "les", "des", "une", "pour", "avec", "sans", "and", "the", "for", "with", "eau", "edp", "edt",
     "parfum", "toilette", "spray", "vaporisateur", "coffret", "set", "pack", "lot", "new", "nouveau",
@@ -145,6 +150,9 @@ def awin_offers(feed):
     for product in feed.get("products") or []:
         offers = [o for o in product.get("offers") or [] if isinstance(o, dict)] or [product]
         for offer in offers:
+            merchant = str(offer.get("merchant") or product.get("merchant") or "").strip()
+            if fold(merchant) in UNVERIFIED_AWIN_MERCHANTS:
+                continue
             gtin = gtin14(offer.get("gtin") or product.get("gtin"))
             price = money(offer.get("priceValue"))
             url = str(offer.get("url") or offer.get("sourceUrl") or product.get("sourceUrl") or "")
@@ -157,7 +165,7 @@ def awin_offers(feed):
             yield {
                 "gtin": gtin,
                 "source": "awin",
-                "merchant": str(offer.get("merchant") or product.get("merchant") or "").strip(),
+                "merchant": merchant,
                 "name": str(product.get("name") or "").strip(),
                 "brand": str(product.get("brand") or "").strip(),
                 "image": product.get("image") or "",
