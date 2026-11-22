@@ -376,5 +376,16 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIn("Échantillon Delta non disponible", workflow)
         self.assertNotIn('"${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"', workflow)
 
+    def test_publication_retries_after_concurrent_main_updates_without_force_push(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
+        self.assertIn("for attempt in 1 2 3; do", workflow)
+        self.assertIn("git fetch origin main", workflow)
+        self.assertIn("git rebase origin/main", workflow)
+        self.assertIn("git rebase --abort || true", workflow)
+        self.assertIn("git push origin HEAD:main", workflow)
+        self.assertIn("snapshot précédent conservé", workflow)
+        self.assertIn("Publication Rakuten impossible après trois tentatives", workflow)
+        self.assertNotIn("git push --force", workflow)
+
 if __name__ == "__main__":
     unittest.main()
