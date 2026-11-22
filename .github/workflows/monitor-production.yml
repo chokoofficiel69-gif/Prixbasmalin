@@ -63,6 +63,20 @@ on:
       - "prix/**"
       - "idees-cadeaux/**"
       - "sitemap.xml"
+  workflow_run:
+    workflows:
+      - "pages build and deployment"
+      - "Importer les catalogues Rakuten autorisés"
+      - "Synchroniser le catalogue produits Awin autorisé"
+      - "Actualiser les historiques PrixTracker"
+      - "Construire les comparaisons multi-marchands par GTIN"
+      - "Rotation contrôlée de la vitrine cadeaux"
+      - "Refresh verified homepage product images"
+      - "Build authorized price feed"
+    types:
+      - completed
+    branches:
+      - main
   push:
     branches:
       - main
@@ -148,6 +162,7 @@ jobs:
           python3 -m py_compile scripts/build_home_deals.py scripts/check_awin_gift_images.py
           python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
           python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v
+          python3 -m unittest discover -s tests -p 'test_monitor_workflow.py' -v
       - name: Tester l'affiliation Amazon, le consentement et l'import CSV officiel
         run: python3 -m unittest discover -s tests -p 'test_tracking_and_affiliation.py' -v
 
@@ -291,7 +306,7 @@ jobs:
   smoke-test:
     name: Disponibilité de production et Worker attribution
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Vérifier la page d'accueil
         run: |
@@ -309,7 +324,7 @@ jobs:
             "https://prixbasmalin.fr/js/track-outbound.js" --output /tmp/track-outbound.js
           grep -q "refHost !== ownHost" /tmp/track-outbound.js
       - name: Vérifier les garde-fous prix et le rail mobile après publication
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event.workflow_run.head_branch == 'main')
         shell: bash
         run: |
           set -euo pipefail
