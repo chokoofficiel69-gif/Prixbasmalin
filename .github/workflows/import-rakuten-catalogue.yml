@@ -150,7 +150,10 @@ jobs:
             local mid="$1" listing
             listing="/tmp/rakuten-${mid}-delta-list.txt"
             if grep -Fxq "$mid" /tmp/rakuten-root-list.txt; then
-              "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/${mid}/" > "$listing"
+              if ! "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/${mid}/" > "$listing"; then
+                echo "::warning::Liste SFTP du MID $mid indisponible ; import des flux standards poursuivi."
+                return 0
+              fi
             else
               listing="/tmp/rakuten-root-list.txt"
             fi
