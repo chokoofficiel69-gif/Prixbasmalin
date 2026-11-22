@@ -256,7 +256,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 52.49,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6300900340263",
@@ -277,7 +279,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 140.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-0601673916218",
@@ -298,7 +302,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 79.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-125844-44778859927",
@@ -319,7 +325,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 29.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-128881-brand-name-bonheur-de-lune-brume-d-ambiance-good-fortune-chance-abondance-bonheur-de-lune---",
@@ -340,7 +348,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 15.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5060403582713",
@@ -361,7 +371,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 14.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-8712844817219",
@@ -382,7 +394,9 @@
    "band": "a-confirmer",
    "price_date": "2026-08-24 13:28:25",
    "price_date_kind": "merchant",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 15.95,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5744006940353",
@@ -403,7 +417,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 30.95,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6979463770543",
@@ -424,7 +440,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 299.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-85523-brand-name-fiido-fr-garde-boue-fiido-q1s---",
@@ -445,7 +463,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 27.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-122426-brand-name-imou-imou-ranger-2-wifi-security-surveillance-smart-camera-2pcs-fhd-1080p-kit-2pcs-256gb-memory-card---",
@@ -466,7 +486,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 113.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-7640167277353",
@@ -487,7 +509,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 269.9,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5060690215141",
@@ -508,7 +532,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 17.95,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-4099671039538",
@@ -529,7 +555,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": null,
+   "listed_price_date": null
   },
   {
    "id": "awin-gtin-6976367682231",
@@ -550,7 +578,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 69.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-124120-brand-name-mccall-s-patron-mccall-s-n-8007-pantalon-evase-avec-variations-de-style-a5-34-42---",
@@ -571,7 +601,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 14.5,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-3474630542709",
@@ -592,7 +624,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 31.5,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6978414658121",
@@ -613,7 +647,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 71.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6300900340201",
@@ -634,7 +670,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 140.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-634562527721",
@@ -655,7 +693,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 79.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-125844-brand-name-bodycross-terrarun-long-t-shirt---",
@@ -676,7 +716,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 29.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-128881-brand-name-bonheur-de-lune-brume-d-ambiance-boho-dreams-apaisant-et-sacre-bonheur-de-lune---",
@@ -697,7 +739,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 14.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5060403582874",
@@ -718,7 +762,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 17.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-4004757122202",
@@ -739,7 +785,9 @@
    "band": "a-confirmer",
    "price_date": "2026-06-09 09:54:40",
    "price_date_kind": "merchant",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 14.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5744006940391",
@@ -760,7 +808,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 30.95,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6979463770550",
@@ -781,7 +831,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 299.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-85523-42571595284715",
@@ -802,7 +854,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 53.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-122426-brand-name-imou-imou-ranger-2-wifi-security-surveillance-smart-camera-2pcs-fhd-1080p-kit-2pcs-128gb-memory-card---",
@@ -823,7 +877,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 81.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-7640167277315",
@@ -844,7 +900,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 269.9,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5060690215844",
@@ -865,7 +923,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 16.95,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-4099671077899",
@@ -886,7 +946,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": null,
+   "listed_price_date": null
   },
   {
    "id": "awin-gtin-6976367680886",
@@ -907,7 +969,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 89.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-124120-brand-name-mccall-s-patron-mccall-s-n-8009-barboteuse-et-combinaisons-elegantes-a5-34-42---",
@@ -928,7 +992,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 14.5,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-3700458603323",
@@ -949,7 +1015,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 255.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6925758627764",
@@ -970,7 +1038,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 149.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6300900340379",
@@ -991,7 +1061,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 140.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-797465943774",
@@ -1012,7 +1084,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 175.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-125844-44778859921",
@@ -1033,7 +1107,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 29.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-128881-brand-name-bonheur-de-lune-brume-purifiante-sauge-blanche-palo-santo-energie-sacree-serenite-100-ml-bonheur-de-lune---",
@@ -1054,7 +1130,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 15.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5060403582614",
@@ -1075,7 +1153,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 12.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6151921527559",
@@ -1096,7 +1176,9 @@
    "band": "a-confirmer",
    "price_date": "2026-04-29 09:37:05",
    "price_date_kind": "merchant",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 83.4,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5744006940155",
@@ -1117,7 +1199,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 30.95,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-awin-85523-brand-name-fiido-fr-garde-boue-fiido-pour-m1-m1pro-m21---",
@@ -1138,7 +1222,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 74.0,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-6939554970207",
@@ -1159,7 +1245,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 27.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-7640167277360",
@@ -1180,7 +1268,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 269.9,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-5056723504634",
@@ -1201,7 +1291,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 12.95,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   },
   {
    "id": "awin-gtin-4099671040176",
@@ -1222,7 +1314,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": null,
+   "listed_price_date": null
   },
   {
    "id": "awin-gtin-6971619679304",
@@ -1243,7 +1337,9 @@
    "band": "a-confirmer",
    "price_date": null,
    "price_date_kind": "missing",
-   "price_tax_status": "unspecified"
+   "price_tax_status": "unspecified",
+   "listed_price_eur": 89.99,
+   "listed_price_date": "2026-11-22T20:28:50.979Z"
   }
  ],
  "rotation": {
