@@ -239,12 +239,17 @@ def has_verified_local_image(product):
     )
 
 
+def has_verified_top_image(product):
+    """Photo locale créditée, ou visuel officiel https déjà validé par build_product_sheets (statut vérifié)."""
+    return has_verified_local_image(product) or str(product.get("image") or "").startswith("https://")
+
+
 def build_top(sheets, limit=12):
     """Les produits les plus comparés, en alternant les catégories (pas de pourcentage d'écart affiché :
     les relevés mélangent parfois des packs ou des configurations différentes)."""
     candidates = sorted(
         (s for s in sheets.get("products", [])
-         if s.get("offer_count", 0) >= 8 and has_verified_local_image(s)),
+         if s.get("offer_count", 0) >= 8 and has_verified_top_image(s)),
         key=lambda s: (-s["offer_count"], s["name"])
     )
     lanes = {}

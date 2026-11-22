@@ -2854,13 +2854,8 @@
    "brand": "Apple",
    "category": "montre",
    "category_label": "Montres connectées",
-   "image": "/assets/produits/apple-watch-series-11.jpg",
-   "image_credit": {
-    "author": "极客湾Geekerwan",
-    "license": "CC BY 3.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
-    "match": "verifie_visuellement"
-   },
+   "image": "",
+   "image_credit": null,
    "offer_count": 17,
    "min_price_eur": 304.49,
    "max_price_eur": 427.89,

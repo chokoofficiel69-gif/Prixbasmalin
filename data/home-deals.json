@@ -8,6 +8,20 @@
  "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
   {
+   "id": "airpods-5",
+   "name": "AirPods 5",
+   "brand": "Apple",
+   "category": "audio",
+   "category_label": "Écouteurs & casques",
+   "image": "https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg",
+   "image_credit": null,
+   "min_price_eur": 128.0,
+   "max_price_eur": 161.79,
+   "offer_count": 19,
+   "last_date": "2026-11-20",
+   "price_kind": "historical"
+  },
+  {
    "id": "manette-switch-pro",
    "name": "Manette Switch Pro",
    "brand": "Nintendo",
@@ -24,25 +38,6 @@
    "max_price_eur": 98.28,
    "offer_count": 18,
    "last_date": "2026-11-20",
-   "price_kind": "historical"
-  },
-  {
-   "id": "apple-watch-series-11",
-   "name": "Apple Watch Series 11",
-   "brand": "Apple",
-   "category": "montre",
-   "category_label": "Montres connectées",
-   "image": "/assets/produits/apple-watch-series-11.jpg",
-   "image_credit": {
-    "author": "极客湾Geekerwan",
-    "license": "CC BY 3.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 304.49,
-   "max_price_eur": 427.89,
-   "offer_count": 17,
-   "last_date": "2026-11-21",
    "price_kind": "historical"
   },
   {
@@ -65,6 +60,20 @@
    "price_kind": "historical"
   },
   {
+   "id": "sony-wh-1000xm6",
+   "name": "Sony WH-1000XM6",
+   "brand": "Sony",
+   "category": "casque",
+   "category_label": "High-Tech",
+   "image": "https://sony.scene7.com/is/image/sonyglobalsolutions/GGB-8071_Olive_Gray_Gallery-1?%24originalDimensions%24=",
+   "image_credit": null,
+   "min_price_eur": 306.99,
+   "max_price_eur": 374.16,
+   "offer_count": 10,
+   "last_date": "2026-11-21",
+   "price_kind": "historical"
+  },
+  {
    "id": "iphone-15",
    "name": "iPhone 15",
    "brand": "Apple",
@@ -80,6 +89,20 @@
    "min_price_eur": 611.0,
    "max_price_eur": 1112.61,
    "offer_count": 16,
+   "last_date": "2026-11-21",
+   "price_kind": "historical"
+  },
+  {
+   "id": "iphone-18-pro",
+   "name": "iPhone 18 Pro",
+   "brand": "Apple",
+   "category": "smartphone",
+   "category_label": "Smartphones",
+   "image": "https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg",
+   "image_credit": null,
+   "min_price_eur": 1309.0,
+   "max_price_eur": 1479.0,
+   "offer_count": 10,
    "last_date": "2026-11-21",
    "price_kind": "historical"
   },

@@ -2,14 +2,6 @@
  "version": 1,
  "policy": "Photos sous licence libre autorisant l'usage commercial (CC0, domaine public, CC BY, CC BY-SA) ou fournies par un partenaire autorisé. Chaque entrée garde l'auteur, la licence et la page source ; le crédit est affiché sur la fiche et sur /credits-photos.html.",
  "images": {
-  "apple-watch-series-11": {
-   "thumb": "/assets/produits/apple-watch-series-11.jpg",
-   "license": "CC BY 3.0",
-   "author": "极客湾Geekerwan",
-   "file_page": "https://commons.wikimedia.org/wiki/File:Two_Apple_Watch_Series_11_(cropped).png",
-   "commons_title": "File:Two Apple Watch Series 11 (cropped).png",
-   "match": "verifie_visuellement"
-  },
   "iphone-15": {
    "thumb": "/assets/produits/iphone-15.jpg",
    "license": "CC BY-SA 4.0",
