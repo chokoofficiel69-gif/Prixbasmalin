@@ -1647,6 +1647,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 .pm-visual-gallery{padding:24px 0 10px;margin:8px 0 14px}
 .pm-gallery-intro{max-width:850px;margin:-5px 0 16px;color:#c2cbd6;font-size:14px;line-height:1.55}
 .pm-visual-gallery-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.pm-visual-card[hidden]{display:none!important}
 .pm-visual-card{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid #354253;border-radius:16px;background:#111923;box-shadow:0 8px 20px #0004;transition:transform .18s ease,border-color .18s ease}
 .pm-visual-card:hover{transform:translateY(-3px);border-color:#ff8a35}
 .pm-visual-media{height:205px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(145deg,#fff,#edf0f4)}
@@ -1681,11 +1682,17 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
    }
    if(!products.length)throw new Error("Aucune photo vérifiée disponible");
    const fragment=document.createDocumentFragment();
-   products.slice(0,8).forEach(p=>{
+   const settle=[];
+   products.slice(0,16).forEach(p=>{
      const card=document.createElement("article");card.className="pm-visual-card";
      const media=document.createElement("div");media.className="pm-visual-media";
      const img=document.createElement("img");img.src=p.image;img.alt=p.name;img.loading="lazy";img.decoding="async";
-     img.onerror=()=>{img.removeAttribute("src");img.alt="Visuel momentanément indisponible";img.style.opacity=".35";};
+     img.loading="eager";
+     settle.push(new Promise(done=>{
+       const drop=()=>{card.remove();[...grid.children].forEach((c,i)=>{c.hidden=i>=8});};
+       img.onload=()=>{if(img.naturalWidth<400||img.naturalHeight<300)drop();done();};
+       img.onerror=()=>{drop();done();};
+     }));
      media.appendChild(img);
      const copy=document.createElement("div");copy.className="pm-visual-copy";
      const meta=document.createElement("span");meta.className="pm-visual-meta";
@@ -1699,6 +1706,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
      copy.append(meta,title,desc,link);card.append(media,copy);fragment.appendChild(card);
    });
    grid.replaceChildren(fragment);
+   [...grid.children].forEach((c,i)=>{c.hidden=i>=8});
    grid.dataset.productCount=String(products.length);
  }catch(error){
    grid.innerHTML='<p class="pm-gallery-loading">Les photos du catalogue seront affichées dès que le flux produits sera disponible. Aucun prix n’est affiché sans vérification.</p>';
