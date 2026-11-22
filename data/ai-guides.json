@@ -1,4 +1,25 @@
 {
- "products": {},
- "updated_at": "2026-11-21"
+ "products": {
+  "apple-watch-series-11": {
+   "criteres": [
+    "Vérifiez que la référence indiquée correspond exactement au modèle, à la taille de boîtier et au bracelet souhaités.",
+    "Préférez une offre incluant une garantie légale ou commerciale clairement identifiée, avec un vendeur joignable et basé dans l'Union européenne.",
+    "Comparez les frais de livraison, le délai, la possibilité de retour gratuit et le statut neuf ou reconditionné avant de choisir."
+   ],
+   "faq": [
+    {
+     "a": "Le reconditionné peut être intéressant à condition qu'il soit garanti, testé et vendu avec une mention claire de son état. Le neuf reste plus sûr si vous voulez la batterie et les accessoires d'origine sans surprise.",
+     "q": "Faut-il privilégier le neuf ou le reconditionné ?"
+    },
+    {
+     "a": "Méfiez-vous : vérifiez la référence exacte, l'origine du produit et les frais cachés avant de commander. Un tarif très éloigné du marché annonce souvent une contrefaçon, un article bloqué ou une garantie inexistante.",
+     "q": "Que faire si le prix semble anormalement bas ?"
+    }
+   ],
+   "generated_at": "2026-11-22",
+   "intro": "Comparez toujours la référence exacte du modèle et de son boîtier avant de retenir une offre, car une simple variante de couleur ou de taille change la valeur du produit. Regardez le coût total plutôt que le seul prix affiché : frais de port, délai et conditions de retour peuvent faire la différence. Un vendeur sérieux affiche clairement son statut, la garantie applicable et la provenance de l'article.",
+   "model": "openrouter:inclusionai/ling-3.2-flash:free"
+  }
+ },
+ "updated_at": "2026-11-22"
 }
