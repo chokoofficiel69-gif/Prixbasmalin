@@ -15,7 +15,7 @@ import html
 import json
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote, urlencode
 
@@ -502,6 +502,31 @@ def bf_selection(sheets, lo, hi, limit=8):
     return items[:limit]
 
 
+def partner_codes_section(today=None):
+    """Codes promo officiels des campagnes partenaires, affichés seulement pendant leur période."""
+    path = ROOT / "data" / "partner-codes.json"
+    if not path.exists():
+        return ""
+    today = today or date.today().isoformat()
+    codes = [c for c in json.loads(path.read_text(encoding="utf-8")).get("codes", [])
+             if c.get("code") and c.get("url", "").startswith("https://") and c.get("end", "") >= today]
+    if not codes:
+        return ""
+    cards = "".join(
+        f'<div class="card pm-code" data-start="{e(c["start"])}" data-end="{e(c["end"])}"><div class="c">'
+        f'<small>{e(c["merchant"])} · du {date_fr(c["start"])} au {date_fr(c["end"])}</small>'
+        f'<b>{e(c["description"])}</b><strong>Code : <code>{e(c["code"])}</code> ({e(c["discount"])})</strong>'
+        f'<a class="buy" href="{e(c["url"])}" target="_blank" rel="sponsored nofollow noopener">Voir l’offre ↗</a></div></div>'
+        for c in codes)
+    script = ('<script>(function(){var d=new Date().toISOString().slice(0,10);'
+              'document.querySelectorAll(".pm-code").forEach(function(el){'
+              'if(d<el.dataset.start){el.querySelector("strong").textContent="Code disponible à partir du "+el.dataset.start.split("-").reverse().join("/");}'
+              'if(d>el.dataset.end){el.remove();}});})();</script>')
+    return (f'<section class="panel" id="codes-promo"><h2>Codes promo officiels de nos partenaires</h2>'
+            f'<div class="grid pm-cards">{cards}</div>'
+            f'<p class="source">Codes fournis par les marchands dans leurs campagnes officielles. Conditions et validité chez le marchand. Lien affilié.</p></section>{script}')
+
+
 def black_friday_page(sheets):
     groups = [(slug, label, bf_selection(sheets, lo, hi)) for slug, label, lo, hi in BF_BUDGETS]
     groups = [g for g in groups if g[2]]
@@ -530,7 +555,7 @@ def black_friday_page(sheets):
 <span class="bf-date" id="bf-countdown">Vendredi 27 novembre 2026 · Cyber Monday le 30 novembre</span>
 <div class="bf-jump">{jump}</div></section>
 <p class="notice" style="margin:0 0 12px">Prix relevés avant le Black Friday (dernier relevé : {date_fr(latest)}), pas des prix promotionnels en direct. Vérifiez toujours le prix final, le vendeur et la livraison chez le marchand.</p>
-{sections}
+{partner_codes_section()}{sections}
 <section class="panel"><h2>Éviter les fausses promotions</h2><p>Préparez votre liste, notez le prix repère de chaque produit et créez une alerte prix gratuite depuis la fiche du produit. Notre guide détaille la méthode : <a href="/guide-black-friday-2026.html">Black Friday 2026 : repérer les vraies bonnes affaires</a>.</p>
 <p>Vous cherchez des idées cadeaux ? <a href="/idees-cadeaux/">Idées cadeaux par budget</a> · <a href="/prix/">Tout le comparateur</a></p></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>

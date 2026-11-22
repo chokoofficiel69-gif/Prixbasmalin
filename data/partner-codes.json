@@ -1,0 +1,15 @@
+{
+  "note": "Codes promo autorisés par les annonceurs (campagnes rejointes dans le réseau d'affiliation). Ne jamais ajouter un code sans campagne officielle.",
+  "codes": [
+    {
+      "merchant": "Jowissa",
+      "description": "Montres et bijoux suisses : offre officielle Black Friday et Cyber Monday",
+      "code": "BFCM35",
+      "discount": "35 % de réduction",
+      "start": "2026-11-26",
+      "end": "2026-12-01",
+      "url": "https://www.awin1.com/cread.php?awinmid=59933&awinaffid=3137386",
+      "source": "Campagne Awin « Black Friday 35 Percent OFF » (programme 59933), vérifiée le 22/11/2026"
+    }
+  ]
+}
