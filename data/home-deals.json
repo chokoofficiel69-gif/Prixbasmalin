@@ -8,44 +8,6 @@
  "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
   {
-   "id": "airpods-4",
-   "name": "AirPods 4",
-   "brand": "Apple",
-   "category": "audio",
-   "category_label": "Écouteurs & casques",
-   "image": "/assets/produits/airpods-4.jpg",
-   "image_credit": {
-    "author": "AppleFans 1",
-    "license": "CC0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_4.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 119.95,
-   "max_price_eur": 197.99,
-   "offer_count": 27,
-   "last_date": "2026-11-20",
-   "price_kind": "historical"
-  },
-  {
-   "id": "playstation-vr2",
-   "name": "PlayStation VR2",
-   "brand": "Sony",
-   "category": "accessoire-ps5",
-   "category_label": "Accessoires PS5",
-   "image": "/assets/produits/playstation-vr2.jpg",
-   "image_credit": {
-    "author": "ArlindoPereira",
-    "license": "CC BY 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_VR2.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 339.0,
-   "max_price_eur": 496.59,
-   "offer_count": 19,
-   "last_date": "2026-11-20",
-   "price_kind": "historical"
-  },
-  {
    "id": "manette-switch-pro",
    "name": "Manette Switch Pro",
    "brand": "Nintendo",
@@ -84,25 +46,6 @@
    "price_kind": "historical"
   },
   {
-   "id": "switch",
-   "name": "Nintendo Switch",
-   "brand": "Nintendo",
-   "category": "console",
-   "category_label": "Consoles",
-   "image": "/assets/produits/switch.jpg",
-   "image_credit": {
-    "author": "KK IN HK",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_-_Red.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 199.99,
-   "max_price_eur": 308.74,
-   "offer_count": 17,
-   "last_date": "2026-11-20",
-   "price_kind": "historical"
-  },
-  {
    "id": "iphone-17-pro",
    "name": "iPhone 17 Pro",
    "brand": "Apple",
@@ -122,101 +65,6 @@
    "price_kind": "historical"
   },
   {
-   "id": "macbook-air-13-m5",
-   "name": "MacBook Air 13\" M5",
-   "brand": "Apple",
-   "category": "laptop",
-   "category_label": "Ordinateurs portables",
-   "image": "/assets/produits/macbook-air-13-m5.jpg",
-   "image_credit": {
-    "author": "Kyu3a",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:M5_Macbook_Air_13_Sky_Blue_model.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 1189.0,
-   "max_price_eur": 1398.17,
-   "offer_count": 16,
-   "last_date": "2026-11-20",
-   "price_kind": "historical"
-  },
-  {
-   "id": "jbl-clip-5",
-   "name": "JBL Clip 5",
-   "brand": "JBL",
-   "category": "enceinte",
-   "category_label": "Enceintes",
-   "image": "/assets/produits/jbl-clip-5.jpg",
-   "image_credit": {
-    "author": "Kyu3a",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:JBL_Clip_5.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 48.99,
-   "max_price_eur": 59.36,
-   "offer_count": 14,
-   "last_date": "2026-11-21",
-   "price_kind": "historical"
-  },
-  {
-   "id": "airpods-pro-3",
-   "name": "AirPods Pro 3",
-   "brand": "Apple",
-   "category": "audio",
-   "category_label": "Écouteurs & casques",
-   "image": "/assets/produits/airpods-pro-3.jpg",
-   "image_credit": {
-    "author": "Burkhard Mücke",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 198.99,
-   "max_price_eur": 325.88,
-   "offer_count": 26,
-   "last_date": "2026-11-20",
-   "price_kind": "historical"
-  },
-  {
-   "id": "dualsense",
-   "name": "Manette DualSense",
-   "brand": "Sony",
-   "category": "accessoire-ps5",
-   "category_label": "Accessoires PS5",
-   "image": "/assets/produits/dualsense.jpg",
-   "image_credit": {
-    "author": "Sergey Galyonkin",
-    "license": "CC BY-SA 2.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Playstation_Dualsense_controller.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 54.99,
-   "max_price_eur": 70.3,
-   "offer_count": 14,
-   "last_date": "2026-11-21",
-   "price_kind": "historical"
-  },
-  {
-   "id": "switch-lite",
-   "name": "Nintendo Switch Lite",
-   "brand": "Nintendo",
-   "category": "console",
-   "category_label": "Consoles",
-   "image": "/assets/produits/switch-lite.jpg",
-   "image_credit": {
-    "author": "GerdeeX",
-    "license": "CC BY-SA 4.0",
-    "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_switch_lite_blue.jpg",
-    "match": "verifie_visuellement"
-   },
-   "min_price_eur": 150.01,
-   "max_price_eur": 201.9,
-   "offer_count": 11,
-   "last_date": "2026-11-20",
-   "price_kind": "historical"
-  },
-  {
    "id": "iphone-15",
    "name": "iPhone 15",
    "brand": "Apple",
@@ -232,6 +80,25 @@
    "min_price_eur": 611.0,
    "max_price_eur": 1112.61,
    "offer_count": 16,
+   "last_date": "2026-11-21",
+   "price_kind": "historical"
+  },
+  {
+   "id": "iphone-fold",
+   "name": "iPhone Duo",
+   "brand": "Apple",
+   "category": "smartphone",
+   "category_label": "Smartphones",
+   "image": "/assets/produits/iphone-fold.jpg",
+   "image_credit": {
+    "author": "SimonWaldherr",
+    "license": "CC BY 4.0",
+    "file_page": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_Duo.jpg",
+    "match": "verifie_visuellement"
+   },
+   "min_price_eur": 2323.92,
+   "max_price_eur": 3354.85,
+   "offer_count": 8,
    "last_date": "2026-11-21",
    "price_kind": "historical"
   }

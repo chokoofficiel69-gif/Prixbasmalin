@@ -478,7 +478,241 @@
   "iphone-17e": "rendu noir sans détail",
   "apple-watch-ultra-3": "génération non vérifiable",
   "apple-watch-ultra-4": "génération non vérifiable",
-  "switch-oled": "écran noir, la console est peu lisible"
+  "switch-oled": "écran noir, la console est peu lisible",
+  "airpods-3": {
+   "thumb": "/assets/produits/airpods-3.jpg",
+   "license": "CC0",
+   "author": "Yovt",
+   "file_page": "https://commons.wikimedia.org/wiki/File:AirPods_3.jpg",
+   "commons_title": "File:AirPods 3.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "airpods-4": {
+   "thumb": "/assets/produits/airpods-4.jpg",
+   "license": "CC0",
+   "author": "AppleFans 1",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_4.jpg",
+   "commons_title": "File:Airpods 4.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "airpods-pro-2": {
+   "thumb": "/assets/produits/airpods-pro-2.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "— aconcagua ( talk )",
+   "file_page": "https://commons.wikimedia.org/wiki/File:AirPods_Pro_2.jpg",
+   "commons_title": "File:AirPods Pro 2.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "airpods-pro-3": {
+   "thumb": "/assets/produits/airpods-pro-3.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Burkhard Mücke",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Airpods_Modell_Pro_3.jpg",
+   "commons_title": "File:Airpods Modell Pro 3.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "dualsense": {
+   "thumb": "/assets/produits/dualsense.jpg",
+   "license": "CC BY-SA 2.0",
+   "author": "Sergey Galyonkin",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Playstation_Dualsense_controller.jpg",
+   "commons_title": "File:Playstation Dualsense controller.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "galaxy-s26": {
+   "thumb": "/assets/produits/galaxy-s26.jpg",
+   "license": "CC BY 4.0",
+   "author": "SUMAKICHI",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Samsung_Galaxy_S26%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA.jpg",
+   "commons_title": "File:Samsung Galaxy S26シリーズ.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "galaxy-s26-plus": {
+   "thumb": "/assets/produits/galaxy-s26-plus.jpg",
+   "license": "CC BY 4.0",
+   "author": "SUMAKICHI",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Samsung_Galaxy_S26%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA.jpg",
+   "commons_title": "File:Samsung Galaxy S26シリーズ.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "galaxy-s26-ultra": {
+   "thumb": "/assets/produits/galaxy-s26-ultra.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Dinkun Chen",
+   "file_page": "https://commons.wikimedia.org/wiki/File:SAMSUNG_Galaxy_S26_Ultra_%26_SAMSUNG_Galaxy_Buds4_Pro.jpg",
+   "commons_title": "File:SAMSUNG Galaxy S26 Ultra & SAMSUNG Galaxy Buds4 Pro.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "iphone-16": {
+   "thumb": "/assets/produits/iphone-16.jpg",
+   "license": "CC BY-SA 2.0",
+   "author": "メイド理世",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_16_(54251031797).jpg",
+   "commons_title": "File:IPhone 16 (54251031797).jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "iphone-16-pro": {
+   "thumb": "/assets/produits/iphone-16-pro.jpg",
+   "license": "CC BY 4.0",
+   "author": "Jakub CA",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_16_Pro_series.jpg",
+   "commons_title": "File:IPhone 16 Pro series.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "iphone-16-pro-max": {
+   "thumb": "/assets/produits/iphone-16-pro-max.jpg",
+   "license": "CC BY-SA 2.0",
+   "author": "メイド理世",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_16_Pro_Max_(54252176424).jpg",
+   "commons_title": "File:IPhone 16 Pro Max (54252176424).jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "iphone-17": {
+   "thumb": "/assets/produits/iphone-17.jpg",
+   "license": "CC0",
+   "author": "Ahmad Ali Karim",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Black_iPhone_17.jpg",
+   "commons_title": "File:Black iPhone 17.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "iphone-17-pro-max": {
+   "thumb": "/assets/produits/iphone-17-pro-max.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "茅野ふたば",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_17_Pro_Max.jpg",
+   "commons_title": "File:IPhone 17 Pro Max.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "iphone-18-pro": {
+   "thumb": "/assets/produits/iphone-18-pro.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "茅野ふたば",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_18_Pro_rear.jpg",
+   "commons_title": "File:IPhone 18 Pro rear.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "iphone-18-pro-max": {
+   "thumb": "/assets/produits/iphone-18-pro-max.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Kyu3a",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_18_Pro_and_Pro_Max.jpg",
+   "commons_title": "File:IPhone 18 Pro and Pro Max.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "iphone-air": {
+   "thumb": "/assets/produits/iphone-air.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "茅野ふたば",
+   "file_page": "https://commons.wikimedia.org/wiki/File:IPhone_Air_backside.jpg",
+   "commons_title": "File:IPhone Air backside.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "jbl-clip-5": {
+   "thumb": "/assets/produits/jbl-clip-5.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Kyu3a",
+   "file_page": "https://commons.wikimedia.org/wiki/File:JBL_Clip_5.jpg",
+   "commons_title": "File:JBL Clip 5.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "macbook-air-13-m4": {
+   "thumb": "/assets/produits/macbook-air-13-m4.jpg",
+   "license": "CC0",
+   "author": "AzureSaturn",
+   "file_page": "https://commons.wikimedia.org/wiki/File:MacBook_Air_(13-inch,_M4,_Silver).jpg",
+   "commons_title": "File:MacBook Air (13-inch, M4, Silver).jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "macbook-air-13-m5": {
+   "thumb": "/assets/produits/macbook-air-13-m5.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "Kyu3a",
+   "file_page": "https://commons.wikimedia.org/wiki/File:M5_Macbook_Air_13_Sky_Blue_model.jpg",
+   "commons_title": "File:M5 Macbook Air 13 Sky Blue model.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "macbook-air-15-m4": {
+   "thumb": "/assets/produits/macbook-air-15-m4.jpg",
+   "license": "CC0",
+   "author": "AzureSaturn",
+   "file_page": "https://commons.wikimedia.org/wiki/File:MacBook_Air_(15-inch,_M4,_Silver).jpg",
+   "commons_title": "File:MacBook Air (15-inch, M4, Silver).jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "macbook-pro-14-m5": {
+   "thumb": "/assets/produits/macbook-pro-14-m5.jpg",
+   "license": "CC0",
+   "author": "AzureSaturn",
+   "file_page": "https://commons.wikimedia.org/wiki/File:MacBook_Pro_(14-inch,_M5,_Space_Black).jpg",
+   "commons_title": "File:MacBook Pro (14-inch, M5, Space Black).jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "macbook-pro-16-m4": {
+   "thumb": "/assets/produits/macbook-pro-16-m4.jpg",
+   "license": "CC0",
+   "author": "AzureSaturn",
+   "file_page": "https://commons.wikimedia.org/wiki/File:MacBook_Pro_(16-inch,_M4_Pro,_Silver).jpg",
+   "commons_title": "File:MacBook Pro (16-inch, M4 Pro, Silver).jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "playstation-portal": {
+   "thumb": "/assets/produits/playstation-portal.jpg",
+   "license": "CC BY 4.0",
+   "author": "ArlindoPereira",
+   "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_Portal.jpg",
+   "commons_title": "File:PlayStation Portal.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "playstation-vr2": {
+   "thumb": "/assets/produits/playstation-vr2.jpg",
+   "license": "CC BY 4.0",
+   "author": "ArlindoPereira",
+   "file_page": "https://commons.wikimedia.org/wiki/File:PlayStation_VR2.jpg",
+   "commons_title": "File:PlayStation VR2.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "switch": {
+   "thumb": "/assets/produits/switch.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "KK IN HK",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_-_Red.jpg",
+   "commons_title": "File:Nintendo Switch - Red.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  },
+  "switch-lite": {
+   "thumb": "/assets/produits/switch-lite.jpg",
+   "license": "CC BY-SA 4.0",
+   "author": "GerdeeX",
+   "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo_switch_lite_blue.jpg",
+   "commons_title": "File:Nintendo switch lite blue.jpg",
+   "match": "verifie_visuellement",
+   "reason": "Photo amateur (décor, main, magasin) retirée à la demande du propriétaire le 22/11/2026"
+  }
  },
  "published": [
   "airpods-3",
