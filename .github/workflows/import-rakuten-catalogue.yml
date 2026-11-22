@@ -147,7 +147,8 @@ jobs:
           # Inventaire en lecture seule des fichiers Delta signalés par Rakuten.
           # Aucun Delta n'est téléchargé ni interprété comme prix tant que son schéma n'est pas validé.
           list_delta_candidates() {
-            local mid="$1" listing="/tmp/rakuten-${mid}-delta-list.txt"
+            local mid="$1" listing
+            listing="/tmp/rakuten-${mid}-delta-list.txt"
             if grep -Fxq "$mid" /tmp/rakuten-root-list.txt; then
               "${CURL[@]}" --list-only "sftp://aftp.linksynergy.com/${mid}/" > "$listing"
             else
