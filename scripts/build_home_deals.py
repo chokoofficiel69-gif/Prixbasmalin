@@ -274,6 +274,26 @@ def rotation_record(gifts, rotated_at):
     }
 
 
+def with_listed_prices(gifts, awin):
+    """Prix public du flux marchand actuel (demande du propriétaire, 22/11/2026) : affiché daté et
+    « à confirmer », jamais comme prix vérifié. Marchands à prix HT (Lusini) exclus."""
+    current = {p.get("id"): p for p in awin.get("products") or [] if isinstance(p, dict)}
+    fetched_at = awin.get("fetched_at")
+    out = []
+    for gift in gifts:
+        g = dict(gift)
+        p = current.get(g.get("id")) or {}
+        try:
+            price = float(p.get("priceValue"))
+        except (TypeError, ValueError):
+            price = 0.0
+        ok = price > 0 and fetched_at and "lusini" not in str(g.get("merchant", "")).lower()
+        g["listed_price_eur"] = round(price, 2) if ok else None
+        g["listed_price_date"] = fetched_at if ok else None
+        out.append(g)
+    return out
+
+
 def build(awin, sheets, previous=None, rotation_now=None):
     previous = previous if isinstance(previous, dict) else {}
     reference_time = parse_utc(awin.get("fetched_at"))
@@ -377,6 +397,7 @@ def build(awin, sheets, previous=None, rotation_now=None):
                         "candidate_count": len(candidates),
                     })
 
+    gifts = with_listed_prices(gifts, awin)
     return {
         "version": 1,
         "awin_fetched_at": awin.get("fetched_at"),
