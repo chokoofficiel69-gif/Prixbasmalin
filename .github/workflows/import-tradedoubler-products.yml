@@ -32,10 +32,12 @@ jobs:
         with:
           node-version: 22
       - name: Vérifier le secret sans afficher sa valeur
+        id: config
         env:
           TRADEDOUBLER_PRODUCTS_TOKEN: ${{ secrets.TRADEDOUBLER_PRODUCTS_TOKEN }}
         run: |
           if [[ -z "${TRADEDOUBLER_PRODUCTS_TOKEN:-}" ]]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Import non exécuté : secret TRADEDOUBLER_PRODUCTS_TOKEN absent."
             exit 0
           fi
@@ -43,12 +45,15 @@ jobs:
             echo "::error::Format du jeton Tradedoubler invalide (valeur masquée)."
             exit 1
           fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
       - name: Télécharger uniquement les flux français EUR modifiés
+        if: steps.config.outputs.ready == 'true'
         env:
           TRADEDOUBLER_PRODUCTS_TOKEN: ${{ secrets.TRADEDOUBLER_PRODUCTS_TOKEN }}
           TRADEDOUBLER_MAX_FEEDS: "100"
         run: node scripts/import-tradedoubler-products.mjs
       - name: Publier le snapshot séparé après validation
+        if: steps.config.outputs.ready == 'true'
         shell: bash
         run: |
           set -euo pipefail
