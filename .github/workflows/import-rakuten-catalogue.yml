@@ -236,7 +236,35 @@ jobs:
           gzip -t /tmp/44806_4768926_mp.xml.gz
           if [[ -f /tmp/54306_4768926_1_cmp.xml.gz ]]; then gzip -t /tmp/54306_4768926_1_cmp.xml.gz; fi
           if [[ -f /tmp/54306_4768926_mp.xml.gz ]]; then gzip -t /tmp/54306_4768926_mp.xml.gz; fi
+
+          # Télécharger un échantillon Delta par annonceur, sans l'intégrer au catalogue.
+          # Ces fichiers servent uniquement à vérifier le schéma réel avant d'écrire le parseur.
+          mkdir -p /tmp/rakuten-delta-samples
+          for mid in 44806 54306; do
+            listing="/tmp/rakuten-${mid}-delta-list.txt"
+            sample="$(grep -E "^(${mid}_)?[^/]*_cmp_delta\\.xml\\.gz$" "$listing" | sort | head -n 1 || true)"
+            if [[ -z "$sample" ]]; then
+              echo "::warning::Aucun Delta XML échantillonnable pour le MID $mid."
+              continue
+            fi
+            remote_path="$sample"
+            if ! grep -Fxq "$sample" /tmp/rakuten-root-list.txt; then
+              remote_path="${mid}/${sample}"
+            fi
+            echo "Échantillon Delta sélectionné pour MID $mid : $sample"
+            "${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"
+            gzip -t "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"
+            gzip -dc "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz" | head -c 200000 > "/tmp/rakuten-delta-samples/${mid}-sample.xml"
+          done
           rm -f "$HOME/.netrc-rakuten"
+      - name: Conserver les échantillons Delta pour analyse
+        if: always() && steps.config.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rakuten-delta-samples
+          path: /tmp/rakuten-delta-samples/
+          if-no-files-found: warn
+          retention-days: 3
       - name: Convertir seulement les sources fraîches et complètes
         if: steps.config.outputs.ready == 'true'
         env:
