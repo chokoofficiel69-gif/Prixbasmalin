@@ -1,10 +1,10 @@
 {
   "version": 1,
   "generated_from": "catalogue.html productData",
-  "generated_at": "2026-11-16",
+  "generated_at": "2026-11-22",
   "count": 341,
-  "verified_image_count": 14,
-  "unverified_image_count": 327,
+  "verified_image_count": 9,
+  "unverified_image_count": 332,
   "price_policy": "No price is displayed unless a verified merchant offer is available.",
   "image_policy": "Promotional product photos are displayed only when imageStatus confirms manufacturer, press, retailer or authorized-feed provenance. Unverified references remain searchable without a product photo.",
   "products": [
@@ -837,7 +837,7 @@
       "brand": "Nike",
       "image": "https://static.nike.com/a/images/t_PDP_144_v1/f_auto%2Cq_auto%3Aeco%2Cu_9ddf04c7-2a9a-4d76-add1-d15af8f0263d%2Cc_scale%2Cfl_relative%2Cw_1.0%2Ch_1.0%2Cfl_layer_apply/c84a9286-76ca-4529-aac6-170b400058a1/AIR%2BFORCE%2B1%2B%2707.png",
       "sourceUrl": "https://www.amazon.fr/s?k=Nike%20Air%20Force%201%2007&tag=prixbasmalin2-21",
-      "imageStatus": "manufacturer_verified",
+      "imageStatus": "image_low_quality",
       "imageKind": "official",
       "imageSource": "https://www.nike.com/fr/t/chaussure-air-force-1-07-pour-n8juM1H2/CW2288-111",
       "imageSourceName": "Nike"
@@ -850,7 +850,7 @@
       "brand": "Nike",
       "image": "https://static.nike.com/a/images/t_PDP_144_v1/f_auto%2Cq_auto%3Aeco%2Cu_9ddf04c7-2a9a-4d76-add1-d15af8f0263d%2Cc_scale%2Cfl_relative%2Cw_1.0%2Ch_1.0%2Cfl_layer_apply/ed4db258-0b59-4741-82cb-57ab630ae22a/NIKE%2BAIR%2BMAX%2B90.png",
       "sourceUrl": "https://www.amazon.fr/s?k=Nike%20Air%20Max%2090&tag=prixbasmalin2-21",
-      "imageStatus": "manufacturer_verified",
+      "imageStatus": "image_low_quality",
       "imageKind": "official",
       "imageSource": "https://www.nike.com/fr/t/chaussure-nike-air-max-90-pour-homme-exykZV6r/IM5989-077",
       "imageSourceName": "Nike"
@@ -1074,7 +1074,7 @@
       "brand": "Carhartt",
       "image": "https://cdn.media.amplience.net/i/carhartt_wip/I020222_89_XX-ST-01?%24ST%24=&fmt=auto&qlt=75&w=640",
       "sourceUrl": "https://www.amazon.fr/s?k=Carhartt%20Acrylic%20Watch%20Hat%20bonnet&tag=prixbasmalin2-21",
-      "imageStatus": "manufacturer_verified",
+      "imageStatus": "image_low_quality",
       "imageKind": "official",
       "imageSource": "https://www.carhartt-wip.com/fr-fr/p/acrylic-watch-hat-black-2134",
       "imageSourceName": "Carhartt WIP"
@@ -1528,7 +1528,7 @@
       "brand": "Sony",
       "image": "https://sony.scene7.com/is/image/sonyglobalsolutions/GGB-8071_Olive_Gray_Gallery-1?%24originalDimensions%24=",
       "sourceUrl": "https://www.amazon.fr/s?k=Sony%20WH-1000XM6&tag=prixbasmalin2-21",
-      "imageStatus": "manufacturer_verified",
+      "imageStatus": "image_low_quality",
       "imageKind": "official",
       "imageSource": "https://www.sony.fr/headphones/products/wh-1000xm6",
       "imageSourceName": "Sony"
@@ -1802,7 +1802,7 @@
       "brand": "Nike",
       "image": "https://static.nike.com/a/images/t_PDP_144_v1/f_auto%2Cq_auto%3Aeco%2Cu_9ddf04c7-2a9a-4d76-add1-d15af8f0263d%2Cc_scale%2Cfl_relative%2Cw_1.0%2Ch_1.0%2Cfl_layer_apply/c84a9286-76ca-4529-aac6-170b400058a1/AIR%2BFORCE%2B1%2B%2707.png",
       "sourceUrl": "https://www.amazon.fr/s?k=Nike%20Air%20Force%201%20Low&tag=prixbasmalin2-21",
-      "imageStatus": "manufacturer_verified",
+      "imageStatus": "image_low_quality",
       "imageKind": "official",
       "imageSource": "https://www.nike.com/fr/t/chaussure-air-force-1-07-pour-n8juM1H2/CW2288-111",
       "imageSourceName": "Nike"
