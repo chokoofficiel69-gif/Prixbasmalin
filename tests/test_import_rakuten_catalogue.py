@@ -367,6 +367,14 @@ class RakutenImportValidationTests(unittest.TestCase):
             gtins = MODULE.load_priority_gtins([str(path)])
         self.assertEqual(gtins, {"00652638010168", "04006381333931"})
 
+    def test_optional_rakuten_feed_failure_does_not_block_other_sources_or_delta_diagnostics(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
+        self.assertIn('if [[ "$required" == "true" ]]; then', workflow)
+        self.assertIn("Flux facultatif gzip incomplet ou invalide", workflow)
+        self.assertIn('download_feed "$mid" "$sample" "$output" false', workflow)
+        self.assertIn('if download_feed "$mid" "$sample" "$output" false && [[ -s "$output" ]]; then', workflow)
+        self.assertIn("Échantillon Delta non disponible", workflow)
+        self.assertNotIn('"${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"', workflow)
 
 if __name__ == "__main__":
     unittest.main()

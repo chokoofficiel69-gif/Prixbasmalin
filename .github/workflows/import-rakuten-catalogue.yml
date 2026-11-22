@@ -222,8 +222,12 @@ jobs:
             size="$(stat -c %s "$temporary" 2>/dev/null || echo 0)"
             if [[ ! -s "$temporary" ]] || ! gzip -t "$temporary"; then
               rm -f "$temporary"
-              echo "::error::Flux gzip incomplet ou invalide après 5 tentatives : $filename (reçu $size octets, attendu ${expected_size:-inconnu})."
-              return 1
+              if [[ "$required" == "true" ]]; then
+                echo "::error::Flux requis gzip incomplet ou invalide après 5 tentatives : $filename (reçu $size octets, attendu ${expected_size:-inconnu})."
+                return 1
+              fi
+              echo "::warning::Flux facultatif gzip incomplet ou invalide après 5 tentatives : $filename (reçu $size octets, attendu ${expected_size:-inconnu}) ; import des autres flux poursuivi."
+              return 0
             fi
             echo "Flux complet : $filename ($size octets, gzip valide)."
             mv "$temporary" "$output"
@@ -252,9 +256,15 @@ jobs:
               remote_path="${mid}/${sample}"
             fi
             echo "Échantillon Delta sélectionné pour MID $mid : $sample"
-            "${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"
-            gzip -t "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"
-            python3 -c 'import gzip,sys; data=gzip.open(sys.argv[1], "rb").read(200000); open(sys.argv[2], "wb").write(data)' "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz" "/tmp/rakuten-delta-samples/${mid}-sample.xml"
+            output="/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"
+            # Réutiliser le téléchargement atomique et ses reprises ; un échantillon facultatif
+            # incomplet ne doit jamais bloquer la conversion des catalogues complets.
+            if download_feed "$mid" "$sample" "$output" false && [[ -s "$output" ]]; then
+              python3 -c 'import gzip,sys; data=gzip.open(sys.argv[1], "rb").read(200000); open(sys.argv[2], "wb").write(data)' "$output" "${output%.gz}"
+              echo "Échantillon Delta valide conservé pour MID $mid."
+            else
+              echo "::warning::Échantillon Delta non disponible pour MID $mid ; import des flux standards poursuivi."
+            fi
           done
           rm -f "$HOME/.netrc-rakuten"
       - name: Conserver les échantillons Delta pour analyse
