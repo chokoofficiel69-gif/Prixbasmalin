@@ -162,7 +162,7 @@ CSS = """<style id="pm-showcase-style">
 .pmx-badge{position:absolute;top:16px;left:16px;z-index:1;padding:4px 9px;border-radius:8px;background:#e5261e;font-size:12px;font-weight:900}
 .pmx-gap{align-self:stretch;margin:4px 0 2px;padding:5px 8px;border-radius:8px;background:#16a34a;color:#fff;font-size:12px;font-weight:850;text-align:center}
 .pmx-ph{display:block;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#fff;margin-bottom:6px}
-.pmx-ph img{width:100%;height:100%;object-fit:cover}
+.pmx-ph img{width:100%;height:100%;object-fit:contain;padding:8px;box-sizing:border-box}
 .pmx-pick .pmx-ph{background:#fff}.pmx-pick .pmx-ph img{object-fit:contain}.pmx-pick h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pmx-card h3{margin:0;font-size:15px;line-height:1.25;color:#fff}
 .pmx-card small{color:var(--mut);font-size:12px}
