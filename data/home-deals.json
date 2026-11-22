@@ -60,20 +60,6 @@
    "price_kind": "historical"
   },
   {
-   "id": "sony-wh-1000xm6",
-   "name": "Sony WH-1000XM6",
-   "brand": "Sony",
-   "category": "casque",
-   "category_label": "High-Tech",
-   "image": "https://sony.scene7.com/is/image/sonyglobalsolutions/GGB-8071_Olive_Gray_Gallery-1?%24originalDimensions%24=",
-   "image_credit": null,
-   "min_price_eur": 306.99,
-   "max_price_eur": 374.16,
-   "offer_count": 10,
-   "last_date": "2026-11-21",
-   "price_kind": "historical"
-  },
-  {
    "id": "iphone-15",
    "name": "iPhone 15",
    "brand": "Apple",
