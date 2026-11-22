@@ -38,6 +38,11 @@ function productsFrom(payload) {
   if (Array.isArray(payload?.result?.products)) return payload.result.products;
   return [];
 }
+export function appendPreviousFeedOffers(collected, oldByFeed, feedId) {
+  const previous = oldByFeed.get(Number(feedId)) || [];
+  collected.push(...previous);
+  return previous.length;
+}
 function normalizeProduct(product, feed, now) {
   const offers = Array.isArray(product?.offers) ? product.offers : [];
   return offers.map(offer => {
@@ -88,7 +93,14 @@ async function main() {
   const feeds = (Array.isArray(feedsPayload?.feeds) ? feedsPayload.feeds : [])
     .filter(validFeed).slice(0, MAX_FEEDS);
   if (!feeds.length) fail("Aucun flux actif, visible, français et EUR accessible au compte.");
-  const previous = await fs.readFile(OUT, "utf8").then(JSON.parse).catch(() => ({ schema_version: 1, offers: [] }));
+  let previous;
+  try {
+    previous = JSON.parse(await fs.readFile(OUT, "utf8"));
+    if (!previous || !Array.isArray(previous.offers)) fail("Snapshot Tradedoubler existant invalide.");
+  } catch (error) {
+    if (error?.code === "ENOENT") previous = { schema_version: 1, offers: [] };
+    else fail("Snapshot Tradedoubler existant illisible ; aucun écrasement effectué.");
+  }
   const state = await fs.readFile(STATE, "utf8").then(JSON.parse).catch(() => ({ feeds: {} }));
   const oldByFeed = new Map();
   for (const offer of Array.isArray(previous.offers) ? previous.offers : []) {
@@ -106,11 +118,12 @@ async function main() {
     const last = await requestJson(API + "/productsUnlimited/lastUpdated.json;fid=" + id + "?token=" + encodeURIComponent(TOKEN), "Date de flux " + id);
     const lastUpdated = String(last?.lastUpdatedTime || "");
     if (!lastUpdated || !Number.isFinite(Date.parse(lastUpdated))) {
-      skipped.push({ feed_id: id, reason: "date de mise à jour absente ou illisible" });
+      const preserved = appendPreviousFeedOffers(collected, oldByFeed, id);
+      skipped.push({ feed_id: id, reason: "date de mise à jour absente ou illisible ; ancien snapshot conservé", preserved_offers: preserved });
       continue;
     }
     if (nextState[id]?.last_updated === lastUpdated && oldByFeed.has(id)) {
-      collected.push(...oldByFeed.get(id));
+      appendPreviousFeedOffers(collected, oldByFeed, id);
       skipped.push({ feed_id: id, reason: "flux inchangé" });
       continue;
     }
@@ -118,7 +131,7 @@ async function main() {
     const products = productsFrom(payload);
     if (!products.length) {
       skipped.push({ feed_id: id, reason: "flux vide ou format inattendu ; ancien snapshot conservé" });
-      if (oldByFeed.has(id)) collected.push(...oldByFeed.get(id));
+      appendPreviousFeedOffers(collected, oldByFeed, id);
       continue;
     }
     const normalized = products.flatMap(product => normalizeProduct(product, feed, now));
