@@ -96,6 +96,12 @@ class HomepageOffersTests(unittest.TestCase):
         self.assertIn("fresh(p.merchantUpdatedAt||p.priceUpdatedAt)", workflow)
         self.assertIn("Publication GitHub Pages encore en propagation", workflow)
 
+    def test_seasonal_theme_is_applied_to_the_hero_container(self):
+        self.assertIn('document.body.classList.add("pm-season-"+season);', self.source)
+        self.assertIn('const hero=document.querySelector(".pmx");', self.source)
+        self.assertIn('if(hero)hero.classList.add("pm-season-"+season);', self.source)
+        self.assertIn(".pmx.pm-season-noel .pmx-hero::before", self.source)
+
 
 if __name__ == "__main__":
     unittest.main()

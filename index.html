@@ -1587,6 +1587,8 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
    season="halloween";label="Les idées qui donnent des frissons";kicker="SÉLECTION HALLOWEEN";
  }
  document.body.classList.add("pm-season-"+season);
+ const hero=document.querySelector(".pmx");
+ if(hero)hero.classList.add("pm-season-"+season);
  document.documentElement.dataset.pmSeason=season;
  const section=document.querySelector("#new-arrivals");
  if(!section)return;
