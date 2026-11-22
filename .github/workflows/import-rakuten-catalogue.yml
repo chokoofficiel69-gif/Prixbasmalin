@@ -254,7 +254,7 @@ jobs:
             echo "Échantillon Delta sélectionné pour MID $mid : $sample"
             "${CURL[@]}" "sftp://aftp.linksynergy.com/${remote_path}" --output "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"
             gzip -t "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz"
-            gzip -dc "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz" | head -c 200000 > "/tmp/rakuten-delta-samples/${mid}-sample.xml"
+            python3 -c 'import gzip,sys; data=gzip.open(sys.argv[1], "rb").read(200000); open(sys.argv[2], "wb").write(data)' "/tmp/rakuten-delta-samples/${mid}-sample.xml.gz" "/tmp/rakuten-delta-samples/${mid}-sample.xml"
           done
           rm -f "$HOME/.netrc-rakuten"
       - name: Conserver les échantillons Delta pour analyse
