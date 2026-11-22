@@ -176,6 +176,8 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertIn('list_delta_candidates "54306"', workflow)
         self.assertIn(r"_cmp_delta\.(txt|xml)\.gz$", workflow)
         self.assertIn("Aucun fichier Delta", workflow)
+        self.assertIn("Liste SFTP du MID", workflow)
+        self.assertIn("import des flux standards poursuivi", workflow)
         # Le fichier _1_cmp standard reste distinct du Delta ; aucun parsing de prix n'est activé.
         self.assertIn("54306_4768926_1_cmp.xml.gz", workflow)
         self.assertNotIn('download_feed "54306" "54306_4768926_1_cmp_delta', workflow)
