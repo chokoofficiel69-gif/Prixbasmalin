@@ -23,7 +23,7 @@ def offer(merchant, price, name="Clive Christian 1872 Féminine 50 ml", brand="C
 class GtinComparisonTests(unittest.TestCase):
     def test_same_gtin_brand_and_quantity_from_two_merchants_is_compared(self):
         result = MODULE.build([
-            offer("Perfumeria Comas FR", 350.0, name="I Woody Floral 50 ml", brand="CLIVE CHRISTIAN"),
+            offer("Awin Partner FR", 350.0, name="I Woody Floral 50 ml", brand="CLIVE CHRISTIAN"),
             offer("Nicchia Luxury", 410.0, name="Clive Christian I Woody Floral Feminine 50 ml", source="rakuten"),
         ], NOW)
         self.assertEqual(result["counts"]["comparisons"], 1)
@@ -31,6 +31,14 @@ class GtinComparisonTests(unittest.TestCase):
         self.assertEqual(product["id"], "gtin-00652638010168")
         self.assertEqual([o["price_eur"] for o in product["offers"]], [350.0, 410.0])
         self.assertEqual(result["counts"]["comparisons_with_two_current_offers"], 1)
+
+    def test_unconfirmed_awin_merchant_is_excluded_from_public_comparisons(self):
+        feed = {"products": [{
+            "gtin": "652638010168", "priceValue": 350.0, "merchant": "Perfumeria Comas FR",
+            "name": "Clive Christian I Woody Floral 50 ml", "brand": "Clive Christian",
+            "sourceUrl": "https://merchant.example/p", "merchantUpdatedAt": "2026-11-13T06:00:00Z"
+        }]}
+        self.assertEqual(list(MODULE.awin_offers(feed)), [])
 
     def test_single_merchant_never_produces_a_comparison(self):
         result = MODULE.build([offer("A", 10.0), offer("A", 9.0)], NOW)
@@ -110,6 +118,7 @@ class GtinComparisonTests(unittest.TestCase):
         self.assertEqual(data["status"], "ok")
         for product in data["products"]:
             self.assertTrue(MODULE.is_valid_gtin(product["gtin"]))
+            self.assertNotIn("perfumeria comas fr", {MODULE.fold(o["merchant"]) for o in product["offers"]})
             self.assertGreaterEqual(len({o["merchant"].casefold() for o in product["offers"]}), 2)
             for row in product["offers"]:
                 self.assertEqual(row["currency"], "EUR")
