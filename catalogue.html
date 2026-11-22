@@ -815,13 +815,26 @@ main{max-width:1180px!important;margin:0 auto!important;padding:18px 14px 100px!
       const name=document.createElement("h3");name.className="pm-amazon-sheet-name";name.textContent=product.name||id;
       const offers=Array.isArray(product.offers)?product.offers.length:Number(product.offer_count||0);
       const meta=document.createElement("p");meta.className="pm-amazon-sheet-meta";
-      meta.textContent=offers+" relevés historiques · dernier relevé : "+formatDate(product.last_date);
+      // Plus bas prix relevé (offre datée et sourcée) : affiché comme repère, avec le marchand et la date.
+      const offerRows=Array.isArray(product.offers)?product.offers.filter(o=>o&&Number(o.price_eur)>0):[];
+      const best=offerRows.slice().sort((a,b)=>Number(a.price_eur)-Number(b.price_eur))[0]||null;
+      const merchantNames={amazon:"Amazon",cdiscount:"Cdiscount",fnac:"Fnac",darty:"Darty",boulanger:"Boulanger",ebay:"eBay",aliexpress:"AliExpress",pixmaniafr:"Pixmania",galaxusfr:"Galaxus",carrefourfr:"Carrefour",rueducommercefrmarke:"Rue du Commerce",eleclercfrmarketplac:"E.Leclerc",eleclerchightechfr:"E.Leclerc High-Tech",joybuyfr:"Joybuy",kauflandfr:"Kaufland",topbizfr:"Topbiz"};
+      const bestMerchant=best?(merchantNames[String(best.merchant||"").toLowerCase()]||String(best.merchant||"")):"";
+      if(best){
+        const priceLine=document.createElement("p");priceLine.className="pm-amazon-sheet-price";
+        priceLine.style.cssText="margin:4px 0 0;font-weight:900;color:#f05a00;font-size:19px";
+        priceLine.textContent=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(Number(best.price_eur));
+        copy.append(brand,name,priceLine);
+      }
+      meta.textContent=best
+        ?"Plus bas prix relevé chez "+bestMerchant+" le "+formatDate(best.date||product.last_date)+" · "+offers+" marchands comparés"
+        :offers+" relevés historiques · dernier relevé : "+formatDate(product.last_date);
       const actions=document.createElement("div");actions.className="pm-amazon-sheet-actions";
-      const compare=document.createElement("a");compare.className="pm-amazon-sheet-compare";compare.href="/prix/"+encodeURIComponent(id)+".html";compare.textContent="Voir l’historique des prix";
+      const compare=document.createElement("a");compare.className="pm-amazon-sheet-compare";compare.href="/prix/"+encodeURIComponent(id)+".html";compare.textContent=best?"Comparer les "+offers+" prix":"Voir l’historique des prix";
       const amazon=document.createElement("a");amazon.className="pm-amazon-sheet-amazon";
       amazon.href="https://www.amazon.fr/dp/"+entry.asin+"?tag="+encodeURIComponent(String(asinData.tag||"prixbasmalin2-21"));
       amazon.target="_blank";amazon.rel="sponsored nofollow noopener noreferrer";amazon.textContent="Voir chez Amazon ↗";
-      actions.append(compare,amazon);copy.append(brand,name,meta,actions);card.append(photo,copy);fragment.append(card);
+      actions.append(compare,amazon);if(!best)copy.append(brand,name);copy.append(meta,actions);card.append(photo,copy);fragment.append(card);
     });
     grid.replaceChildren(fragment);
     shelf.hidden=false;
