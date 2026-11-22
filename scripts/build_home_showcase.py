@@ -219,7 +219,7 @@ CSS = """<style id="pm-showcase-style">
 
 # Coups de cœur partenaires : photos de studio fournies par les marchands dans leurs flux autorisés
 # (image vérifiée par data/home-deals.json) et prix du flux marchand, daté et « à confirmer ».
-PARTNER_PRIORITY = ["Ecovacs FR", "Jowissa", "Mibro FR", "Imou FR", "AKKO FR", "Perfumeria Comas FR",
+PARTNER_PRIORITY = ["Ecovacs FR", "Jowissa", "Mibro FR", "Imou FR", "Perfumeria Comas FR",
                     "Al Jazeera Perfumes EU", "BlazeVideo FR", "Fiido Technology Development Co., Ltd"]
 PARTNER_MAX_AGE_DAYS = 7
 
