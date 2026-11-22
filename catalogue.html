@@ -5956,6 +5956,13 @@ function pmAwinMerchantUpdatedAt(value){
     :raw;
   return Date.parse(normalized);
 }
+function pmListedPriceIsRecent(value,now=Date.now()){
+  if(!value)return false;
+  const updatedAt=pmAwinMerchantUpdatedAt(value);
+  const age=now-updatedAt;
+  return Number.isFinite(updatedAt)&&age>=-5*60*1000&&age<=7*24*60*60*1000;
+}
+function pmHtMerchant(merchant){return /\blusini\b/i.test(String(merchant||""));}
 function pmAwinPriceIsFresh(value,now=Date.now()){
   const updatedAt=pmAwinMerchantUpdatedAt(value);
   const age=now-updatedAt;
@@ -6446,7 +6453,12 @@ function render(){
     const priceDateText=priceDateParsed&&Number.isFinite(priceDateParsed.getTime())?priceDateParsed.toLocaleDateString("fr-FR"):"";
     // Un prix de flux sans date individuelle et TVA confirmée reste une donnée source, pas un prix public vérifié.
     // Le conserver dans les données permet l’audit, mais ne pas afficher son montant dans le catalogue.
-    const listedPrice=null;
+    // Demande du propriétaire (22/11/2026) : afficher le prix public indiqué par le marchand dans son flux
+    // officiel, avec sa date et « à confirmer », quand ce flux a moins de 7 jours. Ce prix n'est jamais
+    // classé « meilleur prix » ni utilisé dans les comparaisons vérifiées. Marchands B2B (prix HT) exclus.
+    const listedDateValue=p.merchantUpdatedAt||p.feedFetchedAt||null;
+    const listedPrice=!hasVerifiedPrice&&pmListedPriceIsRecent(listedDateValue)&&!pmHtMerchant(p.merchant)&&
+      Number.isFinite(Number(p.listedPriceValue))&&Number(p.listedPriceValue)>0?Number(p.listedPriceValue):null;
     const sheet=!hasVerifiedPrice&&listedPrice===null&&p.pmSheet&&Array.isArray(p.pmSheet.offers)&&p.pmSheet.offers.length?p.pmSheet:null;
     const sheetUrl=sheet?"/prix/"+encodeURIComponent(sheet.id)+".html":"";
     const sheetDate=sheet?new Date(String(sheet.last_date)+"T12:00:00").toLocaleDateString("fr-FR"):"";
@@ -7291,7 +7303,8 @@ async function pmLoadRakutenCatalogue(){
         category:p.category||"sport",brand:p.brand||p.merchant,mpn:p.mpn||"",query:p.query||p.name,
         image:p.image,images:[],merchant:p.merchant,
         price:hasVerifiedPrice?new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}).format(base):"Consulter la boutique",
-        priceValue:hasVerifiedPrice?base:null,shippingPriceValue:shipping,
+        priceValue:hasVerifiedPrice?base:null,listedPriceValue:base,shippingPriceValue:shipping,
+        feedFetchedAt:p.sourceCreatedAt||feed.sourceCreatedAt||null,
         sourceUrl:p.sourceUrl,gtin:p.gtin||"",sku:p.sku||"",availability:p.availability||"unknown",
         imageSource:p.image,imageSourceName:p.merchant,imageKind:"merchant_feed",
         imageStatus:"authorized_feed_image",priceTaxStatus,priceStatus,sourceCreatedAt:p.sourceCreatedAt||null,merchantUpdatedAt:sourceUpdatedAt,isRakutenProduct:true
