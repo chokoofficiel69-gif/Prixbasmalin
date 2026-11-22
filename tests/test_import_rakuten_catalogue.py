@@ -169,6 +169,19 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertNotIn("'included'", workflow)
         self.assertIn("if: github.event_name != 'pull_request'", workflow)
 
+    def test_workflow_discovers_delta_files_without_importing_unvalidated_prices(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "import-rakuten-catalogue.yml").read_text(encoding="utf-8")
+        self.assertIn("list_delta_candidates()", workflow)
+        self.assertIn('list_delta_candidates "44806"', workflow)
+        self.assertIn('list_delta_candidates "54306"', workflow)
+        self.assertIn(r"_cmp_delta\.(txt|xml)\.gz$", workflow)
+        self.assertIn("Aucun fichier Delta", workflow)
+        self.assertIn("Liste SFTP du MID", workflow)
+        self.assertIn("import des flux standards poursuivi", workflow)
+        # Le fichier _1_cmp standard reste distinct du Delta ; aucun parsing de prix n'est activé.
+        self.assertIn("54306_4768926_1_cmp.xml.gz", workflow)
+        self.assertNotIn('download_feed "54306" "54306_4768926_1_cmp_delta', workflow)
+
     def test_ttc_requires_explicit_confirmation(self):
         self.assertEqual(MODULE.resolve_price_tax_status("included", False), "unspecified")
         self.assertEqual(MODULE.resolve_price_tax_status("included", True), "included")
