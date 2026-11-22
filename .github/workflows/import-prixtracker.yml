@@ -48,10 +48,32 @@ jobs:
       - name: Valider les relevés importés
         run: |
           node --input-type=module -e "import fs from 'node:fs'; for (const f of ['data/prixtracker-prices.json','data/prixtracker-best-daily.json']) { const d=JSON.parse(fs.readFileSync(f,'utf8')); if (!d.counts?.rows || !d.products?.length) throw new Error('Dataset vide: '+f); if (d.status !== 'historical_reference') throw new Error('Statut historique manquant: '+f); console.log(f, d.counts); }"
+      - name: Sauvegarder le dernier snapshot de la vitrine cadeaux
+        run: cp data/home-deals.json /tmp/home-deals-previous.json
       - name: Construire les fiches produits comparatives
         run: |
           python3 scripts/build_product_sheets.py
           python3 scripts/build_home_deals.py
+      - name: Vérifier les images de la vitrine après reconstruction
+        shell: bash
+        run: |
+          set -euo pipefail
+          NEEDS_CHECK="$(python3 - <<'PY'
+          import json
+          data = json.load(open("data/home-deals.json", encoding="utf-8"))
+          gifts = data.get("gifts") or []
+          rotation = data.get("rotation") or {}
+          needs_check = rotation.get("status") == "rotated" or any(gift.get("image_verified") is not True for gift in gifts)
+          print("true" if needs_check else "false")
+          PY
+          )"
+          if [[ "$NEEDS_CHECK" == "true" ]]; then
+            python3 scripts/check_awin_gift_images.py --previous /tmp/home-deals-previous.json
+          else
+            echo "Les images de la vitrine sont déjà vérifiées ; contrôle réseau supplémentaire ignoré."
+          fi
+      - name: Construire les pages SEO et la vitrine
+        run: |
           python3 scripts/build_seo_pages.py
           python3 scripts/build_home_showcase.py
           python3 scripts/build_partners_page.py
@@ -59,6 +81,7 @@ jobs:
       - name: Tester la vitrine et les pages SEO avec prix vérifiés
         run: |
           python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
+          python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v
           python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
           python3 -m unittest discover -s tests -p 'test_home_showcase.py' -v
       - name: Publier uniquement si les fichiers ont changé

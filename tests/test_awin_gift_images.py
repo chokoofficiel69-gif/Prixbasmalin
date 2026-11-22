@@ -201,5 +201,19 @@ class AwinGiftImageTests(unittest.TestCase):
 
 
 
+    def test_prixtracker_workflow_rechecks_new_or_unverified_gift_images_before_pages(self):
+        workflow = (ROOT / ".github" / "workflows" / "import-prixtracker.yml").read_text(encoding="utf-8")
+        snapshot = 'cp data/home-deals.json /tmp/home-deals-previous.json'
+        checker = "python3 scripts/check_awin_gift_images.py --previous /tmp/home-deals-previous.json"
+        showcase = "python3 scripts/build_home_showcase.py"
+        self.assertIn(snapshot, workflow)
+        self.assertIn('rotation.get("status") == "rotated"', workflow)
+        self.assertIn('any(gift.get("image_verified") is not True for gift in gifts)', workflow)
+        self.assertIn(checker, workflow)
+        self.assertLess(workflow.index("python3 scripts/build_home_deals.py"), workflow.index(checker))
+        self.assertLess(workflow.index(checker), workflow.index(showcase))
+        self.assertIn("python3 -m unittest discover -s tests -p 'test_awin_gift_images.py' -v", workflow)
+
+
 if __name__ == "__main__":
     unittest.main()
