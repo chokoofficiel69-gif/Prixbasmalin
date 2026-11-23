@@ -245,6 +245,12 @@ def partner_picks(now=None):
     best = {}
     for g in gifts:
         p = prices.get(g.get("id")) or {}
+        try:
+            selection_price = float(p.get("priceValue"))
+        except (TypeError, ValueError):
+            continue
+        if selection_price <= 0:
+            continue
         if not (g.get("image_verified") is True and g.get("image_check_status") == "ok"
                 and str(g.get("image", "")).startswith("https://") and str(g.get("url", "")).startswith("https://")
                 and g.get("merchant") in PARTNER_PRIORITY):
@@ -284,11 +290,19 @@ def partner_picks(now=None):
             "price_date": parsed_date.isoformat().replace("+00:00", "Z") if price_verified else None,
             "price_tax_status": "included" if price_verified else gift_tax_status or tax_status or "unspecified",
             "shipping_eur": g.get("shipping_eur") if price_verified else None,
+            # Utilisé uniquement pour garder le même choix de fiche ; jamais rendu au public.
+            "selection_price": selection_price,
         }
         current = best.get(g["merchant"])
-        if current is None or (price_verified and not current.get("price_verified")):
+        if (current is None
+                or (price_verified and not current.get("price_verified"))
+                or (price_verified == current.get("price_verified")
+                    and selection_price > current.get("selection_price", 0))):
             best[g["merchant"]] = candidate
-    picks = [best[m] for m in PARTNER_PRIORITY if m in best]
+    picks = [
+        {key: value for key, value in best[m].items() if key != "selection_price"}
+        for m in PARTNER_PRIORITY if m in best
+    ]
     return picks[:8], fetched_at.date().isoformat()
 
 
