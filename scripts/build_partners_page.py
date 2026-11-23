@@ -31,6 +31,7 @@ import build_seo_pages as seo  # noqa: E402  (mise en page commune, en-tête, pi
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "boutiques-partenaires.json"
+PARTNER_CODES = ROOT / "data" / "partner-codes.json"
 OUT = ROOT / "boutiques-partenaires.html"
 e = lambda s: html.escape(str(s), quote=True)
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -44,6 +45,10 @@ def validate(data):
                 errors.append(f"code {i}: champ « {k} » manquant")
         if c.get("fin") and not DATE_RE.match(str(c["fin"])):
             errors.append(f"code {i}: date de fin au format AAAA-MM-JJ attendue")
+        if c.get("debut") and not DATE_RE.match(str(c["debut"])):
+            errors.append(f"code {i}: date de début au format AAAA-MM-JJ attendue")
+        if c.get("debut") and c.get("fin") and str(c["debut"]) > str(c["fin"]):
+            errors.append(f"code {i}: la date de début doit précéder la date de fin")
         if c.get("url") and not str(c["url"]).startswith("https://"):
             errors.append(f"code {i}: lien https:// attendu")
     for i, b in enumerate(data.get("boutiques", [])):
