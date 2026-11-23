@@ -217,8 +217,8 @@ CSS = """<style id="pm-showcase-style">
 </style>"""
 
 
-# Coups de cœur partenaires : photos de studio fournies par les marchands dans leurs flux autorisés
-# (image vérifiée par data/home-deals.json) et prix du flux marchand, daté et « à confirmer ».
+# Sélection de produits : photos issues des flux Awin accessibles et vérifiées.
+# Les prix ne sont affichés que si le TTC et la date de mise à jour du produit sont confirmés.
 PARTNER_PRIORITY = ["Ecovacs FR", "Jowissa", "Mibro FR", "Imou FR", "Perfumeria Comas FR",
                     "Al Jazeera Perfumes EU", "BlazeVideo FR", "Fiido Technology Development Co., Ltd"]
 PARTNER_MAX_AGE_DAYS = 7
