@@ -3,11 +3,11 @@ import unittest
 
 
 class ProductionMonitorWorkflowTests(unittest.TestCase):
-    def test_monitor_runs_after_pages_deployment_only(self):
+    def test_monitor_runs_after_data_workflows_and_pages_complete_on_main(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
         self.assertIn("  workflow_run:", workflow)
-        self.assertIn('      - "pages build and deployment"', workflow)
         for name in (
+            "pages build and deployment",
             "Importer les catalogues Rakuten autorisés",
             "Synchroniser le catalogue produits Awin autorisé",
             "Actualiser les historiques PrixTracker",
@@ -16,7 +16,7 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
             "Refresh verified homepage product images",
             "Build authorized price feed",
         ):
-            self.assertNotIn(f'      - "{name}"', workflow)
+            self.assertIn(f'      - "{name}"', workflow)
         self.assertIn("    types:\n      - completed\n    branches:\n      - main", workflow)
 
     def test_post_deploy_smoke_check_accepts_workflow_run_main_branch(self):
@@ -67,6 +67,11 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         self.assertIn("github.event_name == 'pull_request'", smoke)
         self.assertIn("github.event.workflow_run.conclusion == 'success'", smoke)
         self.assertNotIn("github.event_name != 'deployment_status'", smoke)
+
+    def test_post_deploy_guard_waits_for_pages_propagation(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("for attempt in $(seq 1 30); do", workflow)
+        self.assertIn("sleep 10", workflow)
 
     def test_rakuten_price_freshness_never_uses_snapshot_timestamp(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
