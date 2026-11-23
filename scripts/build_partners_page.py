@@ -64,13 +64,33 @@ def validate(data):
         raise ValueError("data/boutiques-partenaires.json invalide :\n- " + "\n- ".join(errors))
 
 
+def campaign_codes():
+    if not PARTNER_CODES.exists():
+        return []
+    data = json.loads(PARTNER_CODES.read_text(encoding="utf-8"))
+    return [
+        {
+            "marchand": str(c["merchant"]) + " · Awin",
+            "code": c["code"],
+            "reduction": c["discount"],
+            "conditions": c["description"],
+            "debut": c["start"],
+            "fin": c["end"],
+            "url": c["url"],
+            "exclusif": False,
+        }
+        for c in data.get("codes", [])
+    ]
+
+
 def code_card(c):
     excl = '<span class="bp-ex">Exclusif Prix Bas Malin</span>' if c.get("exclusif") is True else ""
-    return (f'<article class="bp-code" data-fin="{e(c["fin"])}">{excl}<small>{e(c["marchand"])}</small>'
+    validity = ("Disponible du " + seo.date_fr(c["debut"]) + " au " + seo.date_fr(c["fin"])) if c.get("debut") else ("Valable jusqu’au " + seo.date_fr(c["fin"]))
+    return (f'<article class="bp-code" data-debut="{e(c.get("debut") or "")}" data-fin="{e(c["fin"])}">{excl}<small>{e(c["marchand"])}</small>'
             f'<strong>{e(c["reduction"])}</strong><p>{e(c["conditions"])}</p>'
             f'<div class="bp-copy"><code>{e(c["code"])}</code><button type="button" data-code="{e(c["code"])}">Copier</button></div>'
             f'<a class="bp-go" href="{e(c["url"])}" target="_blank" rel="sponsored nofollow noopener">Aller sur le site ↗</a>'
-            f'<small>Valable jusqu’au {seo.date_fr(c["fin"])}</small></article>')
+            f'<small>{e(validity)}</small></article>')
 
 
 def shop_card(b):
