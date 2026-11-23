@@ -1936,10 +1936,6 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   const topCard=p=>'<a class="pm-hp-card" href="/prix/'+encodeURIComponent(p.id)+'.html">'+visual(p.image,p.category,p.brand,p.name)
     +'<span class="pm-hp-badge">'+p.offer_count+' marchands suivis</span><div class="pm-hp-body"><span class="pm-hp-cat">'+esc(p.category_label)+'</span><h3 class="pm-hp-name">'+esc(p.name)+'</h3>'
     +'<span class="pm-hp-from">Plus bas relevé historique</span><span class="pm-hp-price">'+euro.format(p.min_price_eur)+'</span><span class="pm-hp-meta">Dernier relevé : '+day(p.last_date)+'</span></div></a>';
-  const giftListedPrice=g=>{
-    const at=Date.parse(String(g&&g.listed_price_date||"")),age=Date.now()-at;
-    return Number.isFinite(Number(g&&g.listed_price_eur))&&Number(g.listed_price_eur)>0&&Number.isFinite(at)&&age>=-5*60*1000&&age<=7*24*60*60*1000;
-  };
   const giftCard=g=>{
     const image=String(g&&g.image||"").trim();
     if(g.image_verified!==true||!/^https:\/\//i.test(image))return "";
@@ -1947,8 +1943,6 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     const shippingKnown=priceCurrent&&g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur))&&Number(g.shipping_eur)>=0;
     const priceBlock=priceCurrent
       ? '<span class="pm-hp-from">Prix TTC communiqué par le marchand</span><span class="pm-hp-price">'+euro.format(g.price_eur)+'</span><span class="pm-hp-meta">Relevé du '+day(g.price_date)+(shippingKnown?' · Livraison '+euro.format(Number(g.shipping_eur)):'')+'</span>'
-      : giftListedPrice(g)
-      ? '<span class="pm-hp-from">Prix indiqué par le marchand</span><span class="pm-hp-price">'+euro.format(g.listed_price_eur)+'</span><span class="pm-hp-meta">Flux marchand du '+new Date(g.listed_price_date).toLocaleDateString("fr-FR")+' · à confirmer</span>'
       : '<span class="pm-hp-from">Prix non vérifié</span><span class="pm-hp-meta">Consultez le prix sur le site marchand</span>';
     return '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(image,"",g.merchant,g.name)
       +(shippingKnown&&Number(g.shipping_eur)===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">Visuel marchand · '+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
