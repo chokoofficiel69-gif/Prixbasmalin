@@ -26,9 +26,31 @@ class PartnersPageTests(unittest.TestCase):
         self.assertIn("/js/cookie-consent.js", text)
         self.assertIn("prixbasmalin.contact@gmail.com", text)
         self.assertIn("SIRET", text)
+        self.assertIn("BFCM35", text)
+        self.assertIn("à confirmer", text)
 
     def test_committed_data_is_valid(self):
         bp.validate(json.loads(bp.DATA.read_text(encoding="utf-8")))
+        bp.validate({"codes": bp.campaign_codes(), "boutiques": []})
+
+    def test_jowissa_campaign_code_is_visible_with_exact_dates(self):
+        page = bp.build(today="2026-11-23")
+        self.assertIn("Jowissa · Awin", page)
+        self.assertIn("BFCM35", page)
+        self.assertIn("35 % de réduction", page)
+        self.assertIn("Disponible du 26/11/2026 au 01/12/2026", page)
+        self.assertIn("awin1.com/cread.php?awinmid=59933&amp;awinaffid=3137386", page)
+
+    def test_rakuten_and_amazon_routes_are_visible(self):
+        page = bp.build(today="2026-11-23")
+        self.assertIn("Decathlon via Rakuten", page)
+        self.assertIn('href="/catalogue.html"', page)
+        self.assertIn('href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21"', page)
+        self.assertIn("Offres de nos réseaux partenaires", page)
+
+    def test_jowissa_campaign_code_is_removed_after_expiry(self):
+        page = bp.build(today="2026-12-02")
+        self.assertNotIn("BFCM35", page)
 
     def test_incomplete_code_or_unverified_shop_is_refused(self):
         for bad in ({**CODE, "fin": ""}, {**CODE, "url": "http://x"}, {**CODE, "fin": "31/12/2026"}):
