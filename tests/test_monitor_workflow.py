@@ -46,6 +46,14 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         self.assertIn('! grep -Fq "Prix indiqué par le marchand" /tmp/home-after.html', workflow)
         self.assertIn('grep -Fq "Prix non vérifié" /tmp/home-after.html', workflow)
 
+    def test_public_homepage_checks_current_awin_and_rakuten_price_guards(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("const liveAwin=awinFresh?", workflow)
+        self.assertIn('(p.priceTaxStatus==="included"||p.price_tax_status==="included")', workflow)
+        self.assertIn("const liveRakuten=rakutenFresh&&rakutenTaxVerified?", workflow)
+        self.assertIn("p.comparison_authorized===true", workflow)
+        self.assertNotIn("const deals=feed.products.filter", workflow)
+
     def test_public_rakuten_snapshot_requires_explicit_authorization(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
         self.assertIn("p.comparison_authorized !== true", workflow)
