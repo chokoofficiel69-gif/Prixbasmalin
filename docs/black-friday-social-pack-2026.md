@@ -1,7 +1,7 @@
 # Kit éditorial Black Friday 2026 — Prix Malin
 
 **Statut : brouillons prêts à publier — aucune publication sociale n'est effectuée automatiquement.**  
-Période proposée : du 9 au 15 novembre 2026. Objectif : envoyer des acheteurs vers les fiches Prix Malin, où ils peuvent comparer les offres avant de décider.
+Mise à jour : 23 novembre 2026. Sprint prioritaire : du 23 au 27 novembre 2026. Objectif : envoyer des acheteurs vers les fiches Prix Malin avant et pendant le Black Friday ; les 7 publications historiques restent réutilisables.
 
 ## Règles de publication
 
@@ -12,7 +12,56 @@ Période proposée : du 9 au 15 novembre 2026. Objectif : envoyer des acheteurs 
 - Ne jamais acheter soi-même via ses propres liens affiliés et ne jamais demander à des proches de le faire.
 - Mention de transparence à conserver : « Certains liens sont affiliés. Prix Malin peut percevoir une commission, sans surcoût pour vous. »
 
-## Calendrier de 7 publications
+## Sprint prioritaire du 23 au 27 novembre 2026
+
+Les montants des fiches produits sont des relevés historiques datés, pas des promotions en direct. Ne publier aucun chiffre de prix sans recontrôler la fiche le jour même.
+
+### Lundi 23/11 — PS5 : préparer sa liste
+**Texte :**  
+PS5 Slim, PS5 Pro et GTA 6 sur PS5 : préparez votre liste avant le Black Friday. Retrouvez les relevés historiques datés et les liens marchands sur Prix Bas Malin. Les relevés ne sont pas des prix garantis : vérifiez la référence, le vendeur, les frais et le prix final avant de commander.  
+PS5 Slim : https://prixbasmalin.fr/prix/ps5-slim.html  
+PS5 Pro : https://prixbasmalin.fr/prix/ps5-pro.html  
+GTA 6 : https://prixbasmalin.fr/prix/gta-6-ps5.html  
+Sélection Black Friday : https://prixbasmalin.fr/black-friday.html
+
+**Visuel suggéré :** console et jeu séparés, références exactes, aucun prix barré inventé.  
+**Hashtags :** #PS5 #GTA6 #PlayStation #BlackFriday2026 #PrixMalin
+
+### Mardi 24/11 — Nintendo Switch 2
+**Texte :**  
+Vous avez la Nintendo Switch 2 sur votre liste ? Consultez son historique de prix, vérifiez la référence exacte et comparez les liens marchands avant d'acheter. Les relevés affichés sont datés et ne garantissent pas une offre disponible aujourd'hui.  
+https://prixbasmalin.fr/prix/switch-2.html
+
+**Visuel suggéré :** console seule, nom Nintendo Switch 2 lisible, sans badge de réduction.  
+**Hashtags :** #NintendoSwitch2 #Nintendo #Gaming #PrixMalin
+
+### Mercredi 25/11 — AirPods Pro 3
+**Texte :**  
+AirPods Pro 3 : avant de choisir, vérifiez bien le modèle, le vendeur et les frais de livraison. Retrouvez les relevés historiques datés et les liens marchands sur Prix Bas Malin.  
+https://prixbasmalin.fr/prix/airpods-pro-3.html
+
+**Visuel suggéré :** photo du modèle exact, sans prix ni promotion non confirmés.  
+**Hashtags :** #AirPodsPro3 #Apple #Audio #ComparateurDePrix
+
+### Jeudi 26/11 — Code officiel Jowissa BFCM35
+**Texte :**  
+Le code officiel Jowissa **BFCM35** commence aujourd'hui : **35 % de réduction**, du 26 novembre au 1er décembre 2026, sur l'offre annoncée par le marchand. Consultez les conditions et appliquez le code chez Jowissa depuis Prix Bas Malin.  
+https://prixbasmalin.fr/black-friday.html#codes-promo  
+Offre et conditions chez le marchand : https://www.awin1.com/cread.php?awinmid=59933&awinaffid=3137386
+
+**Visuel suggéré :** montre élégante, code BFCM35 et dates exactes ; ne pas ajouter d'autres réductions.  
+**Hashtags :** #Jowissa #CodePromo #BFCM35 #BlackFriday
+
+### Vendredi 27/11 — iPhone 17 et sélection Black Friday
+**Texte :**  
+C'est le Black Friday. Avant de valider un panier, comparez la référence exacte, le vendeur, la livraison et le prix final. Retrouvez le suivi de l'iPhone 17 et notre sélection de produits avec leurs relevés historiques datés sur Prix Bas Malin.  
+iPhone 17 : https://prixbasmalin.fr/prix/iphone-17.html  
+Sélection Black Friday : https://prixbasmalin.fr/black-friday.html
+
+**Visuel suggéré :** iPhone 17 et mosaïque de produits, sans prix promotionnel non vérifié.  
+**Hashtags :** #iPhone17 #BlackFridayFrance #BonPlan #PrixMalin
+
+## Banque de 7 publications réutilisables (contenu initial du 9 au 15 novembre)
 
 ### Jour 1 — AirPods : choisir le bon modèle
 **Texte :**  
@@ -115,5 +164,10 @@ Campagne commune : `black_friday_2026` · support : `social`.
 | J5 · Apple Watch SE 3 | https://prixbasmalin.fr/prix/apple-watch-se-3.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=watchse3 | https://prixbasmalin.fr/prix/apple-watch-se-3.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=watchse3 | https://prixbasmalin.fr/prix/apple-watch-se-3.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=watchse3 |
 | J6 · Guide anti-fausses promos | https://prixbasmalin.fr/guide-black-friday-2026.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=guide | https://prixbasmalin.fr/guide-black-friday-2026.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=guide | https://prixbasmalin.fr/guide-black-friday-2026.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=guide |
 | J7 · Sélection complète | https://prixbasmalin.fr/black-friday.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=selection | https://prixbasmalin.fr/black-friday.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=selection | https://prixbasmalin.fr/black-friday.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=selection |
+| 23/11 · PS5 / GTA 6 | https://prixbasmalin.fr/prix/ps5-slim.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=ps5-gta6 | https://prixbasmalin.fr/prix/ps5-slim.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=ps5-gta6 | https://prixbasmalin.fr/prix/ps5-slim.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=ps5-gta6 |
+| 24/11 · Nintendo Switch 2 | https://prixbasmalin.fr/prix/switch-2.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=switch2-countdown | https://prixbasmalin.fr/prix/switch-2.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=switch2-countdown | https://prixbasmalin.fr/prix/switch-2.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=switch2-countdown |
+| 25/11 · AirPods Pro 3 | https://prixbasmalin.fr/prix/airpods-pro-3.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=airpodspro3-countdown | https://prixbasmalin.fr/prix/airpods-pro-3.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=airpodspro3-countdown | https://prixbasmalin.fr/prix/airpods-pro-3.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=airpodspro3-countdown |
+| 26/11 · Jowissa BFCM35 | https://prixbasmalin.fr/black-friday.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=jowissa-bfcm35#codes-promo | https://prixbasmalin.fr/black-friday.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=jowissa-bfcm35#codes-promo | https://prixbasmalin.fr/black-friday.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=jowissa-bfcm35#codes-promo |
+| 27/11 · iPhone 17 / Black Friday | https://prixbasmalin.fr/prix/iphone-17.html?utm_source=facebook&utm_medium=social&utm_campaign=black_friday_2026&utm_content=iphone17-blackfriday | https://prixbasmalin.fr/prix/iphone-17.html?utm_source=instagram&utm_medium=social&utm_campaign=black_friday_2026&utm_content=iphone17-blackfriday | https://prixbasmalin.fr/prix/iphone-17.html?utm_source=tiktok&utm_medium=social&utm_campaign=black_friday_2026&utm_content=iphone17-blackfriday |
 
 **Contrôle après diffusion :** dans `stats.html`, consulter « Provenance des sessions » et sélectionner la période de publication. Les chiffres dépendent du consentement et peuvent être inférieurs aux statistiques natives des réseaux sociaux. Ne pas assimiler une visite à un clic Amazon, ni un clic Amazon à une commande.
