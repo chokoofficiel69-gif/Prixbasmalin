@@ -256,6 +256,41 @@ def chart_svg(p):
             f'<path d="{line}" fill="none" stroke="#f05a00" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>')
 
 
+ICECAT_GTINS = ROOT / "data" / "icecat-gtins.json"
+GTINS = (json.loads(ICECAT_GTINS.read_text(encoding="utf-8")).get("products") or {}) if ICECAT_GTINS.exists() else {}
+RECENT_OFFER_DAYS = 7  # seuls les relevés de moins de 7 jours (par rapport au dernier relevé) vont dans le balisage
+
+
+def product_ld(p):
+    """Balisage schema.org Product + AggregateOffer pour Google.
+
+    Reprend exactement les prix affichés sur la page (relevés datés), limités aux relevés récents.
+    Sans relevé récent, pas de bloc d'offres : on ne présente jamais un vieux prix comme une offre.
+    """
+    offers = p.get("offers") or []
+    last = max((o["date"] for o in offers), default=None)
+    data = {"@context": "https://schema.org", "@type": "Product", "name": p["name"],
+            "url": f"{SITE}/prix/{p['id']}.html", "sku": p["id"],
+            "category": p.get("category_label") or ""}
+    if p.get("brand"):
+        data["brand"] = {"@type": "Brand", "name": p["brand"]}
+    image = str(p.get("image") or "")
+    if image:
+        data["image"] = image if image.startswith("https://") else f"{SITE}{image}"
+    gtin = GTINS.get(p["id"])
+    if gtin:
+        data["gtin"] = gtin.lstrip("0") if len(gtin) == 14 else gtin
+    if last:
+        limit = (date.fromisoformat(last) - timedelta(days=RECENT_OFFER_DAYS)).isoformat()
+        recent = [o for o in offers if o["date"] >= limit]
+        if recent:
+            prices = [o["price_eur"] for o in recent]
+            data["offers"] = {"@type": "AggregateOffer", "priceCurrency": "EUR",
+                              "lowPrice": f"{min(prices):.2f}", "highPrice": f"{max(prices):.2f}",
+                              "offerCount": len(recent)}
+    return data
+
+
 def product_page(p, sheets, period, guide=None):
     q = query_for(p)
     best = p["offers"][0]
@@ -321,7 +356,8 @@ def product_page(p, sheets, period, guide=None):
 {ART_SCRIPT}"""
     crumbs = [("Accueil", "/"), ("Historique des prix", "/prix/"), (p["category_label"], f"/prix/{cat_slug}.html"), (p["name"], f"/prix/{p['id']}.html")]
     # Identifiant produit lu par la mesure d'audience (produits consultés).
-    extra = f'<meta name="pm-product-id" content="{e(p["id"])}">\n<script type="application/ld+json">{json.dumps(faq_ld, ensure_ascii=False)}</script>\n'
+    extra = (f'<meta name="pm-product-id" content="{e(p["id"])}">\n<script type="application/ld+json">{json.dumps(faq_ld, ensure_ascii=False)}</script>\n'
+             f'<script type="application/ld+json">{json.dumps(product_ld(p), ensure_ascii=False)}</script>\n')
     return layout(title, description, f"/prix/{p['id']}.html", body, crumbs, extra)
 
 
