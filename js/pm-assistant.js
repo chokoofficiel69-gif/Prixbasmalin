@@ -25,7 +25,7 @@
       if(typeof data.amazonSearchUrl==="string"&&data.amazonSearchUrl.startsWith("https://www.amazon.fr/")){
         amazon.href=data.amazonSearchUrl;amazon.hidden=false;
       }
-      status.textContent=data.provider==="freellmapi"?"Réponse générée par l’IA Prix Malin.":"Recherche Amazon préparée.";
+      status.textContent=data.provider==="freellmapi"?"Réponse générée par l’IA Prix Bas Malin.":"Recherche Amazon préparée.";
     }catch(error){
       show(error&&error.message?error.message:"Impossible de joindre l’assistant. Réessayez dans un instant.");
       status.textContent="La demande n’a pas abouti.";

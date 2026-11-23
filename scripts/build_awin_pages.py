@@ -163,7 +163,7 @@ NOTICE = ('<p class="source">Sélection de produits issus des flux Awin accessib
           'Un prix source n’est affiché que si le marchand fournit une date individuelle de mise à jour de moins de 48 h. '
           'Si la TVA n’est pas explicitement confirmée, la mention « TVA non confirmée » apparaît : ce montant ne constitue pas un prix TTC vérifié ni une comparaison multi-marchands. '
           'Les frais de livraison inconnus sont à vérifier. Le prix et la disponibilité peuvent changer : vérifiez-les chez le marchand. '
-          'Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>')
+          'Liens affiliés : Prix Bas Malin peut percevoir une commission, sans surcoût pour vous.</p>')
 
 
 def category_page(slug, label, intro, items, others):
@@ -189,7 +189,7 @@ def category_page(slug, label, intro, items, others):
     ld = {"@context": "https://schema.org", "@type": "ItemList", "name": label, "numberOfItems": len(items),
           "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": p["name"]} for i, p in enumerate(items)]}
     return layout(
-        fit_title(f"{label} : sélection de produits | Prix Malin", f"{label} | Prix Malin", label),
+        fit_title(f"{label} : sélection de produits | Prix Bas Malin", f"{label} | Prix Bas Malin", label),
         fit_description(f"Sélection {label.lower()} issue des flux Awin accessibles. Prix source daté affiché uniquement si une date individuelle du marchand de moins de 48 h est fournie."),
         f"/{FOLDER}/{slug}.html", body,
         [("Accueil", "/"), ("Sélection produits", f"/{FOLDER}/"), (label, f"/{FOLDER}/{slug}.html")],
@@ -207,7 +207,7 @@ def index_page(groups):
 <p>{total} produits classés par rayon. Un prix source n’est affiché que si une date individuelle de mise à jour du marchand de moins de 48 h est fournie ; sinon, aucun montant n’est affiché. Cette sélection n’est pas une comparaison multi-marchands.</p></section>
 {sections}{NOTICE}"""
     return layout(
-        "Sélection produits des flux marchands | Prix Malin",
+        "Sélection produits des flux marchands | Prix Bas Malin",
         fit_description(f"{total} produits issus de flux Awin accessibles, classés par rayon. Prix source affiché uniquement avec date individuelle du marchand de moins de 48 h."),
         f"/{FOLDER}/", body, [("Accueil", "/"), ("Sélection produits", f"/{FOLDER}/")], extra_head=AWIN_MOBILE_CSS)
 

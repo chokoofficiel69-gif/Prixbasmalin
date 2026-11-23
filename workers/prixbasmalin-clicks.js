@@ -1,4 +1,4 @@
-// Prix Malin — Worker de mesure (pages vues, clics sortants, tableau de bord privé).
+// Prix Bas Malin — Worker de mesure (pages vues, clics sortants, tableau de bord privé).
 // Fichier unique : il peut être collé tel quel dans l'éditeur Cloudflare ou déployé avec Wrangler.
 //
 // Version 2 (compatible avec l'ancien frontend) :

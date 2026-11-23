@@ -33,7 +33,7 @@ const overlay = document.createElement("div");
 overlay.className = "pm-auth-overlay";
 overlay.innerHTML = `<section class="pm-auth-panel" role="dialog" aria-modal="true" aria-labelledby="pmAuthTitle">
 <button class="pm-auth-close" type="button" aria-label="Fermer">×</button>
-<h2 id="pmAuthTitle">Mon espace Prix Malin</h2>
+<h2 id="pmAuthTitle">Mon espace Prix Bas Malin</h2>
 <p id="pmAuthIntro">Crée ton compte gratuit pour retrouver tes alertes et tes produits suivis.</p>
 <form id="pmAuthForm">
 <label for="pmAuthEmail">Adresse e-mail</label><input id="pmAuthEmail" type="email" autocomplete="email" required>
@@ -87,7 +87,7 @@ async function refreshAuthUI() {
   $("pmAuthSubmit").hidden = !!session;
   $("pmAuthReset").hidden = !!session;
   $("pmAuthIntro").textContent = session ? `Connecté : ${session.user.email}. Tes alertes sont associées à ce compte.` : "Crée ton compte gratuit pour retrouver tes alertes et tes produits suivis.";
-  $("pmAuthTitle").textContent = session ? "Mon espace Prix Malin" : "Mon espace Prix Malin";
+  $("pmAuthTitle").textContent = session ? "Mon espace Prix Bas Malin" : "Mon espace Prix Bas Malin";
   if (session) {
     authForm.hidden = true;
     $("pmAuthIntro").textContent = `Connecté : ${session.user.email}. Tu peux maintenant enregistrer tes alertes.`;

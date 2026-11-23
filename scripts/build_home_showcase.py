@@ -293,7 +293,7 @@ def build_block():
         f'<a class="pmx-cat" href="{e(url)}"><img src="/assets/accueil/cat-{slug}.webp" alt="" loading="lazy" decoding="async">{icon(slug, "pmx-ci")}<b>{name}</b></a>'
         for name, url, slug in categories())
     latest = max(p["last_date"] for p in top)
-    hero = """<section class="pmx-hero" aria-label="Prix Malin">
+    hero = """<section class="pmx-hero" aria-label="Prix Bas Malin">
 <img class="pmx-hero-img" src="/assets/accueil/hero.webp" alt="" fetchpriority="high">
 <div class="pmx-hero-art" aria-hidden="true">__HERO_ART__<img class="m" src="/assets/malin-3d.webp" alt="" loading="lazy"></div>
 <div class="pmx-hero-txt"><p class="t">Les meilleurs prix<br><span>au même endroit !</span></p>
@@ -320,9 +320,9 @@ def build_block():
 <a class="pmx-b c2" href="/high-tech.html"><img src="/assets/accueil/ban-high-tech.webp" alt="" loading="lazy">{icon("high-tech", "pmx-bi")}<b>High-Tech</b><small>Les dernières nouveautés, prix comparés</small><span>Voir les offres →</span></a>
 <a class="pmx-b c3" href="/maison-deco.html"><img src="/assets/accueil/ban-maison.webp" alt="" loading="lazy">{icon("maison-deco", "pmx-bi")}<b>Maison &amp; Déco</b><small>Des idées pour un intérieur qui vous ressemble</small><span>Voir la sélection →</span></a>
 </section>
-<a class="pmx-promo" href="/boutiques-partenaires.html"><b>🎟️ Codes promo &amp; boutiques partenaires</b><span>Des réductions réservées aux visiteurs de Prix Malin · Commerçants : devenez partenaire →</span></a>
+<a class="pmx-promo" href="/boutiques-partenaires.html"><b>🎟️ Codes promo &amp; boutiques partenaires</b><span>Des réductions réservées aux visiteurs de Prix Bas Malin · Commerçants : devenez partenaire →</span></a>
 {compare_block(compare)}
-<p class="pmx-note">Prix relevés et datés (relevés PrixTracker, data.gouv.fr, Licence Ouverte 2.0), pas des offres en direct : vérifiez le prix final chez le marchand. Visuels Prix Malin et photos libres créditées. Certains liens sont affiliés.</p>
+<p class="pmx-note">Prix relevés et datés (relevés PrixTracker, data.gouv.fr, Licence Ouverte 2.0), pas des offres en direct : vérifiez le prix final chez le marchand. Visuels Prix Bas Malin et photos libres créditées. Certains liens sont affiliés.</p>
 </div>
 {END}"""
     return body

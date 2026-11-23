@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080d14">
-<title>Historique des prix high-tech — Prix Malin</title>
+<title>Historique des prix high-tech — Prix Bas Malin</title>
 <meta name="description" content="Consultez les relevés historiques PrixTracker des smartphones, consoles, écouteurs, tablettes et aspirateurs. Ces montants passés ne sont pas des offres en temps réel : vérifiez le prix actuel chez le marchand.">
 <link rel="canonical" href="https://prixbasmalin.fr/produit.html">
 <link rel="icon" href="/assets/logo-sac-prix-malin.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Prix Malin">
+<meta property="og:site_name" content="Prix Bas Malin">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="Historique des prix high-tech — Prix Malin">
+<meta property="og:title" content="Historique des prix high-tech — Prix Bas Malin">
 <meta property="og:image" content="https://prixbasmalin.fr/assets/og-prix-malin.jpg">
 <style>
 :root{--bg:#080d14;--panel:#ffffff;--soft:#f3f5f8;--line:#e3e7ee;--ink:#111827;--muted:#5b6474;--orange:#f05a00;--blue:#0b63ce;--green:#22a861}
@@ -109,7 +109,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
 <header class="pm-site-header" id="pm-site-header">
  <div class="pm-sh-inner">
   <div class="pm-sh-top">
-   <a class="pm-sh-brand" href="/" aria-label="Prix Malin, accueil"><img src="/assets/logo-sac-prix-malin-hq.webp" alt="" width="44" height="38"><span><b>Prix <span>Malin</span></b><small>Comparez · Trouvez · Économisez</small></span></a>
+   <a class="pm-sh-brand" href="/" aria-label="Prix Bas Malin, accueil"><img src="/assets/logo-sac-prix-malin-hq.webp" alt="" width="44" height="38"><span><b>Prix Bas <span>Malin</span></b><small>Comparez · Trouvez · Économisez</small></span></a>
    <a class="pm-sh-deals" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener">Offres Amazon ↗</a>
   </div>
   <form class="pm-sh-search" id="pm-site-search" role="search" action="/catalogue.html">
@@ -179,7 +179,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
  }
  function sourceNote(){
   const per=data.dataset_period||{};
-  return '<p class="source">Historique PrixTracker'+(per.from?" entre le "+fmtDate(per.from)+" et le "+fmtDate(per.to):"")+'. Ces montants sont des relevés passés, pas des offres actuelles ni des prix en temps réel. Les liens ouvrent une recherche chez le marchand : vérifiez la référence exacte, le prix final, le stock et la livraison avant achat. Source : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener" target="_blank">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Liens Amazon affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html">Crédits photos</a>.</p>';
+  return '<p class="source">Historique PrixTracker'+(per.from?" entre le "+fmtDate(per.from)+" et le "+fmtDate(per.to):"")+'. Ces montants sont des relevés passés, pas des offres actuelles ni des prix en temps réel. Les liens ouvrent une recherche chez le marchand : vérifiez la référence exacte, le prix final, le stock et la livraison avant achat. Source : <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener" target="_blank">PrixTracker via data.gouv.fr</a>, Licence Ouverte 2.0. Liens Amazon affiliés : Prix Bas Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html">Crédits photos</a>.</p>';
  }
  function chart(history){
   if(!history||history.length<2)return '<p class="stamp">Pas assez de relevés pour tracer l’évolution.</p>';
@@ -191,7 +191,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   return '<div class="chart"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Évolution du prix le plus bas relevé, de '+euro.format(history[0].min_price_eur)+' à '+euro.format(history[history.length-1].min_price_eur)+'"><line x1="'+P+'" y1="'+(H-P)+'" x2="'+(W-P)+'" y2="'+(H-P)+'" stroke="#e3e7ee"/><text x="'+P+'" y="16" font-size="13" fill="#5b6474">'+euro.format(max)+'</text><text x="'+P+'" y="'+(H-8)+'" font-size="13" fill="#5b6474">'+euro.format(min)+'</text><path d="'+area+'" fill="#f05a00" fill-opacity=".10"/><path d="'+line+'" fill="none" stroke="#f05a00" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="5" fill="#f05a00"/></svg><div class="legend"><span>'+fmtDate(history[0].date)+'</span><span>Prix le plus bas relevé chaque jour</span><span>'+fmtDate(history[history.length-1].date)+'</span></div></div>';
  }
  function renderProduct(p){
-  setMeta("Historique des prix de "+p.name+" — Prix Malin",
+  setMeta("Historique des prix de "+p.name+" — Prix Bas Malin",
    "Relevés historiques chez "+p.offer_count+" marchands jusqu’au "+fmtDate(p.last_date)+". Ce ne sont pas des offres actuelles : vérifiez le prix du jour chez le marchand.",
    "https://prixbasmalin.fr/prix/"+encodeURIComponent(p.id)+".html");
   let sort="price",shown=8;
@@ -232,7 +232,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   const cats=[...new Map(data.products.map(p=>[p.category,p.category_label]))];
   const matchTerm=(p,t)=>norm(p.name+" "+p.brand+" "+p.category_label).includes(t)||(catWords[t]&&String(p.category).startsWith(catWords[t]));
   const found=data.products.filter(p=>(!cat||p.category===cat)&&(!q||q.split(" ").every(t=>matchTerm(p,t))));
-  setMeta(q?"Historique des prix pour "+params.get("q")+" — Prix Malin":"Historique des prix high-tech — Prix Malin","Relevés historiques PrixTracker par marchand ; les prix affichés ne sont pas des offres en direct. Vérifiez le prix actuel chez le marchand.","https://prixbasmalin.fr/produit.html"+(cat?"?cat="+encodeURIComponent(cat):""));
+  setMeta(q?"Historique des prix pour "+params.get("q")+" — Prix Bas Malin":"Historique des prix high-tech — Prix Bas Malin","Relevés historiques PrixTracker par marchand ; les prix affichés ne sont pas des offres en direct. Vérifiez le prix actuel chez le marchand.","https://prixbasmalin.fr/produit.html"+(cat?"?cat="+encodeURIComponent(cat):""));
   const deals=data.products.filter(p=>p.offer_count>=5).map(p=>({p,gap:(p.max_price_eur-p.min_price_eur)/p.max_price_eur})).sort((a,b)=>b.gap-a.gap).slice(0,10).map(x=>x.p);
   app.innerHTML=(!q&&!cat?'<section class="section"><div class="title-row"><h2>Les plus grands écarts historiques</h2><span>écarts observés dans les relevés PrixTracker</span></div><div class="rail">'+deals.map(card).join("")+'</div></section>':"")
    +'<section class="section"><div class="title-row"><h1>'+(q?"Résultats pour « "+esc(params.get("q"))+" »":cat?esc((cats.find(c=>c[0]===cat)||[])[1]||"Produits"):"Produits avec historique de prix")+'</h1><span>'+found.length+' produits</span></div>'
@@ -247,7 +247,7 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   const product=id&&data.products.find(p=>p.id===id);
   if(product)renderProduct(product);else renderList();
  }).catch(err=>{
-  console.warn("Fiches produits Prix Malin :",err);
+  console.warn("Fiches produits Prix Bas Malin :",err);
   app.innerHTML='<p class="empty">Le comparateur ne répond pas pour le moment. Réessayez dans un instant ou consultez le <a href="/catalogue.html" style="color:#ffad66">catalogue</a>.</p>';
  });
 })();
@@ -265,8 +265,8 @@ main{max-width:1120px;margin:0 auto;padding:14px 16px 90px}
   <a href="/boutiques-partenaires.html">Boutiques &amp; codes promo</a>
   <a href="/credits-photos.html">Crédits photos</a>
  </nav>
- <p><strong>Prix Malin</strong> · comparateur indépendant : catalogue de découverte et historiques de prix datés.</p>
- <p>Certains liens vers les marchands sont affiliés. Si vous achetez après avoir cliqué, Prix Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+ <p><strong>Prix Bas Malin</strong> · comparateur indépendant : catalogue de découverte et historiques de prix datés.</p>
+ <p>Certains liens vers les marchands sont affiliés. Si vous achetez après avoir cliqué, Prix Bas Malin peut percevoir une commission, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Bas Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
 </footer>
 </body>
 </html>

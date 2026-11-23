@@ -60,7 +60,7 @@ def validate(data):
 
 
 def code_card(c):
-    excl = '<span class="bp-ex">Exclusif Prix Malin</span>' if c.get("exclusif") is True else ""
+    excl = '<span class="bp-ex">Exclusif Prix Bas Malin</span>' if c.get("exclusif") is True else ""
     return (f'<article class="bp-code" data-fin="{e(c["fin"])}">{excl}<small>{e(c["marchand"])}</small>'
             f'<strong>{e(c["reduction"])}</strong><p>{e(c["conditions"])}</p>'
             f'<div class="bp-copy"><code>{e(c["code"])}</code><button type="button" data-code="{e(c["code"])}">Copier</button></div>'
@@ -119,24 +119,24 @@ def build(today=None):
                   'fournis par les marchands eux-mêmes, avec leurs conditions et leur date de fin.</p>')
     shops_html = (f'<div class="bp-grid">{"".join(shop_card(b) for b in shops)}</div>' if shops else
                   '<p class="bp-empty">Les premières boutiques partenaires arrivent bientôt : artisans, créateurs et petits '
-                  'commerçants sélectionnés, avec un code promo réservé aux visiteurs de Prix Malin.</p>')
+                  'commerçants sélectionnés, avec un code promo réservé aux visiteurs de Prix Bas Malin.</p>')
     body = f"""<section class="bp-hero"><h1>Boutiques partenaires &amp; codes promo</h1>
-<p>Des petites boutiques sélectionnées et des codes promo obtenus auprès des marchands : grâce à Prix Malin, vous payez moins cher. Chaque code indique ses conditions et sa date de fin.</p></section>
+<p>Des petites boutiques sélectionnées et des codes promo obtenus auprès des marchands : grâce à Prix Bas Malin, vous payez moins cher. Chaque code indique ses conditions et sa date de fin.</p></section>
 <section class="panel" id="codes"><h2>Codes promo partenaires</h2>{codes_html}</section>
 <section class="panel" id="boutiques"><h2>Boutiques partenaires</h2>{shops_html}</section>
 <section class="panel" id="devenir-partenaire"><h2>Commerçant, artisan, créateur ? Devenez boutique partenaire</h2>
-<p>Prix Malin met vos produits en avant sur prixbasmalin.fr et sur ses réseaux (TikTok, Instagram, Snapchat). Vous ne payez rien pour être présent : une commission, convenue ensemble, n’est due que sur les ventes que nous vous apportons.</p>
+<p>Prix Bas Malin met vos produits en avant sur prixbasmalin.fr et sur ses réseaux (TikTok, Instagram, Snapchat). Vous ne payez rien pour être présent : une commission, convenue ensemble, n’est due que sur les ventes que nous vous apportons.</p>
 <div class="bp-steps"><div><b>1. Votre vitrine</b>Vos produits, vos photos et vos prix sur une page à votre nom.</div>
-<div><b>2. Un code promo</b>Un code réservé aux visiteurs de Prix Malin : ils paient moins cher chez vous.</div>
+<div><b>2. Un code promo</b>Un code réservé aux visiteurs de Prix Bas Malin : ils paient moins cher chez vous.</div>
 <div><b>3. Une commission</b>Uniquement sur les nouvelles ventes réalisées avec ce code. Sans abonnement ni engagement.</div></div>
 <p>Conditions : boutique professionnelle (numéro SIRET), produits conformes à la réglementation française, aucune allégation de santé non autorisée.</p>
-<div class="bp-contact"><a href="/assets/partenaires-commercants/fiche-boutique-partenaire.jpg"><img src="/assets/partenaires-commercants/fiche-boutique-partenaire.jpg" alt="Fiche « Vendez plus avec Prix Malin »" loading="lazy"></a>
+<div class="bp-contact"><a href="/assets/partenaires-commercants/fiche-boutique-partenaire.jpg"><img src="/assets/partenaires-commercants/fiche-boutique-partenaire.jpg" alt="Fiche « Vendez plus avec Prix Bas Malin »" loading="lazy"></a>
 <div><p>Écrivez-nous :</p><p class="bp-mail"><a href="mailto:{e(mail)}?subject=Boutique%20partenaire%20Prix%20Malin">{e(mail)}</a></p>
 <p><a href="/assets/partenaires-commercants/fiche-boutique-partenaire.jpg">Voir la fiche de présentation</a></p></div></div></section>
-<p class="source">Liens partenaires : Prix Malin peut percevoir une commission sur les ventes, sans surcoût pour vous. Les réductions et conditions sont celles fixées par chaque marchand.</p>
+<p class="source">Liens partenaires : Prix Bas Malin peut percevoir une commission sur les ventes, sans surcoût pour vous. Les réductions et conditions sont celles fixées par chaque marchand.</p>
 {SCRIPT}"""
-    return seo.layout("Boutiques partenaires & codes promo | Prix Malin",
-                      seo.fit_description("Codes promo partenaires et petites boutiques sélectionnées par Prix Malin, avec leurs conditions et leur date de fin. Commerçants : devenez partenaire."),
+    return seo.layout("Boutiques partenaires & codes promo | Prix Bas Malin",
+                      seo.fit_description("Codes promo partenaires et petites boutiques sélectionnées par Prix Bas Malin, avec leurs conditions et leur date de fin. Commerçants : devenez partenaire."),
                       "/boutiques-partenaires.html", body,
                       [("Accueil", "/"), ("Boutiques partenaires & codes promo", "/boutiques-partenaires.html")], CSS + "\n")
 

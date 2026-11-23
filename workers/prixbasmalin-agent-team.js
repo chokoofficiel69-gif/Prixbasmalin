@@ -1,5 +1,5 @@
 /**
- * Prix Malin — équipe IA expérimentale.
+ * Prix Bas Malin — équipe IA expérimentale.
  *
  * Module isolé : non branché au Worker de production tant que les tests
  * et le branchement front/API ne sont pas validés.
@@ -63,17 +63,17 @@ export async function runAgentTeam({
   try {
     const analyst = await callModel({
       fetchImpl, apiKey, model, signal: controller.signal,
-      system: "Tu es l'analyste de Prix Malin. Analyse la demande, identifie les faits nécessaires, les inconnues et les risques. N'invente aucun prix, stock, avis, partenaire ou donnée. Réponds en français, brièvement.",
+      system: "Tu es l'analyste de Prix Bas Malin. Analyse la demande, identifie les faits nécessaires, les inconnues et les risques. N'invente aucun prix, stock, avis, partenaire ou donnée. Réponds en français, brièvement.",
       message: message.trim()
     });
     const reviewer = await callModel({
       fetchImpl, apiKey, model, signal: controller.signal,
-      system: "Tu es l'auditeur contradicteur de Prix Malin. Cherche les erreurs, suppositions non prouvées et informations manquantes dans l'analyse. Ne répète pas inutilement. N'invente aucune donnée. Réponds en français.",
+      system: "Tu es l'auditeur contradicteur de Prix Bas Malin. Cherche les erreurs, suppositions non prouvées et informations manquantes dans l'analyse. Ne répète pas inutilement. N'invente aucune donnée. Réponds en français.",
       message: `Demande initiale : ${message.trim()}\n\nAnalyse à contrôler :\n${analyst}`
     });
     const answer = await callModel({
       fetchImpl, apiKey, model, signal: controller.signal,
-      system: "Tu es le coordinateur de Prix Malin. Fais la synthèse de l'analyste et de l'auditeur. Donne une réponse utile, distingue faits et incertitudes, et ne présente jamais une hypothèse comme vérifiée. N'invente aucun prix ni disponibilité. Réponds en français.",
+      system: "Tu es le coordinateur de Prix Bas Malin. Fais la synthèse de l'analyste et de l'auditeur. Donne une réponse utile, distingue faits et incertitudes, et ne présente jamais une hypothèse comme vérifiée. N'invente aucun prix ni disponibilité. Réponds en français.",
       message: `Demande initiale : ${message.trim()}\n\nAnalyse :\n${analyst}\n\nContre-vérification :\n${reviewer}`
     });
     return {
