@@ -49,6 +49,226 @@
    "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo-Switch-Pro-Controller-BR.jpg",
    "commons_title": "File:Nintendo-Switch-Pro-Controller-BR.jpg",
    "match": "verifie_visuellement"
+  },
+  "dualsense": {
+   "thumb": "/assets/produits/dualsense.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Sony Interactive Entertainment",
+   "file_page": "https://coc.icecat.biz/4275544a-6855-4d17-85d2-170b97b9214e",
+   "source": "open_icecat",
+   "gtin": "0711719399506",
+   "icecat_title": "Sony Interactive Entertainment Manette sans fil DualSense",
+   "match": "gtin_icecat"
+  },
+  "ps5-slim-digital": {
+   "thumb": "/assets/produits/ps5-slim-digital.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Sony Interactive Entertainment",
+   "file_page": "https://coc.icecat.biz/b43ed01f-e1bf-4ef7-b906-8ea0f6e69f1a",
+   "source": "open_icecat",
+   "gtin": "0711719577294",
+   "icecat_title": "Sony Interactive Entertainment PlayStation 5 (modèle - Slim) - Edition Numérique",
+   "match": "gtin_icecat"
+  },
+  "switch-oled": {
+   "thumb": "/assets/produits/switch-oled.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496453435",
+   "icecat_title": "Nintendo Switch OLED",
+   "match": "gtin_icecat"
+  },
+  "switch": {
+   "thumb": "/assets/produits/switch.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496452629",
+   "icecat_title": "Nintendo Switch V2 2019",
+   "match": "gtin_icecat"
+  },
+  "ps5-slim": {
+   "thumb": "/assets/produits/ps5-slim.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Sony Interactive Entertainment",
+   "file_page": "https://coc.icecat.biz/04a65b46-fd2a-421f-9458-8ebca466ac25",
+   "source": "open_icecat",
+   "gtin": "0711719577171",
+   "icecat_title": "Sony Interactive Entertainment PlayStation 5 (modèle - Slim)",
+   "match": "gtin_icecat"
+  },
+  "ps5-pro": {
+   "thumb": "/assets/produits/ps5-pro.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Sony Interactive Entertainment",
+   "file_page": "https://coc.icecat.biz/690ed055-1dd2-4e7e-9cac-fb9cae02071c",
+   "source": "open_icecat",
+   "gtin": "0711719024040",
+   "icecat_title": "Sony Interactive Entertainment PlayStation 5 Pro 2 To Wifi Noir, Blanc",
+   "match": "gtin_icecat"
+  },
+  "playstation-portal": {
+   "thumb": "/assets/produits/playstation-portal.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Sony Interactive Entertainment",
+   "file_page": "https://coc.icecat.biz/cc6ed547-2dc3-47f1-a661-a978f3725160",
+   "source": "open_icecat",
+   "gtin": "0711719580782",
+   "icecat_title": "Sony Interactive Entertainment Lecteur à distance PlayStation Portal",
+   "match": "gtin_icecat"
+  },
+  "switch-2": {
+   "thumb": "/assets/produits/switch-2.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496321444",
+   "icecat_title": "Nintendo Switch 2 console de jeux portables 20,1 cm (7.9\") 256 Go Écran tactile Wifi Noir",
+   "match": "gtin_icecat"
+  },
+  "switch-2-mario-kart": {
+   "thumb": "/assets/produits/switch-2-mario-kart.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496321529",
+   "icecat_title": "Nintendo Switch 2 + Mario Kart World console de jeux portables 20,1 cm (7.9\") 256 Go Écran tactile Wifi Noir",
+   "match": "gtin_icecat"
+  },
+  "switch-lite": {
+   "thumb": "/assets/produits/switch-lite.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496452650",
+   "icecat_title": "Nintendo Switch Lite",
+   "match": "gtin_icecat"
+  },
+  "jbl-flip-6": {
+   "thumb": "/assets/produits/jbl-flip-6.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "6925281994258",
+   "icecat_title": "JBL FLIP 6 Enceinte portable stéréo Noir 20 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-flip-7": {
+   "thumb": "/assets/produits/jbl-flip-7.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "1200130019272",
+   "icecat_title": "JBL Flip 7 Noir 25 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-charge-5": {
+   "thumb": "/assets/produits/jbl-charge-5.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "6925281982088",
+   "icecat_title": "JBL CHARGE 5 Enceinte portable stéréo Noir 30 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-charge-6": {
+   "thumb": "/assets/produits/jbl-charge-6.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "1200130019555",
+   "icecat_title": "JBL Charge 6 Noir 45 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-go-4": {
+   "thumb": "/assets/produits/jbl-go-4.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "1200130009433",
+   "icecat_title": "JBL Go 4 Enceinte portable mono Noir 4,2 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-go-5": {
+   "thumb": "/assets/produits/jbl-go-5.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "1200130034282",
+   "icecat_title": "JBL GO 5 Enceinte portable mono Noir 4,8 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-clip-5": {
+   "thumb": "/assets/produits/jbl-clip-5.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "1200130010170",
+   "icecat_title": "JBL Clip 5 Enceinte portable mono Noir 7 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-xtreme-4": {
+   "thumb": "/assets/produits/jbl-xtreme-4.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "1200130008153",
+   "icecat_title": "JBL Xtreme 4 Enceinte portable stéréo Noir 30 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-xtreme-5": {
+   "thumb": "/assets/produits/jbl-xtreme-5.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "1200130033742",
+   "icecat_title": "JBL Xtreme 5 Enceinte portable stéréo Noir 130 W",
+   "match": "gtin_icecat"
+  },
+  "jbl-boombox-3": {
+   "thumb": "/assets/produits/jbl-boombox-3.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "JBL",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "6925281998768",
+   "icecat_title": "JBL BOOMBOX 3 Enceinte portable stéréo Noir",
+   "match": "gtin_icecat"
+  },
+  "rowenta-silence-force-ro7457ea": {
+   "thumb": "/assets/produits/rowenta-silence-force-ro7457ea.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Rowenta",
+   "file_page": "https://coc.icecat.biz/84b1acc6-b3cc-4129-8415-1b78ecee8e79",
+   "source": "open_icecat",
+   "gtin": "3221616020245",
+   "icecat_title": "Rowenta Silence Force RO7457 4,5 L Aspirateur réservoir cylindrique Sec 400 W Sac à poussière",
+   "match": "gtin_icecat"
+  },
+  "ecovacs-deebot-t90-pro-omni": {
+   "thumb": "/assets/produits/ecovacs-deebot-t90-pro-omni.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Ecovacs",
+   "file_page": "https://coc.icecat.biz/0a09fb1d-5f5a-465b-a89c-add0ca8c415f",
+   "source": "open_icecat",
+   "gtin": "6970135039418",
+   "icecat_title": "Ecovacs DEEBOT T90 PRO OMNI EU 0,25 L Noir",
+   "match": "gtin_icecat"
   }
  }
 }

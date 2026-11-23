@@ -299,7 +299,7 @@ def product_page(p, sheets, period, guide=None):
     credit = ""
     if p.get("image_credit"):
         c = p["image_credit"]
-        credit = f'<p class="source" style="color:#6b7280">Photo : {e(c.get("author") or "")} · {e(c.get("license") or "")} · <a style="color:#0b63ce" href="{e(c.get("file_page") or "")}">Wikimedia Commons</a></p>'
+        credit = f'<p class="source" style="color:#6b7280">Photo : {e(c.get("author") or "")} · {e(c.get("license") or "")} · <a style="color:#0b63ce" href="{e(c.get("file_page") or "")}">{"Wikimedia Commons" if "wikimedia.org" in (c.get("file_page") or "") else "Icecat"}</a></p>'
     body = f"""<article class="panel">
 <div class="hero"><div><h1>Historique des prix de {e(p['name'])}</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
 <div class="from">Dernier prix observé le {date_fr(best['date'])}<strong>{euro(p['min_price_eur'])}</strong>chez {e(cheapest_names)} · relevé historique</div></div>{visual(p)}</div>

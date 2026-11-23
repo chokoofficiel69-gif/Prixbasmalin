@@ -1,0 +1,52 @@
+name: Photos officielles des fabricants (Open Icecat)
+
+# Télécharge les photos officielles (fournies par les marques via Open Icecat)
+# et régénère les fiches. Écrit uniquement sur la branche qui a lancé le workflow, jamais sur main.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "photos/**"
+    paths:
+      - "data/icecat-gtins.json"
+      - "scripts/fetch_icecat_photos.py"
+      - ".github/workflows/fetch-icecat-photos.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-icecat-photos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fetch:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Installer Pillow
+        run: python -m pip install --quiet pillow
+      - name: Télécharger les photos officielles
+        run: python scripts/fetch_icecat_photos.py
+      - name: Régénérer les fiches et les pages
+        run: |
+          python scripts/build_product_sheets.py
+          python scripts/build_seo_pages.py
+      - name: Enregistrer sur cette branche
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A assets/produits data prix idees-cadeaux black-friday.html
+          if git diff --cached --quiet; then
+            echo "Aucune photo nouvelle."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Photos officielles des fabricants (Open Icecat)"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
