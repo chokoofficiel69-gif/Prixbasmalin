@@ -73,11 +73,23 @@ class GtinComparisonTests(unittest.TestCase):
 
     def test_rakuten_tax_status_requires_snapshot_confirmation(self):
         product = {"gtin": "652638010168", "priceValue": 360, "sourceUrl": "https://click.linksynergy.com/x",
-                   "merchant": "Nicchia Luxury", "priceTaxStatus": "included", "sourceCreatedAt": "2026-11-13T03:00:00Z"}
+                   "merchant": "Nicchia Luxury", "priceTaxStatus": "included", "sourceCreatedAt": "2026-11-13T03:00:00Z",
+                   "comparison_authorized": True}
         unverified = list(MODULE.rakuten_offers({"products": [product]}))
         verified = list(MODULE.rakuten_offers({"priceTaxStatusVerified": True, "products": [product]}))
         self.assertEqual(unverified[0]["price_tax_status"], "unspecified")
         self.assertEqual(verified[0]["price_tax_status"], "included")
+
+    def test_rakuten_offers_require_explicit_public_authorization(self):
+        product = {"gtin": "652638010168", "priceValue": 360,
+                   "sourceUrl": "https://click.linksynergy.com/x", "merchant": "Nicchia Luxury",
+                   "name": "Clive Christian", "brand": "Clive Christian",
+                   "comparison_authorized": False}
+        self.assertEqual(list(MODULE.rakuten_offers({"products": [product]})), [])
+        product["comparison_authorized"] = True
+        self.assertEqual(len(list(MODULE.rakuten_offers({"products": [product]}))), 1)
+        product.pop("comparison_authorized")
+        self.assertEqual(list(MODULE.rakuten_offers({"products": [product]})), [])
 
     def test_awin_download_time_is_never_used_as_price_date(self):
         feed = {"products": [{"gtin": "652638010168", "priceValue": 10, "merchant": "A", "name": "x",
@@ -96,7 +108,8 @@ class GtinComparisonTests(unittest.TestCase):
         product = {"gtin": "652638010168", "priceValue": 360,
                    "sourceUrl": "https://click.linksynergy.com/x",
                    "merchant": "Nicchia Luxury", "name": "Clive Christian",
-                   "brand": "Clive Christian", "sourceCreatedAt": "2026-11-13T03:00:00Z"}
+                   "brand": "Clive Christian", "sourceCreatedAt": "2026-11-13T03:00:00Z",
+                   "comparison_authorized": True}
         row = list(MODULE.rakuten_offers({"products": [product]}))[0]
         self.assertIsNone(row["checked_at"])
         self.assertIsNone(row["checked_at_basis"])

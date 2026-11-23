@@ -359,6 +359,21 @@ class RakutenImportValidationTests(unittest.TestCase):
         self.assertEqual([row["id"] for row in selected], ["b", "a"])
         self.assertEqual(count, 1)
 
+    def test_only_explicitly_authorized_merchants_publish_products(self):
+        rows = [
+            {"id": "decathlon-1", "gtin": "4006381333931", "category": "tech", "priceValue": 100.0, "regularPriceValue": None},
+            {"id": "nicchia-1", "gtin": "00652638010168", "category": "beauty", "priceValue": 200.0, "regularPriceValue": None},
+        ]
+        self.assertTrue(MODULE.PUBLIC_COMPARISON_AUTHORIZATION["decathlon"])
+        self.assertFalse(MODULE.PUBLIC_COMPARISON_AUTHORIZATION["nicchia"])
+        selected, priority_count, excluded = MODULE.select_public_products(rows, "nicchia", 10, set())
+        self.assertEqual(selected, [])
+        self.assertEqual(priority_count, 0)
+        self.assertEqual(excluded, 2)
+        selected, priority_count, excluded = MODULE.select_public_products(rows[:1], "decathlon", 10, set())
+        self.assertEqual(excluded, 0)
+        self.assertTrue(selected[0]["comparison_authorized"])
+
     def test_priority_gtins_are_read_from_awin_feed(self):
         import json
         with tempfile.TemporaryDirectory() as directory:

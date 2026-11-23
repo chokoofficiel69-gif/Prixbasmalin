@@ -18,6 +18,13 @@ FEEDS = [
     ("54306_4768926_1_cmp.xml.gz", "Nicchia Luxury", "nicchia"),
 ]
 
+# Autorisation explicite pour l'affichage public/comparaison, distincte de l'accès technique au flux.
+# Decathlon : accord utilisateur déjà confirmé. Nicchia : confirmation annonceur non reçue.
+PUBLIC_COMPARISON_AUTHORIZATION = {
+    "decathlon": True,
+    "nicchia": False,
+}
+
 
 def parse_source_timestamp(value, date_format):
     value = str(value or "").strip()
@@ -337,6 +344,16 @@ def select_with_priority(rows, limit, priority_gtins):
     return priority + rest, len(priority)
 
 
+def select_public_products(rows, slug, limit, priority_gtins):
+    """N'expose que les marchands dont l'autorisation de comparaison est explicitement confirmée."""
+    if PUBLIC_COMPARISON_AUTHORIZATION.get(slug) is not True:
+        return [], 0, len(rows)
+    selected, priority_count = select_with_priority(rows, limit, priority_gtins)
+    for row in selected:
+        row["comparison_authorized"] = True
+    return selected, priority_count, 0
+
+
 def select_balanced(rows, limit):
     # Les promotions (prix barré fourni par le marchand) passent en premier, la plus forte remise d'abord.
     def discount(row):
@@ -438,11 +455,17 @@ def main():
             print("Source ignorée (" + filename + ") : " + str(error))
             continue
         limit = args.decathlon_limit if slug == "decathlon" else args.nicchia_limit
-        selected, priority_count = select_with_priority(rows, limit, priority_gtins)
+        public_authorized = PUBLIC_COMPARISON_AUTHORIZATION.get(slug) is True
+        selected, priority_count, excluded_count = select_public_products(rows, slug, limit, priority_gtins)
         all_products.extend(selected)
-        source_dates.append(source_created)
+        if public_authorized:
+            source_dates.append(source_created)
+        candidate_shared = sum(1 for row in rows if row["gtin"] and gtin14(row["gtin"]) in priority_gtins)
+        stats["public_display_authorized"] = public_authorized
+        stats["excluded_from_public_authorization"] = excluded_count
         stats["published_products"] = len(selected)
-        stats["gtin_shared_with_other_sources"] = sum(1 for row in rows if row["gtin"] and gtin14(row["gtin"]) in priority_gtins)
+        stats["candidate_gtin_shared_with_other_sources"] = candidate_shared
+        stats["gtin_shared_with_other_sources"] = candidate_shared if public_authorized else 0
         stats["published_priority_gtin"] = priority_count
         source_stats[merchant] = stats
         loaded_slugs.add(slug)
@@ -488,6 +511,7 @@ def main():
             "Sans confirmation explicite, priceTaxStatus=unspecified et le prix est exclu des comparaisons TTC.",
             "Frais de livraison conservés séparément ; aucun total n'est comparé lorsque la livraison est inconnue.",
             "Aucun rapprochement entre marchands sans GTIN valide commun ou identité fabricant exacte.",
+            "Seuls les annonceurs avec autorisation explicite d'affichage public/comparaison sont inclus dans products ; les autres flux restent diagnostiques.",
         ],
         "products": all_products,
     }

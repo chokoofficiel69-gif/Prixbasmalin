@@ -174,6 +174,8 @@ def awin_offers(feed):
 def rakuten_offers(feed):
     tax_verified = feed.get("priceTaxStatusVerified") is True
     for product in feed.get("products") or []:
+        if product.get("comparison_authorized") is not True:
+            continue
         gtin = gtin14(product.get("gtin"))
         price = money(product.get("priceValue"))
         url = str(product.get("sourceUrl") or "")

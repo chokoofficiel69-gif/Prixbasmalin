@@ -40,6 +40,7 @@ def displayable(p: dict) -> bool:
     """Fiche découvrable ; la validation TTC reste faite séparément à l'affichage du prix."""
     return bool(
         p
+        and p.get("comparison_authorized") is True
         and p.get("id")
         and p.get("name")
         and p.get("merchant")
@@ -80,6 +81,20 @@ def build(feed: dict, per_merchant: int = PER_MERCHANT) -> dict:
     out = {k: v for k, v in feed.items() if k != "products"}
     out["derived_from"] = "data/rakuten-products.json"
     out["products"] = light
+    source_stats = {
+        merchant: dict(stats)
+        for merchant, stats in (out.get("source_stats") or {}).items()
+        if isinstance(stats, dict)
+    }
+    for merchant, stats in source_stats.items():
+        stats["public_home_products"] = sum(1 for p in light if p.get("merchant") == merchant)
+    if source_stats:
+        out["source_stats"] = source_stats
+    notes = list(out.get("notes") or [])
+    policy_note = "Seuls les produits explicitement autorisés pour l'affichage public sont inclus dans cette vitrine."
+    if policy_note not in notes:
+        notes.append(policy_note)
+    out["notes"] = notes
     return out
 
 

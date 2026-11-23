@@ -11,6 +11,7 @@ spec.loader.exec_module(mod)
 def product(i, merchant="M", price=10, regular=None, created="2026-11-10T00:00:00Z", **extra):
     p = {
         "id": f"{merchant}-{i}", "name": f"Produit {i:03d}", "merchant": merchant, "priceValue": price,
+        "comparison_authorized": True,
         "regularPriceValue": regular, "priceTaxStatus": "included", "sourceCreatedAt": created,
         "image": "https://img.example/x.jpg", "sourceUrl": "https://click.linksynergy.com/link?x=" + str(i),
         "desc": "longue description",
@@ -39,6 +40,23 @@ class BuildRakutenHomeTest(unittest.TestCase):
         out = mod.build({"products": [item]})
         self.assertEqual(len(out["products"]), 1)
         self.assertEqual(out["products"][0]["priceTaxStatus"], "unspecified")
+
+    def test_unapproved_products_are_excluded_from_public_discovery(self):
+        approved = product(1, merchant="Decathlon National")
+        unapproved = product(2, merchant="Nicchia Luxury", comparison_authorized=False)
+        out = mod.build({"products": [approved, unapproved]})
+        self.assertEqual([p["id"] for p in out["products"]], ["Decathlon National-1"])
+
+    def test_committed_public_home_contains_only_authorized_products(self):
+        data = __import__("json").loads((ROOT / "data" / "rakuten-home.json").read_text(encoding="utf-8"))
+        self.assertTrue(all(p.get("comparison_authorized") is True for p in data["products"]))
+        self.assertNotIn("Nicchia Luxury", {p.get("merchant") for p in data["products"]})
+        self.assertFalse(data["source_stats"]["Nicchia Luxury"]["public_display_authorized"])
+        self.assertEqual(data["source_stats"]["Nicchia Luxury"]["public_home_products"], 0)
+
+    def test_homepage_rakuten_loaders_require_explicit_authorization(self):
+        homepage = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertGreaterEqual(homepage.count("p.comparison_authorized===true"), 3)
 
     def test_rejects_products_without_safe_discovery_fields(self):
         bad = [product(1, price=0), product(2, image="http://x"), product(3, sourceUrl="http://merchant.example/x")]
