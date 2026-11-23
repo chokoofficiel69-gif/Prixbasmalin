@@ -24,6 +24,22 @@ Ces prix sont déjà affichés honnêtement :
 **Si tu vois un problème** (prix faux, flux cassé, marchand HT) : signale-le dans une issue ou dans la description d'une PR.
 Ne supprime pas l'affichage tout seul.
 
+## Objectif n° 1 : du trafic et les premières ventes (décision du 23/11/2026)
+
+Le site n'a encore rapporté aucun euro. Toute session de travail doit d'abord servir cet objectif :
+1. **Faire venir des visiteurs.** Travailler le référencement Google (pages indexables, contenu utile, liens internes, sitemap), IndexNow et les contenus faciles à partager.
+2. **Faire cliquer vers les marchands partenaires.** Liens affiliés Awin, Rakuten et Amazon (tag prixbasmalin2-21) bien visibles, offres partenaires et codes promo officiels.
+3. **Garder un site propre et pro** : vraies photos marchandes, prix datés, rien de cassé.
+
+La conformité et la sécurité restent obligatoires, mais elles ne doivent pas bloquer l'avancement.
+Si une règle de prudence empêche d'atteindre l'objectif, propose une solution qui respecte les deux. Ne te contente pas de retirer des fonctions.
+
+## Travail en équipe avec les autres IA
+
+- **Ne jamais défaire** le travail fusionné par une autre IA, ni annuler une décision du propriétaire. Pas de revert, pas de masquage, pas de suppression.
+- En cas de désaccord, explique-le dans la description de la PR ou dans une issue, puis laisse le propriétaire trancher.
+- Chaque PR doit dire en une phrase **ce qu'elle apporte pour le trafic ou les ventes**.
+
 ## Toujours valable
 
 - Ne jamais inventer de prix.
