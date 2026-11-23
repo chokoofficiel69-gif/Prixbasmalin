@@ -68,13 +68,6 @@ on:
   workflow_run:
     workflows:
       - "pages build and deployment"
-      - "Importer les catalogues Rakuten autorisés"
-      - "Synchroniser le catalogue produits Awin autorisé"
-      - "Actualiser les historiques PrixTracker"
-      - "Construire les comparaisons multi-marchands par GTIN"
-      - "Rotation contrôlée de la vitrine cadeaux"
-      - "Refresh verified homepage product images"
-      - "Build authorized price feed"
     types:
       - completed
     branches:
@@ -307,7 +300,7 @@ jobs:
           NODE
 
   smoke-test:
-    if: github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages')
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages') || (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'pages build and deployment' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     name: Disponibilité de production et Worker attribution
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -328,7 +321,7 @@ jobs:
             "https://prixbasmalin.fr/js/track-outbound.js" --output /tmp/track-outbound.js
           grep -q "refHost !== ownHost" /tmp/track-outbound.js
       - name: Vérifier les garde-fous prix et le rail mobile après publication
-        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event.workflow_run.head_branch == 'main' || (github.event_name == 'deployment_status' && github.event.deployment.environment == 'github-pages'))
+        if: (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages') || (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'pages build and deployment' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
         shell: bash
         run: |
           set -euo pipefail
@@ -344,6 +337,10 @@ jobs:
               grep -Fq 'data-pm-ad-slot="home-top"' /tmp/home-after.html &&
               grep -Fq 'data-pm-ad-slot="catalogue-inline"' /tmp/catalogue-after.html &&
               grep -Fq "fresh(p.merchantUpdatedAt)" /tmp/home-after.html &&
+              grep -Fq "Prix non vérifié" /tmp/home-after.html &&
+              ! grep -Fq "giftListedPrice" /tmp/home-after.html &&
+              ! grep -Fq "listed_price_eur" /tmp/home-after.html &&
+              ! grep -Fq "Prix indiqué par le marchand" /tmp/home-after.html &&
               grep -Fq 'const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";' /tmp/catalogue-after.html &&
               grep -Fq 'priceValue:priceStatus==="fresh"?Number(product.priceValue):null' /tmp/catalogue-after.html &&
               grep -Fq 'offer.currency!=="EUR"||offer.price_tax_status!=="included"' /tmp/catalogue-after.html &&
@@ -353,7 +350,10 @@ jobs:
               ! grep -Fq 'rows.push({merchant:"Amazon",price:null,' /tmp/catalogue-after.html &&
               ! grep -Fq "liveCheckedAt:p.merchantUpdatedAt||awin.fetched_at" /tmp/home-after.html &&
               grep -Fq 'fresh(p.merchantUpdatedAt||p.priceUpdatedAt)' /tmp/home-after.html &&
-              grep -Fq 'const deals=feed.products.filter(p=>p&&p.name&&fresh(p.merchantUpdatedAt||p.priceUpdatedAt)&&p.priceTaxStatus==="included"&&' /tmp/home-after.html &&
+              grep -Fq 'const liveAwin=awinFresh?' /tmp/home-after.html &&
+              grep -Fq '(p.priceTaxStatus==="included"||p.price_tax_status==="included")' /tmp/home-after.html &&
+              grep -Fq 'const liveRakuten=rakutenFresh&&rakutenTaxVerified?' /tmp/home-after.html &&
+              grep -Fq 'p.comparison_authorized===true' /tmp/home-after.html &&
               grep -Fq 'liveCheckedAt:p.merchantUpdatedAt||p.priceUpdatedAt' /tmp/home-after.html &&
               ! grep -Fq 'liveCheckedAt:p.sourceCreatedAt' /tmp/home-after.html &&
               ! grep -Fq 'fresh(p.sourceCreatedAt)&&p.priceTaxStatus' /tmp/home-after.html &&
@@ -560,6 +560,10 @@ jobs:
           }
           if (!Array.isArray(rakuten.products) || rakuten.products.length === 0) {
             throw new Error("Le snapshot de découverte Rakuten public est vide.");
+          }
+          const unauthorizedRakuten = rakuten.products.filter(p => p.comparison_authorized !== true);
+          if (unauthorizedRakuten.length) {
+            throw new Error("Le snapshot Rakuten public contient des produits sans autorisation explicite.");
           }
           const rakutenImages = rakuten.products.filter(p =>
             p.imageStatus === "authorized_feed_image" && /^https:\/\//i.test(String(p.image || ""))
