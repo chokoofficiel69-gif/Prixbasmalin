@@ -1,0 +1,10 @@
+{
+ "note": "Codes-barres (GTIN) vérifiés un par un dans l'API Open Icecat. Ne jamais deviner un GTIN : ajouter seulement un code dont le titre Icecat correspond exactement au produit.",
+ "username": "prixbasmalin",
+ "products": {
+  "dualsense": "0711719399506",
+  "ps5-slim-digital": "0711719577294",
+  "switch-oled": "0045496453435",
+  "switch": "0045496452629"
+ }
+}

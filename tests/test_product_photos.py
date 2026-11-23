@@ -20,8 +20,14 @@ class ProductPhotosTests(unittest.TestCase):
                 words = re.sub(r"[^a-z0-9.]+", " ", entry["license"].lower()).split()
                 self.assertNotIn("nc", words)
                 self.assertNotIn("nd", words)
-                self.assertRegex(entry["license"].lower(), r"^(cc0|public domain|cc by)")
                 self.assertTrue(entry["author"])
+                if entry.get("source") == "open_icecat":
+                    # Photo officielle fournie par la marque via Open Icecat, retrouvée par GTIN vérifié.
+                    self.assertTrue(entry["license"].lower().startswith("partenaire"))
+                    self.assertEqual(entry["match"], "gtin_icecat")
+                    self.assertRegex(entry["gtin"], r"^\d{8,14}$")
+                    continue
+                self.assertRegex(entry["license"].lower(), r"^(cc0|public domain|cc by)")
                 self.assertTrue(entry["file_page"].startswith("https://commons.wikimedia.org/wiki/File:"))
                 self.assertEqual(entry["match"], "verifie_visuellement")
 
@@ -40,8 +46,14 @@ class ProductPhotosTests(unittest.TestCase):
             self.assertNotIn(pid, self.images, pid)
 
     def test_photo_workflow_never_writes_to_main(self):
-        wf = (ROOT / ".github" / "workflows" / "fetch-product-photos.yml").read_text(encoding="utf-8")
-        self.assertIn("if: github.ref != 'refs/heads/main'", wf)
+        for name in ("fetch-product-photos.yml", "fetch-icecat-photos.yml"):
+            wf = (ROOT / ".github" / "workflows" / name).read_text(encoding="utf-8")
+            self.assertIn("if: github.ref != 'refs/heads/main'", wf)
+
+    def test_icecat_gtins_are_digits(self):
+        cfg = json.loads((ROOT / "data" / "icecat-gtins.json").read_text(encoding="utf-8"))
+        for pid, gtin in cfg["products"].items():
+            self.assertRegex(gtin, r"^\d{8,14}$", pid)
 
 
 if __name__ == "__main__":
