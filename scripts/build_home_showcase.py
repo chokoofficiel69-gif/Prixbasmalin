@@ -312,11 +312,11 @@ def build_block():
 {CSS}
 <div class="pmx">
 {hero}
+<section class="pmx-sec" aria-labelledby="pmx-top-t"><div class="pmx-head"><h2 id="pmx-top-t">🔥 Top offres <span>relevées</span></h2><a href="/prix/">Tout le comparateur →</a><small>Les produits les plus suivis, avec le plus bas prix relevé et les marchands les moins chers (dernier relevé : {seo.date_fr(latest)})</small></div>
+<div class="pmx-rail pmx-offers">{"".join(offer_card(p) for p in top)}</div></section>
 <section class="pmx-sec" aria-labelledby="pmx-cats-t"><div class="pmx-head"><h2 id="pmx-cats-t">Nos grandes <span>catégories</span></h2><a href="/catalogue.html">Voir tout le catalogue →</a></div>
 <div class="pmx-rail pmx-cats">{cats}</div></section>
 {partner_section()}
-<section class="pmx-sec" aria-labelledby="pmx-top-t"><div class="pmx-head"><h2 id="pmx-top-t">🔥 Top offres <span>relevées</span></h2><a href="/prix/">Tout le comparateur →</a><small>Les produits les plus suivis, avec le plus bas prix relevé et les marchands les moins chers (dernier relevé : {seo.date_fr(latest)})</small></div>
-<div class="pmx-rail pmx-offers">{"".join(offer_card(p) for p in top)}</div></section>
 <section class="pmx-sec pmx-ban" aria-label="Sélections">
 <a class="pmx-b c1" href="/idees-cadeaux/"><img src="/assets/accueil/ban-cadeaux.webp" alt="" loading="lazy">{icon("idees-cadeaux", "pmx-bi")}<b>Idées cadeaux</b><small>Pour toutes les occasions</small><span>Découvrir la sélection →</span></a>
 <a class="pmx-b c2" href="/high-tech.html"><img src="/assets/accueil/ban-high-tech.webp" alt="" loading="lazy">{icon("high-tech", "pmx-bi")}<b>High-Tech</b><small>Les dernières nouveautés, prix comparés</small><span>Voir les offres →</span></a>
