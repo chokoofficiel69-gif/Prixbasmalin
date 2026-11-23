@@ -326,11 +326,14 @@ def product_page(p, sheets, period, guide=None):
     amz_url, amz_label, amz_direct = amazon_link(p)
     price = euro(best['price_eur'])
     last_date = date_fr(p.get("last_date") or best["date"])
-    title = fit_title(f"{p['name']} : dernier relevé {price} | Prix Bas Malin",
-                      f"Historique des prix de {p['name']} | Prix Bas Malin",
-                      f"Historique {p['name']}")
-    description = fit_description(f"Dernier relevé historique du {last_date} : {price} chez {cheapest_names}. "
-                                  f"Données PrixTracker passées, pas un prix en direct ; vérifiez le marchand.")
+    n_recent = len(recent_offers(p)) or p["offer_count"]
+    first_merchant = merchant_name(best["merchant"])
+    title = fit_title(f"Prix {p['name']} : {price} chez {first_merchant} · {n_recent} marchands",
+                      f"Prix {p['name']} : {price} · {n_recent} marchands relevés",
+                      f"Prix {p['name']} : {price} | Prix Bas Malin",
+                      f"Prix {p['name']}")
+    description = fit_description(f"Prix {p['name']} relevé chez {n_recent} marchands : {price} chez {cheapest_names} le {date_fr(best['date'])}, "
+                                  f"le plus bas de la semaine. Historique et écarts de prix datés, à confirmer chez le marchand.")
     faq = [
         (f"Quel est le dernier prix observé pour {p['name']} ?",
          f"Au relevé du {date_fr(best['date'])}, le plus bas montant observé pour {p['name']} était de {euro(best['price_eur'])} chez {cheapest_names}. "
@@ -353,7 +356,7 @@ def product_page(p, sheets, period, guide=None):
         c = p["image_credit"]
         credit = f'<p class="source" style="color:#6b7280">Photo : {e(c.get("author") or "")} · {e(c.get("license") or "")} · <a style="color:#0b63ce" href="{e(c.get("file_page") or "")}">{"Wikimedia Commons" if "wikimedia.org" in (c.get("file_page") or "") else "Icecat"}</a></p>'
     body = f"""<article class="panel">
-<div class="hero"><div><h1>Historique des prix de {e(p['name'])}</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
+<div class="hero"><div><h1>Prix {e(p['name'])} : comparatif de {n_recent} marchands relevés</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
 <div class="from">Meilleur prix récent, relevé le {date_fr(best['date'])}<strong>{euro(best['price_eur'])}</strong>chez {e(cheapest_names)} · à confirmer chez le marchand</div></div>{visual(p)}</div>
 {credit}<a class="cta pm-btn pm-btn-compare pm-btn-block" href="#prix">Voir les relevés historiques</a>
 <a class="cta pm-btn pm-btn-amazon pm-btn-block" href="{e(amz_url)}" target="_blank" rel="sponsored nofollow noopener">{amz_label}</a>
