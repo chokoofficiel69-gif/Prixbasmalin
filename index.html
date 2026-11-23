@@ -230,7 +230,7 @@
       <p>Vos photos → vidéos pour TikTok, Instagram et vos clips</p>
     </div>
     <div class="badges">
-      <span class="badge">agnes-video-2.5</span>
+      <span class="badge">agnes-video-2.5-flash</span>
       <span class="badge ok">100% Agnes</span>
     </div>
   </header>
@@ -383,7 +383,7 @@
   // ═══════════════════════════════════════════════════════════════
   const API_BASE = 'https://apihub.agnes-ai.com/v1';
   const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
-  const VIDEO_MODEL = 'agnes-video-2.5';
+  const VIDEO_MODEL = 'agnes-video-2.5-flash';
   const FRAME_RATE = 24;
 
   const CREATE_INTERVAL_MIN = 62000;
@@ -878,9 +878,12 @@
     const body = {
       model: VIDEO_MODEL,
       prompt: prompt,
-      image: imageDataUri,
-      num_frames: state.durationFrames,
-      frame_rate: FRAME_RATE
+      mode: 'keyframe',
+      size: '720P',
+      aspect_ratio: '9:16',
+      seconds: String(Math.max(4, Math.min(12, Math.round(state.durationFrames / FRAME_RATE)))),
+      first_frame: imageDataUri,
+      n: 1
     };
     const res = await apiFetch(API_BASE + '/videos', {
       method: 'POST',
