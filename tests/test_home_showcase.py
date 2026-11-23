@@ -94,6 +94,7 @@ class HomeShowcaseTests(unittest.TestCase):
         picks, _ = sc.partner_picks()
         self.assertGreaterEqual(len(picks), 3)
         for pick in picks:
+            self.assertNotIn("selection_price", pick)
             if pick.get("price_verified") is True:
                 self.assertEqual(pick.get("price_tax_status"), "included")
                 self.assertTrue(pick.get("price_date"))
