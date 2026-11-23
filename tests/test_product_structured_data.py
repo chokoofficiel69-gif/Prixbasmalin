@@ -53,3 +53,18 @@ class ProductStructuredDataTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RecentBestPriceTests(unittest.TestCase):
+    def test_headline_shows_best_recent_price(self):
+        sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
+        for p in sheets:
+            last = date.fromisoformat(max(o["date"] for o in p["offers"]))
+            recent = [o for o in p["offers"] if date.fromisoformat(o["date"]) >= last - timedelta(days=7)]
+            best = min(o["price_eur"] for o in recent)
+            html = (ROOT / "prix" / f"{p['id']}.html").read_text(encoding="utf-8")
+            m = re.search(r'<div class="from">Meilleur prix récent, relevé le [^<]*<strong>([^<]*)</strong>', html)
+            with self.subTest(product=p["id"]):
+                self.assertIsNotNone(m)
+                shown = float(m.group(1).replace(" ", "").replace("\xa0", "").replace(" ", "").replace("€", "").replace(",", "."))
+                self.assertEqual(shown, best)
