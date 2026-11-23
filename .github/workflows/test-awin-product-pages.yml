@@ -69,9 +69,11 @@ jobs:
               raise SystemExit("Le flux catalogue n’atteste pas la validation des images.")
           now = datetime.now(timezone.utc)
           generated = pages.build(feed, now=now)
-          rendered_prices = sum(
-              len(re.findall(r"<strong>[^<]*€</strong>", html))
-              for html in generated.values()
+          # Un même produit peut figurer sur sa page de catégorie et sur l'index :
+          # on vérifie page par page (aucune page ne montre plus de prix que de lignes fraîches).
+          rendered_prices = max(
+              (len(re.findall(r"<strong>[^<]*€</strong>", html)) for html in generated.values()),
+              default=0,
           )
           fresh_price_rows = sum(
               1 for row in (feed.get("products") or [])
