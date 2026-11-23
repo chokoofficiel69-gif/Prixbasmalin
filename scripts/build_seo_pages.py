@@ -536,6 +536,27 @@ def black_friday_page(sheets):
         f'<section class="panel" id="{slug}"><h2>{e(label)}</h2><div class="bf-grid">{"".join(bf_card(p) for p in items)}</div></section>'
         for slug, label, items in groups)
     count = sum(len(items) for _, _, items in groups)
+    popular_products = [
+        ("ps5-slim", "PS5 Slim (édition disque)"),
+        ("ps5-pro", "PS5 Pro"),
+        ("gta-6-ps5", "GTA 6 (PS5)"),
+        ("switch-2", "Nintendo Switch 2"),
+        ("airpods-pro-3", "AirPods Pro 3"),
+        ("iphone-17", "iPhone 17"),
+    ]
+    available_ids = {p.get("id") for p in sheets}
+    popular_links = "".join(
+        f'<a href="/prix/{e(product_id)}.html">{e(label)}</a>'
+        for product_id, label in popular_products if product_id in available_ids
+    )
+    popular_section = (
+        '<section class="panel" id="references-a-suivre"><h2>Références à suivre avant le Black Friday</h2>'
+        '<p>Retrouvez les fiches de suivi PS5, GTA 6, Nintendo Switch 2, AirPods Pro 3 et iPhone 17. '
+        'Les montants de ces fiches sont des relevés historiques datés, pas des offres en direct.</p>'
+        f'<div class="bf-jump">{popular_links}</div>'
+        '<p>Le <a href="/catalogue.html">catalogue marchand</a> présente aussi des références Decathlon issues du flux Rakuten ; '
+        'les prix des flux sont datés et affichés « à confirmer ».</p></section>'
+    )
     faq = [
         ("Quand a lieu le Black Friday 2026 ?", "Le vendredi 27 novembre 2026, suivi du Cyber Monday le lundi 30 novembre. Beaucoup de marchands lancent leurs offres plusieurs jours avant."),
         ("Les prix affichés sont-ils des prix Black Friday ?", "Non. Ce sont les plus bas prix relevés avant l’événement, avec leur date et le marchand. Ils servent de repère : si une « promo » Black Friday est plus chère que ce repère, ce n’est pas une bonne affaire."),
@@ -555,14 +576,14 @@ def black_friday_page(sheets):
 <span class="bf-date" id="bf-countdown">Vendredi 27 novembre 2026 · Cyber Monday le 30 novembre</span>
 <div class="bf-jump">{jump}</div></section>
 <p class="notice" style="margin:0 0 12px">Prix relevés avant le Black Friday (dernier relevé : {date_fr(latest)}), pas des prix promotionnels en direct. Vérifiez toujours le prix final, le vendeur et la livraison chez le marchand.</p>
-{partner_codes_section()}{sections}
+{popular_section}{partner_codes_section()}{sections}
 <section class="panel"><h2>Éviter les fausses promotions</h2><p>Préparez votre liste, notez le prix repère de chaque produit et créez une alerte prix gratuite depuis la fiche du produit. Notre guide détaille la méthode : <a href="/guide-black-friday-2026.html">Black Friday 2026 : repérer les vraies bonnes affaires</a>.</p>
 <p>Vous cherchez des idées cadeaux ? <a href="/idees-cadeaux/">Idées cadeaux par budget</a> · <a href="/prix/">Tout le comparateur</a></p></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
 <p class="source">Source des prix : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Liens affiliés : Prix Bas Malin peut percevoir une commission, sans surcoût pour vous.</p>
 {ART_SCRIPT}{BF_SCRIPT}"""
     return layout("Black Friday 2026 : high-tech par budget | Prix Bas Malin",
-                  fit_description(f"Black Friday 2026 : {count} produits high-tech par budget avec le plus bas prix relevé avant l’événement, pour repérer les vraies promotions."),
+                  fit_description(f"Black Friday 2026 : repères datés pour PS5, GTA 6, Switch 2, AirPods Pro 3 et iPhone 17, plus {count} produits par budget."),
                   "/black-friday.html", body, [("Accueil", "/"), ("Black Friday 2026", "/black-friday.html")], extra,
                   og_image="/assets/og-black-friday.jpg")
 

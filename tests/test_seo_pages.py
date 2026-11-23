@@ -33,6 +33,22 @@ class SeoPagesTests(unittest.TestCase):
         self.assertRegex(page, r"(Rechercher|Voir) sur Amazon ↗")
         self.assertNotIn("Voir le prix du jour sur Amazon", page)
 
+    def test_black_friday_page_links_to_popular_product_pages_and_rakuten_catalogue(self):
+        page = seo.build()["black-friday.html"]
+        for target in (
+            "/prix/ps5-slim.html",
+            "/prix/ps5-pro.html",
+            "/prix/gta-6-ps5.html",
+            "/prix/switch-2.html",
+            "/prix/airpods-pro-3.html",
+            "/prix/iphone-17.html",
+            "/catalogue.html",
+        ):
+            self.assertIn(f'href="{target}"', page)
+        self.assertIn("Références à suivre avant le Black Friday", page)
+        self.assertIn("relevés historiques datés", page)
+        self.assertIn("à confirmer", page)
+
     def test_sitemap_and_robots_list_seo_pages(self):
         sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
         self.assertIn("<loc>https://prixbasmalin.fr/prix/airpods-4.html</loc><lastmod>", sitemap)
