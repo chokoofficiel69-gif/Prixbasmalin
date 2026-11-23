@@ -68,3 +68,13 @@ class RecentBestPriceTests(unittest.TestCase):
                 self.assertIsNotNone(m)
                 shown = float(m.group(1).replace(" ", "").replace("\xa0", "").replace(" ", "").replace("€", "").replace(",", "."))
                 self.assertEqual(shown, best)
+
+
+class BlackFridayGapTests(unittest.TestCase):
+    def test_gap_section_lists_real_recent_gaps(self):
+        html = (ROOT / "black-friday.html").read_text(encoding="utf-8")
+        self.assertIn('id="ecarts"', html)
+        start = html.index('id="ecarts"')
+        section = html[start:html.index("</section>", start)]
+        self.assertGreaterEqual(section.count('class="bf-card"'), 1)
+        self.assertIn("d’écart entre marchands", section)
