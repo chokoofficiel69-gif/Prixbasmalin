@@ -135,20 +135,30 @@ if(navigator.clipboard)navigator.clipboard.writeText(v).then(ok,ok);else ok();})
 def build(today=None):
     today = today or date.today().isoformat()
     data = json.loads(DATA.read_text(encoding="utf-8"))
-    validate(data)
+    codes = list(data.get("codes", [])) + campaign_codes()
+    validate({"codes": codes, "boutiques": data.get("boutiques", [])})
     mail = data["contact_email"]
-    codes = sorted((c for c in data.get("codes", []) if c["fin"] >= today), key=lambda c: c["fin"])
+    codes = sorted((c for c in codes if c["fin"] >= today), key=lambda c: c["fin"])
     shops = data.get("boutiques", [])
     codes_html = (f'<div class="bp-grid">{"".join(code_card(c) for c in codes)}</div>' if codes else
                   '<p class="bp-empty">Les premiers codes promo partenaires arrivent bientôt. Nous n’affichons que des codes '
                   'fournis par les marchands eux-mêmes, avec leurs conditions et leur date de fin.</p>')
     shops_html = (f'<div class="bp-grid">{"".join(shop_card(b) for b in shops)}</div>' if shops else
-                  '<p class="bp-empty">Les premières boutiques partenaires arrivent bientôt : artisans, créateurs et petits '
-                  'commerçants sélectionnés, avec un code promo réservé aux visiteurs de Prix Bas Malin.</p>')
+                  '<p class="bp-empty">Aucune boutique indépendante n’a encore été ajoutée. Les offres de nos réseaux partenaires sont présentées ci-dessus.</p>')
+    network_html = """<section class="panel" id="reseaux-partenaires"><h2>Offres de nos réseaux partenaires</h2>
+<div class="bp-grid">
+<article class="bp-shop"><h3>Decathlon via Rakuten</h3>
+<p>Le catalogue Prix Bas Malin présente des références Decathlon reçues via le flux Rakuten. Les prix du flux sont datés et affichés « à confirmer » ; vérifiez le prix final, les frais et la disponibilité chez le marchand.</p>
+<a class="bp-go" href="/catalogue.html">Voir les références Decathlon ↗</a></article>
+<article class="bp-shop"><h3>Amazon</h3>
+<p>Parcourez les offres du jour Amazon via le lien partenaire Prix Bas Malin. Vérifiez le prix final et la disponibilité au moment de l’achat.</p>
+<a class="bp-go" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener">Voir les offres Amazon ↗</a></article>
+</div></section>"""
     body = f"""<section class="bp-hero"><h1>Boutiques partenaires &amp; codes promo</h1>
-<p>Des petites boutiques sélectionnées et des codes promo obtenus auprès des marchands : grâce à Prix Bas Malin, vous payez moins cher. Chaque code indique ses conditions et sa date de fin.</p></section>
+<p>Retrouvez les codes promo transmis par les marchands et les offres de nos réseaux partenaires. Chaque code indique sa période ; les prix des flux restent datés et marqués « à confirmer ».</p></section>
 <section class="panel" id="codes"><h2>Codes promo partenaires</h2>{codes_html}</section>
-<section class="panel" id="boutiques"><h2>Boutiques partenaires</h2>{shops_html}</section>
+{network_html}
+<section class="panel" id="boutiques"><h2>Boutiques partenaires indépendantes</h2>{shops_html}</section>
 <section class="panel" id="devenir-partenaire"><h2>Commerçant, artisan, créateur ? Devenez boutique partenaire</h2>
 <p>Prix Bas Malin met vos produits en avant sur prixbasmalin.fr et sur ses réseaux (TikTok, Instagram, Snapchat). Vous ne payez rien pour être présent : une commission, convenue ensemble, n’est due que sur les ventes que nous vous apportons.</p>
 <div class="bp-steps"><div><b>1. Votre vitrine</b>Vos produits, vos photos et vos prix sur une page à votre nom.</div>
@@ -161,7 +171,7 @@ def build(today=None):
 <p class="source">Liens partenaires : Prix Bas Malin peut percevoir une commission sur les ventes, sans surcoût pour vous. Les réductions et conditions sont celles fixées par chaque marchand.</p>
 {SCRIPT}"""
     return seo.layout("Boutiques partenaires & codes promo | Prix Bas Malin",
-                      seo.fit_description("Codes promo partenaires et petites boutiques sélectionnées par Prix Bas Malin, avec leurs conditions et leur date de fin. Commerçants : devenez partenaire."),
+                      seo.fit_description("Code Jowissa BFCM35 du 26/11 au 01/12, références Decathlon via Rakuten et offres Amazon : liens partenaires, dates et conditions sur Prix Bas Malin."),
                       "/boutiques-partenaires.html", body,
                       [("Accueil", "/"), ("Boutiques partenaires & codes promo", "/boutiques-partenaires.html")], CSS + "\n")
 
