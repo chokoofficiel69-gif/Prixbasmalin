@@ -53,7 +53,7 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
 
     def test_smoke_test_does_not_run_on_push_before_pages_deployment(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
-        smoke = workflow.split("  smoke-test:\\n", 1)[1].split("\\n    name:", 1)[0]
+        smoke = workflow.split("  smoke-test:\n", 1)[1].split("\n    name:", 1)[0]
         self.assertIn("github.event_name == 'workflow_dispatch'", smoke)
         self.assertIn("github.event_name == 'schedule'", smoke)
         self.assertIn("github.event_name == 'pull_request'", smoke)
