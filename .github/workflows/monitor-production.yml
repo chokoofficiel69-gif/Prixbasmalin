@@ -444,8 +444,10 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from "node:fs";
           const data = JSON.parse(fs.readFileSync("/tmp/featured-prices.json", "utf8"));
-          if (!Array.isArray(data.products)) throw new Error("Le flux featured-prices.json ne contient pas de tableau products.");
-          console.log("Flux à la une valide :", data.products.length, "produits.");
+          if (!Array.isArray(data.products) || !data.products.every(product => Array.isArray(product.offers) && product.offers.length > 0 && product.offers.every(offer => offer.stale === true))) {
+            throw new Error("Les relevés manuels à la une doivent rester marqués périmés et ne jamais être traités comme des prix actuels.");
+          }
+          console.log("Relevés manuels historiques :", data.products.length, "produits ; tous marqués périmés, non utilisés comme prix actuels.");
           NODE
       - name: Vérifier le code catalogue attendu
         run: grep -q "productData" /tmp/catalogue.html
