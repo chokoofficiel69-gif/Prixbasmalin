@@ -25,6 +25,13 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         smoke = workflow.split("  smoke-test:", 1)[1]
         self.assertIn("timeout-minutes: 10", smoke)
 
+    def test_monitor_runs_after_successful_github_pages_deployment(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("  deployment_status:\n    types: [success]", workflow)
+        self.assertIn("github.event.deployment_status.state == 'success'", workflow)
+        self.assertIn("github.event.deployment.environment == 'github-pages'", workflow)
+        self.assertIn("github.event_name == 'deployment_status'", workflow)
+
     def test_rakuten_price_freshness_never_uses_snapshot_timestamp(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
         self.assertIn("const rakutenSnapshotRecent", workflow)
