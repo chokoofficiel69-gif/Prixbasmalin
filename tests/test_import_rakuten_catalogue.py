@@ -361,8 +361,8 @@ class RakutenImportValidationTests(unittest.TestCase):
 
     def test_only_explicitly_authorized_merchants_publish_products(self):
         rows = [
-            {"id": "decathlon-1", "gtin": "4006381333931"},
-            {"id": "nicchia-1", "gtin": "00652638010168"},
+            {"id": "decathlon-1", "gtin": "4006381333931", "category": "tech", "priceValue": 100.0, "regularPriceValue": None},
+            {"id": "nicchia-1", "gtin": "00652638010168", "category": "beauty", "priceValue": 200.0, "regularPriceValue": None},
         ]
         self.assertTrue(MODULE.PUBLIC_COMPARISON_AUTHORIZATION["decathlon"])
         self.assertFalse(MODULE.PUBLIC_COMPARISON_AUTHORIZATION["nicchia"])
