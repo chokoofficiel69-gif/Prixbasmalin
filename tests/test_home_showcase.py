@@ -114,6 +114,17 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertEqual(v["max_price_eur"] - v["min_price_eur"], 20.0)
         self.assertIsNone(sc.fresh_view({**p, "offers": p["offers"][2:]}, "2026-11-11"))
 
+    def test_gift_cards_hide_unverified_feed_prices(self):
+        text = (ROOT / "index.html").read_text(encoding="utf-8")
+        start = text.index("  const giftCard=g=>{")
+        end = text.index('  document.querySelectorAll(".pm-partner[data-href]")', start)
+        block = text[start:end]
+        self.assertIn("const priceCurrent=giftPriceIsCurrent(g);", block)
+        self.assertIn("Prix non vérifié", block)
+        self.assertNotIn("listed_price_eur", block)
+        self.assertNotIn("giftListedPrice", text)
+        self.assertNotIn("Flux marchand du", block)
+
     def test_gift_rail_rotates_unique_https_images_every_48_hours(self):
         text = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("const seenGiftImages=new Set();", text)
