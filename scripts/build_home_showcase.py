@@ -232,6 +232,7 @@ CSS = """<style id="pm-showcase-style">
  .pmx-hero-art .p1{left:5%!important;top:12%!important;transform:rotate(-7deg)}
  .pmx-hero-art .p2{left:30%!important;top:auto!important;bottom:6%!important;right:auto!important;transform:rotate(5deg)}
  .pmx-hero-art .p3{display:none!important}}
+.pmx-hero-art .p{display:none!important}
 </style>"""
 
 
