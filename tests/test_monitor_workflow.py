@@ -73,6 +73,14 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         self.assertIn("for attempt in $(seq 1 30); do", workflow)
         self.assertIn("sleep 10", workflow)
 
+    def test_featured_manual_prices_remain_stale_and_not_live(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("offer.stale === true", workflow)
+        self.assertIn("Relevés manuels historiques", workflow)
+        root = Path(__file__).resolve().parents[1]
+        self.assertNotIn("featured-prices.json", (root / "index.html").read_text(encoding="utf-8"))
+        self.assertNotIn("featured-prices.json", (root / "offres.html").read_text(encoding="utf-8"))
+
     def test_rakuten_price_freshness_never_uses_snapshot_timestamp(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
         self.assertIn("const rakutenSnapshotRecent", workflow)
