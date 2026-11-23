@@ -81,7 +81,7 @@ class HomeDealsTests(unittest.TestCase):
         self.assertTrue(gifts[0]["image_verified"])
         self.assertEqual(gifts[0]["image_verified_at"], "2026-11-10T12:00:00Z")
 
-    def test_gifts_show_price_only_with_fresh_merchant_date_and_explicit_ttc(self):
+    def test_verified_price_field_requires_fresh_merchant_date_and_explicit_ttc(self):
         awin = {"fetched_at": "2026-11-06T13:00:00Z", "products": [
             product("Parfum vérifié", "A", 59.9, merchantUpdatedAt="2026-11-06T12:30:00Z",
                     priceTaxStatus="included", shippingPriceValue=3.5)
@@ -94,7 +94,7 @@ class HomeDealsTests(unittest.TestCase):
         self.assertEqual(gifts[0]["band"], "30-60")
         self.assertEqual(gifts[0]["price_date_kind"], "merchant")
 
-    def test_gifts_hide_stale_or_tax_unconfirmed_prices(self):
+    def test_verified_price_field_stays_empty_for_stale_or_tax_unconfirmed_prices(self):
         awin = {"fetched_at": "2026-11-06T13:00:00Z", "products": [
             product("Parfum ancien", "A", 59.9, merchantUpdatedAt="2026-11-03T12:30:00Z",
                     priceTaxStatus="included", shippingPriceValue=0),
@@ -105,6 +105,36 @@ class HomeDealsTests(unittest.TestCase):
         self.assertEqual(len(gifts), 2)
         self.assertTrue(all(not gift["price_verified"] and gift["price_eur"] is None for gift in gifts))
         self.assertTrue(all(gift["shipping_eur"] is None and gift["band"] == "a-confirmer" for gift in gifts))
+
+    def test_listed_feed_price_stays_visible_when_ttc_or_product_date_is_unconfirmed(self):
+        fetched_at = "2026-11-06T13:00:00Z"
+        gifts = [
+            {"id": "Parfum à confirmer", "merchant": "A", "price_verified": False, "price_eur": None},
+            {"id": "Prix HT", "merchant": "Lusini FR", "price_verified": False, "price_eur": None},
+        ]
+        awin = {
+            "fetched_at": fetched_at,
+            "products": [
+                product("Parfum à confirmer", "A", 59.9, priceTaxStatus="unspecified"),
+                product("Prix HT", "Lusini FR", 99.0, priceTaxStatus="included"),
+            ],
+        }
+
+        listed = deals.with_listed_prices(gifts, awin)
+
+        self.assertEqual(listed[0]["listed_price_eur"], 59.9)
+        self.assertEqual(listed[0]["listed_price_date"], fetched_at)
+        self.assertFalse(listed[0]["price_verified"])
+        self.assertIsNone(listed[0]["price_eur"])
+        self.assertIsNone(listed[1]["listed_price_eur"])
+        self.assertIsNone(listed[1]["listed_price_date"])
+
+    def test_published_price_policy_distinguishes_listed_from_verified_prices(self):
+        published = json.loads((ROOT / "data" / "home-deals.json").read_text(encoding="utf-8"))
+        self.assertIn("date du flux", published["price_policy"])
+        self.assertIn("à confirmer", published["price_policy"])
+        self.assertIn("7 jours", published["price_policy"])
+        self.assertIn("moins de 48 h", published["price_policy"])
 
     def test_gifts_alternate_merchants(self):
         awin = {"products": [
