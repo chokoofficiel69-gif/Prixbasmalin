@@ -43,6 +43,9 @@ class ProductPhotosTests(unittest.TestCase):
     def test_rejected_proposals_are_not_published(self):
         proposals = json.loads((ROOT / "data" / "product-images-proposals.json").read_text(encoding="utf-8"))
         for pid in proposals["rejected"]:
+            # Seules les photos Wikimedia sont concernées ; une photo officielle Icecat peut remplacer un refus.
+            if self.images.get(pid, {}).get("source") == "open_icecat":
+                continue
             self.assertNotIn(pid, self.images, pid)
 
     def test_photo_workflow_never_writes_to_main(self):
