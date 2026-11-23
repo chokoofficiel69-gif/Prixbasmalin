@@ -3,11 +3,11 @@ import unittest
 
 
 class ProductionMonitorWorkflowTests(unittest.TestCase):
-    def test_monitor_runs_after_pages_deployment_only(self):
+    def test_monitor_runs_after_data_workflows_and_pages_complete_on_main(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
         self.assertIn("  workflow_run:", workflow)
-        self.assertIn('      - "pages build and deployment"', workflow)
         for name in (
+            "pages build and deployment",
             "Importer les catalogues Rakuten autorisés",
             "Synchroniser le catalogue produits Awin autorisé",
             "Actualiser les historiques PrixTracker",
@@ -16,7 +16,7 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
             "Refresh verified homepage product images",
             "Build authorized price feed",
         ):
-            self.assertNotIn(f'      - "{name}"', workflow)
+            self.assertIn(f'      - "{name}"', workflow)
         self.assertIn("    types:\n      - completed\n    branches:\n      - main", workflow)
 
     def test_post_deploy_smoke_check_accepts_workflow_run_main_branch(self):
@@ -32,10 +32,10 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         self.assertIn("github.event.deployment.environment == 'github-pages'", workflow)
         self.assertIn("github.event_name == 'deployment_status'", workflow)
 
-    def test_post_deploy_guard_runs_only_after_successful_pages_deployment(self):
+    def test_post_deploy_guard_runs_only_after_successful_main_workflow_or_pages_deployment(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
-        self.assertIn("github.event.workflow_run.name == 'pages build and deployment'", workflow)
         self.assertIn("github.event.workflow_run.conclusion == 'success'", workflow)
+        self.assertIn("github.event.workflow_run.head_branch == 'main'", workflow)
         self.assertIn("github.event.deployment_status.state == 'success'", workflow)
         self.assertNotIn("github.ref == 'refs/heads/main' ||", workflow)
 
@@ -67,6 +67,19 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         self.assertIn("github.event_name == 'pull_request'", smoke)
         self.assertIn("github.event.workflow_run.conclusion == 'success'", smoke)
         self.assertNotIn("github.event_name != 'deployment_status'", smoke)
+
+    def test_post_deploy_guard_waits_for_pages_propagation(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("for attempt in $(seq 1 30); do", workflow)
+        self.assertIn("sleep 10", workflow)
+
+    def test_featured_manual_prices_remain_stale_and_not_live(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("offer.stale === true", workflow)
+        self.assertIn("Relevés manuels historiques", workflow)
+        root = Path(__file__).resolve().parents[1]
+        self.assertNotIn("featured-prices.json", (root / "index.html").read_text(encoding="utf-8"))
+        self.assertNotIn("featured-prices.json", (root / "offres.html").read_text(encoding="utf-8"))
 
     def test_rakuten_price_freshness_never_uses_snapshot_timestamp(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")

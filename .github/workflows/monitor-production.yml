@@ -68,6 +68,13 @@ on:
   workflow_run:
     workflows:
       - "pages build and deployment"
+      - "Importer les catalogues Rakuten autorisés"
+      - "Synchroniser le catalogue produits Awin autorisé"
+      - "Actualiser les historiques PrixTracker"
+      - "Construire les comparaisons multi-marchands par GTIN"
+      - "Rotation contrôlée de la vitrine cadeaux"
+      - "Refresh verified homepage product images"
+      - "Build authorized price feed"
     types:
       - completed
     branches:
@@ -300,7 +307,7 @@ jobs:
           NODE
 
   smoke-test:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages') || (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'pages build and deployment' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     name: Disponibilité de production et Worker attribution
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -321,11 +328,11 @@ jobs:
             "https://prixbasmalin.fr/js/track-outbound.js" --output /tmp/track-outbound.js
           grep -q "refHost !== ownHost" /tmp/track-outbound.js
       - name: Vérifier les garde-fous prix et le rail mobile après publication
-        if: (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages') || (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'pages build and deployment' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+        if: (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 12); do
+          for attempt in $(seq 1 30); do
             cache_bust="$(date +%s)"
             if curl --fail --silent --show-error --location --connect-timeout 3 --max-time 15 \
               -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
@@ -437,8 +444,10 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from "node:fs";
           const data = JSON.parse(fs.readFileSync("/tmp/featured-prices.json", "utf8"));
-          if (!Array.isArray(data.products)) throw new Error("Le flux featured-prices.json ne contient pas de tableau products.");
-          console.log("Flux à la une valide :", data.products.length, "produits.");
+          if (!Array.isArray(data.products) || !data.products.every(product => Array.isArray(product.offers) && product.offers.length > 0 && product.offers.every(offer => offer.stale === true))) {
+            throw new Error("Les relevés manuels à la une doivent rester marqués périmés et ne jamais être traités comme des prix actuels.");
+          }
+          console.log("Relevés manuels historiques :", data.products.length, "produits ; tous marqués périmés, non utilisés comme prix actuels.");
           NODE
       - name: Vérifier le code catalogue attendu
         run: grep -q "productData" /tmp/catalogue.html
