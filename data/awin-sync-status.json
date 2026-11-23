@@ -1,118 +1,33 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-23T15:13:08.952Z",
+  "fetched_at": "2026-11-23T21:59:00.588Z",
   "source": "Awin Publisher Enhanced/standard feeds autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
-  "programmes_check_status": "verified",
-  "joined_advertisers_checked": 21,
-  "pending_advertisers_detected": 22,
-  "joined_advertisers": [
-    {
-      "id": "22619",
-      "name": "Lusini FR"
-    },
-    {
-      "id": "36144",
-      "name": "OutIn"
-    },
-    {
-      "id": "40452",
-      "name": "Lunzo HU"
-    },
-    {
-      "id": "40454",
-      "name": "lunzo PL"
-    },
-    {
-      "id": "40456",
-      "name": "Lunzo RO"
-    },
-    {
-      "id": "54353",
-      "name": "Lunzo SK"
-    },
-    {
-      "id": "54355",
-      "name": "Lunzo CZ"
-    },
-    {
-      "id": "54357",
-      "name": "Lapert CZ"
-    },
-    {
-      "id": "54359",
-      "name": "Lapert SK"
-    },
-    {
-      "id": "59933",
-      "name": "Jowissa"
-    },
-    {
-      "id": "69786",
-      "name": "Lunzo DE"
-    },
-    {
-      "id": "85523",
-      "name": "Fiido Technology Development Co., Ltd"
-    },
-    {
-      "id": "105805",
-      "name": "EINSTAR"
-    },
-    {
-      "id": "114104",
-      "name": "Lunzo AT"
-    },
-    {
-      "id": "115393",
-      "name": "ANITA & ZAHA"
-    },
-    {
-      "id": "116725",
-      "name": "World Businesses for Sale"
-    },
-    {
-      "id": "122426",
-      "name": "Imou FR"
-    },
-    {
-      "id": "124120",
-      "name": "PRM Coupons Couture FR"
-    },
-    {
-      "id": "127127",
-      "name": "Anthbot Denmark"
-    },
-    {
-      "id": "131716",
-      "name": "Ecovacs FR"
-    },
-    {
-      "id": "131783",
-      "name": "Mibro FR"
-    }
-  ],
-  "additional_authorized_offers_imported": 23598,
+  "programmes_check_status": "not_verified",
+  "joined_advertisers_checked": null,
+  "pending_advertisers_detected": null,
+  "joined_advertisers": null,
+  "additional_authorized_offers_imported": 19981,
   "counts": {
-    "joined_advertisers_checked": 21,
-    "pending_advertisers_detected": 22,
-    "additional_authorized_offers_imported": 23598,
-    "products": 20794,
-    "merchant_offers": 23598,
-    "merchants": 19,
-    "brands": 309,
-    "products_with_gtin": 14217,
-    "products_with_mpn": 13764,
-    "products_with_brand_mpn": 13745,
+    "joined_advertisers_checked": null,
+    "pending_advertisers_detected": null,
+    "additional_authorized_offers_imported": 19981,
+    "products": 18018,
+    "merchant_offers": 19981,
+    "merchants": 18,
+    "brands": 304,
+    "products_with_gtin": 14206,
+    "products_with_mpn": 10989,
+    "products_with_brand_mpn": 10970,
     "multi_merchant_products": 0,
     "offers_with_shipping": 14585,
-    "offers_with_availability": 18961,
+    "offers_with_availability": 15344,
     "offers_with_tax_included": 0,
-    "products_other_category": 321,
+    "products_other_category": 306,
     "offers_fresh_last_48h": 1,
-    "offers_missing_timestamp": 20598,
+    "offers_missing_timestamp": 16981,
     "offers_stale": 2999,
     "offers_invalid_or_future_timestamp": 0
   }
