@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+REFURB = {"asgoodasnewfr", "friphonerycom", "backmarket", "backmarketfr"}
 
 
 def product_blocks(html):
@@ -37,7 +38,7 @@ class ProductStructuredDataTests(unittest.TestCase):
                 continue
             with self.subTest(product=p["id"]):
                 last = date.fromisoformat(max(o["date"] for o in p["offers"]))
-                recent = [o for o in p["offers"] if date.fromisoformat(o["date"]) >= last - timedelta(days=7)]
+                recent = [o for o in p["offers"] if date.fromisoformat(o["date"]) >= last - timedelta(days=7) and o["merchant"] not in REFURB]
                 self.assertEqual(offers["offerCount"], len(recent))
                 self.assertEqual(float(offers["lowPrice"]), min(o["price_eur"] for o in recent))
                 self.assertEqual(float(offers["highPrice"]), max(o["price_eur"] for o in recent))
@@ -60,7 +61,7 @@ class RecentBestPriceTests(unittest.TestCase):
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
         for p in sheets:
             last = date.fromisoformat(max(o["date"] for o in p["offers"]))
-            recent = [o for o in p["offers"] if date.fromisoformat(o["date"]) >= last - timedelta(days=7)]
+            recent = [o for o in p["offers"] if date.fromisoformat(o["date"]) >= last - timedelta(days=7) and o["merchant"] not in REFURB]
             best = min(o["price_eur"] for o in recent)
             html = (ROOT / "prix" / f"{p['id']}.html").read_text(encoding="utf-8")
             m = re.search(r'<div class="from">Meilleur prix récent, relevé le [^<]*<strong>([^<]*)</strong>', html)
@@ -78,3 +79,14 @@ class BlackFridayGapTests(unittest.TestCase):
         section = html[start:html.index("</section>", start)]
         self.assertGreaterEqual(section.count('class="bf-card"'), 1)
         self.assertIn("d’écart entre marchands", section)
+
+
+class RefurbishedTests(unittest.TestCase):
+    def test_refurbished_never_shown_as_best_new_price(self):
+        sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
+        names = {"asgoodasnewfr": "asgoodasnew", "friphonerycom": "Friphonery"}
+        for p in sheets:
+            html = (ROOT / "prix" / f"{p['id']}.html").read_text(encoding="utf-8")
+            head = re.search(r'<div class="from">(.*?)</div>', html).group(1)
+            for label in ("Friphonery", "asgoodasnew"):
+                self.assertNotIn(label, head, p["id"])

@@ -30,7 +30,7 @@ COMPARE_ID = "airpods-4"
 # Écarts et « plus bas prix » calculés uniquement sur des relevés récents : un prix vieux de
 # plusieurs semaines ou un produit reconditionné fausserait la comparaison avec le neuf.
 FRESH_DAYS = 3
-REFURBISHED = {"asgoodasnewfr", "backmarketfr", "backmarket"}
+REFURBISHED = seo.REFURBISHED
 
 
 def fresh_view(p, ref_date):
