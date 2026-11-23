@@ -32,10 +32,10 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         self.assertIn("github.event.deployment.environment == 'github-pages'", workflow)
         self.assertIn("github.event_name == 'deployment_status'", workflow)
 
-    def test_post_deploy_guard_runs_only_after_successful_pages_deployment(self):
+    def test_post_deploy_guard_runs_only_after_successful_main_workflow_or_pages_deployment(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
-        self.assertIn("github.event.workflow_run.name == 'pages build and deployment'", workflow)
         self.assertIn("github.event.workflow_run.conclusion == 'success'", workflow)
+        self.assertIn("github.event.workflow_run.head_branch == 'main'", workflow)
         self.assertIn("github.event.deployment_status.state == 'success'", workflow)
         self.assertNotIn("github.ref == 'refs/heads/main' ||", workflow)
 
