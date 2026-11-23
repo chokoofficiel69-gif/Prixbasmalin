@@ -523,6 +523,7 @@ BF_BUDGETS = [
     ("plus-de-500", "Plus de 500 €", 500, float("inf")),
 ]
 BF_CSS = """<style>
+.bf-gap{display:inline-block;margin:4px 0;padding:3px 8px;border-radius:8px;background:#e8f7ee;color:#0a7a3d;font-weight:800;font-size:12.5px}
 .bf-hero{background:linear-gradient(120deg,#111827,#1f2937);color:#fff;border-radius:16px;padding:18px 16px;margin-bottom:12px}
 .bf-hero h1{color:#fff}.bf-hero p{color:#dbe3ee;margin:6px 0 0}.bf-date{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:999px;background:#ff650b;color:#fff;font-weight:900;font-size:14px}
 .bf-jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.bf-jump a{padding:8px 12px;border-radius:999px;background:#fff;color:#111827;font-weight:800;text-decoration:none;font-size:14px}
@@ -549,10 +550,34 @@ def bf_card(p):
 
 
 def bf_selection(sheets, lo, hi, limit=8):
-    items = [p for p in sheets if p.get("offers") and lo <= p["offers"][0]["price_eur"] < hi]
+    items = [p for p in sheets if p.get("offers") and lo <= best_recent(p)["price_eur"] < hi]
     # Les produits suivis chez le plus de marchands d'abord (les plus recherchés), photo réelle en priorité.
-    items.sort(key=lambda p: (not p.get("image"), -p["offer_count"], p["offers"][0]["price_eur"], p["id"]))
+    items.sort(key=lambda p: (not p.get("image"), -p["offer_count"], best_recent(p)["price_eur"], p["id"]))
     return items[:limit]
+
+
+def recent_gap(p):
+    """Écart entre le moins cher et le plus cher des relevés récents (même produit, marchands différents)."""
+    recent = recent_offers(p)
+    if len(recent) < 3:
+        return 0.0
+    return round(recent[-1]["price_eur"] - recent[0]["price_eur"], 2)
+
+
+def bf_gap_section(sheets, limit=8):
+    """Les produits où choisir le bon marchand fait économiser le plus (relevés récents, photo en priorité)."""
+    items = [p for p in sheets if recent_gap(p) >= 10 and recent_gap(p) <= 0.5 * recent_offers(p)[0]["price_eur"]]
+    items.sort(key=lambda p: (not p.get("image"), -recent_gap(p), p["id"]))
+    items = items[:limit]
+    if not items:
+        return ""
+    cards = "".join(
+        bf_card(p).replace('<small>Meilleur prix récent</small>',
+                           f'<span class="bf-gap">Jusqu’à {euro(recent_gap(p))} d’écart entre marchands</span><small>Meilleur prix récent</small>', 1)
+        for p in items)
+    return ('<section class="panel" id="ecarts"><h2>Le bon marchand fait la différence</h2>'
+            '<p>Même produit, prix très différents selon le vendeur : écarts entre le moins cher et le plus cher des relevés de la dernière semaine.</p>'
+            f'<div class="bf-grid">{cards}</div></section>')
 
 
 def partner_codes_section(today=None):
@@ -625,11 +650,11 @@ def black_friday_page(sheets):
     ]
     extra = BF_CSS + "\n" + "\n".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld) + "\n"
     body = f"""<section class="bf-hero"><h1>Black Friday 2026 : notre sélection high-tech par budget</h1>
-<p>{count} produits très demandés, classés par budget, avec le plus bas prix que nous avons relevé avant le Black Friday. Le bon réflexe : une promotion n’est intéressante que si elle passe sous ce repère.</p>
+<p>{count} produits très demandés, classés par budget, avec le meilleur prix relevé cette semaine avant le Black Friday. Le bon réflexe : une promotion n’est intéressante que si elle passe sous ce repère.</p>
 <span class="bf-date" id="bf-countdown">Vendredi 27 novembre 2026 · Cyber Monday le 30 novembre</span>
-<div class="bf-jump">{jump}</div></section>
+<div class="bf-jump"><a href="#ecarts">Plus gros écarts</a>{jump}</div></section>
 <p class="notice" style="margin:0 0 12px">Prix relevés avant le Black Friday (dernier relevé : {date_fr(latest)}), pas des prix promotionnels en direct. Vérifiez toujours le prix final, le vendeur et la livraison chez le marchand.</p>
-{popular_section}{partner_codes_section()}{sections}
+{bf_gap_section(sheets)}{popular_section}{partner_codes_section()}{sections}
 <section class="panel"><h2>Éviter les fausses promotions</h2><p>Préparez votre liste, notez le prix repère de chaque produit et créez une alerte prix gratuite depuis la fiche du produit. Notre guide détaille la méthode : <a href="/guide-black-friday-2026.html">Black Friday 2026 : repérer les vraies bonnes affaires</a>.</p>
 <p>Vous cherchez des idées cadeaux ? <a href="/idees-cadeaux/">Idées cadeaux par budget</a> · <a href="/prix/">Tout le comparateur</a></p></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
