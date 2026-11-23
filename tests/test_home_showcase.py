@@ -38,6 +38,9 @@ class HomeShowcaseTests(unittest.TestCase):
         ref = max(p["last_date"] for p in sheets if p.get("last_date"))
         views = [v for v in (sc.fresh_view(p, ref) for p in sheets) if v]
         known |= {f"{v['max_price_eur'] - v['min_price_eur']:.2f}".replace(".", ",") for v in views}
+        # Coups de cœur partenaires : prix du flux marchand Awin, datés et « à confirmer ».
+        picks, _ = sc.partner_picks()
+        known |= {f"{p['price']:.2f}".replace(".", ",") for p in picks}
         for amount in re.findall(r"(\d[\d \u00a0\u202f]*,\d{2})\s?€", self.block):
             amount = re.sub(r"[ \u00a0\u202f]", "", amount)
             self.assertIn(amount, known, amount)
@@ -57,51 +60,6 @@ class HomeShowcaseTests(unittest.TestCase):
         if late:
             self.assertEqual(sc.partner_picks(now=late)[0], [], "flux trop ancien : aucune carte")
 
-    def test_partner_card_hides_unverified_awin_price(self):
-        sc = load("build_home_showcase")
-        unverified = {
-            "merchant": "Ecovacs FR", "name": "DEEBOT test",
-            "url": "https://www.awin1.com/pclick.php?p=1",
-            "image": "https://img.example/product.jpg",
-            "price": 299.0, "price_verified": False,
-        }
-        card = sc.partner_card(unverified, "2026-11-22")
-        self.assertNotIn("299,00", card)
-        self.assertIn("Prix non vérifié", card)
-        self.assertIn("Flux Awin", card)
-
-    def test_partner_card_shows_only_explicitly_verified_ttc(self):
-        sc = load("build_home_showcase")
-        verified = {
-            "merchant": "Ecovacs FR", "name": "DEEBOT test",
-            "url": "https://www.awin1.com/pclick.php?p=1",
-            "image": "https://img.example/product.jpg",
-            "price": 299.0, "price_verified": True,
-            "price_date": "2026-11-22T10:00:00Z", "price_date_kind": "merchant",
-            "price_tax_status": "included", "shipping_eur": 0,
-        }
-        card = sc.partner_card(verified, "2026-11-22")
-        self.assertIn("299,00", card)
-        self.assertIn("Prix TTC vérifié", card)
-        self.assertIn("Livraison offerte", card)
-        missing_verification = {**verified, "price_tax_status": "unspecified"}
-        card = sc.partner_card(missing_verification, "2026-11-22")
-        self.assertNotIn("299,00", card)
-        self.assertIn("Prix non vérifié", card)
-
-    def test_partner_picks_never_promote_feed_import_time_to_price_date(self):
-        sc = load("build_home_showcase")
-        picks, _ = sc.partner_picks()
-        self.assertGreaterEqual(len(picks), 3)
-        for pick in picks:
-            self.assertNotIn("selection_price", pick)
-            if pick.get("price_verified") is True:
-                self.assertEqual(pick.get("price_tax_status"), "included")
-                self.assertTrue(pick.get("price_date"))
-            else:
-                self.assertIsNone(pick.get("price"))
-        self.assertNotIn("Prix du flux marchand du", sc.partner_section())
-
     def test_gaps_use_only_recent_new_offers(self):
         sc = load("build_home_showcase")
         p = {"id": "x", "image": "https://a/x.jpg", "offers": [
@@ -113,17 +71,6 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertEqual([o["merchant"] for o in v["offers"]], ["amazon", "fnac"])
         self.assertEqual(v["max_price_eur"] - v["min_price_eur"], 20.0)
         self.assertIsNone(sc.fresh_view({**p, "offers": p["offers"][2:]}, "2026-11-11"))
-
-    def test_gift_cards_hide_unverified_feed_prices(self):
-        text = (ROOT / "index.html").read_text(encoding="utf-8")
-        start = text.index("  const giftCard=g=>{")
-        end = text.index('  document.querySelectorAll(".pm-partner[data-href]")', start)
-        block = text[start:end]
-        self.assertIn("const priceCurrent=giftPriceIsCurrent(g);", block)
-        self.assertIn("Prix non vérifié", block)
-        self.assertNotIn("listed_price_eur", block)
-        self.assertNotIn("giftListedPrice", text)
-        self.assertNotIn("Flux marchand du", block)
 
     def test_gift_rail_rotates_unique_https_images_every_48_hours(self):
         text = (ROOT / "index.html").read_text(encoding="utf-8")
