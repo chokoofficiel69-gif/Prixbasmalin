@@ -181,7 +181,7 @@ def layout(title, description, canonical, body, breadcrumbs, extra_head="", og_i
 <title>{e(title)}</title>
 <meta name="description" content="{e(description)}">
 <link rel="canonical" href="{SITE}{canonical}">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Prix Malin"><meta property="og:locale" content="fr_FR">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Prix Bas Malin"><meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(description)}"><meta property="og:url" content="{SITE}{canonical}">
 <meta property="og:image" content="{SITE}{og_image}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -274,8 +274,8 @@ def product_page(p, sheets, period, guide=None):
     amz_url, amz_label, amz_direct = amazon_link(p)
     price = euro(p['min_price_eur'])
     last_date = date_fr(p.get("last_date") or best["date"])
-    title = fit_title(f"{p['name']} : dernier relevé {price} | Prix Malin",
-                      f"Historique des prix de {p['name']} | Prix Malin",
+    title = fit_title(f"{p['name']} : dernier relevé {price} | Prix Bas Malin",
+                      f"Historique des prix de {p['name']} | Prix Bas Malin",
                       f"Historique {p['name']}")
     description = fit_description(f"Dernier relevé historique du {last_date} : {price} chez {cheapest_names}. "
                                   f"Données PrixTracker passées, pas un prix en direct ; vérifiez le marchand.")
@@ -317,7 +317,7 @@ def product_page(p, sheets, period, guide=None):
 {ai_guide_html(guide)}<section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
 {f'<section class="panel"><h2>Autres {e(p["category_label"].lower())} comparés</h2><div class="grid pm-cards">{"".join(product_card(s) for s in similar)}</div><p><a href="/prix/{cat_slug}.html">Tous les {e(p["category_label"].lower())} →</a></p></section>' if similar else ''}
 <p class="source">À lire : <a href="/guide-black-friday-2026.html">repérer les vraies bonnes affaires</a> · <a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a> · <a href="/guides.html">tous nos guides</a></p>
-<p class="source">Source : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Ces montants ne sont pas des prix en direct. Prix Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
+<p class="source">Source : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Ces montants ne sont pas des prix en direct. Prix Bas Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
 {ART_SCRIPT}"""
     crumbs = [("Accueil", "/"), ("Historique des prix", "/prix/"), (p["category_label"], f"/prix/{cat_slug}.html"), (p["name"], f"/prix/{p['id']}.html")]
     # Identifiant produit lu par la mesure d'audience (produits consultés).
@@ -334,7 +334,7 @@ def category_page(cat, label, items):
     if label == "High-Tech" and cat in GENERIC_LABELS:
         label = GENERIC_LABELS[cat]  # libellé générique partagé : titre unique par catégorie
     cheapest = min(items, key=lambda s: s["min_price_eur"])
-    title = fit_title(f"Historique des prix {label.lower()} | Prix Malin",
+    title = fit_title(f"Historique des prix {label.lower()} | Prix Bas Malin",
                       f"Historique des prix {label.lower()}", f"{label} : historique des prix")
     description = fit_description(f"{len(items)} produits {label.lower()} avec relevés historiques PrixTracker chez jusqu’à "
                                   f"{max(s['offer_count'] for s in items)} marchands. Données datées, pas des offres en direct.")
@@ -357,7 +357,7 @@ def index_page(groups, total):
         for cat, label, items in groups)
     body = f"""<section class="panel"><h1>Historique des prix high-tech</h1>
 <p>{total} produits avec relevés historiques PrixTracker chez plusieurs marchands : smartphones, consoles, écouteurs, tablettes, ordinateurs, montres connectées, enceintes et aspirateurs. Ces montants sont des observations passées, pas des offres en direct.</p></section>{sections}{ART_SCRIPT}"""
-    return layout("Comparateur et historique des prix high-tech | Prix Malin",
+    return layout("Historique des prix high-tech | Prix Bas Malin",
                   fit_description(f"{total} produits high-tech avec relevés historiques PrixTracker, datés et sourcés. Ces montants ne sont pas des offres en temps réel."),
                   "/prix/", body, [("Accueil", "/"), ("Historique des prix", "/prix/")])
 
@@ -439,8 +439,8 @@ def gift_page(slug, label, items, all_budgets):
 <p>{len(items)} produits avec prix TTC explicitement confirmé et date marchande de moins de 48 h. Dernière date marchande de la sélection : {date_fr(latest) if latest else 'non disponible'}. Les prix peuvent évoluer et la livraison doit être vérifiée chez le marchand.</p>
 <p>Autres budgets : {links}</p>
 <div class="grid pm-cards">{''.join(gift_card(p) for p in items)}</div></section>
-<p class="source">Offres issues des flux marchands autorisés ; chaque prix affiché est daté et déclaré TTC. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>"""
-    return layout(fit_title(f"{label} : prix TTC vérifiés | Prix Malin", f"{label} | Prix Malin", label),
+<p class="source">Offres issues des flux marchands autorisés ; chaque prix affiché est daté et déclaré TTC. Liens affiliés : Prix Bas Malin peut percevoir une commission, sans surcoût pour vous.</p>"""
+    return layout(fit_title(f"{label} : prix TTC vérifiés | Prix Bas Malin", f"{label} | Prix Bas Malin", label),
                   fit_description(f"{label} : {len(items)} produits avec prix TTC confirmé et date marchande de moins de 48 h. À vérifier chez le marchand."),
                   f"/idees-cadeaux/{slug}.html", body, [("Accueil", "/"), ("Idées cadeaux", "/idees-cadeaux/"), (label, f"/idees-cadeaux/{slug}.html")])
 
@@ -457,7 +457,7 @@ def gift_index(budgets_with_items):
     )
     body = f"""<section class="panel"><h1>Idées cadeaux de Noël par budget</h1>
 <p>Les prix ne sont affichés que lorsque le flux marchand confirme le TTC et fournit une date marchande récente. Les montants peuvent évoluer ; vérifiez le prix final et la livraison avant achat.</p>{empty}</section>{sections}"""
-    return layout("Idées cadeaux de Noël | Prix Malin",
+    return layout("Idées cadeaux de Noël | Prix Bas Malin",
                   "Sélection de cadeaux issue de flux marchands autorisés. Les prix sont masqués si la date marchande récente ou le statut TTC ne sont pas confirmés.",
                   "/idees-cadeaux/", body, [("Accueil", "/"), ("Idées cadeaux", "/idees-cadeaux/")])
 
@@ -559,9 +559,9 @@ def black_friday_page(sheets):
 <section class="panel"><h2>Éviter les fausses promotions</h2><p>Préparez votre liste, notez le prix repère de chaque produit et créez une alerte prix gratuite depuis la fiche du produit. Notre guide détaille la méthode : <a href="/guide-black-friday-2026.html">Black Friday 2026 : repérer les vraies bonnes affaires</a>.</p>
 <p>Vous cherchez des idées cadeaux ? <a href="/idees-cadeaux/">Idées cadeaux par budget</a> · <a href="/prix/">Tout le comparateur</a></p></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
-<p class="source">Source des prix : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Liens affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
+<p class="source">Source des prix : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Liens affiliés : Prix Bas Malin peut percevoir une commission, sans surcoût pour vous.</p>
 {ART_SCRIPT}{BF_SCRIPT}"""
-    return layout("Black Friday 2026 : high-tech par budget | Prix Malin",
+    return layout("Black Friday 2026 : high-tech par budget | Prix Bas Malin",
                   fit_description(f"Black Friday 2026 : {count} produits high-tech par budget avec le plus bas prix relevé avant l’événement, pour repérer les vraies promotions."),
                   "/black-friday.html", body, [("Accueil", "/"), ("Black Friday 2026", "/black-friday.html")], extra,
                   og_image="/assets/og-black-friday.jpg")

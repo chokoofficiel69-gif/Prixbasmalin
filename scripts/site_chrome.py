@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""En-tête commun Prix Malin (étape 1 de l'harmonisation).
+"""En-tête commun Prix Bas Malin (étape 1 de l'harmonisation).
 
 - header_html(current) : le HTML de l'en-tête, avec la rubrique courante mise en avant.
 - Exécuté en script : remplace l'en-tête des pages écrites à la main (liste PAGES) par
@@ -72,7 +72,7 @@ def header_html(current=None, query="", variant=""):
 <header class="pm-site-header{" pm-sh-compact" if compact else ""}" id="pm-site-header">
  <div class="pm-sh-inner">
   <div class="pm-sh-top">
-   <a class="pm-sh-brand" href="/" aria-label="Prix Malin, accueil"><img src="/assets/logo-sac-prix-malin-hq.webp" alt="" width="44" height="38"><span><b>Prix <span>Malin</span></b><small>Comparez · Trouvez · Économisez</small></span></a>
+   <a class="pm-sh-brand" href="/" aria-label="Prix Bas Malin, accueil"><img src="/assets/logo-sac-prix-malin-hq.webp" alt="" width="44" height="38"><span><b>Prix Bas <span>Malin</span></b><small>Comparez · Trouvez · Économisez</small></span></a>
    <a class="pm-sh-deals" href="{AMAZON_DEALS}" target="_blank" rel="sponsored nofollow noopener">Offres Amazon ↗</a>
   </div>{search}
   <nav class="pm-sh-nav" aria-label="Rubriques">{nav}</nav>

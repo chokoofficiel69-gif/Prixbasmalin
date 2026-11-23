@@ -1,10 +1,10 @@
-# Prix Malin
+# Prix Bas Malin
 
 Comparateur et moteur de découverte de produits — https://prixbasmalin.fr/
 
 ## Objectif du projet
 
-Prix Malin aide les visiteurs à découvrir des produits, rechercher des références chez des marchands et, lorsque des sources marchandes autorisées le permettent, comparer des offres exactes et récentes.
+Prix Bas Malin aide les visiteurs à découvrir des produits, rechercher des références chez des marchands et, lorsque des sources marchandes autorisées le permettent, comparer des offres exactes et récentes.
 
 **Règle de données :** une fiche de découverte n'est pas une offre de prix. Un prix ne doit jamais être présenté comme actuel ou comme le « meilleur prix » sans source autorisée, identité produit exacte, devise, frais connus, disponibilité et date de contrôle.
 

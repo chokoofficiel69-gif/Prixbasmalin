@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Génère les guides d'achat Prix Malin (même gabarit que guide-choisir-smartphone.html)
+"""Génère les guides d'achat Prix Bas Malin (même gabarit que guide-choisir-smartphone.html)
 et la page sommaire /guides.html.
 
 Contenu éditorial rédigé à la main dans GUIDES. Aucun prix n'est cité : les guides renvoient
@@ -28,7 +28,7 @@ def amazon(q):
 GUIDES = [
     {
         "slug": "guide-air-fryer-pas-cher",
-        "title": "Meilleur air fryer pas cher : bien choisir | Prix Malin",
+        "title": "Meilleur air fryer pas cher : bien choisir | Prix Bas Malin",
         "h1": "Meilleur air fryer pas cher : comment bien le choisir ?",
         "description": "Capacité, puissance, panier ou double tiroir, revêtement, nettoyage : les critères pour choisir un air fryer pas cher sans regretter son achat.",
         "eyebrow": "Guide d'achat · Maison & cuisine",
@@ -50,7 +50,7 @@ GUIDES = [
             ("3. Puissance, réglages et programmes", """<p>La puissance des modèles courants se situe généralement entre 1 400 et 2 400 watts : plus le panier est grand, plus il faut de puissance pour chauffer vite. Un modèle peu puissant avec un gros panier risque de cuire de façon inégale.</p>
 <p>Vérifiez la plage de température (souvent jusqu'à 200 °C environ) et la minuterie. Les programmes préréglés sont pratiques mais pas indispensables : la température et le temps suffisent dans la plupart des recettes. Une fenêtre de contrôle ou une lumière intérieure évite d'ouvrir le tiroir pendant la cuisson.</p>"""),
             ("4. Nettoyage et revêtement", """<p>Un air fryer s'utilise souvent : un panier difficile à laver finit au placard. Privilégiez un panier et une grille compatibles lave-vaisselle, avec un revêtement antiadhésif de bonne qualité. Les revêtements céramiques sont une alternative aux revêtements classiques. Dans tous les cas, évitez les ustensiles métalliques qui rayent la surface et ne faites pas chauffer l'appareil à vide plus que nécessaire.</p>
-<div class="tip"><strong>Le réflexe Prix Malin :</strong> regardez si le panier et la grille sont vendus en pièces détachées. Un appareil réparable dure plus longtemps et revient moins cher sur la durée.</div>"""),
+<div class="tip"><strong>Le réflexe Prix Bas Malin :</strong> regardez si le panier et la grille sont vendus en pièces détachées. Un appareil réparable dure plus longtemps et revient moins cher sur la durée.</div>"""),
             ("5. Les pièges à éviter", """<ol class="checklist">
 <li><strong>Acheter trop petit</strong> pour gagner quelques euros, puis cuire en plusieurs fournées.</li>
 <li><strong>Ignorer l'encombrement</strong> : mesurez votre plan de travail et la place sous les placards, l'air chaud sort par l'arrière.</li>
@@ -68,7 +68,7 @@ GUIDES = [
     },
     {
         "slug": "guide-ecouteurs-sans-fil-petit-prix",
-        "title": "Écouteurs sans fil à petit prix : le guide | Prix Malin",
+        "title": "Écouteurs sans fil à petit prix : le guide | Prix Bas Malin",
         "h1": "Les meilleurs écouteurs sans fil à petit prix : comment choisir ?",
         "description": "Autonomie, réduction de bruit, compatibilité iPhone ou Android, étanchéité, micro : les critères pour choisir des écouteurs sans fil sans trop dépenser.",
         "eyebrow": "Guide d'achat · Audio",
@@ -89,7 +89,7 @@ GUIDES = [
 <li><strong>Regardez l'évolution du prix</strong> avant d'acheter, surtout à l'approche des grandes promotions.</li>
 <li><strong>Méfiez-vous des copies</strong> vendues par des vendeurs inconnus : achetez auprès d'un marchand identifiable.</li>
 </ol>
-<div class="tip"><strong>Le réflexe Prix Malin :</strong> sur nos fiches AirPods, JBL ou Bose, vous voyez le prix relevé chez chaque marchand et son évolution, pour acheter au bon moment.</div>"""),
+<div class="tip"><strong>Le réflexe Prix Bas Malin :</strong> sur nos fiches AirPods, JBL ou Bose, vous voyez le prix relevé chez chaque marchand et son évolution, pour acheter au bon moment.</div>"""),
         ],
         "faq": [
             ("Les AirPods fonctionnent-ils avec Android ?", "Oui, en Bluetooth classique, mais certaines fonctions (appairage automatique, réglages avancés) sont réservées aux appareils Apple."),
@@ -100,7 +100,7 @@ GUIDES = [
     },
     {
         "slug": "guide-choisir-aspirateur-robot",
-        "title": "Comment choisir un aspirateur robot ? | Prix Malin",
+        "title": "Comment choisir un aspirateur robot ? | Prix Bas Malin",
         "h1": "Comment choisir un aspirateur robot sans se tromper ?",
         "description": "Navigation laser, station, serpillière, poils d'animaux, entretien : les critères pour choisir un aspirateur robot adapté à votre logement.",
         "eyebrow": "Guide d'achat · Maison",
@@ -124,7 +124,7 @@ GUIDES = [
 <li><strong>Les consommables</strong> : brosses, filtres, sacs et serpillières se remplacent ; vérifiez qu'ils sont faciles à trouver.</li>
 <li><strong>L'application</strong> : zones interdites, nettoyage par pièce et programmation sont plus utiles que la commande vocale.</li>
 </ol>
-<div class="tip"><strong>Le réflexe Prix Malin :</strong> les robots haut de gamme changent souvent de prix. Sur nos fiches Roborock, Dreame, Ecovacs ou iRobot, comparez les marchands et l'évolution du prix avant de vous décider.</div>"""),
+<div class="tip"><strong>Le réflexe Prix Bas Malin :</strong> les robots haut de gamme changent souvent de prix. Sur nos fiches Roborock, Dreame, Ecovacs ou iRobot, comparez les marchands et l'évolution du prix avant de vous décider.</div>"""),
             ("6. Quel robot pour quel logement ?", """<p><strong>Studio ou petit appartement :</strong> un modèle simple avec cartographie suffit souvent ; la station est un luxe.</p>
 <p><strong>Appartement familial ou maison :</strong> navigation laser, carte multi-niveaux si vous avez un étage, et station d'auto-vidage pour limiter l'entretien.</p>
 <p><strong>Avec animaux :</strong> brosse anti-enchevêtrement, bon filtre et bac ou station de grande capacité.</p>
@@ -140,7 +140,7 @@ GUIDES = [
     {
         "slug": "guide-black-friday-2026",
         "og_image": "/assets/og-black-friday.jpg",
-        "title": "Black Friday 2026 : vrais bons plans | Prix Malin",
+        "title": "Black Friday 2026 : vrais bons plans | Prix Bas Malin",
         "h1": "Black Friday 2026 : comment repérer les vraies bonnes affaires ?",
         "description": "Dates du Black Friday 2026, prix de référence, historique des prix, alertes, droit de rétractation : la méthode pour éviter les fausses promotions.",
         "eyebrow": "Guide pratique · Bons plans",
@@ -150,7 +150,7 @@ GUIDES = [
             ("1. Préparez votre liste avant les promotions", """<p>Les meilleures affaires profitent à ceux qui savent déjà ce qu'ils veulent. Notez les produits dont vous avez réellement besoin, la référence exacte (capacité, couleur, version) et un prix maximal. Sans liste, on achète surtout ce qui est mis en avant.</p>
 <p>C'est aussi le bon moment pour préparer les cadeaux de Noël : les offres de fin novembre peuvent couvrir une bonne partie de la liste.</p>"""),
             ("2. Vérifiez le prix de référence", """<p>En France, depuis 2022, une annonce de réduction doit se calculer à partir du <strong>prix le plus bas pratiqué par le vendeur au cours des 30 jours précédents</strong> (article L112-1-1 du Code de la consommation). Cette règle limite les hausses de prix juste avant une promotion, mais elle ne garantit pas que l'offre soit la moins chère du marché : un autre marchand peut vendre moins cher sans afficher de « remise ».</p>
-<div class="tip"><strong>Le réflexe Prix Malin :</strong> consultez l'évolution du prix sur nos fiches produits. Si le prix « remisé » est proche du prix habituel, ce n'est pas une affaire exceptionnelle.</div>"""),
+<div class="tip"><strong>Le réflexe Prix Bas Malin :</strong> consultez l'évolution du prix sur nos fiches produits. Si le prix « remisé » est proche du prix habituel, ce n'est pas une affaire exceptionnelle.</div>"""),
             ("3. Suivez les prix dès maintenant", """<p>Plus vous connaissez le prix habituel d'un produit, plus il est facile de repérer une vraie baisse. Créez des alertes prix sur les produits de votre liste : vous serez prévenu lorsqu'un prix descend, sans surveiller les sites tous les jours.</p>
 <p>Les produits high-tech très demandés (consoles, écouteurs, smartphones, aspirateurs robots) sont souvent ceux dont le prix varie le plus d'un marchand à l'autre.</p>"""),
             ("4. Comparez le coût total, pas seulement l'étiquette", """<ol class="checklist">
@@ -161,7 +161,7 @@ GUIDES = [
 <li><strong>Les accessoires</strong> indispensables non inclus (chargeur, câble, sacs pour une station…).</li>
 </ol>"""),
             ("5. Achetez sereinement en ligne", """<p>Pour un achat à distance auprès d'un professionnel, vous disposez en principe d'un <strong>droit de rétractation de 14 jours</strong> après la réception, avec quelques exceptions. Vérifiez qui paie les frais de retour. Méfiez-vous des sites inconnus aux prix très inférieurs au marché, des paiements par virement à l'étranger et des offres reçues par SMS ou message privé.</p>"""),
-            ("6. Nos raccourcis pour le Black Friday", """<p>Notre <a href="/black-friday.html">sélection Black Friday par budget</a> réunit les produits les plus recherchés avec leur plus bas prix relevé. Pour gagner du temps : le comparateur Prix Malin classe les offres du moins cher au plus cher pour des dizaines de produits high-tech, et nos pages d'idées cadeaux sont organisées par budget. Les offres du jour Amazon regroupent aussi des promotions limitées dans le temps.</p>"""),
+            ("6. Nos raccourcis pour le Black Friday", """<p>Notre <a href="/black-friday.html">sélection Black Friday par budget</a> réunit les produits les plus recherchés avec leur plus bas prix relevé. Pour gagner du temps : le comparateur Prix Bas Malin classe les offres du moins cher au plus cher pour des dizaines de produits high-tech, et nos pages d'idées cadeaux sont organisées par budget. Les offres du jour Amazon regroupent aussi des promotions limitées dans le temps.</p>"""),
         ],
         "faq": [
             ("Quand a lieu le Black Friday 2026 ?", "Le vendredi 27 novembre 2026. Le Cyber Monday suit le lundi 30 novembre, et de nombreuses enseignes proposent des offres sur plusieurs jours, voire tout le mois."),
@@ -172,7 +172,7 @@ GUIDES = [
     },
     {
         "slug": "guide-payer-moins-cher-en-ligne",
-        "title": "Payer moins cher en ligne : 10 astuces | Prix Malin",
+        "title": "Payer moins cher en ligne : 10 astuces | Prix Bas Malin",
         "h1": "10 astuces pour payer moins cher en ligne",
         "description": "Prix total, historique, alertes, reconditionné, frais cachés : 10 astuces simples pour payer moins cher en ligne sans perdre de temps.",
         "eyebrow": "Guide pratique · Économies",
@@ -189,7 +189,7 @@ GUIDES = [
             ("8. Vérifiez le vendeur", """<p>Sur une place de marché, le vendeur peut être un tiers. Regardez qui expédie, les conditions de retour et les avis. Fuyez les sites inconnus aux prix anormalement bas.</p>"""),
             ("9. Ne payez pas les options inutiles", """<p>Extensions de garantie, assurances et services ajoutés au panier augmentent la facture. La garantie légale de 2 ans couvre déjà les produits neufs achetés auprès d'un professionnel.</p>"""),
             ("10. Gardez vos droits en tête", """<p>Pour un achat à distance auprès d'un professionnel, le droit de rétractation de 14 jours permet en principe de renvoyer un produit, sauf exceptions. Conservez les confirmations de commande et les factures.</p>
-<div class="tip"><strong>Le réflexe Prix Malin :</strong> le comparateur classe les offres du moins cher au plus cher, affiche la date de chaque prix et son évolution. Le prix final reste celui du marchand au moment de l'achat.</div>"""),
+<div class="tip"><strong>Le réflexe Prix Bas Malin :</strong> le comparateur classe les offres du moins cher au plus cher, affiche la date de chaque prix et son évolution. Le prix final reste celui du marchand au moment de l'achat.</div>"""),
         ],
         "faq": [
             ("Les prix barrés sont-ils fiables ?", "En France, une réduction doit être calculée par rapport au prix le plus bas pratiqué par le vendeur sur les 30 jours précédents. Comparez tout de même avec les autres marchands."),
@@ -230,7 +230,7 @@ def render(g, style, footer):
         for t, u in g["links"])
     ld = [
         {"@context": "https://schema.org", "@type": "Article", "headline": g["h1"], "description": g["description"], "inLanguage": "fr-FR",
-         "mainEntityOfPage": {"@type": "WebPage", "@id": url}, "publisher": {"@type": "Organization", "name": "Prix Malin", "url": SITE + "/"}},
+         "mainEntityOfPage": {"@type": "WebPage", "@id": url}, "publisher": {"@type": "Organization", "name": "Prix Bas Malin", "url": SITE + "/"}},
         {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
             {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in g["faq"]]},
         {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
@@ -249,7 +249,7 @@ def render(g, style, footer):
   <meta name="description" content="{e(g['description'])}">
   <link rel="canonical" href="{url}">
   <meta property="og:type" content="article">
-  <meta property="og:site_name" content="Prix Malin">
+  <meta property="og:site_name" content="Prix Bas Malin">
   <meta property="og:locale" content="fr_FR">
   <meta property="og:title" content="{e(g['h1'])}">
   <meta property="og:description" content="{e(g['description'])}">
@@ -283,7 +283,7 @@ def render(g, style, footer):
     <p>Une fois vos critères définis, comparez les offres. Les prix et les stocks doivent être revérifiés chez le vendeur avant l’achat.</p>
     {links}
     {related(g['slug'])}
-    <p class="disclaimer">Prix Malin fournit des repères pour comparer les offres. Les tarifs, disponibilités, garanties et conditions finales sont ceux affichés par chaque vendeur au moment de l’achat. Certains liens sont des liens d’affiliation : Prix Malin peut percevoir une commission, sans surcoût pour vous.</p>
+    <p class="disclaimer">Prix Bas Malin fournit des repères pour comparer les offres. Les tarifs, disponibilités, garanties et conditions finales sont ceux affichés par chaque vendeur au moment de l’achat. Certains liens sont des liens d’affiliation : Prix Bas Malin peut percevoir une commission, sans surcoût pour vous.</p>
   </article>
 </main>
 {footer}</body>
@@ -301,18 +301,18 @@ def render_index(style, footer):
     ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": "Accueil", "item": SITE + "/"},
         {"@type": "ListItem", "position": 2, "name": "Guides d’achat", "item": SITE + "/guides.html"}]}
-    desc = "Guides d’achat Prix Malin : air fryer, écouteurs sans fil, aspirateur robot, smartphone, Black Friday et astuces pour payer moins cher en ligne."
+    desc = "Guides d’achat Prix Bas Malin : air fryer, écouteurs sans fil, aspirateur robot, smartphone, Black Friday et astuces pour payer moins cher en ligne."
     return f"""<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ff650b">
-  <title>Guides d’achat : choisir et payer moins cher | Prix Malin</title>
+  <title>Guides d’achat pour payer moins cher | Prix Bas Malin</title>
   <meta name="description" content="{e(desc)}">
   <link rel="canonical" href="{SITE}/guides.html">
-  <meta property="og:type" content="website"><meta property="og:site_name" content="Prix Malin"><meta property="og:locale" content="fr_FR">
-  <meta property="og:title" content="Guides d’achat Prix Malin"><meta property="og:description" content="{e(desc)}">
+  <meta property="og:type" content="website"><meta property="og:site_name" content="Prix Bas Malin"><meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Guides d’achat Prix Bas Malin"><meta property="og:description" content="{e(desc)}">
   <meta property="og:url" content="{SITE}/guides.html"><meta property="og:image" content="{SITE}/assets/og-prix-malin.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.ico" sizes="any">

@@ -107,22 +107,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#080b10">
-<meta name="description" content="Suivez l’historique des prix high-tech. Offres et comparaisons Prix Malin uniquement sur produits, prix et dates vérifiés.">
+<meta name="description" content="Suivez l’historique des prix high-tech. Offres et comparaisons Prix Bas Malin uniquement sur produits, prix et dates vérifiés.">
 <link rel="canonical" href="https://prixbasmalin.fr/">
 <meta name="robots" content="index,follow">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Prix Malin">
+<meta property="og:site_name" content="Prix Bas Malin">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:url" content="https://prixbasmalin.fr/">
-<meta property="og:title" content="Prix Malin — Trouvez, suivez et économisez">
+<meta property="og:title" content="Prix Bas Malin — Trouvez, suivez et économisez">
 <meta property="og:description" content="Explorez les sélections produits et créez gratuitement des alertes pour suivre les prix.">
 <meta property="og:image" content="https://prixbasmalin.fr/assets/og-prix-malin.jpg">
-<meta property="og:image:alt" content="Prix Malin — Comparez. Économisez. Malin.">
+<meta property="og:image:alt" content="Prix Bas Malin — Comparez. Économisez. Malin.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Prix Malin — Trouvez, suivez et économisez">
+<meta name="twitter:title" content="Prix Bas Malin — Trouvez, suivez et économisez">
 <meta name="twitter:description" content="Explorez les sélections produits et créez gratuitement des alertes pour suivre les prix.">
 <meta name="twitter:image" content="https://prixbasmalin.fr/assets/og-prix-malin.jpg">
-<title>Prix Malin — Comparateur de prix et bonnes affaires</title>
+<title>Prix Bas Malin — Comparateur de prix et bonnes affaires</title>
 <style>
 :root{--bg:#080b10;--panel:#111821;--line:#303b49;--text:#f7f8fa;--muted:#b5bec9;--orange:#ff681c}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}a{color:inherit;text-decoration:none}button,input{font:inherit}.wrap{max-width:1440px;margin:auto;padding:0 18px}.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -319,7 +319,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "Prix Malin",
+  "name": "Prix Bas Malin",
   "url": "https://prixbasmalin.fr/",
   "inLanguage": "fr-FR",
   "description": "Sélections de produits, découverte de marchands et suivi gratuit de produits par alertes de prix.",
@@ -456,7 +456,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     const card=document.createElement("article");card.className="pm-history-card pm-discovery-card";
     const img=document.createElement("img");img.className="pm-discovery-image";img.src=safeUrl(product.image);img.alt=product.name;img.loading="lazy";img.decoding="async";
     img.addEventListener("error",()=>card.remove(),{once:true});
-    const brand=document.createElement("span");brand.className="pm-discovery-brand";brand.textContent=product.brand||product.category||"Sélection Prix Malin";
+    const brand=document.createElement("span");brand.className="pm-discovery-brand";brand.textContent=product.brand||product.category||"Sélection Prix Bas Malin";
     const title=document.createElement("h3");title.textContent=product.name;
     const note=document.createElement("p");note.className="pm-history-meta";
     if(Number(product.livePrice)>0){
@@ -479,7 +479,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
    list.replaceChildren(fragment);
   }catch(error){
    list.innerHTML='<p class="pm-history-empty">Le catalogue ne répond pas pour le moment. Réessayez dans quelques instants.</p>';
-   console.warn("Catalogue de secours Prix Malin :",error);
+   console.warn("Catalogue de secours Prix Bas Malin :",error);
   }
  }
  try{
@@ -540,7 +540,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
   }
   list.replaceChildren(fragment);
  }catch(error){
-  console.warn("Comparaisons historiques Prix Malin :",error);
+  console.warn("Comparaisons historiques Prix Bas Malin :",error);
   await showProducts("La sélection reste accessible ; les prix actuels sont à vérifier chez les marchands.");
  }
 })();
@@ -548,7 +548,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 
 <script src="/js/performance-images.js" defer></script>
 <link rel="stylesheet" href="/css/pm-site-footer.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "Prix Malin", "url": "https://prixbasmalin.fr/", "logo": "https://prixbasmalin.fr/apple-touch-icon.png", "description": "Catalogue de produits, historiques et comparaisons de prix publiés uniquement lorsque les données sont vérifiées."}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "Prix Bas Malin", "url": "https://prixbasmalin.fr/", "logo": "https://prixbasmalin.fr/apple-touch-icon.png", "description": "Catalogue de produits, historiques et comparaisons de prix publiés uniquement lorsque les données sont vérifiées."}</script>
 <link rel="stylesheet" href="/css/partner-ads.css">
 <script src="/js/partner-ads.js" defer></script>
 <style id="pm-seasonal-theme-style">
@@ -575,10 +575,10 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 <body><a class="skip-link" href="#main-content">Aller au contenu</a>
 <header class="pm-header">
 <div class="wrap pm-head-top">
-<a class="brand" href="/" aria-label="Prix Malin, accueil"><img class="brand-mascot brand-bag-logo" src="assets/logo-sac-prix-malin-hq.webp" alt="Sac orange souriant Prix Malin" width="56" height="49"><span class="brand-copy"><b>Prix <span>Malin</span></b><span class="tag">Comparez · Trouvez · Économisez</span></span></a>
+<a class="brand" href="/" aria-label="Prix Bas Malin, accueil"><img class="brand-mascot brand-bag-logo" src="assets/logo-sac-prix-malin-hq.webp" alt="Sac orange souriant Prix Bas Malin" width="56" height="49"><span class="brand-copy"><b>Prix Bas <span>Malin</span></b><span class="tag">Comparez · Trouvez · Économisez</span></span></a>
 <nav class="tools" aria-label="Raccourcis personnels"><a href="catalogue.html?favoris=1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 11-8.8 11S3.2 14 3.2 8.8A4.7 4.7 0 0 1 12 6.3a4.7 4.7 0 0 1 8.8 2.5Z"/></svg>Favoris</a><a href="#alerts" data-nav="alerts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>Alertes<i class="alert-dot"></i></a><a href="#account" data-nav="account"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.3-7 8-7s8 2.8 8 7"/></svg>Mon compte</a><a href="#services"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span class="sr-only">Menu</span></a></nav>
 </div>
-<div class="wrap pm-search-row"><form class="search" id="search" role="search"><label class="sr-only" for="q">Rechercher dans Prix Malin</label><input id="q" type="search" list="pmSearchSuggestions" autocomplete="off" spellcheck="true" aria-label="Rechercher un produit, une marque, une référence" placeholder="Rechercher un produit, une marque, une référence…"><datalist id="pmSearchSuggestions"><option value="Ordinateurs portables"><option value="PC gamer"><option value="Ordinateur de bureau"><option value="MacBook"><option value="PC Lenovo"><option value="PC HP"><option value="PC Dell"><option value="PC ASUS"><option value="Smartphone"><option value="Télévision"><option value="Casque audio"><option value="Aspirateur"><option value="Airfryer"><option value="Machine à café"></datalist><button type="submit" aria-label="Lancer la recherche"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"/><path d="m16 16 4.5 4.5"/></svg></button></form></div>
+<div class="wrap pm-search-row"><form class="search" id="search" role="search"><label class="sr-only" for="q">Rechercher dans Prix Bas Malin</label><input id="q" type="search" list="pmSearchSuggestions" autocomplete="off" spellcheck="true" aria-label="Rechercher un produit, une marque, une référence" placeholder="Rechercher un produit, une marque, une référence…"><datalist id="pmSearchSuggestions"><option value="Ordinateurs portables"><option value="PC gamer"><option value="Ordinateur de bureau"><option value="MacBook"><option value="PC Lenovo"><option value="PC HP"><option value="PC Dell"><option value="PC ASUS"><option value="Smartphone"><option value="Télévision"><option value="Casque audio"><option value="Aspirateur"><option value="Airfryer"><option value="Machine à café"></datalist><button type="submit" aria-label="Lancer la recherche"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"/><path d="m16 16 4.5 4.5"/></svg></button></form></div>
 <nav class="catsnav wrap" aria-label="Navigation principale"><a class="nav-home" href="/"><span class="nav-emoji"><svg class="category-icon icon-home" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 22 24 5l19 17h-5v20H10V22z" fill="#ff8b16" stroke="#a94312" stroke-width="2"/><path d="M19 42V27h10v15" fill="#ffd15a"/><path d="M8 22 24 7l16 15" fill="none" stroke="#ffc04a" stroke-width="3" stroke-linecap="round"/></svg></span><span>Accueil</span></a><a href="high-tech.html"><span class="nav-emoji"><svg class="category-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M7 26v-4a17 17 0 0 1 34 0v4" fill="none" stroke="#cbd2dc" stroke-width="5" stroke-linecap="round"/><rect x="5" y="23" width="10" height="17" rx="4" fill="#d9e0e8" stroke="#737d89" stroke-width="2"/><rect x="33" y="23" width="10" height="17" rx="4" fill="#d9e0e8" stroke="#737d89" stroke-width="2"/><path d="M8 27v8m32-8v8" stroke="#fff" stroke-width="2"/></svg></span><span>High-Tech</span></a><a href="maison-deco.html"><span class="nav-emoji"><svg class="category-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="19" width="34" height="17" rx="5" fill="#c87838" stroke="#8e451e" stroke-width="2"/><rect x="4" y="24" width="8" height="13" rx="4" fill="#e89a50"/><rect x="36" y="24" width="8" height="13" rx="4" fill="#e89a50"/><path d="M10 19v-5q0-4 5-4h18q5 0 5 4v5" fill="#d98b49" stroke="#8e451e" stroke-width="2"/><path d="M12 36v5m24-5v5" stroke="#d9b08a" stroke-width="3"/></svg></span><span>Maison & Déco</span></a><a href="catalogue.html?cat=fashion"><span class="nav-emoji"><svg class="category-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="m15 8 9-3 9 3 10 7-6 9-5-3v22H16V21l-5 3-6-9z" fill="#f16b20" stroke="#9f3c15" stroke-width="2" stroke-linejoin="round"/><path d="M19 7q5 8 10 0" fill="none" stroke="#ffca8a" stroke-width="2"/></svg></span><span>Mode</span></a><a href="catalogue.html?cat=beauty"><span class="nav-emoji"><svg class="category-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="19" y="4" width="10" height="7" rx="2" fill="#e7a5ce"/><path d="M17 11h14v5l4 5v21q0 3-4 3H17q-4 0-4-3V21l4-5z" fill="#e84fa8" stroke="#9f326f" stroke-width="2"/><path d="M18 27h12" stroke="#ffc3e2" stroke-width="3" stroke-linecap="round"/><path d="M20 4h8" stroke="#fff" stroke-width="2"/></svg></span><span>Beauté & Santé</span></a><a href="catalogue.html?cat=sport"><span class="nav-emoji"><svg class="category-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="#f5f5f2" stroke="#9ba4ae" stroke-width="2"/><path d="m24 13 7 5-3 8h-8l-3-8zm-7 5-8 1-3 8 7 5 7-6m11-8 8 1 3 8-7 5-7-6m-10 0-4 10 10 7 10-7-4-10" fill="#202b37" stroke="#202b37" stroke-width="2" stroke-linejoin="round"/></svg></span><span>Sport & Loisirs</span></a><a href="catalogue.html?cat=auto"><span class="nav-emoji"><svg class="category-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="m9 22 4-10q1-3 5-3h12q4 0 5 3l4 10 4 4v12H5V26z" fill="#aeb9c6" stroke="#515e6d" stroke-width="2"/><path d="m15 12-3 10h24l-3-10z" fill="#26394d" stroke="#e2e9f0" stroke-width="2"/><path d="M9 28h30" stroke="#fff" stroke-width="2"/><circle cx="13" cy="36" r="3" fill="#303844"/><circle cx="35" cy="36" r="3" fill="#303844"/></svg></span><span>Auto & Moto</span></a><a href="#services"><span class="nav-emoji"><svg class="category-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="10" cy="24" r="4" fill="#ff8a1e"/><circle cx="24" cy="24" r="4" fill="#f5f5f5"/><circle cx="38" cy="24" r="4" fill="#f5f5f5"/></svg></span><span>Plus</span></a></nav></header>
 <main class="wrap" id="main-content" tabindex="-1">
 <!-- pm-showcase -->
@@ -667,7 +667,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 @media(max-width:860px) and (min-width:520px){.pmx-offers{grid-auto-columns:31%}.pmx-cats{grid-auto-columns:18%}}
 </style>
 <div class="pmx">
-<section class="pmx-hero" aria-label="Prix Malin">
+<section class="pmx-hero" aria-label="Prix Bas Malin">
 <img class="pmx-hero-img" src="/assets/accueil/hero.webp" alt="" fetchpriority="high">
 <div class="pmx-hero-art" aria-hidden="true"><img class="p p1" src="https://site-static.ecovacs.com/upload/fr/image/product/2026/04/10/011051_7128$deebot-t50s-omni-white-2-920x920.png" alt="" loading="lazy"><img class="p p2" src="https://cdn.shopify.com/s/files/1/0605/9615/8564/files/j5.618.m_cringview_facet_strass_jowissa_watch_medium.jpg?v=1750855093" alt="" loading="lazy"><img class="p p3" src="https://cdn.shopify.com/s/files/1/0651/4992/7604/files/MibroSmartWatchGSPro2_4.jpg?v=1750040065" alt="" loading="lazy"><img class="m" src="/assets/malin-3d.webp" alt="" loading="lazy"></div>
 <div class="pmx-hero-txt"><p class="t">Les meilleurs prix<br><span>au même endroit !</span></p>
@@ -685,21 +685,21 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 <a class="pmx-b c2" href="/high-tech.html"><img src="/assets/accueil/ban-high-tech.webp" alt="" loading="lazy"><svg class="pmx-bi" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg><b>High-Tech</b><small>Les dernières nouveautés, prix comparés</small><span>Voir les offres →</span></a>
 <a class="pmx-b c3" href="/maison-deco.html"><img src="/assets/accueil/ban-maison.webp" alt="" loading="lazy"><svg class="pmx-bi" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><path d="M2 12a2 2 0 0 1 4 0v3h12v-3a2 2 0 0 1 4 0v6H2z"/><path d="M5 18v2M19 18v2"/></svg><b>Maison &amp; Déco</b><small>Des idées pour un intérieur qui vous ressemble</small><span>Voir la sélection →</span></a>
 </section>
-<a class="pmx-promo" href="/boutiques-partenaires.html"><b>🎟️ Codes promo &amp; boutiques partenaires</b><span>Des réductions réservées aux visiteurs de Prix Malin · Commerçants : devenez partenaire →</span></a>
+<a class="pmx-promo" href="/boutiques-partenaires.html"><b>🎟️ Codes promo &amp; boutiques partenaires</b><span>Des réductions réservées aux visiteurs de Prix Bas Malin · Commerçants : devenez partenaire →</span></a>
 <section class="pmx-sec pmx-compare" aria-labelledby="pmx-compare-t">
 <div class="pmx-head"><h2 id="pmx-compare-t">📊 Comparatif de prix <span>relevés</span></h2><small>Un exemple réel : prix relevés et datés, à confirmer chez le marchand</small></div>
 <div class="pmx-cmp"><div class="pmx-cmp-p"><img src="/assets/produits/manette-switch-pro.jpg" alt="Manette Switch Pro" loading="lazy"><div><h3>Manette Switch Pro</h3><small>13 marchands relevés ces 3 derniers jours</small><a class="pmx-btn" href="/prix/manette-switch-pro.html">Voir tous les relevés</a></div></div>
 <ul class="pmx-cmp-l"><li><span class="m">Cdiscount</span><em>Plus bas relevé</em><b>49,99 €</b><small>20/11/2026</small><a href="/prix/manette-switch-pro.html">Comparer →</a></li><li><span class="m">Amazon</span><em class="x"></em><b>54,99 €</b><small>20/11/2026</small><a href="/prix/manette-switch-pro.html">Comparer →</a></li><li><span class="m">Joybuy</span><em class="x"></em><b>54,99 €</b><small>20/11/2026</small><a href="/prix/manette-switch-pro.html">Comparer →</a></li><li><span class="m">Galaxus</span><em class="x"></em><b>63,14 €</b><small>20/11/2026</small><a href="/prix/manette-switch-pro.html">Comparer →</a></li></ul>
 <div class="pmx-cmp-g"><small>Écart entre marchands</small><strong>47,07 €</strong><small>entre le plus bas et le plus haut relevé ces 3 derniers jours</small><svg viewBox="0 0 240 64" role="img" aria-label="Évolution du plus bas prix relevé"><polyline points="6.0,15.9 14.1,15.9 22.3,15.9 30.4,15.9 38.6,15.9 46.7,15.9 54.9,15.9 63.0,58.0 71.1,15.9 79.3,15.9 87.4,15.9 95.6,15.9 103.7,12.0 111.9,12.0 120.0,12.0 128.1,12.0 136.3,12.0 144.4,12.0 152.6,12.0 160.7,12.0 168.9,16.6 177.0,27.3 185.1,27.3 193.3,27.3 201.4,27.3 209.6,27.3 217.7,27.3 225.9,27.3 234.0,27.3" fill="none" stroke="#ffb02e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg><small>Plus bas relevé : 49,99 € le 20/11/2026</small></div></div>
 </section>
-<p class="pmx-note">Prix relevés et datés (relevés PrixTracker, data.gouv.fr, Licence Ouverte 2.0), pas des offres en direct : vérifiez le prix final chez le marchand. Visuels Prix Malin et photos libres créditées. Certains liens sont affiliés.</p>
+<p class="pmx-note">Prix relevés et datés (relevés PrixTracker, data.gouv.fr, Licence Ouverte 2.0), pas des offres en direct : vérifiez le prix final chez le marchand. Visuels Prix Bas Malin et photos libres créditées. Certains liens sont affiliés.</p>
 </div>
 <!-- /pm-showcase -->
-<h1 class="sr-only">Prix Malin : comparateur de prix, produits et bonnes affaires</h1>
-<section class="hero hero-home hero-reference" aria-label="Bannière Prix Malin — Le moins cher, en un clic">
-  <img id="pm-hero-exact" class="hero-reference-image" alt="Bannière Prix Malin avec la mascotte, le slogan Le moins cher en un clic, des écouteurs, un smartphone, une PlayStation, un écran, des chaussures et une remise jusqu’à 70 %." width="768" height="284" fetchpriority="high" decoding="async">
+<h1 class="sr-only">Prix Bas Malin : comparateur de prix, produits et bonnes affaires</h1>
+<section class="hero hero-home hero-reference" aria-label="Bannière Prix Bas Malin — Le moins cher, en un clic">
+  <img id="pm-hero-exact" class="hero-reference-image" alt="Bannière Prix Bas Malin avec la mascotte, le slogan Le moins cher en un clic, des écouteurs, un smartphone, une PlayStation, un écran, des chaussures et une remise jusqu’à 70 %." width="768" height="284" fetchpriority="high" decoding="async">
 </section>
-<section class="pm-benefits-banner" aria-label="Les avantages Prix Malin">
+<section class="pm-benefits-banner" aria-label="Les avantages Prix Bas Malin">
   <div class="pm-benefit">
     <span class="pm-benefit-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 3 41 10v12c0 11-7 18-17 23C14 40 7 33 7 22V10L24 3Z" fill="none" stroke="white" stroke-width="4" stroke-linejoin="round"/><path d="m15 24 6 6 13-14" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     <span>100 % gratuit</span>
@@ -739,7 +739,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <a class="pm-partner pm-partner-ecovacs" data-partner="ecovacs" data-awin-advertiser-id="131716" data-authorization-status="unverified" data-href="https://www.awin1.com/cread.php?awinmid=131716&amp;awinaffid=3137386" target="_blank" rel="sponsored nofollow noopener" hidden><img class="pm-partner-logo pm-logo-white" src="/assets/partenaires/ecovacs.png" alt="Ecovacs" width="372" height="110" loading="lazy"><span>Robots aspirateurs</span></a>
     <a class="pm-partner pm-partner-mibro" data-partner="mibro" data-awin-advertiser-id="131783" data-authorization-status="unverified" data-href="https://www.awin1.com/cread.php?awinmid=131783&amp;awinaffid=3137386" target="_blank" rel="sponsored nofollow noopener" hidden><img class="pm-partner-logo pm-logo-white" src="/assets/partenaires/mibro.png" alt="Mibro" width="371" height="110" loading="lazy"><span>Montres connectées</span></a>
   </div>
-  <p class="pm-hp-note">Les liens sont activés uniquement après confirmation de l’autorisation du programme. Les demandes en attente ne sont pas des partenariats actifs. Prix Malin peut percevoir une commission sur les achats éligibles, sans surcoût pour vous.</p>
+  <p class="pm-hp-note">Les liens sont activés uniquement après confirmation de l’autorisation du programme. Les demandes en attente ne sont pas des partenariats actifs. Prix Bas Malin peut percevoir une commission sur les achats éligibles, sans surcoût pour vous.</p>
 </section>
 <section id="pm-partner-deals" class="pm-hp-section" aria-labelledby="pm-partner-deals-title" hidden>
   <div class="pm-hp-head">
@@ -816,7 +816,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
     <button type="button" role="tab" aria-selected="false" data-gift="all">Toutes les idées</button>
   </div>
   <div id="pm-gifts-rail" class="pm-hp-rail" aria-live="polite"><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div><div class="pm-hp-card pm-hp-skel"></div></div>
-  <p class="pm-hp-note">Les prix affichés proviennent de flux marchands ou de relevés historiques datés. Certains liens sont affiliés : Prix Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html" style="color:#ffad66">Crédits photos</a>.</p>
+  <p class="pm-hp-note">Les prix affichés proviennent de flux marchands ou de relevés historiques datés. Certains liens sont affiliés : Prix Bas Malin peut percevoir une commission, sans surcoût pour vous. <a href="/credits-photos.html" style="color:#ffad66">Crédits photos</a>.</p>
 </section>
 <section id="pm-visual-gallery" class="pm-visual-gallery" aria-labelledby="pm-visual-gallery-title">
   <div class="section-head">
@@ -872,12 +872,12 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 </div></section>
 <section id="deals" class="pm-home-selection">
 <div class="section-head">
-  <h2>🔥 Toute la sélection Prix Malin</h2>
+  <h2>🔥 Toute la sélection Prix Bas Malin</h2>
   <small id="home-products-meta">Sélection de produits à découvrir · accès direct aux boutiques</small>
 </div>
 <div class="pm-product-rail">
   <button class="pm-rail-button pm-rail-prev" type="button" data-pm-scroll="prev" aria-label="Produits précédents" aria-controls="products">‹</button>
-  <div class="products" id="products" tabindex="0" aria-label="Produits Prix Malin, défilement horizontal">
+  <div class="products" id="products" tabindex="0" aria-label="Produits Prix Bas Malin, défilement horizontal">
   <article class="product" data-name="Apple iPhone 18 Pro"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-iPhone-18-Pro-Max-black-iPhone-18-Pro-black_inline.jpg.large.jpg" alt="Apple iPhone 18 Pro noir" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple iPhone 18 Pro</div><p class="product-subtitle">Puce A20 Pro et caméra Fusion 48 Mpx.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+iPhone+18+Pro&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
   <article class="product" data-name="Apple Watch Series 12"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-Watch-Series-12-black-aluminum-with-burgundy-plaid-Sport-Loop_inline.jpg.large.jpg" alt="Apple Watch Series 12 noire" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple Watch Series 12</div><p class="product-subtitle">Montre connectée et suivi au quotidien.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+Watch+Series+12&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
   <article class="product" data-name="Apple AirPods 5"><div class="photo"><img src="https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg" alt="Apple AirPods 5" loading="lazy" decoding="async"></div><div class="pbody"><div class="pname">Apple AirPods 5</div><p class="product-subtitle">Écouteurs sans fil et audio adaptatif.</p><a class="buy" href="https://www.amazon.fr/s?k=Apple+AirPods+5&tag=prixbasmalin2-21" rel="sponsored nofollow noopener noreferrer">Voir les offres ↗</a></div></article>
@@ -907,7 +907,7 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
 body{padding-bottom:84px!important}
 @media(max-width:640px){.legacy-tools .tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.legacy-tools a,.legacy-tools button{min-height:88px;padding:12px}}
 
-/* Correctif final responsive — composition de la maquette Prix Malin */
+/* Correctif final responsive — composition de la maquette Prix Bas Malin */
 .hero{display:block!important;position:relative!important;min-height:0!important;height:440px!important;margin:16px 0 0!important;overflow:hidden!important;border:1px solid #26364a!important;border-radius:18px!important;background:#080b12!important}
 .hero-art{position:absolute!important;inset:0!important;min-height:0!important;height:100%!important;width:100%!important;background:radial-gradient(ellipse at 75% 55%,#53240f 0%,#17131b 46%,#080b12 83%)!important}
 .hero-copy{position:absolute!important;left:39%!important;right:3%!important;top:8%!important;width:auto!important;padding:0!important;z-index:6!important;display:block!important}
@@ -989,7 +989,7 @@ section{padding-top:24px!important}
 @media(max-width:360px){.pm-old-bottom span{font-size:10px!important}}
 </style>
 <section class="legacy-tools" id="services">
-<div class="section-head"><h2>Tout l’univers Prix Malin</h2><small>Retrouvez les outils du site initial</small></div>
+<div class="section-head"><h2>Tout l’univers Prix Bas Malin</h2><small>Retrouvez les outils du site initial</small></div>
 <div class="tool-grid">
 <a href="catalogue.html"><b>🛍️ Catalogue complet</b><small>Mode, high-tech, maison, sport, beauté et toutes les sélections.</small></a>
 <a href="#alerts" data-nav="alerts"><b>🔔 Alertes prix</b><small>Retrouvez l’espace de suivi et de demande d’alertes.</small></a>
@@ -1002,7 +1002,7 @@ section{padding-top:24px!important}
 <a href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="noopener"><b>🟠 Offres Amazon</b><small>Accéder aux offres Amazon avec le lien affilié du site.</small></a>
 <a href="https://www.fnac.com/" target="_blank" rel="noopener"><b>Fnac</b><small>Accéder au marchand.</small></a>
 <a href="https://www.cdiscount.com/" target="_blank" rel="noopener"><b>Cdiscount</b><small>Accéder au marchand.</small></a>
-<a href="publicite.html"><b>💼 Proposer un partenariat</b><small>Contacter Prix Malin pour une collaboration commerciale.</small></a>
+<a href="publicite.html"><b>💼 Proposer un partenariat</b><small>Contacter Prix Bas Malin pour une collaboration commerciale.</small></a>
 </div>
 <form class="pm-old-quick" id="pmQuickCompare"><input id="pmQuickQuery" placeholder="Comparer un produit (ex. aspirateur, téléphone…)" aria-label="Produit à comparer"><button type="submit">Comparer</button></form>
 </section>
@@ -1027,7 +1027,7 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
 </script>
 
 <style>
-/* Prix Malin — composition mobile propre : éléments du vrai hero-home */
+/* Prix Bas Malin — composition mobile propre : éléments du vrai hero-home */
 @media (max-width: 650px) {
   .hero.hero-home {
     display: grid !important;
@@ -1502,7 +1502,7 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
         const title = document.createElement("h3");
         title.textContent = product.name;
         const desc = document.createElement("p");
-        desc.textContent = product.desc || "Découvrez cette référence dans le catalogue Prix Malin.";
+        desc.textContent = product.desc || "Découvrez cette référence dans le catalogue Prix Bas Malin.";
         const link = document.createElement("a");
         link.href = product.sourceUrl || ("catalogue.html?q=" + encodeURIComponent(product.name));
         link.target = product.sourceUrl ? "_blank" : "_self";
@@ -1534,14 +1534,14 @@ document.getElementById('search').addEventListener('submit',e=>{e.preventDefault
     });
   } catch (error) {
     // Les visuels éditoriaux déjà présents restent le repli en cas d'indisponibilité du flux.
-    console.warn("Rotation visuelle Prix Malin non appliquée :", error);
+    console.warn("Rotation visuelle Prix Bas Malin non appliquée :", error);
   }
 })();
 </script>
 
 
 <style id="pm-seasonal-theme">
-/* Habillage saisonnier discret : l'identité noire/orange Prix Malin reste prioritaire. */
+/* Habillage saisonnier discret : l'identité noire/orange Prix Bas Malin reste prioritaire. */
 #new-arrivals{position:relative;isolation:isolate}
 #new-arrivals .pm-season-ribbon{display:none}
 body.pm-season-noel #new-arrivals .pm-season-ribbon{
@@ -1573,7 +1573,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
  }catch(error){
    const now=new Date();month=now.getMonth()+1;day=now.getDate();
  }
- let season="standard", label="Sélection Prix Malin", kicker="SÉLECTION RENOUVELÉE";
+ let season="standard", label="Sélection Prix Bas Malin", kicker="SÉLECTION RENOUVELÉE";
  if(month===11||(month===12&&day<=26)){
    season="noel";label="La magie des fêtes commence ici";kicker="IDÉES & SÉLECTIONS DE NOËL";
  }else if((month===12&&day>=27)||(month===1&&day<=7)){
@@ -1697,7 +1697,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
      media.appendChild(img);
      const copy=document.createElement("div");copy.className="pm-visual-copy";
      const meta=document.createElement("span");meta.className="pm-visual-meta";
-     meta.textContent=[p.brand,p.category].filter(Boolean).join(" · ")||"Sélection Prix Malin";
+     meta.textContent=[p.brand,p.category].filter(Boolean).join(" · ")||"Sélection Prix Bas Malin";
      const title=document.createElement("h3");title.textContent=p.name;
      const desc=document.createElement("p");desc.textContent=p.desc||"Photo produit issue d’une source fabricant ou marchande vérifiée.";
      const link=document.createElement("a");link.className="pm-visual-link";
@@ -1711,7 +1711,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
    grid.dataset.productCount=String(products.length);
  }catch(error){
    grid.innerHTML='<p class="pm-gallery-loading">Les photos du catalogue seront affichées dès que le flux produits sera disponible. Aucun prix n’est affiché sans vérification.</p>';
-   console.warn("Galerie Prix Malin :",error);
+   console.warn("Galerie Prix Bas Malin :",error);
  }
 })();
 </script>
@@ -2024,9 +2024,9 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   });
 })();
 </script>
-<section class="pm-methodology-callout" aria-labelledby="pm-methodology-title"><h2 id="pm-methodology-title">Comment lire une comparaison de prix</h2><p>Un prix n’a de sens qu’avec sa source, sa date et le produit exact. Prix Malin sépare les relevés historiques des offres marchandes récentes et des simples liens de recherche. Avant d’acheter, vérifiez toujours les frais de livraison, le vendeur et la disponibilité sur sa page.</p><p><a href="/methodologie-prix.html">Lire notre méthode de comparaison et ses limites →</a></p></section>
+<section class="pm-methodology-callout" aria-labelledby="pm-methodology-title"><h2 id="pm-methodology-title">Comment lire une comparaison de prix</h2><p>Un prix n’a de sens qu’avec sa source, sa date et le produit exact. Prix Bas Malin sépare les relevés historiques des offres marchandes récentes et des simples liens de recherche. Avant d’acheter, vérifiez toujours les frais de livraison, le vendeur et la disponibilité sur sa page.</p><p><a href="/methodologie-prix.html">Lire notre méthode de comparaison et ses limites →</a></p></section>
 <nav class="pm-related-links" aria-label="Guides d’achat et comparateur"><h2>Guides d’achat et comparateur</h2><ul><li><a href="/guide-black-friday-2026.html">Black Friday 2026 : vrais bons plans</a></li><li><a href="/guide-ecouteurs-sans-fil-petit-prix.html">Écouteurs sans fil à petit prix</a></li><li><a href="/guide-choisir-aspirateur-robot.html">Choisir un aspirateur robot</a></li><li><a href="/guide-air-fryer-pas-cher.html">Bien choisir son air fryer</a></li><li><a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a></li><li><a href="/guide-choisir-smartphone.html">Choisir un smartphone</a></li><li><a href="/prix/">Comparateur de prix high-tech</a></li>
-<li><a href="/assistant.html">Assistant IA Prix Malin</a></li><li><a href="/idees-cadeaux/">Idées cadeaux par budget</a></li><li><a href="/guides.html">Tous les guides d’achat</a></li></ul></nav>
+<li><a href="/assistant.html">Assistant IA Prix Bas Malin</a></li><li><a href="/idees-cadeaux/">Idées cadeaux par budget</a></li><li><a href="/guides.html">Tous les guides d’achat</a></li></ul></nav>
 <footer class="pm-site-footer" id="pm-site-footer">
  <nav aria-label="Informations">
   <a href="/a-propos.html">À propos</a>
@@ -2042,8 +2042,8 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   <a href="/boutiques-partenaires.html">Boutiques &amp; codes promo</a>
   <a href="/credits-photos.html">Crédits photos</a>
  </nav>
- <p><strong>Prix Malin</strong> · comparateur de prix indépendant. Prix observés chez différents marchands, avec leur date de relevé.</p>
- <p>Les liens marchands et affiliés sont activés uniquement lorsque l’autorisation du programme est confirmée. Une demande en attente ne constitue pas un partenariat actif. Prix Malin peut percevoir une commission sur les achats éligibles, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+ <p><strong>Prix Bas Malin</strong> · comparateur de prix indépendant. Prix observés chez différents marchands, avec leur date de relevé.</p>
+ <p>Les liens marchands et affiliés sont activés uniquement lorsque l’autorisation du programme est confirmée. Une demande en attente ne constitue pas un partenariat actif. Prix Bas Malin peut percevoir une commission sur les achats éligibles, sans surcoût pour vous. En tant que Partenaire Amazon, Prix Bas Malin réalise un bénéfice sur les achats remplissant les conditions requises.</p>
 </footer>
 <script id="pm-seasonal-theme-script">
 (function(){

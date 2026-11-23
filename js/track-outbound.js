@@ -1,4 +1,4 @@
-/* Prix Malin — mesure d'audience et des clics sortants (chargée uniquement après consentement).
+/* Prix Bas Malin — mesure d'audience et des clics sortants (chargée uniquement après consentement).
    Version 2 :
    - une seule page vue envoyée par chargement de page (au lieu de deux, vers deux Workers) ;
    - visiteur mesuré : identifiant aléatoire conservé 13 mois au plus dans ce navigateur ;

@@ -1,4 +1,4 @@
-/* Prix Malin — illustrations vectorielles sobres pour les produits sans photo libre de droits.
+/* Prix Bas Malin — illustrations vectorielles sobres pour les produits sans photo libre de droits.
    Utilisé par l'accueil et les fiches produits. */
 (function (global) {
   "use strict";

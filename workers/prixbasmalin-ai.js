@@ -1,5 +1,5 @@
 /**
- * Prix Malin — FreeLLMAPI gateway.
+ * Prix Bas Malin — FreeLLMAPI gateway.
  * Existing /api/ai callers remain compatible; credentials stay in Worker secrets.
  */
 const ALLOWED_ORIGINS = new Set(["https://prixbasmalin.fr","https://www.prixbasmalin.fr"]);
@@ -13,7 +13,7 @@ export default {async fetch(request,env){
  const cors={...(allowed?{"Access-Control-Allow-Origin":origin}:{}),"Access-Control-Allow-Methods":"POST, GET, OPTIONS","Access-Control-Allow-Headers":"Content-Type","Vary":"Origin"};
  if(request.method==="OPTIONS")return new Response(null,{status:allowed?204:403,headers:{...SECURITY_HEADERS,...cors}});
  const url=new URL(request.url);
- if(url.pathname==="/health"&&request.method==="GET")return json({ok:true,service:"Prix Malin AI gateway",provider:"FreeLLMAPI",configured:Boolean(env.FREELLMAPI_API_KEY),model:env.FREELLMAPI_MODEL||"gpt-oss-120b"},200,cors);
+ if(url.pathname==="/health"&&request.method==="GET")return json({ok:true,service:"Prix Bas Malin AI gateway",provider:"FreeLLMAPI",configured:Boolean(env.FREELLMAPI_API_KEY),model:env.FREELLMAPI_MODEL||"gpt-oss-120b"},200,cors);
  if(url.pathname!=="/api/ai"||request.method!=="POST")return json({error:"Not found"},404,cors);
  if(!allowed)return json({error:"Origin not allowed"},403);
  const receivedContentType=request.headers.get("Content-Type");
@@ -29,7 +29,7 @@ export default {async fetch(request,env){
  const ip=request.headers.get("CF-Connecting-IP")||"unknown";if(isRateLimited(ip))return json({error:"Limite de test atteinte. Réessaie dans une minute."},429,cors);
  const model=env.FREELLMAPI_MODEL||"gpt-oss-120b";if(!/^[a-zA-Z0-9._:-]{1,100}$/.test(model))return json({error:"Invalid server model configuration"},500,cors);
  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),35000);let upstream;
- try{upstream=await fetch("https://freellmapi.prixbasmalin.prod.page/v1/chat/completions",{method:"POST",signal:controller.signal,headers:{"Authorization":"Bearer "+env.FREELLMAPI_API_KEY,"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({model,messages:[{role:"system",content:"Tu es l’assistant d’achat de Prix Malin. Réponds en français, de façon courte et utile. N’invente jamais de produit, de prix, de stock, de livraison, de partenariat ou d’avis. Les recherches de produits et les offres vérifiées doivent provenir des données réelles de Prix Malin ; si elles ne sont pas fournies dans le contexte, dis-le clairement. Pour les produits, rappelle que les recherches actuelles sont centrées sur Amazon France."},{role:"user",content:message}],max_tokens:500,temperature:0.2})});}
+ try{upstream=await fetch("https://freellmapi.prixbasmalin.prod.page/v1/chat/completions",{method:"POST",signal:controller.signal,headers:{"Authorization":"Bearer "+env.FREELLMAPI_API_KEY,"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({model,messages:[{role:"system",content:"Tu es l’assistant d’achat de Prix Bas Malin. Réponds en français, de façon courte et utile. N’invente jamais de produit, de prix, de stock, de livraison, de partenariat ou d’avis. Les recherches de produits et les offres vérifiées doivent provenir des données réelles de Prix Bas Malin ; si elles ne sont pas fournies dans le contexte, dis-le clairement. Pour les produits, rappelle que les recherches actuelles sont centrées sur Amazon France."},{role:"user",content:message}],max_tokens:500,temperature:0.2})});}
  catch(e){clearTimeout(timeout);return json({error:e?.name==="AbortError"?"AI provider timed out":"AI provider unreachable"},502,cors);}
  let raw;try{raw=await upstream.text();}catch{clearTimeout(timeout);return json({error:"Could not read FreeLLMAPI response"},502,cors);}clearTimeout(timeout);
  if(!upstream.ok){let msg="";try{const x=JSON.parse(raw),c=x?.error?.message||x?.message||x?.error;if(typeof c==="string")msg=c;else if(c&&typeof c.message==="string")msg=c.message;}catch{}return json({error:"FreeLLMAPI request failed",status:upstream.status,providerMessage:String(msg).replace(/[\r\n\t]+/g," ").slice(0,200)},502,cors);}

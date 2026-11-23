@@ -1,4 +1,4 @@
-/* Prix Malin — optimisation prudente des images et stabilité visuelle.
+/* Prix Bas Malin — optimisation prudente des images et stabilité visuelle.
    Ne modifie que les URL de CDN dont les paramètres de redimensionnement sont documentés
    dans les URL déjà utilisées par le site. Aucun proxy, scraping ou service payant. */
 (() => {
