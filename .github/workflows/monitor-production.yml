@@ -300,7 +300,7 @@ jobs:
           NODE
 
   smoke-test:
-    if: github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages')
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages') || (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'pages build and deployment' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     name: Disponibilité de production et Worker attribution
     runs-on: ubuntu-latest
     timeout-minutes: 10
