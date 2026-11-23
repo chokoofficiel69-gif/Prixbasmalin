@@ -2,6 +2,8 @@ name: Vérifier le site en production
 
 on:
   workflow_dispatch:
+  deployment_status:
+    types: [success]
   schedule:
     - cron: "17 */6 * * *"
   pull_request:
@@ -125,6 +127,7 @@ permissions:
 
 jobs:
   validate-code:
+    if: github.event_name != 'deployment_status'
     name: Tests et syntaxe du code de la branche
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -304,6 +307,7 @@ jobs:
           NODE
 
   smoke-test:
+    if: github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages')
     name: Disponibilité de production et Worker attribution
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -324,7 +328,7 @@ jobs:
             "https://prixbasmalin.fr/js/track-outbound.js" --output /tmp/track-outbound.js
           grep -q "refHost !== ownHost" /tmp/track-outbound.js
       - name: Vérifier les garde-fous prix et le rail mobile après publication
-        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event.workflow_run.head_branch == 'main')
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event.workflow_run.head_branch == 'main' || (github.event_name == 'deployment_status' && github.event.deployment.environment == 'github-pages'))
         shell: bash
         run: |
           set -euo pipefail
