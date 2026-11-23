@@ -215,6 +215,7 @@ CSS = """<style id="pm-showcase-style">
  .pmx-offers{grid-auto-columns:47%;gap:8px}.pmx-card{padding:8px}.pmx-badge{top:12px;left:12px;font-size:11px}
  .pmx-card h3{font-size:13.5px}.pmx-card strong{font-size:21px}.pmx-card li{font-size:12px;padding:4px 1px}.pmx-gap{font-size:11px;padding:4px 6px}.pmx-go{min-height:36px;font-size:13px}
  .pmx-cats{grid-auto-columns:23%;gap:6px}.pmx-cat b{font-size:11px;min-height:34px}}
+@media(max-width:760px){.pmx-hero-art{display:block!important;position:absolute;right:6px;bottom:44px;width:38%;max-width:170px;height:auto;z-index:2;pointer-events:none}.pmx-hero-art .p{display:none!important}.pmx-hero-art .m{display:block;width:100%;height:auto;filter:drop-shadow(0 10px 18px #000c)}}
 @media(max-width:860px) and (min-width:520px){.pmx-offers{grid-auto-columns:31%}.pmx-cats{grid-auto-columns:18%}}
 </style>"""
 
