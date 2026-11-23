@@ -217,9 +217,24 @@ def visual(p):
 ART_SCRIPT = """<script>document.querySelectorAll("[data-art-category]").forEach(function(el){if(window.pmProductArt)el.innerHTML=pmProductArt(el.dataset.artCategory,el.dataset.artBrand);});</script>"""
 
 
+def recent_offers(p):
+    """Relevés de moins de RECENT_OFFER_DAYS jours par rapport au dernier relevé du produit (triés par prix)."""
+    offers = p.get("offers") or []
+    if not offers:
+        return []
+    limit = (date.fromisoformat(max(o["date"] for o in offers)) - timedelta(days=RECENT_OFFER_DAYS)).isoformat()
+    return sorted((o for o in offers if o["date"] >= limit), key=lambda o: (o["price_eur"], o["merchant"]))
+
+
+def best_recent(p):
+    """Meilleur prix parmi les relevés récents ; à défaut, le plus bas de l'historique."""
+    recent = recent_offers(p)
+    return recent[0] if recent else p["offers"][0]
+
+
 def product_card(p):
     return (f'<a class="card pm-card" href="/prix/{e(p["id"])}.html">{visual(p)}<div class="c"><small>{e(p["category_label"])} · {p["offer_count"]} marchands suivis</small>'
-            f'<b>{e(p["name"])}</b><small>Plus bas relevé historique</small><strong>{euro(p["min_price_eur"])}</strong><small>Dernier relevé : {date_fr(p["last_date"])}</small></div></a>')
+            f'<b>{e(p["name"])}</b><small>Meilleur prix récent</small><strong>{euro(best_recent(p)["price_eur"])}</strong><small>Relevé du {date_fr(best_recent(p)["date"])} chez {e(merchant_name(best_recent(p)["merchant"]))}</small></div></a>')
 
 
 def trend_sentence(p):
@@ -293,8 +308,10 @@ def product_ld(p):
 
 def product_page(p, sheets, period, guide=None):
     q = query_for(p)
-    best = p["offers"][0]
-    cheapest = [o for o in p["offers"] if o["price_eur"] == best["price_eur"]]
+    best = best_recent(p)
+    pool = recent_offers(p) or p["offers"]
+    cheapest = [o for o in pool if o["price_eur"] == best["price_eur"]]
+    hist_low = p["offers"][0]
     cheapest_names = " et ".join(merchant_name(o["merchant"]) for o in cheapest[:2])
     gap = p["max_price_eur"] - p["min_price_eur"]
     rows = []
@@ -307,7 +324,7 @@ def product_page(p, sheets, period, guide=None):
     similar = [s for s in sheets if s["category"] == p["category"] and s["id"] != p["id"]][:8]
     cat_slug = CATEGORY_SLUGS.get(p["category"], "high-tech")
     amz_url, amz_label, amz_direct = amazon_link(p)
-    price = euro(p['min_price_eur'])
+    price = euro(best['price_eur'])
     last_date = date_fr(p.get("last_date") or best["date"])
     title = fit_title(f"{p['name']} : dernier relevé {price} | Prix Bas Malin",
                       f"Historique des prix de {p['name']} | Prix Bas Malin",
@@ -337,13 +354,13 @@ def product_page(p, sheets, period, guide=None):
         credit = f'<p class="source" style="color:#6b7280">Photo : {e(c.get("author") or "")} · {e(c.get("license") or "")} · <a style="color:#0b63ce" href="{e(c.get("file_page") or "")}">{"Wikimedia Commons" if "wikimedia.org" in (c.get("file_page") or "") else "Icecat"}</a></p>'
     body = f"""<article class="panel">
 <div class="hero"><div><h1>Historique des prix de {e(p['name'])}</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
-<div class="from">Dernier prix observé le {date_fr(best['date'])}<strong>{euro(p['min_price_eur'])}</strong>chez {e(cheapest_names)} · relevé historique</div></div>{visual(p)}</div>
+<div class="from">Meilleur prix récent, relevé le {date_fr(best['date'])}<strong>{euro(best['price_eur'])}</strong>chez {e(cheapest_names)} · à confirmer chez le marchand</div></div>{visual(p)}</div>
 {credit}<a class="cta pm-btn pm-btn-compare pm-btn-block" href="#prix">Voir les relevés historiques</a>
 <a class="cta pm-btn pm-btn-amazon pm-btn-block" href="{e(amz_url)}" target="_blank" rel="sponsored nofollow noopener">{amz_label}</a>
 <p class="notice">Historique PrixTracker : les montants ci-dessous sont des observations passées, pas des offres actuelles. {"Le bouton Amazon ouvre la fiche du produit ; les autres liens ouvrent une recherche chez le marchand" if amz_direct else "Les liens ouvrent une recherche chez le marchand"} ; vérifiez la référence exacte, le prix final, la disponibilité et la livraison.</p>
 </article>
 <section class="panel" id="prix"><h2>Relevés historiques par marchand pour {e(p['name'])}</h2>
-<p>L’historique contient <strong>{p['offer_count']} relevés marchands</strong>. Le plus bas relevé était de <strong>{euro(best['price_eur'])}</strong> chez {e(cheapest_names)} le {date_fr(best['date'])} ; le plus haut relevé atteint {euro(p['max_price_eur'])}. Cet écart est historique, pas une comparaison de prix actuels.</p>
+<p>L’historique contient <strong>{p['offer_count']} relevés marchands</strong>. Le plus bas relevé de l’historique était de <strong>{euro(hist_low['price_eur'])}</strong> chez {e(merchant_name(hist_low['merchant']))} le {date_fr(hist_low['date'])} ; le plus haut relevé atteint {euro(p['max_price_eur'])}. Cet écart est historique, pas une comparaison de prix actuels.</p>
 <table><thead><tr><th>Marchand</th><th>Prix observé</th><th class="h">Date du relevé</th><th><span style="position:absolute;left:-9999px">Recherche</span></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
 <p class="source" style="color:#6b7280">{"Le lien Amazon ouvre la fiche du produit ; les autres liens ouvrent une recherche chez le marchand. Aucun de ces liens n’est une offre garantie." if amz_direct else "Les liens ouvrent une recherche du produit chez le marchand, pas une offre produit garantie."}</p>
 </section>
@@ -522,10 +539,10 @@ else{el.textContent="Black Friday terminé · les prix relevés restent consulta
 
 
 def bf_card(p):
-    best = p["offers"][0]
+    best = best_recent(p)
     url, label, _ = amazon_link(p)
     return (f'<article class="bf-card">{visual(p)}<div class="c"><small>{e(p["category_label"])}</small><b>{e(p["name"])}</b>'
-            f'<small>Plus bas prix relevé</small><strong>{euro(best["price_eur"])}</strong>'
+            f'<small>Meilleur prix récent</small><strong>{euro(best["price_eur"])}</strong>'
             f'<small>chez {e(merchant_name(best["merchant"]))} le {date_fr(best["date"])}</small>'
             f'<div class="bf-actions"><a class="pm-btn pm-btn-compare pm-btn-block" href="/prix/{e(p["id"])}.html">Comparer les prix</a>'
             f'<a class="pm-btn pm-btn-amazon pm-btn-block" href="{e(url)}" target="_blank" rel="sponsored nofollow noopener">{e(label)}</a></div></div></article>')
