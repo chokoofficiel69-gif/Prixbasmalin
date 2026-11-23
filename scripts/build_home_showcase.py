@@ -149,6 +149,7 @@ CSS = """<style id="pm-showcase-style">
 .pmx-trust span{display:flex;align-items:center;gap:8px;text-shadow:0 1px 8px #000}
 .pmx-trust i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:2px solid #fff;font-style:normal;font-size:15px}
 .pmx-sec{margin:22px 0 6px}
+.pmx-hero+.pmx-sec{margin-top:8px}
 .pmx-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .pmx-head h2{margin:0;font:900 clamp(21px,2.4vw,28px)/1.15 Inter,system-ui,sans-serif;letter-spacing:-.6px;color:#fff}
 .pmx-head h2 span{color:var(--o)}.pmx-head small{color:var(--mut);font-size:13px;width:100%}
@@ -215,6 +216,7 @@ CSS = """<style id="pm-showcase-style">
  .pmx-offers{grid-auto-columns:47%;gap:8px}.pmx-card{padding:8px}.pmx-badge{top:12px;left:12px;font-size:11px}
  .pmx-card h3{font-size:13.5px}.pmx-card strong{font-size:21px}.pmx-card li{font-size:12px;padding:4px 1px}.pmx-gap{font-size:11px;padding:4px 6px}.pmx-go{min-height:36px;font-size:13px}
  .pmx-cats{grid-auto-columns:23%;gap:6px}.pmx-cat b{font-size:11px;min-height:34px}}
+@media(max-width:760px){.pmx-hero-art{display:block!important;position:absolute;right:6px;bottom:44px;width:38%;max-width:170px;height:auto;z-index:2;pointer-events:none}.pmx-hero-art .p{display:none!important}.pmx-hero-art .m{display:block;width:100%;height:auto;filter:drop-shadow(0 10px 18px #000c)}}
 @media(max-width:860px) and (min-width:520px){.pmx-offers{grid-auto-columns:31%}.pmx-cats{grid-auto-columns:18%}}
 </style>"""
 
@@ -312,11 +314,11 @@ def build_block():
 {CSS}
 <div class="pmx">
 {hero}
+<section class="pmx-sec" aria-labelledby="pmx-top-t"><div class="pmx-head"><h2 id="pmx-top-t">🔥 Top offres <span>relevées</span></h2><a href="/prix/">Tout le comparateur →</a><small>Les produits les plus suivis, avec le plus bas prix relevé et les marchands les moins chers (dernier relevé : {seo.date_fr(latest)})</small></div>
+<div class="pmx-rail pmx-offers">{"".join(offer_card(p) for p in top)}</div></section>
 <section class="pmx-sec" aria-labelledby="pmx-cats-t"><div class="pmx-head"><h2 id="pmx-cats-t">Nos grandes <span>catégories</span></h2><a href="/catalogue.html">Voir tout le catalogue →</a></div>
 <div class="pmx-rail pmx-cats">{cats}</div></section>
 {partner_section()}
-<section class="pmx-sec" aria-labelledby="pmx-top-t"><div class="pmx-head"><h2 id="pmx-top-t">🔥 Top offres <span>relevées</span></h2><a href="/prix/">Tout le comparateur →</a><small>Les produits les plus suivis, avec le plus bas prix relevé et les marchands les moins chers (dernier relevé : {seo.date_fr(latest)})</small></div>
-<div class="pmx-rail pmx-offers">{"".join(offer_card(p) for p in top)}</div></section>
 <section class="pmx-sec pmx-ban" aria-label="Sélections">
 <a class="pmx-b c1" href="/idees-cadeaux/"><img src="/assets/accueil/ban-cadeaux.webp" alt="" loading="lazy">{icon("idees-cadeaux", "pmx-bi")}<b>Idées cadeaux</b><small>Pour toutes les occasions</small><span>Découvrir la sélection →</span></a>
 <a class="pmx-b c2" href="/high-tech.html"><img src="/assets/accueil/ban-high-tech.webp" alt="" loading="lazy">{icon("high-tech", "pmx-bi")}<b>High-Tech</b><small>Les dernières nouveautés, prix comparés</small><span>Voir les offres →</span></a>
