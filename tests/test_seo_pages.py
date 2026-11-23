@@ -20,7 +20,8 @@ class SeoPagesTests(unittest.TestCase):
     def test_product_page_is_crawlable_and_dated(self):
         page = (ROOT / "prix" / "airpods-4.html").read_text(encoding="utf-8")
         self.assertIn('<link rel="canonical" href="https://prixbasmalin.fr/prix/airpods-4.html">', page)
-        self.assertIn("<h1>Historique des prix de AirPods 4</h1>", page)
+        self.assertRegex(page, r"<h1>Prix AirPods 4 : comparatif de \d+ marchands relevés</h1>")
+        self.assertRegex(page, r"<title>Prix AirPods 4 : ")
         self.assertIn("<tbody><tr", page)
         self.assertIn("pas des offres actuelles", page)
         self.assertIn("Relevés historiques par marchand", page)
