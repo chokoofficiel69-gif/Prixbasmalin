@@ -219,6 +219,19 @@ CSS = """<style id="pm-showcase-style">
  .pmx-cats{grid-auto-columns:23%;gap:6px}.pmx-cat b{font-size:11px;min-height:34px}}
 @media(max-width:760px){.pmx-hero-art{display:block!important;position:absolute;right:6px;bottom:44px;width:38%;max-width:170px;height:auto;z-index:2;pointer-events:none}.pmx-hero-art .p{display:none!important}.pmx-hero-art .m{display:block;width:100%;height:auto;filter:drop-shadow(0 10px 18px #000c)}}
 @media(max-width:860px) and (min-width:520px){.pmx-offers{grid-auto-columns:31%}.pmx-cats{grid-auto-columns:18%}}
+/* Bannière nette (23/11/2026) : fond graphique + mascotte + photos officielles, sans photo de décor floue. */
+.pmx-hero-img{display:none!important}
+.pmx-hero{background:radial-gradient(520px 340px at 78% 55%,#ff650b55,transparent 70%),radial-gradient(300px 220px at 20% 120%,#ff650b22,transparent 70%),linear-gradient(120deg,#0b0f17,#151012)!important}
+.pmx-hero-art .p{object-fit:contain!important;padding:8px;background:#fff!important}
+@media(min-width:1280px){.pmx-hero-art{width:52%!important;right:2%!important}.pmx-hero-art .p{display:block!important}}
+@media(min-width:761px) and (max-width:1279px){.pmx-hero-art{width:44%!important}.pmx-hero-art .p2{display:block!important}}
+@media(max-width:760px){.pmx-hero{min-height:0!important}
+ .pmx-hero-art{display:block!important;position:relative!important;order:2;right:auto!important;bottom:auto!important;width:100%!important;max-width:none!important;height:210px!important;margin:4px 0 0}
+ .pmx-hero-art .m{position:absolute!important;right:4%;bottom:0;height:100%!important;width:auto!important}
+ .pmx-hero-art .p{display:block!important;position:absolute!important;width:112px!important;height:112px!important;border-radius:16px;border:3px solid #fff;box-shadow:0 14px 30px #000b}
+ .pmx-hero-art .p1{left:5%!important;top:12%!important;transform:rotate(-7deg)}
+ .pmx-hero-art .p2{left:30%!important;top:auto!important;bottom:6%!important;right:auto!important;transform:rotate(5deg)}
+ .pmx-hero-art .p3{display:none!important}}
 </style>"""
 
 
@@ -299,16 +312,18 @@ def build_block():
         for name, url, slug in categories())
     latest = max(p["last_date"] for p in top)
     hero = """<section class="pmx-hero" aria-label="Prix Bas Malin">
-<img class="pmx-hero-img" src="/assets/accueil/hero.webp" alt="" fetchpriority="high">
-<div class="pmx-hero-art" aria-hidden="true">__HERO_ART__<img class="m" src="/assets/malin-3d.webp" alt="" loading="lazy"></div>
+<div class="pmx-hero-art" aria-hidden="true">__HERO_ART__<img class="m" src="/assets/malin-3d.webp" alt="" fetchpriority="high"></div>
 <div class="pmx-hero-txt"><p class="t">Les meilleurs prix<br><span>au même endroit !</span></p>
 <p>Comparez, économisez et trouvez les meilleures offres sur vos produits préférés, avec la date de chaque prix relevé.</p>
 <div class="pmx-cta"><a class="pmx-btn" href="/prix/">Voir toutes les offres →</a><a class="pmx-btn ghost" href="/black-friday.html">Black Friday · 27 nov.</a></div></div>
 <div class="pmx-trust"><span><i>⌕</i>Comparateur<br>de prix</span><span><i>€</i>Prix datés<br>et sourcés</span><span><i>✓</i>Sources<br>vérifiables</span><span><i>♥</i>100 % gratuit<br>sans inscription</span></div>
 </section>"""
     picks, _ = partner_picks()
-    art = [p["image"] for p in picks[:3]] if len(picks) >= 3 else [
-        "/assets/produits/manette-switch-pro.jpg", "/assets/produits/iphone-17-pro.jpg", "/assets/produits/iphone-15-pro.jpg"]
+    # Photos officielles nettes (Open Icecat), hébergées sur le site.
+    art = [a for a in ("/assets/produits/ps5-pro.jpg", "/assets/produits/dualsense.jpg", "/assets/produits/galaxy-s26-ultra.jpg")
+           if (ROOT / a.lstrip("/")).is_file()]
+    if len(art) < 3:
+        art = [p["image"] for p in picks[:3]]
     hero = hero.replace("__HERO_ART__", "".join(
         f'<img class="p p{i}" src="{e(src)}" alt="" loading="lazy">' for i, src in enumerate(art, 1)))
     body = f"""{START}

@@ -670,11 +670,23 @@ section{padding:30px 0 5px}.section-head{display:flex;justify-content:space-betw
  .pmx-cats{grid-auto-columns:23%;gap:6px}.pmx-cat b{font-size:11px;min-height:34px}}
 @media(max-width:760px){.pmx-hero-art{display:block!important;position:absolute;right:6px;bottom:44px;width:38%;max-width:170px;height:auto;z-index:2;pointer-events:none}.pmx-hero-art .p{display:none!important}.pmx-hero-art .m{display:block;width:100%;height:auto;filter:drop-shadow(0 10px 18px #000c)}}
 @media(max-width:860px) and (min-width:520px){.pmx-offers{grid-auto-columns:31%}.pmx-cats{grid-auto-columns:18%}}
+/* Bannière nette (23/11/2026) : fond graphique + mascotte + photos officielles, sans photo de décor floue. */
+.pmx-hero-img{display:none!important}
+.pmx-hero{background:radial-gradient(520px 340px at 78% 55%,#ff650b55,transparent 70%),radial-gradient(300px 220px at 20% 120%,#ff650b22,transparent 70%),linear-gradient(120deg,#0b0f17,#151012)!important}
+.pmx-hero-art .p{object-fit:contain!important;padding:8px;background:#fff!important}
+@media(min-width:1280px){.pmx-hero-art{width:52%!important;right:2%!important}.pmx-hero-art .p{display:block!important}}
+@media(min-width:761px) and (max-width:1279px){.pmx-hero-art{width:44%!important}.pmx-hero-art .p2{display:block!important}}
+@media(max-width:760px){.pmx-hero{min-height:0!important}
+ .pmx-hero-art{display:block!important;position:relative!important;order:2;right:auto!important;bottom:auto!important;width:100%!important;max-width:none!important;height:210px!important;margin:4px 0 0}
+ .pmx-hero-art .m{position:absolute!important;right:4%;bottom:0;height:100%!important;width:auto!important}
+ .pmx-hero-art .p{display:block!important;position:absolute!important;width:112px!important;height:112px!important;border-radius:16px;border:3px solid #fff;box-shadow:0 14px 30px #000b}
+ .pmx-hero-art .p1{left:5%!important;top:12%!important;transform:rotate(-7deg)}
+ .pmx-hero-art .p2{left:30%!important;top:auto!important;bottom:6%!important;right:auto!important;transform:rotate(5deg)}
+ .pmx-hero-art .p3{display:none!important}}
 </style>
 <div class="pmx">
 <section class="pmx-hero" aria-label="Prix Bas Malin">
-<img class="pmx-hero-img" src="/assets/accueil/hero.webp" alt="" fetchpriority="high">
-<div class="pmx-hero-art" aria-hidden="true"><img class="p p1" src="https://site-static.ecovacs.com/upload/fr/image/product/2026/04/10/011051_7128$deebot-t50s-omni-white-2-920x920.png" alt="" loading="lazy"><img class="p p2" src="https://cdn.shopify.com/s/files/1/0605/9615/8564/files/j5.618.m_cringview_facet_strass_jowissa_watch_medium.jpg?v=1750855093" alt="" loading="lazy"><img class="p p3" src="https://cdn.shopify.com/s/files/1/0651/4992/7604/files/MibroSmartWatchGSPro2_4.jpg?v=1750040065" alt="" loading="lazy"><img class="m" src="/assets/malin-3d.webp" alt="" loading="lazy"></div>
+<div class="pmx-hero-art" aria-hidden="true"><img class="p p1" src="/assets/produits/ps5-pro.jpg" alt="" loading="lazy"><img class="p p2" src="/assets/produits/dualsense.jpg" alt="" loading="lazy"><img class="p p3" src="/assets/produits/galaxy-s26-ultra.jpg" alt="" loading="lazy"><img class="m" src="/assets/malin-3d.webp" alt="" fetchpriority="high"></div>
 <div class="pmx-hero-txt"><p class="t">Les meilleurs prix<br><span>au même endroit !</span></p>
 <p>Comparez, économisez et trouvez les meilleures offres sur vos produits préférés, avec la date de chaque prix relevé.</p>
 <div class="pmx-cta"><a class="pmx-btn" href="/prix/">Voir toutes les offres →</a><a class="pmx-btn ghost" href="/black-friday.html">Black Friday · 27 nov.</a></div></div>
