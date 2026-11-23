@@ -39,12 +39,19 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         self.assertIn("github.event.deployment_status.state == 'success'", workflow)
         self.assertNotIn("github.ref == 'refs/heads/main' ||", workflow)
 
-    def test_public_homepage_hides_unverified_awin_feed_prices(self):
+    def test_public_homepage_displays_awin_feed_prices_with_date_and_confirmation(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
-        self.assertIn('! grep -Fq "giftListedPrice" /tmp/home-after.html', workflow)
-        self.assertIn('! grep -Fq "listed_price_eur" /tmp/home-after.html', workflow)
-        self.assertIn('! grep -Fq "Prix indiqué par le marchand" /tmp/home-after.html', workflow)
-        self.assertIn('grep -Fq "Prix non vérifié" /tmp/home-after.html', workflow)
+        self.assertIn('grep -Fq "giftListedPrice" /tmp/home-after.html', workflow)
+        self.assertIn('grep -Fq "listed_price_eur" /tmp/home-after.html', workflow)
+        self.assertIn('grep -Fq "Prix indiqué par le marchand" /tmp/home-after.html', workflow)
+        self.assertIn('grep -Fq "à confirmer" /tmp/home-after.html', workflow)
+        self.assertIn("https://prixbasmalin.fr/data/home-deals.json", workflow)
+        self.assertNotIn('! grep -Fq "giftListedPrice"', workflow)
+        self.assertNotIn('! grep -Fq "listed_price_eur"', workflow)
+
+    def test_public_homepage_brand_check_accepts_prix_bas_malin(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("grep -Eiq 'Prix( Bas)? Malin' /tmp/home.html", workflow)
 
     def test_public_homepage_checks_current_awin_and_rakuten_price_guards(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
