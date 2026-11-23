@@ -834,7 +834,7 @@
   // ═══════════════════════════════════════════════════════════════
   async function apiFetch(url, options, label){
     label = label || 'API';
-    for(let attempt = 0; attempt < 7; attempt++){
+    for(let attempt = 0; attempt < 16; attempt++){
       if(state.stopRequested) throw new Error('Arrêt demandé');
       try {
         const res = await fetch(url, options);
@@ -850,8 +850,8 @@
           continue;
         }
         if(res.status === 503){
-          const wait = [5,10,15,20,30,45][Math.min(attempt,5)];
-          log(label+' : 503, attente '+wait+'s', 'warn');
+          const wait = [15,30,45,60][Math.min(attempt,3)];
+          log(label+' : file d’attente Agnès pleine, nouvel essai dans '+wait+'s ('+(attempt+1)+'/16)', 'warn');
           await sleep(wait*1000);
           continue;
         }
