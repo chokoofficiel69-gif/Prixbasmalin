@@ -91,7 +91,7 @@ def parse_utc(value):
 
 
 def verified_merchant_price(product, reference_time):
-    """A numeric price is public only with a recent merchant timestamp and explicit TTC status."""
+    """A numeric price is verified only with a recent merchant timestamp and explicit TTC status."""
     price = product.get("priceValue")
     if isinstance(price, bool) or not isinstance(price, (int, float)) or not 0 < price:
         return False
@@ -407,7 +407,7 @@ def build(awin, sheets, previous=None, rotation_now=None):
         "version": 1,
         "awin_fetched_at": awin.get("fetched_at"),
         "sheets_period": sheets.get("dataset_period"),
-        "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
+        "price_policy": "Les prix listés des flux marchands sont affichés avec la date du flux et « à confirmer » pendant 7 jours (hors marchands HT). Seuls les prix vérifiés exigent une date marchande de moins de 48 h et une TVA TTC explicitement confirmée. Les données PrixTracker sont historiques, jamais des offres en direct.",
         "top": build_top(sheets),
         "gifts": gifts,
         "rotation": rotation,

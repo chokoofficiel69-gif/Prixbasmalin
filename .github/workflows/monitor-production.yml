@@ -316,7 +316,35 @@ jobs:
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/ --output /tmp/home.html
-          grep -qi "Prix Malin" /tmp/home.html
+          grep -Eiq 'Prix( Bas)? Malin' /tmp/home.html
+      - name: Vérifier que les prix Awin du flux restent visibles et datés
+        run: |
+          curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
+            https://prixbasmalin.fr/data/home-deals.json --output /tmp/home-deals.json
+          python3 - <<'PY'
+          import json
+          from datetime import datetime
+
+          with open("/tmp/home-deals.json", encoding="utf-8") as handle:
+              data = json.load(handle)
+          gifts = data.get("gifts") or []
+          listed = [
+              gift for gift in gifts
+              if isinstance(gift.get("listed_price_eur"), (int, float))
+              and not isinstance(gift.get("listed_price_eur"), bool)
+              and gift["listed_price_eur"] > 0
+          ]
+          if not listed:
+              raise SystemExit("Aucun prix positif du flux Awin n'est publié sur la vitrine.")
+          for gift in listed:
+              stamp = gift.get("listed_price_date")
+              if not stamp:
+                  raise SystemExit("Prix du flux sans date : " + str(gift.get("id", "")))
+              datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+              if "lusini" in str(gift.get("merchant", "")).casefold():
+                  raise SystemExit("Un prix HT Lusini ne doit pas être publié.")
+          print(str(len(listed)) + " prix du flux affichables, datés et à confirmer.")
+          PY
       - name: Vérifier que la politique de confidentialité publiée mentionne la mesure par pays
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
@@ -344,10 +372,10 @@ jobs:
               grep -Fq 'data-pm-ad-slot="home-top"' /tmp/home-after.html &&
               grep -Fq 'data-pm-ad-slot="catalogue-inline"' /tmp/catalogue-after.html &&
               grep -Fq "fresh(p.merchantUpdatedAt)" /tmp/home-after.html &&
-              grep -Fq "Prix non vérifié" /tmp/home-after.html &&
-              ! grep -Fq "giftListedPrice" /tmp/home-after.html &&
-              ! grep -Fq "listed_price_eur" /tmp/home-after.html &&
-              ! grep -Fq "Prix indiqué par le marchand" /tmp/home-after.html &&
+              grep -Fq "giftListedPrice" /tmp/home-after.html &&
+              grep -Fq "listed_price_eur" /tmp/home-after.html &&
+              grep -Fq "Prix indiqué par le marchand" /tmp/home-after.html &&
+              grep -Fq "à confirmer" /tmp/home-after.html &&
               grep -Fq 'const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";' /tmp/catalogue-after.html &&
               grep -Fq 'priceValue:priceStatus==="fresh"?Number(product.priceValue):null' /tmp/catalogue-after.html &&
               grep -Fq 'offer.currency!=="EUR"||offer.price_tax_status!=="included"' /tmp/catalogue-after.html &&
