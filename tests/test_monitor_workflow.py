@@ -17,7 +17,7 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
             "Build authorized price feed",
         ):
             self.assertNotIn(f'      - "{name}"', workflow)
-        self.assertIn("    types:\\n      - completed\\n    branches:\\n      - main", workflow)
+        self.assertIn("    types:\n      - completed\n    branches:\n      - main", workflow)
 
     def test_post_deploy_smoke_check_accepts_workflow_run_main_branch(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
@@ -50,6 +50,15 @@ class ProductionMonitorWorkflowTests(unittest.TestCase):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
         self.assertIn("p.comparison_authorized !== true", workflow)
         self.assertIn("produits sans autorisation explicite", workflow)
+
+    def test_smoke_test_does_not_run_on_push_before_pages_deployment(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        smoke = workflow.split("  smoke-test:\\n", 1)[1].split("\\n    name:", 1)[0]
+        self.assertIn("github.event_name == 'workflow_dispatch'", smoke)
+        self.assertIn("github.event_name == 'schedule'", smoke)
+        self.assertIn("github.event_name == 'pull_request'", smoke)
+        self.assertIn("github.event.workflow_run.conclusion == 'success'", smoke)
+        self.assertNotIn("github.event_name != 'deployment_status'", smoke)
 
     def test_rakuten_price_freshness_never_uses_snapshot_timestamp(self):
         workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
