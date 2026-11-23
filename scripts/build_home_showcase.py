@@ -217,8 +217,8 @@ CSS = """<style id="pm-showcase-style">
 </style>"""
 
 
-# Sélection de produits : photos issues des flux Awin accessibles et vérifiées.
-# Les prix ne sont affichés que si le TTC et la date de mise à jour du produit sont confirmés.
+# Coups de cœur partenaires : photos de studio fournies par les marchands dans leurs flux autorisés
+# (image vérifiée par data/home-deals.json) et prix du flux marchand, daté et « à confirmer ».
 PARTNER_PRIORITY = ["Ecovacs FR", "Jowissa", "Mibro FR", "Imou FR", "Perfumeria Comas FR",
                     "Al Jazeera Perfumes EU", "BlazeVideo FR", "Fiido Technology Development Co., Ltd"]
 PARTNER_MAX_AGE_DAYS = 7
@@ -236,105 +236,42 @@ def partner_picks(now=None):
     except ValueError:
         return [], None
     now = now or dt.datetime.now(dt.timezone.utc)
-    if now.tzinfo is None:
-        now = now.replace(tzinfo=dt.timezone.utc)
     fresh = dt.timedelta(0) <= now - fetched_at <= dt.timedelta(days=PARTNER_MAX_AGE_DAYS)
-    if not fresh:
-        return [], fetched_at.date().isoformat()
     prices = {p.get("id"): p for p in cat.get("products") or []}
     best = {}
     for g in gifts:
         p = prices.get(g.get("id")) or {}
         try:
-            selection_price = float(p.get("priceValue"))
+            price = float(p.get("priceValue"))
         except (TypeError, ValueError):
-            continue
-        if selection_price <= 0:
             continue
         if not (g.get("image_verified") is True and g.get("image_check_status") == "ok"
                 and str(g.get("image", "")).startswith("https://") and str(g.get("url", "")).startswith("https://")
-                and g.get("merchant") in PARTNER_PRIORITY):
+                and g.get("merchant") in PARTNER_PRIORITY and price > 0 and fresh):
             continue
-
-        # Un prix n'est publiable que si le flux confirme explicitement le TTC
-        # et fournit une date de modification propre au produit (pas fetched_at).
-        merchant_date = p.get("merchantUpdatedAt") or g.get("price_date")
-        parsed_date = None
-        try:
-            parsed_date = dt.datetime.fromisoformat(str(merchant_date).replace("Z", "+00:00"))
-            if parsed_date.tzinfo is None:
-                parsed_date = parsed_date.replace(tzinfo=dt.timezone.utc)
-            else:
-                parsed_date = parsed_date.astimezone(dt.timezone.utc)
-        except (TypeError, ValueError):
-            parsed_date = None
-        tax_status = str(p.get("priceTaxStatus") or p.get("price_tax_status") or "").strip().lower()
-        gift_tax_status = str(g.get("price_tax_status") or "").strip().lower()
-        try:
-            value = float(g.get("price_eur"))
-        except (TypeError, ValueError):
-            value = 0.0
-        price_verified = bool(
-            g.get("price_verified") is True
-            and g.get("price_date_kind") == "merchant"
-            and gift_tax_status == "included"
-            and tax_status == "included"
-            and parsed_date is not None
-            and dt.timedelta(0) <= now - parsed_date <= dt.timedelta(hours=48)
-            and value > 0
-        )
-        candidate = {
-            **g,
-            "price": value if price_verified else None,
-            "price_verified": price_verified,
-            "price_date": parsed_date.isoformat().replace("+00:00", "Z") if price_verified else None,
-            "price_tax_status": "included" if price_verified else gift_tax_status or tax_status or "unspecified",
-            "shipping_eur": g.get("shipping_eur") if price_verified else None,
-            # Utilisé uniquement pour garder le même choix de fiche ; jamais rendu au public.
-            "selection_price": selection_price,
-        }
-        current = best.get(g["merchant"])
-        if (current is None
-                or (price_verified and not current.get("price_verified"))
-                or (price_verified == current.get("price_verified")
-                    and selection_price > current.get("selection_price", 0))):
-            best[g["merchant"]] = candidate
-    picks = [
-        {key: value for key, value in best[m].items() if key != "selection_price"}
-        for m in PARTNER_PRIORITY if m in best
-    ]
+        cur = best.get(g["merchant"])
+        if cur is None or price > cur["price"]:
+            best[g["merchant"]] = {**g, "price": price}
+    picks = [best[m] for m in PARTNER_PRIORITY if m in best]
     return picks[:8], fetched_at.date().isoformat()
 
 
 def partner_card(p, day):
     merchant = p["merchant"].replace(" Technology Development Co., Ltd", "").replace(" FR", "").replace(" EU", "")
-    if (p.get("price_verified") is True and p.get("price_tax_status") == "included"
-            and p.get("price_date_kind") == "merchant" and p.get("price_date")
-            and p.get("price") is not None):
-        shipping = p.get("shipping_eur")
-        if isinstance(shipping, (int, float)) and not isinstance(shipping, bool) and shipping >= 0:
-            shipping_label = "Livraison offerte" if shipping == 0 else "Livraison " + seo.euro(shipping)
-        else:
-            shipping_label = "Livraison non renseignée"
-        price_markup = (
-            f'<strong>{seo.euro(p["price"])}</strong>'
-            f'<small>Prix TTC vérifié le {seo.date_fr(str(p["price_date"])[:10])} · {shipping_label}</small>'
-        )
-    else:
-        price_markup = '<small>Prix non vérifié · consulter le marchand</small>'
-    return (f'<article class="pmx-card pmx-pick"><span class="pmx-badge">Flux Awin</span>'
+    return (f'<article class="pmx-card pmx-pick"><span class="pmx-badge">Partenaire</span>'
             f'<a class="pmx-ph" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy" decoding="async"></a>'
-            f'<h3>{e(p["name"])}</h3><small>{e(merchant)}</small>{price_markup}'
-            f'<a class="pmx-go" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener">Découvrir chez le marchand ↗</a></article>')
+            f'<h3>{e(p["name"])}</h3><small>{e(merchant)}</small><strong>{seo.euro(p["price"])}</strong>'
+            f'<small>Prix du flux marchand du {seo.date_fr(day)} · à confirmer</small>'
+            f'<a class="pmx-go" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener">Voir l’offre ↗</a></article>')
 
 
 def partner_section():
-    picks, _ = partner_picks()
+    picks, day = partner_picks()
     if len(picks) < 3:
         return ""
-    return (f'<section class="pmx-sec" aria-labelledby="pmx-picks-t"><div class="pmx-head"><h2 id="pmx-picks-t">⭐ Sélection <span>des flux marchands</span></h2>'
-            f'<a href="/boutiques-partenaires.html">Voir les boutiques →</a><small>Photos issues des flux Awin accessibles et vérifiées. Les prix ne sont affichés que si la date marchande et la TVA TTC sont confirmées. Liens marchands.</small></div>'
-            f'<div class="pmx-rail pmx-offers">{"".join(partner_card(p, "") for p in picks)}</div></section>')
+    return (f'<section class="pmx-sec" aria-labelledby="pmx-picks-t"><div class="pmx-head"><h2 id="pmx-picks-t">⭐ Coups de cœur <span>partenaires</span></h2>'
+            f'<a href="/boutiques-partenaires.html">Nos boutiques partenaires →</a><small>Photos et prix fournis par les marchands dans leurs flux officiels (mis à jour le {seo.date_fr(day)}). Liens affiliés.</small></div>'
+            f'<div class="pmx-rail pmx-offers">{"".join(partner_card(p, day) for p in picks)}</div></section>')
 
 
 def build_block():
