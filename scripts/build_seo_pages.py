@@ -223,13 +223,17 @@ def recent_offers(p):
     if not offers:
         return []
     limit = (date.fromisoformat(max(o["date"] for o in offers)) - timedelta(days=RECENT_OFFER_DAYS)).isoformat()
-    return sorted((o for o in offers if o["date"] >= limit), key=lambda o: (o["price_eur"], o["merchant"]))
+    return sorted((o for o in offers if o["date"] >= limit and o["merchant"] not in REFURBISHED),
+                  key=lambda o: (o["price_eur"], o["merchant"]))
 
 
 def best_recent(p):
     """Meilleur prix parmi les relevés récents ; à défaut, le plus bas de l'historique."""
     recent = recent_offers(p)
-    return recent[0] if recent else p["offers"][0]
+    if recent:
+        return recent[0]
+    new = [o for o in p["offers"] if o["merchant"] not in REFURBISHED]
+    return new[0] if new else p["offers"][0]
 
 
 def product_card(p):
@@ -273,7 +277,9 @@ def chart_svg(p):
 
 ICECAT_GTINS = ROOT / "data" / "icecat-gtins.json"
 GTINS = (json.loads(ICECAT_GTINS.read_text(encoding="utf-8")).get("products") or {}) if ICECAT_GTINS.exists() else {}
-RECENT_OFFER_DAYS = 7  # seuls les relevés de moins de 7 jours (par rapport au dernier relevé) vont dans le balisage
+RECENT_OFFER_DAYS = 7
+# Vendeurs de reconditionné : affichés dans le tableau avec la mention, jamais comme « meilleur prix » du neuf.
+REFURBISHED = {"asgoodasnewfr", "friphonerycom", "backmarket", "backmarketfr"}  # seuls les relevés de moins de 7 jours (par rapport au dernier relevé) vont dans le balisage
 
 
 def product_ld(p):
@@ -297,7 +303,7 @@ def product_ld(p):
         data["gtin"] = gtin.lstrip("0") if len(gtin) == 14 else gtin
     if last:
         limit = (date.fromisoformat(last) - timedelta(days=RECENT_OFFER_DAYS)).isoformat()
-        recent = [o for o in offers if o["date"] >= limit]
+        recent = [o for o in offers if o["date"] >= limit and o["merchant"] not in REFURBISHED]
         if recent:
             prices = [o["price_eur"] for o in recent]
             data["offers"] = {"@type": "AggregateOffer", "priceCurrency": "EUR",
@@ -319,7 +325,10 @@ def product_page(p, sheets, period, guide=None):
         url, label, aff = merchant_link(o["merchant"], q, p)
         rel = "sponsored nofollow noopener" if aff else "nofollow noopener"
         cls = ' class="best"' if o["price_eur"] == best["price_eur"] else ""
-        rows.append(f'<tr{cls}><td><b>{e(merchant_name(o["merchant"]))}</b></td><td class="p">{euro(o["price_eur"])}</td>'
+        refurb = ' <small style="color:#6b7280;font-weight:600">· reconditionné</small>' if o["merchant"] in REFURBISHED else ""
+        if refurb:
+            cls = ""
+        rows.append(f'<tr{cls}><td><b>{e(merchant_name(o["merchant"]))}</b>{refurb}</td><td class="p">{euro(o["price_eur"])}</td>'
                     f'<td class="h">{date_fr(o["date"])}</td><td><a class="go" href="{e(url)}" target="_blank" rel="{rel}">{label}</a></td></tr>')
     similar = [s for s in sheets if s["category"] == p["category"] and s["id"] != p["id"]][:8]
     cat_slug = CATEGORY_SLUGS.get(p["category"], "high-tech")
