@@ -3504,8 +3504,13 @@
    "brand": "Nintendo",
    "category": "console",
    "category_label": "Consoles",
-   "image": "",
-   "image_credit": null,
+   "image": "/assets/produits/switch.jpg",
+   "image_credit": {
+    "author": "Nintendo",
+    "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+    "file_page": "https://icecat.biz/",
+    "match": "gtin_icecat"
+   },
    "offer_count": 17,
    "min_price_eur": 199.99,
    "max_price_eur": 308.74,
@@ -4150,8 +4155,13 @@
    "brand": "Sony",
    "category": "console",
    "category_label": "Consoles",
-   "image": "",
-   "image_credit": null,
+   "image": "/assets/produits/ps5-slim-digital.jpg",
+   "image_credit": {
+    "author": "Sony Interactive Entertainment",
+    "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+    "file_page": "https://coc.icecat.biz/b43ed01f-e1bf-4ef7-b906-8ea0f6e69f1a",
+    "match": "gtin_icecat"
+   },
    "offer_count": 17,
    "min_price_eur": 599.0,
    "max_price_eur": 1089.99,
@@ -8977,8 +8987,13 @@
    "brand": "Sony",
    "category": "accessoire-ps5",
    "category_label": "Accessoires PS5",
-   "image": "",
-   "image_credit": null,
+   "image": "/assets/produits/dualsense.jpg",
+   "image_credit": {
+    "author": "Sony Interactive Entertainment",
+    "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+    "file_page": "https://coc.icecat.biz/4275544a-6855-4d17-85d2-170b97b9214e",
+    "match": "gtin_icecat"
+   },
    "offer_count": 14,
    "min_price_eur": 54.99,
    "max_price_eur": 70.3,
@@ -9367,8 +9382,13 @@
    "brand": "Nintendo",
    "category": "console",
    "category_label": "Consoles",
-   "image": "",
-   "image_credit": null,
+   "image": "/assets/produits/switch-oled.jpg",
+   "image_credit": {
+    "author": "Nintendo",
+    "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+    "file_page": "https://icecat.biz/",
+    "match": "gtin_icecat"
+   },
    "offer_count": 14,
    "min_price_eur": 289.99,
    "max_price_eur": 349.95,

@@ -49,6 +49,46 @@
    "file_page": "https://commons.wikimedia.org/wiki/File:Nintendo-Switch-Pro-Controller-BR.jpg",
    "commons_title": "File:Nintendo-Switch-Pro-Controller-BR.jpg",
    "match": "verifie_visuellement"
+  },
+  "dualsense": {
+   "thumb": "/assets/produits/dualsense.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Sony Interactive Entertainment",
+   "file_page": "https://coc.icecat.biz/4275544a-6855-4d17-85d2-170b97b9214e",
+   "source": "open_icecat",
+   "gtin": "0711719399506",
+   "icecat_title": "Sony Interactive Entertainment Manette sans fil DualSense",
+   "match": "gtin_icecat"
+  },
+  "ps5-slim-digital": {
+   "thumb": "/assets/produits/ps5-slim-digital.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Sony Interactive Entertainment",
+   "file_page": "https://coc.icecat.biz/b43ed01f-e1bf-4ef7-b906-8ea0f6e69f1a",
+   "source": "open_icecat",
+   "gtin": "0711719577294",
+   "icecat_title": "Sony Interactive Entertainment PlayStation 5 (modèle - Slim) - Edition Numérique",
+   "match": "gtin_icecat"
+  },
+  "switch-oled": {
+   "thumb": "/assets/produits/switch-oled.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496453435",
+   "icecat_title": "Nintendo Switch OLED",
+   "match": "gtin_icecat"
+  },
+  "switch": {
+   "thumb": "/assets/produits/switch.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496452629",
+   "icecat_title": "Nintendo Switch V2 2019",
+   "match": "gtin_icecat"
   }
  }
 }
