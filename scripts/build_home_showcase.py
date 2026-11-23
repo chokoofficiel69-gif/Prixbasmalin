@@ -294,7 +294,9 @@ def partner_picks(now=None):
 
 def partner_card(p, day):
     merchant = p["merchant"].replace(" Technology Development Co., Ltd", "").replace(" FR", "").replace(" EU", "")
-    if p.get("price_verified") is True and p.get("price") is not None:
+    if (p.get("price_verified") is True and p.get("price_tax_status") == "included"
+            and p.get("price_date_kind") == "merchant" and p.get("price_date")
+            and p.get("price") is not None):
         shipping = p.get("shipping_eur")
         if isinstance(shipping, (int, float)) and not isinstance(shipping, bool) and shipping >= 0:
             shipping_label = "Livraison offerte" if shipping == 0 else "Livraison " + seo.euro(shipping)
