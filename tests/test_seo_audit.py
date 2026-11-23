@@ -56,8 +56,10 @@ class SeoAuditTests(unittest.TestCase):
         description = html.unescape(match.group(1)).lower()
         self.assertNotIn("60 marchands", description)
         self.assertNotIn("comparez les prix chez", description)
-        self.assertIn("historique des prix high-tech", description)
-        self.assertIn("produits, prix et dates vérifiés", description)
+        self.assertIn("prix des flux marchands datés", description)
+        self.assertIn("à confirmer", description)
+        self.assertIn("historiques de prix", description)
+        self.assertNotIn("uniquement sur produits, prix et dates vérifiés", description)
 
     def test_homepage_structured_data(self):
         page = (ROOT / "index.html").read_text(encoding="utf-8")
