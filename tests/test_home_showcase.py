@@ -77,13 +77,17 @@ class HomeShowcaseTests(unittest.TestCase):
             "url": "https://www.awin1.com/pclick.php?p=1",
             "image": "https://img.example/product.jpg",
             "price": 299.0, "price_verified": True,
-            "price_date": "2026-11-22T10:00:00Z",
+            "price_date": "2026-11-22T10:00:00Z", "price_date_kind": "merchant",
             "price_tax_status": "included", "shipping_eur": 0,
         }
         card = sc.partner_card(verified, "2026-11-22")
         self.assertIn("299,00", card)
         self.assertIn("Prix TTC vérifié", card)
         self.assertIn("Livraison offerte", card)
+        missing_verification = {**verified, "price_tax_status": "unspecified"}
+        card = sc.partner_card(missing_verification, "2026-11-22")
+        self.assertNotIn("299,00", card)
+        self.assertIn("Prix non vérifié", card)
 
     def test_partner_picks_never_promote_feed_import_time_to_price_date(self):
         sc = load("build_home_showcase")
