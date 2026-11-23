@@ -269,6 +269,96 @@
    "gtin": "6970135039418",
    "icecat_title": "Ecovacs DEEBOT T90 PRO OMNI EU 0,25 L Noir",
    "match": "gtin_icecat"
+  },
+  "dualsense-edge": {
+   "thumb": "/assets/produits/dualsense-edge.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Sony Interactive Entertainment",
+   "file_page": "https://coc.icecat.biz/ed85024a-755d-4604-a2e9-d66e8d2ec795",
+   "source": "open_icecat",
+   "gtin": "0711719443995",
+   "icecat_title": "Sony Interactive Entertainment DualSense Edge controller/EUR",
+   "match": "gtin_icecat"
+  },
+  "joy-con-2": {
+   "thumb": "/assets/produits/joy-con-2.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496321833",
+   "icecat_title": "Nintendo Joy-Con 2 Noir, Vert clair, Violet Bluetooth Manette de jeu Analogique/Numérique Nintendo Switch 2",
+   "match": "gtin_icecat"
+  },
+  "manette-switch-2-pro": {
+   "thumb": "/assets/produits/manette-switch-2-pro.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Nintendo",
+   "file_page": "https://icecat.biz/",
+   "source": "open_icecat",
+   "gtin": "0045496321475",
+   "icecat_title": "Nintendo Manette Pro Switch 2",
+   "match": "gtin_icecat"
+  },
+  "galaxy-s26-ultra": {
+   "thumb": "/assets/produits/galaxy-s26-ultra.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Samsung",
+   "file_page": "https://coc.icecat.biz/fc31be38-2589-4aec-8e6f-9a597b9b437a",
+   "source": "open_icecat",
+   "gtin": "8806097827221",
+   "icecat_title": "Samsung Galaxy S26 Ultra 17,5 cm (6.9\") Double SIM Android 16.0 5G USB Type-C 12 Go 256 Go 5000 mAh Noir",
+   "match": "gtin_icecat"
+  },
+  "galaxy-s26-plus": {
+   "thumb": "/assets/produits/galaxy-s26-plus.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Samsung",
+   "file_page": "https://coc.icecat.biz/582a34f4-602d-443b-af86-da4fa1584752",
+   "source": "open_icecat",
+   "gtin": "8806097828358",
+   "icecat_title": "Samsung Galaxy S26+ 17 cm (6.7\") Double SIM Android 16.0 5G USB Type-C 12 Go 256 Go 4900 mAh Noir",
+   "match": "gtin_icecat"
+  },
+  "galaxy-s26": {
+   "thumb": "/assets/produits/galaxy-s26.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Samsung",
+   "file_page": "https://coc.icecat.biz/112b0967-d70f-4c1b-8b3d-7bf8ccf93aee",
+   "source": "open_icecat",
+   "gtin": "8806097827467",
+   "icecat_title": "Samsung Galaxy S26 16 cm (6.3\") Double SIM Android 16.0 5G USB Type-C 12 Go 256 Go 4300 mAh Noir",
+   "match": "gtin_icecat"
+  },
+  "dreame-x50-ultra": {
+   "thumb": "/assets/produits/dreame-x50-ultra.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Dreame",
+   "file_page": "https://coc.icecat.biz/3e911077-fd75-49ec-893e-814081b0d5ef",
+   "source": "open_icecat",
+   "gtin": "6977328065117",
+   "icecat_title": "Dreame X50 Ultra Complete Noir",
+   "match": "gtin_icecat"
+  },
+  "rowenta-x-force-flex-16-60": {
+   "thumb": "/assets/produits/rowenta-x-force-flex-16-60.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Rowenta",
+   "file_page": "https://coc.icecat.biz/094e6f27-e640-4979-851b-a2fe364220fb",
+   "source": "open_icecat",
+   "gtin": "3221616163492",
+   "icecat_title": "Rowenta X-Force Flex RH9CD9E0 aspirateur balai et balai électrique Aspirateur-balai 2 en 1 Batterie Sec&humide Sans sac 0,65 L Bronze",
+   "match": "gtin_icecat"
+  },
+  "samsung-bespoke-ai-jet-lite": {
+   "thumb": "/assets/produits/samsung-bespoke-ai-jet-lite.jpg",
+   "license": "partenaire : Open Icecat (contenu officiel fourni par la marque)",
+   "author": "Samsung",
+   "file_page": "https://coc.icecat.biz/8b7a6719-648d-4508-b6f2-4ab5b2d415ae",
+   "source": "open_icecat",
+   "gtin": "8806097264811",
+   "icecat_title": "Samsung VS80F28DFP Aspirateur-balai 2 en 1 Batterie Sec HEPA, Micro Sans sac 0,5 L 770 W Noir, Gris",
+   "match": "gtin_icecat"
   }
  }
 }
