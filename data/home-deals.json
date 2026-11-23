@@ -5,7 +5,7 @@
   "from": "2026-10-09",
   "to": "2026-11-21"
  },
- "price_policy": "Les prix Awin ne sont affichables que si la date marchande a moins de 48 h et si le TTC est explicitement confirmé. Les données PrixTracker sont historiques, jamais des offres en direct.",
+ "price_policy": "Les prix listés des flux marchands sont affichés avec la date du flux et « à confirmer » pendant 7 jours (hors marchands HT). Seuls les prix vérifiés exigent une date marchande de moins de 48 h et une TVA TTC explicitement confirmée. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
   {
    "id": "airpods-5",
