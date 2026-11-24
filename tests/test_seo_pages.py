@@ -34,6 +34,50 @@ class SeoPagesTests(unittest.TestCase):
         self.assertRegex(page, r"(Rechercher|Voir) sur Amazon ↗")
         self.assertNotIn("Voir le prix du jour sur Amazon", page)
 
+
+    def test_only_explicit_fresh_ttc_merchant_timestamps_are_current(self):
+        now = seo.parse_utc("2026-11-24T10:00:00Z")
+        base = {
+            "price_verified": True, "price_tax_status": "included",
+            "price_date_kind": "merchant", "currency": "EUR", "price_eur": 99.0,
+        }
+        offers = [
+            {**base, "merchant": "fresh", "price_date": "2026-11-23T10:00:00Z"},
+            {**base, "merchant": "stale", "price_date": "2026-11-22T09:59:00Z"},
+            {**base, "merchant": "tax-unknown", "price_tax_status": "unspecified",
+             "price_date": "2026-11-24T09:00:00Z"},
+            {**base, "merchant": "feed-date", "price_date_kind": "feed",
+             "price_date": "2026-11-24T09:00:00Z"},
+            {**base, "merchant": "date-only", "price_date": "2026-11-24"},
+        ]
+        self.assertEqual(
+            [offer["merchant"] for offer in seo.recent_offers({"offers": offers}, now=now)],
+            ["fresh"],
+        )
+
+    def test_historical_product_page_keeps_prices_without_claiming_a_current_best_price(self):
+        product = {
+            "id": "test-historical", "name": "Produit historique", "brand": "Marque",
+            "category": "console", "category_label": "Consoles", "image": "",
+            "offer_count": 2, "min_price_eur": 99.0, "max_price_eur": 109.0,
+            "last_date": "2026-11-21", "history": [],
+            "offers": [
+                {"merchant": "amazon", "price_eur": 99.0, "date": "2026-11-21"},
+                {"merchant": "fnac", "price_eur": 109.0, "date": "2026-11-20"},
+            ],
+        }
+        page = seo.product_page(
+            product, [], None, now=seo.parse_utc("2026-11-24T10:00:00Z")
+        )
+        self.assertIn("Plus bas relevé historique", page)
+        self.assertIn("99,00", page)
+        self.assertIn("21/11/2026", page)
+        self.assertIn("à confirmer chez le marchand", page)
+        self.assertNotIn("Meilleur prix récent", page)
+        self.assertNotIn("le plus bas de la semaine", page)
+        self.assertNotIn('"@type": "AggregateOffer"', page)
+        self.assertNotIn('<tr class="best">', page)
+
     def test_black_friday_page_links_to_popular_product_pages_and_rakuten_catalogue(self):
         page = seo.build()["black-friday.html"]
         for target in (
@@ -88,7 +132,8 @@ class SeoPagesTests(unittest.TestCase):
         }
         section = seo.bf_gap_section([fresh_product], today=today)
         self.assertIn("Jusqu’à 20,00 € d’écart entre marchands", section)
-        self.assertIn("Meilleur prix récent", section)
+        self.assertIn("Prix relevé récemment · à confirmer", section)
+        self.assertNotIn("Meilleur prix récent", section)
 
     def test_sitemap_and_robots_list_seo_pages(self):
         sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
