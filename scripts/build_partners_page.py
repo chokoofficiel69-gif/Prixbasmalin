@@ -31,6 +31,7 @@ import build_seo_pages as seo  # noqa: E402  (mise en page commune, en-tête, pi
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "boutiques-partenaires.json"
+PARTNER_CODES = ROOT / "data" / "partner-codes.json"
 OUT = ROOT / "boutiques-partenaires.html"
 e = lambda s: html.escape(str(s), quote=True)
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -44,6 +45,10 @@ def validate(data):
                 errors.append(f"code {i}: champ « {k} » manquant")
         if c.get("fin") and not DATE_RE.match(str(c["fin"])):
             errors.append(f"code {i}: date de fin au format AAAA-MM-JJ attendue")
+        if c.get("debut") and not DATE_RE.match(str(c["debut"])):
+            errors.append(f"code {i}: date de début au format AAAA-MM-JJ attendue")
+        if c.get("debut") and c.get("fin") and str(c["debut"]) > str(c["fin"]):
+            errors.append(f"code {i}: la date de début doit précéder la date de fin")
         if c.get("url") and not str(c["url"]).startswith("https://"):
             errors.append(f"code {i}: lien https:// attendu")
     for i, b in enumerate(data.get("boutiques", [])):
@@ -59,13 +64,33 @@ def validate(data):
         raise ValueError("data/boutiques-partenaires.json invalide :\n- " + "\n- ".join(errors))
 
 
+def campaign_codes():
+    if not PARTNER_CODES.exists():
+        return []
+    data = json.loads(PARTNER_CODES.read_text(encoding="utf-8"))
+    return [
+        {
+            "marchand": str(c["merchant"]) + " · Awin",
+            "code": c["code"],
+            "reduction": c["discount"],
+            "conditions": c["description"],
+            "debut": c["start"],
+            "fin": c["end"],
+            "url": c["url"],
+            "exclusif": False,
+        }
+        for c in data.get("codes", [])
+    ]
+
+
 def code_card(c):
     excl = '<span class="bp-ex">Exclusif Prix Bas Malin</span>' if c.get("exclusif") is True else ""
-    return (f'<article class="bp-code" data-fin="{e(c["fin"])}">{excl}<small>{e(c["marchand"])}</small>'
+    validity = ("Disponible du " + seo.date_fr(c["debut"]) + " au " + seo.date_fr(c["fin"])) if c.get("debut") else ("Valable jusqu’au " + seo.date_fr(c["fin"]))
+    return (f'<article class="bp-code" data-debut="{e(c.get("debut") or "")}" data-fin="{e(c["fin"])}">{excl}<small>{e(c["marchand"])}</small>'
             f'<strong>{e(c["reduction"])}</strong><p>{e(c["conditions"])}</p>'
             f'<div class="bp-copy"><code>{e(c["code"])}</code><button type="button" data-code="{e(c["code"])}">Copier</button></div>'
             f'<a class="bp-go" href="{e(c["url"])}" target="_blank" rel="sponsored nofollow noopener">Aller sur le site ↗</a>'
-            f'<small>Valable jusqu’au {seo.date_fr(c["fin"])}</small></article>')
+            f'<small>{e(validity)}</small></article>')
 
 
 def shop_card(b):
@@ -110,20 +135,30 @@ if(navigator.clipboard)navigator.clipboard.writeText(v).then(ok,ok);else ok();})
 def build(today=None):
     today = today or date.today().isoformat()
     data = json.loads(DATA.read_text(encoding="utf-8"))
-    validate(data)
+    codes = list(data.get("codes", [])) + campaign_codes()
+    validate({"codes": codes, "boutiques": data.get("boutiques", [])})
     mail = data["contact_email"]
-    codes = sorted((c for c in data.get("codes", []) if c["fin"] >= today), key=lambda c: c["fin"])
+    codes = sorted((c for c in codes if c["fin"] >= today), key=lambda c: c["fin"])
     shops = data.get("boutiques", [])
     codes_html = (f'<div class="bp-grid">{"".join(code_card(c) for c in codes)}</div>' if codes else
                   '<p class="bp-empty">Les premiers codes promo partenaires arrivent bientôt. Nous n’affichons que des codes '
                   'fournis par les marchands eux-mêmes, avec leurs conditions et leur date de fin.</p>')
     shops_html = (f'<div class="bp-grid">{"".join(shop_card(b) for b in shops)}</div>' if shops else
-                  '<p class="bp-empty">Les premières boutiques partenaires arrivent bientôt : artisans, créateurs et petits '
-                  'commerçants sélectionnés, avec un code promo réservé aux visiteurs de Prix Bas Malin.</p>')
+                  '<p class="bp-empty">Aucune boutique indépendante n’a encore été ajoutée. Les offres de nos réseaux partenaires sont présentées ci-dessus.</p>')
+    network_html = """<section class="panel" id="reseaux-partenaires"><h2>Offres de nos réseaux partenaires</h2>
+<div class="bp-grid">
+<article class="bp-shop"><h3>Decathlon via Rakuten</h3>
+<p>Le catalogue Prix Bas Malin présente des références Decathlon reçues via le flux Rakuten. Les prix du flux sont datés et affichés « à confirmer » ; vérifiez le prix final, les frais et la disponibilité chez le marchand.</p>
+<a class="bp-go" href="/catalogue.html">Voir les références Decathlon ↗</a></article>
+<article class="bp-shop"><h3>Amazon</h3>
+<p>Parcourez les offres du jour Amazon via le lien partenaire Prix Bas Malin. Vérifiez le prix final et la disponibilité au moment de l’achat.</p>
+<a class="bp-go" href="https://www.amazon.fr/gp/goldbox?tag=prixbasmalin2-21" target="_blank" rel="sponsored nofollow noopener">Voir les offres Amazon ↗</a></article>
+</div></section>"""
     body = f"""<section class="bp-hero"><h1>Boutiques partenaires &amp; codes promo</h1>
-<p>Des petites boutiques sélectionnées et des codes promo obtenus auprès des marchands : grâce à Prix Bas Malin, vous payez moins cher. Chaque code indique ses conditions et sa date de fin.</p></section>
+<p>Retrouvez les codes promo transmis par les marchands et les offres de nos réseaux partenaires. Chaque code indique sa période ; les prix des flux restent datés et marqués « à confirmer ».</p></section>
 <section class="panel" id="codes"><h2>Codes promo partenaires</h2>{codes_html}</section>
-<section class="panel" id="boutiques"><h2>Boutiques partenaires</h2>{shops_html}</section>
+{network_html}
+<section class="panel" id="boutiques"><h2>Boutiques partenaires indépendantes</h2>{shops_html}</section>
 <section class="panel" id="devenir-partenaire"><h2>Commerçant, artisan, créateur ? Devenez boutique partenaire</h2>
 <p>Prix Bas Malin met vos produits en avant sur prixbasmalin.fr et sur ses réseaux (TikTok, Instagram, Snapchat). Vous ne payez rien pour être présent : une commission, convenue ensemble, n’est due que sur les ventes que nous vous apportons.</p>
 <div class="bp-steps"><div><b>1. Votre vitrine</b>Vos produits, vos photos et vos prix sur une page à votre nom.</div>
@@ -135,8 +170,17 @@ def build(today=None):
 <p><a href="/assets/partenaires-commercants/fiche-boutique-partenaire.jpg">Voir la fiche de présentation</a></p></div></div></section>
 <p class="source">Liens partenaires : Prix Bas Malin peut percevoir une commission sur les ventes, sans surcoût pour vous. Les réductions et conditions sont celles fixées par chaque marchand.</p>
 {SCRIPT}"""
+    if codes:
+        featured = codes[0]
+        merchant = str(featured["marchand"]).split(" · ")[0]
+        description = (f"Code {featured['code']} chez {merchant} du "
+                       f"{seo.date_fr(featured.get('debut') or today)} au {seo.date_fr(featured['fin'])}, "
+                       "plus offres Awin, Rakuten et Amazon sur Prix Bas Malin.")
+    else:
+        description = ("Offres partenaires Awin, Rakuten et Amazon, prix des flux datés "
+                       "« à confirmer » et conditions de chaque marchand sur Prix Bas Malin.")
     return seo.layout("Boutiques partenaires & codes promo | Prix Bas Malin",
-                      seo.fit_description("Codes promo partenaires et petites boutiques sélectionnées par Prix Bas Malin, avec leurs conditions et leur date de fin. Commerçants : devenez partenaire."),
+                      seo.fit_description(description),
                       "/boutiques-partenaires.html", body,
                       [("Accueil", "/"), ("Boutiques partenaires & codes promo", "/boutiques-partenaires.html")], CSS + "\n")
 
