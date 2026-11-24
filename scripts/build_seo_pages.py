@@ -217,7 +217,17 @@ def visual(p):
 ART_SCRIPT = """<script>document.querySelectorAll("[data-art-category]").forEach(function(el){if(window.pmProductArt)el.innerHTML=pmProductArt(el.dataset.artCategory,el.dataset.artBrand);});</script>"""
 
 
-def recent_offers(p, now=None):
+def recent_offers(p):
+    """Relevés de moins de RECENT_OFFER_DAYS jours par rapport au dernier relevé du produit (triés par prix)."""
+    offers = p.get("offers") or []
+    if not offers:
+        return []
+    limit = (date.fromisoformat(max(o["date"] for o in offers)) - timedelta(days=RECENT_OFFER_DAYS)).isoformat()
+    return sorted((o for o in offers if o["date"] >= limit and o["merchant"] not in REFURBISHED),
+                  key=lambda o: (o["price_eur"], o["merchant"]))
+
+
+def verified_current_offers(p, now=None):
     """Offres actuelles admissibles seulement si TTC, date marchande et fraîcheur sont prouvés."""
     reference_time = now or datetime.now(timezone.utc)
     eligible = []
@@ -228,7 +238,6 @@ def recent_offers(p, now=None):
             continue
         if offer.get("currency") != "EUR" or offer.get("merchant") in REFURBISHED:
             continue
-        # Une date de jour seule ou la date de téléchargement du flux ne prouve pas l'âge du prix marchand.
         raw_date = offer.get("price_date")
         if not offer.get("date") or not isinstance(raw_date, str) or "T" not in raw_date:
             continue
@@ -245,18 +254,24 @@ def recent_offers(p, now=None):
     return sorted(eligible, key=lambda o: (o["price_eur"], str(o.get("merchant") or "")))
 
 
-def best_recent(p, now=None):
-    """Meilleure offre TTC admissible ; à défaut, plus bas relevé historique, jamais présenté comme actuel."""
-    current = recent_offers(p, now=now)
-    if current:
-        return current[0]
-    new = [o for o in p.get("offers", []) if o.get("merchant") not in REFURBISHED]
+def best_recent(p):
+    """Meilleur relevé dans la fenêtre historique relative au dernier relevé du produit."""
+    recent = recent_offers(p)
+    if recent:
+        return recent[0]
+    new = [o for o in p["offers"] if o["merchant"] not in REFURBISHED]
     return new[0] if new else p["offers"][0]
 
 
+def historical_lowest_offer(p):
+    """Plus bas relevé historique disponible, hors vendeurs reconditionnés."""
+    offers = [o for o in p.get("offers", []) if o.get("merchant") not in REFURBISHED]
+    return min(offers or p["offers"], key=lambda o: (o["price_eur"], o.get("date", "")))
+
+
 def product_card(p, now=None):
-    current = recent_offers(p, now=now)
-    best = best_recent(p, now=now)
+    current = verified_current_offers(p, now=now)
+    best = current[0] if current else historical_lowest_offer(p)
     label = "Prix TTC confirmé" if current else "Plus bas relevé historique"
     return (f'<a class="card pm-card" href="/prix/{e(p["id"])}.html">{visual(p)}<div class="c"><small>{e(p["category_label"])} · {p["offer_count"]} marchands suivis</small>'
             f'<b>{e(p["name"])}</b><small>{label}</small><strong>{euro(best["price_eur"])}</strong><small>Relevé du {date_fr(best["date"])} chez {e(merchant_name(best["merchant"]))}</small></div></a>')
@@ -317,7 +332,7 @@ def product_ld(p, now=None):
     gtin = GTINS.get(p["id"])
     if gtin:
         data["gtin"] = gtin.lstrip("0") if len(gtin) == 14 else gtin
-    current = recent_offers(p, now=now)
+    current = verified_current_offers(p, now=now)
     if current:
         prices = [o["price_eur"] for o in current]
         data["offers"] = {"@type": "AggregateOffer", "priceCurrency": "EUR",
@@ -328,8 +343,8 @@ def product_ld(p, now=None):
 
 def product_page(p, sheets, period, guide=None, now=None):
     q = query_for(p)
-    current = recent_offers(p, now=now)
-    best = best_recent(p, now=now)
+    current = verified_current_offers(p, now=now)
+    best = current[0] if current else historical_lowest_offer(p)
     pool = current or p["offers"]
     cheapest = [o for o in pool if o["price_eur"] == best["price_eur"]]
     hist_low = p["offers"][0]
@@ -605,16 +620,8 @@ def bf_price_label(offer, today=None):
     return "Prix historique · à confirmer chez le marchand"
 
 
-def bf_best_offer(p, today=None):
-    recent = bf_recent_offers(p, today=today)
-    if recent:
-        return recent[0]
-    new = [o for o in p.get("offers", []) if o.get("merchant") not in REFURBISHED]
-    return new[0] if new else p["offers"][0]
-
-
-def bf_card(p, today=None):
-    best = bf_best_offer(p, today=today)
+def bf_card(p, today=None, best_override=None):
+    best = best_override or best_recent(p)
     label_text = bf_price_label(best, today=today)
     url, label, _ = amazon_link(p)
     return (f'<article class="bf-card">{visual(p)}<div class="c"><small>{e(p["category_label"])}</small><b>{e(p["name"])}</b>'
@@ -624,10 +631,10 @@ def bf_card(p, today=None):
             f'<a class="pm-btn pm-btn-amazon pm-btn-block" href="{e(url)}" target="_blank" rel="sponsored nofollow noopener">{e(label)}</a></div></div></article>')
 
 
-def bf_selection(sheets, lo, hi, limit=8, today=None):
-    items = [p for p in sheets if p.get("offers") and lo <= bf_best_offer(p, today=today)["price_eur"] < hi]
+def bf_selection(sheets, lo, hi, limit=8):
+    items = [p for p in sheets if p.get("offers") and lo <= best_recent(p)["price_eur"] < hi]
     # Les produits suivis chez le plus de marchands d'abord (les plus recherchés), photo réelle en priorité.
-    items.sort(key=lambda p: (not p.get("image"), -p["offer_count"], bf_best_offer(p, today=today)["price_eur"], p["id"]))
+    items.sort(key=lambda p: (not p.get("image"), -p["offer_count"], best_recent(p)["price_eur"], p["id"]))
     return items[:limit]
 
 
@@ -652,7 +659,7 @@ def bf_gap_section(sheets, limit=8, today=None):
     if not items:
         return ""
     cards = "".join(
-        bf_card(p, today=today).replace('<small>Prix relevé récemment · à confirmer</small>',
+        bf_card(p, today=today, best_override=bf_recent_offers(p, today=today)[0]).replace('<small>Prix relevé récemment · à confirmer</small>',
                            f'<span class="bf-gap">Jusqu’à {euro(recent_gap(p, today=today))} d’écart entre marchands</span><small>Prix relevé récemment · à confirmer</small>', 1)
         for p in items)
     return ('<section class="panel" id="ecarts"><h2>Le bon marchand fait la différence</h2>'
@@ -687,7 +694,7 @@ def partner_codes_section(today=None):
 
 def black_friday_page(sheets, today=None):
     today = today or datetime.now(timezone.utc).date()
-    groups = [(slug, label, bf_selection(sheets, lo, hi, today=today)) for slug, label, lo, hi in BF_BUDGETS]
+    groups = [(slug, label, bf_selection(sheets, lo, hi)) for slug, label, lo, hi in BF_BUDGETS]
     groups = [g for g in groups if g[2]]
     latest = max((p.get("last_date") or "") for p in sheets)
     jump = "".join(f'<a href="#{slug}">{e(label)}</a>' for slug, label, _ in groups)
