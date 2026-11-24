@@ -230,7 +230,7 @@ def recent_offers(p, now=None):
             continue
         # Une date de jour seule ou la date de téléchargement du flux ne prouve pas l'âge du prix marchand.
         raw_date = offer.get("price_date")
-        if not isinstance(raw_date, str) or "T" not in raw_date:
+        if not offer.get("date") or not isinstance(raw_date, str) or "T" not in raw_date:
             continue
         updated_at = parse_utc(raw_date)
         if updated_at is None:
