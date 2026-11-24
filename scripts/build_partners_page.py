@@ -170,8 +170,17 @@ def build(today=None):
 <p><a href="/assets/partenaires-commercants/fiche-boutique-partenaire.jpg">Voir la fiche de présentation</a></p></div></div></section>
 <p class="source">Liens partenaires : Prix Bas Malin peut percevoir une commission sur les ventes, sans surcoût pour vous. Les réductions et conditions sont celles fixées par chaque marchand.</p>
 {SCRIPT}"""
+    if codes:
+        featured = codes[0]
+        merchant = str(featured["marchand"]).split(" · ")[0]
+        description = (f"Code {featured['code']} chez {merchant} du "
+                       f"{seo.date_fr(featured.get('debut') or today)} au {seo.date_fr(featured['fin'])}, "
+                       "plus offres Awin, Rakuten et Amazon sur Prix Bas Malin.")
+    else:
+        description = ("Offres partenaires Awin, Rakuten et Amazon, prix des flux datés "
+                       "« à confirmer » et conditions de chaque marchand sur Prix Bas Malin.")
     return seo.layout("Boutiques partenaires & codes promo | Prix Bas Malin",
-                      seo.fit_description("Code Jowissa BFCM35 du 26/11 au 01/12, références Decathlon via Rakuten et offres Amazon : liens partenaires, dates et conditions sur Prix Bas Malin."),
+                      seo.fit_description(description),
                       "/boutiques-partenaires.html", body,
                       [("Accueil", "/"), ("Boutiques partenaires & codes promo", "/boutiques-partenaires.html")], CSS + "\n")
 
