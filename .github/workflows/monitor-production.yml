@@ -436,7 +436,7 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \
             https://prixbasmalin.fr/historique-prix.html --output /tmp/historique-prix.html
           grep -q "Les prix dans le temps" /tmp/historique-prix.html
-      - name: Vérifier les pages SEO historiques publiques
+      - name: Vérifier les pages SEO et mentions de contexte publiques
         if: github.event_name != 'pull_request'
         run: |
           set -e
@@ -449,10 +449,10 @@ jobs:
             "https://prixbasmalin.fr/idees-cadeaux/index.html?pm-deploy-check=${cache_bust}" --output /tmp/idees-cadeaux.html
           grep -Fq "Historique des prix high-tech" /tmp/prix-index.html
           grep -Fq "pas des offres en direct" /tmp/prix-index.html
-          grep -Fq "Historique des prix de AirPods 4" /tmp/prix-airpods.html
+          grep -Fq "Prix AirPods 4 : comparatif" /tmp/prix-airpods.html
           grep -Fq "pas des offres actuelles" /tmp/prix-airpods.html
           grep -Fq "date marchande récente" /tmp/idees-cadeaux.html
-          echo "Pages SEO historiques et garde-fous de prix visibles publiquement."
+          echo "Titres SEO actuels et mentions de contexte visibles publiquement."
       - name: Vérifier les relevés historiques publiés
         run: |
           curl --fail --silent --show-error --location --retry 2 --retry-all-errors --max-time 25 \

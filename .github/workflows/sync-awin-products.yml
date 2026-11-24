@@ -295,18 +295,29 @@ jobs:
             (!/^https:\/\//i.test(String(g.image || "")) || g.image_provenance !== "Flux marchand Awin autorisé" ||
              !g.image_verified_at));
           const falsePrices = gifts.filter(g => g.price_verified !== true &&
-            (g.price_eur !== null || g.shipping_eur !== null));
+            ((g.price_eur !== null && g.price_eur !== undefined) ||
+             (g.shipping_eur !== null && g.shipping_eur !== undefined)));
           const invalidPrices = gifts.filter(g => g.price_verified === true &&
             (!Number.isFinite(Number(g.price_eur)) || g.price_tax_status !== "included" ||
              g.price_date_kind !== "merchant" || !g.price_date));
-          if (invalidImages.length || falsePrices.length || invalidPrices.length) {
-            throw new Error("La vitrine cadeaux contient une image non sourcée ou un prix non vérifié.");
+          const listedPrices = gifts.filter(g =>
+            Number.isFinite(Number(g.listed_price_eur)) && Number(g.listed_price_eur) > 0);
+          const invalidListedPrices = listedPrices.filter(g => {
+            const stamp = Date.parse(String(g.listed_price_date || ""));
+            const age = Date.now() - stamp;
+            return !Number.isFinite(stamp) || age < -5 * 60 * 1000 || age > 7 * 24 * 60 * 60 * 1000 ||
+              /\blusini\b/i.test(String(g.merchant || ""));
+          });
+          if (invalidImages.length || falsePrices.length || invalidPrices.length || invalidListedPrices.length) {
+            throw new Error("La vitrine cadeaux contient une image non sourcée, un prix mal daté ou un prix HT.");
           }
           const uniqueVerified = new Set(gifts.filter(g => g.image_verified === true).map(g => g.image)).size;
-          const unpriced = gifts.filter(g => g.image_verified === true && g.price_verified !== true).length;
+          const hasListedPrice = g => Number.isFinite(Number(g.listed_price_eur)) && Number(g.listed_price_eur) > 0;
+          const unpriced = gifts.filter(g => g.image_verified === true && g.price_verified !== true && !hasListedPrice(g)).length;
+          const verifiedPriceCount = gifts.filter(g => g.price_verified === true).length;
           console.log("Vitrine cadeaux publique :", uniqueVerified, "images marchandes uniques vérifiées ;",
-            unpriced, "cartes sans prix affiché ;", gifts.filter(g => g.price_verified === true).length,
-            "prix TTC marchands vérifiés.");
+            listedPrices.length, "prix du flux datés affichables « à confirmer » ;",
+            unpriced, "cartes sans prix fourni par le flux ;", verifiedPriceCount, "prix TTC marchands vérifiés.");
           if (uniqueVerified === 0) {
             console.log("AVERTISSEMENT : aucune image marchande n'est vérifiée ; la vitrine conserve son message de secours.");
           }
@@ -315,6 +326,8 @@ jobs:
             -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
             "https://prixbasmalin.fr/?v=${EXPECTED_FETCHED_AT}" --output /tmp/home-public.html
           grep -Fq 'g.image_verified!==true' /tmp/home-public.html
-          grep -Fq 'Prix non vérifié' /tmp/home-public.html
+          grep -Fq 'giftListedPrice' /tmp/home-public.html
+          grep -Fq 'Flux marchand du' /tmp/home-public.html
+          grep -Fq 'à confirmer' /tmp/home-public.html
           grep -Fq 'giftRail.querySelectorAll("img")' /tmp/home-public.html
-          echo "Accueil public : cartes sans prix affiché tant que le TTC n'est pas confirmé ; images non vérifiées masquées."
+          echo "Accueil public : prix des flux affichés avec date et mention « à confirmer » ; images non vérifiées masquées."
