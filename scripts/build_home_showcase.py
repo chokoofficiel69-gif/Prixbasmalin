@@ -9,6 +9,7 @@ des vraies données du site.
 - Le bloc est inséré dans index.html entre les marqueurs <!-- pm-showcase --> et
   <!-- /pm-showcase --> ; --check vérifie qu'il est à jour.
 """
+import re
 import argparse
 import datetime as dt
 import html
@@ -221,6 +222,12 @@ CSS = """<style id="pm-showcase-style">
 @media(max-width:860px) and (min-width:520px){.pmx-offers{grid-auto-columns:31%}.pmx-cats{grid-auto-columns:18%}}
 /* Bannière nette (23/11/2026, choix du propriétaire) : fond graphique + mascotte seule, sans photo de décor ni vignettes produits. */
 .pmx-hero-img,.pmx-hero-art .p{display:none!important}
+.pmx-hero-art .ph{display:none}
+@media(min-width:761px){.pmx-hero-art .ph{display:flex;align-items:center;justify-content:center;position:absolute;width:190px;height:190px;padding:14px;box-sizing:border-box;background:#fff;border-radius:22px;box-shadow:0 22px 48px #000c;z-index:1}
+ .pmx-hero-art .ph img{width:100%;height:100%;object-fit:contain;image-rendering:auto}
+ .pmx-hero-art .ph1{left:2%;top:8%;transform:rotate(-6deg)}.pmx-hero-art .ph2{left:18%;bottom:8%;transform:rotate(4deg)}.pmx-hero-art .ph3{left:34%;top:4%;width:160px;height:160px;transform:rotate(5deg)}
+ .pmx-hero-art .m{z-index:2}}
+@media(min-width:761px) and (max-width:1279px){.pmx-hero-art .ph1,.pmx-hero-art .ph3{display:none}.pmx-hero-art .ph2{left:0;bottom:auto;top:10%;width:130px;height:130px}}
 .pmx-hero{background:radial-gradient(520px 340px at 78% 55%,#ff650b55,transparent 70%),radial-gradient(300px 220px at 20% 120%,#ff650b22,transparent 70%),linear-gradient(120deg,#0b0f17,#151012)!important}
 @media(min-width:1280px){.pmx-hero-art{width:52%!important;right:2%!important}}
 @media(min-width:761px) and (max-width:1279px){.pmx-hero-art{width:44%!important}}
@@ -235,6 +242,14 @@ CSS = """<style id="pm-showcase-style">
 PARTNER_PRIORITY = ["Ecovacs FR", "Jowissa", "Mibro FR", "Imou FR", "Perfumeria Comas FR",
                     "Al Jazeera Perfumes EU", "BlazeVideo FR", "Fiido Technology Development Co., Ltd"]
 PARTNER_MAX_AGE_DAYS = 7
+
+
+def _sharp(url):
+    """Version pleine résolution d'une image Shopify (retire _small, _medium…)."""
+    url = re.sub(r"_(?:pico|icon|thumb|small|compact|medium|large|grande)(\.(?:jpe?g|png|webp)\?)", r"\1", url)
+    if "cdn.shopify.com" in url and "width=" not in url:
+        url += ("&" if "?" in url else "?") + "width=440"
+    return url
 
 
 def partner_picks(now=None):
@@ -314,8 +329,14 @@ def build_block():
 <div class="pmx-trust"><span><i>⌕</i>Comparateur<br>de prix</span><span><i>€</i>Prix datés<br>et sourcés</span><span><i>✓</i>Sources<br>vérifiables</span><span><i>♥</i>100 % gratuit<br>sans inscription</span></div>
 </section>"""
     picks, _ = partner_picks()
-    # Bannière : mascotte seule (pas de vignettes produits), choix du propriétaire du 23/11/2026.
-    hero = hero.replace("__HERO_ART__", "")
+    # Bannière : mascotte + 3 produits phares partenaires en photos studio nettes
+    # (demande du propriétaire du 24/11/2026, remplace le choix « mascotte seule » du 23/11).
+    want = ["Ecovacs FR", "Jowissa", "Al Jazeera Perfumes EU"]
+    by_merchant = {p["merchant"]: p for p in picks}
+    hero_picks = [by_merchant[m] for m in want if m in by_merchant] or picks[:3]
+    hero = hero.replace("__HERO_ART__", "".join(
+        f'<span class="ph ph{i}"><img src="{e(_sharp(p["image"]))}" alt="" loading="eager" decoding="async"></span>'
+        for i, p in enumerate(hero_picks[:3], 1)))
     body = f"""{START}
 {CSS}
 <div class="pmx">
