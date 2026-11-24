@@ -94,12 +94,10 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
     def test_catalogue_uses_verified_lightweight_preview_and_lazy_loads_full_feeds(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn('async function pmLoadHomeDealsPreview()', source)
-        self.assertIn('gift.image_verified!==true', source)
-        self.assertIn('gift.image_check_status!=="ok"', source)
-        self.assertIn('gift.image_provenance!=="Flux marchand Awin autorisé"', source)
-        self.assertIn('priceValue:null,listedPriceValue:null', source)
+        self.assertIn('const listedPrice=Number(gift.listed_price_eur);', source)
+        self.assertIn('listedPriceValue:hasListedPrice?listedPrice:null', source)
+        self.assertIn('imageStatus:usableImage?"authorized_feed_image":"unverified_feed_image"', source)
         self.assertIn('isDiscoveryProduct:true', source)
-        self.assertIn('pmProductHasAnyPrice(p)||p.isDiscoveryProduct===true', source)
         self.assertIn('function pmEnsureAwinCatalogueLoaded()', source)
         self.assertIn('function pmEnsureCatalogueFeedsLoaded()', source)
         self.assertIn('window.pmEnsureRakutenCatalogueLoaded=function()', source)
@@ -108,6 +106,15 @@ class CatalogueComparisonVisibilityTests(unittest.TestCase):
         self.assertNotIn('render();pmLoadAwinCatalogue().then(render)', source)
         self.assertNotIn('(async function pmLoadRakutenCatalogue()', source)
 
+    def test_source_prices_are_not_hidden_when_feed_is_old_or_image_is_missing(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('const feedIsFresh=Number.isFinite(fetchedAt)&&age>=-5*60*1000&&age<=48*60*60*1000;', source)
+        self.assertNotIn('Les prix de ce flux sont masqués', source)
+        self.assertIn('const listedPrice=!hasVerifiedPrice&&Number.isFinite(Number(p.listedPriceValue))', source)
+        self.assertIn('imageIsVerified', source)
+        self.assertIn('unverified_feed_image', source)
+        self.assertIn('Date individuelle du prix non fournie', source)
+        self.assertIn('Prix HT · TVA à ajouter', source)
 
     def test_no_comparison_state_explains_the_public_guardrails(self):
         source = CATALOGUE.read_text(encoding="utf-8")
