@@ -449,7 +449,7 @@ jobs:
             "https://prixbasmalin.fr/idees-cadeaux/index.html?pm-deploy-check=${cache_bust}" --output /tmp/idees-cadeaux.html
           grep -Fq "Historique des prix high-tech" /tmp/prix-index.html
           grep -Fq "pas des offres en direct" /tmp/prix-index.html
-          grep -Fq "Prix AirPods 4 : comparatif" /tmp/prix-airpods.html
+          grep -Fq "Prix AirPods 4 : relevé historique" /tmp/prix-airpods.html
           grep -Fq "pas des offres actuelles" /tmp/prix-airpods.html
           grep -Fq "date marchande récente" /tmp/idees-cadeaux.html
           echo "Titres SEO actuels et mentions de contexte visibles publiquement."
