@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clone Studio Pro · fal.ai</title>
+<style>
+:root{--bg:#0b0b0d;--card:#16161a;--line:#2a2a31;--txt:#f2f2f2;--mut:#9a9aa5;--red:#e1121f;--ok:#2ecc71}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:18px 16px 8px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:24px;letter-spacing:.5px}
+h1 b{color:var(--red)}
+header p{margin:4px 0 0;color:var(--mut);font-size:14px}
+main{max-width:760px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.card h2{margin:0 0 10px;font-size:17px}
+.card h2 span{display:inline-block;background:var(--red);color:#fff;border-radius:6px;padding:0 8px;margin-right:6px}
+label{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
+input[type=text],input[type=password],textarea,select{width:100%;background:#0f0f12;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:16px}
+textarea{min-height:84px;resize:vertical}
+button{background:var(--red);color:#fff;border:0;border-radius:10px;padding:13px 16px;font-size:16px;font-weight:700;width:100%;margin-top:12px;cursor:pointer}
+button.sec{background:#2a2a31}
+button:disabled{opacity:.45}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#222228;border:1px solid var(--line);border-radius:20px;padding:7px 11px;font-size:13px;cursor:pointer}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.thumbs .t{position:relative;width:88px;height:118px;border-radius:10px;overflow:hidden;border:2px solid transparent;cursor:pointer}
+.thumbs .t img{width:100%;height:100%;object-fit:cover}
+.thumbs .t.sel{border-color:var(--red)}
+.thumbs .t .x{position:absolute;top:2px;right:2px;background:#000a;border-radius:50%;width:22px;height:22px;text-align:center;font-size:14px;line-height:22px}
+.hint{font-size:13px;color:var(--mut);margin-top:6px}
+.ok{color:var(--ok)}
+#log{background:#060608;border-radius:10px;padding:10px;font:12px/1.5 ui-monospace,monospace;color:#b8b8c0;max-height:260px;overflow:auto;white-space:pre-wrap}
+.res video,.res img{width:100%;border-radius:10px;margin-top:8px;background:#000}
+.res a{color:#fff;font-size:14px}
+.res .item{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.small{font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 Clone Studio <b>PRO</b></h1>
+  <p>Ton clone dans n'importe quelle scène · il bouge · il parle — propulsé par fal.ai</p>
+</header>
+<main>
+
+<div class="card">
+  <h2>🔑 Clé fal.ai</h2>
+  <input id="key" type="password" placeholder="Colle ta clé fal (xxxxxxxx:yyyyyyyy)" autocomplete="off">
+  <div class="row"><button id="saveKey" class="sec">Enregistrer la clé</button></div>
+  <div id="keyState" class="hint">Clé gardée seulement dans ce navigateur. Crée-la sur fal.ai → Keys.</div>
+</div>
+
+<div class="card">
+  <h2>📸 Mes photos</h2>
+  <input id="photos" type="file" accept="image/*" multiple>
+  <div class="hint">1 à 4 photos de toi (visage net, de face). Elles servent de référence pour garder ta tête.</div>
+  <div id="refThumbs" class="thumbs"></div>
+</div>
+
+<div class="card">
+  <h2><span>1</span>Te placer dans la scène</h2>
+  <div class="chips" id="scenePresets"></div>
+  <label>Décris la scène</label>
+  <textarea id="scenePrompt" placeholder="Ex : au volant d'une voiture de luxe décapotable qui roule sur la lune, la Terre dans le ciel"></textarea>
+  <div class="row">
+    <div><label>Format</label><select id="sceneRatio"><option value="9:16">Vertical 9:16 (TikTok)</option><option value="16:9">Horizontal 16:9</option><option value="1:1">Carré 1:1</option></select></div>
+    <div><label>Nombre d'images</label><select id="sceneNum"><option>1</option><option selected>2</option><option>4</option></select></div>
+  </div>
+  <button id="btnScene">🖼️ Créer la scène</button>
+  <div class="hint">Puis touche l'image qui te plaît pour la choisir (bord rouge). Tu peux aussi choisir directement une de tes photos.</div>
+  <div id="sceneThumbs" class="thumbs"></div>
+</div>
+
+<div class="card">
+  <h2><span>2</span>Faire bouger la scène</h2>
+  <div class="chips" id="motionPresets"></div>
+  <label>Ce qui se passe (mouvement, caméra)</label>
+  <textarea id="motionPrompt" placeholder="Ex : la voiture roule vite, poussière lunaire, caméra drone qui suit la voiture, il regarde la caméra"></textarea>
+  <div class="row">
+    <div><label>Modèle</label><select id="videoModel">
+      <option value="kling">Kling 3.0 Pro (le plus fidèle)</option>
+      <option value="seedance">Seedance 2.0 (bon rapport qualité/prix)</option>
+      <option value="veo">Veo 3.1 (rendu cinéma)</option>
+    </select></div>
+    <div><label>Durée</label><select id="videoDur"></select></div>
+  </div>
+  <label><input type="checkbox" id="videoAudio"> Générer aussi le son de la scène</label>
+  <button id="btnVideo">🎥 Animer la scène choisie</button>
+</div>
+
+<div class="card">
+  <h2><span>3</span>Faire parler ton clone</h2>
+  <div class="hint">Utilise l'image choisie (scène ou photo) + ta voix. La vidéo dure exactement la longueur de l'audio.</div>
+  <label>Ta voix (mp3, wav, m4a…)</label>
+  <input id="audioFile" type="file" accept="audio/*">
+  <div class="row">
+    <button id="btnRec" class="sec">🎙️ Enregistrer ma voix</button>
+  </div>
+  <audio id="audioPrev" controls style="width:100%;margin-top:8px;display:none"></audio>
+  <label>Ambiance / attitude (optionnel)</label>
+  <input id="talkPrompt" type="text" placeholder="Ex : il rappe avec énergie, gestes des mains">
+  <div class="row">
+    <div><label>Qualité</label><select id="talkModel"><option value="fal-ai/kling-video/ai-avatar/v2/standard">Standard</option><option value="fal-ai/kling-video/ai-avatar/v2/pro">Pro</option></select></div>
+  </div>
+  <button id="btnTalk">🗣️ Faire parler le clone</button>
+</div>
+
+<div class="card res">
+  <h2>📺 Mes vidéos</h2>
+  <div id="results"><div class="hint">Tes vidéos apparaîtront ici.</div></div>
+</div>
+
+<div class="card">
+  <h2>📋 Journal</h2>
+  <div id="log"></div>
+</div>
+<p class="small" style="text-align:center">Vidéos générées par IA — mentionne-le en publiant. · <a href="/" style="color:#9a9aa5">ancienne version (Agnes)</a></p>
+</main>
+
+<script type="module">
+import { fal } from "https://esm.sh/@fal-ai/client@1";
+
+const $ = id => document.getElementById(id);
+const logEl = $("log");
+function log(m){ const t=new Date().toLocaleTimeString("fr-FR"); logEl.textContent += `[${t}] ${m}\n`; logEl.scrollTop = logEl.scrollHeight; }
+
+// ---------- clé ----------
+let KEY = "";
+try { KEY = localStorage.getItem("falKey") || ""; } catch(e){}
+function applyKey(){
+  if(KEY){ fal.config({ credentials: KEY }); $("keyState").innerHTML = `<span class="ok">Clé active · ${KEY.slice(0,6)}…${KEY.slice(-4)}</span>`; }
+}
+applyKey();
+$("saveKey").onclick = () => {
+  KEY = $("key").value.trim();
+  if(!KEY){ log("⚠️ Colle d'abord ta clé."); return; }
+  try { localStorage.setItem("falKey", KEY); } catch(e){}
+  $("key").value = ""; applyKey(); log("Clé enregistrée.");
+};
+function needKey(){ if(!KEY){ log("⚠️ Ajoute ta clé fal.ai en haut de la page."); alertBox(); return true;} return false; }
+function alertBox(){ $("key").focus(); $("key").scrollIntoView({behavior:"smooth",block:"center"}); }
+
+// ---------- upload ----------
+const cache = new Map();
+async function upload(fileOrBlob){
+  if(cache.has(fileOrBlob)) return cache.get(fileOrBlob);
+  const url = await fal.storage.upload(fileOrBlob);
+  cache.set(fileOrBlob, url); return url;
+}
+
+// ---------- photos ----------
+let refs = []; // {file, url(local)}
+let chosen = null; // {kind:'ref'|'scene', file?, remote?}
+function renderRefs(){
+  const box = $("refThumbs"); box.innerHTML="";
+  refs.forEach((r,i)=>{
+    const d=document.createElement("div"); d.className="t"+(chosen&&chosen.ref===r?" sel":"");
+    d.innerHTML=`<img src="${r.local}"><div class="x">✕</div>`;
+    d.querySelector(".x").onclick=(e)=>{e.stopPropagation(); refs.splice(i,1); if(chosen&&chosen.ref===r) chosen=null; renderRefs();};
+    d.onclick=()=>{ chosen={ref:r, file:r.file, local:r.local}; renderRefs(); renderScenes(); log("Image choisie : ta photo "+(i+1)); };
+    box.appendChild(d);
+  });
+}
+$("photos").onchange = e => {
+  for(const f of e.target.files){ if(refs.length<4) refs.push({file:f, local:URL.createObjectURL(f)}); }
+  if(!chosen && refs[0]) chosen={ref:refs[0], file:refs[0].file, local:refs[0].local};
+  renderRefs(); log(`${refs.length} photo(s) prêtes.`);
+  e.target.value="";
+};
+
+// ---------- presets ----------
+const SCENES = {
+  "🌕 Voiture sur la lune":"au volant d'une voiture de sport de luxe noire qui roule sur la lune, la Terre bien visible dans le ciel noir, poussière lunaire, éclairage cinéma",
+  "🗽 Marche à New York":"marche dans une rue de New York la nuit, Times Square, néons, foule floue, tenue streetwear, photo cinéma",
+  "🚁 Toit de Lyon":"debout sur un toit de Lyon au coucher du soleil, la tour Crayon et Fourvière derrière, vent, tenue streetwear",
+  "🏎️ Voiture de luxe":"assis au volant d'une Lamborghini dans une rue de nuit, néons rouges, vitre baissée, regard caméra",
+  "🎤 Scène de concert":"sur une grande scène de concert rap, micro à la main, fumée, projecteurs rouges, public immense",
+  "🏝️ Bord de piscine":"posé au bord d'une piscine de palace, lunettes de soleil, chaîne en or, golden hour",
+};
+const MOTIONS = {
+  "🚗 Roule + drone":"la voiture roule vite, la caméra drone suit la voiture puis remonte, mouvement fluide",
+  "🚶 Marche caméra":"il marche vers la caméra avec assurance, la caméra recule devant lui, travelling fluide",
+  "🎤 Il rappe":"il rappe face caméra avec énergie, gestes des mains, la caméra tourne lentement autour de lui",
+  "🌀 Tour 360°":"la caméra fait un tour complet autour de lui, il reste posé et regarde la caméra",
+  "🔍 Zoom lent":"zoom lent et cinématique vers son visage, léger vent, ambiance posée",
+};
+function chips(id, obj, target){
+  const box=$(id);
+  for(const [k,v] of Object.entries(obj)){ const c=document.createElement("div"); c.className="chip"; c.textContent=k; c.onclick=()=>{$(target).value=v;}; box.appendChild(c); }
+}
+chips("scenePresets", SCENES, "scenePrompt");
+chips("motionPresets", MOTIONS, "motionPrompt");
+
+// ---------- durées ----------
+const DUR = { kling:["5","10","15","3"], seedance:["5","10","15","4"], veo:["8s","6s","4s"] };
+function fillDur(){ const m=$("videoModel").value; $("videoDur").innerHTML = DUR[m].map(d=>`<option value="${d}">${d.replace("s","")} s</option>`).join(""); }
+$("videoModel").onchange=fillDur; fillDur();
+
+// ---------- appels fal ----------
+async function run(endpoint, input, label){
+  log(`${label} : envoi à ${endpoint}…`);
+  const t0=Date.now(); let last="";
+  try{
+    const r = await fal.subscribe(endpoint, { input, logs:true, mode:"polling", pollInterval:3000,
+      onQueueUpdate: u => {
+        let s = u.status==="IN_QUEUE" ? `en file d'attente (position ${u.queue_position ?? "?"})` : u.status==="IN_PROGRESS" ? "en cours…" : u.status;
+        if(s!==last){ log(`${label} : ${s}`); last=s; }
+      }});
+    log(`${label} : ✅ terminé en ${Math.round((Date.now()-t0)/1000)} s`);
+    return r.data;
+  }catch(err){
+    let msg = err?.body?.detail ? JSON.stringify(err.body.detail) : (err?.message || String(err));
+    if(err?.status===401||err?.status===403) msg="clé refusée (vérifie ta clé fal.ai)";
+    if(err?.status===402||/balance|credit|locked/i.test(msg)) msg="crédit insuffisant sur fal.ai (ajoute du crédit dans Billing)";
+    log(`${label} : ❌ ${msg}`); throw err;
+  }
+}
+
+// ---------- étape 1 : scène ----------
+let scenes = []; // {remote}
+function renderScenes(){
+  const box=$("sceneThumbs"); box.innerHTML="";
+  scenes.forEach((s,i)=>{
+    const d=document.createElement("div"); d.className="t"+(chosen&&chosen.remote===s.remote?" sel":"");
+    d.innerHTML=`<img src="${s.remote}">`;
+    d.onclick=()=>{ chosen={remote:s.remote, local:s.remote}; renderScenes(); renderRefs(); log("Image choisie : scène "+(i+1)); };
+    box.appendChild(d);
+  });
+}
+$("btnScene").onclick = async () => {
+  if(needKey()) return;
+  if(!refs.length){ log("⚠️ Ajoute au moins une photo de toi."); return; }
+  const p=$("scenePrompt").value.trim(); if(!p){ log("⚠️ Décris la scène."); return; }
+  const b=$("btnScene"); b.disabled=true; b.textContent="⏳ Création de la scène…";
+  try{
+    log("Envoi de tes photos…");
+    const urls = await Promise.all(refs.map(r=>upload(r.file)));
+    const prompt = `Photo réaliste de la même personne que sur les photos de référence (garde exactement son visage, sa peau, sa coiffure et sa barbe), ${p}. Photo cinéma, très détaillée, nette.`;
+    const data = await run("fal-ai/nano-banana-2/edit", { prompt, image_urls:urls, num_images:+$("sceneNum").value, aspect_ratio:$("sceneRatio").value, resolution:"1K", output_format:"jpeg" }, "Scène");
+    const imgs=(data.images||[]).map(x=>({remote:x.url}));
+    scenes = imgs.concat(scenes);
+    if(imgs[0]) chosen={remote:imgs[0].remote, local:imgs[0].remote};
+    renderScenes(); renderRefs();
+    imgs.forEach(x=>addResult("image", x.remote, "Scène : "+p));
+  }catch(e){} finally{ b.disabled=false; b.textContent="🖼️ Créer la scène"; }
+};
+
+async function chosenUrl(){
+  if(!chosen){ log("⚠️ Choisis une image (scène ou photo)."); return null; }
+  if(chosen.remote) return chosen.remote;
+  return await upload(chosen.file);
+}
+
+// ---------- étape 2 : vidéo ----------
+$("btnVideo").onclick = async () => {
+  if(needKey()) return;
+  const img = await chosenUrl(); if(!img) return;
+  const p=$("motionPrompt").value.trim() || "mouvement de caméra cinématique, la personne bouge naturellement";
+  const m=$("videoModel").value, d=$("videoDur").value, audio=$("videoAudio").checked;
+  const b=$("btnVideo"); b.disabled=true; b.textContent="⏳ Animation… (1 à 10 min)";
+  try{
+    let ep, input;
+    if(m==="kling"){ ep="fal-ai/kling-video/v3/pro/image-to-video"; input={start_image_url:img, prompt:p, duration:d, generate_audio:audio}; }
+    else if(m==="seedance"){ ep="bytedance/seedance-2.0/image-to-video"; input={image_url:img, prompt:p, duration:d, resolution:"720p", aspect_ratio:"auto", generate_audio:audio}; }
+    else { ep="fal-ai/veo3.1/image-to-video"; input={image_url:img, prompt:p, duration:d, resolution:"720p", aspect_ratio:"auto", generate_audio:audio}; }
+    const data = await run(ep, input, "Vidéo");
+    if(data?.video?.url) addResult("video", data.video.url, p);
+  }catch(e){} finally{ b.disabled=false; b.textContent="🎥 Animer la scène choisie"; }
+};
+
+// ---------- étape 3 : parler ----------
+let voice=null;
+$("audioFile").onchange=e=>{ voice=e.target.files[0]||null; if(voice){ $("audioPrev").src=URL.createObjectURL(voice); $("audioPrev").style.display="block"; log("Voix chargée : "+voice.name);} };
+let rec=null, chunks=[];
+$("btnRec").onclick = async () => {
+  if(rec && rec.state==="recording"){ rec.stop(); return; }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    chunks=[]; rec=new MediaRecorder(stream);
+    rec.ondataavailable=e=>chunks.push(e.data);
+    rec.onstop=()=>{ stream.getTracks().forEach(t=>t.stop());
+      const type = rec.mimeType || "audio/webm";
+      const ext = type.includes("mp4")?"m4a":type.includes("ogg")?"ogg":"webm";
+      voice = new File([new Blob(chunks,{type})], "voix."+ext, {type});
+      $("audioPrev").src=URL.createObjectURL(voice); $("audioPrev").style.display="block";
+      $("btnRec").textContent="🎙️ Réenregistrer"; log("Voix enregistrée."); };
+    rec.start(); $("btnRec").textContent="⏹ Arrêter l'enregistrement"; log("Enregistrement… parle !");
+  }catch(e){ log("❌ Micro refusé : autorise le micro dans Chrome."); }
+};
+$("btnTalk").onclick = async () => {
+  if(needKey()) return;
+  const img = await chosenUrl(); if(!img) return;
+  if(!voice){ log("⚠️ Ajoute ou enregistre ta voix."); return; }
+  const b=$("btnTalk"); b.disabled=true; b.textContent="⏳ Ton clone apprend à parler…";
+  try{
+    const audio_url = await upload(voice);
+    const data = await run($("talkModel").value, { image_url:img, audio_url, prompt:$("talkPrompt").value.trim()||"." }, "Clone qui parle");
+    if(data?.video?.url) addResult("video", data.video.url, "Clone qui parle");
+  }catch(e){} finally{ b.disabled=false; b.textContent="🗣️ Faire parler le clone"; }
+};
+
+// ---------- résultats ----------
+function addResult(kind, url, label){
+  const box=$("results"); if(box.querySelector(".hint")) box.innerHTML="";
+  const d=document.createElement("div"); d.className="item";
+  d.innerHTML = (kind==="video" ? `<video src="${url}" controls playsinline loop></video>` : `<img src="${url}">`) +
+    `<div class="small">${label.replace(/</g,"&lt;").slice(0,120)}</div><a href="${url}" target="_blank" download>⬇️ Télécharger</a>`;
+  box.prepend(d);
+}
+log("Prêt. 1) clé fal  2) tes photos  3) crée la scène  4) anime-la ou fais-la parler.");
+</script>
+</body>
+</html>
