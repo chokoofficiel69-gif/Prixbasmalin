@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-24T00:13:32.927Z",
+  "fetched_at": "2026-11-24T00:19:04.736Z",
   "source": "Awin Publisher Enhanced/standard feeds autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
@@ -105,7 +105,7 @@
     "brands": 309,
     "products_with_gtin": 14213,
     "products_with_mpn": 13763,
-    "products_with_brand_mpn": 13744,
+    "products_with_brand_mpn": 13742,
     "multi_merchant_products": 0,
     "offers_with_shipping": 14585,
     "offers_with_availability": 18961,
