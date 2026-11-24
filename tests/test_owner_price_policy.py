@@ -21,6 +21,20 @@ class OwnerPricePolicyTest(unittest.TestCase):
         self.assertIn("def partner_picks", src)
         self.assertIn("à confirmer", src)
 
+    def test_awin_monitor_counts_listed_feed_prices_separately(self):
+        workflow = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
+        self.assertIn("listed_price_eur", workflow)
+        self.assertIn("listed_price_date", workflow)
+        self.assertIn("prix du flux datés affichables", workflow)
+        html = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn("giftListedPrice", html)
+        self.assertIn("Flux marchand du", html)
+        self.assertIn("à confirmer", html)
+
+    def test_production_monitor_uses_current_seo_heading(self):
+        workflow = (ROOT / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
+        self.assertIn("Prix AirPods 4 : comparatif", workflow)
+
     def test_agents_instructions_present(self):
         self.assertIn("NE PAS MASQUER", (ROOT / "AGENTS.md").read_text(encoding="utf-8"))
 
