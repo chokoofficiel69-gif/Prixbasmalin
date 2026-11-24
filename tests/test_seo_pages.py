@@ -54,7 +54,7 @@ class SeoPagesTests(unittest.TestCase):
             {**base, "merchant": "date-only", "price_date": "2026-11-24"},
         ]
         self.assertEqual(
-            [offer["merchant"] for offer in seo.recent_offers({"offers": offers}, now=now)],
+            [offer["merchant"] for offer in seo.verified_current_offers({"offers": offers}, now=now)],
             ["fresh"],
         )
 
