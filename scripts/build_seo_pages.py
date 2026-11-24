@@ -620,7 +620,7 @@ def bf_card(p, today=None):
             f'<a class="pm-btn pm-btn-amazon pm-btn-block" href="{e(url)}" target="_blank" rel="sponsored nofollow noopener">{e(label)}</a></div></div></article>')
 
 
-def bf_selection(sheets, lo, hi, limit=8):
+def bf_selection(sheets, lo, hi, limit=8, today=None):
     items = [p for p in sheets if p.get("offers") and lo <= bf_best_offer(p, today=today)["price_eur"] < hi]
     # Les produits suivis chez le plus de marchands d'abord (les plus recherchés), photo réelle en priorité.
     items.sort(key=lambda p: (not p.get("image"), -p["offer_count"], bf_best_offer(p, today=today)["price_eur"], p["id"]))
@@ -648,7 +648,7 @@ def bf_gap_section(sheets, limit=8, today=None):
     if not items:
         return ""
     cards = "".join(
-        bf_card(p, today=today).replace('<small>Meilleur prix récent</small>',
+        bf_card(p, today=today).replace('<small>Prix relevé récemment · à confirmer</small>',
                            f'<span class="bf-gap">Jusqu’à {euro(recent_gap(p, today=today))} d’écart entre marchands</span><small>Prix relevé récemment · à confirmer</small>', 1)
         for p in items)
     return ('<section class="panel" id="ecarts"><h2>Le bon marchand fait la différence</h2>'
