@@ -50,6 +50,46 @@ class SeoPagesTests(unittest.TestCase):
         self.assertIn("relevés historiques datés", page)
         self.assertIn("à confirmer", page)
 
+    def test_black_friday_labels_old_prices_as_historical_without_hiding_them(self):
+        product = {
+            "id": "switch-2", "name": "Nintendo Switch 2", "brand": "Nintendo",
+            "category": "console", "category_label": "Consoles", "image": "",
+            "offers": [
+                {"date": "2026-11-14", "price_eur": 367.59, "merchant": "aliexpress"},
+                {"date": "2026-11-21", "price_eur": 399.99, "merchant": "darty"},
+            ],
+        }
+        card = seo.bf_card(product, today=seo.date(2026, 11, 24))
+        self.assertIn("Prix historique · à confirmer chez le marchand", card)
+        self.assertIn("367,59", card)
+        self.assertIn("chez AliExpress le 14/11/2026", card)
+
+    def test_black_friday_gap_section_uses_the_real_last_seven_days(self):
+        old_product = {
+            "id": "switch-2", "name": "Nintendo Switch 2", "brand": "Nintendo",
+            "category": "console", "category_label": "Consoles", "image": "",
+            "offers": [
+                {"date": "2026-11-14", "price_eur": 100.0, "merchant": "amazon"},
+                {"date": "2026-11-15", "price_eur": 110.0, "merchant": "fnac"},
+                {"date": "2026-11-16", "price_eur": 120.0, "merchant": "darty"},
+            ],
+        }
+        today = seo.date(2026, 11, 24)
+        self.assertEqual(seo.recent_gap(old_product, today=today), 0.0)
+        self.assertEqual(seo.bf_gap_section([old_product], today=today), "")
+
+        fresh_product = {
+            **old_product,
+            "offers": [
+                {"date": "2026-11-20", "price_eur": 100.0, "merchant": "amazon"},
+                {"date": "2026-11-21", "price_eur": 110.0, "merchant": "fnac"},
+                {"date": "2026-11-22", "price_eur": 120.0, "merchant": "darty"},
+            ],
+        }
+        section = seo.bf_gap_section([fresh_product], today=today)
+        self.assertIn("Jusqu’à 20,00 € d’écart entre marchands", section)
+        self.assertIn("Meilleur prix récent", section)
+
     def test_sitemap_and_robots_list_seo_pages(self):
         sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
         self.assertIn("<loc>https://prixbasmalin.fr/prix/airpods-4.html</loc><lastmod>", sitemap)
