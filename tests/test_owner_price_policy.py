@@ -33,7 +33,7 @@ class OwnerPricePolicyTest(unittest.TestCase):
 
     def test_production_monitor_uses_current_seo_heading(self):
         workflow = (ROOT / ".github" / "workflows" / "monitor-production.yml").read_text(encoding="utf-8")
-        self.assertIn("Prix AirPods 4 : comparatif", workflow)
+        self.assertIn("Prix AirPods 4 : relevé historique", workflow)
 
     def test_agents_instructions_present(self):
         self.assertIn("NE PAS MASQUER", (ROOT / "AGENTS.md").read_text(encoding="utf-8"))
