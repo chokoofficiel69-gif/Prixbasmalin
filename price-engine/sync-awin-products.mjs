@@ -17,7 +17,7 @@ const EXCLUDED_ADVERTISERS = new Set(String(process.env.AWIN_EXCLUDED_ADVERTISER
 const MAX_PROGRAMMES = 100;
 const MAX_PRODUCTS = 25000;
 const MAX_PER_ADVERTISER = 3000;
-const CONCURRENCY = 3;
+const CONCURRENCY = 1; // Les flux CSV volumineux sont traités un par un pour limiter le pic mémoire.
 const ENHANCED_FEED_INTERVAL_MS = 12000; // Awin: maximum 5 téléchargements Enhanced par minute.
 const TIMEOUT_MS = 45000;
 
@@ -276,6 +276,30 @@ function parseCsv(text) {
   if (field.length || row.length) { row.push(field.replace(/\r$/, "")); rows.push(row); }
   return rows.filter(item => item.some(cell => String(cell).trim() !== ""));
 }
+function* iterateCsvRows(text) {
+  let row = [], field = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (quoted) {
+      if (char === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (char === '"') quoted = false;
+      else field += char;
+    } else if (char === '"') quoted = true;
+    else if (char === ",") { row.push(field); field = ""; }
+    else if (char === "\n") {
+      row.push(field.replace(/\r$/, ""));
+      if (row.some(cell => String(cell).trim() !== "")) yield row;
+      row = [];
+      field = "";
+    } else field += char;
+  }
+  if (quoted) throw new Error("CSV Awin invalide : guillemet non refermé.");
+  if (field.length || row.length) {
+    row.push(field.replace(/\r$/, ""));
+    if (row.some(cell => String(cell).trim() !== "")) yield row;
+  }
+}
+
 function objectRowsFromCsv(text) {
   const rows = parseCsv(text);
   if (rows.length < 2) return [];
@@ -381,11 +405,15 @@ async function loadDirectAwinFeed(rawOffers) {
       if (!response.ok) throw new Error("Téléchargement du flux Awin refusé (HTTP " + response.status + ").");
       let bytes = Buffer.from(await response.arrayBuffer());
       if (bytes.length >= 2 && bytes[0] === 0x1f && bytes[1] === 0x8b) bytes = gunzipSync(bytes);
-      const csv = bytes.toString("utf8");
+      let csv = bytes.toString("utf8");
+      bytes = null;
       if (/^\s*<(!doctype|html)/i.test(csv)) throw new Error("Awin a renvoyé une page HTML au lieu du fichier produits.");
-      const rows = objectRowsFromCsv(csv);
-      if (!rows.length) throw new Error("Le flux Awin est vide ou son CSV est illisible.");
-      const headers = new Set(Object.keys(rows[0] || {}));
+
+      let iterator = iterateCsvRows(csv);
+      const headerResult = iterator.next();
+      if (headerResult.done) throw new Error("Le flux Awin est vide ou son CSV est illisible.");
+      const headerNames = headerResult.value.map(value => norm(value.replace(/^\uFEFF/, "")).replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""));
+      const headers = new Set(headerNames);
       log("En-têtes CSV Awin observés : " + [...headers].sort().join(", ") + ".");
       if (!headers.has("product_name") || !(headers.has("search_price") || headers.has("store_price") || headers.has("display_price"))) {
         throw new Error("Les colonnes produit/prix attendues sont absentes du flux Awin.");
@@ -395,32 +423,33 @@ async function loadDirectAwinFeed(rawOffers) {
         gtin: GTIN_FIELDS,
         mpn: MPN_FIELDS
       };
-      const identityCoverage = Object.entries(identityFields).map(([label, fields]) => {
-        const present = fields.filter(field => headers.has(field));
-        const populated = rows.filter(row => fields.some(field => String(row[field] || "").trim())).length;
-        return label + " " + populated + "/" + rows.length + " (colonnes : " + (present.join(", ") || "absentes") + ")";
-      });
-      log("Couverture des identifiants du flux Awin : " + identityCoverage.join(" ; ") + ".");
+      const identityStats = Object.entries(identityFields).map(([label, fields]) => ({
+        label,
+        fields,
+        present: fields.filter(field => headers.has(field)),
+        populated: 0
+      }));
       const temporalHeaders = [...headers].filter(field => /(date|time|updated|modified|last)/i.test(field)).sort();
       const timestampNow = Date.now();
       const timestampCoverage = { fresh: 0, missing: 0, stale: 0, invalidOrFuture: 0 };
-      for (const row of rows) {
-        const value = String(row.last_updated || "").trim();
-        if (!value) { timestampCoverage.missing++; continue; }
-        const timestamp = Date.parse(value);
-        if (!Number.isFinite(timestamp) || timestamp > timestampNow + 5 * 60 * 1000) {
-          timestampCoverage.invalidOrFuture++;
-        } else if (timestampNow - timestamp <= 48 * 60 * 60 * 1000) {
-          timestampCoverage.fresh++;
-        } else {
-          timestampCoverage.stale++;
-        }
-      }
-      log("Colonnes temporelles présentes dans le CSV Awin : " + (temporalHeaders.join(", ") || "aucune") + ".");
-      log("last_updated : colonne " + (headers.has("last_updated") ? "présente" : "absente") + " ; couverture des lignes source : " + JSON.stringify(timestampCoverage) + " (fraîches = moins de 48 h).");
       const perAdvertiser = new Map();
       let imported = 0;
-      for (const row of rows) {
+      let rowCount = 0;
+      for (const cells of iterator) {
+        const row = Object.fromEntries(headerNames.map((header, index) => [header, String(cells[index] ?? "").trim()]));
+        rowCount++;
+        for (const item of identityStats) {
+          if (item.fields.some(field => String(row[field] || "").trim())) item.populated++;
+        }
+        const value = String(row.last_updated || "").trim();
+        if (!value) timestampCoverage.missing++;
+        else {
+          const timestamp = Date.parse(value);
+          if (!Number.isFinite(timestamp) || timestamp > timestampNow + 5 * 60 * 1000) timestampCoverage.invalidOrFuture++;
+          else if (timestampNow - timestamp <= 48 * 60 * 60 * 1000) timestampCoverage.fresh++;
+          else timestampCoverage.stale++;
+        }
+
         if (row.language && !/^(fr|french|fr_fr)$/i.test(String(row.language).trim())) continue;
         const advertiser = String(row.merchant_id || row.advertiser_id || row.data_feed_id || "awin-standard");
         const currentCount = perAdvertiser.get(advertiser) || 0;
@@ -431,6 +460,15 @@ async function loadDirectAwinFeed(rawOffers) {
         perAdvertiser.set(advertiser, currentCount + 1);
         imported++;
       }
+      iterator = null;
+      csv = "";
+      if (!rowCount) throw new Error("Le flux Awin est vide ou son CSV ne contient aucune ligne produit.");
+      const identityCoverage = identityStats.map(item =>
+        item.label + " " + item.populated + "/" + rowCount + " (colonnes : " + (item.present.join(", ") || "absentes") + ")"
+      );
+      log("Couverture des identifiants du flux Awin : " + identityCoverage.join(" ; ") + ".");
+      log("Colonnes temporelles présentes dans le CSV Awin : " + (temporalHeaders.join(", ") || "aucune") + ".");
+      log("last_updated : colonne " + (headers.has("last_updated") ? "présente" : "absente") + " ; couverture des lignes source : " + JSON.stringify(timestampCoverage) + " (fraîches = moins de 48 h).");
       if (!imported) throw new Error("Aucune offre exploitable dans le flux Awin (prix EUR, image, lien HTTPS et données produit requis).");
       log(imported + " offre(s) importée(s) depuis le flux produits Awin direct.");
       return imported;
@@ -510,7 +548,6 @@ async function loadStandardAwinFeeds(rawOffers) {
     encodeURIComponent(PUBLISHER_ID) + "/" + encodeURIComponent(key) + "/1/feedList";
   let response = await fetch(listUrl,{headers:{Accept:"text/csv"},signal:AbortSignal.timeout(TIMEOUT_MS)});
   if (!response.ok) {
-    // Compatibilité avec l'ancien endpoint encore documenté dans certaines pages Awin.
     const legacyUrl = "https://productdata.awin.com/datafeed/list/apikey/" + encodeURIComponent(key);
     response = await fetch(legacyUrl,{headers:{Accept:"text/csv"},signal:AbortSignal.timeout(TIMEOUT_MS)});
   }
@@ -545,32 +582,46 @@ async function loadStandardAwinFeeds(rawOffers) {
         if (!feedResponse.ok) { log("Flux standard ignoré (HTTP "+feedResponse.status+")."); continue; }
         let bytes = Buffer.from(await feedResponse.arrayBuffer());
         if (bytes[0]===0x1f && bytes[1]===0x8b) bytes=gunzipSync(bytes);
-        const rows = objectRowsFromCsv(bytes.toString("utf8"));
+        let csv = bytes.toString("utf8");
+        bytes = null;
+        let iterator = iterateCsvRows(csv);
+        const headerResult = iterator.next();
+        if (headerResult.done) continue;
+        const headers = headerResult.value.map(value => norm(value.replace(/^\uFEFF/, "")).replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""));
+        const temporalFields = headers.filter(field => /(date|time|updated|modified|last)/i.test(field)).sort();
+        const temporalCounts = new Map(temporalFields.map(field => [field, 0]));
         const advertiser = String(row.advertiser_id || row.advertiserid || row.id || row.feed_id || "standard");
         const program = {name:row.advertiser_name || row.advertiser || ("Annonceur Awin "+advertiser)};
-        const temporalFields = temporalFieldCoverage(rows);
-        const temporalSummary = temporalFields.length
-          ? temporalFields.map(field => field.field + "=" + field.populated + "/" + field.total).join(", ")
-          : "aucune colonne temporelle";
-        const lastUpdatedColumn = Object.prototype.hasOwnProperty.call(rows[0] || {}, "last_updated") ? "présente" : "absente";
+        const lastUpdatedColumn = headers.includes("last_updated") ? "présente" : "absente";
         const feedLastImported = String(row.last_imported || row.last_imported_at || row.last_imported_date || "").trim();
-        log(program.name + " (flux standard) : champs temporels : " + temporalSummary + " ; last_updated produit " + lastUpdatedColumn + " ; dernier import du flux " + (feedLastImported || "non fourni") + ".");
+        let totalRows = 0;
         let count = 0;
-        for (const productRow of rows) {
+        for (const cells of iterator) {
+          const productRow = Object.fromEntries(headers.map((header,index) => [header,String(cells[index] ?? "").trim()]));
+          totalRows++;
+          for (const field of temporalFields) {
+            if (String(productRow[field] ?? "").trim()) temporalCounts.set(field, (temporalCounts.get(field) || 0) + 1);
+          }
+          if (count >= MAX_PER_ADVERTISER || rawOffers.length >= MAX_PRODUCTS) continue;
           const offer = parseFeedRow({ ...productRow, feed_last_imported: feedLastImported },program,advertiser);
           if (!offer) continue;
           rawOffers.push(offer);
           imported++;
           count++;
-          if (count>=MAX_PER_ADVERTISER || rawOffers.length>=MAX_PRODUCTS) break;
         }
+        iterator = null;
+        csv = "";
+        const temporalSummary = temporalFields.length
+          ? temporalFields.map(field => field + "=" + (temporalCounts.get(field) || 0) + "/" + totalRows).join(", ")
+          : "aucune colonne temporelle";
+        log(program.name + " (flux standard) : champs temporels : " + temporalSummary + " ; last_updated produit " + lastUpdatedColumn + " ; dernier import du flux " + (feedLastImported || "non fourni") + ".");
         if (count) log(program.name+" (flux standard) : "+count+" offre(s) importée(s).");
       } catch (error) {
         log("Flux standard ignoré ("+String(error.message||"erreur").slice(0,100)+").");
       }
     }
   }
-  await Promise.all(Array.from({length:Math.min(2,joined.length)},standardWorker));
+  await Promise.all(Array.from({length:Math.min(CONCURRENCY,joined.length)},standardWorker));
   return imported;
 }
 
@@ -929,6 +980,20 @@ async function runSelfTests() {
       freshnessCheck.missing !== 1 || freshnessCheck.invalidOrFuture !== 2) {
     throw new Error("TEST ÉCHEC : la fraîcheur combinée des offres doit distinguer fraîches, périmées, absentes et invalides.");
   }
+  const streamingCsv = 'id,description\r\n1,"ligne 1\nligne 2, ""citation"""\r\n2,texte\r\n\r\n';
+  const streamingExpected = [
+    ["id", "description"],
+    ["1", 'ligne 1\nligne 2, "citation"'],
+    ["2", "texte"]
+  ];
+  if (JSON.stringify([...iterateCsvRows(streamingCsv)]) !== JSON.stringify(streamingExpected) ||
+      JSON.stringify(parseCsv(streamingCsv)) !== JSON.stringify(streamingExpected)) {
+    throw new Error("TEST ÉCHEC : le parseur CSV en flux doit conserver les guillemets échappés, les virgules et les retours à la ligne.");
+  }
+  let rejectedStreamingCsv = false;
+  try { [...iterateCsvRows('id,name\n1,"guillemet ouvert')]; }
+  catch { rejectedStreamingCsv = true; }
+  if (!rejectedStreamingCsv) throw new Error("TEST ÉCHEC : un CSV tronqué doit être rejeté par le parseur en flux.");
   const rows = objectRowsFromCsv(sampleCsv);
   const temporalDiagnostics = temporalFieldCoverage([
     { last_updated: "2026-11-04T10:00:00Z", updated_at: "" },
