@@ -83,6 +83,10 @@ function categoryFor(row, merchantName = "") {
   if (/perfumeria comas|boucleme/.test(merchant) && ["other", "fashion"].includes(metadataCategory)) return "beauty";
   // Jowissa est une maison horlogère : ses montres, bijoux et bracelets relèvent de la mode.
   if (/jowissa/.test(merchant) && metadataCategory === "other") return "fashion";
+  // House-of-Sneakers est un marchand spécialisé dans les chaussures/sneakers.
+  // Son flux standard ne fournit pas de catégorie ; ne classer en mode que si la source
+  // est absente/générique, sans écraser une catégorie explicite.
+  if (/house-of-sneakers/.test(merchant) && metadataCategory === "other") return "fashion";
   // Le flux Imou FR omet la catégorie source. Ne classer que les familles produit
   // identifiables dans son catalogue officiel ; les modèles inconnus restent "other".
   if (/imou/.test(merchant) && metadataCategory === "other") {
@@ -1116,6 +1120,8 @@ async function runSelfTests() {
     [{ title: "Appareil à fondue électrique Fiesta Russell Hobbs" }, "home", "SODEAL CH"],
     [{ title: "Appareil à Raclette 8 Personnes 3 en 1 Ohmex" }, "home", "SODEAL CH"],
     [{ title: "Jowissa Facet Oval Petite Montre Femme Suisse" }, "fashion", "Jowissa"],
+    [{ title: "A Ma Maniére x Air Jordan 4 Retro Fossil Stone" }, "fashion", "House-of-Sneakers DE"],
+    [{ product_type: "Electronics > Audio", title: "Air Jordan 4" }, "tech", "House-of-Sneakers DE"],
     [{ title: "10x PULSIVA Accroche-porte Presto ovale" }, "home", "LUSINI FR"],
     [{ title: "10x PULSIVA Chevalet de table non fumeur" }, "home", "LUSINI FR"],
     [{ title: "120x VEGA Produit d'entretien pour lave-verres" }, "home", "LUSINI FR"],
