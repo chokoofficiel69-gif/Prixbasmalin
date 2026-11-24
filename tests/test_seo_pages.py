@@ -39,7 +39,7 @@ class SeoPagesTests(unittest.TestCase):
         now = seo.parse_utc("2026-11-24T10:00:00Z")
         base = {
             "price_verified": True, "price_tax_status": "included",
-            "price_date_kind": "merchant", "currency": "EUR", "price_eur": 99.0,
+            "price_date_kind": "merchant", "currency": "EUR", "price_eur": 99.0, "date": "2026-11-23",
         }
         offers = [
             {**base, "merchant": "fresh", "price_date": "2026-11-23T10:00:00Z"},
