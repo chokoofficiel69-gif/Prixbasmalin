@@ -14,10 +14,12 @@ Sont concernés :
 - les cartes du catalogue : `listedPrice` et `pmListedPriceIsRecent` dans `catalogue.html`.
 
 Ces prix sont déjà affichés honnêtement :
-- ils ne sont jamais présentés comme « vérifiés » ;
-- ils portent la mention « flux marchand du JJ/MM · à confirmer » ;
-- ils disparaissent quand le flux a plus de 7 jours ;
-- les marchands qui affichent leurs prix hors taxes (Lusini) sont exclus.
+- ils ne sont jamais présentés comme « vérifiés » tant que devise, TVA et date individuelle ne sont pas confirmées ;
+- ils restent visibles même si le flux est ancien, si la date individuelle manque ou si la TVA n'est pas confirmée ;
+- afficher la date marchande si elle existe, sinon la date de réception du flux en la nommant explicitement ;
+- signaler « relevé ancien », « date individuelle non fournie », « TVA non confirmée » ou « Prix HT · TVA à ajouter » selon le cas ;
+- les prix source ne sont jamais classés « meilleur prix total » et n'entrent pas dans les comparaisons vérifiées ;
+- les offres vérifiées restent limitées à EUR, TTC explicitement confirmé, date marchande exploitable de moins de 48 h et identité produit exacte.
 
 **Interdit** : retirer, masquer ou remplacer ces prix par « Prix non vérifié » sans l'accord écrit du propriétaire.
 
