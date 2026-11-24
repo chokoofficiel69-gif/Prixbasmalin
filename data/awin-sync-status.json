@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-24T10:43:43.068Z",
+  "fetched_at": "2026-11-24T20:15:17.939Z",
   "source": "Awin Publisher Enhanced/standard feeds autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
   "programmes_check_status": "verified",
-  "joined_advertisers_checked": 21,
-  "pending_advertisers_detected": 22,
+  "joined_advertisers_checked": 23,
+  "pending_advertisers_detected": 29,
   "joined_advertisers": [
     {
       "id": "22619",
@@ -66,6 +66,10 @@
       "name": "Lunzo AT"
     },
     {
+      "id": "114336",
+      "name": "House-of-Sneakers DE"
+    },
+    {
       "id": "115393",
       "name": "ANITA & ZAHA"
     },
@@ -92,28 +96,32 @@
     {
       "id": "131783",
       "name": "Mibro FR"
+    },
+    {
+      "id": "131963",
+      "name": "Magic Farmers FR"
     }
   ],
-  "additional_authorized_offers_imported": 23586,
+  "additional_authorized_offers_imported": 25000,
   "counts": {
-    "joined_advertisers_checked": 21,
-    "pending_advertisers_detected": 22,
-    "additional_authorized_offers_imported": 23586,
-    "products": 20794,
-    "merchant_offers": 23586,
-    "merchants": 19,
-    "brands": 309,
-    "products_with_gtin": 14210,
-    "products_with_mpn": 13767,
-    "products_with_brand_mpn": 13746,
+    "joined_advertisers_checked": 23,
+    "pending_advertisers_detected": 29,
+    "additional_authorized_offers_imported": 25000,
+    "products": 22017,
+    "merchant_offers": 25000,
+    "merchants": 18,
+    "brands": 306,
+    "products_with_gtin": 15375,
+    "products_with_mpn": 14992,
+    "products_with_brand_mpn": 14971,
     "multi_merchant_products": 0,
-    "offers_with_shipping": 14584,
-    "offers_with_availability": 18960,
+    "offers_with_shipping": 17549,
+    "offers_with_availability": 17366,
     "offers_with_tax_included": 0,
-    "products_other_category": 321,
+    "products_other_category": 3071,
     "offers_fresh_last_48h": 1,
-    "offers_missing_timestamp": 20586,
-    "offers_stale": 2999,
+    "offers_missing_timestamp": 23529,
+    "offers_stale": 1470,
     "offers_invalid_or_future_timestamp": 0
   }
 }
