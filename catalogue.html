@@ -6491,7 +6491,8 @@ function render(){
     };
     const updateValue=p.merchantUpdatedAt||null;
     const priceDateValue=updateValue;
-    const hasVerifiedPrice=p.priceStatus==="fresh"&&p.feedIsFresh===true&&currencyCode==="EUR"&&
+    const feedFreshForPrice=!p.isAwinProduct||p.feedIsFresh===true;
+    const hasVerifiedPrice=p.priceStatus==="fresh"&&feedFreshForPrice&&currencyCode==="EUR"&&
       (p.priceTaxStatus==="included"||p.price_tax_status==="included")&&
       Number.isFinite(Number(p.priceValue))&&Number(p.priceValue)>0&&
       pmAwinPriceIsFresh(updateValue);
@@ -6511,10 +6512,10 @@ function render(){
     const dateLabel=priceDateText?"Date source du prix : "+priceDateText
       :feedDateText?"Date individuelle du prix non fournie · flux reçu le "+feedDateText
       :"Date individuelle du prix non fournie";
-    const freshnessLabel=!p.feedIsFresh?"flux ancien ou datation du flux absente"
+    const freshnessLabel=p.isAwinProduct&&!p.feedIsFresh?"flux ancien ou datation du flux absente"
       :listedFresh?"date source récente"
       :priceDateText?"date source ancienne"
-      :"date individuelle du prix non fournie";
+      :p.isAwinProduct?"date individuelle du prix non fournie":"date source à confirmer";
     const taxStatus=String(p.priceTaxStatus||p.price_tax_status||"unspecified").toLowerCase();
     const taxLabel=taxStatus==="excluded"||pmHtMerchant(p.merchant)?"Prix HT · TVA à ajouter"
       :taxStatus==="included"?"TVA indiquée incluse par la source, à confirmer"
