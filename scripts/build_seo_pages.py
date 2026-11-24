@@ -551,11 +551,40 @@ else if(now<end){el.textContent="C’est le Black Friday · jusqu’au Cyber Mon
 else{el.textContent="Black Friday terminé · les prix relevés restent consultables";}})();</script>"""
 
 
-def bf_card(p):
+def bf_recent_offers(p, today=None):
+    """Relevés réellement datés des 7 derniers jours, par rapport au jour du rendu."""
+    today = today or datetime.now(timezone.utc).date()
+    if isinstance(today, str):
+        today = date.fromisoformat(today)
+    cutoff = (today - timedelta(days=RECENT_OFFER_DAYS)).isoformat()
+    end = today.isoformat()
+    return sorted(
+        (o for o in (p.get("offers") or [])
+         if cutoff <= str(o.get("date") or "")[:10] <= end and o.get("merchant") not in REFURBISHED),
+        key=lambda o: (o["price_eur"], o["merchant"]),
+    )
+
+
+def bf_price_label(offer, today=None):
+    """Évite d'appeler « récent » un relevé de plus de 7 jours au jour du rendu."""
+    today = today or datetime.now(timezone.utc).date()
+    if isinstance(today, str):
+        today = date.fromisoformat(today)
+    observed = date.fromisoformat(str(offer["date"])[:10])
+    age_days = (today - observed).days
+    if age_days < 0:
+        return "Date de relevé à vérifier"
+    if age_days <= RECENT_OFFER_DAYS:
+        return "Meilleur prix récent"
+    return "Prix historique · à confirmer chez le marchand"
+
+
+def bf_card(p, today=None):
     best = best_recent(p)
+    label_text = bf_price_label(best, today=today)
     url, label, _ = amazon_link(p)
     return (f'<article class="bf-card">{visual(p)}<div class="c"><small>{e(p["category_label"])}</small><b>{e(p["name"])}</b>'
-            f'<small>Meilleur prix récent</small><strong>{euro(best["price_eur"])}</strong>'
+            f'<small>{e(label_text)}</small><strong>{euro(best["price_eur"])}</strong>'
             f'<small>chez {e(merchant_name(best["merchant"]))} le {date_fr(best["date"])}</small>'
             f'<div class="bf-actions"><a class="pm-btn pm-btn-compare pm-btn-block" href="/prix/{e(p["id"])}.html">Comparer les prix</a>'
             f'<a class="pm-btn pm-btn-amazon pm-btn-block" href="{e(url)}" target="_blank" rel="sponsored nofollow noopener">{e(label)}</a></div></div></article>')
@@ -568,24 +597,29 @@ def bf_selection(sheets, lo, hi, limit=8):
     return items[:limit]
 
 
-def recent_gap(p):
-    """Écart entre le moins cher et le plus cher des relevés récents (même produit, marchands différents)."""
-    recent = recent_offers(p)
+def recent_gap(p, today=None):
+    """Écart entre marchands calculé uniquement sur les 7 derniers jours calendaires."""
+    recent = bf_recent_offers(p, today=today)
     if len(recent) < 3:
         return 0.0
     return round(recent[-1]["price_eur"] - recent[0]["price_eur"], 2)
 
 
-def bf_gap_section(sheets, limit=8):
-    """Les produits où choisir le bon marchand fait économiser le plus (relevés récents, photo en priorité)."""
-    items = [p for p in sheets if recent_gap(p) >= 10 and recent_gap(p) <= 0.5 * recent_offers(p)[0]["price_eur"]]
-    items.sort(key=lambda p: (not p.get("image"), -recent_gap(p), p["id"]))
+def bf_gap_section(sheets, limit=8, today=None):
+    """Les produits où choisir le bon marchand fait économiser le plus sur les 7 derniers jours."""
+    today = today or datetime.now(timezone.utc).date()
+    items = [
+        p for p in sheets
+        if recent_gap(p, today=today) >= 10
+        and recent_gap(p, today=today) <= 0.5 * bf_recent_offers(p, today=today)[0]["price_eur"]
+    ]
+    items.sort(key=lambda p: (not p.get("image"), -recent_gap(p, today=today), p["id"]))
     items = items[:limit]
     if not items:
         return ""
     cards = "".join(
-        bf_card(p).replace('<small>Meilleur prix récent</small>',
-                           f'<span class="bf-gap">Jusqu’à {euro(recent_gap(p))} d’écart entre marchands</span><small>Meilleur prix récent</small>', 1)
+        bf_card(p, today=today).replace('<small>Meilleur prix récent</small>',
+                           f'<span class="bf-gap">Jusqu’à {euro(recent_gap(p, today=today))} d’écart entre marchands</span><small>Meilleur prix récent</small>', 1)
         for p in items)
     return ('<section class="panel" id="ecarts"><h2>Le bon marchand fait la différence</h2>'
             '<p>Même produit, prix très différents selon le vendeur : écarts entre le moins cher et le plus cher des relevés de la dernière semaine.</p>'
@@ -617,13 +651,14 @@ def partner_codes_section(today=None):
             f'<p class="source">Codes fournis par les marchands dans leurs campagnes officielles. Conditions et validité chez le marchand. Lien affilié.</p></section>{script}')
 
 
-def black_friday_page(sheets):
+def black_friday_page(sheets, today=None):
+    today = today or datetime.now(timezone.utc).date()
     groups = [(slug, label, bf_selection(sheets, lo, hi)) for slug, label, lo, hi in BF_BUDGETS]
     groups = [g for g in groups if g[2]]
     latest = max((p.get("last_date") or "") for p in sheets)
     jump = "".join(f'<a href="#{slug}">{e(label)}</a>' for slug, label, _ in groups)
     sections = "".join(
-        f'<section class="panel" id="{slug}"><h2>{e(label)}</h2><div class="bf-grid">{"".join(bf_card(p) for p in items)}</div></section>'
+        f'<section class="panel" id="{slug}"><h2>{e(label)}</h2><div class="bf-grid">{"".join(bf_card(p, today=today) for p in items)}</div></section>'
         for slug, label, items in groups)
     count = sum(len(items) for _, _, items in groups)
     popular_products = [
@@ -662,11 +697,11 @@ def black_friday_page(sheets):
     ]
     extra = BF_CSS + "\n" + "\n".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld) + "\n"
     body = f"""<section class="bf-hero"><h1>Black Friday 2026 : notre sélection high-tech par budget</h1>
-<p>{count} produits très demandés, classés par budget, avec le meilleur prix relevé cette semaine avant le Black Friday. Le bon réflexe : une promotion n’est intéressante que si elle passe sous ce repère.</p>
+<p>{count} produits très demandés, classés par budget, avec un prix relevé sur les 7 derniers jours lorsqu’il existe ; sinon, un relevé historique disponible reste affiché avec sa date. Le bon réflexe : vérifiez toujours le montant chez le marchand.</p>
 <span class="bf-date" id="bf-countdown">Vendredi 27 novembre 2026 · Cyber Monday le 30 novembre</span>
 <div class="bf-jump"><a href="#ecarts">Plus gros écarts</a>{jump}</div></section>
 <p class="notice" style="margin:0 0 12px">Prix relevés avant le Black Friday (dernier relevé : {date_fr(latest)}), pas des prix promotionnels en direct. Vérifiez toujours le prix final, le vendeur et la livraison chez le marchand.</p>
-{bf_gap_section(sheets)}{popular_section}{partner_codes_section()}{sections}
+{bf_gap_section(sheets, today=today)}{popular_section}{partner_codes_section()}{sections}
 <section class="panel"><h2>Éviter les fausses promotions</h2><p>Préparez votre liste, notez le prix repère de chaque produit et créez une alerte prix gratuite depuis la fiche du produit. Notre guide détaille la méthode : <a href="/guide-black-friday-2026.html">Black Friday 2026 : repérer les vraies bonnes affaires</a>.</p>
 <p>Vous cherchez des idées cadeaux ? <a href="/idees-cadeaux/">Idées cadeaux par budget</a> · <a href="/prix/">Tout le comparateur</a></p></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
