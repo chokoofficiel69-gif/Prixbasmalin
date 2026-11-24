@@ -306,7 +306,7 @@ jobs:
             const stamp = Date.parse(String(g.listed_price_date || ""));
             const age = Date.now() - stamp;
             return !Number.isFinite(stamp) || age < -5 * 60 * 1000 || age > 7 * 24 * 60 * 60 * 1000 ||
-              /\\blusini\\b/i.test(String(g.merchant || ""));
+              /\blusini\b/i.test(String(g.merchant || ""));
           });
           if (invalidImages.length || falsePrices.length || invalidPrices.length || invalidListedPrices.length) {
             throw new Error("La vitrine cadeaux contient une image non sourcée, un prix mal daté ou un prix HT.");
