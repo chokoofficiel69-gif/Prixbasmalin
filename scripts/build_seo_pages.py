@@ -416,6 +416,10 @@ def product_page(p, sheets, period, guide=None, now=None):
     return layout(title, description, f"/prix/{p['id']}.html", body, crumbs, extra)
 
 
+GENERIC_LABELS = {"cuisine": "Cuisine high-tech", "casque-vr": "Casques VR", "coiffure": "Appareils de coiffure",
+                  "accessoire-ps5-jeu": "Jeux PS5", "casque": "Casques audio"}
+
+
 def category_page(cat, label, items):
     slug = CATEGORY_SLUGS.get(cat, cat)
     if label == "High-Tech" and cat in GENERIC_LABELS:
