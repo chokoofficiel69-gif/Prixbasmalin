@@ -227,8 +227,35 @@ def recent_offers(p):
                   key=lambda o: (o["price_eur"], o["merchant"]))
 
 
+def verified_current_offers(p, now=None):
+    """Offres actuelles admissibles seulement si TTC, date marchande et fraîcheur sont prouvés."""
+    reference_time = now or datetime.now(timezone.utc)
+    eligible = []
+    for offer in p.get("offers") or []:
+        if offer.get("price_verified") is not True:
+            continue
+        if offer.get("price_tax_status") != "included" or offer.get("price_date_kind") != "merchant":
+            continue
+        if offer.get("currency") != "EUR" or offer.get("merchant") in REFURBISHED:
+            continue
+        raw_date = offer.get("price_date")
+        if not offer.get("date") or not isinstance(raw_date, str) or "T" not in raw_date:
+            continue
+        updated_at = parse_utc(raw_date)
+        if updated_at is None:
+            continue
+        age = reference_time - updated_at
+        if age < timedelta(minutes=-5) or age > timedelta(hours=MAX_VERIFIED_PRICE_AGE_HOURS):
+            continue
+        price = offer.get("price_eur")
+        if isinstance(price, bool) or not isinstance(price, (int, float)) or price <= 0:
+            continue
+        eligible.append(offer)
+    return sorted(eligible, key=lambda o: (o["price_eur"], str(o.get("merchant") or "")))
+
+
 def best_recent(p):
-    """Meilleur prix parmi les relevés récents ; à défaut, le plus bas de l'historique."""
+    """Meilleur relevé dans la fenêtre historique relative au dernier relevé du produit."""
     recent = recent_offers(p)
     if recent:
         return recent[0]
@@ -236,9 +263,18 @@ def best_recent(p):
     return new[0] if new else p["offers"][0]
 
 
-def product_card(p):
+def historical_lowest_offer(p):
+    """Plus bas relevé historique disponible, hors vendeurs reconditionnés."""
+    offers = [o for o in p.get("offers", []) if o.get("merchant") not in REFURBISHED]
+    return min(offers or p["offers"], key=lambda o: (o["price_eur"], o.get("date", "")))
+
+
+def product_card(p, now=None):
+    current = verified_current_offers(p, now=now)
+    best = current[0] if current else historical_lowest_offer(p)
+    label = "Prix TTC confirmé" if current else "Plus bas relevé historique"
     return (f'<a class="card pm-card" href="/prix/{e(p["id"])}.html">{visual(p)}<div class="c"><small>{e(p["category_label"])} · {p["offer_count"]} marchands suivis</small>'
-            f'<b>{e(p["name"])}</b><small>Meilleur prix récent</small><strong>{euro(best_recent(p)["price_eur"])}</strong><small>Relevé du {date_fr(best_recent(p)["date"])} chez {e(merchant_name(best_recent(p)["merchant"]))}</small></div></a>')
+            f'<b>{e(p["name"])}</b><small>{label}</small><strong>{euro(best["price_eur"])}</strong><small>Relevé du {date_fr(best["date"])} chez {e(merchant_name(best["merchant"]))}</small></div></a>')
 
 
 def trend_sentence(p):
@@ -278,18 +314,13 @@ def chart_svg(p):
 ICECAT_GTINS = ROOT / "data" / "icecat-gtins.json"
 GTINS = (json.loads(ICECAT_GTINS.read_text(encoding="utf-8")).get("products") or {}) if ICECAT_GTINS.exists() else {}
 RECENT_OFFER_DAYS = 7
+MAX_VERIFIED_PRICE_AGE_HOURS = 48
 # Vendeurs de reconditionné : affichés dans le tableau avec la mention, jamais comme « meilleur prix » du neuf.
 REFURBISHED = {"asgoodasnewfr", "friphonerycom", "backmarket", "backmarketfr"}  # seuls les relevés de moins de 7 jours (par rapport au dernier relevé) vont dans le balisage
 
 
-def product_ld(p):
-    """Balisage schema.org Product + AggregateOffer pour Google.
-
-    Reprend exactement les prix affichés sur la page (relevés datés), limités aux relevés récents.
-    Sans relevé récent, pas de bloc d'offres : on ne présente jamais un vieux prix comme une offre.
-    """
-    offers = p.get("offers") or []
-    last = max((o["date"] for o in offers), default=None)
+def product_ld(p, now=None):
+    """Balisage Product ; AggregateOffer uniquement pour des offres TTC confirmées de moins de 48 h."""
     data = {"@context": "https://schema.org", "@type": "Product", "name": p["name"],
             "url": f"{SITE}/prix/{p['id']}.html", "sku": p["id"],
             "category": p.get("category_label") or ""}
@@ -301,21 +332,20 @@ def product_ld(p):
     gtin = GTINS.get(p["id"])
     if gtin:
         data["gtin"] = gtin.lstrip("0") if len(gtin) == 14 else gtin
-    if last:
-        limit = (date.fromisoformat(last) - timedelta(days=RECENT_OFFER_DAYS)).isoformat()
-        recent = [o for o in offers if o["date"] >= limit and o["merchant"] not in REFURBISHED]
-        if recent:
-            prices = [o["price_eur"] for o in recent]
-            data["offers"] = {"@type": "AggregateOffer", "priceCurrency": "EUR",
-                              "lowPrice": f"{min(prices):.2f}", "highPrice": f"{max(prices):.2f}",
-                              "offerCount": len(recent)}
+    current = verified_current_offers(p, now=now)
+    if current:
+        prices = [o["price_eur"] for o in current]
+        data["offers"] = {"@type": "AggregateOffer", "priceCurrency": "EUR",
+                          "lowPrice": f"{min(prices):.2f}", "highPrice": f"{max(prices):.2f}",
+                          "offerCount": len(current)}
     return data
 
 
-def product_page(p, sheets, period, guide=None):
+def product_page(p, sheets, period, guide=None, now=None):
     q = query_for(p)
-    best = best_recent(p)
-    pool = recent_offers(p) or p["offers"]
+    current = verified_current_offers(p, now=now)
+    best = current[0] if current else historical_lowest_offer(p)
+    pool = current or p["offers"]
     cheapest = [o for o in pool if o["price_eur"] == best["price_eur"]]
     hist_low = p["offers"][0]
     cheapest_names = " et ".join(merchant_name(o["merchant"]) for o in cheapest[:2])
@@ -324,7 +354,7 @@ def product_page(p, sheets, period, guide=None):
     for o in p["offers"]:
         url, label, aff = merchant_link(o["merchant"], q, p)
         rel = "sponsored nofollow noopener" if aff else "nofollow noopener"
-        cls = ' class="best"' if o["price_eur"] == best["price_eur"] else ""
+        cls = ' class="best"' if current and o["price_eur"] == best["price_eur"] else ""
         refurb = ' <small style="color:#6b7280;font-weight:600">· reconditionné</small>' if o["merchant"] in REFURBISHED else ""
         if refurb:
             cls = ""
@@ -334,15 +364,26 @@ def product_page(p, sheets, period, guide=None):
     cat_slug = CATEGORY_SLUGS.get(p["category"], "high-tech")
     amz_url, amz_label, amz_direct = amazon_link(p)
     price = euro(best['price_eur'])
-    last_date = date_fr(p.get("last_date") or best["date"])
-    n_recent = len(recent_offers(p)) or p["offer_count"]
+    merchant_count = len(current) if current else p["offer_count"]
     first_merchant = merchant_name(best["merchant"])
-    title = fit_title(f"Prix {p['name']} : {price} chez {first_merchant} · {n_recent} marchands",
-                      f"Prix {p['name']} : {price} · {n_recent} marchands relevés",
-                      f"Prix {p['name']} : {price} | Prix Bas Malin",
-                      f"Prix {p['name']}")
-    description = fit_description(f"Prix {p['name']} relevé chez {n_recent} marchands : {price} chez {cheapest_names} le {date_fr(best['date'])}, "
-                                  f"le plus bas de la semaine. Historique et écarts de prix datés, à confirmer chez le marchand.")
+    if current:
+        title = fit_title(f"Prix {p['name']} : {price} chez {first_merchant} · {merchant_count} marchands",
+                          f"Prix {p['name']} : {price} · {merchant_count} marchands relevés",
+                          f"Prix {p['name']} : {price} | Prix Bas Malin",
+                          f"Prix {p['name']}")
+        description = fit_description(f"Prix TTC confirmé pour {p['name']} : {price} chez {cheapest_names} le {date_fr(best['date'])}. "
+                                      f"{len(current)} offre(s) marchande(s) datée(s) de moins de 48 h.")
+        h1_text = f"Prix {p['name']} : offres TTC confirmées chez {len(current)} marchands"
+        hero_label = f"Prix TTC confirmé, relevé le {date_fr(best['date'])}"
+    else:
+        title = fit_title(f"Prix {p['name']} : relevé historique {price} · {date_fr(best['date'])}",
+                          f"Historique des prix {p['name']} | Prix Bas Malin",
+                          f"Prix {p['name']} | Prix Bas Malin",
+                          f"Prix {p['name']}")
+        description = fit_description(f"Historique des prix {p['name']} : plus bas relevé {price} chez {cheapest_names} le {date_fr(best['date'])}. "
+                                      "Observation passée PrixTracker, à confirmer chez le marchand ; vérifiez le prix actuel avant achat.")
+        h1_text = f"Historique des prix {p['name']} : {p['offer_count']} marchands relevés"
+        hero_label = f"Plus bas relevé historique, le {date_fr(best['date'])}"
     faq = [
         (f"Quel est le dernier prix observé pour {p['name']} ?",
          f"Au relevé du {date_fr(best['date'])}, le plus bas montant observé pour {p['name']} était de {euro(best['price_eur'])} chez {cheapest_names}. "
@@ -365,8 +406,8 @@ def product_page(p, sheets, period, guide=None):
         c = p["image_credit"]
         credit = f'<p class="source" style="color:#6b7280">Photo : {e(c.get("author") or "")} · {e(c.get("license") or "")} · <a style="color:#0b63ce" href="{e(c.get("file_page") or "")}">{"Wikimedia Commons" if "wikimedia.org" in (c.get("file_page") or "") else "Icecat"}</a></p>'
     body = f"""<article class="panel">
-<div class="hero"><div><h1>Prix {e(p['name'])} : comparatif de {n_recent} marchands relevés</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
-<div class="from">Meilleur prix récent, relevé le {date_fr(best['date'])}<strong>{euro(best['price_eur'])}</strong>chez {e(cheapest_names)} · à confirmer chez le marchand</div></div>{visual(p)}</div>
+<div class="hero"><div><h1>{e(h1_text)}</h1><div style="color:#5b6474;font-weight:700">{e(p['brand'])} · {e(p['category_label'])}</div>
+<div class="from">{e(hero_label)}<strong>{euro(best['price_eur'])}</strong>chez {e(cheapest_names)} · à confirmer chez le marchand</div></div>{visual(p)}</div>
 {credit}<a class="cta pm-btn pm-btn-compare pm-btn-block" href="#prix">Voir les relevés historiques</a>
 <a class="cta pm-btn pm-btn-amazon pm-btn-block" href="{e(amz_url)}" target="_blank" rel="sponsored nofollow noopener">{amz_label}</a>
 <p class="notice">Historique PrixTracker : les montants ci-dessous sont des observations passées, pas des offres actuelles. {"Le bouton Amazon ouvre la fiche du produit ; les autres liens ouvrent une recherche chez le marchand" if amz_direct else "Les liens ouvrent une recherche chez le marchand"} ; vérifiez la référence exacte, le prix final, la disponibilité et la livraison.</p>
@@ -386,7 +427,7 @@ def product_page(p, sheets, period, guide=None):
     crumbs = [("Accueil", "/"), ("Historique des prix", "/prix/"), (p["category_label"], f"/prix/{cat_slug}.html"), (p["name"], f"/prix/{p['id']}.html")]
     # Identifiant produit lu par la mesure d'audience (produits consultés).
     extra = (f'<meta name="pm-product-id" content="{e(p["id"])}">\n<script type="application/ld+json">{json.dumps(faq_ld, ensure_ascii=False)}</script>\n'
-             f'<script type="application/ld+json">{json.dumps(product_ld(p), ensure_ascii=False)}</script>\n')
+             f'<script type="application/ld+json">{json.dumps(product_ld(p, now=now), ensure_ascii=False)}</script>\n')
     return layout(title, description, f"/prix/{p['id']}.html", body, crumbs, extra)
 
 
@@ -575,12 +616,12 @@ def bf_price_label(offer, today=None):
     if age_days < 0:
         return "Date de relevé à vérifier"
     if age_days <= RECENT_OFFER_DAYS:
-        return "Meilleur prix récent"
+        return "Prix relevé récemment · à confirmer"
     return "Prix historique · à confirmer chez le marchand"
 
 
-def bf_card(p, today=None):
-    best = best_recent(p)
+def bf_card(p, today=None, best_override=None):
+    best = best_override or best_recent(p)
     label_text = bf_price_label(best, today=today)
     url, label, _ = amazon_link(p)
     return (f'<article class="bf-card">{visual(p)}<div class="c"><small>{e(p["category_label"])}</small><b>{e(p["name"])}</b>'
@@ -618,8 +659,8 @@ def bf_gap_section(sheets, limit=8, today=None):
     if not items:
         return ""
     cards = "".join(
-        bf_card(p, today=today).replace('<small>Meilleur prix récent</small>',
-                           f'<span class="bf-gap">Jusqu’à {euro(recent_gap(p, today=today))} d’écart entre marchands</span><small>Meilleur prix récent</small>', 1)
+        bf_card(p, today=today, best_override=bf_recent_offers(p, today=today)[0]).replace('<small>Prix relevé récemment · à confirmer</small>',
+                           f'<span class="bf-gap">Jusqu’à {euro(recent_gap(p, today=today))} d’écart entre marchands</span><small>Prix relevé récemment · à confirmer</small>', 1)
         for p in items)
     return ('<section class="panel" id="ecarts"><h2>Le bon marchand fait la différence</h2>'
             '<p>Même produit, prix très différents selon le vendeur : écarts entre le moins cher et le plus cher des relevés de la dernière semaine.</p>'

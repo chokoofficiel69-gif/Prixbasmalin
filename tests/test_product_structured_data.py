@@ -30,19 +30,14 @@ class ProductStructuredDataTests(unittest.TestCase):
                 self.assertEqual(len(blocks), 1)
                 self.assertEqual(blocks[0]["name"], p["name"])
 
-    def test_offer_prices_are_shown_on_the_page_and_recent(self):
+    def test_historical_tracker_prices_are_not_published_as_current_offer_schema(self):
         for p in self.sheets:
             html = (ROOT / "prix" / f"{p['id']}.html").read_text(encoding="utf-8")
-            offers = product_blocks(html)[0].get("offers")
-            if not offers:
-                continue
+            block = product_blocks(html)[0]
             with self.subTest(product=p["id"]):
-                last = date.fromisoformat(max(o["date"] for o in p["offers"]))
-                recent = [o for o in p["offers"] if date.fromisoformat(o["date"]) >= last - timedelta(days=7) and o["merchant"] not in REFURB]
-                self.assertEqual(offers["offerCount"], len(recent))
-                self.assertEqual(float(offers["lowPrice"]), min(o["price_eur"] for o in recent))
-                self.assertEqual(float(offers["highPrice"]), max(o["price_eur"] for o in recent))
-                self.assertEqual(offers["priceCurrency"], "EUR")
+                self.assertNotIn("offers", block)
+                self.assertIn("Plus bas relevé historique", html)
+
 
     def test_product_image_is_absolute_when_present(self):
         for p in self.sheets:
@@ -56,19 +51,20 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class RecentBestPriceTests(unittest.TestCase):
-    def test_headline_shows_best_recent_price(self):
+class HistoricalPriceHeadlineTests(unittest.TestCase):
+    def test_headline_shows_lowest_historical_price_with_its_date(self):
         sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
         for p in sheets:
-            last = date.fromisoformat(max(o["date"] for o in p["offers"]))
-            recent = [o for o in p["offers"] if date.fromisoformat(o["date"]) >= last - timedelta(days=7) and o["merchant"] not in REFURB]
-            best = min(o["price_eur"] for o in recent)
+            candidates = [o for o in p["offers"] if o["merchant"] not in REFURB]
+            best = min(candidates or p["offers"], key=lambda o: (o["price_eur"], o["date"]))
             html = (ROOT / "prix" / f"{p['id']}.html").read_text(encoding="utf-8")
-            m = re.search(r'<div class="from">Meilleur prix récent, relevé le [^<]*<strong>([^<]*)</strong>', html)
+            match = re.search(r'<div class="from">Plus bas relevé historique, le ([^<]*)<strong>([^<]*)</strong>', html)
             with self.subTest(product=p["id"]):
-                self.assertIsNotNone(m)
-                shown = float(m.group(1).replace(" ", "").replace("\xa0", "").replace(" ", "").replace("€", "").replace(",", "."))
-                self.assertEqual(shown, best)
+                self.assertIsNotNone(match)
+                shown = float(match.group(2).replace(" ", "").replace("\xa0", "").replace(" ", "").replace("€", "").replace(",", "."))
+                self.assertEqual(shown, best["price_eur"])
+                observed = date.fromisoformat(best["date"]).strftime("%d/%m/%Y")
+                self.assertEqual(match.group(1), observed)
 
 
 class BlackFridayGapTests(unittest.TestCase):
