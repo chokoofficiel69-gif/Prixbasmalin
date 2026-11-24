@@ -64,8 +64,9 @@ class CatalogueComparablePriceTests(unittest.TestCase):
 
     def test_feed_image_provenance_points_to_the_image_not_affiliate_url(self):
         source = CATALOGUE.read_text(encoding="utf-8")
-        self.assertIn("product.imageSource=product.image;", source)
-        self.assertIn("imageSource:p.image", source)
+        self.assertIn('imageSource:imageIsVerified?(product.imageSource||product.image||""):""', source)
+        self.assertIn('imageSource:usableImage?image:""', source)
+        self.assertNotIn("imageSource:product.sourceUrl", source)
 
     def test_old_featured_observations_are_explicitly_marked_stale(self):
         import json
@@ -82,7 +83,7 @@ class CatalogueComparablePriceTests(unittest.TestCase):
     def test_awin_prices_use_merchant_update_timestamp_not_feed_download_time(self):
         source = CATALOGUE.read_text(encoding="utf-8")
         self.assertIn("function pmAwinPriceIsFresh(value,now=Date.now())", source)
-        self.assertIn("const priceFresh=hasPrice&&pmAwinPriceIsFresh(merchantUpdatedAt);", source)
+        self.assertIn('const priceFresh=hasPrice&&feedIsFresh&&currency==="EUR"&&pmAwinPriceIsFresh(merchantUpdatedAt);', source)
         self.assertIn("checked_at:checkedAt,", source)
         self.assertIn("stale:!pmAwinPriceIsFresh(checkedAt)", source)
         self.assertNotIn("checked_at:product.fetchedAt||feed.fetched_at", source)
@@ -94,13 +95,25 @@ class CatalogueComparablePriceTests(unittest.TestCase):
 
     def test_old_or_tax_unconfirmed_awin_prices_are_excluded_from_current_offers(self):
         source = CATALOGUE.read_text(encoding="utf-8")
-        self.assertIn('const priceStatus=!hasPrice?"unavailable":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";', source)
+        self.assertIn('priceStatus=!hasPrice?"unavailable":taxStatus==="excluded"?"tax_excluded":!priceFresh?"dated":!priceTaxIncluded?"tax_unconfirmed":"fresh";', source)
         self.assertIn('priceValue:priceStatus==="fresh"?Number(product.priceValue):null', source)
-        self.assertIn('priceTaxStatus:priceTaxIncluded?"included":"unspecified"', source)
+        self.assertIn('priceTaxStatus:taxStatus', source)
+        self.assertIn('listedPriceValue:hasPrice?Number(product.priceValue):null', source)
+        self.assertIn('const listedPrice=!hasVerifiedPrice&&Number.isFinite(Number(p.listedPriceValue))', source)
         self.assertIn('p.priceStatus==="fresh"', source)
         self.assertIn('taxStatus==="included"', source)
         self.assertIn("Dernier relevé marchand du ", source)
         self.assertIn("TVA non confirmée par la source : prix exclu des comparaisons.", source)
+
+    def test_stale_awin_source_prices_remain_visible_but_never_verified(self):
+        source = CATALOGUE.read_text(encoding="utf-8")
+        self.assertIn('listedPriceValue:hasListedPrice?listedPrice:null', source)
+        self.assertIn('feedIsFresh:previewFeedIsFresh', source)
+        self.assertIn('TVA indiquée incluse par la source, à confirmer', source)
+        self.assertIn('TVA non confirmée', source)
+        self.assertIn('non classé « meilleur prix »', source)
+        self.assertIn('verifiedShelf.hidden=true;', source)
+        self.assertIn('priceStatus==="fresh"&&p.feedIsFresh===true&&currencyCode==="EUR"', source)
 
     def test_rakuten_comparison_uses_each_merchants_product_price_timestamp(self):
         source = CATALOGUE.read_text(encoding="utf-8")
