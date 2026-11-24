@@ -113,7 +113,8 @@ class CatalogueComparablePriceTests(unittest.TestCase):
         self.assertIn('TVA non confirmée', source)
         self.assertIn('non classé « meilleur prix »', source)
         self.assertIn('verifiedShelf.hidden=true;', source)
-        self.assertIn('priceStatus==="fresh"&&p.feedIsFresh===true&&currencyCode==="EUR"', source)
+        self.assertIn('const feedFreshForPrice=!p.isAwinProduct||p.feedIsFresh===true;', source)
+        self.assertIn('priceStatus==="fresh"&&feedFreshForPrice&&currencyCode==="EUR"', source)
 
     def test_rakuten_comparison_uses_each_merchants_product_price_timestamp(self):
         source = CATALOGUE.read_text(encoding="utf-8")
