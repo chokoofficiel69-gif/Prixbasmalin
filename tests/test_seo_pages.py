@@ -189,13 +189,24 @@ class SeoPagesTests(unittest.TestCase):
         awin_diff = next(line for line in awin.splitlines() if "git diff --quiet --" in line)
         awin_add = next(line for line in awin.splitlines() if line.strip().startswith("git add "))
         ai_add = next(line for line in guides.splitlines() if line.strip().startswith("git add "))
-        for path in ("black-friday.html", "idees-cadeaux", "prix"):
+        for path in ("black-friday.html", "cyber-monday.html", "idees-cadeaux", "prix"):
             self.assertIn(path, awin_diff)
             self.assertIn(path, awin_add)
             self.assertIn(path, ai_add)
         generated = seo.build()
         self.assertIn("black-friday.html", generated)
         self.assertIn("idees-cadeaux/index.html", generated)
+        self.assertIn("cyber-monday.html", generated)
+
+    def test_cyber_monday_page_is_indexable_and_linked_from_black_friday(self):
+        page = (ROOT / "cyber-monday.html").read_text(encoding="utf-8")
+        self.assertIn("<h1>Cyber Monday 2026", page)
+        self.assertIn('rel="canonical" href="https://prixbasmalin.fr/cyber-monday.html"', page)
+        self.assertNotIn('id="bf-countdown"', page)  # le compte à rebours Black Friday ne doit pas réécrire la date
+        self.assertIn('href="/black-friday.html"', page)
+        self.assertIn('href="/cyber-monday.html"', (ROOT / "black-friday.html").read_text(encoding="utf-8"))
+        self.assertIn("https://prixbasmalin.fr/cyber-monday.html", (ROOT / "sitemap.xml").read_text(encoding="utf-8"))
+        self.assertIn("tag=prixbasmalin2-21", page)
 
 
 if __name__ == "__main__":

@@ -692,7 +692,26 @@ def partner_codes_section(today=None):
             f'<p class="source">Codes fournis par les marchands dans leurs campagnes officielles. Conditions et validité chez le marchand. Lien affilié.</p></section>{script}')
 
 
-def black_friday_page(sheets, today=None):
+CYBER_MONDAY = {
+    "path": "/cyber-monday.html",
+    "crumb": "Cyber Monday 2026",
+    "title": "Cyber Monday 2026 : high-tech par budget | Prix Bas Malin",
+    "h1": "Cyber Monday 2026 : notre sélection high-tech par budget",
+    "date": "Lundi 30 novembre 2026 · après le Black Friday du 27 novembre",
+    "lead": "Cyber Monday 2026",
+    "faq": [
+        ("Quand a lieu le Cyber Monday 2026 ?", "Le lundi 30 novembre 2026, trois jours après le Black Friday du vendredi 27 novembre. Certaines offres durent tout le week-end."),
+        ("Les prix affichés sont-ils des prix Cyber Monday ?", "Non. Ce sont les plus bas prix relevés avant l’événement, avec leur date et le marchand. Ils servent de repère : si une « promo » Cyber Monday est plus chère que ce repère, ce n’est pas une bonne affaire."),
+        ("Cyber Monday ou Black Friday : quand acheter ?", "Comparez le prix du jour avec le plus bas prix relevé sur nos fiches. Si le repère est déjà atteint au Black Friday, inutile d’attendre ; sinon, le Cyber Monday peut offrir une seconde chance."),
+    ],
+}
+
+
+def cyber_monday_page(sheets, today=None):
+    return black_friday_page(sheets, today=today, event=CYBER_MONDAY)
+
+
+def black_friday_page(sheets, today=None, event=None):
     today = today or datetime.now(timezone.utc).date()
     groups = [(slug, label, bf_selection(sheets, lo, hi)) for slug, label, lo, hi in BF_BUDGETS]
     groups = [g for g in groups if g[2]]
@@ -728,26 +747,38 @@ def black_friday_page(sheets, today=None):
         ("Les prix affichés sont-ils des prix Black Friday ?", "Non. Ce sont les plus bas prix relevés avant l’événement, avec leur date et le marchand. Ils servent de repère : si une « promo » Black Friday est plus chère que ce repère, ce n’est pas une bonne affaire."),
         ("Comment savoir si une promotion est réelle ?", "Comparez le prix proposé avec le plus bas prix relevé sur nos fiches et chez les autres marchands. En France, une réduction affichée doit être calculée à partir du prix le plus bas des 30 derniers jours chez ce vendeur."),
     ]
+    if event:
+        faq = event["faq"]
     faq_html = "".join(f"<dt>{e(q)}</dt><dd>{e(a)}</dd>" for q, a in faq)
     ld = [
         {"@context": "https://schema.org", "@type": "FAQPage",
          "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
-        {"@context": "https://schema.org", "@type": "ItemList", "name": "Sélection high-tech Black Friday 2026",
+        {"@context": "https://schema.org", "@type": "ItemList", "name": "Sélection high-tech " + (event["lead"] if event else "Black Friday 2026"),
          "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{SITE}/prix/{p['id']}.html", "name": p["name"]}
                              for i, p in enumerate(p for _, _, items in groups for p in items)]},
     ]
+    lead = event["lead"] if event else "Black Friday 2026"
+    h1 = event["h1"] if event else "Black Friday 2026 : notre sélection high-tech par budget"
+    date_line = event["date"] if event else "Vendredi 27 novembre 2026 · Cyber Monday le 30 novembre"
+    sibling = ('<a href="/black-friday.html">Black Friday 2026</a>' if event
+               else '<a href="/cyber-monday.html">Cyber Monday 2026</a>')
     extra = BF_CSS + "\n" + "\n".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld) + "\n"
-    body = f"""<section class="bf-hero"><h1>Black Friday 2026 : notre sélection high-tech par budget</h1>
+    body = f"""<section class="bf-hero"><h1>{e(h1)}</h1>
 <p>{count} produits très demandés, classés par budget, avec un prix relevé sur les 7 derniers jours lorsqu’il existe ; sinon, un relevé historique disponible reste affiché avec sa date. Le bon réflexe : vérifiez toujours le montant chez le marchand.</p>
-<span class="bf-date" id="bf-countdown">Vendredi 27 novembre 2026 · Cyber Monday le 30 novembre</span>
-<div class="bf-jump"><a href="#ecarts">Plus gros écarts</a>{jump}</div></section>
-<p class="notice" style="margin:0 0 12px">Prix relevés avant le Black Friday (dernier relevé : {date_fr(latest)}), pas des prix promotionnels en direct. Vérifiez toujours le prix final, le vendeur et la livraison chez le marchand.</p>
+<span class="bf-date"{"" if event else ' id="bf-countdown"'}>{e(date_line)}</span>
+<div class="bf-jump"><a href="#ecarts">Plus gros écarts</a>{jump}{sibling}</div></section>
+<p class="notice" style="margin:0 0 12px">Prix relevés avant le {e(lead.replace(" 2026", ""))} (dernier relevé : {date_fr(latest)}), pas des prix promotionnels en direct. Vérifiez toujours le prix final, le vendeur et la livraison chez le marchand.</p>
 {bf_gap_section(sheets, today=today)}{popular_section}{partner_codes_section()}{sections}
 <section class="panel"><h2>Éviter les fausses promotions</h2><p>Préparez votre liste, notez le prix repère de chaque produit et créez une alerte prix gratuite depuis la fiche du produit. Notre guide détaille la méthode : <a href="/guide-black-friday-2026.html">Black Friday 2026 : repérer les vraies bonnes affaires</a>.</p>
 <p>Vous cherchez des idées cadeaux ? <a href="/idees-cadeaux/">Idées cadeaux par budget</a> · <a href="/prix/">Tout le comparateur</a></p></section>
 <section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
 <p class="source">Source des prix : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Liens affiliés : Prix Bas Malin peut percevoir une commission, sans surcoût pour vous.</p>
 {ART_SCRIPT}{BF_SCRIPT}"""
+    if event:
+        return layout(event["title"],
+                      fit_description(f"{lead} : repères datés pour PS5, GTA 6, Switch 2, AirPods Pro 3 et iPhone 17, plus {count} produits par budget."),
+                      event["path"], body, [("Accueil", "/"), (event["crumb"], event["path"])], extra,
+                      og_image="/assets/og-black-friday.jpg")
     return layout("Black Friday 2026 : high-tech par budget | Prix Bas Malin",
                   fit_description(f"Black Friday 2026 : repères datés pour PS5, GTA 6, Switch 2, AirPods Pro 3 et iPhone 17, plus {count} produits par budget."),
                   "/black-friday.html", body, [("Accueil", "/"), ("Black Friday 2026", "/black-friday.html")], extra,
@@ -772,6 +803,7 @@ def build():
         groups.append((cat, label, items))
     files["prix/index.html"] = index_page(groups, len(sheets))
     files["black-friday.html"] = black_friday_page(sheets)
+    files["cyber-monday.html"] = cyber_monday_page(sheets)
     budgets = []
     reference_time = datetime.now(timezone.utc)
     for slug, label, lo, hi in GIFT_BUDGETS:
