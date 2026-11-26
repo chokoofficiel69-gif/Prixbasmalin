@@ -87,7 +87,7 @@ jobs:
       - name: Publier uniquement si les fichiers ont changé
         if: github.event_name != 'pull_request'
         run: |
-          git add data/prixtracker-prices.json data/prixtracker-best-daily.json data/fiches-produits.json data/home-deals.json prix idees-cadeaux black-friday.html boutiques-partenaires.html index.html sitemap.xml sitemap.txt data/sitemap-lastmod.json
+          git add data/prixtracker-prices.json data/prixtracker-best-daily.json data/fiches-produits.json data/home-deals.json prix idees-cadeaux black-friday.html cyber-monday.html boutiques-partenaires.html index.html sitemap.xml sitemap.txt data/sitemap-lastmod.json
           if git diff --cached --quiet; then
             echo "Aucune évolution des données."
             exit 0
