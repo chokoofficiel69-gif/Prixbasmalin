@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-24T20:25:38.694Z",
+  "fetched_at": "2026-11-26T10:49:29.981Z",
   "source": "Awin Publisher Enhanced/standard feeds autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
   "programmes_check_status": "verified",
-  "joined_advertisers_checked": 23,
-  "pending_advertisers_detected": 29,
+  "joined_advertisers_checked": 25,
+  "pending_advertisers_detected": 25,
   "joined_advertisers": [
     {
       "id": "22619",
@@ -58,8 +58,16 @@
       "name": "Fiido Technology Development Co., Ltd"
     },
     {
+      "id": "86907",
+      "name": "Heimwerkertools - FR"
+    },
+    {
       "id": "105805",
       "name": "EINSTAR"
+    },
+    {
+      "id": "107814",
+      "name": "Simbye"
     },
     {
       "id": "114104",
@@ -104,24 +112,24 @@
   ],
   "additional_authorized_offers_imported": 25000,
   "counts": {
-    "joined_advertisers_checked": 23,
-    "pending_advertisers_detected": 29,
+    "joined_advertisers_checked": 25,
+    "pending_advertisers_detected": 25,
     "additional_authorized_offers_imported": 25000,
-    "products": 22017,
+    "products": 23171,
     "merchant_offers": 25000,
-    "merchants": 18,
-    "brands": 306,
-    "products_with_gtin": 15375,
-    "products_with_mpn": 14992,
-    "products_with_brand_mpn": 14971,
+    "merchants": 16,
+    "brands": 316,
+    "products_with_gtin": 16708,
+    "products_with_mpn": 14749,
+    "products_with_brand_mpn": 14728,
     "multi_merchant_products": 0,
-    "offers_with_shipping": 17549,
-    "offers_with_availability": 17366,
+    "offers_with_shipping": 16004,
+    "offers_with_availability": 17359,
     "offers_with_tax_included": 0,
-    "products_other_category": 320,
-    "offers_fresh_last_48h": 1,
-    "offers_missing_timestamp": 23529,
-    "offers_stale": 1470,
+    "products_other_category": 979,
+    "offers_fresh_last_48h": 0,
+    "offers_missing_timestamp": 25000,
+    "offers_stale": 0,
     "offers_invalid_or_future_timestamp": 0
   }
 }
