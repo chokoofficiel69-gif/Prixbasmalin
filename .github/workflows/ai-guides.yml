@@ -28,7 +28,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
       - name: Publier uniquement si quelque chose a changé
         run: |
-          git add data/ai-guides.json prix
+          git add data/ai-guides.json prix idees-cadeaux black-friday.html
           if git diff --cached --quiet; then
             echo "Aucun nouveau conseil."
             exit 0
@@ -36,6 +36,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "contenu: conseils d'achat rédigés par IA (sans prix)"
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::warning::Fichiers régénérés hors commit, mis de côté pour ne pas bloquer le rebase :"
+            git status --porcelain | head -50
+            git stash push --include-untracked -m "fichiers-generes-hors-commit" >/dev/null
+          fi
           for attempt in 1 2 3; do
             git fetch origin "${GITHUB_REF_NAME}"
             if ! git rebase "origin/${GITHUB_REF_NAME}"; then

@@ -95,6 +95,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "data: actualiser les historiques PrixTracker"
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::warning::Fichiers régénérés hors commit, mis de côté pour ne pas bloquer le rebase :"
+            git status --porcelain | head -50
+            git stash push --include-untracked -m "fichiers-generes-hors-commit" >/dev/null
+          fi
           for attempt in 1 2 3; do
             git fetch origin "${GITHUB_REF_NAME}"
             if ! git rebase "origin/${GITHUB_REF_NAME}"; then

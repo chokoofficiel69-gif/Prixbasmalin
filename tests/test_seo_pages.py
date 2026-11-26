@@ -183,5 +183,20 @@ class SeoPagesTests(unittest.TestCase):
         self.assertIn('"https://prixbasmalin.fr/prix/"+encodeURIComponent(p.id)+".html"', page)
 
 
+    def test_generated_seo_outputs_are_staged_by_data_workflows(self):
+        awin = (ROOT / ".github" / "workflows" / "sync-awin-products.yml").read_text(encoding="utf-8")
+        guides = (ROOT / ".github" / "workflows" / "ai-guides.yml").read_text(encoding="utf-8")
+        awin_diff = next(line for line in awin.splitlines() if "git diff --quiet --" in line)
+        awin_add = next(line for line in awin.splitlines() if line.strip().startswith("git add "))
+        ai_add = next(line for line in guides.splitlines() if line.strip().startswith("git add "))
+        for path in ("black-friday.html", "idees-cadeaux", "prix"):
+            self.assertIn(path, awin_diff)
+            self.assertIn(path, awin_add)
+            self.assertIn(path, ai_add)
+        generated = seo.build()
+        self.assertIn("black-friday.html", generated)
+        self.assertIn("idees-cadeaux/index.html", generated)
+
+
 if __name__ == "__main__":
     unittest.main()

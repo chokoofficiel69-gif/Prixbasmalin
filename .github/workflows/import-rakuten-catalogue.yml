@@ -330,6 +330,11 @@ jobs:
             echo "Le snapshot n'a pas changé ; aucun commit inutile."
           else
             git commit -m "Refresh fresh authorized Rakuten catalogues"
+            if [ -n "$(git status --porcelain)" ]; then
+              echo "::warning::Fichiers régénérés hors commit, mis de côté pour ne pas bloquer le rebase :"
+              git status --porcelain | head -50
+              git stash push --include-untracked -m "fichiers-generes-hors-commit" >/dev/null
+            fi
             for attempt in 1 2 3; do
               git fetch origin main
               if ! git rebase origin/main; then
