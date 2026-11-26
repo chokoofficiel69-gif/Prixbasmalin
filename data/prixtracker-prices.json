@@ -4,7 +4,7 @@
   "source_url": "https://prixtracker.fr/donnees/prix-par-marchand.csv",
   "license": "Licence Ouverte 2.0",
   "attribution": "Source : PrixTracker (prixtracker.fr/donnees), réutilisé sous Licence Ouverte 2.0 via data.gouv.fr.",
-  "generated_at": "2026-11-26T10:50:45.806Z",
+  "generated_at": "2026-11-26T11:25:56.345Z",
   "dataset_period": {
     "from": "2026-10-09",
     "to": "2026-11-26"
