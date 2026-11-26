@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import unittest
 from pathlib import Path
 
@@ -197,6 +198,25 @@ class SeoPagesTests(unittest.TestCase):
         self.assertIn("black-friday.html", generated)
         self.assertIn("idees-cadeaux/index.html", generated)
         self.assertIn("cyber-monday.html", generated)
+
+    def test_internal_product_links_reach_existing_pages_and_every_sheet(self):
+        import re, os
+        targets = set()
+        for f in list((ROOT / "prix").glob("*.html")) + [ROOT / "black-friday.html", ROOT / "cyber-monday.html"]:
+            targets.update(re.findall(r'href="(/prix/[a-z0-9-]+\.html)"', f.read_text(encoding="utf-8")))
+        missing = sorted(t for t in targets if not (ROOT / t.lstrip("/")).exists())
+        self.assertEqual(missing, [], "lien interne vers une page absente (404 pour Google)")
+        index = (ROOT / "prix" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('id="toutes-les-fiches"', index)
+        sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
+        for sheet in sheets:
+            self.assertIn(f'href="/prix/{sheet["id"]}.html"', index)
+
+    def test_similar_products_spread_links_across_the_whole_category(self):
+        sheets = json.loads((ROOT / "data" / "fiches-produits.json").read_text(encoding="utf-8"))["products"]
+        linked = {s["id"] for p in sheets for s in seo.similar_products(p, sheets)}
+        multi = {p["id"] for p in sheets if sum(1 for s in sheets if s["category"] == p["category"]) > 1}
+        self.assertEqual(multi - linked, set())
 
     def test_cyber_monday_page_is_indexable_and_linked_from_black_friday(self):
         page = (ROOT / "cyber-monday.html").read_text(encoding="utf-8")

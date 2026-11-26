@@ -341,6 +341,23 @@ def product_ld(p, now=None):
     return data
 
 
+def similar_products(p, sheets, limit=8):
+    """Voisins circulaires dans la catégorie : chaque fiche reçoit des liens internes, pas seulement les 8 premières."""
+    same = [s for s in sheets if s["category"] == p["category"]]
+    if len(same) <= 1:
+        return []
+    i = next((k for k, s in enumerate(same) if s["id"] == p["id"]), 0)
+    picks = []
+    for step in range(1, len(same)):
+        for k in (i + step, i - step):
+            cand = same[k % len(same)]
+            if cand["id"] != p["id"] and cand not in picks:
+                picks.append(cand)
+            if len(picks) >= limit:
+                return picks
+    return picks
+
+
 def product_page(p, sheets, period, guide=None, now=None):
     q = query_for(p)
     current = verified_current_offers(p, now=now)
@@ -360,8 +377,8 @@ def product_page(p, sheets, period, guide=None, now=None):
             cls = ""
         rows.append(f'<tr{cls}><td><b>{e(merchant_name(o["merchant"]))}</b>{refurb}</td><td class="p">{euro(o["price_eur"])}</td>'
                     f'<td class="h">{date_fr(o["date"])}</td><td><a class="go" href="{e(url)}" target="_blank" rel="{rel}">{label}</a></td></tr>')
-    similar = [s for s in sheets if s["category"] == p["category"] and s["id"] != p["id"]][:8]
-    cat_slug = CATEGORY_SLUGS.get(p["category"], "high-tech")
+    similar = similar_products(p, sheets)
+    cat_slug = CATEGORY_SLUGS.get(p["category"], p["category"])  # même slug que category_page() : jamais de lien vers une page absente
     amz_url, amz_label, amz_direct = amazon_link(p)
     price = euro(best['price_eur'])
     merchant_count = len(current) if current else p["offer_count"]
@@ -420,7 +437,7 @@ def product_page(p, sheets, period, guide=None, now=None):
 <section class="panel"><h2>Évolution des prix relevés</h2>{chart_svg(p)}<p>{e(trend_sentence(p))}</p>
 <a class="cta pm-btn pm-btn-ghost pm-btn-block" href="/produit.html?id={e(p['id'])}#alerte">Créer une alerte prix gratuite</a></section>
 {ai_guide_html(guide)}<section class="panel"><h2>Questions fréquentes</h2><dl>{faq_html}</dl></section>
-{f'<section class="panel"><h2>Autres {e(p["category_label"].lower())} comparés</h2><div class="grid pm-cards">{"".join(product_card(s) for s in similar)}</div><p><a href="/prix/{cat_slug}.html">Tous les {e(p["category_label"].lower())} →</a></p></section>' if similar else ''}
+{f'<section class="panel"><h2>Autres {e(p["category_label"].lower())} comparés</h2><div class="grid pm-cards">{"".join(product_card(s) for s in similar)}</div><p><a href="/prix/{cat_slug}.html">Tous les {e(p["category_label"].lower())} →</a></p></section>' if similar else f'<p class="source"><a href="/prix/{cat_slug}.html">Historique des prix : {e(p["category_label"].lower())} →</a> · <a href="/prix/#toutes-les-fiches">Toutes les fiches</a></p>'}
 <p class="source">À lire : <a href="/guide-black-friday-2026.html">repérer les vraies bonnes affaires</a> · <a href="/guide-payer-moins-cher-en-ligne.html">10 astuces pour payer moins cher</a> · <a href="/guides.html">tous nos guides</a></p>
 <p class="source">Source : relevés historiques PrixTracker via <a href="https://www.data.gouv.fr/datasets/releves-quotidiens-de-prix-de-produits-high-tech-en-france-prixtracker" rel="noopener">data.gouv.fr</a>, Licence Ouverte 2.0. Ces montants ne sont pas des prix en direct. Prix Bas Malin peut percevoir une commission sur les liens affiliés, sans surcoût pour vous.</p>
 {ART_SCRIPT}"""
@@ -456,13 +473,16 @@ def category_page(cat, label, items):
 
 
 def index_page(groups, total):
+    every = sorted((s for _, _, items in groups for s in items), key=lambda s: s["name"].lower())
+    all_links = ('<section class="panel" id="toutes-les-fiches"><h2>Toutes les fiches de A à Z</h2><p class="pm-az">'
+                 + " · ".join(f'<a href="/prix/{e(s["id"])}.html">{e(s["name"])}</a>' for s in every) + "</p></section>")
     sections = "".join(
         f'<section class="panel"><h2><a href="/prix/{CATEGORY_SLUGS.get(cat, cat)}.html" style="color:inherit">{e(label)}</a></h2>'
         f'<div class="grid pm-cards">{"".join(product_card(s) for s in items[:8])}</div>'
         f'<p><a href="/prix/{CATEGORY_SLUGS.get(cat, cat)}.html">Voir les {len(items)} {e(label.lower())} →</a></p></section>'
         for cat, label, items in groups)
     body = f"""<section class="panel"><h1>Historique des prix high-tech</h1>
-<p>{total} produits avec relevés historiques PrixTracker chez plusieurs marchands : smartphones, consoles, écouteurs, tablettes, ordinateurs, montres connectées, enceintes et aspirateurs. Ces montants sont des observations passées, pas des offres en direct.</p></section>{sections}{ART_SCRIPT}"""
+<p>{total} produits avec relevés historiques PrixTracker chez plusieurs marchands : smartphones, consoles, écouteurs, tablettes, ordinateurs, montres connectées, enceintes et aspirateurs. Ces montants sont des observations passées, pas des offres en direct.</p></section>{sections}{all_links}{ART_SCRIPT}"""
     return layout("Historique des prix high-tech | Prix Bas Malin",
                   fit_description(f"{total} produits high-tech avec relevés historiques PrixTracker, datés et sourcés. Ces montants ne sont pas des offres en temps réel."),
                   "/prix/", body, [("Accueil", "/"), ("Historique des prix", "/prix/")])
