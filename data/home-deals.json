@@ -3,7 +3,7 @@
  "awin_fetched_at": "2026-11-26T10:49:29.981Z",
  "sheets_period": {
   "from": "2026-10-09",
-  "to": "2026-11-21"
+  "to": "2026-11-26"
  },
  "price_policy": "Les prix listés des flux marchands sont affichés avec la date du flux et « à confirmer » pendant 7 jours (hors marchands HT). Seuls les prix vérifiés exigent une date marchande de moins de 48 h et une TVA TTC explicitement confirmée. Les données PrixTracker sont historiques, jamais des offres en direct.",
  "top": [
@@ -16,9 +16,9 @@
    "image": "https://www.apple.com/newsroom/images/2026/09/get-ready-to-experience-iphone-18-pro-the-new-apple-watch-lineup-and-airpods-5/article/Apple-AirPods-5_inline.jpg.large.jpg",
    "image_credit": null,
    "min_price_eur": 128.0,
-   "max_price_eur": 161.79,
+   "max_price_eur": 167.38,
    "offer_count": 19,
-   "last_date": "2026-11-20",
+   "last_date": "2026-11-25",
    "price_kind": "historical"
   },
   {
@@ -37,7 +37,7 @@
    "min_price_eur": 49.99,
    "max_price_eur": 98.28,
    "offer_count": 18,
-   "last_date": "2026-11-20",
+   "last_date": "2026-11-25",
    "price_kind": "historical"
   },
   {
@@ -54,9 +54,9 @@
     "match": "verifie_visuellement"
    },
    "min_price_eur": 1085.59,
-   "max_price_eur": 1229.0,
+   "max_price_eur": 1250.0,
    "offer_count": 17,
-   "last_date": "2026-11-21",
+   "last_date": "2026-11-26",
    "price_kind": "historical"
   },
   {
@@ -72,10 +72,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_15.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 611.0,
+   "min_price_eur": 619.99,
    "max_price_eur": 1112.61,
    "offer_count": 16,
-   "last_date": "2026-11-21",
+   "last_date": "2026-11-25",
    "price_kind": "historical"
   },
   {
@@ -88,8 +88,8 @@
    "image_credit": null,
    "min_price_eur": 1309.0,
    "max_price_eur": 1479.0,
-   "offer_count": 10,
-   "last_date": "2026-11-21",
+   "offer_count": 12,
+   "last_date": "2026-11-24",
    "price_kind": "historical"
   },
   {
@@ -105,10 +105,10 @@
     "file_page": "https://commons.wikimedia.org/wiki/File:Apple_iPhone_Duo.jpg",
     "match": "verifie_visuellement"
    },
-   "min_price_eur": 2323.92,
+   "min_price_eur": 2339.0,
    "max_price_eur": 3354.85,
    "offer_count": 8,
-   "last_date": "2026-11-21",
+   "last_date": "2026-11-24",
    "price_kind": "historical"
   }
  ],
