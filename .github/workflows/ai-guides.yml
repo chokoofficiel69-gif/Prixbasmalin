@@ -28,7 +28,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_seo_pages.py' -v
       - name: Publier uniquement si quelque chose a changé
         run: |
-          git add data/ai-guides.json prix
+          git add data/ai-guides.json prix idees-cadeaux black-friday.html
           if git diff --cached --quiet; then
             echo "Aucun nouveau conseil."
             exit 0
