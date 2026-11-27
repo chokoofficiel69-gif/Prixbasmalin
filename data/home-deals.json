@@ -1221,7 +1221,7 @@
  "rotation": {
   "interval_hours": 48,
   "last_rotated_at": "2026-11-26T21:46:14.741132Z",
-  "status": "rotated",
+  "status": "waiting_48h",
   "selected_count": 48
  },
  "rotation_history": [
