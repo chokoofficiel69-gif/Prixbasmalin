@@ -1829,6 +1829,7 @@ body.pm-season-noel .pm-benefits-banner{border-color:#b9974c;box-shadow:0 0 16px
 .pm-hp-rail{display:grid;grid-auto-flow:column;grid-auto-columns:min(46%,230px);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;scrollbar-width:thin}
 .pm-hp-card{position:relative;display:flex;flex-direction:column;min-height:330px;background:#fff;border-radius:14px;overflow:hidden;text-decoration:none;color:#111827;scroll-snap-align:start;box-shadow:0 6px 18px rgba(0,0,0,.25);transition:transform .15s ease}
 .pm-hp-card:hover,.pm-hp-card:focus-visible{transform:translateY(-3px)}
+.pm-hp-card-unlinked{cursor:default}.pm-hp-card-unlinked:hover,.pm-hp-card-unlinked:focus-visible{transform:none}.pm-hp-link-note{color:#5b6474;font-size:11px;padding:0 12px 10px}
 .pm-hp-skel{background:linear-gradient(90deg,#1a2433 0%,#243145 50%,#1a2433 100%);background-size:200% 100%;animation:pmHpPulse 1.2s infinite linear;box-shadow:none}
 @keyframes pmHpPulse{to{background-position:-200% 0}}
 .pm-hp-media{position:relative;aspect-ratio:1/1;background:#f3f4f6;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -1958,9 +1959,20 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
     const at=Date.parse(String(g&&g.listed_price_date||"")),age=Date.now()-at;
     return Number.isFinite(Number(g&&g.listed_price_eur))&&Number(g.listed_price_eur)>0&&Number.isFinite(at)&&age>=-5*60*1000&&age<=7*24*60*60*1000;
   };
-  const giftCard=g=>{
+  const giftAdvertiserId=url=>{
+    try{const parsed=new URL(String(url||""));return parsed.searchParams.get("m")||parsed.searchParams.get("awinmid")||"";}catch{return "";}
+  };
+  const joinedIdsFromStatus=status=>{
+    const at=Date.parse(String(status&&status.fetched_at||"")),age=Date.now()-at;
+    if(!status||status.status!=="ok"||status.programmes_check_status!=="verified"||
+       !Array.isArray(status.joined_advertisers)||!Number.isFinite(at)||
+       age< -5*60*1000||age>72*60*60*1000)return new Set();
+    return new Set(status.joined_advertisers.filter(item=>item&&/^\d+$/.test(String(item.id||""))).map(item=>String(item.id)));
+  };
+  const giftCard=(g,joinedIds)=>{
     const image=String(g&&g.image||"").trim();
     if(g.image_verified!==true||!/^https:\/\//i.test(image))return "";
+    const mid=giftAdvertiserId(g.url),authorized=joinedIds.has(mid);
     const priceCurrent=giftPriceIsCurrent(g);
     const shippingKnown=priceCurrent&&g.shipping_eur!==null&&g.shipping_eur!==undefined&&Number.isFinite(Number(g.shipping_eur))&&Number(g.shipping_eur)>=0;
     const priceBlock=priceCurrent
@@ -1968,9 +1980,12 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
       : giftListedPrice(g)
       ? '<span class="pm-hp-from">Prix indiqué par le marchand</span><span class="pm-hp-price">'+euro.format(g.listed_price_eur)+'</span><span class="pm-hp-meta">Flux marchand du '+new Date(g.listed_price_date).toLocaleDateString("fr-FR")+' · à confirmer</span>'
       : '<span class="pm-hp-from">Prix non vérifié</span><span class="pm-hp-meta">Consultez le prix sur le site marchand</span>';
-    return '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+visual(image,"",g.merchant,g.name)
+    const content=visual(image,"",g.merchant,g.name)
       +(shippingKnown&&Number(g.shipping_eur)===0?'<span class="pm-hp-badge free">Livraison gratuite</span>':'')+'<div class="pm-hp-body"><span class="pm-hp-cat">Visuel marchand · '+esc(g.family_label)+' · '+esc(g.merchant)+'</span><h3 class="pm-hp-name">'+esc(g.name)+'</h3>'
-      +priceBlock+'</div></a>';
+      +priceBlock+(authorized?'':'<small class="pm-hp-link-note">Programme non rejoint · lien affilié désactivé</small>')+'</div>';
+    return authorized
+      ? '<a class="pm-hp-card" href="'+esc(g.url)+'" target="_blank" rel="sponsored nofollow noopener">'+content+'</a>'
+      : '<div class="pm-hp-card pm-hp-card-unlinked">'+content+'</div>';
   };
   document.querySelectorAll(".pm-partner[data-href]").forEach(a=>{
     const href=a.getAttribute("data-href");
@@ -1979,7 +1994,9 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
   });
   const fail=rail=>{if(rail)rail.innerHTML='<p class="pm-hp-note">La sélection se recharge, réessayez dans un instant.</p>';};
   const sheetsReady=fetch("/data/fiches-produits.json",{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  fetch("/data/home-deals.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(data=>{
+  const joinedStatusReady=fetch("/data/awin-sync-status.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null);
+  fetch("/data/home-deals.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(async data=>{
+    const joinedIds=joinedIdsFromStatus(await joinedStatusReady);
     const topRail=document.getElementById("pm-top-prices-rail"),giftRail=document.getElementById("pm-gifts-rail");
     if(topRail)topRail.innerHTML=(data.top||[]).map(topCard).join("")||'<p class="pm-hp-note">Comparaisons en cours de mise à jour.</p>';
     const gifts=Array.isArray(data.gifts)?data.gifts:[];
@@ -2002,7 +2019,7 @@ body > section:not(.hero):not(.pm-benefits-banner),main > section:not(.hero):not
       giftRail.dataset.pmRotationSlot=String(rotationSlot);
       giftRail.dataset.pmRotationDate=new Date().toISOString();
       giftRail.dataset.pmRotationProductIds=rotated.map(g=>String(g.id||g.name||"")).join(",");
-      giftRail.innerHTML=rotated.map(giftCard).join("")||'<p class="pm-hp-note">Visuels marchands en cours de vérification.</p>';
+      giftRail.innerHTML=rotated.map(g=>giftCard(g,joinedIds)).join("")||'<p class="pm-hp-note">Visuels marchands en cours de vérification.</p>';
       giftRail.querySelectorAll("img").forEach(img=>img.addEventListener("error",()=>{
         const card=img.closest(".pm-hp-card");
         if(card)card.remove();
