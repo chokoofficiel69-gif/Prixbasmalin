@@ -105,7 +105,7 @@ class HomeShowcaseTests(unittest.TestCase):
             "url": url, "program_joined": True,
         }, "26/11/2026")
         self.assertIn("Partenaire", card)
-        self.assertIn(url, card)
+        self.assertIn(url.replace("&", "&amp;"), card)
 
     def test_gaps_use_only_recent_new_offers(self):
         sc = load("build_home_showcase")
@@ -126,7 +126,7 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertIn("giftRail.dataset.pmRotationSlot=String(rotationSlot);", text)
         self.assertIn("giftRail.dataset.pmRotationDate=new Date().toISOString();", text)
         self.assertIn('giftRail.dataset.pmRotationProductIds=rotated.map(g=>String(g.id||g.name||"")).join(",");', text)
-        self.assertIn('giftRail.innerHTML=rotated.map(giftCard).join("")', text)
+         self.assertIn('giftRail.innerHTML=rotated.map(g=>giftCard(g,joinedIds)).join("")', text)
         self.assertNotIn('giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")', text)
 
         # Use the current published feed, not a hard-coded image count.
@@ -153,6 +153,20 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertEqual(len(selected(3)), 16)
         self.assertEqual(len(set(selected(3))), 16)
 
+
+    def test_gift_rail_links_require_recent_joined_status(self):
+        text = (ROOT / "index.html").read_text(encoding="utf-8")
+        for marker in (
+            "const giftAdvertiserId=url=>",
+            "const joinedIdsFromStatus=status=>",
+            'fetch("/data/awin-sync-status.json",{cache:"no-store"})',
+            'age>72*60*60*1000',
+            'giftRail.innerHTML=rotated.map(g=>giftCard(g,joinedIds)).join("")',
+            "pm-hp-card-unlinked",
+            "Programme non rejoint · lien affilié désactivé",
+        ):
+            self.assertIn(marker, text)
+        self.assertNotIn('giftRail.innerHTML=rotated.map(giftCard).join("")', text)
 
     def test_seasonal_theme_uses_paris_calendar_and_preserves_brand(self):
         page = (ROOT / "index.html").read_text(encoding="utf-8")
