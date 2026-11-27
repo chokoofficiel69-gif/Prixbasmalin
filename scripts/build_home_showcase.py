@@ -16,6 +16,7 @@ import html
 import json
 import sys
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_seo_pages as seo  # noqa: E402  (noms de marchands, liens Amazon, formats)
@@ -242,6 +243,51 @@ CSS = """<style id="pm-showcase-style">
 PARTNER_PRIORITY = ["Ecovacs FR", "Jowissa", "Mibro FR", "Imou FR", "Perfumeria Comas FR",
                     "Al Jazeera Perfumes EU", "BlazeVideo FR", "Fiido Technology Development Co., Ltd"]
 PARTNER_MAX_AGE_DAYS = 7
+PARTNER_AUTH_MAX_AGE_HOURS = 72
+
+
+def advertiser_id(url):
+    """Extract the Awin advertiser MID from a feed deep-link, without guessing."""
+    try:
+        query = parse_qs(urlsplit(str(url or "")).query)
+    except (TypeError, ValueError):
+        return None
+    for key in ("m", "awinmid"):
+        value = query.get(key) or []
+        if value and re.fullmatch(r"\d+", str(value[0])):
+            return str(value[0])
+    return None
+
+
+def joined_ids_from_status(status, now=None):
+    """Return joined MIDs only from a recent, verified status snapshot; fail closed."""
+    if not isinstance(status, dict):
+        return None
+    try:
+        fetched_at = dt.datetime.fromisoformat(str(status.get("fetched_at") or "").replace("Z", "+00:00"))
+        now = now or dt.datetime.now(dt.timezone.utc)
+        if now.tzinfo is None:
+            now = now.replace(tzinfo=dt.timezone.utc)
+        if fetched_at.tzinfo is None:
+            fetched_at = fetched_at.replace(tzinfo=dt.timezone.utc)
+        age = now - fetched_at
+        items = status.get("joined_advertisers")
+        if (status.get("status") != "ok" or status.get("programmes_check_status") != "verified"
+                or not isinstance(items, list) or age < dt.timedelta(0)
+                or age > dt.timedelta(hours=PARTNER_AUTH_MAX_AGE_HOURS)):
+            return None
+        return {str(item.get("id")) for item in items
+                if isinstance(item, dict) and re.fullmatch(r"\d+", str(item.get("id") or ""))}
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+def joined_advertisers(now=None):
+    try:
+        status = json.loads((ROOT / "data" / "awin-sync-status.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return joined_ids_from_status(status, now)
 
 
 def _sharp(url):
@@ -263,8 +309,13 @@ def partner_picks(now=None):
         fetched_at = dt.datetime.fromisoformat(fetched.replace("Z", "+00:00"))
     except ValueError:
         return [], None
+    if fetched_at.tzinfo is None:
+        fetched_at = fetched_at.replace(tzinfo=dt.timezone.utc)
     now = now or dt.datetime.now(dt.timezone.utc)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=dt.timezone.utc)
     fresh = dt.timedelta(0) <= now - fetched_at <= dt.timedelta(days=PARTNER_MAX_AGE_DAYS)
+    joined = joined_advertisers(now)
     prices = {p.get("id"): p for p in cat.get("products") or []}
     best = {}
     for g in gifts:
@@ -273,32 +324,41 @@ def partner_picks(now=None):
             price = float(p.get("priceValue"))
         except (TypeError, ValueError):
             continue
+        mid = advertiser_id(g.get("url"))
+        program_joined = joined is not None and mid is not None and mid in joined
         if not (g.get("image_verified") is True and g.get("image_check_status") == "ok"
                 and str(g.get("image", "")).startswith("https://") and str(g.get("url", "")).startswith("https://")
                 and g.get("merchant") in PARTNER_PRIORITY and price > 0 and fresh):
             continue
         cur = best.get(g["merchant"])
         if cur is None or price > cur["price"]:
-            best[g["merchant"]] = {**g, "price": price}
+            best[g["merchant"]] = {**g, "price": price, "program_joined": program_joined}
     picks = [best[m] for m in PARTNER_PRIORITY if m in best]
     return picks[:8], fetched_at.date().isoformat()
 
 
 def partner_card(p, day):
     merchant = p["merchant"].replace(" Technology Development Co., Ltd", "").replace(" FR", "").replace(" EU", "")
-    return (f'<article class="pmx-card pmx-pick"><span class="pmx-badge">Partenaire</span>'
-            f'<a class="pmx-ph" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener"><img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy" decoding="async"></a>'
+    image = f'<img src="{e(p["image"])}" alt="{e(p["name"])}" loading="lazy" decoding="async">'
+    if p.get("program_joined") is True:
+        media = f'<a class="pmx-ph" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener">{image}</a>'
+        action = f'<a class="pmx-go" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener">Voir l’offre ↗</a>'
+        badge = "Partenaire"
+    else:
+        media = f'<div class="pmx-ph">{image}</div>'
+        action = '<small>Programme non rejoint · lien affilié désactivé</small>'
+        badge = "Flux · à confirmer"
+    return (f'<article class="pmx-card pmx-pick"><span class="pmx-badge">{badge}</span>{media}'
             f'<h3>{e(p["name"])}</h3><small>{e(merchant)}</small><strong>{seo.euro(p["price"])}</strong>'
-            f'<small>Prix du flux marchand du {seo.date_fr(day)} · à confirmer</small>'
-            f'<a class="pmx-go" href="{e(p["url"])}" target="_blank" rel="sponsored nofollow noopener">Voir l’offre ↗</a></article>')
+            f'<small>Prix du flux marchand du {seo.date_fr(day)} · à confirmer</small>{action}</article>')
 
 
 def partner_section():
     picks, day = partner_picks()
     if len(picks) < 3:
         return ""
-    return (f'<section class="pmx-sec" aria-labelledby="pmx-picks-t"><div class="pmx-head"><h2 id="pmx-picks-t">⭐ Coups de cœur <span>partenaires</span></h2>'
-            f'<a href="/boutiques-partenaires.html">Nos boutiques partenaires →</a><small>Photos et prix fournis par les marchands dans leurs flux officiels (mis à jour le {seo.date_fr(day)}). Liens affiliés.</small></div>'
+    return (f'<section class="pmx-sec" aria-labelledby="pmx-picks-t"><div class="pmx-head"><h2 id="pmx-picks-t">⭐ Coups de cœur <span>marchands</span></h2>'
+            f'<a href="/boutiques-partenaires.html">Nos boutiques partenaires →</a><small>Photos et prix issus des flux marchands (mis à jour le {seo.date_fr(day)} ; prix à confirmer). Liens affiliés activés uniquement pour les programmes rejoints.</small></div>'
             f'<div class="pmx-rail pmx-offers">{"".join(partner_card(p, day) for p in picks)}</div></section>')
 
 

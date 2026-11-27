@@ -1,0 +1,46 @@
+name: Tests vitrine homepage
+
+on:
+  pull_request:
+    paths:
+      - "scripts/build_home_showcase.py"
+      - "scripts/build_home_deals.py"
+      - "tests/test_home_showcase.py"
+      - "tests/test_home_deals.py"
+      - "index.html"
+      - "data/home-deals.json"
+      - "data/awin-catalogue.json"
+      - "data/awin-sync-status.json"
+      - ".github/workflows/test-home-showcase.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build_home_showcase.py"
+      - "scripts/build_home_deals.py"
+      - "tests/test_home_showcase.py"
+      - "tests/test_home_deals.py"
+      - "index.html"
+      - "data/home-deals.json"
+      - "data/awin-catalogue.json"
+      - "data/awin-sync-status.json"
+      - ".github/workflows/test-home-showcase.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Vérifier que le bloc généré est à jour
+        run: python3 scripts/build_home_showcase.py --check
+      - name: Tester la vitrine et les liens affiliés
+        run: |
+          python3 -m unittest discover -s tests -p 'test_home_showcase.py' -v
+          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
