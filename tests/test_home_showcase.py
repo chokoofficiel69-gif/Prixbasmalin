@@ -126,7 +126,7 @@ class HomeShowcaseTests(unittest.TestCase):
         self.assertIn("giftRail.dataset.pmRotationSlot=String(rotationSlot);", text)
         self.assertIn("giftRail.dataset.pmRotationDate=new Date().toISOString();", text)
         self.assertIn('giftRail.dataset.pmRotationProductIds=rotated.map(g=>String(g.id||g.name||"")).join(",");', text)
-         self.assertIn('giftRail.innerHTML=rotated.map(g=>giftCard(g,joinedIds)).join("")', text)
+        self.assertIn('giftRail.innerHTML=rotated.map(g=>giftCard(g,joinedIds)).join("")', text)
         self.assertNotIn('giftRail.innerHTML=list.slice(0,16).map(giftCard).join("")', text)
 
         # Use the current published feed, not a hard-coded image count.
