@@ -90,7 +90,7 @@ class HomeShowcaseTests(unittest.TestCase):
             "merchant": "Perfumeria Comas FR", "name": "Laquerink Lipshine",
             "price": 24.50, "image": "https://merchant.example/image.jpg",
             "url": url, "program_joined": False,
-        }, "26/11/2026")
+        }, "2026-11-26")
         self.assertIn("24,50", card)
         self.assertIn("Programme non rejoint", card)
         self.assertIn("Flux · à confirmer", card)
@@ -104,7 +104,7 @@ class HomeShowcaseTests(unittest.TestCase):
             "merchant": "Jowissa", "name": "Montre test",
             "price": 269.90, "image": "https://merchant.example/image.jpg",
             "url": url, "program_joined": True,
-        }, "26/11/2026")
+        }, "2026-11-26")
         self.assertIn("Partenaire", card)
         self.assertIn(url.replace("&", "&amp;"), card)
 
