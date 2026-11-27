@@ -52,13 +52,60 @@ class HomeShowcaseTests(unittest.TestCase):
         import datetime as dt
         sc = load("build_home_showcase")
         picks, day = sc.partner_picks()
+        joined = sc.joined_advertisers()
         for p in picks:
             self.assertTrue(p["image_verified"])
             self.assertTrue(p["image"].startswith("https://"))
             self.assertIn(p["merchant"], sc.PARTNER_PRIORITY)
+            mid = sc.advertiser_id(p["url"])
+            self.assertEqual(p["program_joined"], joined is not None and mid is not None and mid in joined)
         late = dt.datetime.fromisoformat(day + "T00:00:00+00:00") + dt.timedelta(days=9) if day else None
         if late:
             self.assertEqual(sc.partner_picks(now=late)[0], [], "flux trop ancien : aucune carte")
+
+    def test_awin_mid_is_extracted_without_guessing(self):
+        sc = load("build_home_showcase")
+        self.assertEqual(sc.advertiser_id("https://www.awin1.com/pclick.php?p=1&a=2&m=105475"), "105475")
+        self.assertEqual(sc.advertiser_id("https://www.awin1.com/cread.php?awinmid=85523&awinaffid=2"), "85523")
+        self.assertIsNone(sc.advertiser_id("https://merchant.example/product"))
+
+    def test_joined_status_requires_recent_verified_snapshot(self):
+        import datetime as dt
+        sc = load("build_home_showcase")
+        now = dt.datetime.fromisoformat("2026-11-27T09:00:00+00:00")
+        status = {
+            "status": "ok", "programmes_check_status": "verified",
+            "fetched_at": "2026-11-26T14:16:30.022Z",
+            "joined_advertisers": [{"id": "59933"}, {"id": "85523"}],
+        }
+        self.assertEqual(sc.joined_ids_from_status(status, now), {"59933", "85523"})
+        self.assertIsNone(sc.joined_ids_from_status({**status, "programmes_check_status": "partial"}, now))
+        self.assertIsNone(sc.joined_ids_from_status({**status, "fetched_at": "2026-11-22T00:00:00Z"}, now))
+
+    def test_unjoined_pick_keeps_price_but_has_no_affiliate_link(self):
+        sc = load("build_home_showcase")
+        url = "https://www.awin1.com/pclick.php?p=1&a=3137386&m=105475"
+        card = sc.partner_card({
+            "merchant": "Perfumeria Comas FR", "name": "Laquerink Lipshine",
+            "price": 24.50, "image": "https://merchant.example/image.jpg",
+            "url": url, "program_joined": False,
+        }, "26/11/2026")
+        self.assertIn("24,50", card)
+        self.assertIn("Programme non rejoint", card)
+        self.assertIn("Flux · à confirmer", card)
+        self.assertNotIn("href=", card)
+        self.assertNotIn(url, card)
+
+    def test_joined_pick_keeps_affiliate_link(self):
+        sc = load("build_home_showcase")
+        url = "https://www.awin1.com/pclick.php?p=1&a=3137386&m=59933"
+        card = sc.partner_card({
+            "merchant": "Jowissa", "name": "Montre test",
+            "price": 269.90, "image": "https://merchant.example/image.jpg",
+            "url": url, "program_joined": True,
+        }, "26/11/2026")
+        self.assertIn("Partenaire", card)
+        self.assertIn(url, card)
 
     def test_gaps_use_only_recent_new_offers(self):
         sc = load("build_home_showcase")
