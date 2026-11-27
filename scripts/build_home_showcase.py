@@ -261,6 +261,8 @@ def advertiser_id(url):
 
 def joined_ids_from_status(status, now=None):
     """Return joined MIDs only from a recent, verified status snapshot; fail closed."""
+    if not isinstance(status, dict):
+        return None
     try:
         fetched_at = dt.datetime.fromisoformat(str(status.get("fetched_at") or "").replace("Z", "+00:00"))
         now = now or dt.datetime.now(dt.timezone.utc)
@@ -307,6 +309,8 @@ def partner_picks(now=None):
         fetched_at = dt.datetime.fromisoformat(fetched.replace("Z", "+00:00"))
     except ValueError:
         return [], None
+    if fetched_at.tzinfo is None:
+        fetched_at = fetched_at.replace(tzinfo=dt.timezone.utc)
     now = now or dt.datetime.now(dt.timezone.utc)
     if now.tzinfo is None:
         now = now.replace(tzinfo=dt.timezone.utc)
