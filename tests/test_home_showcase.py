@@ -79,6 +79,7 @@ class HomeShowcaseTests(unittest.TestCase):
             "joined_advertisers": [{"id": "59933"}, {"id": "85523"}],
         }
         self.assertEqual(sc.joined_ids_from_status(status, now), {"59933", "85523"})
+        self.assertIsNone(sc.joined_ids_from_status(None, now))
         self.assertIsNone(sc.joined_ids_from_status({**status, "programmes_check_status": "partial"}, now))
         self.assertIsNone(sc.joined_ids_from_status({**status, "fetched_at": "2026-11-22T00:00:00Z"}, now))
 
