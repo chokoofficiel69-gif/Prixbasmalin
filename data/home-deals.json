@@ -1,6 +1,6 @@
 {
  "version": 1,
- "awin_fetched_at": "2026-11-27T08:47:42.840Z",
+ "awin_fetched_at": "2026-11-27T14:13:54.160Z",
  "sheets_period": {
   "from": "2026-10-09",
   "to": "2026-11-26"
@@ -124,8 +124,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=45638039376&a=3137386&m=69050",
    "family": "autre",
    "family_label": "Idées cadeaux",
@@ -134,7 +134,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 59.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-617737631119",
@@ -147,8 +147,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=45548774889&a=3137386&m=66486",
    "family": "tech",
    "family_label": "High-tech",
@@ -157,7 +157,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 73.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5060403580207",
@@ -170,8 +170,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=41259979427&a=3137386&m=114998",
    "family": "autre",
    "family_label": "Idées cadeaux",
@@ -180,7 +180,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 72.0,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5744006942173",
@@ -192,8 +192,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0612/2599/2348/files/DE-WL-1020RS.png?v=1788435653",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=46009790774&a=3137386&m=120407",
    "family": "bougie",
@@ -203,7 +203,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 22.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-85523-brand-name-fiido-fr-garde-boue-fiido-d4s---",
@@ -216,8 +216,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/cread.php?awinmid=85523&awinaffid=3137386&ued=https%3A%2F%2Ffr.fiido.com%2Fproducts%2Fgarde-boue-fiido-d4s-en-option%3Fvariant%3D42570252779755",
    "family": "tech",
    "family_label": "Tech",
@@ -226,7 +226,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 56.0,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5902801213007",
@@ -238,8 +238,8 @@
    "image": "https://hwt.media-optimizer.hubble-cdn.io/media/73/55/b8/1708532440/ht4r630.jpg?ts=1725619999",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=44326866904&a=3137386&m=86907",
    "family": "mode",
@@ -248,8 +248,8 @@
    "price_date": null,
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
-   "listed_price_eur": 49.04,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_eur": null,
+   "listed_price_date": null
   },
   {
    "id": "awin-gtin-197593158734",
@@ -262,8 +262,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=45302605888&a=3137386&m=114336",
    "family": "mode",
    "family_label": "Mode",
@@ -272,7 +272,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 230.56,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-122426-brand-name-imou-imou-ranger-2-wifi-security-surveillance-smart-camera-2pcs-fhd-1080p-kit-none---",
@@ -285,8 +285,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=46509800252&a=3137386&m=122426",
    "family": "tech",
    "family_label": "Tech",
@@ -295,7 +295,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 51.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-7640167277308",
@@ -308,8 +308,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=46361647014&a=3137386&m=59933",
    "family": "mode",
    "family_label": "Mode",
@@ -318,7 +318,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 269.9,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5060690212881",
@@ -331,8 +331,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=46434185682&a=3137386&m=111020",
    "family": "bougie",
    "family_label": "Bougies & bien-être",
@@ -341,7 +341,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 18.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-4099671003829",
@@ -353,8 +353,8 @@
    "image": "https://res.cloudinary.com/lusini/w_1200,h_1200,q_80,c_pad,f_auto/pim/b34429/a57e5f/358c1b/faace3/73f38d/23/b34429a57e5f358c1bfaace373f38d23.jpeg",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=42910453373&a=3137386&m=22619",
    "family": "maison",
@@ -377,8 +377,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/cread.php?awinmid=124120&awinaffid=3137386&ued=https%3A%2F%2Fcouponscouture.fr%2Fproducts%2Fpatron-mccalls-8060-a5-robes%3Fvariant%3D53760409993564",
    "family": "mode",
    "family_label": "Mode",
@@ -387,7 +387,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 14.5,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-4973167815670",
@@ -399,8 +399,8 @@
    "image": "https://perfumeriacomas.com/cdnassets/products/102896-1_s.webp",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=39179009102&a=3137386&m=105475",
    "family": "autre",
@@ -410,7 +410,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 32.5,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-107814-brand-name-simbye-simbye-kosovo-3gb-15days-esim---",
@@ -422,8 +422,8 @@
    "image": "https://pub-51dd9ca922e84c46a7e2c36b69b2ca97.r2.dev/en/esim-kosovo_3GB_15d.png",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/cread.php?awinmid=107814&awinaffid=3137386&ued=https%3A%2F%2Fsimbye.com%2Fproducts%2Fesim-kosovo",
    "family": "autre",
@@ -433,7 +433,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 13.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-6978414650576",
@@ -446,8 +446,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=42416617890&a=3137386&m=69050",
    "family": "autre",
    "family_label": "Idées cadeaux",
@@ -456,7 +456,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 119.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-634562527769",
@@ -468,8 +468,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0358/8348/3181/files/1_65e34ff7-fef9-4726-b943-9f8443125f84.png?v=1793772566",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=46638812915&a=3137386&m=66486",
    "family": "tech",
@@ -479,7 +479,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 79.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-114998-brand-name-boucleme-intensive-moisture-treatment-refill-pouch-250ml---",
@@ -492,8 +492,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=41259979609&a=3137386&m=114998",
    "family": "autre",
    "family_label": "Idées cadeaux",
@@ -502,7 +502,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 29.0,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5744006942272",
@@ -514,8 +514,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0612/2599/2348/files/DE-WL-715DG.png?v=1788435632",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=46009790767&a=3137386&m=120407",
    "family": "bougie",
@@ -525,7 +525,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 12.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-85523-42571476009195",
@@ -538,8 +538,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/cread.php?awinmid=85523&awinaffid=3137386&ued=https%3A%2F%2Ffr.fiido.com%2Fproducts%2Fgarde-boue-fiido-q1-en-option%3Fvariant%3D42571476009195",
    "family": "tech",
    "family_label": "Tech",
@@ -548,7 +548,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 42.0,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5902801381584",
@@ -560,8 +560,8 @@
    "image": "https://hwt.media-optimizer.hubble-cdn.io/media/d0/8b/15/1708532541/ht4r781.jpg?ts=1725619999",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=44326866915&a=3137386&m=86907",
    "family": "mode",
@@ -570,8 +570,8 @@
    "price_date": null,
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
-   "listed_price_eur": 137.49,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_eur": null,
+   "listed_price_date": null
   },
   {
    "id": "awin-gtin-195866140417",
@@ -584,8 +584,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=45302604912&a=3137386&m=114336",
    "family": "mode",
    "family_label": "Mode",
@@ -594,7 +594,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 286.73,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-122426-brand-name-imou-imou-ranger-2-wifi-security-surveillance-smart-camera-2pcs-fhd-1080p-kit-2pcs-64gb-memory-card---",
@@ -606,8 +606,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0727/5711/7240/files/ranger-2-4mp2mp-995698.jpg?v=1750841005",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=46509800253&a=3137386&m=122426",
    "family": "tech",
@@ -617,7 +617,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 65.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-7640167277292",
@@ -630,8 +630,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=46361646962&a=3137386&m=59933",
    "family": "mode",
    "family_label": "Mode",
@@ -640,7 +640,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 269.9,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5060690213017",
@@ -653,8 +653,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=40152237620&a=3137386&m=111020",
    "family": "bougie",
    "family_label": "Bougies & bien-être",
@@ -663,7 +663,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 18.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-4099671039927",
@@ -675,8 +675,8 @@
    "image": "https://res.cloudinary.com/lusini/w_1200,h_1200,q_80,c_pad,f_auto/pim/99b8b6/59e6c5/e2149d/57809c/6dadf7/cb/99b8b659e6c5e2149d57809c6dadf7cb.jpeg",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=46596859497&a=3137386&m=22619",
    "family": "maison",
@@ -699,8 +699,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/cread.php?awinmid=124120&awinaffid=3137386&ued=https%3A%2F%2Fcouponscouture.fr%2Fproducts%2Fpatron-mccalls-8059-b5-hauts-et-tuniques%3Fvariant%3D53759430951260",
    "family": "mode",
    "family_label": "Mode",
@@ -709,7 +709,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 14.5,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-3700928801594",
@@ -721,8 +721,8 @@
    "image": "https://perfumeriacomas.com/cdnassets/products/112517-1_s.webp",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=39179010086&a=3137386&m=105475",
    "family": "autre",
@@ -732,7 +732,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 39.3,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-107814-brand-name-simbye-simbye-kosovo-5gb-30days-esim---",
@@ -744,8 +744,8 @@
    "image": "https://pub-51dd9ca922e84c46a7e2c36b69b2ca97.r2.dev/en/esim-kosovo_5GB_30d.png",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/cread.php?awinmid=107814&awinaffid=3137386&ued=https%3A%2F%2Fsimbye.com%2Fproducts%2Fesim-kosovo",
    "family": "autre",
@@ -755,7 +755,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 21.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-6925758632263",
@@ -768,8 +768,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=42322774302&a=3137386&m=69050",
    "family": "autre",
    "family_label": "Idées cadeaux",
@@ -778,7 +778,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 111.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-601673915969",
@@ -791,8 +791,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=44704613816&a=3137386&m=66486",
    "family": "tech",
    "family_label": "High-tech",
@@ -801,7 +801,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 39.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5060403580177",
@@ -814,8 +814,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=41259979413&a=3137386&m=114998",
    "family": "bougie",
    "family_label": "Bougies & bien-être",
@@ -824,7 +824,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 50.0,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5744006942159",
@@ -836,8 +836,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0612/2599/2348/files/DE-WL-715RS.png?v=1788435626",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=46009790765&a=3137386&m=120407",
    "family": "bougie",
@@ -847,7 +847,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 12.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-85523-brand-name-fiido-fr-garde-boue-fiido-d3s---",
@@ -860,8 +860,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/cread.php?awinmid=85523&awinaffid=3137386&ued=https%3A%2F%2Ffr.fiido.com%2Fproducts%2Fgarde-boue-fiido-d3s-en-option%3Fvariant%3D42571607310571",
    "family": "tech",
    "family_label": "Tech",
@@ -870,7 +870,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 51.0,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5902801282720",
@@ -882,8 +882,8 @@
    "image": "https://hwt.media-optimizer.hubble-cdn.io/media/a2/b2/a8/1708532447/ht4r625.jpg?ts=1725619999",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=44326866903&a=3137386&m=86907",
    "family": "mode",
@@ -892,8 +892,8 @@
    "price_date": null,
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
-   "listed_price_eur": 212.84,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_eur": null,
+   "listed_price_date": null
   },
   {
    "id": "awin-gtin-196969273514",
@@ -906,8 +906,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=45302605833&a=3137386&m=114336",
    "family": "mode",
    "family_label": "Mode",
@@ -916,7 +916,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 297.62,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-122426-brand-name-imou-imou-ranger-2-wifi-security-surveillance-smart-camera-certified-refurbished-fhd-1080p-2pcs-128gb-memory-card---",
@@ -929,8 +929,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=46509800246&a=3137386&m=122426",
    "family": "tech",
    "family_label": "Tech",
@@ -939,7 +939,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 29.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-7640167277377",
@@ -951,8 +951,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0605/9615/8564/files/j5.617.m_cringview_facet_strass_jowissa_watch_medium.jpg?v=1750855096",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=46361646958&a=3137386&m=59933",
    "family": "mode",
@@ -962,7 +962,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 269.9,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5060690212706",
@@ -975,8 +975,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=40152237526&a=3137386&m=111020",
    "family": "bougie",
    "family_label": "Bougies & bien-être",
@@ -985,7 +985,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 16.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-4099671077882",
@@ -997,8 +997,8 @@
    "image": "https://res.cloudinary.com/lusini/w_1200,h_1200,q_80,c_pad,f_auto/pim/041404/59e372/6be377/0631bb/6d127e/fe/04140459e3726be3770631bb6d127efe.jpeg",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=38847444822&a=3137386&m=22619",
    "family": "maison",
@@ -1020,8 +1020,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0856/1976/9692/files/M8063.jpg?v=1736526616",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/cread.php?awinmid=124120&awinaffid=3137386&ued=https%3A%2F%2Fcouponscouture.fr%2Fproducts%2Fpatron-mccalls-8063-y-short-et-pantalon%3Fvariant%3D53760441385308",
    "family": "mode",
@@ -1031,7 +1031,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 14.5,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-8435415017190",
@@ -1043,8 +1043,8 @@
    "image": "https://perfumeriacomas.com/cdnassets/products/97795-1_s.webp",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=41206774245&a=3137386&m=105475",
    "family": "parfum",
@@ -1054,7 +1054,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 56.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-107814-brand-name-simbye-simbye-kenya-5gb-30days-esim---",
@@ -1066,8 +1066,8 @@
    "image": "https://pub-51dd9ca922e84c46a7e2c36b69b2ca97.r2.dev/en/kenya-roaming-data-esim_5GB_30d.png",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/cread.php?awinmid=107814&awinaffid=3137386&ued=https%3A%2F%2Fsimbye.com%2Fproducts%2Fkenya-roaming-data-esim",
    "family": "autre",
@@ -1077,7 +1077,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 16.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-6978414652921",
@@ -1089,8 +1089,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0609/5428/0135/files/Akko-MOD-007B-HE-Black-Silver-ISO-DE-Stock.png?v=1768458987",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=43748604854&a=3137386&m=69050",
    "family": "autre",
@@ -1100,7 +1100,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 169.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-617737631126",
@@ -1113,8 +1113,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/pclick.php?p=46020062969&a=3137386&m=66486",
    "family": "tech",
    "family_label": "High-tech",
@@ -1123,7 +1123,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 143.99,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5060403581532",
@@ -1135,8 +1135,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0548/9981/products/Resized-Products_0000s_0023_Boucleme_ProteinBooster_30ml_1.png?v=1667479452",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=41259979567&a=3137386&m=114998",
    "family": "autre",
@@ -1146,7 +1146,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 29.0,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5744006944566",
@@ -1158,8 +1158,8 @@
    "image": "https://cdn.shopify.com/s/files/1/0612/2599/2348/files/image_8e0f53d7-7af6-42f1-9ff9-d3891b710c3a.png?v=1795523869",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=46934525903&a=3137386&m=120407",
    "family": "bougie",
@@ -1169,7 +1169,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 40.95,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-awin-85523-brand-name-fiido-fr-interrupteur-multifonction-fiido-d11-l3---",
@@ -1182,8 +1182,8 @@
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
    "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
-   "image_check_status": "ok",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
+   "image_check_status": "transient-preserved",
    "url": "https://www.awin1.com/cread.php?awinmid=85523&awinaffid=3137386&ued=https%3A%2F%2Ffr.fiido.com%2Fproducts%2Finterrupteur-multifonction-fiido-d11-l3%3Fvariant%3D42571457822955",
    "family": "tech",
    "family_label": "Tech",
@@ -1192,7 +1192,7 @@
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
    "listed_price_eur": 30.0,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_date": "2026-11-27T14:13:54.160Z"
   },
   {
    "id": "awin-gtin-5902801026829",
@@ -1204,8 +1204,8 @@
    "image": "https://hwt.media-optimizer.hubble-cdn.io/media/b9/18/1a/1708532832/ht6d748.jpg?ts=1725620000",
    "image_provenance": "Flux marchand Awin autorisé",
    "image_verified": true,
-   "image_verified_at": "2026-11-27T08:47:46.936071Z",
-   "image_checked_at": "2026-11-27T08:47:46.936071Z",
+   "image_verified_at": "2026-11-27T14:13:58.683534Z",
+   "image_checked_at": "2026-11-27T14:13:58.683534Z",
    "image_check_status": "ok",
    "url": "https://www.awin1.com/pclick.php?p=44326866977&a=3137386&m=86907",
    "family": "mode",
@@ -1214,8 +1214,8 @@
    "price_date": null,
    "price_date_kind": "missing",
    "price_tax_status": "unspecified",
-   "listed_price_eur": 86.16,
-   "listed_price_date": "2026-11-27T08:47:42.840Z"
+   "listed_price_eur": null,
+   "listed_price_date": null
   }
  ],
  "rotation": {
