@@ -259,7 +259,12 @@ class HomeDealsTests(unittest.TestCase):
         self.assertIn('p.priceTaxStatus==="included"', page)
         self.assertIn('Number(p.regularPriceValue)>Number(p.priceValue)', page)
         self.assertIn(".pm-partner[hidden]{display:none!important}", page)
-        self.assertIn('target="_blank" rel="sponsored nofollow noopener">\'+visual(image', page)
+        # La vitrine cadeaux conditionne les liens Awin au statut joined récent.
+        self.assertIn("const giftCard=(g,joinedIds)=>", page)
+        self.assertIn("authorized=joinedIds.has(mid)", page)
+        self.assertIn("return authorized", page)
+        self.assertIn('pm-hp-card-unlinked', page)
+        self.assertIn("Programme non rejoint · lien affilié désactivé", page)
         self.assertIn("const giftPriceIsCurrent=g=>", page)
         self.assertIn("g.image_verified!==true", page)
         self.assertIn("Prix non vérifié", page)
