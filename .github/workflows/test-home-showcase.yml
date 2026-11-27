@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - "scripts/build_home_showcase.py"
+      - "scripts/build_home_deals.py"
       - "tests/test_home_showcase.py"
+      - "tests/test_home_deals.py"
       - "index.html"
       - "data/home-deals.json"
       - "data/awin-catalogue.json"
@@ -14,25 +16,65 @@ on:
     branches: [main]
     paths:
       - "scripts/build_home_showcase.py"
+      - "scripts/build_home_deals.py"
       - "tests/test_home_showcase.py"
+      - "tests/test_home_deals.py"
       - "index.html"
       - "data/home-deals.json"
       - "data/awin-catalogue.json"
       - "data/awin-sync-status.json"
       - ".github/workflows/test-home-showcase.yml"
 
-permissions:
-  contents: read
+concurrency:
+  group: pm-showcase-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  test:
+  regenerate:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
+      - name: Checkout la branche PR
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
       - name: Installer Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Tester la vitrine
-        run: python3 -m unittest discover -s tests -p 'test_home_showcase.py' -v
+      - name: Regénérer le bloc et le commit si nécessaire
+        run: |
+          python3 scripts/build_home_showcase.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "Le bloc de vitrine est déjà à jour."
+          else
+            git commit -m "build: refresh generated homepage showcase"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
+
+  test:
+    needs: regenerate
+    if: always() && (github.event_name != 'pull_request' || needs.regenerate.result == 'success' || needs.regenerate.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout la branche PR ou main
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tester la vitrine et les liens affiliés
+        run: |
+          python3 -m unittest discover -s tests -p 'test_home_showcase.py' -v
+          python3 -m unittest discover -s tests -p 'test_home_deals.py' -v
