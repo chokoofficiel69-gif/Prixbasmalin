@@ -259,10 +259,9 @@ def advertiser_id(url):
     return None
 
 
-def joined_advertisers(now=None):
+def joined_ids_from_status(status, now=None):
     """Return joined MIDs only from a recent, verified status snapshot; fail closed."""
     try:
-        status = json.loads((ROOT / "data" / "awin-sync-status.json").read_text(encoding="utf-8"))
         fetched_at = dt.datetime.fromisoformat(str(status.get("fetched_at") or "").replace("Z", "+00:00"))
         now = now or dt.datetime.now(dt.timezone.utc)
         if now.tzinfo is None:
@@ -279,6 +278,14 @@ def joined_advertisers(now=None):
                 if isinstance(item, dict) and re.fullmatch(r"\d+", str(item.get("id") or ""))}
     except (OSError, ValueError, TypeError):
         return None
+
+
+def joined_advertisers(now=None):
+    try:
+        status = json.loads((ROOT / "data" / "awin-sync-status.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return joined_ids_from_status(status, now)
 
 
 def _sharp(url):
