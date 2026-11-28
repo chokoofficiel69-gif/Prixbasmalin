@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "status": "ok",
-  "fetched_at": "2026-11-27T14:13:54.160Z",
+  "fetched_at": "2026-11-28T13:31:43.730Z",
   "source": "Awin Publisher Enhanced/standard feeds autorisés",
   "publisher_id": "3137386",
   "locale": "fr_FR",
   "programmes_check_status": "verified",
-  "joined_advertisers_checked": 25,
-  "pending_advertisers_detected": 25,
+  "joined_advertisers_checked": 26,
+  "pending_advertisers_detected": 24,
   "joined_advertisers": [
     {
       "id": "22619",
@@ -62,6 +62,10 @@
       "name": "Heimwerkertools - FR"
     },
     {
+      "id": "87255",
+      "name": "Erverte Paris"
+    },
+    {
       "id": "105805",
       "name": "EINSTAR"
     },
@@ -112,21 +116,21 @@
   ],
   "additional_authorized_offers_imported": 25000,
   "counts": {
-    "joined_advertisers_checked": 25,
-    "pending_advertisers_detected": 25,
+    "joined_advertisers_checked": 26,
+    "pending_advertisers_detected": 24,
     "additional_authorized_offers_imported": 25000,
-    "products": 23212,
+    "products": 22538,
     "merchant_offers": 25000,
-    "merchants": 16,
-    "brands": 326,
-    "products_with_gtin": 16777,
-    "products_with_mpn": 15463,
-    "products_with_brand_mpn": 15443,
+    "merchants": 17,
+    "brands": 328,
+    "products_with_gtin": 16884,
+    "products_with_mpn": 14489,
+    "products_with_brand_mpn": 14468,
     "multi_merchant_products": 0,
-    "offers_with_shipping": 16010,
-    "offers_with_availability": 17365,
+    "offers_with_shipping": 16019,
+    "offers_with_availability": 17378,
     "offers_with_tax_included": 0,
-    "products_other_category": 979,
+    "products_other_category": 934,
     "offers_fresh_last_48h": 0,
     "offers_missing_timestamp": 25000,
     "offers_stale": 0,
